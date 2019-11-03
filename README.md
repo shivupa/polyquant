@@ -1,0 +1,2 @@
+# selci
+SELected Configuration Interaction
