@@ -1,5 +1,5 @@
 project(PYCI)
-
+set (CMAKE_CXX_STANDARD 11)
 cmake_minimum_required(VERSION 3.6.0)
 
 set(PYCI_VERSION_MAJOR 0)
@@ -38,12 +38,7 @@ configure_file(${PYCI_SOURCE_DIR}/src/pyci.settings
                ${PYCI_BINARY_DIR}/bin/pyci.settings)
 install(FILES ${PYCI_BINARY_DIR}/bin/pyci.settings DESTINATION bin)
 
-# set(pyci src/pyci.cpp)
-
 add_subdirectory(src)
-
-# add_executable(pyci ${pyci}) include_directories( ${io_SOURCE_DIR}
-# ${molecule_SOURCE_DIR}) target_link_libraries(pyci io molecule)
 
 if(PYCI_DEBUG)
   # found this useful macro on SO https://stackoverflow.com/a/31390758
@@ -60,4 +55,4 @@ if(PYCI_DEBUG)
   print_all_variables()
 endif(PYCI_DEBUG)
 
-# set( CMAKE_VERBOSE_MAKEFILE on )
+set( CMAKE_VERBOSE_MAKEFILE on )
