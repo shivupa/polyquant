@@ -7,6 +7,7 @@ static char help[] =
 #include <slepceps.h>
 #include <string>
 #include "io/io.h"
+#include "molecule/molecule.h"
 
 int main(int argc, char **argv) {
   PetscErrorCode ierr;
@@ -24,6 +25,9 @@ int main(int argc, char **argv) {
     ierr = PetscPrintf(PETSC_COMM_WORLD, "Reading Input File: %s\n", filename);
     CHKERRQ(ierr);
     // parse input file
+    PYCI_INPUT input_params = PYCI_INPUT(filename);
+    PYCI_MOLECULE input_molecule = PYCI_MOLECULE(input_params);
+    
     // set up calculation object
     // run calculation
   } else{

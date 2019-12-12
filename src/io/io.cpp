@@ -1,6 +1,6 @@
 #include "io.h"
 #include <sstream>
-#include <algorithm>
+#include <fstream>
 
 PetscErrorCode APP_ABORT(std::string reason){
   std::string ERROR_MESSAGE = "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n"; SETERRQ1(PETSC_COMM_WORLD,PETSC_ERR_ARG_WRONG,ERROR_MESSAGE.c_str(),reason.c_str());
@@ -8,6 +8,11 @@ PetscErrorCode APP_ABORT(std::string reason){
 
 
 PYCI_INPUT::PYCI_INPUT( std::string filename) {
+    std::ifstream inputfile(filename);
+    input_data = json::parse(inputfile);
+    
+    std::cout << input_data.dump(4) << std::endl;
+    /*
     std::ifstream inputfile(filename);
     std::string line;
     std::string value;
@@ -50,4 +55,5 @@ PYCI_INPUT::PYCI_INPUT( std::string filename) {
         APP_ABORT("Error Parsing input file. Are there commands outside of an input block?");
       }
     }
+    */
 }

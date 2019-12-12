@@ -1,0 +1,19 @@
+{
+  "schema_name": "qc_schema_input",
+  "schema_version": 1,
+  "molecule": {
+    "geometry": [
+	  0.0000000, 0.0000000, 0.0000000,
+      0.7569685, 0.0000000, -0.5858752,
+      -0.7569685, 0.0000000, -0.5858752
+    ],
+    "symbols": ["O", "H", "H"]
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CIPSI",
+    "basis": "sto-3g"
+  },
+  "keywords": {}
+}
+

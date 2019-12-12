@@ -1,16 +1,18 @@
 #include <slepceps.h>
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <map>
+#include <iostream>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 
 
-PetscErrorCode APP_ABORT(std::string reason);
+PetscErrorCode APP_ABORT(std::string& reason);
 
-
+#ifndef PYCI_INPUT
+#define PYCI_INPUT
 class PYCI_INPUT {
 public:
-  PYCI_INPUT(std::string filename);
-  std::map < std::string, std::string> input;
+  PYCI_INPUT();
+  json input_data;
 };
+#endif

@@ -6,5 +6,6 @@ CC=mpicc \
 CXX=mpic++ \
 FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
-cmake ..
+cmake .. \
+-DPYCI_DEBUG=1
 make

@@ -1,0 +1,16 @@
+PYCI_VERSION    = 0.0.1
+PYCI_MPI                = 1
+PYCI_OMP                = 1
+SYSTEM                 = Linux-5.4.2-arch1-1
+SYSTEM_NAME            = Linux
+SYSTEM_PROCESSOR       = x86_64
+SYSTEM_VERSION         = 5.4.2-arch1-1
+CMAKE_VERSION          = 3.16.1
+CMAKE_BUILD_TYPE       = 
+CXX_COMPILER           = /usr/bin/mpic++
+CXX_COMPILER_ID        = GNU
+CXX_COMPILER_VERSION   = 9.2.0
+CXX_FLAGS              = -Wall -Wextra -O3
+C_COMPILER             = /usr/bin/mpicc
+C_COMPILER_VERSION     = 9.2.0
+C_FLAGS                = 
