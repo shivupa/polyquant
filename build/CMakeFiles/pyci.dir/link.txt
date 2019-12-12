@@ -1,1 +1,0 @@
-/usr/bin/mpic++  -Wall -Wextra -O3   CMakeFiles/pyci.dir/src/pyci.cpp.o CMakeFiles/pyci.dir/src/io/io.cpp.o CMakeFiles/pyci.dir/src/molecule/molecule.cpp.o  -o bin/pyci  -Wl,-rpath,/opt/petsc/linux-c-opt/lib:/opt/slepc/linux-c-opt/lib /opt/petsc/linux-c-opt/lib/libpetsc.so /opt/slepc/linux-c-opt/lib/libslepc.so 

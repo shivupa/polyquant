@@ -1,7 +1,0 @@
-/home/shiv/Documents/selci/build/CMakeFiles/install/strip.dir
-/home/shiv/Documents/selci/build/CMakeFiles/install/local.dir
-/home/shiv/Documents/selci/build/CMakeFiles/edit_cache.dir
-/home/shiv/Documents/selci/build/CMakeFiles/pyci.dir
-/home/shiv/Documents/selci/build/CMakeFiles/rebuild_cache.dir
-/home/shiv/Documents/selci/build/CMakeFiles/install.dir
-/home/shiv/Documents/selci/build/CMakeFiles/list_install_components.dir

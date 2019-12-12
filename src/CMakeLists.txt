@@ -1,0 +1,26 @@
+
+ADD_SUBDIRECTORY( io )
+ADD_SUBDIRECTORY( molecule )
+
+add_executable(pyci pyci.cpp)
+find_package(PETSC REQUIRED)
+if(PETSC_FOUND)
+  include_directories(${PETSC_INCLUDES})
+  target_link_libraries(pyci ${PETSC_LIBRARIES})
+endif(PETSC_FOUND)
+find_package(SLEPC REQUIRED)
+if(SLEPC_FOUND)
+  include_directories(${SLEPC_INC})
+  target_link_libraries(pyci ${SLEPC_LIB})
+endif(SLEPC_FOUND)
+find_package(nlohmann_json 3.2.0 REQUIRED)
+message(${nlohmann_json_FOUND})
+if(nlohmann_json_FOUND)
+  target_link_libraries(pyci nlohmann_json::nlohmann_json)
+endif(nlohmann_json_FOUND)
+target_include_directories(pyci PUBLIC include)
+target_link_libraries(pyci io molecule)
+
+
+
+install(TARGETS pyci DESTINATION bin)

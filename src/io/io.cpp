@@ -1,13 +1,13 @@
-#include "io.h"
+#include <io/io.hpp>
 #include <sstream>
 #include <fstream>
 
-PetscErrorCode APP_ABORT(std::string reason){
+PetscErrorCode APP_ABORT(const std::string& reason){
   std::string ERROR_MESSAGE = "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n"; SETERRQ1(PETSC_COMM_WORLD,PETSC_ERR_ARG_WRONG,ERROR_MESSAGE.c_str(),reason.c_str());
 }
 
 
-PYCI_INPUT::PYCI_INPUT( std::string filename) {
+PYCI_INPUT::PYCI_INPUT(const std::string& filename) {
     std::ifstream inputfile(filename);
     input_data = json::parse(inputfile);
     

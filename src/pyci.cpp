@@ -6,8 +6,8 @@ static char help[] =
 #include <iostream>
 #include <slepceps.h>
 #include <string>
-#include "io/io.h"
-#include "molecule/molecule.h"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 
 int main(int argc, char **argv) {
   PetscErrorCode ierr;

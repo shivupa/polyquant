@@ -6,13 +6,13 @@ using json = nlohmann::json;
 
 
 
-PetscErrorCode APP_ABORT(std::string& reason);
+PetscErrorCode APP_ABORT(const std::string& reason);
 
-#ifndef PYCI_INPUT
-#define PYCI_INPUT
+#ifndef PYCI_INPUT_H
+#define PYCI_INPUT_H
 class PYCI_INPUT {
 public:
-  PYCI_INPUT();
+  PYCI_INPUT(const std::string& filename);
   json input_data;
 };
 #endif
