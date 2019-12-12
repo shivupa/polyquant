@@ -13,9 +13,7 @@ if(SLEPC_FOUND)
   target_link_libraries(molecule ${SLEPC_LIB})
 endif(SLEPC_FOUND)
 
-target_link_libraries(molecule io )
+target_link_libraries(molecule io)
 target_include_directories(molecule PUBLIC include)
 install(TARGETS molecule DESTINATION lib)
 install(FILES ${_HDRS} DESTINATION include/molecule)
-
-

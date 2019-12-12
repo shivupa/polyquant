@@ -42,16 +42,11 @@ install(FILES ${PYCI_BINARY_DIR}/bin/pyci.settings DESTINATION bin)
 
 add_subdirectory(src)
 
-# add_executable(pyci ${pyci})
-# include_directories( ${io_SOURCE_DIR} ${molecule_SOURCE_DIR})
-# target_link_libraries(pyci io molecule)
-
-
-
+# add_executable(pyci ${pyci}) include_directories( ${io_SOURCE_DIR}
+# ${molecule_SOURCE_DIR}) target_link_libraries(pyci io molecule)
 
 if(PYCI_DEBUG)
-  # found this useful macro on SO
-  # https://stackoverflow.com/a/31390758
+  # found this useful macro on SO https://stackoverflow.com/a/31390758
   macro(print_all_variables)
     message(
       STATUS "print_all_variables------------------------------------------{")
