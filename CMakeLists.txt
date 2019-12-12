@@ -53,6 +53,6 @@ if(PYCI_DEBUG)
       STATUS "print_all_variables------------------------------------------}")
   endmacro()
   print_all_variables()
+  set( CMAKE_VERBOSE_MAKEFILE on )
 endif(PYCI_DEBUG)
 
-set( CMAKE_VERBOSE_MAKEFILE on )
