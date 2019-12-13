@@ -3,11 +3,11 @@ static char help[] =
     "  -i <filename>, where <filename> is the input file.\n"
     "  -n <n>, where <n> = number of grid subdivisions = matrix dimension.\n\n";
 
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <iostream>
 #include <slepceps.h>
 #include <string>
-#include "io/io.hpp"
-#include "molecule/molecule.hpp"
 
 int main(int argc, char **argv) {
   PetscErrorCode ierr;
@@ -19,20 +19,20 @@ int main(int argc, char **argv) {
     return ierr;
   }
 
-  ierr = PetscOptionsGetString(NULL, NULL, "-i", filename, sizeof(filename), &input_provided);
+  ierr = PetscOptionsGetString(NULL, NULL, "-i", filename, sizeof(filename),
+                               &input_provided);
 
-  if (input_provided){
+  if (input_provided) {
     ierr = PetscPrintf(PETSC_COMM_WORLD, "Reading Input File: %s\n", filename);
     CHKERRQ(ierr);
     // parse input file
     PYCI_INPUT input_params = PYCI_INPUT(filename);
     PYCI_MOLECULE input_molecule = PYCI_MOLECULE(input_params);
-    
+
     // set up calculation object
     // run calculation
-  } else{
+  } else {
     APP_ABORT("MISSING INPUT FILE");
-
   }
 
   exit(0);
