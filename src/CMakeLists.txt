@@ -1,5 +1,6 @@
 add_subdirectory(io)
 add_subdirectory(molecule)
+add_subdirectory(basis)
 
 add_executable(pyci pyci.cpp)
 find_package(PETSC REQUIRED)
@@ -18,6 +19,6 @@ if(nlohmann_json_FOUND)
   target_link_libraries(pyci nlohmann_json::nlohmann_json)
 endif(nlohmann_json_FOUND)
 target_include_directories(pyci PUBLIC include)
-target_link_libraries(pyci io molecule)
+target_link_libraries(pyci io molecule basis)
 
 install(TARGETS pyci DESTINATION bin)

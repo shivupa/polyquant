@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#ifndef PYCI_MOLECULE_H
-#define PYCI_MOLECULE_H
-class PYCI_MOLECULE {
+#ifndef PYCI_BASIS_H
+#define PYCI_BASIS_H
+class PYCI_BASIS {
 public:
-  PYCI_MOLECULE(const PYCI_INPUT &input);
-  std::vector<std::string> atom_symb;
+  PYCI_BASIS(const PYCI_INPUT &input);
+  std::string basis_name;
   int num_atom;
   std::vector<std::vector<double>> atom_coord;
   std::vector<int> atom_num;

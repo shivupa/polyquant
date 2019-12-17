@@ -1,8 +1,8 @@
+#include <basis/basis.hpp>
 #include <io/io.hpp>
 #include <iostream>
-#include <molecule/molecule.hpp>
 
-PYCI_MOLECULE::PYCI_MOLECULE(const PYCI_INPUT &input) {
+PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input) {
   _atm_symb_to_num = {
       {"H", 1},   {"He", 2},  {"Li", 3}, {"Be", 4},  {"B", 5},   {"C", 6},
       {"N", 7},   {"O", 8},   {"F", 9},  {"Ne", 10}, {"Na", 11}, {"Mg", 12},

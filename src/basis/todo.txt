@@ -1,0 +1,2 @@
+Figure out how to query the basissetexchange programmatically
+Is there a c++ api?
