@@ -12,10 +12,10 @@ set(PYCI_VERSION
     "${PYCI_VERSION_MAJOR}.${PYCI_VERSION_MINOR}.${PYCI_VERSION_PATCH}")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
-set(LIBRARY_OUTPUT_PATH
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
     ${PYCI_BINARY_DIR}/lib
     CACHE PATH "Single output directory for building all libraries.")
-set(EXECUTABLE_OUTPUT_PATH
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
     ${PYCI_BINARY_DIR}/bin
     CACHE PATH "Single output directory for building all executables.")
 

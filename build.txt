@@ -885,6 +885,7 @@ Ld[^
 -- CMAKE_INSTALL_SO_NO_EXE=0
 -- CMAKE_INTERNAL_PLATFORM_ABI=ELF
 -- CMAKE_LIBRARY_ARCHITECTURE_REGEX=[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*
+-- CMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/shiv/Documents/selci/build/lib
 -- CMAKE_LIBRARY_PATH_FLAG=-L
 -- CMAKE_LIBRARY_PATH_TERMINATOR=
 -- CMAKE_LINKER=/usr/bin/ld
@@ -924,6 +925,7 @@ Ld[^
 -- CMAKE_RANLIB=/usr/bin/ranlib
 -- CMAKE_READELF=/usr/bin/readelf
 -- CMAKE_ROOT=/usr/share/cmake-3.16
+-- CMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/shiv/Documents/selci/build/bin
 -- CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS=-shared
 -- CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS=-shared
 -- CMAKE_SHARED_LIBRARY_CXX_FLAGS=-fPIC
@@ -984,17 +986,16 @@ Ld[^
 -- CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED=1
 -- CMAKE_SYSTEM_SPECIFIC_INITIALIZE_LOADED=1
 -- CMAKE_SYSTEM_VERSION=5.4.3-arch1-1
+-- CMAKE_TESTING_ENABLED=1
 -- CMAKE_TWEAK_VERSION=0
 -- CMAKE_UNAME=/usr/bin/uname
 -- CMAKE_VERBOSE_MAKEFILE=FALSE
 -- CMAKE_VERSION=3.16.1
 -- CXX_TEST_WAS_RUN=1
 -- C_TEST_WAS_RUN=1
--- EXECUTABLE_OUTPUT_PATH=/home/shiv/Documents/selci/build/bin
 -- FIND_PACKAGE_MESSAGE_DETAILS_PETSc=[/opt/petsc/linux-c-opt/include;/opt/petsc/linux-c-opt/include][/opt/petsc/linux-c-opt/lib/libpetsc.so][YES][v3.11.1()]
 -- FIND_PACKAGE_MESSAGE_DETAILS_SLEPc=[/opt/slepc/linux-c-opt/lib/libslepc.so][/opt/slepc/linux-c-opt/include][/opt/slepc/linux-c-opt][v()]
 -- FIND_PACKAGE_MESSAGE_DETAILS_nlohmann_json=[/usr/lib64/cmake/nlohmann_json/nlohmann_jsonConfig.cmake][v3.7.3(3.2.0)]
--- LIBRARY_OUTPUT_PATH=/home/shiv/Documents/selci/build/lib
 -- MAKE_EXECUTABLE=/usr/bin/make
 -- MSVC_CXX_ARCHITECTURE_ID=
 -- MSVC_C_ARCHITECTURE_ID=
@@ -1101,7 +1102,7 @@ make[2]: Leaving directory '/home/shiv/Documents/selci/build'
 make -f src/io/CMakeFiles/io.dir/build.make src/io/CMakeFiles/io.dir/build
 make[2]: Entering directory '/home/shiv/Documents/selci/build'
 [  9%] Building CXX object src/io/CMakeFiles/io.dir/io.cpp.o
-[ 18%] Linking CXX static library ../../lib/libio.a
+[ 18%] Linking CXX static library libio.a
 make[2]: Leaving directory '/home/shiv/Documents/selci/build'
 [ 18%] Built target io
 make -f src/basis/CMakeFiles/basis.dir/build.make src/basis/CMakeFiles/basis.dir/depend
@@ -1115,7 +1116,7 @@ make[2]: Entering directory '/home/shiv/Documents/selci/build'
 /home/shiv/Documents/selci/src/basis/basis.cpp:5:42: warning: unused parameter ‘input’ [-Wunused-parameter]
     5 | PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input) {
       |                        ~~~~~~~~~~~~~~~~~~^~~~~
-[ 36%] Linking CXX static library ../../lib/libbasis.a
+[ 36%] Linking CXX static library libbasis.a
 make[2]: Leaving directory '/home/shiv/Documents/selci/build'
 [ 36%] Built target basis
 make -f src/molecule/CMakeFiles/molecule.dir/build.make src/molecule/CMakeFiles/molecule.dir/depend
@@ -1125,29 +1126,6 @@ make[2]: Leaving directory '/home/shiv/Documents/selci/build'
 make -f src/molecule/CMakeFiles/molecule.dir/build.make src/molecule/CMakeFiles/molecule.dir/build
 make[2]: Entering directory '/home/shiv/Documents/selci/build'
 [ 45%] Building CXX object src/molecule/CMakeFiles/molecule.dir/molecule.cpp.o
-[ 54%] Linking CXX static library ../../lib/libmolecule.a
-make[2]: Leaving directory '/home/shiv/Documents/selci/build'
-[ 54%] Built target molecule
-make -f src/CMakeFiles/pyci.dir/build.make src/CMakeFiles/pyci.dir/depend
-make[2]: Entering directory '/home/shiv/Documents/selci/build'
-Scanning dependencies of target pyci
-make[2]: Leaving directory '/home/shiv/Documents/selci/build'
-make -f src/CMakeFiles/pyci.dir/build.make src/CMakeFiles/pyci.dir/build
-make[2]: Entering directory '/home/shiv/Documents/selci/build'
-[ 63%] Building CXX object src/CMakeFiles/pyci.dir/pyci.cpp.o
-[ 72%] Linking CXX executable ../bin/pyci
-make[2]: Leaving directory '/home/shiv/Documents/selci/build'
-[ 72%] Built target pyci
-make -f tests/CMakeFiles/main_test.dir/build.make tests/CMakeFiles/main_test.dir/depend
-make[2]: Entering directory '/home/shiv/Documents/selci/build'
-Scanning dependencies of target main_test
-make[2]: Leaving directory '/home/shiv/Documents/selci/build'
-make -f tests/CMakeFiles/main_test.dir/build.make tests/CMakeFiles/main_test.dir/build
-make[2]: Entering directory '/home/shiv/Documents/selci/build'
-[ 81%] Building CXX object tests/CMakeFiles/main_test.dir/doctest_main.cpp.o
-[ 90%] Building CXX object tests/CMakeFiles/main_test.dir/io_test.cpp.o
-[100%] Linking CXX executable ../bin/main_test
-make[2]: Leaving directory '/home/shiv/Documents/selci/build'
-[100%] Built target main_test
-make[1]: Leaving directory '/home/shiv/Documents/selci/build'
-/usr/bin/cmake -E cmake_progress_start /home/shiv/Documents/selci/build/CMakeFiles 0
+make[2]: *** [src/molecule/CMakeFiles/molecule.dir/build.make:63: src/molecule/CMakeFiles/molecule.dir/molecule.cpp.o] Interrupt
+make[1]: *** [CMakeFiles/Makefile2:236: src/molecule/CMakeFiles/molecule.dir/all] Interrupt
+make: *** [Makefile:144: all] Interrupt
