@@ -1,6 +1,6 @@
 project(PYCI)
 cmake_minimum_required(VERSION 3.6.0)
-set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 enable_testing()
@@ -30,7 +30,6 @@ set(PYCI_DEBUG
     CACHE BOOL "Enable/disable debug printing")
 set(PROJECT_CMAKE ${PYCI_SOURCE_DIR}/CMake)
 
-
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
 message(STATUS "Ready to build PYCI")
@@ -55,5 +54,5 @@ if(PYCI_DEBUG)
       STATUS "print_all_variables------------------------------------------}")
   endmacro()
   print_all_variables()
-  set( CMAKE_VERBOSE_MAKEFILE on )
+  set(CMAKE_VERBOSE_MAKEFILE on)
 endif(PYCI_DEBUG)
