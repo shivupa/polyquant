@@ -1,0 +1,1153 @@
+-- The C compiler identification is GNU 9.2.0
+-- The CXX compiler identification is GNU 9.2.0
+-- Check for working C compiler: /usr/bin/mpicc
+-- Check for working C compiler: /usr/bin/mpicc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/mpic++
+-- Check for working CXX compiler: /usr/bin/mpic++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Ready to build PYCI
+-- Include directory /home/shiv/Documents/ptchrg/petsc-git/src/petsc/arch-linux-c-opt/include does not exist
+-- Include directory /home/shiv/Documents/ptchrg/petsc-git/src/petsc/arch-linux-c-opt/include/eigen3 does not exist
+-- petsc_lib_dir /opt/petsc/linux-c-opt/lib
+-- Recognized PETSc install with single library for all packages
+-- Performing Test MULTIPASS_TEST_1_petsc_works_minimal
+-- Performing Test MULTIPASS_TEST_1_petsc_works_minimal - Success
+-- Minimal PETSc includes and libraries work.  This probably means we are building with shared libs.
+-- Found PETSc: /opt/petsc/linux-c-opt/include;/opt/petsc/linux-c-opt/include (found version "3.11.1") 
+-- Found SLEPc: /opt/slepc/linux-c-opt/lib/libslepc.so  
+-- Found nlohmann_json: /usr/lib64/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found suitable version "3.7.3", minimum required is "3.2.0") 
+1
+-- print_all_variables------------------------------------------{
+-- CMAKE_ADDR2LINE=/usr/bin/addr2line
+-- CMAKE_AR=/usr/bin/ar
+-- CMAKE_AR=/usr/bin/ar
+-- CMAKE_AUTOGEN_ORIGIN_DEPENDS=ON
+-- CMAKE_AUTOMOC_COMPILER_PREDEFINES=ON
+-- CMAKE_AUTOMOC_MACRO_NAMES=Q_OBJECT;Q_GADGET;Q_NAMESPACE
+-- CMAKE_AUTOMOC_PATH_PREFIX=ON
+-- CMAKE_BASE_NAME=g++
+-- CMAKE_BINARY_DIR=/home/shiv/Documents/selci/build
+-- CMAKE_BUILD_TOOL=/usr/bin/make
+-- CMAKE_BUILD_TYPE=
+-- CMAKE_C11_COMPILE_FEATURES=c_std_11;c_static_assert
+-- CMAKE_C11_EXTENSION_COMPILE_OPTION=-std=gnu11
+-- CMAKE_C11_STANDARD_COMPILE_OPTION=-std=c11
+-- CMAKE_C11_STANDARD__HAS_FULL_SUPPORT=ON
+-- CMAKE_C90_COMPILE_FEATURES=c_std_90;c_function_prototypes
+-- CMAKE_C90_EXTENSION_COMPILE_OPTION=-std=gnu90
+-- CMAKE_C90_STANDARD_COMPILE_OPTION=-std=c90
+-- CMAKE_C90_STANDARD__HAS_FULL_SUPPORT=ON
+-- CMAKE_C99_COMPILE_FEATURES=c_std_99;c_restrict;c_variadic_macros
+-- CMAKE_C99_EXTENSION_COMPILE_OPTION=-std=gnu99
+-- CMAKE_C99_STANDARD_COMPILE_OPTION=-std=c99
+-- CMAKE_C99_STANDARD__HAS_FULL_SUPPORT=ON
+-- CMAKE_CFG_INTDIR=.
+-- CMAKE_COLOR_MAKEFILE=ON
+-- CMAKE_COMMAND=/usr/bin/cmake
+-- CMAKE_COMPILER_IS_GNUCC=1
+-- CMAKE_COMPILER_IS_GNUCXX=1
+-- CMAKE_CPACK_COMMAND=/usr/bin/cpack
+-- CMAKE_CROSSCOMPILING=FALSE
+-- CMAKE_CTEST_COMMAND=/usr/bin/ctest
+-- CMAKE_CURRENT_BINARY_DIR=/home/shiv/Documents/selci/build
+-- CMAKE_CURRENT_LIST_DIR=/home/shiv/Documents/selci
+-- CMAKE_CURRENT_LIST_FILE=/home/shiv/Documents/selci/CMakeLists.txt
+-- CMAKE_CURRENT_SOURCE_DIR=/home/shiv/Documents/selci
+-- CMAKE_CXX11_COMPILE_FEATURES=cxx_std_11;cxx_alias_templates;cxx_alignas;cxx_alignof;cxx_attributes;cxx_auto_type;cxx_constexpr;cxx_decltype;cxx_decltype_incomplete_return_types;cxx_default_function_template_args;cxx_defaulted_functions;cxx_defaulted_move_initializers;cxx_delegating_constructors;cxx_deleted_functions;cxx_enum_forward_declarations;cxx_explicit_conversions;cxx_extended_friend_declarations;cxx_extern_templates;cxx_final;cxx_func_identifier;cxx_generalized_initializers;cxx_inheriting_constructors;cxx_inline_namespaces;cxx_lambdas;cxx_local_type_template_args;cxx_long_long_type;cxx_noexcept;cxx_nonstatic_member_init;cxx_nullptr;cxx_override;cxx_range_for;cxx_raw_string_literals;cxx_reference_qualified_functions;cxx_right_angle_brackets;cxx_rvalue_references;cxx_sizeof_member;cxx_static_assert;cxx_strong_enums;cxx_thread_local;cxx_trailing_return_types;cxx_unicode_literals;cxx_uniform_initialization;cxx_unrestricted_unions;cxx_user_literals;cxx_variadic_macros;cxx_variadic_templates
+-- CMAKE_CXX11_EXTENSION_COMPILE_OPTION=-std=gnu++11
+-- CMAKE_CXX11_STANDARD_COMPILE_OPTION=-std=c++11
+-- CMAKE_CXX11_STANDARD__HAS_FULL_SUPPORT=ON
+-- CMAKE_CXX14_COMPILE_FEATURES=cxx_std_14;cxx_aggregate_default_initializers;cxx_attribute_deprecated;cxx_binary_literals;cxx_contextual_conversions;cxx_decltype_auto;cxx_digit_separators;cxx_generic_lambdas;cxx_lambda_init_captures;cxx_relaxed_constexpr;cxx_return_type_deduction;cxx_variable_templates
+-- CMAKE_CXX14_EXTENSION_COMPILE_OPTION=-std=gnu++14
+-- CMAKE_CXX14_STANDARD_COMPILE_OPTION=-std=c++14
+-- CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT=ON
+-- CMAKE_CXX17_COMPILE_FEATURES=cxx_std_17
+-- CMAKE_CXX17_EXTENSION_COMPILE_OPTION=-std=gnu++17
+-- CMAKE_CXX17_STANDARD_COMPILE_OPTION=-std=c++17
+-- CMAKE_CXX20_COMPILE_FEATURES=cxx_std_20
+-- CMAKE_CXX20_EXTENSION_COMPILE_OPTION=-std=gnu++2a
+-- CMAKE_CXX20_STANDARD_COMPILE_OPTION=-std=c++2a
+-- CMAKE_CXX98_COMPILE_FEATURES=cxx_std_98;cxx_template_template_parameters
+-- CMAKE_CXX98_EXTENSION_COMPILE_OPTION=-std=gnu++98
+-- CMAKE_CXX98_STANDARD_COMPILE_OPTION=-std=c++98
+-- CMAKE_CXX98_STANDARD__HAS_FULL_SUPPORT=ON
+-- CMAKE_CXX_ABI_COMPILED=TRUE
+-- CMAKE_CXX_ARCHIVE_APPEND=<CMAKE_AR> q  <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_CXX_ARCHIVE_APPEND_IPO="/usr/bin/gcc-ar" r <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_CXX_ARCHIVE_CREATE=<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_CXX_ARCHIVE_CREATE_IPO="/usr/bin/gcc-ar" cr <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_CXX_ARCHIVE_FINISH=<CMAKE_RANLIB> <TARGET>
+-- CMAKE_CXX_ARCHIVE_FINISH_IPO="/usr/bin/gcc-ranlib" <TARGET>
+-- CMAKE_CXX_CL_SHOWINCLUDES_PREFIX=
+-- CMAKE_CXX_COMPILER=/usr/bin/mpic++
+-- CMAKE_CXX_COMPILER=/usr/bin/mpic++
+-- CMAKE_CXX_COMPILER_ABI=ELF
+-- CMAKE_CXX_COMPILER_AR=/usr/bin/gcc-ar
+-- CMAKE_CXX_COMPILER_AR=/usr/bin/gcc-ar
+-- CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+-- CMAKE_CXX_COMPILER_ARG1=
+-- CMAKE_CXX_COMPILER_ENV_VAR=CXX
+-- CMAKE_CXX_COMPILER_FRONTEND_VARIANT=
+-- CMAKE_CXX_COMPILER_ID=GNU
+-- CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT=#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+/* Identify known platforms by name.  */
+#if defined(__linux) || defined(__linux__) || defined(linux)
+# define PLATFORM_ID "Linux"
+
+#elif defined(__CYGWIN__)
+# define PLATFORM_ID "Cygwin"
+
+#elif defined(__MINGW32__)
+# define PLATFORM_ID "MinGW"
+
+#elif defined(__APPLE__)
+# define PLATFORM_ID "Darwin"
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+# define PLATFORM_ID "Windows"
+
+#elif defined(__FreeBSD__) || defined(__FreeBSD)
+# define PLATFORM_ID "FreeBSD"
+
+#elif defined(__NetBSD__) || defined(__NetBSD)
+# define PLATFORM_ID "NetBSD"
+
+#elif defined(__OpenBSD__) || defined(__OPENBSD)
+# define PLATFORM_ID "OpenBSD"
+
+#elif defined(__sun) || defined(sun)
+# define PLATFORM_ID "SunOS"
+
+#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
+# define PLATFORM_ID "AIX"
+
+#elif defined(__hpux) || defined(__hpux__)
+# define PLATFORM_ID "HP-UX"
+
+#elif defined(__HAIKU__)
+# define PLATFORM_ID "Haiku"
+
+#elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
+# define PLATFORM_ID "BeOS"
+
+#elif defined(__QNX__) || defined(__QNXNTO__)
+# define PLATFORM_ID "QNX"
+
+#elif defined(__tru64) || defined(_tru64) || defined(__TRU64__)
+# define PLATFORM_ID "Tru64"
+
+#elif defined(__riscos) || defined(__riscos__)
+# define PLATFORM_ID "RISCos"
+
+#elif defined(__sinix) || defined(__sinix__) || defined(__SINIX__)
+# define PLATFORM_ID "SINIX"
+
+#elif defined(__UNIX_SV__)
+# define PLATFORM_ID "UNIX_SV"
+
+#elif defined(__bsdos__)
+# define PLATFORM_ID "BSDOS"
+
+#elif defined(_MPRAS) || defined(MPRAS)
+# define PLATFORM_ID "MP-RAS"
+
+#elif defined(__osf) || defined(__osf__)
+# define PLATFORM_ID "OSF1"
+
+#elif defined(_SCO_SV) || defined(SCO_SV) || defined(sco_sv)
+# define PLATFORM_ID "SCO_SV"
+
+#elif defined(__ultrix) || defined(__ultrix__) || defined(_ULTRIX)
+# define PLATFORM_ID "ULTRIX"
+
+#elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
+# define PLATFORM_ID "Xenix"
+
+#elif defined(__WATCOMC__)
+# if defined(__LINUX__)
+#  define PLATFORM_ID "Linux"
+
+# elif defined(__DOS__)
+#  define PLATFORM_ID "DOS"
+
+# elif defined(__OS2__)
+#  define PLATFORM_ID "OS2"
+
+# elif defined(__WINDOWS__)
+#  define PLATFORM_ID "Windows3x"
+
+# else /* unknown platform */
+#  define PLATFORM_ID
+# endif
+
+#elif defined(__INTEGRITY)
+# if defined(INT_178B)
+#  define PLATFORM_ID "Integrity178"
+
+# else /* regular Integrity */
+#  define PLATFORM_ID "Integrity"
+# endif
+
+#else /* unknown platform */
+# define PLATFORM_ID
+
+#endif
+
+/* For windows compilers MSVC and Intel we can determine
+   the architecture of the compiler being used.  This is because
+   the compilers do not have flags that can change the architecture,
+   but rather depend on which compiler is being used
+*/
+#if defined(_WIN32) && defined(_MSC_VER)
+# if defined(_M_IA64)
+#  define ARCHITECTURE_ID "IA64"
+
+# elif defined(_M_X64) || defined(_M_AMD64)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# elif defined(_M_ARM64)
+#  define ARCHITECTURE_ID "ARM64"
+
+# elif defined(_M_ARM)
+#  if _M_ARM == 4
+#   define ARCHITECTURE_ID "ARMV4I"
+#  elif _M_ARM == 5
+#   define ARCHITECTURE_ID "ARMV5I"
+#  else
+#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
+#  endif
+
+# elif defined(_M_MIPS)
+#  define ARCHITECTURE_ID "MIPS"
+
+# elif defined(_M_SH)
+#  define ARCHITECTURE_ID "SHx"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__WATCOMC__)
+# if defined(_M_I86)
+#  define ARCHITECTURE_ID "I86"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
+# if defined(__ICCARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__ICCRX__)
+#  define ARCHITECTURE_ID "RX"
+
+# elif defined(__ICCRH850__)
+#  define ARCHITECTURE_ID "RH850"
+
+# elif defined(__ICCRL78__)
+#  define ARCHITECTURE_ID "RL78"
+
+# elif defined(__ICCRISCV__)
+#  define ARCHITECTURE_ID "RISCV"
+
+# elif defined(__ICCAVR__)
+#  define ARCHITECTURE_ID "AVR"
+
+# elif defined(__ICC430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__ICCV850__)
+#  define ARCHITECTURE_ID "V850"
+
+# elif defined(__ICC8051__)
+#  define ARCHITECTURE_ID "8051"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__ghs__)
+# if defined(__PPC64__)
+#  define ARCHITECTURE_ID "PPC64"
+
+# elif defined(__ppc__)
+#  define ARCHITECTURE_ID "PPC"
+
+# elif defined(__ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__x86_64__)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(__i386__)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+#else
+#  define ARCHITECTURE_ID
+#endif
+
+/* Convert integer to decimal digit literals.  */
+#define DEC(n)                   \
+  ('0' + (((n) / 10000000)%10)), \
+  ('0' + (((n) / 1000000)%10)),  \
+  ('0' + (((n) / 100000)%10)),   \
+  ('0' + (((n) / 10000)%10)),    \
+  ('0' + (((n) / 1000)%10)),     \
+  ('0' + (((n) / 100)%10)),      \
+  ('0' + (((n) / 10)%10)),       \
+  ('0' +  ((n) % 10))
+
+/* Convert integer to hex digit literals.  */
+#define HEX(n)             \
+  ('0' + ((n)>>28 & 0xF)), \
+  ('0' + ((n)>>24 & 0xF)), \
+  ('0' + ((n)>>20 & 0xF)), \
+  ('0' + ((n)>>16 & 0xF)), \
+  ('0' + ((n)>>12 & 0xF)), \
+  ('0' + ((n)>>8  & 0xF)), \
+  ('0' + ((n)>>4  & 0xF)), \
+  ('0' + ((n)     & 0xF))
+
+/* Construct a string literal encoding the version number components. */
+#ifdef COMPILER_VERSION_MAJOR
+char const info_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
+  COMPILER_VERSION_MAJOR,
+# ifdef COMPILER_VERSION_MINOR
+  '.', COMPILER_VERSION_MINOR,
+#  ifdef COMPILER_VERSION_PATCH
+   '.', COMPILER_VERSION_PATCH,
+#   ifdef COMPILER_VERSION_TWEAK
+    '.', COMPILER_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct a string literal encoding the internal version number. */
+#ifdef COMPILER_VERSION_INTERNAL
+char const info_version_internal[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
+  'i','n','t','e','r','n','a','l','[',
+  COMPILER_VERSION_INTERNAL,']','\0'};
+#endif
+
+/* Construct a string literal encoding the version number components. */
+#ifdef SIMULATE_VERSION_MAJOR
+char const info_simulate_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  's','i','m','u','l','a','t','e','_','v','e','r','s','i','o','n','[',
+  SIMULATE_VERSION_MAJOR,
+# ifdef SIMULATE_VERSION_MINOR
+  '.', SIMULATE_VERSION_MINOR,
+#  ifdef SIMULATE_VERSION_PATCH
+   '.', SIMULATE_VERSION_PATCH,
+#   ifdef SIMULATE_VERSION_TWEAK
+    '.', SIMULATE_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+
+
+-- CMAKE_CXX_COMPILER_ID_RUN=1
+-- CMAKE_CXX_COMPILER_ID_TEST_FLAGS=-c;--c++;--ec++;--target=arm-arm-none-eabi -mcpu=cortex-m3
+-- CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX=2
+-- CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX=
+Ld[^
+]*(
+[ 	]+[^
+]*)*
+[ 	]+([^ 	
+]+)[^
+]*-o[^
+]*CompilerIdCXX/(\./)?(CompilerIdCXX.(framework|xctest)/)?CompilerIdCXX[ 	
+\"]
+-- CMAKE_CXX_COMPILER_ID_VENDORS=IAR
+-- CMAKE_CXX_COMPILER_ID_VENDOR_REGEX_IAR=IAR .+ Compiler
+-- CMAKE_CXX_COMPILER_INIT=/usr/bin/mpic++
+-- CMAKE_CXX_COMPILER_LIST=/usr/bin/mpic++
+-- CMAKE_CXX_COMPILER_LOADED=1
+-- CMAKE_CXX_COMPILER_NAMES=c++
+-- CMAKE_CXX_COMPILER_PREDEFINES_COMMAND=/usr/bin/mpic++;-dM;-E;-c;/usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp
+-- CMAKE_CXX_COMPILER_PRODUCED_FILES=a.out
+-- CMAKE_CXX_COMPILER_PRODUCED_OUTPUT=
+-- CMAKE_CXX_COMPILER_RANLIB=/usr/bin/gcc-ranlib
+-- CMAKE_CXX_COMPILER_RANLIB=/usr/bin/gcc-ranlib
+-- CMAKE_CXX_COMPILER_VERSION=9.2.0
+-- CMAKE_CXX_COMPILER_VERSION_INTERNAL=
+-- CMAKE_CXX_COMPILER_WORKS=TRUE
+-- CMAKE_CXX_COMPILER_WRAPPER=
+-- CMAKE_CXX_COMPILE_FEATURES=cxx_std_98;cxx_template_template_parameters;cxx_std_11;cxx_alias_templates;cxx_alignas;cxx_alignof;cxx_attributes;cxx_auto_type;cxx_constexpr;cxx_decltype;cxx_decltype_incomplete_return_types;cxx_default_function_template_args;cxx_defaulted_functions;cxx_defaulted_move_initializers;cxx_delegating_constructors;cxx_deleted_functions;cxx_enum_forward_declarations;cxx_explicit_conversions;cxx_extended_friend_declarations;cxx_extern_templates;cxx_final;cxx_func_identifier;cxx_generalized_initializers;cxx_inheriting_constructors;cxx_inline_namespaces;cxx_lambdas;cxx_local_type_template_args;cxx_long_long_type;cxx_noexcept;cxx_nonstatic_member_init;cxx_nullptr;cxx_override;cxx_range_for;cxx_raw_string_literals;cxx_reference_qualified_functions;cxx_right_angle_brackets;cxx_rvalue_references;cxx_sizeof_member;cxx_static_assert;cxx_strong_enums;cxx_thread_local;cxx_trailing_return_types;cxx_unicode_literals;cxx_uniform_initialization;cxx_unrestricted_unions;cxx_user_literals;cxx_variadic_macros;cxx_variadic_templates;cxx_std_14;cxx_aggregate_default_initializers;cxx_attribute_deprecated;cxx_binary_literals;cxx_contextual_conversions;cxx_decltype_auto;cxx_digit_separators;cxx_generic_lambdas;cxx_lambda_init_captures;cxx_relaxed_constexpr;cxx_return_type_deduction;cxx_variable_templates;cxx_std_17;cxx_std_20
+-- CMAKE_CXX_COMPILE_OBJECT=<CMAKE_CXX_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>
+-- CMAKE_CXX_COMPILE_OPTIONS_CREATE_PCH=-Winvalid-pch;-x;c++-header;-include;<PCH_HEADER>
+-- CMAKE_CXX_COMPILE_OPTIONS_IPO=-flto;-fno-fat-lto-objects
+-- CMAKE_CXX_COMPILE_OPTIONS_PIC=-fPIC
+-- CMAKE_CXX_COMPILE_OPTIONS_PIE=-fPIE
+-- CMAKE_CXX_COMPILE_OPTIONS_SYSROOT=--sysroot=
+-- CMAKE_CXX_COMPILE_OPTIONS_USE_PCH=-Winvalid-pch;-include;<PCH_HEADER>
+-- CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY=-fvisibility=
+-- CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN=-fvisibility-inlines-hidden
+-- CMAKE_CXX_CREATE_ASSEMBLY_SOURCE=<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>
+-- CMAKE_CXX_CREATE_PREPROCESSED_SOURCE=<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>
+-- CMAKE_CXX_CREATE_SHARED_LIBRARY=<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>
+-- CMAKE_CXX_CREATE_SHARED_MODULE=<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>
+-- CMAKE_CXX_FLAGS=-Wall -Wextra -O3
+-- CMAKE_CXX_FLAGS_DEBUG=-g
+-- CMAKE_CXX_FLAGS_DEBUG_INIT= -g
+-- CMAKE_CXX_FLAGS_INIT=-Wall -Wextra -O3  
+-- CMAKE_CXX_FLAGS_MINSIZEREL=-Os -DNDEBUG
+-- CMAKE_CXX_FLAGS_MINSIZEREL_INIT= -Os -DNDEBUG
+-- CMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG
+-- CMAKE_CXX_FLAGS_RELEASE_INIT= -O3 -DNDEBUG
+-- CMAKE_CXX_FLAGS_RELWITHDEBINFO=-O2 -g -DNDEBUG
+-- CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT= -O2 -g -DNDEBUG
+-- CMAKE_CXX_IGNORE_EXTENSIONS=inl;h;hpp;HPP;H;o;O;obj;OBJ;def;DEF;rc;RC
+-- CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES=/usr/include/c++/9.2.0;/usr/include/c++/9.2.0/x86_64-pc-linux-gnu;/usr/include/c++/9.2.0/backward;/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/include;/usr/local/include;/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/include-fixed;/usr/include
+-- CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES=/usr/lib/openmpi;/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0;/usr/lib;/lib
+-- CMAKE_CXX_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES=
+-- CMAKE_CXX_IMPLICIT_LINK_LIBRARIES=mpi_cxx;mpi;stdc++;m;gcc_s;gcc;pthread;c;gcc_s;gcc
+-- CMAKE_CXX_INFORMATION_LOADED=1
+-- CMAKE_CXX_LIBRARY_ARCHITECTURE=
+-- CMAKE_CXX_LINKER_PREFERENCE=30
+-- CMAKE_CXX_LINKER_PREFERENCE_PROPAGATES=1
+-- CMAKE_CXX_LINKER_WRAPPER_FLAG=-Wl,
+-- CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP=,
+-- CMAKE_CXX_LINK_EXECUTABLE=<CMAKE_CXX_COMPILER>  <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>
+-- CMAKE_CXX_LINK_OPTIONS_NO_PIE=-no-pie
+-- CMAKE_CXX_LINK_OPTIONS_PIE=-fPIE;-pie
+-- CMAKE_CXX_OUTPUT_EXTENSION=.o
+-- CMAKE_CXX_PLATFORM_ID=Linux
+-- CMAKE_CXX_SIMULATE_ID=
+-- CMAKE_CXX_SIMULATE_VERSION=
+-- CMAKE_CXX_SIZEOF_DATA_PTR=8
+-- CMAKE_CXX_SOURCE_FILE_EXTENSIONS=C;M;c++;cc;cpp;cxx;mm;CPP
+-- CMAKE_CXX_STANDARD=17
+-- CMAKE_CXX_STANDARD_COMPUTED_DEFAULT=14
+-- CMAKE_CXX_STANDARD_DEFAULT=14
+-- CMAKE_CXX_STANDARD_REQUIRED=ON
+-- CMAKE_CXX_VERBOSE_FLAG=-v
+-- CMAKE_CXX_XCODE_ARCHS=
+-- CMAKE_C_ABI_COMPILED=TRUE
+-- CMAKE_C_ARCHIVE_APPEND=<CMAKE_AR> q  <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_C_ARCHIVE_APPEND_IPO="/usr/bin/gcc-ar" r <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_C_ARCHIVE_CREATE=<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_C_ARCHIVE_CREATE_IPO="/usr/bin/gcc-ar" cr <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_C_ARCHIVE_FINISH=<CMAKE_RANLIB> <TARGET>
+-- CMAKE_C_ARCHIVE_FINISH_IPO="/usr/bin/gcc-ranlib" <TARGET>
+-- CMAKE_C_CL_SHOWINCLUDES_PREFIX=
+-- CMAKE_C_COMPILER=/usr/bin/mpicc
+-- CMAKE_C_COMPILER=/usr/bin/mpicc
+-- CMAKE_C_COMPILER_ABI=ELF
+-- CMAKE_C_COMPILER_AR=/usr/bin/gcc-ar
+-- CMAKE_C_COMPILER_AR=/usr/bin/gcc-ar
+-- CMAKE_C_COMPILER_ARCHITECTURE_ID=
+-- CMAKE_C_COMPILER_ARG1=
+-- CMAKE_C_COMPILER_ENV_VAR=CC
+-- CMAKE_C_COMPILER_FRONTEND_VARIANT=
+-- CMAKE_C_COMPILER_ID=GNU
+-- CMAKE_C_COMPILER_ID_PLATFORM_CONTENT=#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+/* Identify known platforms by name.  */
+#if defined(__linux) || defined(__linux__) || defined(linux)
+# define PLATFORM_ID "Linux"
+
+#elif defined(__CYGWIN__)
+# define PLATFORM_ID "Cygwin"
+
+#elif defined(__MINGW32__)
+# define PLATFORM_ID "MinGW"
+
+#elif defined(__APPLE__)
+# define PLATFORM_ID "Darwin"
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+# define PLATFORM_ID "Windows"
+
+#elif defined(__FreeBSD__) || defined(__FreeBSD)
+# define PLATFORM_ID "FreeBSD"
+
+#elif defined(__NetBSD__) || defined(__NetBSD)
+# define PLATFORM_ID "NetBSD"
+
+#elif defined(__OpenBSD__) || defined(__OPENBSD)
+# define PLATFORM_ID "OpenBSD"
+
+#elif defined(__sun) || defined(sun)
+# define PLATFORM_ID "SunOS"
+
+#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
+# define PLATFORM_ID "AIX"
+
+#elif defined(__hpux) || defined(__hpux__)
+# define PLATFORM_ID "HP-UX"
+
+#elif defined(__HAIKU__)
+# define PLATFORM_ID "Haiku"
+
+#elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
+# define PLATFORM_ID "BeOS"
+
+#elif defined(__QNX__) || defined(__QNXNTO__)
+# define PLATFORM_ID "QNX"
+
+#elif defined(__tru64) || defined(_tru64) || defined(__TRU64__)
+# define PLATFORM_ID "Tru64"
+
+#elif defined(__riscos) || defined(__riscos__)
+# define PLATFORM_ID "RISCos"
+
+#elif defined(__sinix) || defined(__sinix__) || defined(__SINIX__)
+# define PLATFORM_ID "SINIX"
+
+#elif defined(__UNIX_SV__)
+# define PLATFORM_ID "UNIX_SV"
+
+#elif defined(__bsdos__)
+# define PLATFORM_ID "BSDOS"
+
+#elif defined(_MPRAS) || defined(MPRAS)
+# define PLATFORM_ID "MP-RAS"
+
+#elif defined(__osf) || defined(__osf__)
+# define PLATFORM_ID "OSF1"
+
+#elif defined(_SCO_SV) || defined(SCO_SV) || defined(sco_sv)
+# define PLATFORM_ID "SCO_SV"
+
+#elif defined(__ultrix) || defined(__ultrix__) || defined(_ULTRIX)
+# define PLATFORM_ID "ULTRIX"
+
+#elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
+# define PLATFORM_ID "Xenix"
+
+#elif defined(__WATCOMC__)
+# if defined(__LINUX__)
+#  define PLATFORM_ID "Linux"
+
+# elif defined(__DOS__)
+#  define PLATFORM_ID "DOS"
+
+# elif defined(__OS2__)
+#  define PLATFORM_ID "OS2"
+
+# elif defined(__WINDOWS__)
+#  define PLATFORM_ID "Windows3x"
+
+# else /* unknown platform */
+#  define PLATFORM_ID
+# endif
+
+#elif defined(__INTEGRITY)
+# if defined(INT_178B)
+#  define PLATFORM_ID "Integrity178"
+
+# else /* regular Integrity */
+#  define PLATFORM_ID "Integrity"
+# endif
+
+#else /* unknown platform */
+# define PLATFORM_ID
+
+#endif
+
+/* For windows compilers MSVC and Intel we can determine
+   the architecture of the compiler being used.  This is because
+   the compilers do not have flags that can change the architecture,
+   but rather depend on which compiler is being used
+*/
+#if defined(_WIN32) && defined(_MSC_VER)
+# if defined(_M_IA64)
+#  define ARCHITECTURE_ID "IA64"
+
+# elif defined(_M_X64) || defined(_M_AMD64)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# elif defined(_M_ARM64)
+#  define ARCHITECTURE_ID "ARM64"
+
+# elif defined(_M_ARM)
+#  if _M_ARM == 4
+#   define ARCHITECTURE_ID "ARMV4I"
+#  elif _M_ARM == 5
+#   define ARCHITECTURE_ID "ARMV5I"
+#  else
+#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
+#  endif
+
+# elif defined(_M_MIPS)
+#  define ARCHITECTURE_ID "MIPS"
+
+# elif defined(_M_SH)
+#  define ARCHITECTURE_ID "SHx"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__WATCOMC__)
+# if defined(_M_I86)
+#  define ARCHITECTURE_ID "I86"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)
+# if defined(__ICCARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__ICCRX__)
+#  define ARCHITECTURE_ID "RX"
+
+# elif defined(__ICCRH850__)
+#  define ARCHITECTURE_ID "RH850"
+
+# elif defined(__ICCRL78__)
+#  define ARCHITECTURE_ID "RL78"
+
+# elif defined(__ICCRISCV__)
+#  define ARCHITECTURE_ID "RISCV"
+
+# elif defined(__ICCAVR__)
+#  define ARCHITECTURE_ID "AVR"
+
+# elif defined(__ICC430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__ICCV850__)
+#  define ARCHITECTURE_ID "V850"
+
+# elif defined(__ICC8051__)
+#  define ARCHITECTURE_ID "8051"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__ghs__)
+# if defined(__PPC64__)
+#  define ARCHITECTURE_ID "PPC64"
+
+# elif defined(__ppc__)
+#  define ARCHITECTURE_ID "PPC"
+
+# elif defined(__ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__x86_64__)
+#  define ARCHITECTURE_ID "x64"
+
+# elif defined(__i386__)
+#  define ARCHITECTURE_ID "X86"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+#else
+#  define ARCHITECTURE_ID
+#endif
+
+/* Convert integer to decimal digit literals.  */
+#define DEC(n)                   \
+  ('0' + (((n) / 10000000)%10)), \
+  ('0' + (((n) / 1000000)%10)),  \
+  ('0' + (((n) / 100000)%10)),   \
+  ('0' + (((n) / 10000)%10)),    \
+  ('0' + (((n) / 1000)%10)),     \
+  ('0' + (((n) / 100)%10)),      \
+  ('0' + (((n) / 10)%10)),       \
+  ('0' +  ((n) % 10))
+
+/* Convert integer to hex digit literals.  */
+#define HEX(n)             \
+  ('0' + ((n)>>28 & 0xF)), \
+  ('0' + ((n)>>24 & 0xF)), \
+  ('0' + ((n)>>20 & 0xF)), \
+  ('0' + ((n)>>16 & 0xF)), \
+  ('0' + ((n)>>12 & 0xF)), \
+  ('0' + ((n)>>8  & 0xF)), \
+  ('0' + ((n)>>4  & 0xF)), \
+  ('0' + ((n)     & 0xF))
+
+/* Construct a string literal encoding the version number components. */
+#ifdef COMPILER_VERSION_MAJOR
+char const info_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
+  COMPILER_VERSION_MAJOR,
+# ifdef COMPILER_VERSION_MINOR
+  '.', COMPILER_VERSION_MINOR,
+#  ifdef COMPILER_VERSION_PATCH
+   '.', COMPILER_VERSION_PATCH,
+#   ifdef COMPILER_VERSION_TWEAK
+    '.', COMPILER_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct a string literal encoding the internal version number. */
+#ifdef COMPILER_VERSION_INTERNAL
+char const info_version_internal[] = {
+  'I', 'N', 'F', 'O', ':',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
+  'i','n','t','e','r','n','a','l','[',
+  COMPILER_VERSION_INTERNAL,']','\0'};
+#endif
+
+/* Construct a string literal encoding the version number components. */
+#ifdef SIMULATE_VERSION_MAJOR
+char const info_simulate_version[] = {
+  'I', 'N', 'F', 'O', ':',
+  's','i','m','u','l','a','t','e','_','v','e','r','s','i','o','n','[',
+  SIMULATE_VERSION_MAJOR,
+# ifdef SIMULATE_VERSION_MINOR
+  '.', SIMULATE_VERSION_MINOR,
+#  ifdef SIMULATE_VERSION_PATCH
+   '.', SIMULATE_VERSION_PATCH,
+#   ifdef SIMULATE_VERSION_TWEAK
+    '.', SIMULATE_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+
+
+-- CMAKE_C_COMPILER_ID_RUN=1
+-- CMAKE_C_COMPILER_ID_TEST_FLAGS=-c;-Aa;-D__CLASSIC_C__;--target=arm-arm-none-eabi -mcpu=cortex-m3
+-- CMAKE_C_COMPILER_ID_TOOL_MATCH_INDEX=2
+-- CMAKE_C_COMPILER_ID_TOOL_MATCH_REGEX=
+Ld[^
+]*(
+[ 	]+[^
+]*)*
+[ 	]+([^ 	
+]+)[^
+]*-o[^
+]*CompilerIdC/(\./)?(CompilerIdC.(framework|xctest)/)?CompilerIdC[ 	
+\"]
+-- CMAKE_C_COMPILER_ID_VENDORS=IAR
+-- CMAKE_C_COMPILER_ID_VENDOR_REGEX_IAR=IAR .+ Compiler
+-- CMAKE_C_COMPILER_INIT=/usr/bin/mpicc
+-- CMAKE_C_COMPILER_LIST=/usr/bin/mpicc
+-- CMAKE_C_COMPILER_LOADED=1
+-- CMAKE_C_COMPILER_NAMES=cc
+-- CMAKE_C_COMPILER_PREDEFINES_COMMAND=/usr/bin/mpicc;-dM;-E;-c;/usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp
+-- CMAKE_C_COMPILER_PRODUCED_FILES=a.out
+-- CMAKE_C_COMPILER_PRODUCED_OUTPUT=
+-- CMAKE_C_COMPILER_RANLIB=/usr/bin/gcc-ranlib
+-- CMAKE_C_COMPILER_RANLIB=/usr/bin/gcc-ranlib
+-- CMAKE_C_COMPILER_VERSION=9.2.0
+-- CMAKE_C_COMPILER_VERSION_INTERNAL=
+-- CMAKE_C_COMPILER_WORKS=TRUE
+-- CMAKE_C_COMPILER_WRAPPER=
+-- CMAKE_C_COMPILE_FEATURES=c_std_90;c_function_prototypes;c_std_99;c_restrict;c_variadic_macros;c_std_11;c_static_assert
+-- CMAKE_C_COMPILE_OBJECT=<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>   -c <SOURCE>
+-- CMAKE_C_COMPILE_OPTIONS_CREATE_PCH=-Winvalid-pch;-x;c-header;-include;<PCH_HEADER>
+-- CMAKE_C_COMPILE_OPTIONS_IPO=-flto;-fno-fat-lto-objects
+-- CMAKE_C_COMPILE_OPTIONS_PIC=-fPIC
+-- CMAKE_C_COMPILE_OPTIONS_PIE=-fPIE
+-- CMAKE_C_COMPILE_OPTIONS_SYSROOT=--sysroot=
+-- CMAKE_C_COMPILE_OPTIONS_USE_PCH=-Winvalid-pch;-include;<PCH_HEADER>
+-- CMAKE_C_COMPILE_OPTIONS_VISIBILITY=-fvisibility=
+-- CMAKE_C_CREATE_ASSEMBLY_SOURCE=<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>
+-- CMAKE_C_CREATE_PREPROCESSED_SOURCE=<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>
+-- CMAKE_C_CREATE_SHARED_LIBRARY=<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>
+-- CMAKE_C_CREATE_SHARED_MODULE=<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>
+-- CMAKE_C_FLAGS=
+-- CMAKE_C_FLAGS_DEBUG=-g
+-- CMAKE_C_FLAGS_DEBUG_INIT= -g
+-- CMAKE_C_FLAGS_INIT=  
+-- CMAKE_C_FLAGS_MINSIZEREL=-Os -DNDEBUG
+-- CMAKE_C_FLAGS_MINSIZEREL_INIT= -Os -DNDEBUG
+-- CMAKE_C_FLAGS_RELEASE=-O3 -DNDEBUG
+-- CMAKE_C_FLAGS_RELEASE_INIT= -O3 -DNDEBUG
+-- CMAKE_C_FLAGS_RELWITHDEBINFO=-O2 -g -DNDEBUG
+-- CMAKE_C_FLAGS_RELWITHDEBINFO_INIT= -O2 -g -DNDEBUG
+-- CMAKE_C_IGNORE_EXTENSIONS=h;H;o;O;obj;OBJ;def;DEF;rc;RC
+-- CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES=/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/include;/usr/local/include;/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/include-fixed;/usr/include
+-- CMAKE_C_IMPLICIT_LINK_DIRECTORIES=/usr/lib/openmpi;/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0;/usr/lib;/lib
+-- CMAKE_C_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES=
+-- CMAKE_C_IMPLICIT_LINK_LIBRARIES=mpi;gcc;gcc_s;pthread;c;gcc;gcc_s
+-- CMAKE_C_INFORMATION_LOADED=1
+-- CMAKE_C_LIBRARY_ARCHITECTURE=
+-- CMAKE_C_LINKER_PREFERENCE=10
+-- CMAKE_C_LINKER_WRAPPER_FLAG=-Wl,
+-- CMAKE_C_LINKER_WRAPPER_FLAG_SEP=,
+-- CMAKE_C_LINK_EXECUTABLE=<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>
+-- CMAKE_C_LINK_OPTIONS_NO_PIE=-no-pie
+-- CMAKE_C_LINK_OPTIONS_PIE=-fPIE;-pie
+-- CMAKE_C_OUTPUT_EXTENSION=.o
+-- CMAKE_C_PLATFORM_ID=Linux
+-- CMAKE_C_SIMULATE_ID=
+-- CMAKE_C_SIMULATE_VERSION=
+-- CMAKE_C_SIZEOF_DATA_PTR=8
+-- CMAKE_C_SOURCE_FILE_EXTENSIONS=c;m
+-- CMAKE_C_STANDARD_COMPUTED_DEFAULT=11
+-- CMAKE_C_STANDARD_DEFAULT=11
+-- CMAKE_C_VERBOSE_FLAG=-v
+-- CMAKE_C_XCODE_ARCHS=
+-- CMAKE_DEPFILE_FLAGS_C=-MD -MT <OBJECT> -MF <DEPFILE>
+-- CMAKE_DEPFILE_FLAGS_CXX=-MD -MT <OBJECT> -MF <DEPFILE>
+-- CMAKE_DLLTOOL=CMAKE_DLLTOOL-NOTFOUND
+-- CMAKE_DL_LIBS=dl
+-- CMAKE_EDIT_COMMAND=/usr/bin/ccmake
+-- CMAKE_EFFECTIVE_SYSTEM_NAME=Linux
+-- CMAKE_EXECUTABLE_FORMAT=ELF
+-- CMAKE_EXECUTABLE_RPATH_LINK_CXX_FLAG=-Wl,-rpath-link,
+-- CMAKE_EXECUTABLE_RPATH_LINK_C_FLAG=-Wl,-rpath-link,
+-- CMAKE_EXECUTABLE_RUNTIME_CXX_FLAG=-Wl,-rpath,
+-- CMAKE_EXECUTABLE_RUNTIME_CXX_FLAG_SEP=:
+-- CMAKE_EXECUTABLE_RUNTIME_C_FLAG=-Wl,-rpath,
+-- CMAKE_EXECUTABLE_RUNTIME_C_FLAG_SEP=:
+-- CMAKE_EXECUTABLE_SUFFIX=
+-- CMAKE_EXE_EXPORTS_CXX_FLAG=-Wl,--export-dynamic
+-- CMAKE_EXE_EXPORTS_C_FLAG=-Wl,--export-dynamic
+-- CMAKE_EXE_LINKER_FLAGS=
+-- CMAKE_EXE_LINKER_FLAGS_DEBUG=
+-- CMAKE_EXE_LINKER_FLAGS_INIT=  
+-- CMAKE_EXE_LINKER_FLAGS_MINSIZEREL=
+-- CMAKE_EXE_LINKER_FLAGS_RELEASE=
+-- CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=
+-- CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS=-Wl,-Bdynamic
+-- CMAKE_EXE_LINK_DYNAMIC_C_FLAGS=-Wl,-Bdynamic
+-- CMAKE_EXE_LINK_STATIC_CXX_FLAGS=-Wl,-Bstatic
+-- CMAKE_EXE_LINK_STATIC_C_FLAGS=-Wl,-Bstatic
+-- CMAKE_EXPORT_COMPILE_COMMANDS=OFF
+-- CMAKE_EXTRA_GENERATOR=
+-- CMAKE_FILES_DIRECTORY=/CMakeFiles
+-- CMAKE_FIND_LIBRARY_PREFIXES=lib
+-- CMAKE_FIND_LIBRARY_SUFFIXES=.so;.a
+-- CMAKE_GENERATOR=Unix Makefiles
+-- CMAKE_GENERATOR_INSTANCE=
+-- CMAKE_GENERATOR_PLATFORM=
+-- CMAKE_GENERATOR_TOOLSET=
+-- CMAKE_HOME_DIRECTORY=/home/shiv/Documents/selci
+-- CMAKE_HOST_SYSTEM=Linux-5.4.3-arch1-1
+-- CMAKE_HOST_SYSTEM_NAME=Linux
+-- CMAKE_HOST_SYSTEM_PROCESSOR=x86_64
+-- CMAKE_HOST_SYSTEM_VERSION=5.4.3-arch1-1
+-- CMAKE_HOST_UNIX=1
+-- CMAKE_INCLUDE_FLAG_C=-I
+-- CMAKE_INCLUDE_FLAG_CXX=-I
+-- CMAKE_INCLUDE_SYSTEM_FLAG_C=-isystem 
+-- CMAKE_INCLUDE_SYSTEM_FLAG_CXX=-isystem 
+-- CMAKE_INSTALL_DEFAULT_COMPONENT_NAME=Unspecified
+-- CMAKE_INSTALL_PREFIX=/usr/local
+-- CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT=1
+-- CMAKE_INSTALL_SO_NO_EXE=0
+-- CMAKE_INTERNAL_PLATFORM_ABI=ELF
+-- CMAKE_LIBRARY_ARCHITECTURE_REGEX=[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*
+-- CMAKE_LIBRARY_PATH_FLAG=-L
+-- CMAKE_LIBRARY_PATH_TERMINATOR=
+-- CMAKE_LINKER=/usr/bin/ld
+-- CMAKE_LINKER=/usr/bin/ld
+-- CMAKE_LINK_LIBRARY_FLAG=-l
+-- CMAKE_LINK_LIBRARY_SUFFIX=
+-- CMAKE_MAJOR_VERSION=3
+-- CMAKE_MAKE_PROGRAM=/usr/bin/make
+-- CMAKE_MATCH_0=
+-- CMAKE_MATCH_1=
+-- CMAKE_MATCH_COUNT=0
+-- CMAKE_MINIMUM_REQUIRED_VERSION=3.6.0
+-- CMAKE_MINOR_VERSION=16
+-- CMAKE_MODULE_LINKER_FLAGS=
+-- CMAKE_MODULE_LINKER_FLAGS_DEBUG=
+-- CMAKE_MODULE_LINKER_FLAGS_INIT=  
+-- CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL=
+-- CMAKE_MODULE_LINKER_FLAGS_RELEASE=
+-- CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO=
+-- CMAKE_MODULE_PATH=/home/shiv/Documents/selci/CMake
+-- CMAKE_MT=
+-- CMAKE_NM=/usr/bin/nm
+-- CMAKE_OBJCOPY=/usr/bin/objcopy
+-- CMAKE_OBJDUMP=/usr/bin/objdump
+-- CMAKE_PARENT_LIST_FILE=/home/shiv/Documents/selci/CMakeLists.txt
+-- CMAKE_PATCH_VERSION=1
+-- CMAKE_PCH_EXTENSION=.gch
+-- CMAKE_PCH_PROLOGUE=#pragma GCC system_header
+-- CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES=/lib;/lib32;/lib64;/usr/lib;/usr/lib32;/usr/lib64
+-- CMAKE_PLATFORM_INFO_DIR=/home/shiv/Documents/selci/build/CMakeFiles/3.16.1
+-- CMAKE_PLATFORM_INFO_INITIALIZED=1
+-- CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME=1
+-- CMAKE_PROJECT_DESCRIPTION=
+-- CMAKE_PROJECT_HOMEPAGE_URL=
+-- CMAKE_PROJECT_NAME=PYCI
+-- CMAKE_RANLIB=/usr/bin/ranlib
+-- CMAKE_RANLIB=/usr/bin/ranlib
+-- CMAKE_READELF=/usr/bin/readelf
+-- CMAKE_ROOT=/usr/share/cmake-3.16
+-- CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS=-shared
+-- CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS=-shared
+-- CMAKE_SHARED_LIBRARY_CXX_FLAGS=-fPIC
+-- CMAKE_SHARED_LIBRARY_C_FLAGS=-fPIC
+-- CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS=-rdynamic
+-- CMAKE_SHARED_LIBRARY_LINK_C_FLAGS=-rdynamic
+-- CMAKE_SHARED_LIBRARY_LINK_DYNAMIC_CXX_FLAGS=-Wl,-Bdynamic
+-- CMAKE_SHARED_LIBRARY_LINK_DYNAMIC_C_FLAGS=-Wl,-Bdynamic
+-- CMAKE_SHARED_LIBRARY_LINK_STATIC_CXX_FLAGS=-Wl,-Bstatic
+-- CMAKE_SHARED_LIBRARY_LINK_STATIC_C_FLAGS=-Wl,-Bstatic
+-- CMAKE_SHARED_LIBRARY_PREFIX=lib
+-- CMAKE_SHARED_LIBRARY_RPATH_LINK_CXX_FLAG=-Wl,-rpath-link,
+-- CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG=-Wl,-rpath-link,
+-- CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN=$ORIGIN
+-- CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG=-Wl,-rpath,
+-- CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP=:
+-- CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG=-Wl,-rpath,
+-- CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP=:
+-- CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG=-Wl,-soname,
+-- CMAKE_SHARED_LIBRARY_SONAME_C_FLAG=-Wl,-soname,
+-- CMAKE_SHARED_LIBRARY_SUFFIX=.so
+-- CMAKE_SHARED_LINKER_FLAGS=
+-- CMAKE_SHARED_LINKER_FLAGS_DEBUG=
+-- CMAKE_SHARED_LINKER_FLAGS_INIT=  
+-- CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL=
+-- CMAKE_SHARED_LINKER_FLAGS_RELEASE=
+-- CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO=
+-- CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS=-shared
+-- CMAKE_SHARED_MODULE_CREATE_C_FLAGS=-shared
+-- CMAKE_SHARED_MODULE_CXX_FLAGS=-fPIC
+-- CMAKE_SHARED_MODULE_C_FLAGS=-fPIC
+-- CMAKE_SHARED_MODULE_LINK_DYNAMIC_CXX_FLAGS=-Wl,-Bdynamic
+-- CMAKE_SHARED_MODULE_LINK_DYNAMIC_C_FLAGS=-Wl,-Bdynamic
+-- CMAKE_SHARED_MODULE_LINK_STATIC_CXX_FLAGS=-Wl,-Bstatic
+-- CMAKE_SHARED_MODULE_LINK_STATIC_C_FLAGS=-Wl,-Bstatic
+-- CMAKE_SHARED_MODULE_PREFIX=lib
+-- CMAKE_SHARED_MODULE_SUFFIX=.so
+-- CMAKE_SIZEOF_VOID_P=8
+-- CMAKE_SKIP_INSTALL_RPATH=NO
+-- CMAKE_SKIP_RPATH=NO
+-- CMAKE_SOURCE_DIR=/home/shiv/Documents/selci
+-- CMAKE_STATIC_LIBRARY_PREFIX=lib
+-- CMAKE_STATIC_LIBRARY_SUFFIX=.a
+-- CMAKE_STATIC_LINKER_FLAGS=
+-- CMAKE_STATIC_LINKER_FLAGS_DEBUG=
+-- CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL=
+-- CMAKE_STATIC_LINKER_FLAGS_RELEASE=
+-- CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO=
+-- CMAKE_STRIP=/usr/bin/strip
+-- CMAKE_SYSTEM=Linux-5.4.3-arch1-1
+-- CMAKE_SYSTEM_INCLUDE_PATH=/usr/include/X11
+-- CMAKE_SYSTEM_INFO_FILE=Platform/Linux
+-- CMAKE_SYSTEM_LIBRARY_PATH=/usr/lib/X11
+-- CMAKE_SYSTEM_LOADED=1
+-- CMAKE_SYSTEM_NAME=Linux
+-- CMAKE_SYSTEM_PREFIX_PATH=/usr/local;/usr;/;/usr;/usr/local;/usr/X11R6;/usr/pkg;/opt
+-- CMAKE_SYSTEM_PROCESSOR=x86_64
+-- CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED=1
+-- CMAKE_SYSTEM_SPECIFIC_INITIALIZE_LOADED=1
+-- CMAKE_SYSTEM_VERSION=5.4.3-arch1-1
+-- CMAKE_TWEAK_VERSION=0
+-- CMAKE_UNAME=/usr/bin/uname
+-- CMAKE_VERBOSE_MAKEFILE=FALSE
+-- CMAKE_VERSION=3.16.1
+-- CXX_TEST_WAS_RUN=1
+-- C_TEST_WAS_RUN=1
+-- EXECUTABLE_OUTPUT_PATH=/home/shiv/Documents/selci/build/bin
+-- FIND_PACKAGE_MESSAGE_DETAILS_PETSc=[/opt/petsc/linux-c-opt/include;/opt/petsc/linux-c-opt/include][/opt/petsc/linux-c-opt/lib/libpetsc.so][YES][v3.11.1()]
+-- FIND_PACKAGE_MESSAGE_DETAILS_SLEPc=[/opt/slepc/linux-c-opt/lib/libslepc.so][/opt/slepc/linux-c-opt/include][/opt/slepc/linux-c-opt][v()]
+-- FIND_PACKAGE_MESSAGE_DETAILS_nlohmann_json=[/usr/lib64/cmake/nlohmann_json/nlohmann_jsonConfig.cmake][v3.7.3(3.2.0)]
+-- LIBRARY_OUTPUT_PATH=/home/shiv/Documents/selci/build/lib
+-- MAKE_EXECUTABLE=/usr/bin/make
+-- MSVC_CXX_ARCHITECTURE_ID=
+-- MSVC_C_ARCHITECTURE_ID=
+-- MULTIPASS_TEST_1_petsc_works_minimal=1
+-- MULTIPASS_TEST_1_petsc_works_minimal_COMPILED=TRUE
+-- MULTIPASS_TEST_1_petsc_works_minimal_EXITCODE=0
+-- MULTIPASS_TEST_COUNT=1
+-- PACKAGE_MULTIPASS_PETSC_ARCH=
+-- PACKAGE_MULTIPASS_PETSC_DIR=/opt/petsc/linux-c-opt
+-- PACKAGE_MULTIPASS__CALLED=YES
+-- PETSC_COMPILER=mpicc
+-- PETSC_CURRENT=YES
+-- PETSC_DEFINITIONS=-D__INSDIR__=
+-- PETSC_DIR=/opt/petsc/linux-c-opt
+-- PETSC_EXECUTABLE_RUNS=YES
+-- PETSC_INCLUDES=/opt/petsc/linux-c-opt/include;/opt/petsc/linux-c-opt/include
+-- PETSC_INCLUDE_CONF=/opt/petsc/linux-c-opt/include
+-- PETSC_INCLUDE_DIR=/opt/petsc/linux-c-opt/include
+-- PETSC_LIBRARIES=/opt/petsc/linux-c-opt/lib/libpetsc.so
+-- PETSC_LIBRARY_SINGLE=/opt/petsc/linux-c-opt/lib/libpetsc.so
+-- PETSC_LIBRARY_VEC=NOTFOUND
+-- PETSC_MPIEXEC=mpiexec --oversubscribe
+-- PETSC_VERSION=3.11.1
+-- PRESET_CMAKE_SYSTEM_NAME=FALSE
+-- PROJECT_BINARY_DIR=/home/shiv/Documents/selci/build
+-- PROJECT_CMAKE=/home/shiv/Documents/selci/CMake
+-- PROJECT_DESCRIPTION=
+-- PROJECT_HOMEPAGE_URL=
+-- PROJECT_NAME=PYCI
+-- PROJECT_SOURCE_DIR=/home/shiv/Documents/selci
+-- PYCI_BINARY_DIR=/home/shiv/Documents/selci/build
+-- PYCI_DEBUG=1
+-- PYCI_DESCRIPTION=
+-- PYCI_HOMEPAGE_URL=
+-- PYCI_MPI=1
+-- PYCI_OMP=1
+-- PYCI_SOURCE_DIR=/home/shiv/Documents/selci
+-- PYCI_VERSION=0.0.1
+-- PYCI_VERSION_MAJOR=0
+-- PYCI_VERSION_MINOR=0
+-- PYCI_VERSION_PATCH=1
+-- RUN_CONFIGURE=ON
+-- UNIX=1
+-- _CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES_INIT=/usr/include
+-- _CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES_INIT=/usr/include
+-- _CMAKE_CXX_IPO_MAY_BE_SUPPORTED_BY_COMPILER=YES
+-- _CMAKE_CXX_IPO_SUPPORTED_BY_CMAKE=YES
+-- _CMAKE_CXX_PIE_MAY_BE_SUPPORTED_BY_LINKER=YES
+-- _CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES_INIT=/usr/include
+-- _CMAKE_C_IPO_MAY_BE_SUPPORTED_BY_COMPILER=YES
+-- _CMAKE_C_IPO_SUPPORTED_BY_CMAKE=YES
+-- _CMAKE_C_PIE_MAY_BE_SUPPORTED_BY_LINKER=YES
+-- _CMAKE_INSTALL_DIR=/usr
+-- _CMAKE_TOOLCHAIN_LOCATION=/usr/bin
+-- _INCLUDED_FILE=/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-CXX.cmake
+-- _INCLUDED_SYSTEM_INFO_FILE=/usr/share/cmake-3.16/Modules/Platform/Linux.cmake
+-- _IN_TC=0
+-- _SET_CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+-- _SET_CMAKE_C_COMPILER_ARCHITECTURE_ID=
+-- __COMPILER_CMAKE_COMMON_COMPILER_MACROS=1
+-- __COMPILER_GNU=1
+-- __LINUX_COMPILER_GNU=1
+-- __UNIX_PATHS_INCLUDED=1
+-- __gcc_hints=/usr/bin
+-- __lto_flags=-flto;-fno-fat-lto-objects
+-- __pch_header_C=c-header
+-- __pch_header_CXX=c++-header
+-- __pch_header_OBJC=objective-c-header
+-- __pch_header_OBJCXX=objective-c++-header
+-- __version_x=9
+-- __version_x_y=9.2
+-- basis_LIB_DEPENDS=general;/opt/petsc/linux-c-opt/lib/libpetsc.so;general;/opt/slepc/linux-c-opt/lib/libslepc.so;general;io;
+-- doctest_DIR=/usr/lib64/cmake/doctest
+-- extension=
+-- f=
+-- io_LIB_DEPENDS=general;/opt/petsc/linux-c-opt/lib/libpetsc.so;general;/opt/slepc/linux-c-opt/lib/libslepc.so;
+-- l=
+-- lang=
+-- molecule_LIB_DEPENDS=general;/opt/petsc/linux-c-opt/lib/libpetsc.so;general;/opt/slepc/linux-c-opt/lib/libslepc.so;general;io;
+-- nlohmann_json_DIR=/usr/lib64/cmake/nlohmann_json
+-- petsc_cc=NOTFOUND
+-- petsc_cc_flags=NOTFOUND
+-- petsc_cpp_line=NOTFOUND
+-- petsc_include=NOTFOUND
+-- petsc_lib_dir=NOTFOUND
+-- petsc_libs_external=NOTFOUND
+-- petsc_mpiexec=NOTFOUND
+-- petscconf=NOTFOUND
+-- type=
+-- val=0
+-- var=
+-- print_all_variables------------------------------------------}
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/shiv/Documents/selci/build
+/usr/bin/cmake -S/home/shiv/Documents/selci -B/home/shiv/Documents/selci/build --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /home/shiv/Documents/selci/build/CMakeFiles /home/shiv/Documents/selci/build/CMakeFiles/progress.marks
+make -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/home/shiv/Documents/selci/build'
+make -f src/io/CMakeFiles/io.dir/build.make src/io/CMakeFiles/io.dir/depend
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+Scanning dependencies of target io
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+make -f src/io/CMakeFiles/io.dir/build.make src/io/CMakeFiles/io.dir/build
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+[  9%] Building CXX object src/io/CMakeFiles/io.dir/io.cpp.o
+[ 18%] Linking CXX static library ../../lib/libio.a
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+[ 18%] Built target io
+make -f src/basis/CMakeFiles/basis.dir/build.make src/basis/CMakeFiles/basis.dir/depend
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+Scanning dependencies of target basis
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+make -f src/basis/CMakeFiles/basis.dir/build.make src/basis/CMakeFiles/basis.dir/build
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+[ 27%] Building CXX object src/basis/CMakeFiles/basis.dir/basis.cpp.o
+/home/shiv/Documents/selci/src/basis/basis.cpp: In constructor ‘PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT&)’:
+/home/shiv/Documents/selci/src/basis/basis.cpp:5:42: warning: unused parameter ‘input’ [-Wunused-parameter]
+    5 | PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input) {
+      |                        ~~~~~~~~~~~~~~~~~~^~~~~
+[ 36%] Linking CXX static library ../../lib/libbasis.a
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+[ 36%] Built target basis
+make -f src/molecule/CMakeFiles/molecule.dir/build.make src/molecule/CMakeFiles/molecule.dir/depend
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+Scanning dependencies of target molecule
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+make -f src/molecule/CMakeFiles/molecule.dir/build.make src/molecule/CMakeFiles/molecule.dir/build
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+[ 45%] Building CXX object src/molecule/CMakeFiles/molecule.dir/molecule.cpp.o
+[ 54%] Linking CXX static library ../../lib/libmolecule.a
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+[ 54%] Built target molecule
+make -f src/CMakeFiles/pyci.dir/build.make src/CMakeFiles/pyci.dir/depend
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+Scanning dependencies of target pyci
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+make -f src/CMakeFiles/pyci.dir/build.make src/CMakeFiles/pyci.dir/build
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+[ 63%] Building CXX object src/CMakeFiles/pyci.dir/pyci.cpp.o
+[ 72%] Linking CXX executable ../bin/pyci
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+[ 72%] Built target pyci
+make -f tests/CMakeFiles/main_test.dir/build.make tests/CMakeFiles/main_test.dir/depend
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+Scanning dependencies of target main_test
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+make -f tests/CMakeFiles/main_test.dir/build.make tests/CMakeFiles/main_test.dir/build
+make[2]: Entering directory '/home/shiv/Documents/selci/build'
+[ 81%] Building CXX object tests/CMakeFiles/main_test.dir/doctest_main.cpp.o
+[ 90%] Building CXX object tests/CMakeFiles/main_test.dir/io_test.cpp.o
+[100%] Linking CXX executable ../bin/main_test
+make[2]: Leaving directory '/home/shiv/Documents/selci/build'
+[100%] Built target main_test
+make[1]: Leaving directory '/home/shiv/Documents/selci/build'
+/usr/bin/cmake -E cmake_progress_start /home/shiv/Documents/selci/build/CMakeFiles 0

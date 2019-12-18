@@ -3,21 +3,28 @@ add_subdirectory(molecule)
 add_subdirectory(basis)
 
 add_executable(pyci pyci.cpp)
+
+# FIND PETSC
 find_package(PETSC REQUIRED)
 if(PETSC_FOUND)
   include_directories(${PETSC_INCLUDES})
   target_link_libraries(pyci ${PETSC_LIBRARIES})
 endif(PETSC_FOUND)
+# FIND SLEPC
 find_package(SLEPC REQUIRED)
 if(SLEPC_FOUND)
   include_directories(${SLEPC_INC})
   target_link_libraries(pyci ${SLEPC_LIB})
 endif(SLEPC_FOUND)
+# FIND nlohmann_json
 find_package(nlohmann_json 3.2.0 REQUIRED)
 message(${nlohmann_json_FOUND})
 if(nlohmann_json_FOUND)
   target_link_libraries(pyci nlohmann_json::nlohmann_json)
 endif(nlohmann_json_FOUND)
+
+# Done finding
+
 target_include_directories(pyci PUBLIC include)
 target_link_libraries(pyci io molecule basis)
 

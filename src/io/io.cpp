@@ -8,6 +8,7 @@ PetscErrorCode APP_ABORT(const std::string &reason) {
       "PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
   SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
            reason.c_str());
+  return 1;
 }
 
 PYCI_INPUT::PYCI_INPUT(const std::string &filename) {

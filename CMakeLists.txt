@@ -1,6 +1,9 @@
 project(PYCI)
-set (CMAKE_CXX_STANDARD 11)
 cmake_minimum_required(VERSION 3.6.0)
+set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+enable_testing()
 
 set(PYCI_VERSION_MAJOR 0)
 set(PYCI_VERSION_MINOR 0)
@@ -27,8 +30,6 @@ set(PYCI_DEBUG
     CACHE BOOL "Enable/disable debug printing")
 set(PROJECT_CMAKE ${PYCI_SOURCE_DIR}/CMake)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
@@ -39,6 +40,7 @@ configure_file(${PYCI_SOURCE_DIR}/src/pyci.settings
 install(FILES ${PYCI_BINARY_DIR}/bin/pyci.settings DESTINATION bin)
 
 add_subdirectory(src)
+add_subdirectory(tests)
 
 if(PYCI_DEBUG)
   # found this useful macro on SO https://stackoverflow.com/a/31390758
@@ -55,4 +57,3 @@ if(PYCI_DEBUG)
   print_all_variables()
   set( CMAKE_VERBOSE_MAKEFILE on )
 endif(PYCI_DEBUG)
-

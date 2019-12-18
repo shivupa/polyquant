@@ -9,3 +9,4 @@ CXXFLAGS="-Wall -Wextra -O3" \
 cmake .. \
 -DPYCI_DEBUG=1
 make
+make test
