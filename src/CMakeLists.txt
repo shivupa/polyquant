@@ -18,11 +18,21 @@ if(SLEPC_FOUND)
 endif(SLEPC_FOUND)
 # FIND nlohmann_json
 find_package(nlohmann_json 3.2.0 REQUIRED)
-message(${nlohmann_json_FOUND})
 if(nlohmann_json_FOUND)
   target_link_libraries(pyci nlohmann_json::nlohmann_json)
 endif(nlohmann_json_FOUND)
-
+# FIND CPR
+find_package(CPR REQUIRED)
+if(CPR_FOUND)
+  include_directories(${CPR_INCLUDE_DIRS})
+  target_link_libraries(pyci ${CPR_LIBRARIES})
+endif(CPR_FOUND)
+# FIND CURL
+find_package(CURL REQUIRED)
+if(CURL_FOUND)
+  include_directories(${CURL_INCLUDE_DIR})
+  target_link_libraries(pyci ${CURL_LIBRARIES})
+endif(CURL_FOUND)
 # Done finding
 
 target_include_directories(pyci PUBLIC include)

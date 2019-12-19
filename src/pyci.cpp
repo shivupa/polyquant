@@ -3,6 +3,7 @@ static char help[] =
     "  -i <filename>, where <filename> is the input file.\n"
     "  -n <n>, where <n> = number of grid subdivisions = matrix dimension.\n\n";
 
+#include <basis/basis.hpp>
 #include <io/io.hpp>
 #include <iostream>
 #include <molecule/molecule.hpp>
@@ -28,6 +29,7 @@ int main(int argc, char **argv) {
     // parse input file
     PYCI_INPUT input_params = PYCI_INPUT(filename);
     PYCI_MOLECULE input_molecule = PYCI_MOLECULE(input_params);
+    PYCI_BASIS input_basis = PYCI_BASIS(input_params);
 
     // set up calculation object
     // run calculation
