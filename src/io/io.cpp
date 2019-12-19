@@ -1,6 +1,5 @@
 #include <fstream>
 #include <io/io.hpp>
-#include <sstream>
 
 PetscErrorCode APP_ABORT(const std::string &reason) {
   std::string ERROR_MESSAGE =
