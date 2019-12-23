@@ -7,6 +7,6 @@ CXX=mpic++ \
 FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
 cmake .. \
--DPYCI_DEBUG=0
+-DPYCI_DEBUG=1
 make
 make test

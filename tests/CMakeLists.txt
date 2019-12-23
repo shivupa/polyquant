@@ -1,7 +1,7 @@
 enable_testing()
 
 add_executable(main_test doctest_main.cpp io_test.cpp molecule_test.cpp
-                         basis_test.cpp)
+                         basis_test.cpp integral_test.cpp)
 
 find_package(doctest REQUIRED)
 find_package(PETSC REQUIRED)

@@ -1,6 +1,7 @@
 add_subdirectory(io)
 add_subdirectory(molecule)
 add_subdirectory(basis)
+add_subdirectory(integral)
 
 add_executable(pyci pyci.cpp)
 
@@ -36,6 +37,6 @@ endif(CURL_FOUND)
 # Done finding
 
 target_include_directories(pyci PUBLIC include)
-target_link_libraries(pyci io molecule basis)
+target_link_libraries(pyci io molecule basis integral)
 
 install(TARGETS pyci DESTINATION bin)
