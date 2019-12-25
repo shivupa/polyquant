@@ -5,6 +5,8 @@
 using json = nlohmann::json;
 
 PetscErrorCode APP_ABORT(const std::string &reason);
+void Selci_cout(auto message);
+void Selci_dump_json(const json &json_obj);
 
 #ifndef PYCI_INPUT_H
 #define PYCI_INPUT_H

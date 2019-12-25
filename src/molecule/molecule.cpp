@@ -11,7 +11,7 @@ PYCI_MOLECULE::PYCI_MOLECULE(const PYCI_INPUT &input) {
   for (auto label : input.input_data["molecule"]["symbols"]) {
     atom_symb.push_back(label);
     atom_num.push_back(_atm_symb_to_num[label]);
-    std::cout << _atm_symb_to_num[label] << std::endl;
+    Selci_cout(_atm_symb_to_num[label]);
   }
   // Store number of atoms
   num_atom = atom_symb.size();

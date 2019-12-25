@@ -34,6 +34,12 @@ if(CURL_FOUND)
   include_directories(${CURL_INCLUDE_DIR})
   target_link_libraries(pyci ${CURL_LIBRARIES})
 endif(CURL_FOUND)
+# FIND CURL
+find_package(Libint2 REQUIRED)
+if(Libint2_FOUND)
+  include_directories(${Libint2_INCLUDE_DIR})
+  target_link_libraries(pyci ${Libint2_LIBRARY})
+endif(Libint2_FOUND)
 # Done finding
 
 target_include_directories(pyci PUBLIC include)

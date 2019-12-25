@@ -1,4 +1,5 @@
 #!/bin/bash
+./format.sh
 rm -rf build
 mkdir -p build
 cd build
@@ -8,5 +9,5 @@ FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
 cmake .. \
 -DPYCI_DEBUG=1
-make
+make -j 4
 make test

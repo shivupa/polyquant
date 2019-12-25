@@ -1,9 +1,19 @@
 project(PYCI)
-cmake_minimum_required(VERSION 3.6.0)
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.6.0 FATAL_ERROR)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-enable_testing()
+if(PYCI_DEBUG)
+  # https://stackoverflow.com/questions/41610822/set-cxx-include-what-you-use-
+  # property-in-cmake-for-every-target
+  find_program(IWYU_PATH NAMES include-what-you-use iwyu)
+  if(NOT IWYU_PATH)
+    message(FATAL_ERROR "Could not find the program include-what-you-use.")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
+  set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
+  set(CMAKE_VERBOSE_MAKEFILE on)
+endif(PYCI_DEBUG)
 
 set(PYCI_VERSION_MAJOR 0)
 set(PYCI_VERSION_MINOR 0)
@@ -22,9 +32,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 set(PYCI_MPI
     1
     CACHE BOOL "Enable/disable MPI")
-set(PYCI_OMP
-    1
-    CACHE BOOL "Enable/disable OpenMP")
+# There isn't currently support for OpenMP set(PYCI_OMP 1 CACHE BOOL
+# "Enable/disable OpenMP")
 set(PYCI_DEBUG
     0
     CACHE BOOL "Enable/disable debug printing")
@@ -54,5 +63,5 @@ if(PYCI_DEBUG)
       STATUS "print_all_variables------------------------------------------}")
   endmacro()
   print_all_variables()
-  set(CMAKE_VERBOSE_MAKEFILE on)
+
 endif(PYCI_DEBUG)

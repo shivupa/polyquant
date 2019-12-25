@@ -9,12 +9,29 @@ PetscErrorCode APP_ABORT(const std::string &reason) {
            reason.c_str());
   return 1;
 }
+void Selci_cout(auto message) {
+  // TODO: in these types of functions we could do a if USING_SLEPC
+  // just in case its not using mpi etc
+  int my_rank;
+  MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  if (my_rank == 0) {
+    std::cout << message << std::endl;
+  }
+}
+
+void Selci_dump_json(const json &json_obj) {
+  int my_rank;
+  MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  if (my_rank == 0) {
+    std::cout << json_obj.dump(4) << std::endl;
+  }
+}
 
 PYCI_INPUT::PYCI_INPUT(const std::string &filename) {
   std::ifstream inputfile(filename);
   input_data = json::parse(inputfile);
 
-  std::cout << input_data.dump(4) << std::endl;
+  Selci_dump_json(input_data);
   /*
   std::ifstream inputfile(filename);
   std::string line;

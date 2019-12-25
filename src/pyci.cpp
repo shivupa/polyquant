@@ -4,6 +4,7 @@ static char help[] =
     "  -n <n>, where <n> = number of grid subdivisions = matrix dimension.\n\n";
 
 #include <basis/basis.hpp>
+#include <integral/integral.hpp>
 #include <io/io.hpp>
 #include <iostream>
 #include <molecule/molecule.hpp>
@@ -26,10 +27,16 @@ int main(int argc, char **argv) {
   if (input_provided) {
     ierr = PetscPrintf(PETSC_COMM_WORLD, "Reading Input File: %s\n", filename);
     CHKERRQ(ierr);
+    // This will all later be in the calculation object
+
     // parse input file
     PYCI_INPUT input_params = PYCI_INPUT(filename);
+    // parse molecule
     PYCI_MOLECULE input_molecule = PYCI_MOLECULE(input_params);
+    // parse basis
     PYCI_BASIS input_basis = PYCI_BASIS(input_params);
+    // calculate integrals
+    PYCI_INTEGRAL input_integral = PYCI_INTEGRAL(input_params, input_basis);
 
     // set up calculation object
     // run calculation
