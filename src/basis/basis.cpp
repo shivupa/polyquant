@@ -8,16 +8,28 @@
 #include <string>
 using json = nlohmann::json;
 
-PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input) {
+PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
   Selci_cout("BASIS");
   // parse basis name from data
   basis_name = input.input_data["model"]["basis"];
-  Selci_cout(basis_name);
+  // Selci_cout(basis_name);
   std::transform(basis_name.begin(), basis_name.end(), basis_name.begin(),
                  ::tolower);
-  Selci_cout(basis_name);
+  // Selci_cout(basis_name);
+
+  // TODO move each of these to a function.
+
+  // Libint basis object
+  Selci_cout("Creating a Libint2 basis object assuming basis_name is part of "
+             "the Libint2 library.");
+  basis = libint2::BasisSet(basis_name, molecule.libint_atom);
+
+  // Parsing custom basis
   // try to parse local files {atom_symbol}_{basis_name}.txt
 
+  // Parsing a basis from BSE
+  // Below code queries the metadata. Getting a basis is similar.
+  /*
   // retrive metadata about basis sets contained in basis set exchange
   auto r = cpr::Get(cpr::Url{"https://www.basissetexchange.org/api/metadata"});
   // TODO handle a failure to retrive info
@@ -35,13 +47,6 @@ PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input) {
     Selci_cout(message);
     // Selci_dump_json(basis_set_exchange_metadata[basis_name]);
   }
+  */
   // std::cout << basis_set_exchange_metadata.dump(4) << std::endl;
-  // RestClient::Response r =
-  //     RestClient::get("https://www.basissetexchange.org/api/metadata");
-  // std::cout << "r.code" << std::endl;
-  // std::cout << r.code << std::endl;
-  // std::cout << "r.body" << std::endl;
-  // std::cout << r.body << std::endl;
-  // std::cout << "r.headers" << std::endl;
-  // std::cout << r.headers << std::endl;
 }

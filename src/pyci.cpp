@@ -3,6 +3,7 @@ static char help[] =
     "  -i <filename>, where <filename> is the input file.\n"
     "  -n <n>, where <n> = number of grid subdivisions = matrix dimension.\n\n";
 
+// #include <Python.h>
 #include <basis/basis.hpp>
 #include <integral/integral.hpp>
 #include <io/io.hpp>
@@ -12,6 +13,13 @@ static char help[] =
 #include <string>
 
 int main(int argc, char **argv) {
+  // A way to do python stuff
+  // PyObject *pInt;
+  // Py_Initialize();
+  // PyRun_SimpleString("a = 4 \nprint('Hello World from Embedded Python!!!')");
+  // Py_Finalize();
+  // std::cout << pInt << std::endl;
+
   PetscErrorCode ierr;
   PetscBool input_provided;
   char filename[PETSC_MAX_PATH_LEN];
@@ -34,9 +42,10 @@ int main(int argc, char **argv) {
     // parse molecule
     PYCI_MOLECULE input_molecule = PYCI_MOLECULE(input_params);
     // parse basis
-    PYCI_BASIS input_basis = PYCI_BASIS(input_params);
+    PYCI_BASIS input_basis = PYCI_BASIS(input_params, input_molecule);
     // calculate integrals
-    PYCI_INTEGRAL input_integral = PYCI_INTEGRAL(input_params, input_basis);
+    PYCI_INTEGRAL input_integral =
+        PYCI_INTEGRAL(input_params, input_basis, input_molecule);
 
     // set up calculation object
     // run calculation

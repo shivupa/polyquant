@@ -1,7 +1,8 @@
 project(PYCI)
 cmake_minimum_required(VERSION 3.6.0 FATAL_ERROR)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+enable_testing()
 
 if(PYCI_DEBUG)
   # https://stackoverflow.com/questions/41610822/set-cxx-include-what-you-use-

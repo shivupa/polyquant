@@ -11,7 +11,6 @@ PYCI_MOLECULE::PYCI_MOLECULE(const PYCI_INPUT &input) {
   for (auto label : input.input_data["molecule"]["symbols"]) {
     atom_symb.push_back(label);
     atom_num.push_back(_atm_symb_to_num[label]);
-    Selci_cout(_atm_symb_to_num[label]);
   }
   // Store number of atoms
   num_atom = atom_symb.size();
@@ -23,4 +22,30 @@ PYCI_MOLECULE::PYCI_MOLECULE(const PYCI_INPUT &input) {
     }
     atom_coord.push_back(atom);
   }
+  // Selci_cout(this->dump_xyz());
+  libint_atom = this->to_libint_atom();
+}
+
+std::string PYCI_MOLECULE::dump_xyz() const {
+  std::string temp_xyz = "";
+  temp_xyz += std::to_string(this->num_atom);
+  temp_xyz += "\n";
+  temp_xyz += "PYCI Dumped XYZ";
+  for (auto i = 0; i < this->num_atom; i++) {
+
+    temp_xyz += "\n";
+    temp_xyz += this->atom_symb[i];
+    temp_xyz += "\t";
+    temp_xyz += std::to_string(this->atom_coord[i][0]);
+    temp_xyz += "\t";
+    temp_xyz += std::to_string(this->atom_coord[i][1]);
+    temp_xyz += "\t";
+    temp_xyz += std::to_string(this->atom_coord[i][2]);
+  }
+  return temp_xyz;
+}
+
+std::vector<libint2::Atom> PYCI_MOLECULE::to_libint_atom() const {
+  std::istringstream temp_xyz_stream(this->dump_xyz());
+  return libint2::read_dotxyz(temp_xyz_stream);
 }

@@ -34,13 +34,14 @@ if(CURL_FOUND)
   include_directories(${CURL_INCLUDE_DIR})
   target_link_libraries(pyci ${CURL_LIBRARIES})
 endif(CURL_FOUND)
-# FIND CURL
+# FIND Libint2
 find_package(Libint2 REQUIRED)
 if(Libint2_FOUND)
-  include_directories(${Libint2_INCLUDE_DIR})
-  target_link_libraries(pyci ${Libint2_LIBRARY})
+  target_link_libraries(pyci Libint2::cxx)
 endif(Libint2_FOUND)
-# Done finding
+# FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
+# include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci
+# ${PYTHON_LIBRARIES}) endif(PythonLibs_FOUND) Done finding
 
 target_include_directories(pyci PUBLIC include)
 target_link_libraries(pyci io molecule basis integral)
