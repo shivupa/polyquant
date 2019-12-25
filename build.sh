@@ -11,3 +11,6 @@ cmake .. \
 -DPYCI_DEBUG=0
 make 
 make test
+cd ..
+cd examples/h2o
+./run.sh

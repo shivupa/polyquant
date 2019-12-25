@@ -2,6 +2,7 @@
 #include <io/io.hpp>
 #include <iostream>
 #include <libint2.hpp>
+#include <numeric>
 #include <slepceps.h>
 #include <sstream>
 
@@ -11,17 +12,45 @@ PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
   PetscErrorCode ierr;
   Selci_cout("INTEGRAL");
   const auto num_basis = this->nbasis(basis.basis);
+
   ierr = MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, num_basis,
-                        num_basis, NULL, &S);
+                        num_basis, NULL, &overlap);
   CHKERRV(ierr);
-  MatSetUp(S);
-  this->compute_1body_ints(S, basis.basis, libint2::Operator::overlap,
+  MatSetUp(overlap);
+  this->compute_1body_ints(overlap, basis.basis, libint2::Operator::overlap);
+  ierr = MatAssemblyBegin(overlap, MAT_FINAL_ASSEMBLY);
+  CHKERRV(ierr);
+  ierr = MatAssemblyEnd(overlap, MAT_FINAL_ASSEMBLY);
+  CHKERRV(ierr);
+  PetscViewer viewer;
+  PetscViewerASCIIOpen(PETSC_COMM_WORLD, "ovlp.txt", &viewer);
+  MatView(overlap, viewer);
+
+  ierr = MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, num_basis,
+                        num_basis, NULL, &kinetic);
+  CHKERRV(ierr);
+  MatSetUp(kinetic);
+  this->compute_1body_ints(kinetic, basis.basis, libint2::Operator::kinetic);
+  ierr = MatAssemblyBegin(kinetic, MAT_FINAL_ASSEMBLY);
+  CHKERRV(ierr);
+  ierr = MatAssemblyEnd(kinetic, MAT_FINAL_ASSEMBLY);
+  CHKERRV(ierr);
+  PetscViewerASCIIOpen(PETSC_COMM_WORLD, "kin.txt", &viewer);
+  MatView(kinetic, viewer);
+
+  ierr = MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, num_basis,
+                        num_basis, NULL, &nuclear);
+  CHKERRV(ierr);
+  MatSetUp(nuclear);
+  this->compute_1body_ints(nuclear, basis.basis, libint2::Operator::nuclear,
                            molecule.libint_atom);
-  ierr = MatAssemblyBegin(S, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyBegin(nuclear, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
-  ierr = MatAssemblyEnd(S, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyEnd(nuclear, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
-  MatView(S, PETSC_VIEWER_STDOUT_WORLD);
+  PetscViewerASCIIOpen(PETSC_COMM_WORLD, "nuc.txt", &viewer);
+  MatView(nuclear, viewer);
+
   libint2::finalize();
 }
 
@@ -97,31 +126,25 @@ void PYCI_INTEGRAL::compute_1body_ints(
 
     for (auto s2 = 0; s2 != shells.size(); ++s2) {
 
-      std::vector<PetscInt> Petsc_bf1;
-      std::vector<PetscInt> Petsc_bf2;
-
       auto bf2 = shell2bf[s2];
       auto n2 = shells[s2].size();
       // Todo use symmetry
       // compute shell pair
       engine.compute(shells[s1], shells[s2]);
       // Write values to the matrix
-      // TODO Could be a dangerous cast long unsigned int -> Petsc Int but let's
-      // see if it works
-      for (auto i = bf1; i < bf1+n1; i++){
-        Petsc_bf1.push_back(i);
-      }
-      for (auto i = bf2; i < bf2+n2; i++){
-        Petsc_bf2.push_back(i);
-      }
+      // this stupid stuff is probably slow?
+      std::vector<PetscInt> Petsc_bf1(n1);
+      std::vector<PetscInt> Petsc_bf2(n2);
+      std::iota(Petsc_bf1.begin(), Petsc_bf1.end(), bf1);
+      std::iota(Petsc_bf2.begin(), Petsc_bf2.end(), bf2);
       // Selci_cout("bf1");
       // Selci_cout(n1);
       // Selci_cout(Petsc_bf1);
       // Selci_cout("bf2");
       // Selci_cout(n2);
       // Selci_cout(Petsc_bf2);
-      MatSetValues(output_matrix, n1, Petsc_bf1.data(), n2, Petsc_bf2.data(), buf[0],
-                   INSERT_VALUES);
+      MatSetValues(output_matrix, n1, Petsc_bf1.data(), n2, Petsc_bf2.data(),
+                   buf[0], INSERT_VALUES);
     }
   }
 }

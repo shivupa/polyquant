@@ -20,11 +20,13 @@ public:
 
   std::vector<size_t>
   map_shell_to_basis_function(const std::vector<libint2::Shell> &shells);
-  void compute_1body_ints(Mat &output_matrix,
-                          const std::vector<libint2::Shell> &shells,
-                          libint2::Operator obtype,
-                          const std::vector<libint2::Atom> &atoms);
+  void compute_1body_ints(
+      Mat &output_matrix, const std::vector<libint2::Shell> &shells,
+      libint2::Operator obtype,
+      const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
-  Mat S; // Overlap matrix
+  Mat overlap; // Overlap matrix
+  Mat kinetic; // Kinetic matrix
+  Mat nuclear; // Nuclear matrix
 };
 #endif

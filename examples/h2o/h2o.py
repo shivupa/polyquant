@@ -11,9 +11,27 @@ mol.symmetry = 1
 mol.unit='Angstrom'
 mol.build()
 
+print("PYTHON CHECK WITH PYSCF")
+
+
+print("OVERLAP CHECK")
 b = mol.intor('int1e_ovlp_sph')
+a = np.loadtxt("ovlp.txt",skiprows=2)
+print(np.allclose(a,b))
+print(a-b)
 
 
-a = np.loadtxt("ovlp.txt")
+
+print("KINETIC CHECK")
+b = mol.intor('int1e_kin_sph')
+a = np.loadtxt("kin.txt",skiprows=2)
+print(np.allclose(a,b))
+print(a-b)
+
+
+
+print("NUCLEAR CHECK")
+b = mol.intor('int1e_nuc_sph')
+a = np.loadtxt("nuc.txt",skiprows=2)
 print(np.allclose(a,b))
 print(a-b)
