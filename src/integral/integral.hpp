@@ -12,21 +12,21 @@ class PYCI_INTEGRAL {
 public:
   PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                 const PYCI_MOLECULE &molecule);
-  size_t nbasis(const std::vector<libint2::Shell> &shells);
+  int idx2(const int &i, const int &j);
 
-  size_t max_nprim(const std::vector<libint2::Shell> &shells);
+  int idx4(const int &i, const int &j, const int &k, const int &l);
 
-  int max_l(const std::vector<libint2::Shell> &shells);
-
-  std::vector<size_t>
-  map_shell_to_basis_function(const std::vector<libint2::Shell> &shells);
   void compute_1body_ints(
-      Mat &output_matrix, const std::vector<libint2::Shell> &shells,
+      Mat &output_matrix, const libint2::BasisSet &shells,
       libint2::Operator obtype,
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
-  Mat overlap; // Overlap matrix
-  Mat kinetic; // Kinetic matrix
-  Mat nuclear; // Nuclear matrix
+  void compute_2body_ints(Vec &output_vec, const libint2::BasisSet &shells,
+                          libint2::Operator obtype);
+
+  Mat overlap; // Overlap vector matrix
+  Mat kinetic; // Kinetic vector matrix
+  Mat nuclear; // Nuclear vector matrix
+  Vec twoelec; // Two electron integral vector
 };
 #endif
