@@ -20,7 +20,9 @@ void Selci_dump_json(const json &json_obj);
 
 class PYCI_INPUT {
 public:
+  PYCI_INPUT() = default;
   PYCI_INPUT(const std::string &filename);
+  void parse_input(const std::string &filename);
   json input_data;
 };
 #endif

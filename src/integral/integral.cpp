@@ -8,50 +8,59 @@
 
 PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                              const PYCI_MOLECULE &molecule) {
+  this->setup_integral(input, basis, molecule);
+}
+
+void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
+                                   const PYCI_BASIS &basis,
+                                   const PYCI_MOLECULE &molecule) {
 
   auto num_basis = libint2::nbf(basis.basis);
-  libint2::initialize();
   PetscErrorCode ierr;
+  PetscViewer viewer;
+  libint2::initialize();
+
   Selci_cout("INTEGRAL");
   Selci_cout("Calculating One Body Integrals...");
 
   ierr = MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, num_basis,
-                        num_basis, NULL, &overlap);
+                        num_basis, NULL, &(this->overlap));
   CHKERRV(ierr);
-  MatSetUp(overlap);
-  this->compute_1body_ints(overlap, basis.basis, libint2::Operator::overlap);
-  ierr = MatAssemblyBegin(overlap, MAT_FINAL_ASSEMBLY);
+  MatSetUp(this->overlap);
+  this->compute_1body_ints(this->overlap, basis.basis,
+                           libint2::Operator::overlap);
+  ierr = MatAssemblyBegin(this->overlap, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
-  ierr = MatAssemblyEnd(overlap, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyEnd(this->overlap, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
-  PetscViewer viewer;
   PetscViewerASCIIOpen(PETSC_COMM_WORLD, "ovlp.txt", &viewer);
-  MatView(overlap, viewer);
+  MatView(this->overlap, viewer);
 
   ierr = MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, num_basis,
-                        num_basis, NULL, &kinetic);
+                        num_basis, NULL, &(this->kinetic));
   CHKERRV(ierr);
-  MatSetUp(kinetic);
-  this->compute_1body_ints(kinetic, basis.basis, libint2::Operator::kinetic);
-  ierr = MatAssemblyBegin(kinetic, MAT_FINAL_ASSEMBLY);
+  MatSetUp(this->kinetic);
+  this->compute_1body_ints(this->kinetic, basis.basis,
+                           libint2::Operator::kinetic);
+  ierr = MatAssemblyBegin(this->kinetic, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
-  ierr = MatAssemblyEnd(kinetic, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyEnd(this->kinetic, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
   PetscViewerASCIIOpen(PETSC_COMM_WORLD, "kin.txt", &viewer);
   MatView(kinetic, viewer);
 
   ierr = MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, num_basis,
-                        num_basis, NULL, &nuclear);
+                        num_basis, NULL, &(this->nuclear));
   CHKERRV(ierr);
-  MatSetUp(nuclear);
-  this->compute_1body_ints(nuclear, basis.basis, libint2::Operator::nuclear,
-                           molecule.libint_atom);
-  ierr = MatAssemblyBegin(nuclear, MAT_FINAL_ASSEMBLY);
+  MatSetUp(this->nuclear);
+  this->compute_1body_ints(this->nuclear, basis.basis,
+                           libint2::Operator::nuclear, molecule.libint_atom);
+  ierr = MatAssemblyBegin(this->nuclear, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
-  ierr = MatAssemblyEnd(nuclear, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyEnd(this->nuclear, MAT_FINAL_ASSEMBLY);
   CHKERRV(ierr);
   PetscViewerASCIIOpen(PETSC_COMM_WORLD, "nuc.txt", &viewer);
-  MatView(nuclear, viewer);
+  MatView(this->nuclear, viewer);
 
   Selci_cout("Calculating Two Body Integrals...");
 
@@ -60,17 +69,18 @@ PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
   auto two_elec_size = ((num_basis) * (num_basis + 1) *
                         ((num_basis * num_basis) + (num_basis) + 2)) /
                        8;
-  ierr =
-      VecCreateShared(PETSC_COMM_WORLD, PETSC_DECIDE, two_elec_size, &twoelec);
+  ierr = VecCreateShared(PETSC_COMM_WORLD, PETSC_DECIDE, two_elec_size,
+                         &(this->twoelec));
   CHKERRV(ierr);
-  VecSetUp(twoelec);
-  this->compute_2body_ints(twoelec, basis.basis, libint2::Operator::coulomb);
-  ierr = VecAssemblyBegin(twoelec);
+  VecSetUp(this->twoelec);
+  this->compute_2body_ints(this->twoelec, basis.basis,
+                           libint2::Operator::coulomb);
+  ierr = VecAssemblyBegin(this->twoelec);
   CHKERRV(ierr);
-  ierr = VecAssemblyEnd(twoelec);
+  ierr = VecAssemblyEnd(this->twoelec);
   CHKERRV(ierr);
   PetscViewerASCIIOpen(PETSC_COMM_WORLD, "eri.txt", &viewer);
-  VecView(twoelec, viewer);
+  VecView(this->twoelec, viewer);
 
   libint2::finalize();
 }

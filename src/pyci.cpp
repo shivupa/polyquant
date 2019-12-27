@@ -4,11 +4,8 @@ static char help[] =
     "  -n <n>, where <n> = number of grid subdivisions = matrix dimension.\n\n";
 
 // #include <Python.h>
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
+#include <calculation/calculation.hpp>
 #include <iostream>
-#include <molecule/molecule.hpp>
 #include <slepceps.h>
 #include <string>
 
@@ -25,29 +22,15 @@ int main(int argc, char **argv) {
   char filename[PETSC_MAX_PATH_LEN];
 
   ierr = SlepcInitialize(&argc, &argv, (char *)0, help);
-  if (ierr) {
-    return ierr;
-  }
+  CHKERRQ(ierr);
 
   ierr = PetscOptionsGetString(NULL, NULL, "-i", filename, sizeof(filename),
                                &input_provided);
+  CHKERRQ(ierr);
 
   if (input_provided) {
-    ierr = PetscPrintf(PETSC_COMM_WORLD, "Reading Input File: %s\n", filename);
-    CHKERRQ(ierr);
-    // This will all later be in the calculation object
-
-    // parse input file
-    PYCI_INPUT input_params = PYCI_INPUT(filename);
-    // parse molecule
-    PYCI_MOLECULE input_molecule = PYCI_MOLECULE(input_params);
-    // parse basis
-    PYCI_BASIS input_basis = PYCI_BASIS(input_params, input_molecule);
-    // calculate integrals
-    PYCI_INTEGRAL input_integral =
-        PYCI_INTEGRAL(input_params, input_basis, input_molecule);
-
     // set up calculation object
+    PYCI_CALCULATION calc = PYCI_CALCULATION(filename);
     // run calculation
   } else {
     ierr = APP_ABORT("MISSING INPUT FILE");
