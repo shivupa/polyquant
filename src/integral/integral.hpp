@@ -10,8 +10,11 @@
 #define PYCI_INTEGRAL_H
 class PYCI_INTEGRAL {
 public:
+  PYCI_INTEGRAL() = default;
   PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                 const PYCI_MOLECULE &molecule);
+  void setup_integral(const PYCI_INPUT &input, const PYCI_BASIS &basis,
+                      const PYCI_MOLECULE &molecule);
   int idx2(const int &i, const int &j);
 
   int idx4(const int &i, const int &j, const int &k, const int &l);

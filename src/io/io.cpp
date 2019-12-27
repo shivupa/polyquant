@@ -28,10 +28,18 @@ void Selci_dump_json(const json &json_obj) {
 }
 
 PYCI_INPUT::PYCI_INPUT(const std::string &filename) {
-  std::ifstream inputfile(filename);
-  input_data = json::parse(inputfile);
+  this->parse_input(filename);
+}
 
-  Selci_dump_json(input_data);
+void PYCI_INPUT::parse_input(const std::string &filename) {
+  std::ifstream inputfile(filename);
+  this->input_data = json::parse(inputfile);
+
+  Selci_cout("Reading Input File: " + filename);
+
+  Selci_cout("Input file: ");
+  Selci_dump_json(this->input_data);
+  Selci_cout("End input file");
   /*
   std::ifstream inputfile(filename);
   std::string line;

@@ -8,7 +8,9 @@
 #define PYCI_MOLECULE_H
 class PYCI_MOLECULE {
 public:
+  PYCI_MOLECULE() = default;
   PYCI_MOLECULE(const PYCI_INPUT &input);
+  void setup_molecule(const PYCI_INPUT &input);
 
   std::vector<libint2::Atom> to_libint_atom() const;
   std::string dump_xyz() const;

@@ -9,12 +9,16 @@
 using json = nlohmann::json;
 
 PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
+  this->load_basis(input, molecule);
+}
+void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
+                            const PYCI_MOLECULE &molecule) {
   Selci_cout("BASIS");
   // parse basis name from data
-  basis_name = input.input_data["model"]["basis"];
+  this->basis_name = input.input_data["model"]["basis"];
   // Selci_cout(basis_name);
-  std::transform(basis_name.begin(), basis_name.end(), basis_name.begin(),
-                 ::tolower);
+  std::transform(this->basis_name.begin(), this->basis_name.end(),
+                 this->basis_name.begin(), ::tolower);
   // Selci_cout(basis_name);
 
   // TODO move each of these to a function.
@@ -22,7 +26,7 @@ PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
   // Libint basis object
   Selci_cout("Creating a Libint2 basis object assuming basis_name is part of "
              "the Libint2 library.");
-  basis = libint2::BasisSet(basis_name, molecule.libint_atom);
+  this->basis = libint2::BasisSet(this->basis_name, molecule.libint_atom);
 
   // Parsing custom basis
   // try to parse local files {atom_symbol}_{basis_name}.txt
