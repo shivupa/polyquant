@@ -12,5 +12,6 @@ void PYCI_CALCULATION::setup_calculation(const std::string &filename) {
   // parse basis
   this->input_basis = PYCI_BASIS(input_params, input_molecule);
   // calculate integrals
-  this->input_integral = PYCI_INTEGRAL(input_params, input_basis, input_molecule);
+  this->input_integral =
+      PYCI_INTEGRAL(input_params, input_basis, input_molecule);
 }

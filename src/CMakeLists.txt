@@ -1,11 +1,14 @@
+# add the subdirectories of things that need to be built
 add_subdirectory(io)
 add_subdirectory(molecule)
 add_subdirectory(basis)
 add_subdirectory(integral)
 add_subdirectory(calculation)
 
+# tell cmake what our excutable is going to be
 add_executable(pyci pyci.cpp)
 
+# Find all the required things
 # FIND PETSC
 find_package(PETSC REQUIRED)
 if(PETSC_FOUND)
