@@ -12,6 +12,12 @@ SELected Configuration Interaction
    Scalable Library for Eigenvalue Problem Computations
 
    `Selci` uses SLEPc for MPI distributed matrix diagonalization.
+
+- [onqtam/doctest](https://github.com/onqtam/doctest)
+   The fastest feature-rich C++11/14/17/20 single-header testing framework for unit tests and TDD 
+
+   `Selci` uses doctest for testing.
+
 - [nlohmann/json](https://github.com/nlohmann/json)
    JSON for Modern C++
 
@@ -30,3 +36,8 @@ SELected Configuration Interaction
 ## For a debug build
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
+
+## On Arch:
+    ```
+    yay -Syu petsc slepc doctest nlohmann-json cpr-git libint2 include-what-you-use
+    ```
