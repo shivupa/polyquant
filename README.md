@@ -41,7 +41,8 @@ SELected Configuration Interaction
 
    `Selci` uses `cmake-format` to format all of the `CMakeLists.txt`
 ## On Arch:
-    ```
-    pacman -Syu clang
-    yay -Syu petsc slepc doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use
-    ```
+
+```
+pacman -Syu clang
+yay -Syu petsc slepc doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use
+```
