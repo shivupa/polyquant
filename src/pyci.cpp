@@ -5,8 +5,7 @@ static char help[] =
 
 // #include <Python.h>
 #include <calculation/calculation.hpp>
-#include <iostream>
-#include <slepceps.h>
+#include <slepceps.h> // IWYU pragma: keep
 #include <string>
 
 int main(int argc, char **argv) {

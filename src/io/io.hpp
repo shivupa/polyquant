@@ -1,6 +1,6 @@
 #include <iostream>
-#include <nlohmann/json.hpp>
-#include <slepceps.h>
+#include <nlohmann/json.hpp> // IWYU pragma: keep
+#include <slepceps.h>        // IWYU pragma: keep
 #include <string>
 using json = nlohmann::json;
 

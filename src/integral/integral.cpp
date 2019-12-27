@@ -1,10 +1,7 @@
 #include <integral/integral.hpp>
-#include <io/io.hpp>
-#include <iostream>
-#include <libint2.hpp>
+#include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>
-#include <slepceps.h>
-#include <sstream>
+#include <slepceps.h> // IWYU pragma: keep
 
 PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                              const PYCI_MOLECULE &molecule) {

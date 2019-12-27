@@ -1,9 +1,7 @@
 #include <basis/basis.hpp>
 #include <io/io.hpp>
-#include <iostream>
 #include <molecule/molecule.hpp>
-#include <slepceps.h>
-#include <string>
+#include <slepceps.h> // IWYU pragma: keep
 #include <vector>
 
 #ifndef PYCI_INTEGRAL_H

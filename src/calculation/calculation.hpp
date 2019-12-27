@@ -1,11 +1,8 @@
 #include <basis/basis.hpp>
 #include <integral/integral.hpp>
 #include <io/io.hpp>
-#include <iostream>
-#include <libint2.hpp>
 #include <molecule/molecule.hpp>
 #include <string>
-#include <vector>
 
 #ifndef PYCI_CALCULATION_H
 #define PYCI_CALCULATION_H

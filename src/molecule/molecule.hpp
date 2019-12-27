@@ -1,6 +1,5 @@
 #include <io/io.hpp>
-#include <iostream>
-#include <libint2.hpp>
+#include <libint2.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
 

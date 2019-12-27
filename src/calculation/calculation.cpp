@@ -1,5 +1,4 @@
 #include <calculation/calculation.hpp>
-#include <io/io.hpp>
 
 PYCI_CALCULATION::PYCI_CALCULATION(const std::string &filename) {
   this->setup_calculation(filename);

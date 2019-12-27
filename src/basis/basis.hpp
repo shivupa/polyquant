@@ -1,9 +1,7 @@
 #include <io/io.hpp>
-#include <iostream>
-#include <libint2.hpp>
+#include <libint2.hpp> // IWYU pragma: keep
 #include <molecule/molecule.hpp>
 #include <string>
-#include <vector>
 
 #ifndef PYCI_BASIS_H
 #define PYCI_BASIS_H
