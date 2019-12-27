@@ -1,4 +1,5 @@
 #!/bin/bash
+./format.sh
 rm -rf build
 mkdir -p build
 cd build
@@ -7,5 +8,9 @@ CXX=mpic++ \
 FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
 cmake .. \
--DPYCI_DEBUG=1
-make
+-DPYCI_DEBUG=0
+make 
+make test
+cd ..
+cd examples/h2o
+./run.sh

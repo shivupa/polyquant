@@ -1,0 +1,5 @@
+molecule class stores information about physical system requires input
+basis stores gaussian basis info requires input
+integral class stores integrals by calling to libint requires input
+
+calculation type takes molecule basis integral and input sets up calculations. requires mos that could be read from file or if not present will set up a hf calculation. if keywords have cipsi type will run cipsi
