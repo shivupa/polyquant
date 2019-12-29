@@ -82,6 +82,12 @@ void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
   libint2::finalize();
 }
 
+/**
+ * @details This follows the HF test in the Libint2 repo. It constructs the
+ * integral engine. This all needs to be flipped around so we are using the
+ * SLEPc/PETSc get domain and calculating the integrals on each process that we
+ * need to. Right now we calculate them all on each rank.
+ */
 void PYCI_INTEGRAL::compute_1body_ints(
     Mat &output_matrix, const libint2::BasisSet &shells,
     libint2::Operator obtype, const std::vector<libint2::Atom> &atoms) {
@@ -91,7 +97,6 @@ void PYCI_INTEGRAL::compute_1body_ints(
   // on each process that we need to. Right now we calculate
   // them on each rank
 
-  // Following the HF test in the Libint2 repo
   // construct the overlap integrals engine
   libint2::Engine engine(obtype, shells.max_nprim(), shells.max_l(), 0);
 
@@ -99,13 +104,6 @@ void PYCI_INTEGRAL::compute_1body_ints(
   // the nuclei are charges in this case; in QM/MM there will also be classical
   // charges
   if (obtype == libint2::Operator::nuclear) {
-    // std::vector<
-    //     std::pair<libint2::scalar_type, std::array<libint2::scalar_type, 3>>>
-    //     q;
-    // for (const auto &atom : atoms) {
-    //   q.push_back({static_cast<libint2::scalar_type>(atom.atomic_number),
-    //                {{atom.x, atom.y, atom.z}}});
-    // }
     engine.set_params(libint2::make_point_charges(atoms));
   }
 
@@ -146,6 +144,12 @@ void PYCI_INTEGRAL::compute_1body_ints(
   }
 }
 
+/**
+ * @details This follows the HF test in the Libint2 repo. It constructs the
+ * integral engine. This all needs to be flipped around so we are using the
+ * SLEPc/PETSc get domain and calculating the integrals on each process that we
+ * need to. Right now we calculate them all on each rank.
+ */
 void PYCI_INTEGRAL::compute_2body_ints(Vec &output_vec,
                                        const libint2::BasisSet &shells,
                                        libint2::Operator obtype) {

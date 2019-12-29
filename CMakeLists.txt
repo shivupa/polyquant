@@ -29,6 +29,9 @@ set(PYCI_MPI
 set(PYCI_DEBUG
     0
     CACHE BOOL "Enable/disable debug printing")
+set(PYCI_DOCS
+    0
+    CACHE BOOL "Enable/disable documentation building")
 
 message(STATUS "Ready to build PYCI")
 
@@ -60,6 +63,28 @@ if(PYCI_DEBUG)
   set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE on)
 endif(PYCI_DEBUG)
+
+# if the docs flag is on this will use doxygen to build the docs
+if(PYCI_DOCS)
+  # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html
+  find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
+  if(DOXYGEN_FOUND)
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_GENERATE_LATEX YES)
+    set(DOXYGEN_GENERATE_MAN NO)
+    set(DOXYGEN_OUTPUT_DIRECTORY docs)
+    doxygen_add_docs(doxygen ${PROJECT_SOURCE_DIR} COMMENT
+                     "Generate HTML and LATEX documentation.")
+    add_custom_command(
+      TARGET doxygen
+      POST_BUILD
+      COMMAND "${CMAKE_MAKE_PROGRAM}"
+      COMMENT
+        "Running LaTeX for Doxygen documentation in ${DOXYGEN_OUTPUT_DIRECTORY}/latex ..."
+      WORKING_DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}/latex")
+
+  endif(DOXYGEN_FOUND)
+endif(PYCI_DOCS)
 
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
