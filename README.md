@@ -34,6 +34,12 @@ SELected Configuration Interaction
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
 
 ## For documentation:
+`Selci` uses a combination of libraries to generate documentations from comments included in the source:
+- [doxygen](http://www.doxygen.nl/)
+- [breathe](https://github.com/michaeljones/breathe)
+- [exhale](https://github.com/svenevs/exhale)
+- [sphinx](http://www.sphinx-doc.org/en/master/)
+- [m2r](https://github.com/miyakogi/m2r)
 
 ## For formatting the source
 - [clang-format](https://clang.llvm.org/)
@@ -42,9 +48,11 @@ SELected Configuration Interaction
 - [cmake-format](https://github.com/cheshirekow/cmake_format)
 
    `Selci` uses `cmake-format` to format all of the `CMakeLists.txt`
+
 ## To install dependencies on Arch:
 
-```
+```bash
 pacman -Syu clang
-yay -Syu petsc slepc doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use
+yay -Syu petsc slepc doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use doxygen
+pip install sphinx sphinx-rtd-theme breathe exhale m2r --user
 ```

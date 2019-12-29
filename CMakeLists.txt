@@ -69,6 +69,7 @@ if(PYCI_DOCS)
   # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html
   # add_subdirectory(docs)
   file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${PYCI_BINARY_DIR})
+  file(COPY ${PROJECT_SOURCE_DIR}/README.md DESTINATION ${PYCI_BINARY_DIR})
   configure_file(${PROJECT_SOURCE_DIR}/docs/source/conf.py
                  ${PYCI_BINARY_DIR}/docs/source)
   find_package(Sphinx REQUIRED)

@@ -11,7 +11,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-on_rtd = os.environ.get('READTHEDOCS') == 'True'
+
+on_rtd = os.environ.get("READTHEDOCS") == "True"
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -31,7 +32,7 @@ release = "0.0.1"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.mathjax", "breathe", "exhale"]
+extensions = ["sphinx.ext.mathjax", "breathe", "exhale", 'm2r']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -50,7 +51,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 if not on_rtd:  # only import and set the theme if we're building docs locally
     import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
+
+    html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -62,35 +64,31 @@ html_static_path = ["_static"]
 # -- Options for breathe and exhale extensions --------------------------------
 # Setup the breathe extension
 if on_rtd:
-    breathe_projects = {
-        "Selci": "../_build/doxygenoutput/xml"
-    }
+    breathe_projects = {"Selci": "../_build/doxygenoutput/xml"}
 else:
-    breathe_projects = {
-        "Selci": "@PYCI_BINARY_DIR@/docs/doxygenoutput/xml"
-    }
+    breathe_projects = {"Selci": "@PYCI_BINARY_DIR@/docs/doxygenoutput/xml"}
 breathe_default_project = "Selci"
 
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
     "containmentFolder": "./api",
-    "rootFileName":          "library_root.rst",
-    "rootFileTitle":         "Selci API",
-    "doxygenStripFromPath":  "..",
+    "rootFileName": "library_root.rst",
+    "rootFileTitle": "Selci API",
+    "doxygenStripFromPath": "..",
     # Suggested optional arguments
-    "createTreeView":        True,
+    "createTreeView": True,
     # TIP: if using the sphinx-bootstrap-theme, you need
     # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
 }
 if on_rtd:
-    exhale_args["exhaleDoxygenStdin"]  = "INPUT = ../../src"
+    exhale_args["exhaleDoxygenStdin"] = "INPUT = ../../src"
 else:
-    exhale_args["exhaleDoxygenStdin"]  = "INPUT = @PYCI_SOURCE_DIR@/src"
+    exhale_args["exhaleDoxygenStdin"] = "INPUT = @PYCI_SOURCE_DIR@/src"
 
 # Tell sphinx what the primary language being documented is.
-primary_domain = 'cpp'
+primary_domain = "cpp"
 
 # Tell sphinx what the pygments highlight language should be.
-highlight_language = 'cpp'
+highlight_language = "cpp"
