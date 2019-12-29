@@ -12,7 +12,7 @@ Welcome to Selci's documentation!
 
    api/library_root
 
-.. mdinclude: ../README.md
+.. mdinclude:: ../../README.md
 
 
 
