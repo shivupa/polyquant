@@ -32,3 +32,5 @@
 *.app
 
 build/*
+
+docs/source/api
