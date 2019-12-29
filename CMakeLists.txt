@@ -67,23 +67,19 @@ endif(PYCI_DEBUG)
 # if the docs flag is on this will use doxygen to build the docs
 if(PYCI_DOCS)
   # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html
-  find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
-  if(DOXYGEN_FOUND)
-    set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_GENERATE_LATEX YES)
-    set(DOXYGEN_GENERATE_MAN NO)
-    set(DOXYGEN_OUTPUT_DIRECTORY docs)
-    doxygen_add_docs(doxygen ${PROJECT_SOURCE_DIR} COMMENT
-                     "Generate HTML and LATEX documentation.")
-    add_custom_command(
-      TARGET doxygen
-      POST_BUILD
-      COMMAND "${CMAKE_MAKE_PROGRAM}"
-      COMMENT
-        "Running LaTeX for Doxygen documentation in ${DOXYGEN_OUTPUT_DIRECTORY}/latex ..."
-      WORKING_DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}/latex")
-
-  endif(DOXYGEN_FOUND)
+  # add_subdirectory(docs)
+  file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${PYCI_BINARY_DIR})
+  configure_file(${PROJECT_SOURCE_DIR}/docs/source/conf.py
+                 ${PYCI_BINARY_DIR}/docs/source)
+  find_package(Sphinx REQUIRED)
+  set(SPHINX_SOURCE ${PYCI_BINARY_DIR}/docs/source)
+  set(SPHINX_BUILD ${PYCI_BINARY_DIR}/docs)
+  add_custom_target(
+    Sphinx ALL
+    COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
+    COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
+    WORKING_DIRECTORY ${SPHINX_BUILD}
+    COMMENT "Generating documentation with Sphinx")
 endif(PYCI_DOCS)
 
 # set include paths

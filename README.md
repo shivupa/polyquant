@@ -33,6 +33,8 @@ SELected Configuration Interaction
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
 
+## For documentation:
+
 ## For formatting the source
 - [clang-format](https://clang.llvm.org/)
    
@@ -40,7 +42,7 @@ SELected Configuration Interaction
 - [cmake-format](https://github.com/cheshirekow/cmake_format)
 
    `Selci` uses `cmake-format` to format all of the `CMakeLists.txt`
-## On Arch:
+## To install dependencies on Arch:
 
 ```
 pacman -Syu clang

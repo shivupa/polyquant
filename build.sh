@@ -12,7 +12,7 @@ cmake .. \
 -DPYCI_DOCS=1
 # make 
 # make test
-make doxygen
+make Sphinx
 # cd ..
 # cd examples/h2o
 # ./run.sh
