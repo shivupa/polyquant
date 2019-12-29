@@ -1,3 +1,5 @@
+
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 static char help[] =
     "The command line options are:\n"
     "  -i <filename>, where <filename> is the input file.\n"
@@ -5,8 +7,7 @@ static char help[] =
 
 // #include <Python.h>
 #include <calculation/calculation.hpp>
-#include <iostream>
-#include <slepceps.h>
+#include <slepceps.h> // IWYU pragma: keep
 #include <string>
 
 int main(int argc, char **argv) {
@@ -218,3 +219,4 @@ int main(int argc, char **argv) {
   ierr = SlepcFinalize();
   return ierr;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS

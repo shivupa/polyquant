@@ -8,9 +8,11 @@ CXX=mpic++ \
 FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
 cmake .. \
--DPYCI_DEBUG=0
-make 
-make test
-cd ..
-cd examples/h2o
-./run.sh
+-DPYCI_DEBUG=0 \
+-DPYCI_DOCS=1
+# make 
+# make test
+make Sphinx
+# cd ..
+# cd examples/h2o
+# ./run.sh

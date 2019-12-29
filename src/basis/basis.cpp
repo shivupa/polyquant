@@ -1,12 +1,8 @@
 #include <algorithm>
 #include <basis/basis.hpp>
-#include <cpr/cpr.h>
-#include <io/io.hpp>
-#include <iostream>
-#include <nlohmann/json.hpp>
-#include <sstream>
+#include <cpr/cpr.h> // IWYU pragma: keep
+#include <io/io.hpp> // IWYU pragma: keep
 #include <string>
-using json = nlohmann::json;
 
 PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
   this->load_basis(input, molecule);

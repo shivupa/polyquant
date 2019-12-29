@@ -1,6 +1,7 @@
 #include <fstream>
 #include <io/io.hpp>
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 PetscErrorCode APP_ABORT(const std::string &reason) {
   std::string ERROR_MESSAGE =
       "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
@@ -9,6 +10,8 @@ PetscErrorCode APP_ABORT(const std::string &reason) {
            reason.c_str());
   return 1;
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 // template <typename T> void Selci_cout(const T &message) {
 //   // TODO: in these types of functions we could do a if USING_SLEPC
 //   // just in case its not using mpi etc
@@ -19,6 +22,7 @@ PetscErrorCode APP_ABORT(const std::string &reason) {
 //   }
 // }
 
+#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void Selci_dump_json(const json &json_obj) {
   int my_rank;
   MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
@@ -26,6 +30,7 @@ void Selci_dump_json(const json &json_obj) {
     std::cout << json_obj.dump(4) << std::endl;
   }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 PYCI_INPUT::PYCI_INPUT(const std::string &filename) {
   this->parse_input(filename);
