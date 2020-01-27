@@ -23,18 +23,8 @@ void PYCI_SCF::set_integral(const PYCI_INTEGRAL &input_integral) {
   this->input_integral = input_integral;
 }
 
-  void PYCI_SCF::print_start_iterations(){
-    
-  }
-  void PYCI_SCF::print_iteration(){
-    
-  }
-  void PYCI_SCF::print_sucess(){
-    
-  }
-  void PYCI_SCF::print_exceeded_iterations(){
-    
-  }
-  void PYCI_SCF::print_error(){
-    
-  }
+void PYCI_SCF::print_start_iterations() {}
+void PYCI_SCF::print_iteration() {}
+void PYCI_SCF::print_sucess() {}
+void PYCI_SCF::print_exceeded_iterations() {}
+void PYCI_SCF::print_error() {}

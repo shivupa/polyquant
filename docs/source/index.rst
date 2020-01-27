@@ -6,17 +6,15 @@
 Welcome to Selci's documentation!
 =================================
 
+.. mdinclude:: ../../README.md
+
+
+Selci API
+=================================
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    api/library_root
 
-.. mdinclude:: ../../README.md
 
-
-
-Indices and tables
-==================
-
-* :ref:`search`
