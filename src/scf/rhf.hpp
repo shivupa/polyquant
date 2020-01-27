@@ -10,7 +10,7 @@
  * @brief A class to set up a calculation.
  *
  */
-class PYCI_RHF {
+class PYCI_RHF : PYCI_SCF {
 public:
   PYCI_RHF() = default;
   /**
@@ -19,36 +19,23 @@ public:
    *
    * @param filename the input file
    */
-  PYCI_RHF(const std::string &filename);
-  /**
-   * @brief Set up the calculation
-   *
-   * @param filename
-   */
-  void print_start_iterations();
+  PYCI_RHF(const std::string &filename) : PYCI_SCF(filename);
+
+  void form_H_core() override;
+  void form_fock() override;
+  void diag_fock() override;
+  void form_DM() override;
+  void calculate_E_elec() override;
+  void calculate_E_total() override;
+  void check_stop() override;
+  void run_iteration() override;
+  void guess_DM() override;
+  void run() override;
 
   /**
-   * @brief the input parameters
+   * @brief H_core matrix
    *
    */
-  PYCI_INPUT input_params;
-
-  /**
-   * @brief the input molecule
-   *
-   */
-  PYCI_MOLECULE input_molecule;
-
-  /**
-   * @brief the input basis
-   *
-   */
-  PYCI_BASIS input_basis;
-
-  /**
-   * @brief integrals calculated for the input molecule in the input basis
-   *
-   */
-  PYCI_INTEGRAL input_integral;
+  Mat H_core;
 };
 #endif

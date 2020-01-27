@@ -23,6 +23,7 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
   Selci_cout("Creating a Libint2 basis object assuming basis_name is part of "
              "the Libint2 library.");
   this->basis = libint2::BasisSet(this->basis_name, molecule.libint_atom);
+  this->num_basis = libint2::nbf(this->basis);
 
   // Parsing custom basis
   // try to parse local files {atom_symbol}_{basis_name}.txt

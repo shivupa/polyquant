@@ -36,5 +36,10 @@ public:
    *
    */
   libint2::BasisSet basis;
+  /**
+   * @brief Number of basis functions
+   *
+   */
+  num_basis;
 };
 #endif
