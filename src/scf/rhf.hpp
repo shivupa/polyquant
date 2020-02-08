@@ -31,5 +31,17 @@ public:
    *
    */
   Mat H_core;
+
+  /**
+   * @brief One particle density matrix
+   *
+   */
+  Mat D;
+
+  /**
+   * @brief Fock matrix
+   *
+   */
+  Mat F;
 };
 #endif

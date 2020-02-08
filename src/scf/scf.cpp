@@ -23,8 +23,13 @@ void PYCI_SCF::set_integral(const PYCI_INTEGRAL &input_integral) {
   this->input_integral = input_integral;
 }
 
-void PYCI_SCF::print_start_iterations() {}
-void PYCI_SCF::print_iteration() {}
-void PYCI_SCF::print_success() {}
-void PYCI_SCF::print_exceeded_iterations() {}
-void PYCI_SCF::print_error() {}
+void PYCI_SCF::print_start_iterations() { Selci_cout("Starting Iterations"); }
+void PYCI_SCF::print_iteration() { Selci_cout("iteration "); }
+void PYCI_SCF::print_success() { Selci_cout("SCF SUCCESS"); }
+void PYCI_SCF::print_exceeded_iterations() {
+  Selci_cout("Exceeded Iterations");
+}
+void PYCI_SCF::print_error() {
+  Selci_cout("Something wrong!");
+  // APP ABORT here
+}

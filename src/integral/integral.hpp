@@ -45,8 +45,8 @@ public:
   int idx2(const int &i, const int &j);
   /**
    * @brief Calculate the combined index for the vector containing the unique
-   * elements of a 4D symmetric tensor from four indicies of the unflattened
-   * tensor.
+   * elements of a 4D symmetric tensor with 8 fold symmetry from four indicies
+   * of the unflattened tensor.
    *
    * @param i index for the symmetric tensor
    * @param j index for the symmetric tensor
@@ -55,7 +55,7 @@ public:
    * @return int combined index for the flattened unique elements of the
    * symmetric tensor
    */
-  int idx4(const int &i, const int &j, const int &k, const int &l);
+  int idx8(const int &i, const int &j, const int &k, const int &l);
 
   /**
    * @brief Calculate one body integrals

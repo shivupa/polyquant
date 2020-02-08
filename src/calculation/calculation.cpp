@@ -44,6 +44,6 @@ void PYCI_CALCULATION::run_mean_field(std::string &mean_field_type) {
   if (mean_field_type == "RHF") {
     PYCI_RHF rhf_calc = PYCI_RHF(this->input_params, this->input_molecule,
                                  this->input_basis, this->input_integral);
-    rhf_calc.form_H_core();
+    rhf_calc.run();
   }
 }

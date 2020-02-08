@@ -159,7 +159,7 @@ void PYCI_INTEGRAL::compute_2body_ints(Vec &output_vec,
   // This also needs to be flipped around so we are using
   // the SLEPc/PETSc get domain and calculating the integrals
   // on each process that we need to. This is harder cause
-  // we have to go from an idx4 to the ijkl separated.
+  // we have to go from an idx8 to the ijkl separated.
   libint2::Engine engine(obtype, shells.max_nprim(), shells.max_l(), 0);
 
   auto shell2bf = shells.shell2bf();
@@ -206,7 +206,7 @@ void PYCI_INTEGRAL::compute_2body_ints(Vec &output_vec,
                 const auto bf3 = f3 + bf3_first;
                 for (PetscInt f4 = 0; f4 != n4; ++f4, ++f1234) {
                   const auto bf4 = f4 + bf4_first;
-                  PetscInt location = this->idx4(bf1, bf2, bf3, bf4);
+                  PetscInt location = this->idx8(bf1, bf2, bf3, bf4);
                   VecSetValues(output_vec, 1, &location, &buf_1234[f1234],
                                INSERT_VALUES);
                 }
@@ -218,7 +218,7 @@ void PYCI_INTEGRAL::compute_2body_ints(Vec &output_vec,
           //   for (auto j : Petsc_bf2) {
           //     for (auto k : Petsc_bf3) {
           //       for (auto l : Petsc_bf4) {
-          //         insert_idx.push_back(this->idx4(i, j, k, l));
+          //         insert_idx.push_back(this->idx8(i, j, k, l));
           //       }
           //     }
           //   }
@@ -241,7 +241,7 @@ int PYCI_INTEGRAL::idx2(const int &i, const int &j) {
   }
 }
 
-int PYCI_INTEGRAL::idx4(const int &i, const int &j, const int &k,
+int PYCI_INTEGRAL::idx8(const int &i, const int &j, const int &k,
                         const int &l) {
   return PYCI_INTEGRAL::idx2(PYCI_INTEGRAL::idx2(i, j),
                              PYCI_INTEGRAL::idx2(k, l));
