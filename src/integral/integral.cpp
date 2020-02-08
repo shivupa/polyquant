@@ -12,7 +12,7 @@ void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
                                    const PYCI_BASIS &basis,
                                    const PYCI_MOLECULE &molecule) {
 
-  auto num_basis = basis->num_basis;
+  auto num_basis = basis.num_basis;
   PetscErrorCode ierr;
   PetscViewer viewer;
   libint2::initialize();

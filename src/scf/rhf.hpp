@@ -2,24 +2,18 @@
 #include <integral/integral.hpp>
 #include <io/io.hpp>
 #include <molecule/molecule.hpp>
+#include <scf/scf.hpp>
 #include <string>
 
 #ifndef PYCI_RHF_H
 #define PYCI_RHF_H
-/**
- * @brief A class to set up a calculation.
- *
- */
+
 class PYCI_RHF : PYCI_SCF {
 public:
   PYCI_RHF() = default;
-  /**
-   * @brief Construct a new pyci calculation object using the setup_calculation
-   * function.
-   *
-   * @param filename the input file
-   */
-  PYCI_RHF(const std::string &filename) : PYCI_SCF(filename);
+  PYCI_RHF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
+           const PYCI_BASIS &input_basis, const PYCI_INTEGRAL &input_integral)
+      : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
   void form_fock() override;

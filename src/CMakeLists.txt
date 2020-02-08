@@ -4,6 +4,7 @@ add_subdirectory(molecule)
 add_subdirectory(basis)
 add_subdirectory(integral)
 add_subdirectory(calculation)
+add_subdirectory(scf)
 
 # tell cmake what our excutable is going to be
 add_executable(pyci pyci.cpp)

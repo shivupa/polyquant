@@ -14,6 +14,8 @@
     "method": "CIPSI",
     "basis": "sto-3g"
   },
-  "keywords": {}
+  "keywords": {
+    "mean_field" : "rhf"
+  }
 }
 

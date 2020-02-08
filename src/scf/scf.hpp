@@ -23,20 +23,20 @@ public:
 
   void print_start_iterations();
   void print_iteration();
-  void print_sucess();
+  void print_success();
   void print_exceeded_iterations();
   void print_error();
 
-  virtual void form_H_core();
-  virtual void form_fock();
-  virtual void diag_fock();
-  virtual void form_DM();
-  virtual void calculate_E_elec();
-  virtual void calculate_E_total();
-  virtual void check_stop();
-  virtual void run_iteration();
-  virtual void guess_DM();
-  virtual void run();
+  virtual void form_H_core() = 0;
+  virtual void form_fock() = 0;
+  virtual void diag_fock() = 0;
+  virtual void form_DM() = 0;
+  virtual void calculate_E_elec() = 0;
+  virtual void calculate_E_total() = 0;
+  virtual void check_stop() = 0;
+  virtual void run_iteration() = 0;
+  virtual void guess_DM() = 0;
+  virtual void run() = 0;
 
   /**
    * @brief the input parameters

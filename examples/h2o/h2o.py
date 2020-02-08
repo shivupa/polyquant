@@ -1,4 +1,4 @@
-from pyscf import gto
+from pyscf import gto, scf
 import numpy as np
 
 mol = gto.Mole()
@@ -41,3 +41,12 @@ b = mol.intor("cint2e_sph", aosym="s8")
 a = np.loadtxt("eri.txt", skiprows=2)
 print(np.allclose(a, b))
 print(np.max(a - b))
+
+
+print("HCORE")
+myhf = scf.RHF(mol)
+b = myhf.get_hcore()
+a = np.loadtxt("hcore.txt", skiprows=2)
+print(np.allclose(a, b))
+print(np.max(a - b))
+

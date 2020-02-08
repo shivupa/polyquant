@@ -7,5 +7,5 @@
 python h2o.py
 
 
-rm kin.txt nuc.txt ovlp.txt eri.txt
+rm kin.txt nuc.txt ovlp.txt eri.txt hcore.txt
 

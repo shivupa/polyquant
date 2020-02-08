@@ -40,6 +40,6 @@ public:
    * @brief Number of basis functions
    *
    */
-  num_basis;
+  size_t num_basis;
 };
 #endif

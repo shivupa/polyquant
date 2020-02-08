@@ -42,7 +42,7 @@ configure_file(${PYCI_SOURCE_DIR}/src/pyci.settings
                ${PYCI_BINARY_DIR}/bin/pyci.settings)
 install(FILES ${PYCI_BINARY_DIR}/bin/pyci.settings DESTINATION bin)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # enable testing so the tests will build should we use a flag to only build
