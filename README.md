@@ -27,8 +27,20 @@ SELected Configuration Interaction
 - [evaleev/libint](https://github.com/evaleev/libint)
    Libint is a high-performance library for computing Gaussian integrals in quantum mechanics
 
-
    `Selci` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
+- [xtensor-stack/xtensor](https://github.com/xtensor-stack/xtensor)
+   C++ tensors with broadcasting and lazy computing 
+
+   `Selci` uses `xtensor-stack/xtensor` to handle arrays for the SCF portion of the code.
+- [xtensor-stack/xsimd](https://github.com/xtensor-stack/xsimd)
+   C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)
+
+   `Selci` doesn't actually use `xtensor-stack/xsimd` yet...
+
+- [xtensor-stack/xtensor-blas](https://github.com/xtensor-stack/xtensor-blas)
+   BLAS extension to xtensor 
+
+   `Selci` uses `xtensor-stack/xtensor-blas` to solve eigenvalue problems.
 ### For a debug build
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
