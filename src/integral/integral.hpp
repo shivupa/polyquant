@@ -1,8 +1,13 @@
+#include "xtensor/xadapt.hpp"
+#include "xtensor/xarray.hpp"
+#include "xtensor/xview.hpp"
 #include <basis/basis.hpp>
 #include <io/io.hpp>
+#include <libint2.hpp> // IWYU pragma: keep
 #include <molecule/molecule.hpp>
-#include <slepceps.h> // IWYU pragma: keep
+#include <numeric>
 #include <vector>
+#include <xtensor/xnpy.hpp>
 
 #ifndef PYCI_INTEGRAL_H
 #define PYCI_INTEGRAL_H
@@ -67,7 +72,7 @@ public:
    * know where the nuclei are
    */
   void compute_1body_ints(
-      Mat &output_matrix, const libint2::BasisSet &shells,
+      xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
       libint2::Operator obtype,
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
@@ -78,28 +83,29 @@ public:
    * @param shells the basis set to ccalculate the two body integrals in
    * @param obtype the operator just the coulomb operator
    */
-  void compute_2body_ints(Vec &output_vec, const libint2::BasisSet &shells,
+  void compute_2body_ints(xt::xarray<double> &output_vec,
+                          const libint2::BasisSet &shells,
                           libint2::Operator obtype);
 
   /**
    * @brief Overlap integral matrix
    *
    */
-  Mat overlap;
+  xt::xarray<double> overlap;
   /**
    * @brief Kinetic integral matrix
    *
    */
-  Mat kinetic;
+  xt::xarray<double> kinetic;
   /**
    * @brief Nuclear attraction integral matrix
    *
    */
-  Mat nuclear;
+  xt::xarray<double> nuclear;
   /**
    * @brief Two electron integral vector
    *
    */
-  Vec twoelec;
+  xt::xarray<double> twoelec;
 };
 #endif

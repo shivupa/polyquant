@@ -4,6 +4,10 @@
 #include <molecule/molecule.hpp>
 #include <scf/scf.hpp>
 #include <string>
+#include <xtensor/xadapt.hpp>
+#include <xtensor/xarray.hpp>
+#include <xtensor/xnpy.hpp>
+#include <xtensor/xview.hpp>
 
 #ifndef PYCI_RHF_H
 #define PYCI_RHF_H
@@ -30,18 +34,18 @@ public:
    * @brief H_core matrix
    *
    */
-  Mat H_core;
+  xt::xarray<double> H_core;
 
   /**
    * @brief One particle density matrix
    *
    */
-  Mat D;
+  xt::xarray<double> D;
 
   /**
    * @brief Fock matrix
    *
    */
-  Mat F;
+  xt::xarray<double> F;
 };
 #endif
