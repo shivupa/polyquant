@@ -8,22 +8,22 @@ PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
 void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
                                    const PYCI_BASIS &basis,
                                    const PYCI_MOLECULE &molecule) {
-
-  auto num_basis = basis.num_basis;
+  this->input_basis = basis;
+  auto num_basis = this->input_basis.num_basis;
   libint2::initialize();
 
   Selci_cout("INTEGRAL");
   Selci_cout("Calculating One Body Integrals...");
   this->overlap = xt::zeros<double>({num_basis, num_basis});
-  this->compute_1body_ints(this->overlap, basis.basis,
+  this->compute_1body_ints(this->overlap, this->input_basis.basis,
                            libint2::Operator::overlap);
 
   this->kinetic = xt::zeros<double>({num_basis, num_basis});
-  this->compute_1body_ints(this->kinetic, basis.basis,
+  this->compute_1body_ints(this->kinetic, this->input_basis.basis,
                            libint2::Operator::kinetic);
 
   this->nuclear = xt::zeros<double>({num_basis, num_basis});
-  this->compute_1body_ints(this->nuclear, basis.basis,
+  this->compute_1body_ints(this->nuclear, this->input_basis.basis,
                            libint2::Operator::nuclear, molecule.libint_atom);
 
   Selci_cout("Calculating Two Body Integrals...");
@@ -33,7 +33,7 @@ void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
                         ((num_basis * num_basis) + (num_basis) + 2)) /
                        8;
   this->twoelec = xt::zeros<double>({two_elec_size});
-  this->compute_2body_ints(this->twoelec, basis.basis,
+  this->compute_2body_ints(this->twoelec, this->input_basis.basis,
                            libint2::Operator::coulomb);
   xt::dump_npy("overlap.npy", this->overlap);
   xt::dump_npy("kinetic.npy", this->kinetic);
@@ -192,4 +192,17 @@ int PYCI_INTEGRAL::idx8(const int &i, const int &j, const int &k,
                         const int &l) {
   return PYCI_INTEGRAL::idx2(PYCI_INTEGRAL::idx2(i, j),
                              PYCI_INTEGRAL::idx2(k, l));
+}
+
+void PYCI_INTEGRAL::symmetric_orthogonalization() {
+  auto num_basis = this->input_basis.num_basis;
+  auto eigen_S = xt::linalg::eigh(this->overlap);
+  auto s = std::get<0>(eigen_S);
+  auto L = std::get<1>(eigen_S);
+  this->orth_X = xt::zeros<double>({num_basis, num_basis});
+  for (size_t i = 0; i < s.size(); i++) {
+    this->orth_X(i, i) = 1.0 / std::sqrt(s(i));
+  }
+  this->orth_X =
+      xt::linalg::dot(L, xt::linalg::dot(this->orth_X, xt::transpose(L)));
 }

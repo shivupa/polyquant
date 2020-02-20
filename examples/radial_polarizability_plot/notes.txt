@@ -1,0 +1,11 @@
+Static polarizabilites from https://www.tandfonline.com/doi/full/10.1080/00268976.2018.1535143
+
+even though the Swann and Gribakin paper used values from https://pubs.acs.org/doi/pdf/10.1021/ja00179a044
+
+For the atoms considered through Ar, the fitting can be done from
+    0 to ...
+        20 as all potentials fall to 1e-3 before 20
+        40 as all potentials fall to 1e-4 before 40
+        60 as all potentials fall to 1e-5 before 60
+
+Not sure which one of these is best.

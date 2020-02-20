@@ -7,7 +7,9 @@
       0.7569685, 0.0000000, -0.5858752,
       -0.7569685, 0.0000000, -0.5858752
     ],
-    "symbols": ["O", "H", "H"]
+    "symbols": ["O", "H", "H"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
   },
   "driver": "energy",
   "model": {

@@ -3,7 +3,8 @@ file(GLOB_RECURSE _SRCS "*.[hc]pp")
 add_library(scf ${_HDRS} ${_SRCS})
 
 if(xtensor_FOUND)
-  target_link_libraries(scf xtensor xtensor::optimize xtensor::use_xsimd)
+  target_link_libraries(scf xtensor xtensor::optimize xtensor::use_xsimd
+                        ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 endif(xtensor_FOUND)
 if(PETSC_FOUND)
   include_directories(${PETSC_INCLUDES})

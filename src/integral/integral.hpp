@@ -1,3 +1,4 @@
+#include "xtensor-blas/xlinalg.hpp"
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
 #include "xtensor/xview.hpp"
@@ -87,6 +88,8 @@ public:
                           const libint2::BasisSet &shells,
                           libint2::Operator obtype);
 
+  void symmetric_orthogonalization();
+
   /**
    * @brief Overlap integral matrix
    *
@@ -107,5 +110,16 @@ public:
    *
    */
   xt::xarray<double> twoelec;
+  /**
+   * @brief The orthogonalization matrix
+   *
+   */
+  xt::xarray<double> orth_X;
+
+  /**
+   * @brief the input basis
+   *
+   */
+  PYCI_BASIS input_basis;
 };
 #endif

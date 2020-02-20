@@ -1,3 +1,4 @@
+#include "xtensor-blas/xlinalg.hpp"
 #include <basis/basis.hpp>
 #include <integral/integral.hpp>
 #include <io/io.hpp>
@@ -17,7 +18,9 @@ public:
   PYCI_RHF() = default;
   PYCI_RHF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
            const PYCI_BASIS &input_basis, const PYCI_INTEGRAL &input_integral)
-      : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
+      : PYCI_SCF(input_params, input_molecule, input_basis, input_integral) {
+    this->input_integral.symmetric_orthogonalization();
+  };
 
   void form_H_core() override;
   void form_fock() override;
@@ -41,11 +44,88 @@ public:
    *
    */
   xt::xarray<double> D;
+  /**
+   * @brief One particle density matrix from the previous iteration
+   *
+   */
+  xt::xarray<double> D_last;
 
   /**
    * @brief Fock matrix
    *
    */
   xt::xarray<double> F;
+
+  /**
+   * @brief MO Coefficient matrix
+   *
+   */
+  xt::xarray<double> C;
+
+  /**
+   * @brief MO energy vector
+   *
+   */
+  xt::xarray<double> E_orbitals;
+  /**
+   * @brief Electronic energy
+   *
+   */
+  double E_elec = 0.0;
+  /**
+   * @brief Electronic energy from the previous iteration
+   *
+   */
+  double E_elec_last = 0.0;
+  /**
+   * @brief Total energy
+   *
+   */
+  double E_total = 0.0;
+  /**
+   * @brief Iteration number
+   *
+   */
+  int iteration_num = 0;
+  /**
+   * @brief Iteration energy difference
+   *
+   */
+  double iteration_E_diff = 0.0;
+  /**
+   * @brief Iteration rmsc DM
+   *
+   */
+  double iteration_rmsc_dm = 0.0;
+  /**
+   * @brief Stop running iterations?
+   *
+   */
+  bool stop = false;
+  /**
+   * @brief Converged?
+   *
+   */
+  bool converged = false;
+  /**
+   * @brief Exceeded iterations?
+   *
+   */
+  bool exceeded_iterations = false;
+  /**
+   * @brief Energy convergence
+   *
+   */
+  double convergence_E = 1e-6;
+  /**
+   * @brief Root mean squared change in DM convergence
+   *
+   */
+  double convergence_DM = 1e-8;
+  /**
+   * @brief Maximum iteration number
+   *
+   */
+  int iteration_max = 500;
 };
 #endif

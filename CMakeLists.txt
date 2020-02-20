@@ -103,6 +103,10 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # FIND xtensor
 find_package(xtl REQUIRED)
 find_package(xtensor REQUIRED)
+find_package(BLAS REQUIRED)
+# find_package(CBLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci
 # ${PYTHON_LIBRARIES}) endif(PythonLibs_FOUND) Done finding Done finding all the

@@ -8,10 +8,10 @@ mol.atom = """
 O   0.0000000 0.0000000  0.0000000,
 H   0.7569685 0.0000000 -0.5858752,
 H  -0.7569685 0.0000000 -0.5858752"""
-mol.symmetry = 1
+mol.symmetry = 0
 mol.unit = "Angstrom"
 mol.build()
-
+print(mol.energy_nuc())
 print("PYTHON CHECK WITH PYSCF")
 
 
@@ -59,5 +59,7 @@ a = np.load("F.npy")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
+myhf.run()
+print(myhf.e_tot)
 
 
