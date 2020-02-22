@@ -165,33 +165,63 @@ void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
     auto bf1 = shell2bf[s1]; // first basis function in this shell
     for (auto s2 = s1; s2 != shells.size(); ++s2) {
       auto bf2 = shell2bf[s2];
-      std::cout << "[" << s1 << ", " << bf1 << ", " << n1 << "]"
+      std::cout << "[" << s1 << ", " << bf1 << "]"
                 << " "
-                << "[" << s2 << ", " << bf2 << ", " << n2 << "]" << std::endl;
-      {
-        int f1 = 0;
-        int am1 = shells[s1].contr[0].l;
-        int l1, m1, n1;
-        FOR_CART(l1, m1, n1, am1)
-        int f2 = 0;
-        int am2 = shells[s2].contr[0].l;
-        int l2, m2, n2;
-        FOR_CART(l2, m2, n2, am2)
-        std::cout << "(" << l1 << ", " << m1 << ", " << n1 << ")"
-                  << " "
-                  << "(" << l2 << ", " << m2 << ", " << n2 << ")" << std::endl;
-        std::cout << " " << bf1 + f1 << " " << bf2 + f2 << std::endl;
-        // This entire function will need good documentation.
-        // We iterate over shells so shells2bf goes from a shell to the index of the first basis function in a shell.
-        // then FOR_CART iterates over the basis functions of each angular momentum in this shell.
-        // l+m+n = am is the total angular momentum .
-        // FOR_CART makes the lmn pairs, we use f1 and f2 to keep track of which function we are working with.
-        // So to index the array the correct index is (bf1+f1, bf2+f2).
-
-        ++f2;
-        END_FOR_CART
-        ++f1;
-        END_FOR_CART
+                << "[" << s2 << ", " << bf2 << "]" << std::endl;
+      for (auto contr1 = 0; contr1 != shells[s1].contr.size(); contr1++) {
+        for (auto contr2 = 0; contr2 != shells[s2].contr.size(); contr2++) {
+          {
+            int f1 = 0;
+            int am1 = shells[s1].contr[contr1].l;
+            int l1, m1, n1;
+            FOR_CART(l1, m1, n1, am1) {
+              int f2 = 0;
+              int am2 = shells[s2].contr[contr2].l;
+              int l2, m2, n2;
+              FOR_CART(l2, m2, n2, am2) {
+                std::cout << "(" << l1 << ", " << m1 << ", " << n1 << ")"
+                          << " "
+                          << "(" << l2 << ", " << m2 << ", " << n2 << ")"
+                          << std::endl;
+                std::cout << " " << bf1 + f1 << " " << bf2 + f2 << std::endl;
+                // This entire function is complicated.
+                // We iterate over shells so shells2bf goes from a shell to the
+                // index of the first basis function in a shell. Then we iterate
+                // over the number of contractions in each basis function. Then
+                // FOR_CART iterates over the basis functions of each angular
+                // momentum in this shell. l+m+n = am is the total angular
+                // momentum . FOR_CART makes the lmn pairs, we use f1 and f2 to
+                // keep track of which function we are working with. So to index
+                // the array the correct index is (bf1+f1, bf2+f2). Inside of
+                // FOR_CART, we now loop over the contracted gaussians that make
+                // up each of the basis functions. The looping assumes that the
+                // alpha vector and the contraction coefficient vector is of the
+                // same size, which it should be. Finally we are able to
+                // calculate the integral over two primitive gaussians.
+                for (auto idx_exp_coeff1 = 0;
+                     idx_exp_coeff1 < shells[s1].alpha.size();
+                     idx_exp_coeff1++) {
+                  auto exp1 = shells[s1].alpha[idx_exp_coeff1];
+                  auto cont_coeff1 =
+                      shells[s1].contr[contr1].coeff[idx_exp_coeff1];
+                  for (auto idx_exp_coeff2 = 0;
+                       idx_exp_coeff2 < shells[s2].alpha.size();
+                       idx_exp_coeff2++) {
+                    auto exp2 = shells[s2].alpha[idx_exp_coeff2];
+                    auto cont_coeff2 =
+                        shells[s2].contr[contr2].coeff[idx_exp_coeff2];
+                    // now we are ready to calculate the integral over a
+                    // primitive gaussian
+                  }
+                }
+                ++f2;
+              }
+              END_FOR_CART
+              ++f1;
+            }
+            END_FOR_CART
+          }
+        }
       }
       // for (size_t f1 = 0, f12 = 0; f1 != n1; ++f1) {
       //   for (size_t f2 = 0; f2 != n2; ++f2, ++f12) {
