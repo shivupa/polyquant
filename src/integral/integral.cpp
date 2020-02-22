@@ -2,45 +2,89 @@
 
 PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                              const PYCI_MOLECULE &molecule) {
+  Selci_cout("INTEGRAL");
   this->setup_integral(input, basis, molecule);
+}
+
+void PYCI_INTEGRAL::calculate_overlap() {
+  Selci_cout("Calculating One Body Overlap Integrals...");
+  if (this->overlap.shape() == std::vector<size_t>({})) {
+    auto num_basis = this->input_basis.num_basis;
+    libint2::initialize();
+    this->overlap = xt::zeros<double>({num_basis, num_basis});
+    this->compute_1body_ints(this->overlap, this->input_basis.basis,
+                             libint2::Operator::overlap);
+    xt::dump_npy("overlap.npy", this->overlap);
+    libint2::finalize();
+  }
+}
+
+void PYCI_INTEGRAL::calculate_kinetic() {
+  Selci_cout("Calculating One Body Kinetic Integrals...");
+  if (this->kinetic.shape() == std::vector<size_t>({})) {
+    auto num_basis = this->input_basis.num_basis;
+    libint2::initialize();
+    this->kinetic = xt::zeros<double>({num_basis, num_basis});
+    this->compute_1body_ints(this->kinetic, this->input_basis.basis,
+                             libint2::Operator::kinetic);
+    xt::dump_npy("kinetic.npy", this->kinetic);
+    libint2::finalize();
+  }
+}
+
+void PYCI_INTEGRAL::calculate_nuclear() {
+  Selci_cout("Calculating One Body Nuclear Integrals...");
+  if (this->nuclear.shape() == std::vector<size_t>({})) {
+    auto num_basis = this->input_basis.num_basis;
+    libint2::initialize();
+    this->nuclear = xt::zeros<double>({num_basis, num_basis});
+    this->compute_1body_ints(this->nuclear, this->input_basis.basis,
+                             libint2::Operator::nuclear,
+                             this->input_molecule.libint_atom);
+    xt::dump_npy("nuclear.npy", this->nuclear);
+    libint2::finalize();
+  }
+}
+
+void PYCI_INTEGRAL::calculate_polarization_potential(
+    const xt::xarray<double> &operator_coeff,
+    const xt::xarray<double> &operator_exps) {
+  Selci_cout("Calculating One Body Polarization Potential Integrals...");
+  if (this->polarization_potential.shape() == std::vector<size_t>({})) {
+    auto num_basis = this->input_basis.num_basis;
+    libint2::initialize();
+    this->polarization_potential = xt::zeros<double>({num_basis, num_basis});
+    this->compute_1body_ints_operator_expanded_in_gaussians(
+        this->polarization_potential, this->input_basis.basis, operator_coeff,
+        operator_exps);
+    xt::dump_npy("polarization_potential.npy", this->polarization_potential);
+    libint2::finalize();
+  }
+}
+
+void PYCI_INTEGRAL::calculate_two_electron() {
+  Selci_cout("Calculating Two Body Electron Repulsion Integrals...");
+  if (this->twoelec.shape() == std::vector<size_t>({})) {
+    auto num_basis = this->input_basis.num_basis;
+    libint2::initialize();
+    // the upper triangle of a square matrix is size N*(N-1)/2
+    // this is that but where N=M*(M-1)/2
+    auto two_elec_size = ((num_basis) * (num_basis + 1) *
+                          ((num_basis * num_basis) + (num_basis) + 2)) /
+                         8;
+    this->twoelec = xt::zeros<double>({two_elec_size});
+    this->compute_2body_ints(this->twoelec, this->input_basis.basis,
+                             libint2::Operator::coulomb);
+    xt::dump_npy("twoelec.npy", this->twoelec);
+    libint2::finalize();
+  }
 }
 
 void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
                                    const PYCI_BASIS &basis,
                                    const PYCI_MOLECULE &molecule) {
   this->input_basis = basis;
-  auto num_basis = this->input_basis.num_basis;
-  libint2::initialize();
-
-  Selci_cout("INTEGRAL");
-  Selci_cout("Calculating One Body Integrals...");
-  this->overlap = xt::zeros<double>({num_basis, num_basis});
-  this->compute_1body_ints(this->overlap, this->input_basis.basis,
-                           libint2::Operator::overlap);
-
-  this->kinetic = xt::zeros<double>({num_basis, num_basis});
-  this->compute_1body_ints(this->kinetic, this->input_basis.basis,
-                           libint2::Operator::kinetic);
-
-  this->nuclear = xt::zeros<double>({num_basis, num_basis});
-  this->compute_1body_ints(this->nuclear, this->input_basis.basis,
-                           libint2::Operator::nuclear, molecule.libint_atom);
-
-  Selci_cout("Calculating Two Body Integrals...");
-  // the upper triangle of a square matrix is size N*(N-1)/2
-  // this is that but where N=M*(M-1)/2
-  auto two_elec_size = ((num_basis) * (num_basis + 1) *
-                        ((num_basis * num_basis) + (num_basis) + 2)) /
-                       8;
-  this->twoelec = xt::zeros<double>({two_elec_size});
-  this->compute_2body_ints(this->twoelec, this->input_basis.basis,
-                           libint2::Operator::coulomb);
-  xt::dump_npy("overlap.npy", this->overlap);
-  xt::dump_npy("kinetic.npy", this->kinetic);
-  xt::dump_npy("nuclear.npy", this->nuclear);
-  xt::dump_npy("twoelec.npy", this->twoelec);
-
-  libint2::finalize();
+  this->input_molecule = molecule;
 }
 
 /**
@@ -104,10 +148,71 @@ void PYCI_INTEGRAL::compute_1body_ints(
 }
 
 /**
+ * @details This follows the eri test in the Libint2 repo. It doesn't construct
+ * an engine to calculate integrals over shells, but it instead calculates the
+ * integrals explicitly over basis functions. This is less efficient, but this
+ * integral type is not a part of libint.
+ */
+void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
+    xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
+    const xt::xarray<double> &operator_coeff,
+    const xt::xarray<double> &operator_exps) {
+  auto shell2bf = shells.shell2bf();
+  // loop over unique shell pairs, {s1,s2} such that s1 >= s2
+  // this is due to the permutational symmetry of the real integrals over
+  // Hermitian operators: (1|2) = (2|1)
+  for (auto s1 = 0; s1 != shells.size(); ++s1) {
+    auto bf1 = shell2bf[s1]; // first basis function in this shell
+    for (auto s2 = s1; s2 != shells.size(); ++s2) {
+      auto bf2 = shell2bf[s2];
+      std::cout << "[" << s1 << ", " << bf1 << ", " << n1 << "]"
+                << " "
+                << "[" << s2 << ", " << bf2 << ", " << n2 << "]" << std::endl;
+      {
+        int f1 = 0;
+        int am1 = shells[s1].contr[0].l;
+        int l1, m1, n1;
+        FOR_CART(l1, m1, n1, am1)
+        int f2 = 0;
+        int am2 = shells[s2].contr[0].l;
+        int l2, m2, n2;
+        FOR_CART(l2, m2, n2, am2)
+        std::cout << "(" << l1 << ", " << m1 << ", " << n1 << ")"
+                  << " "
+                  << "(" << l2 << ", " << m2 << ", " << n2 << ")" << std::endl;
+        std::cout << " " << bf1 + f1 << " " << bf2 + f2 << std::endl;
+        // This entire function will need good documentation.
+        // We iterate over shells so shells2bf goes from a shell to the index of the first basis function in a shell.
+        // then FOR_CART iterates over the basis functions of each angular momentum in this shell.
+        // l+m+n = am is the total angular momentum .
+        // FOR_CART makes the lmn pairs, we use f1 and f2 to keep track of which function we are working with.
+        // So to index the array the correct index is (bf1+f1, bf2+f2).
+
+        ++f2;
+        END_FOR_CART
+        ++f1;
+        END_FOR_CART
+      }
+      // for (size_t f1 = 0, f12 = 0; f1 != n1; ++f1) {
+      //   for (size_t f2 = 0; f2 != n2; ++f2, ++f12) {
+      //     output_matrix(bf1 + f1, bf2 + f2) = buf_12[f12];
+      //     output_matrix(bf2 + f2, bf1 + f1) = buf_12[f12];
+      //   }
+      // }
+    }
+    // auto computed_shell = xt::view(output_matrix, xt::range(bf1, bf1 + n1),
+    //                                xt::range(bf2, bf2 + n2));
+    // std::vector<std::size_t> shape = {n1, n2};
+    // computed_shell = xt::adapt(&buf, n1 + n2, xt::acquire_ownership(),
+    // shape);
+  }
+}
+
+/**
  * @details This follows the HF test in the Libint2 repo. It constructs the
  * integral engine. This all needs to be flipped around so we are using the
- * SLEPc/PETSc get domain and calculating the integrals on each process that we
- * need to. Right now we calculate them all on each rank.
+ * SLEPc/PETSc get domain and calculating the integrals on each process that
+ * we need to. Right now we calculate them all on each rank.
  */
 void PYCI_INTEGRAL::compute_2body_ints(xt::xarray<double> &output_vec,
                                        const libint2::BasisSet &shells,
@@ -123,7 +228,8 @@ void PYCI_INTEGRAL::compute_2body_ints(xt::xarray<double> &output_vec,
 
   auto shell2bf = shells.shell2bf();
 
-  // buf[0] points to the target shell set after every call to engine.compute()
+  // buf[0] points to the target shell set after every call to
+  // engine.compute()
   const auto &buf = engine.results();
   // loop over unique shell pairs, {s1,s2} such that s1 >= s2
   // this is due to the permutational symmetry of the real integrals over
@@ -195,14 +301,17 @@ int PYCI_INTEGRAL::idx8(const int &i, const int &j, const int &k,
 }
 
 void PYCI_INTEGRAL::symmetric_orthogonalization() {
-  auto num_basis = this->input_basis.num_basis;
-  auto eigen_S = xt::linalg::eigh(this->overlap);
-  auto s = std::get<0>(eigen_S);
-  auto L = std::get<1>(eigen_S);
-  this->orth_X = xt::zeros<double>({num_basis, num_basis});
-  for (size_t i = 0; i < s.size(); i++) {
-    this->orth_X(i, i) = 1.0 / std::sqrt(s(i));
+  Selci_cout("Calculating Symmetric Orthogonalization Matrix...");
+  if (this->orth_X.shape() == std::vector<size_t>({})) {
+    auto num_basis = this->input_basis.num_basis;
+    auto eigen_S = xt::linalg::eigh(this->overlap);
+    auto s = std::get<0>(eigen_S);
+    auto L = std::get<1>(eigen_S);
+    this->orth_X = xt::zeros<double>({num_basis, num_basis});
+    for (size_t i = 0; i < s.size(); i++) {
+      this->orth_X(i, i) = 1.0 / std::sqrt(s(i));
+    }
+    this->orth_X =
+        xt::linalg::dot(L, xt::linalg::dot(this->orth_X, xt::transpose(L)));
   }
-  this->orth_X =
-      xt::linalg::dot(L, xt::linalg::dot(this->orth_X, xt::transpose(L)));
 }

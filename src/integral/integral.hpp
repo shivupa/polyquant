@@ -29,6 +29,14 @@ public:
   PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                 const PYCI_MOLECULE &molecule);
 
+  void calculate_overlap();
+  void calculate_kinetic();
+  void calculate_nuclear();
+  void
+  calculate_polarization_potential(const xt::xarray<double> &operator_coeff,
+                                   const xt::xarray<double> &operator_exps);
+  void calculate_two_electron();
+
   /**
    * @brief Create the matrivies and vector to hold the integrals and call to
    * the functions to calculate them.
@@ -78,6 +86,21 @@ public:
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
   /**
+   * @brief Calculate one body integrals with an operator that has been expanded
+   * as a sum of gaussians
+   *
+   * @param output_matrix the matrix to hold the one body ints
+   * @param shells the basis set to calculate the one body integrals in
+   * @param operator_coeff the coefficients of the gaussians that the operator
+   * has been expanded in
+   * @param operator_exps the exponents of the gaussians that the operator has
+   * been expanded in
+   */
+  void compute_1body_ints_operator_expanded_in_gaussians(
+      xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
+      const xt::xarray<double> &operator_coeff,
+      const xt::xarray<double> &operator_exps);
+  /**
    * @brief Calculate two body integrals
    *
    * @param output_vec the vector to hold the two body ints
@@ -89,7 +112,6 @@ public:
                           libint2::Operator obtype);
 
   void symmetric_orthogonalization();
-
   /**
    * @brief Overlap integral matrix
    *
@@ -106,6 +128,12 @@ public:
    */
   xt::xarray<double> nuclear;
   /**
+   * @brief Polarization potential integral matrix (where the potential was
+   * expanded as a sum of gaussians)
+   *
+   */
+  xt::xarray<double> polarization_potential;
+  /**
    * @brief Two electron integral vector
    *
    */
@@ -115,11 +143,15 @@ public:
    *
    */
   xt::xarray<double> orth_X;
-
   /**
    * @brief the input basis
    *
    */
   PYCI_BASIS input_basis;
+  /**
+   * @brief the input molecule
+   *
+   */
+  PYCI_MOLECULE input_molecule;
 };
 #endif
