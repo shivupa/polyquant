@@ -1,11 +1,38 @@
-Static polarizabilites from https://www.tandfonline.com/doi/full/10.1080/00268976.2018.1535143
-
+Static polarizabilites from https://doi.org/10.1002/(SICI)1097-461X(2000)77:1%3C473::AID-QUA47%3E3.0.CO;2-4
 even though the Swann and Gribakin paper used values from https://pubs.acs.org/doi/pdf/10.1021/ja00179a044
 
-For the atoms considered through Ar, the fitting can be done from
-    0 to ...
-        20 as all potentials fall to 1e-3 before 20
-        40 as all potentials fall to 1e-4 before 40
-        60 as all potentials fall to 1e-5 before 60
+cutoffs from doi.org/10.1002/chem.201602949
 
-Not sure which one of these is best.
+Experimental:
+-------------
+For the atoms types considered, the fitting can be done from
+    0 to ...
+        07 as all potentials fall to 1e-3 before this
+        12 as all potentials fall to 1e-4 before this
+        20 as all potentials fall to 1e-5 before this
+
+Miller:
+-------
+For the atoms types considered, the fitting can be done from
+    0 to ...
+        08 as all potentials fall to 1e-3 before this
+        14 as all potentials fall to 1e-4 before this
+        23 as all potentials fall to 1e-5 before this
+
+M1:
+---
+For the atoms types considered, the fitting can be done from
+    0 to ...
+        08 as all potentials fall to 1e-3 before this
+        13 as all potentials fall to 1e-4 before this
+        23 as all potentials fall to 1e-5 before this
+
+M2:
+---
+For the atoms types considered, the fitting can be done from
+    0 to ...
+        08 as all potentials fall to 1e-3 before this
+        13 as all potentials fall to 1e-4 before this
+        23 as all potentials fall to 1e-5 before this
+
+Let's use M2.
