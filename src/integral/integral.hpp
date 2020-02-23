@@ -33,7 +33,8 @@ public:
   void calculate_kinetic();
   void calculate_nuclear();
   void
-  calculate_polarization_potential(const xt::xarray<double> &operator_coeff,
+  calculate_polarization_potential(const xt::xarray<double> &operator_origin,
+                                   const xt::xarray<double> &operator_coeff,
                                    const xt::xarray<double> &operator_exps);
   void calculate_two_electron();
 
@@ -85,6 +86,14 @@ public:
       libint2::Operator obtype,
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
+  double primitive_integral_operator_expanded_in_gaussians(
+      const xt::xarray<double> &origin1, const double &cont_coeff1,
+      const double &exp1, const xt::xarray<int> &angular_momentum_1,
+      const xt::xarray<double> &origin2, const double &cont_coeff2,
+      const double &exp2, const xt::xarray<int> &angular_momentum_2,
+      const xt::xarray<double> &operator_origin,
+      const xt::xarray<double> &operator_coeff,
+      const xt::xarray<double> &operator_exps);
   /**
    * @brief Calculate one body integrals with an operator that has been expanded
    * as a sum of gaussians
@@ -98,6 +107,7 @@ public:
    */
   void compute_1body_ints_operator_expanded_in_gaussians(
       xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
+      const xt::xarray<double> &operator_origin,
       const xt::xarray<double> &operator_coeff,
       const xt::xarray<double> &operator_exps);
   /**

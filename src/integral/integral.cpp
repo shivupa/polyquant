@@ -47,6 +47,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 }
 
 void PYCI_INTEGRAL::calculate_polarization_potential(
+    const xt::xarray<double> &operator_origin,
     const xt::xarray<double> &operator_coeff,
     const xt::xarray<double> &operator_exps) {
   Selci_cout("Calculating One Body Polarization Potential Integrals...");
@@ -55,8 +56,8 @@ void PYCI_INTEGRAL::calculate_polarization_potential(
     libint2::initialize();
     this->polarization_potential = xt::zeros<double>({num_basis, num_basis});
     this->compute_1body_ints_operator_expanded_in_gaussians(
-        this->polarization_potential, this->input_basis.basis, operator_coeff,
-        operator_exps);
+        this->polarization_potential, this->input_basis.basis, operator_origin,
+        operator_coeff, operator_exps);
     xt::dump_npy("polarization_potential.npy", this->polarization_potential);
     libint2::finalize();
   }
@@ -147,6 +148,88 @@ void PYCI_INTEGRAL::compute_1body_ints(
   // computed_shell = xt::adapt(&buf, n1 + n2, xt::acquire_ownership(), shape);
 }
 
+double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
+    const xt::xarray<double> &origin1, const double &cont_coeff1,
+    const double &exp1, const xt::xarray<int> &angular_momentum_1,
+    const xt::xarray<double> &origin2, const double &cont_coeff2,
+    const double &exp2, const xt::xarray<int> &angular_momentum_2,
+    const xt::xarray<double> &operator_origin,
+    const xt::xarray<double> &operator_coeff,
+    const xt::xarray<double> &operator_exps) {
+  double integral_value = 0.0;
+  double nu = (exp1 * exp2) / (exp1 + exp2);
+  auto r_ab = ((exp1 * origin1) + (exp2 * origin2)) / (exp1 + exp2);
+  for (auto m = 0; m < operator_coeff.size(); m++) {
+    double lambda =
+        ((exp1 + exp2) * operator_exps(m)) / (exp1 + exp2 + operator_exps(m));
+    auto r_abc = ((exp1 * origin1) + (exp2 * origin2) +
+                  (operator_exps(m) * operator_origin)) /
+                 (exp1 + exp2 + operator_exps(m));
+
+    double loop_integral_value = 0.0;
+    loop_integral_value = operator_coeff(m);
+    loop_integral_value *=
+        std::exp(-lambda * std::pow(xt::linalg::norm(origin1 - origin2, 2), 2));
+    double H_x = 0;
+    double H_y = 0;
+    double H_z = 0;
+    // eq A10 https://arxiv.org/pdf/1809.03250.pdf
+    for (auto s_x_1 = 0; s_x_1 <= angular_momentum_1[0]; s_x_1++) {
+      for (auto s_x_2 = 0; s_x_2 <= angular_momentum_2[0]; s_x_2++) {
+        double val = libint2::math::bc(angular_momentum_1[0], s_x_1);
+        val *= libint2::math::bc(angular_momentum_2[0], s_x_2);
+        val *= 0.5;
+        val *= (1 + std::pow(-1, s_x_1 + s_x_2));
+        val *= std::pow((r_abc[0] - origin1[0]), angular_momentum_1[0] - s_x_1);
+        val *= std::pow((r_abc[0] - origin2[0]), angular_momentum_2[0] - s_x_2);
+        val *= std::pow(exp1 + exp2 + operator_exps(m),
+                        ((-(1 + s_x_1 + s_x_2)) / 2));
+        val *= std::tgamma((1.0 + s_x_1 + s_x_2) / 2.0);
+        H_x += val;
+      }
+    }
+    for (auto s_y_1 = 0; s_y_1 <= angular_momentum_1[1]; s_y_1++) {
+      for (auto s_y_2 = 0; s_y_2 <= angular_momentum_2[1]; s_y_2++) {
+        double val = libint2::math::bc(angular_momentum_1[1], s_y_1);
+        val *= libint2::math::bc(angular_momentum_2[1], s_y_2);
+        val *= 0.5;
+        val *= (1 + std::pow(-1, s_y_1 + s_y_2));
+        val *= std::pow((r_abc[1] - origin1[1]), angular_momentum_1[1] - s_y_1);
+        val *= std::pow((r_abc[1] - origin2[1]), angular_momentum_2[1] - s_y_2);
+        val *= std::pow(exp1 + exp2 + operator_exps(m),
+                        ((-(1 + s_y_1 + s_y_2)) / 2));
+        val *= std::tgamma((1.0 + s_y_1 + s_y_2) / 2.0);
+        H_y += val;
+      }
+    }
+    for (auto s_z_1 = 0; s_z_1 <= angular_momentum_1[2]; s_z_1++) {
+      for (auto s_z_2 = 0; s_z_2 <= angular_momentum_2[2]; s_z_2++) {
+        double val = libint2::math::bc(angular_momentum_1[2], s_z_1);
+        val *= libint2::math::bc(angular_momentum_2[2], s_z_2);
+        val *= 0.5;
+        val *= (1 + std::pow(-1, s_z_1 + s_z_2));
+        val *= std::pow((r_abc[2] - origin1[2]), angular_momentum_1[2] - s_z_1);
+        val *= std::pow((r_abc[2] - origin2[2]), angular_momentum_2[2] - s_z_2);
+        val *= std::pow(exp1 + exp2 + operator_exps(m),
+                        ((-(1 + s_z_1 + s_z_2)) / 2));
+        val *= std::tgamma((1.0 + s_z_1 + s_z_2) / 2.0);
+        H_z += val;
+      }
+    }
+    loop_integral_value *= H_x * H_y * H_z;
+    integral_value += loop_integral_value;
+  }
+
+  // calculate the scaling prefactor \exp^{-\nu |r_A - r_B|^2}
+  double prefactor =
+      std::exp(-nu * std::pow(xt::linalg::norm(origin1 - origin2, 2), 2));
+  integral_value *= prefactor;
+  // multiply integral by contraction coefficients and return it!
+  integral_value *= cont_coeff1;
+  integral_value *= cont_coeff2;
+  return integral_value;
+}
+
 /**
  * @details This follows the eri test in the Libint2 repo. It doesn't construct
  * an engine to calculate integrals over shells, but it instead calculates the
@@ -155,6 +238,7 @@ void PYCI_INTEGRAL::compute_1body_ints(
  */
 void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
     xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
+    const xt::xarray<double> &operator_origin,
     const xt::xarray<double> &operator_coeff,
     const xt::xarray<double> &operator_exps) {
   auto shell2bf = shells.shell2bf();
@@ -163,11 +247,12 @@ void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
   // Hermitian operators: (1|2) = (2|1)
   for (auto s1 = 0; s1 != shells.size(); ++s1) {
     auto bf1 = shell2bf[s1]; // first basis function in this shell
+    xt::xarray<double> origin1 = {shells[s1].O[0], shells[s1].O[1],
+                                  shells[s1].O[2]};
     for (auto s2 = s1; s2 != shells.size(); ++s2) {
       auto bf2 = shell2bf[s2];
-      std::cout << "[" << s1 << ", " << bf1 << "]"
-                << " "
-                << "[" << s2 << ", " << bf2 << "]" << std::endl;
+      xt::xarray<double> origin2 = {shells[s2].O[0], shells[s2].O[1],
+                                    shells[s2].O[2]};
       for (auto contr1 = 0; contr1 != shells[s1].contr.size(); contr1++) {
         for (auto contr2 = 0; contr2 != shells[s2].contr.size(); contr2++) {
           {
@@ -175,43 +260,49 @@ void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
             int am1 = shells[s1].contr[contr1].l;
             int l1, m1, n1;
             FOR_CART(l1, m1, n1, am1) {
+              xt::xarray<int> angular_momentum_1 = {l1, m1, n1};
               int f2 = 0;
               int am2 = shells[s2].contr[contr2].l;
               int l2, m2, n2;
               FOR_CART(l2, m2, n2, am2) {
-                std::cout << "(" << l1 << ", " << m1 << ", " << n1 << ")"
-                          << " "
-                          << "(" << l2 << ", " << m2 << ", " << n2 << ")"
-                          << std::endl;
-                std::cout << " " << bf1 + f1 << " " << bf2 + f2 << std::endl;
-                // This entire function is complicated.
-                // We iterate over shells so shells2bf goes from a shell to the
-                // index of the first basis function in a shell. Then we iterate
-                // over the number of contractions in each basis function. Then
-                // FOR_CART iterates over the basis functions of each angular
-                // momentum in this shell. l+m+n = am is the total angular
-                // momentum . FOR_CART makes the lmn pairs, we use f1 and f2 to
-                // keep track of which function we are working with. So to index
-                // the array the correct index is (bf1+f1, bf2+f2). Inside of
-                // FOR_CART, we now loop over the contracted gaussians that make
-                // up each of the basis functions. The looping assumes that the
-                // alpha vector and the contraction coefficient vector is of the
-                // same size, which it should be. Finally we are able to
-                // calculate the integral over two primitive gaussians.
+                // This entire function is extremely complicated at first
+                // glance. We iterate over shells so shells2bf goes from a shell
+                // to the index of the first basis function in a shell. Then we
+                // iterate over the number of contractions in each basis
+                // function. Then FOR_CART iterates over the basis functions of
+                // each angular momentum in this shell. l+m+n = am is the total
+                // angular momentum . FOR_CART makes the lmn pairs, we use f1
+                // and f2 to keep track of which function we are working with.
+                // So to index the array the correct index is (bf1+f1, bf2+f2).
+                // Inside of FOR_CART, we now loop over the contracted gaussians
+                // that make up each of the basis functions. The looping assumes
+                // that the alpha vector and the contraction coefficient vector
+                // is of the same size, which it should be. Finally we are able
+                // to calculate the integral over two primitive gaussians.
+                xt::xarray<int> angular_momentum_2 = {l2, m2, n2};
                 for (auto idx_exp_coeff1 = 0;
                      idx_exp_coeff1 < shells[s1].alpha.size();
                      idx_exp_coeff1++) {
                   auto exp1 = shells[s1].alpha[idx_exp_coeff1];
                   auto cont_coeff1 =
                       shells[s1].contr[contr1].coeff[idx_exp_coeff1];
+
                   for (auto idx_exp_coeff2 = 0;
                        idx_exp_coeff2 < shells[s2].alpha.size();
                        idx_exp_coeff2++) {
                     auto exp2 = shells[s2].alpha[idx_exp_coeff2];
                     auto cont_coeff2 =
                         shells[s2].contr[contr2].coeff[idx_exp_coeff2];
+
                     // now we are ready to calculate the integral over a
                     // primitive gaussian
+                    auto integral_value =
+                        this->primitive_integral_operator_expanded_in_gaussians(
+                            origin1, cont_coeff1, exp1, angular_momentum_1,
+                            origin2, cont_coeff2, exp2, angular_momentum_2,
+                            operator_origin, operator_coeff, operator_exps);
+                    output_matrix(bf1 + f1, bf2 + f2) += integral_value;
+                    output_matrix(bf2 + f2, bf1 + f1) += integral_value;
                   }
                 }
                 ++f2;

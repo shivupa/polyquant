@@ -94,16 +94,16 @@ void PYCI_RHF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
-
+  xt::xarray<double> operator_origin = {0.0, 0.0, 0.0};
   xt::xarray<double> operator_coeff = {
-      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+      0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0,    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   xt::xarray<double> operator_exps = {
       0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128, 0.256,
       0.512, 1.0,   2.0,   3.0,   4.0,   5.0,   6.0,   7.0,   8.0,
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0};
-  this->input_integral.calculate_polarization_potential(operator_coeff,
-                                                        operator_exps);
+  this->input_integral.calculate_polarization_potential(
+      operator_origin, operator_coeff, operator_exps);
 
   // start the RHF process
   this->form_H_core();

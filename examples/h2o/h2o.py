@@ -63,3 +63,7 @@ myhf.run()
 print(myhf.e_tot)
 
 
+print("Polarization Potential")
+a = np.load("polarization_potential.npy")
+print(a)
+
