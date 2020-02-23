@@ -188,12 +188,14 @@ def fit(x, *gaussian_coeff):
         val += c * np.exp(-a * x * x)
     return val
 
+fitted_params = {}
 
 for a in alpha.keys():
     print("*" * 79)
     print("*" * 79)
     print("{}".format(a))
     print("*" * 79)
+    fitted_params[a] = {}
     fig = plt.figure(figsize=(7, 5))
     for i in range(len(alpha[a])):
         print("*" * 79)
@@ -206,6 +208,7 @@ for a in alpha.keys():
         x = r
         true_y = pot(r, alpha[a][i], cutoff[i])
         popt, pcov = spo.curve_fit(fit, x, true_y, p0=gaussian_coeff_guess)
+        fitted_params[a][atom_types[i]] = popt
         gaussian_coeff_guess=popt
         print(popt)
         # plt.plot(x,true_y,linestyle='--',label="true")
@@ -216,3 +219,32 @@ for a in alpha.keys():
     plt.title(a)
     plt.tight_layout()
     plt.savefig("{}_difference.eps".format(a))
+
+print("*" * 79)
+print("")
+
+# generate unordered maps from dictionary
+for unordered_map in fitted_params.keys():
+    print("const static std::unordered_map<std::string, xt::xarray<double> > {} = {{".format(unordered_map))
+    count = 1
+    for key in fitted_params[unordered_map]:
+        print("{{ \"{}\", {{ ".format(key),end="")
+        for i in range(len(fitted_params[unordered_map][key])-1):
+            print("{}, ".format(fitted_params[unordered_map][key][i]), end="")
+        print("{} ".format(fitted_params[unordered_map][key][-1]), end="")
+        if count == len(fitted_params[unordered_map]):
+            print("} }")
+        else:
+            print("} },")
+            count += 1
+    print("};")
+    print("")
+
+
+# generate operator exponents
+
+print("const static xt::xarray<double> operator_exponents = { ", end="")
+for i in range(len(gaussian_exp)-1):
+    print("{}, ".format(gaussian_exp[i]),end="")
+print("{} }};".format(gaussian_exp[-1]))
+
