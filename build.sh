@@ -1,6 +1,6 @@
 #!/bin/bash
 ./format.sh
-#rm -rf build
+rm -rf build
 mkdir -p build
 cd build
 CC=mpicc \
@@ -11,8 +11,8 @@ cmake .. \
 -DPYCI_DEBUG=0 \
 -DPYCI_DOCS=0
 make -j 1
-#make test
-#make Sphinx
+make test
+make Sphinx
 cd ..
 cd examples/h2o
 ./run.sh
