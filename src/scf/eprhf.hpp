@@ -2,8 +2,8 @@
 #include <basis/basis.hpp>
 #include <integral/integral.hpp>
 #include <io/io.hpp>
-#include <libint2/chemistry/sto3g_atomic_density.h>
 #include <molecule/molecule.hpp>
+#include <scf/rhf.hpp>
 #include <scf/scf.hpp>
 #include <string>
 #include <xtensor/xadapt.hpp>
@@ -11,27 +11,34 @@
 #include <xtensor/xnpy.hpp>
 #include <xtensor/xview.hpp>
 
-#ifndef PYCI_RHF_H
-#define PYCI_RHF_H
+#ifndef PYCI_EPRHF_H
+#define PYCI_EPRHF_H
 
-class PYCI_RHF : PYCI_SCF {
+class PYCI_EPRHF : PYCI_SCF {
 public:
-  PYCI_RHF() = default;
-  PYCI_RHF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
-           const PYCI_BASIS &input_basis, const PYCI_INTEGRAL &input_integral)
+  PYCI_EPRHF() = default;
+  PYCI_EPRHF(const PYCI_INPUT &input_params,
+             const PYCI_MOLECULE &input_molecule, const PYCI_BASIS &input_basis,
+             const PYCI_INTEGRAL &input_integral)
       : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
   void form_fock() override;
   void diag_fock() override;
   void form_DM() override;
-  void calculate_E_elec() override;
+  void calculate_E_elec() override{};
   void calculate_E_total() override;
   void check_stop() override;
   void run_iteration() override;
   void guess_DM() override;
   void run() override;
+  void set_electronic_system(PYCI_RHF &elec_RHF);
+  void set_polarization_potential();
+  void calculate_E_elec_plus_excess_particle();
+  void set_relax_target();
+  void set_excess_particle_type(std::string particle_type);
 
+  PYCI_RHF elec_RHF;
   /**
    * @brief H_core matrix
    *
@@ -70,12 +77,12 @@ public:
    * @brief Electronic energy
    *
    */
-  double E_elec = 0.0;
+  double E_elec_plus_ep = 0.0;
   /**
    * @brief Electronic energy from the previous iteration
    *
    */
-  double E_elec_last = 0.0;
+  double E_elec_plus_ep_last = 0.0;
   /**
    * @brief Total energy
    *
@@ -126,5 +133,10 @@ public:
    *
    */
   int iteration_max = 500;
+
+  int excess_particle_charge;
+  bool exchange;
+  bool polarization_potential = false;
+  bool relax_target = false;
 };
 #endif

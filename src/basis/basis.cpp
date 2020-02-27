@@ -1,8 +1,4 @@
-#include <algorithm>
 #include <basis/basis.hpp>
-#include <cpr/cpr.h> // IWYU pragma: keep
-#include <io/io.hpp> // IWYU pragma: keep
-#include <string>
 
 PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
   this->load_basis(input, molecule);
@@ -20,10 +16,30 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
   // TODO move each of these to a function.
 
   // Libint basis object
-  Selci_cout("Creating a Libint2 basis object assuming basis_name is part of "
-             "the Libint2 library.");
-  this->basis = libint2::BasisSet(this->basis_name, molecule.libint_atom);
-  this->num_basis = libint2::nbf(this->basis);
+  try {
+    try {
+      Selci_cout("Trying to create a Libint2 basis object assuming basis_name "
+                 "is part of "
+                 "the Libint2 library.");
+      this->basis =
+          libint2::BasisSet(this->basis_name, molecule.libint_atom, true);
+      this->num_basis = libint2::nbf(this->basis);
+    } catch (...) {
+      Selci_cout(
+          "That didn't work. Trying to load a basis from load a basis from the "
+          "current working directory. The value of \"basis\" in the json file "
+          "is taken to be the filename. Loading filename:");
+      Selci_cout(this->basis_name);
+      std::string cwd = std::filesystem::current_path();
+      setenv("LIBINT_DATA_PATH", cwd.c_str(), 1);
+      this->basis =
+          libint2::BasisSet(this->basis_name, molecule.libint_atom, true);
+      this->num_basis = libint2::nbf(this->basis);
+      Selci_cout(this->num_basis);
+    }
+  } catch (...) {
+    APP_ABORT("Selci couldn't parse basis.");
+  }
 
   // Parsing custom basis
   // try to parse local files {atom_symbol}_{basis_name}.txt

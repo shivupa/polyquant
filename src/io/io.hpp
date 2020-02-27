@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <slepceps.h>        // IWYU pragma: keep
@@ -26,7 +27,7 @@ template <typename T> void Selci_cout(const T &message) {
   int my_rank;
   MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   if (my_rank == 0) {
-    std::cout << message << std::endl;
+    std::cout << std::setprecision(10) << message << std::endl;
   }
 };
 

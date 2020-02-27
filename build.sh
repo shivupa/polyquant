@@ -16,3 +16,5 @@ make -j 1
 cd ..
 cd examples/h2o
 ./run.sh
+cd ../hcn
+./run.sh

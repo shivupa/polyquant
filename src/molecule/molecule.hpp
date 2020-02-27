@@ -55,6 +55,7 @@ public:
    *
    */
   std::vector<std::string> atom_symb;
+
   /**
    * @brief the number of atoms
    *

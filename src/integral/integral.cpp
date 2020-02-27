@@ -7,8 +7,8 @@ PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
 }
 
 void PYCI_INTEGRAL::calculate_overlap() {
-  Selci_cout("Calculating One Body Overlap Integrals...");
   if (this->overlap.shape() == std::vector<size_t>({})) {
+    Selci_cout("Calculating One Body Overlap Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     this->overlap = xt::zeros<double>({num_basis, num_basis});
@@ -20,8 +20,8 @@ void PYCI_INTEGRAL::calculate_overlap() {
 }
 
 void PYCI_INTEGRAL::calculate_kinetic() {
-  Selci_cout("Calculating One Body Kinetic Integrals...");
   if (this->kinetic.shape() == std::vector<size_t>({})) {
+    Selci_cout("Calculating One Body Kinetic Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     this->kinetic = xt::zeros<double>({num_basis, num_basis});
@@ -33,8 +33,8 @@ void PYCI_INTEGRAL::calculate_kinetic() {
 }
 
 void PYCI_INTEGRAL::calculate_nuclear() {
-  Selci_cout("Calculating One Body Nuclear Integrals...");
   if (this->nuclear.shape() == std::vector<size_t>({})) {
+    Selci_cout("Calculating One Body Nuclear Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     this->nuclear = xt::zeros<double>({num_basis, num_basis});
@@ -46,26 +46,105 @@ void PYCI_INTEGRAL::calculate_nuclear() {
   }
 }
 
-void PYCI_INTEGRAL::calculate_polarization_potential(
-    const xt::xarray<double> &operator_origin,
-    const xt::xarray<double> &operator_coeff,
-    const xt::xarray<double> &operator_exps) {
-  Selci_cout("Calculating One Body Polarization Potential Integrals...");
+void PYCI_INTEGRAL::calculate_polarization_potential() {
   if (this->polarization_potential.shape() == std::vector<size_t>({})) {
+    Selci_cout("Calculating One Body Polarization Potential Integrals...");
+    std::vector<std::string> atom_types = {};
+    std::vector<std::string> polarization_types = {};
+    Selci_cout(
+        "Parsing the necessary keywords atom_types and polarization_types...");
+    if (this->input_params.input_data.contains("keywords")) {
+      if (this->input_params.input_data["keywords"].contains("atom_types")) {
+        for (auto i : this->input_params.input_data["keywords"]["atom_types"]) {
+          std::string atom_type = i;
+          std::transform(atom_type.begin(), atom_type.end(), atom_type.begin(),
+                         ::toupper);
+          atom_types.push_back(atom_type);
+        }
+      }
+      if (this->input_params.input_data["keywords"].contains(
+              "polarization_types")) {
+        for (auto i :
+             this->input_params.input_data["keywords"]["polarization_types"]) {
+          std::string polarization_type = i;
+          std::transform(polarization_type.begin(), polarization_type.end(),
+                         polarization_type.begin(), ::toupper);
+          polarization_types.push_back(polarization_type);
+        }
+      }
+    } else {
+      APP_ABORT("Selci needs keywords atom_types and polarization_types to do "
+                "a polarization potential calculation.");
+    }
+
     auto num_basis = this->input_basis.num_basis;
-    libint2::initialize();
     this->polarization_potential = xt::zeros<double>({num_basis, num_basis});
-    this->compute_1body_ints_operator_expanded_in_gaussians(
-        this->polarization_potential, this->input_basis.basis, operator_origin,
-        operator_coeff, operator_exps);
+    libint2::initialize();
+
+    for (auto i = 0; i < this->input_molecule.num_atom; i++) {
+      xt::xarray<double> atom_polarization_potential =
+          xt::zeros<double>({num_basis, num_basis});
+      xt::xarray<double> operator_coeff;
+      xt::xarray<double> operator_origin = {
+          this->input_molecule.atom_coord[i][0],
+          this->input_molecule.atom_coord[i][1],
+          this->input_molecule.atom_coord[i][2]};
+      if (polarization_types[i] == "MILLER") {
+        auto search_for_key = this->alpha_miller.find(atom_types[i]);
+        if (search_for_key == this->alpha_miller.end()) {
+          Selci_cout("Could not find the following atom type: ");
+          Selci_cout(atom_types[i]);
+          APP_ABORT("Polarization Key is incorrect!");
+        } else {
+          operator_coeff = search_for_key->second;
+        }
+      } else if (polarization_types[i] == "EXP") {
+        auto search_for_key = this->alpha_exp.find(atom_types[i]);
+        if (search_for_key == this->alpha_exp.end()) {
+          Selci_cout("Could not find the following atom type: ");
+          Selci_cout(atom_types[i]);
+          APP_ABORT("Polarization Key is incorrect!");
+        } else {
+          operator_coeff = search_for_key->second;
+        }
+      } else if (polarization_types[i] == "M1") {
+        auto search_for_key = this->alpha_m1.find(atom_types[i]);
+        if (search_for_key == this->alpha_m1.end()) {
+          Selci_cout("Could not find the following atom type: ");
+          Selci_cout(atom_types[i]);
+          APP_ABORT("Polarization Key is incorrect!");
+        } else {
+          operator_coeff = search_for_key->second;
+        }
+      } else if (polarization_types[i] == "M2") {
+        auto search_for_key = this->alpha_m2.find(atom_types[i]);
+        if (search_for_key == this->alpha_m2.end()) {
+          Selci_cout("Could not find the following atom type: ");
+          Selci_cout(atom_types[i]);
+          APP_ABORT("Polarization Key is incorrect!");
+        } else {
+          operator_coeff = search_for_key->second;
+        }
+      } else {
+        Selci_cout("The following polarization type was not recognized:");
+        Selci_cout(polarization_types[i]);
+        APP_ABORT("Selci didn't understand what polarization type you wanted.");
+      }
+      this->compute_1body_ints_operator_expanded_in_gaussians(
+          atom_polarization_potential, this->input_basis.basis, operator_origin,
+          operator_coeff, this->operator_exponents);
+
+      this->polarization_potential += atom_polarization_potential;
+    }
+
     xt::dump_npy("polarization_potential.npy", this->polarization_potential);
     libint2::finalize();
   }
 }
 
 void PYCI_INTEGRAL::calculate_two_electron() {
-  Selci_cout("Calculating Two Body Electron Repulsion Integrals...");
   if (this->twoelec.shape() == std::vector<size_t>({})) {
+    Selci_cout("Calculating Two Body Electron Repulsion Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     // the upper triangle of a square matrix is size N*(N-1)/2
@@ -84,6 +163,7 @@ void PYCI_INTEGRAL::calculate_two_electron() {
 void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
                                    const PYCI_BASIS &basis,
                                    const PYCI_MOLECULE &molecule) {
+  this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
 }
@@ -168,8 +248,8 @@ double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
 
     double loop_integral_value = 0.0;
     loop_integral_value = operator_coeff(m);
-    loop_integral_value *=
-        std::exp(-lambda * std::pow(xt::linalg::norm(origin1 - origin2, 2), 2));
+    loop_integral_value *= std::exp(
+        -lambda * std::pow(xt::linalg::norm(operator_origin - r_ab, 2), 2));
     double H_x = 0;
     double H_y = 0;
     double H_z = 0;
@@ -183,7 +263,7 @@ double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
         val *= std::pow((r_abc[0] - origin1[0]), angular_momentum_1[0] - s_x_1);
         val *= std::pow((r_abc[0] - origin2[0]), angular_momentum_2[0] - s_x_2);
         val *= std::pow(exp1 + exp2 + operator_exps(m),
-                        ((-(1 + s_x_1 + s_x_2)) / 2));
+                        ((-(1.0 + s_x_1 + s_x_2)) / 2.0));
         val *= std::tgamma((1.0 + s_x_1 + s_x_2) / 2.0);
         H_x += val;
       }
@@ -197,7 +277,7 @@ double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
         val *= std::pow((r_abc[1] - origin1[1]), angular_momentum_1[1] - s_y_1);
         val *= std::pow((r_abc[1] - origin2[1]), angular_momentum_2[1] - s_y_2);
         val *= std::pow(exp1 + exp2 + operator_exps(m),
-                        ((-(1 + s_y_1 + s_y_2)) / 2));
+                        ((-(1.0 + s_y_1 + s_y_2)) / 2.0));
         val *= std::tgamma((1.0 + s_y_1 + s_y_2) / 2.0);
         H_y += val;
       }
@@ -211,7 +291,7 @@ double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
         val *= std::pow((r_abc[2] - origin1[2]), angular_momentum_1[2] - s_z_1);
         val *= std::pow((r_abc[2] - origin2[2]), angular_momentum_2[2] - s_z_2);
         val *= std::pow(exp1 + exp2 + operator_exps(m),
-                        ((-(1 + s_z_1 + s_z_2)) / 2));
+                        ((-(1.0 + s_z_1 + s_z_2)) / 2.0));
         val *= std::tgamma((1.0 + s_z_1 + s_z_2) / 2.0);
         H_z += val;
       }

@@ -7,7 +7,7 @@ def pot(r, alpha, cutoff):
     return (alpha / (2 * (r ** 4))) * (1 - np.exp(-(r ** 6) / (cutoff ** 6)))
 
 
-r = np.arange(30, 0, -0.1)
+r = np.arange(45, 0, -0.1)
 r = r[::-1]
 
 atom_types = [
@@ -126,7 +126,8 @@ alpha = {
 for a in alpha.keys():
     fig = plt.figure(figsize=(7,5))
     for i,j in zip(alpha[a],atom_types):
-        pol = pot(r, i, 2.0)
+        i *= 1.88972612457**3
+        pol = pot(r, i,2.0)
         plt.plot(r, pol,label=j)
     plt.yscale("log")
     plt.ylim(1e-5,1e-3)

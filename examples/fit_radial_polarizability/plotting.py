@@ -8,7 +8,7 @@ def pot(r, alpha, cutoff):
     return (-alpha / (2 * (r ** 4))) * (1 - np.exp(-(r ** 6) / (cutoff ** 6)))
 
 
-r = np.arange(23, 0, -0.1)
+r = np.arange(35, 0, -0.1)
 r = r[::-1]
 
 atom_types = [
@@ -198,6 +198,8 @@ for a in alpha.keys():
     fitted_params[a] = {}
     fig = plt.figure(figsize=(7, 5))
     for i in range(len(alpha[a])):
+        alpha[a][i]*=1.88972612457**3
+        cutoff[i]=2.0
         print("*" * 79)
         print("atom type: {:>10}".format(atom_types[i]))
         print("alpha  : {:>10.6f}".format(alpha[a][i]))
@@ -212,9 +214,9 @@ for a in alpha.keys():
         gaussian_coeff_guess=popt
         print(popt)
         # plt.plot(x,true_y,linestyle='--',label="true")
-        plt.plot(x, true_y - fit(x, *popt), label="{} difference".format(atom_types[i]))
+        plt.plot(x, true_y-fit(x, *popt), label="{} difference".format(atom_types[i]))
     plt.legend()
-    plt.xlim(-1, 35)
+    plt.xlim(-1, 40)
     plt.ylim(-0.0007, 0.0007)
     plt.title(a)
     plt.tight_layout()
@@ -225,7 +227,7 @@ print("")
 
 # generate unordered maps from dictionary
 for unordered_map in fitted_params.keys():
-    print("const static std::unordered_map<std::string, xt::xarray<double> > {} = {{".format(unordered_map))
+    print("std::unordered_map<std::string, xt::xarray<double> > {} = {{".format(unordered_map))
     count = 1
     for key in fitted_params[unordered_map]:
         print("{{ \"{}\", {{ ".format(key),end="")
@@ -243,7 +245,7 @@ for unordered_map in fitted_params.keys():
 
 # generate operator exponents
 
-print("const static xt::xarray<double> operator_exponents = { ", end="")
+print("xt::xarray<double> operator_exponents = { ", end="")
 for i in range(len(gaussian_exp)-1):
     print("{}, ".format(gaussian_exp[i]),end="")
 print("{} }};".format(gaussian_exp[-1]))

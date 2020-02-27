@@ -1,10 +1,10 @@
 #!/bin/bash
 
 
-../../build/bin/pyci -i h2o.json
+../../build/bin/pyci -i hcn.json
 
 
-python h2o.py
+python hcn.py
 
 
 rm F.npy

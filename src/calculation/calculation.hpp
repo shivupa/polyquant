@@ -3,6 +3,8 @@
 #include <integral/integral.hpp>
 #include <io/io.hpp>
 #include <molecule/molecule.hpp>
+#include <scf/eprhf.hpp>
+#include <scf/rhf.hpp>
 #include <string>
 #include <unordered_set>
 
@@ -38,8 +40,12 @@ public:
    *
    * @param mean field method
    */
-  void run_mean_field(std::string &mean_field_type);
+  void run_electronic_mean_field(std::string &mean_field_type);
 
+  void
+  run_excess_electron_plus_electronic_mean_field(std::string &mean_field_type);
+
+  std::string parse_electronic_mean_field();
   /**
    * @brief the input parameters
    *
