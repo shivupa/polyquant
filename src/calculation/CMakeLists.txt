@@ -17,7 +17,7 @@ if(Eigen3_FOUND)
   target_link_libraries(calculation Eigen3::Eigen)
 endif(Eigen3_FOUND)
 
-target_link_libraries(calculation io molecule basis integral)
+target_link_libraries(calculation io molecule basis integral scf)
 target_include_directories(calculation PUBLIC include)
 install(TARGETS calculation DESTINATION lib)
 install(FILES ${_HDRS} DESTINATION include/calculation)

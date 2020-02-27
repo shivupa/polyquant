@@ -3,11 +3,11 @@
   "schema_version": 1,
   "molecule": {
     "geometry": [
-	  0.0000000, 0.0000000, 0.0000000,
-    0.7569685, 0.0000000, -0.5858752,
-    -0.7569685, 0.0000000, -0.5858752
+	  0.0000000, 0.0000000, -1.54572660,
+	  0.0000000, 0.0000000, -0.48684300,
+	  0.0000000, 0.0000000,  0.63977525
     ],
-    "symbols": ["O", "H", "H"],
+    "symbols": ["H", "C", "N"],
     "molecular_charge": 0,
     "molecular_multiplicity": 1
   },
@@ -18,9 +18,11 @@
   },
   "keywords": {
     "mean_field" : "rhf",
+    "atom_types" : ["H", "CDI", "NDI"],
+    "polarization_types" : ["M2", "M2", "M2"],
     "positron" : false,
-    "excess_electron" : false,
-    "polarization_potential": false,
+    "excess_electron" : true,
+    "polarization_potential": true,
     "relax_target": false
   }
 }

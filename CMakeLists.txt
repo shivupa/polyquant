@@ -42,7 +42,7 @@ configure_file(${PYCI_SOURCE_DIR}/src/pyci.settings
                ${PYCI_BINARY_DIR}/bin/pyci.settings)
 install(FILES ${PYCI_BINARY_DIR}/bin/pyci.settings DESTINATION bin)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # enable testing so the tests will build should we use a flag to only build
@@ -100,6 +100,13 @@ find_package(CURL REQUIRED)
 find_package(Libint2 REQUIRED)
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+# FIND xtensor
+find_package(xtl REQUIRED)
+find_package(xtensor REQUIRED)
+find_package(BLAS REQUIRED)
+# find_package(CBLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci
 # ${PYTHON_LIBRARIES}) endif(PythonLibs_FOUND) Done finding Done finding all the

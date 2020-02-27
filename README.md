@@ -1,9 +1,9 @@
 # selci
 SELected Configuration Interaction
 
-# Dependencies
+## Dependencies
 
-## For a production build
+### For a production build
 - [PETSc](https://gitlab.com/petsc/petsc)
    `PETSc`, pronounced PET-see (the S is silent), is a suite of data structures and routines for the scalable (parallel) solution of scientific applications modeled by partial differential equations.
 
@@ -27,13 +27,25 @@ SELected Configuration Interaction
 - [evaleev/libint](https://github.com/evaleev/libint)
    Libint is a high-performance library for computing Gaussian integrals in quantum mechanics
 
-
    `Selci` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
-## For a debug build
+- [xtensor-stack/xtensor](https://github.com/xtensor-stack/xtensor)
+   C++ tensors with broadcasting and lazy computing 
+
+   `Selci` uses `xtensor-stack/xtensor` to handle arrays for the SCF portion of the code.
+- [xtensor-stack/xsimd](https://github.com/xtensor-stack/xsimd)
+   C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)
+
+   `Selci` doesn't actually use `xtensor-stack/xsimd` yet...
+
+- [xtensor-stack/xtensor-blas](https://github.com/xtensor-stack/xtensor-blas)
+   BLAS extension to xtensor 
+
+   `Selci` uses `xtensor-stack/xtensor-blas` to solve eigenvalue problems.
+### For a debug build
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
 
-## For documentation:
+### For documentation:
 `Selci` uses a combination of libraries to generate documentations from comments included in the source:
 - [doxygen](http://www.doxygen.nl/)
 - [breathe](https://github.com/michaeljones/breathe)
@@ -41,7 +53,7 @@ SELected Configuration Interaction
 - [sphinx](http://www.sphinx-doc.org/en/master/)
 - [m2r](https://github.com/miyakogi/m2r)
 
-## For formatting the source
+### For formatting the source
 - [clang-format](https://clang.llvm.org/)
    
    `Selci` uses `clang-format` to format all of the `hpp` and `cpp` files
@@ -49,7 +61,7 @@ SELected Configuration Interaction
 
    `Selci` uses `cmake-format` to format all of the `CMakeLists.txt`
 
-## To install dependencies on Arch:
+### To install dependencies on Arch:
 
 ```bash
 pacman -Syu clang

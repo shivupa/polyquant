@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
     // set up calculation object
     PYCI_CALCULATION calc = PYCI_CALCULATION(filename);
     // run calculation
+    calc.run();
   } else {
     ierr = APP_ABORT("MISSING INPUT FILE");
     return ierr;

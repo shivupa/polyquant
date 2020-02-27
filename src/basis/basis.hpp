@@ -1,6 +1,11 @@
+#include <algorithm>
+#include <cpr/cpr.h> // IWYU pragma: keep
+#include <filesystem>
 #include <io/io.hpp>
+#include <io/io.hpp>   // IWYU pragma: keep
 #include <libint2.hpp> // IWYU pragma: keep
 #include <molecule/molecule.hpp>
+#include <stdlib.h>
 #include <string>
 
 #ifndef PYCI_BASIS_H
@@ -36,5 +41,10 @@ public:
    *
    */
   libint2::BasisSet basis;
+  /**
+   * @brief Number of basis functions
+   *
+   */
+  size_t num_basis;
 };
 #endif

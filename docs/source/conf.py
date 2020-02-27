@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import textwrap
 
 on_rtd = os.environ.get("READTHEDOCS") == "True"
 # import sys
@@ -32,7 +33,7 @@ release = "0.0.1"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.mathjax", "breathe", "exhale", 'm2r']
+extensions = ["sphinx.ext.mathjax", "breathe", "exhale", "m2r"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -83,9 +84,19 @@ exhale_args = {
     "exhaleExecutesDoxygen": True,
 }
 if on_rtd:
-    exhale_args["exhaleDoxygenStdin"] = "INPUT = ../../src"
+    exhale_args["exhaleDoxygenStdin"] = textwrap.dedent(
+        """
+        INPUT = ../../src
+        EXCLUDE_PATTERNS =*.txt
+        """
+    )
 else:
-    exhale_args["exhaleDoxygenStdin"] = "INPUT = @PYCI_SOURCE_DIR@/src"
+    exhale_args["exhaleDoxygenStdin"] = textwrap.dedent(
+        """
+        INPUT = @PYCI_SOURCE_DIR@/src
+        EXCLUDE_PATTERNS =*.txt
+        """
+    )
 
 # Tell sphinx what the primary language being documented is.
 primary_domain = "cpp"

@@ -10,19 +10,7 @@ PetscErrorCode APP_ABORT(const std::string &reason) {
            reason.c_str());
   return 1;
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
-// template <typename T> void Selci_cout(const T &message) {
-//   // TODO: in these types of functions we could do a if USING_SLEPC
-//   // just in case its not using mpi etc
-//   int my_rank;
-//   MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-//   if (my_rank == 0) {
-//     std::cout << message << std::endl;
-//   }
-// }
-
-#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 void Selci_dump_json(const json &json_obj) {
   int my_rank;
   MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
