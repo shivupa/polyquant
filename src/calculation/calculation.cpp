@@ -44,12 +44,47 @@ void PYCI_CALCULATION::run() {
     this->run_excess_electron_plus_electronic_mean_field(mean_field_type);
   } else if (do_positron) {
     // positron + electrons
-    Selci_cout("We will be adding a positron!");
+    this->run_excess_positron_plus_electronic_mean_field(mean_field_type);
   } else {
     // only electrons
     if (mean_field_type != "NONE") {
       this->run_electronic_mean_field(mean_field_type);
     }
+  }
+}
+
+void PYCI_CALCULATION::run_excess_positron_plus_electronic_mean_field(
+    std::string &mean_field_type) {
+  if (mean_field_type == "NONE") {
+    APP_ABORT(
+        "SELCI must run a electronic mean-field calculation when treating an "
+        "excess particle (e+ or e-). At least until orbitals can be read in.");
+  }
+  Selci_cout("We will be approximately treating an excess positron!");
+  if (mean_field_type == "RHF") {
+    PYCI_RHF rhf_calc = PYCI_RHF(this->input_params, this->input_molecule,
+                                 this->input_basis, this->input_integral);
+    rhf_calc.run();
+    PYCI_EPRHF eprhf_calc = PYCI_EPRHF(this->input_params, this->input_molecule,
+                                       this->input_basis, this->input_integral);
+    eprhf_calc.set_electronic_system(rhf_calc);
+    eprhf_calc.set_excess_particle_type("POSITRON");
+    if (this->input_params.input_data.contains("keywords")) {
+      if (this->input_params.input_data["keywords"].contains(
+              "polarization_potential")) {
+        if (this->input_params
+                .input_data["keywords"]["polarization_potential"]) {
+          eprhf_calc.set_polarization_potential();
+        }
+      }
+      if (this->input_params.input_data["keywords"].contains("relax_target")) {
+        if (this->input_params.input_data["keywords"]["relax_target"]) {
+          eprhf_calc.set_relax_target();
+        }
+      }
+    }
+
+    eprhf_calc.run();
   }
 }
 

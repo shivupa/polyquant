@@ -20,8 +20,8 @@
     "mean_field" : "rhf",
     "atom_types" : ["H", "CDI", "NDI"],
     "polarization_types" : ["M2", "M2", "M2"],
-    "positron" : false,
-    "excess_electron" : true,
+    "positron" : true,
+    "excess_electron" : false,
     "polarization_potential": false,
     "relax_target": true
   }

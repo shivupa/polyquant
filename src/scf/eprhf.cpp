@@ -13,6 +13,10 @@ void PYCI_EPRHF::form_H_core() {
 void PYCI_EPRHF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
+  if (this->iteration_num < 1 || this->relax_target) {
+    this->elec_RHF.F = xt::zeros<double>({num_basis, num_basis});
+    this->elec_RHF.F += this->elec_RHF.H_core;
+  }
   this->F = xt::zeros<double>({num_basis, num_basis});
   this->F += this->H_core;
   for (int i = 0; i < num_basis; i++) {
@@ -60,8 +64,7 @@ void PYCI_EPRHF::form_fock() {
     }
   }
   if (this->iteration_num <= 1) {
-
-    xt::dump_npy("F_pos.npy", this->F);
+    xt::dump_npy("F_ep.npy", this->F);
   }
 }
 void PYCI_EPRHF::diag_fock() {
@@ -75,7 +78,6 @@ void PYCI_EPRHF::diag_fock() {
   auto F_prime_eigen = xt::linalg::eigh(F_prime);
   this->E_orbitals = std::get<0>(F_prime_eigen);
   C_prime = std::get<1>(F_prime_eigen);
-
   this->C = xt::linalg::dot(this->input_integral.orth_X, C_prime);
 }
 void PYCI_EPRHF::form_DM() {
@@ -95,7 +97,10 @@ void PYCI_EPRHF::calculate_E_elec_plus_excess_particle() {
   this->E_elec_plus_ep_last = this->E_elec_plus_ep;
   this->E_elec_plus_ep =
       xt::sum(this->elec_RHF.D * (this->elec_RHF.H_core + this->elec_RHF.F))(0);
+  Selci_cout(this->E_elec_plus_ep);
+
   this->E_elec_plus_ep += 0.5 * xt::sum(this->D * (this->H_core + this->F))(0);
+  Selci_cout(this->E_elec_plus_ep);
 }
 void PYCI_EPRHF::calculate_E_total() {
   this->E_total = this->E_elec_plus_ep + this->input_molecule.E_nuc;
@@ -124,7 +129,7 @@ void PYCI_EPRHF::run_iteration() {
     this->elec_RHF.diag_fock();
     this->elec_RHF.form_DM();
   }
-  this->calculate_E_elec();
+  this->calculate_E_elec_plus_excess_particle();
 }
 void PYCI_EPRHF::guess_DM() {
   auto num_basis = this->input_basis.num_basis;
@@ -147,7 +152,6 @@ void PYCI_EPRHF::run() {
   while (!this->stop) {
     Selci_cout(this->iteration_num);
     Selci_cout(this->E_elec_plus_ep);
-
     this->run_iteration();
     this->check_stop();
   }
