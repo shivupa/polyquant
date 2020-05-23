@@ -6,6 +6,8 @@
 
 #ifndef PYCI_SCF_H
 #define PYCI_SCF_H
+namespace selci {
+
 /**
  * @brief A class to set up SCF type calculations.
  *
@@ -62,4 +64,5 @@ public:
    */
   PYCI_INTEGRAL input_integral;
 };
+} // namespace selci
 #endif

@@ -10,6 +10,8 @@
 
 #ifndef PYCI_BASIS_H
 #define PYCI_BASIS_H
+namespace selci {
+
 /**
  * @brief A class to hold basis information.
  *
@@ -47,4 +49,5 @@ public:
    */
   size_t num_basis;
 };
+} // namespace selci
 #endif

@@ -1,5 +1,7 @@
 #include <scf/eprhf.hpp>
 
+using namespace selci;
+
 void PYCI_RHF::form_H_core() {
   auto num_basis = this->input_basis.num_basis;
   this->H_core = xt::zeros<double>({num_basis, num_basis});

@@ -13,6 +13,7 @@
 
 #ifndef PYCI_EPRHF_H
 #define PYCI_EPRHF_H
+namespace selci {
 
 class PYCI_EPRHF : PYCI_SCF {
 public:
@@ -139,4 +140,5 @@ public:
   bool polarization_potential = false;
   bool relax_target = false;
 };
+} // namespace selci
 #endif

@@ -7,6 +7,8 @@ using json = nlohmann::json;
 
 #ifndef PYCI_INPUT_H
 #define PYCI_INPUT_H
+namespace selci {
+
 /**
  * @brief Abort the code and print a reason for aborting.
  *
@@ -63,4 +65,5 @@ public:
    */
   json input_data;
 };
+} // namespace selci
 #endif

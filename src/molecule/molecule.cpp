@@ -1,5 +1,7 @@
 #include <molecule/molecule.hpp>
 
+using namespace selci;
+
 PYCI_MOLECULE::PYCI_MOLECULE(const PYCI_INPUT &input) { setup_molecule(input); }
 
 void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {

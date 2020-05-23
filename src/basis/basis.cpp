@@ -1,5 +1,7 @@
 #include <basis/basis.hpp>
 
+using namespace selci;
+
 PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
   this->load_basis(input, molecule);
 }

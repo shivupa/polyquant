@@ -1,5 +1,7 @@
 #include <integral/integral.hpp>
 
+using namespace selci;
+
 PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
                              const PYCI_MOLECULE &molecule) {
   Selci_cout("INTEGRAL");

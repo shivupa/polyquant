@@ -1,6 +1,8 @@
 #include <fstream>
 #include <io/io.hpp>
 
+using namespace selci;
+
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 PetscErrorCode APP_ABORT(const std::string &reason) {
   std::string ERROR_MESSAGE =

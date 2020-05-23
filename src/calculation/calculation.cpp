@@ -1,5 +1,7 @@
 #include <calculation/calculation.hpp>
 
+using namespace selci;
+
 PYCI_CALCULATION::PYCI_CALCULATION(const std::string &filename) {
   this->setup_calculation(filename);
 }

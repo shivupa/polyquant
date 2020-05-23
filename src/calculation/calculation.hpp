@@ -10,6 +10,8 @@
 
 #ifndef PYCI_CALCULATION_H
 #define PYCI_CALCULATION_H
+namespace selci {
+
 /**
  * @brief A class to set up a calculation.
  *
@@ -84,4 +86,5 @@ public:
    */
   const std::unordered_set<std::string> post_mean_field_methods = {"CIPSI"};
 };
+} // namespace selci
 #endif

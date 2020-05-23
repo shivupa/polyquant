@@ -13,6 +13,7 @@
 
 #ifndef PYCI_RHF_H
 #define PYCI_RHF_H
+namespace selci {
 
 class PYCI_RHF : PYCI_SCF {
 public:
@@ -127,4 +128,5 @@ public:
    */
   int iteration_max = 500;
 };
+} // namespace selci
 #endif
