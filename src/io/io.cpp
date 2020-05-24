@@ -4,6 +4,7 @@
 using namespace selci;
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
+namespace selci {
 PetscErrorCode APP_ABORT(const std::string &reason) {
   std::string ERROR_MESSAGE =
       "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
@@ -20,6 +21,7 @@ void Selci_dump_json(const json &json_obj) {
     std::cout << json_obj.dump(4) << std::endl;
   }
 }
+} // namespace selci
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 PYCI_INPUT::PYCI_INPUT(const std::string &filename) {
