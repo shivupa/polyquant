@@ -1,4 +1,3 @@
-#include "xtensor-blas/xlinalg.hpp"
 #include <basis/basis.hpp>
 #include <integral/integral.hpp>
 #include <io/io.hpp>
@@ -6,10 +5,6 @@
 #include <scf/rhf.hpp>
 #include <scf/scf.hpp>
 #include <string>
-#include <xtensor/xadapt.hpp>
-#include <xtensor/xarray.hpp>
-#include <xtensor/xnpy.hpp>
-#include <xtensor/xview.hpp>
 
 #ifndef PYCI_EPRHF_H
 #define PYCI_EPRHF_H

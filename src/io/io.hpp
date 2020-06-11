@@ -1,22 +1,24 @@
+#include <algorithm>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp> // IWYU pragma: keep
-#include <slepceps.h>        // IWYU pragma: keep
 #include <string>
+#include <vector>
 using json = nlohmann::json;
 
 #ifndef PYCI_INPUT_H
 #define PYCI_INPUT_H
 namespace selci {
 
-/**
- * @brief Abort the code and print a reason for aborting.
- *
- * @param reason a string stating the reason to abort.
- * @return PetscErrorCode
- */
-PetscErrorCode APP_ABORT(const std::string &reason);
-
+// /**
+//  * @brief Abort the code and print a reason for aborting.
+//  *
+//  * @param reason a string stating the reason to abort.
+//  * @return PetscErrorCode
+//  */
+// PetscErrorCode APP_ABORT(const std::string &reason);
+void APP_ABORT(const std::string &reason);
 /**
  * @brief A helper function to print only if we are on rank 0.
  *
@@ -26,11 +28,11 @@ PetscErrorCode APP_ABORT(const std::string &reason);
 template <typename T> void Selci_cout(const T &message) {
   // TODO: in these types of functions we could do a if USING_SLEPC
   // just in case its not using mpi etc
-  int my_rank;
-  MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  if (my_rank == 0) {
-    std::cout << std::setprecision(10) << message << std::endl;
-  }
+  // int my_rank;
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  // if (my_rank == 0) {
+  std::cout << std::setprecision(10) << message << std::endl;
+  //}
 };
 
 /**

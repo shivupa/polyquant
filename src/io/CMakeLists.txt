@@ -1,16 +1,9 @@
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.[hc]pp")
+
 add_library(io ${_HDRS} ${_SRCS})
 
-if(PETSC_FOUND)
-  include_directories(${PETSC_INCLUDES})
-  target_link_libraries(io ${PETSC_LIBRARIES})
-endif(PETSC_FOUND)
-
-if(SLEPC_FOUND)
-  include_directories(${SLEPC_INC})
-  target_link_libraries(io ${SLEPC_LIB})
-endif(SLEPC_FOUND)
 target_include_directories(io PUBLIC include)
+
 install(TARGETS io DESTINATION lib)
 install(FILES ${_HDRS} DESTINATION include/io)

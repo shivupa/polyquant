@@ -1,6 +1,6 @@
 #!/bin/bash
 ./format.sh
-#rm -rf build
+rm -rf build
 mkdir -p build
 cd build
 CC=mpicc \
@@ -13,8 +13,8 @@ cmake .. \
 make -j 1
 #make test
 #make Sphinx
-cd ..
-cd examples/h2o
-./run.sh
-cd ../hcn
-./run.sh
+#cd ..
+#cd examples/h2o
+#./run.sh
+#cd ../hcn
+#./run.sh

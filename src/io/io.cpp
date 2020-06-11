@@ -1,25 +1,34 @@
-#include <fstream>
 #include <io/io.hpp>
 
 using namespace selci;
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 namespace selci {
-PetscErrorCode APP_ABORT(const std::string &reason) {
-  std::string ERROR_MESSAGE =
-      "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
-      "PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
-  SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
-           reason.c_str());
-  return 1;
+// PetscErrorCode APP_ABORT(const std::string &reason) {
+//   std::string ERROR_MESSAGE =
+//       "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
+//       "PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
+//   SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
+//            reason.c_str());
+//   return 1;
+// }
+void APP_ABORT(const std::string &reason) {
+  std::vector<std::string> ERROR_MESSAGE = {
+      "THIS IS A PYCI++ ERROR. PLEASE REPORT TO ", "PYCI++ MAINTAINERS.",
+      "ABORT REASON:"};
+  ERROR_MESSAGE.push_back(reason);
+  for (auto line : ERROR_MESSAGE) {
+    Selci_cout(line);
+  }
+  exit(1);
 }
 
 void Selci_dump_json(const json &json_obj) {
-  int my_rank;
-  MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  if (my_rank == 0) {
-    std::cout << json_obj.dump(4) << std::endl;
-  }
+  // int my_rank;
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  // if (my_rank == 0) {
+  std::cout << json_obj.dump(4) << std::endl;
+  //}
 }
 } // namespace selci
 #endif // DOXYGEN_SHOULD_SKIP_THIS

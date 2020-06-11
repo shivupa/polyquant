@@ -32,6 +32,9 @@ set(PYCI_DEBUG
 set(PYCI_DOCS
     0
     CACHE BOOL "Enable/disable documentation building")
+set(PYCI_USE_DENSE_MATRIX_STL
+    1
+    CACHE BOOL "Dense Matrix Type")
 
 message(STATUS "Ready to build PYCI")
 
@@ -86,11 +89,8 @@ endif(PYCI_DOCS)
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
-# Find all the things FIND PETSC
-find_package(PETSC REQUIRED)
-# FIND SLEPC
-find_package(SLEPC REQUIRED)
-# FIND nlohmann_json
+# Find all the things FIND PETSC find_package(PETSC REQUIRED) FIND SLEPC
+# find_package(SLEPC REQUIRED) FIND nlohmann_json
 find_package(nlohmann_json 3.2.0 REQUIRED)
 # FIND CPR
 find_package(CPR REQUIRED)
@@ -100,12 +100,12 @@ find_package(CURL REQUIRED)
 find_package(Libint2 REQUIRED)
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-# FIND xtensor
-find_package(xtl REQUIRED)
-find_package(xtensor REQUIRED)
+# FIND xtensor find_package(xtl REQUIRED) find_package(xtensor REQUIRED)
 find_package(BLAS REQUIRED)
 # find_package(CBLAS REQUIRED)
 find_package(LAPACK REQUIRED)
+# FIND cxxopts
+find_package(cxxopts REQUIRED)
 
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci

@@ -1,0 +1,1 @@
+protect printing for mpi
