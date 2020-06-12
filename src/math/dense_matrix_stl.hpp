@@ -10,9 +10,9 @@ namespace selci {
  * @brief A class to represent a dense matrix using the STL
  * Row major
  */
-template <typename T> class DENSE_MATRIX_STL : public MATRIX {
+template <typename T> class DENSE_MATRIX : public MATRIX {
 public:
-  DENSE_MATRIX_STL(size_t n, size_t m) : MATRIX(n, m) { this->resize(n, m); };
+  DENSE_MATRIX(size_t n, size_t m) : MATRIX(n, m) { this->resize(n, m); };
   T &operator()(const size_t &i, const size_t &j) { return data[i * N + j]; };
   T operator()(const size_t &i, const size_t &j) const {
     return data[i * N + j];

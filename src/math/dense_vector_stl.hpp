@@ -9,9 +9,9 @@ namespace selci {
  * @brief A class to represent a dense vector using the STL
  * Row major
  */
-template <typename T> class DENSE_VECTOR_STL : public VECTOR {
+template <typename T> class DENSE_VECTOR : public VECTOR {
 public:
-  DENSE_VECTOR_STL(size_t n) : VECTOR(n) { this->resize(n); };
+  DENSE_VECTOR(size_t n) : VECTOR(n) { this->resize(n); };
   T &operator()(const size_t &i){return data[i]};
   T operator()(const size_t &i) const { return data[i]; };
 

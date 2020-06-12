@@ -51,6 +51,6 @@ void eigenvalues_and_eigenvectors(DENSE_MATRIX<double> &input_matrix,
       eigenvectors[i, j] = z[i][j];
     }
   }
-
+}
 } // namespace selci
 #endif
