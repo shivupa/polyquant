@@ -154,7 +154,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //}
 
 void PYCI_INTEGRAL::calculate_two_electron() {
-  if (this->twoelec.shape() == 0) {
+  if (this->twoelec.size() == 0) {
     Selci_cout("Calculating Two Body Electron Repulsion Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
@@ -227,8 +227,8 @@ void PYCI_INTEGRAL::compute_1body_ints(
       }
       for (size_t f1 = 0, f12 = 0; f1 != n1; ++f1) {
         for (size_t f2 = 0; f2 != n2; ++f2, ++f12) {
-          output_matrix[bf1 + f1, bf2 + f2] = buf_12[f12];
-          output_matrix[bf2 + f2, bf1 + f1] = buf_12[f12];
+          output_matrix(bf1 + f1, bf2 + f2) = buf_12[f12];
+          output_matrix(bf2 + f2, bf1 + f1) = buf_12[f12];
         }
       }
     }
@@ -484,7 +484,7 @@ void PYCI_INTEGRAL::compute_2body_ints(DENSE_VECTOR<double> &output_vec,
                 for (size_t f4 = 0; f4 != n4; ++f4, ++f1234) {
                   const auto bf4 = f4 + bf4_first;
                   size_t location = this->idx8(bf1, bf2, bf3, bf4);
-                  output_vec[location] = buf_1234[f1234];
+                  output_vec(location) = buf_1234[f1234];
                 }
               }
             }
@@ -521,16 +521,16 @@ int PYCI_INTEGRAL::idx8(const int &i, const int &j, const int &k,
 
 void PYCI_INTEGRAL::symmetric_orthogonalization() {
   Selci_cout("Calculating Symmetric Orthogonalization Matrix...");
-  if (this->orth_X.shape() == std::vector<size_t>({})) {
-    auto num_basis = this->input_basis.num_basis;
-    auto eigen_S = xt::linalg::eigh(this->overlap);
-    auto s = std::get<0>(eigen_S);
-    auto L = std::get<1>(eigen_S);
-    this->orth_X = xt::zeros<double>({num_basis, num_basis});
-    for (size_t i = 0; i < s.size(); i++) {
-      this->orth_X(i, i) = 1.0 / std::sqrt(s(i));
-    }
-    this->orth_X =
-        xt::linalg::dot(L, xt::linalg::dot(this->orth_X, xt::transpose(L)));
-  }
+  // if (this->orth_X.shape() == std::vector<size_t>({})) {
+  //  auto num_basis = this->input_basis.num_basis;
+  //  auto eigen_S = xt::linalg::eigh(this->overlap);
+  //  auto s = std::get<0>(eigen_S);
+  //  auto L = std::get<1>(eigen_S);
+  //  this->orth_X = xt::zeros<double>({num_basis, num_basis});
+  //  for (size_t i = 0; i < s.size(); i++) {
+  //    this->orth_X(i, i) = 1.0 / std::sqrt(s(i));
+  //  }
+  //  this->orth_X =
+  //      xt::linalg::dot(L, xt::linalg::dot(this->orth_X, xt::transpose(L)));
+  //}
 }

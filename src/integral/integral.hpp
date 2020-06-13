@@ -3,6 +3,7 @@
 #include <libint2.hpp> // IWYU pragma: keep
 #include <math/dense_matrix.hpp>
 #include <math/dense_matrix_operations.hpp>
+#include <math/dense_vector.hpp>
 #include <molecule/molecule.hpp>
 #include <numeric>
 #include <vector>
@@ -113,7 +114,7 @@ public:
    * @param shells the basis set to ccalculate the two body integrals in
    * @param obtype the operator just the coulomb operator
    */
-  void compute_2body_ints(DENSE_MATRIX<double> &output_vec,
+  void compute_2body_ints(DENSE_VECTOR<double> &output_vec,
                           const libint2::BasisSet &shells,
                           libint2::Operator obtype);
 
@@ -166,7 +167,7 @@ public:
   PYCI_MOLECULE input_molecule;
 
 private:
-  std::unordered_map<std::string, DENSE_MATRIX<double>> alpha_miller = {
+  /*std::unordered_map<std::string, DENSE_MATRIX<double>> alpha_miller = {
       {"H",
        {0.00032373615175901847, -0.001191384594906283, 0.002269474128788352,
         -0.003618386394706905,  0.005256482800147806,  -0.009916552646920785,
@@ -972,6 +973,7 @@ private:
       0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128, 0.256,
       0.512, 1.0,   2.0,   3.0,   4.0,   5.0,   6.0,   7.0,   8.0,
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0, 250.0};
+  */
 };
 } // namespace selci
 #endif

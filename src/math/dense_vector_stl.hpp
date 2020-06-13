@@ -1,5 +1,5 @@
 #include <io/io.hpp>
-#include <vector>
+#include <math/vector.hpp>
 
 #ifndef PYCI_DENSE_VECTOR_STL_H
 #define PYCI_DENSE_VECTOR_STL_H
@@ -11,11 +11,12 @@ namespace selci {
  */
 template <typename T> class DENSE_VECTOR : public VECTOR {
 public:
+  DENSE_VECTOR() : VECTOR(){};
   DENSE_VECTOR(size_t n) : VECTOR(n) { this->resize(n); };
-  T &operator()(const size_t &i){return data[i]};
+  T &operator()(const size_t &i) { return data[i]; };
   T operator()(const size_t &i) const { return data[i]; };
 
-  T get_data() const { return &data.data(); };
+  T *get_data() { return data.data(); };
   size_t size() { return N; };
   void resize(size_t n) {
     N = n;

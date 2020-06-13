@@ -2,7 +2,7 @@
 #include <integral/integral.hpp>
 #include <io/io.hpp>
 #include <libint2/chemistry/sto3g_atomic_density.h>
-#include <math/dense.hpp>
+#include <math/dense_matrix.hpp>
 #include <molecule/molecule.hpp>
 #include <scf/scf.hpp>
 #include <string>

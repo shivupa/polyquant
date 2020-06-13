@@ -12,16 +12,17 @@ namespace selci {
  */
 template <typename T> class DENSE_MATRIX : public MATRIX {
 public:
+  DENSE_MATRIX() : MATRIX(){};
   DENSE_MATRIX(size_t n, size_t m) : MATRIX(n, m) { this->resize(n, m); };
   T &operator()(const size_t &i, const size_t &j) { return data[i * N + j]; };
   T operator()(const size_t &i, const size_t &j) const {
     return data[i * N + j];
   };
 
-  T get_data() const { return &data.data(); };
-  std::pair<size_t, size_t> size() {
-    std::pair<size_t, size_t> size(N, M);
-    return size;
+  T *get_data() { return data.data(); };
+  std::pair<size_t, size_t> shape() {
+    std::pair<size_t, size_t> shape(N, M);
+    return shape;
   };
   void resize(size_t n, size_t m) {
     N = n;
