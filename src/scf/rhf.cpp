@@ -4,14 +4,16 @@ using namespace selci;
 
 void PYCI_RHF::form_H_core() {
   auto num_basis = this->input_basis.num_basis;
-  this->H_core = xt::zeros<double>({num_basis, num_basis});
+  this->H_core.resize(num_basis, num_basis);
+  this->H_core.fill(0.0);
   this->H_core += this->input_integral.kinetic;
   this->H_core += this->input_integral.nuclear;
-  xt::dump_npy("hcore.npy", this->H_core);
+  // xt::dump_npy("hcore.npy", this->H_core);
 }
 void PYCI_RHF::form_fock() {
   auto num_basis = this->input_basis.num_basis;
-  this->F = xt::zeros<double>({num_basis, num_basis});
+  this->F.resize(num_basis, num_basis);
+  this->F.fill(0.0);
   this->F += this->H_core;
   for (int i = 0; i < num_basis; i++) {
     for (int j = 0; j < num_basis; j++) {
@@ -28,13 +30,17 @@ void PYCI_RHF::form_fock() {
   }
   if (this->iteration_num <= 1) {
 
-    xt::dump_npy("F.npy", this->F);
+   // xt::dump_npy("F.npy", this->F);
   }
 }
 void PYCI_RHF::diag_fock() {
   auto num_basis = this->input_basis.num_basis;
-  xt::xarray<double> F_prime = xt::zeros<double>({num_basis, num_basis});
-  xt::xarray<double> C_prime = xt::zeros<double>({num_basis, num_basis});
+  DENSE_MATRIX<double> F_prime(num_basis, num_basis);
+  DENSE_MATRIX<double> C_prime(num_basis, num_basis);
+  F_prime.fill(0.0);
+  C_prime.fill(0.0);
+
+
   F_prime =
       xt::linalg::dot(this->input_integral.orth_X,
                       xt::linalg::dot(this->F, this->input_integral.orth_X));

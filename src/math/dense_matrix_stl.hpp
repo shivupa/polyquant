@@ -19,7 +19,16 @@ public:
     return data[i * N + j];
   };
 
+  void operator+=(const DENSE_MATRIX<T>& other) const {
+    assert(other.shape() == this->shape());
+    auto other_vec = other.get_data_vec();
+    std::transform(this->data.begin( ), this->data.end( ), other_vec.begin( ), this->data.begin( ),std::plus<T>( ));
+  };
+
+
+  std::vector<T> &get_data_vec() { return &data; };
   T *get_data() { return data.data(); };
+
   std::pair<size_t, size_t> shape() {
     std::pair<size_t, size_t> shape(N, M);
     return shape;

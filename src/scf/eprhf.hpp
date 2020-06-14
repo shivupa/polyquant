@@ -5,6 +5,7 @@
 #include <scf/rhf.hpp>
 #include <scf/scf.hpp>
 #include <string>
+#include <math/dense_matrix.hpp>
 
 #ifndef PYCI_EPRHF_H
 #define PYCI_EPRHF_H
@@ -39,36 +40,36 @@ public:
    * @brief H_core matrix
    *
    */
-  xt::xarray<double> H_core;
+  DENSE_MATRIX<double> H_core;
 
   /**
    * @brief One particle density matrix
    *
    */
-  xt::xarray<double> D;
+  DENSE_MATRIX<double> D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  xt::xarray<double> D_last;
+  DENSE_MATRIX<double> D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  xt::xarray<double> F;
+  DENSE_MATRIX<double> F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  xt::xarray<double> C;
+  DENSE_MATRIX<double> C;
 
   /**
    * @brief MO energy vector
    *
    */
-  xt::xarray<double> E_orbitals;
+  DENSE_MATRIX<double> E_orbitals;
   /**
    * @brief Electronic energy
    *
