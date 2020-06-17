@@ -166,7 +166,7 @@ public:
    */
   PYCI_MOLECULE input_molecule;
 
-private:
+  // private:
   /*std::unordered_map<std::string, DENSE_MATRIX<double>> alpha_miller = {
       {"H",
        {0.00032373615175901847, -0.001191384594906283, 0.002269474128788352,

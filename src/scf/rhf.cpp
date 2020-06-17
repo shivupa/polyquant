@@ -1,4 +1,4 @@
-#include <scf/eprhf.hpp>
+#include <scf/rhf.hpp>
 
 using namespace selci;
 
@@ -30,7 +30,7 @@ void PYCI_RHF::form_fock() {
   }
   if (this->iteration_num <= 1) {
 
-   // xt::dump_npy("F.npy", this->F);
+    // xt::dump_npy("F.npy", this->F);
   }
 }
 void PYCI_RHF::diag_fock() {
@@ -40,21 +40,18 @@ void PYCI_RHF::diag_fock() {
   F_prime.fill(0.0);
   C_prime.fill(0.0);
 
+  DENSE_MATRIX<double> temp;
+  mm_dot(this->F, this->input_integral.orth_X, temp, false, false);
+  mm_dot(this->input_integral.orth_X, temp, F_prime, false, false);
+  eigenvalues_and_eigenvectors(F_prime, this->E_orbitals, C_prime);
 
-  F_prime =
-      xt::linalg::dot(this->input_integral.orth_X,
-                      xt::linalg::dot(this->F, this->input_integral.orth_X));
-
-  auto F_prime_eigen = xt::linalg::eigh(F_prime);
-  this->E_orbitals = std::get<0>(F_prime_eigen);
-  C_prime = std::get<1>(F_prime_eigen);
-
-  this->C = xt::linalg::dot(this->input_integral.orth_X, C_prime);
+  mm_dot(this->input_integral.orth_X, C_prime, this->C, false, false);
 }
 void PYCI_RHF::form_DM() {
   this->D_last = this->D;
   auto num_basis = this->input_basis.num_basis;
-  this->D = xt::zeros<double>({num_basis, num_basis});
+  this->D.resize(num_basis, num_basis);
+  this->D.fill(0.0);
   for (size_t i = 0; i < num_basis; i++) {
     for (size_t j = 0; j < num_basis; j++) {
       for (size_t k = 0; k < this->input_molecule.num_elec_alpha; k++) {
@@ -65,15 +62,15 @@ void PYCI_RHF::form_DM() {
 }
 void PYCI_RHF::calculate_E_elec() {
   this->E_elec_last = this->E_elec;
-  this->E_elec = xt::sum(this->D * (this->H_core + this->F))(0);
+  // this->E_elec = xt::sum(this->D * (this->H_core + this->F))(0);
+  this->E_elec = (this->D * (this->H_core + this->F)).sum();
 }
 void PYCI_RHF::calculate_E_total() {
   this->E_total = this->E_elec + this->input_molecule.E_nuc;
 }
 void PYCI_RHF::check_stop() {
   this->iteration_E_diff = std::abs(this->E_elec - this->E_elec_last);
-  this->iteration_rmsc_dm =
-      std::abs(xt::sum(xt::square(this->D - this->D_last))(0));
+  this->iteration_rmsc_dm = std::abs(((this->D - this->D_last) ^ 2).sum());
   if ((std::abs(this->iteration_E_diff) < this->convergence_E) &&
       (this->iteration_rmsc_dm < this->convergence_DM)) {
 
@@ -92,8 +89,12 @@ void PYCI_RHF::run_iteration() {
   this->calculate_E_elec();
 }
 void PYCI_RHF::guess_DM() {
+  // SAD
+  // TODO SAP
+  // TODO move into separate functions
   auto num_basis = this->input_basis.num_basis;
-  this->D = xt::zeros<double>({num_basis, num_basis});
+  this->D.resize(num_basis, num_basis);
+  this->D.fill(0.0);
   // compute number of atomic orbitals
   size_t nao = 0;
   for (const auto &atom : this->input_molecule.to_libint_atom()) {
@@ -139,4 +140,5 @@ void PYCI_RHF::run() {
   } else {
     this->print_error();
   }
+}
 }

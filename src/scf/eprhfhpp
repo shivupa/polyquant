@@ -1,11 +1,11 @@
 #include <basis/basis.hpp>
 #include <integral/integral.hpp>
 #include <io/io.hpp>
+#include <math/dense_matrix.hpp>
 #include <molecule/molecule.hpp>
 #include <scf/rhf.hpp>
 #include <scf/scf.hpp>
 #include <string>
-#include <math/dense_matrix.hpp>
 
 #ifndef PYCI_EPRHF_H
 #define PYCI_EPRHF_H

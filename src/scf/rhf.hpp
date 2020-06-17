@@ -62,7 +62,7 @@ public:
    * @brief MO energy vector
    *
    */
-  DENSE_MATRIX<double> E_orbitals;
+  DENSE_VECTOR<double> E_orbitals;
   /**
    * @brief Electronic energy
    *

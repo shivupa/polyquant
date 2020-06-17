@@ -15,7 +15,6 @@ set(_MATH_DEF_HDRS "dense_matrix.hpp" "dense_vector.hpp")
 install(FILES ${_HDRS} DESTINATION include/math)
 install(FILES ${_MATH_DEF_HDRS} DESTINATION include/math)
 
-message(${_HDRS} ${_MATH_DEF_HDRS})
 add_library(math ${_HDRS} ${_MATH_DEF_HDRS})
 set_target_properties(math PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(math PUBLIC include)
