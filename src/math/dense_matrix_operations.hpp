@@ -65,7 +65,7 @@ void eigenvalues_and_eigenvectors(const DENSE_MATRIX<double> &input_matrix,
  * @brief define matrix operations
  *
  */
-void mm_dot(const DENSE_MATRIX<double> &A, const DENSE_MATRIX<double> &B,
+void mm_dot(DENSE_MATRIX<double> &A, DENSE_MATRIX<double> &B,
             DENSE_MATRIX<double> &output, bool trans_A = false,
             bool trans_B = false) {
   // assumes a symmetric matrix of doubles

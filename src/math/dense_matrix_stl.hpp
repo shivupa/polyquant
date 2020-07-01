@@ -16,10 +16,11 @@ public:
   DENSE_MATRIX(size_t rows, size_t cols) : MATRIX(rows, cols) {
     this->resize(rows, cols);
   };
-  DENSE_MATRIX(DENSE_MATRIX<T> &other) {
+  DENSE_MATRIX(DENSE_MATRIX<T> const &other) {
     auto shape = other.shape();
     this->resize(shape.first, shape.second);
-    this->data = other.get_data_vec();
+    // this->data = other.get_data_vec();
+    this->set_data_vec(other.get_data_vec());
   };
 
   T &operator()(const size_t &i, const size_t &j) {
@@ -75,7 +76,7 @@ public:
   void operator+=(const T &val) { this->data += val; };
   void operator-=(const T &val) { this->data -= val; };
 
-  void operator=(DENSE_MATRIX<T> &other) {
+  void operator=(DENSE_MATRIX<T> const &other) {
     auto shape = other.shape();
     this->resize(shape.first, shape.second);
     auto other_vec = other.get_data_vec();
@@ -145,10 +146,19 @@ public:
     return result;
   };
 
-  std::vector<T> &get_data_vec() { return data; };
+  void set_data_vec(const std::vector<T> other_data) {
+    for (size_t i = 0; i <= other_data.size(); i++) {
+      this->data[i] = other_data[i];
+    }
+  };
+  // std::vector<T> &get_data_vec() { return data; };
+  const std::vector<T> &get_data_vec() {
+    const std::vector<T> &const_data = data;
+    return const_data;
+  };
   T *get_data() { return data.data(); };
 
-  std::pair<size_t, size_t> shape() {
+  std::pair<size_t, size_t> shape() const {
     std::pair<size_t, size_t> ret_shape(ROWS, COLS);
     return ret_shape;
   };

@@ -21,7 +21,7 @@ void PYCI_SCF::set_molecule(const PYCI_MOLECULE &input_molecule) {
 void PYCI_SCF::set_basis(const PYCI_BASIS &input_basis) {
   this->input_basis = input_basis;
 }
-void PYCI_SCF::set_integral(PYCI_INTEGRAL const &input_integral) {
+void PYCI_SCF::set_integral(const PYCI_INTEGRAL &input_integral) {
   this->input_integral = input_integral;
 }
 
