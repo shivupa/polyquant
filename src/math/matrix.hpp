@@ -1,4 +1,3 @@
-#include <io/io.hpp>
 
 #ifndef PYCI_MATRIX_H
 #define PYCI_MATRIX_H

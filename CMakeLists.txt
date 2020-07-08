@@ -101,9 +101,9 @@ find_package(Libint2 REQUIRED)
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # FIND xtensor find_package(xtl REQUIRED) find_package(xtensor REQUIRED)
-find_package(BLAS REQUIRED)
-# find_package(CBLAS REQUIRED)
-find_package(LAPACK REQUIRED)
+find_package(OpenMP REQUIRED)
+find_package(blaspp REQUIRED)
+find_package(lapackpp REQUIRED)
 # FIND cxxopts
 find_package(cxxopts REQUIRED)
 

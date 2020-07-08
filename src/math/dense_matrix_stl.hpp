@@ -1,4 +1,3 @@
-#include <io/io.hpp>
 #include <math/matrix.hpp>
 #include <vector>
 
@@ -152,10 +151,6 @@ public:
     }
   };
   // std::vector<T> &get_data_vec() { return data; };
-  const std::vector<T> &get_data_vec() {
-    const std::vector<T> &const_data = data;
-    return const_data;
-  };
   T *get_data() { return data.data(); };
 
   std::pair<size_t, size_t> shape() const {

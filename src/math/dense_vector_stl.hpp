@@ -1,4 +1,3 @@
-#include <io/io.hpp>
 #include <math/vector.hpp>
 
 #ifndef PYCI_DENSE_VECTOR_STL_H

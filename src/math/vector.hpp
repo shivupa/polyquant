@@ -1,4 +1,3 @@
-#include <io/io.hpp>
 
 #ifndef PYCI_VECTOR_H
 #define PYCI_VECTOR_H
