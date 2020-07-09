@@ -4,6 +4,7 @@
 #include <blas.hh>
 #include <lapack.hh>
 
+#include <complex>
 #include <cstdint>
 
 #ifndef PYCI_DENSE_MATRIX_OPERATIONS_H
@@ -26,23 +27,32 @@ void eigenvalues_and_eigenvectors(DENSE_MATRIX<T> &input_matrix,
                                   DENSE_VECTOR<T> &eigenvalues,
                                   DENSE_MATRIX<T> &eigenvectors) {
   auto shape = input_matrix.shape();
-  auto n = shape.first;
+  int64_t n = shape.first;
   // resize and zero out eigenvalues and eigenvectors
   eigenvalues.resize(n);
   eigenvalues.fill(0.0);
   eigenvectors.resize(n, n);
   eigenvectors.fill(0.0);
 
-  auto lda = n;
-  auto ldvl = n;
+  int64_t lda = n;
+  int64_t ldvl = n;
 
   T *dummy_eigenvector;
-  int ldvr = 0;
+  int64_t ldvr = 0;
+  // a general matrix has complex eigenvalues
+  // we only need real right now so we will take real
+  // TODO remove this dummy
+  std::vector<std::complex<T>> dummy_eigenvalues;
+
   // default to right eigenvectors
-  int info = lapack::geev(lapack::Job::NoVec, lapack::Job::Vec, n,
-                          input_matrix.get_data(), lda, eigenvalues.get_data(),
-                          eigenvectors.get_data(), dummy_eigenvector, ldvr);
+  int info =
+      lapack::geev(lapack::Job::NoVec, lapack::Job::Vec, n,
+                   input_matrix.get_data(), lda, dummy_eigenvalues.data(),
+                   eigenvectors.get_data(), dummy_eigenvector, ldvr);
   // TODO check info
+  for (auto i = 0; i < n; i++) {
+    eigenvalues(i) = dummy_eigenvalues[i].real();
+  }
 
   /*
 
