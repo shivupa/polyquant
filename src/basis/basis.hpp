@@ -1,3 +1,5 @@
+#ifndef PYCI_BASIS_H
+#define PYCI_BASIS_H
 #include <algorithm>
 #include <cpr/cpr.h> // IWYU pragma: keep
 #include <filesystem>
@@ -7,8 +9,6 @@
 #include <stdlib.h>
 #include <string>
 
-#ifndef PYCI_BASIS_H
-#define PYCI_BASIS_H
 namespace selci {
 
 /**

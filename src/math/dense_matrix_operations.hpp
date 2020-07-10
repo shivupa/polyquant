@@ -48,7 +48,7 @@ void eigenvalues_and_eigenvectors(DENSE_MATRIX<T> &input_matrix,
   int info =
       lapack::geev(lapack::Job::NoVec, lapack::Job::Vec, n,
                    input_matrix.get_data(), lda, dummy_eigenvalues.data(),
-                   eigenvectors.get_data(), dummy_eigenvector, ldvr);
+                   eigenvectors.get_data(), ldvl, dummy_eigenvector, ldvr);
   // TODO check info
   for (auto i = 0; i < n; i++) {
     eigenvalues(i) = dummy_eigenvalues[i].real();
@@ -112,8 +112,8 @@ void mm_dot(DENSE_MATRIX<T> &A, DENSE_MATRIX<T> &B, DENSE_MATRIX<T> &output,
   output.resize(m, n);
   output.fill(0.0);
 
-  blas::gemm(&layout, &TRANSA, &TRANSB, m, n, k, alpha, A.get_data(), lda,
-             B.get_data(), beta, output.get_data(), ldc);
+  blas::gemm(layout, TRANSA, TRANSB, m, n, k, alpha, A.get_data(), lda,
+             B.get_data(), ldb, beta, output.get_data(), ldc);
 
 } // namespace selci
 #endif
