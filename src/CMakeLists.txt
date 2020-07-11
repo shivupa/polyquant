@@ -10,7 +10,7 @@ add_subdirectory(scf)
 # tell cmake what our excutable is going to be
 add_executable(pyci pyci.cpp)
 
-target_include_directories(pyci PUBLIC include)
+# target_include_directories(pyci PUBLIC include)
 target_link_libraries(pyci io calculation)
 
 install(TARGETS pyci DESTINATION bin)

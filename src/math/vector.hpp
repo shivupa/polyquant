@@ -1,4 +1,3 @@
-
 #ifndef PYCI_VECTOR_H
 #define PYCI_VECTOR_H
 namespace selci {
@@ -15,7 +14,7 @@ public:
    *
    * @param
    */
-  VECTOR(size_t n) { N = n; }
+  VECTOR(size_t n) { N = n; };
 
 private:
   size_t N;

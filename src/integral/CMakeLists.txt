@@ -10,6 +10,9 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(integral io basis math)
-target_include_directories(integral PUBLIC include)
-install(TARGETS integral DESTINATION lib)
-install(FILES ${_HDRS} DESTINATION include/integral)
+# target_include_directories(integral PRIVATE include)
+install(
+  TARGETS integral
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/integral)
+# install(FILES ${_HDRS} DESTINATION include/integral)

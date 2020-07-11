@@ -1,8 +1,7 @@
+#ifndef PYCI_DENSE_MATRIX_H
+#define PYCI_DENSE_MATRIX_H
 #include <math/matrix.hpp>
 #include <vector>
-
-#ifndef PYCI_DENSE_MATRIX_STL_H
-#define PYCI_DENSE_MATRIX_STL_H
 namespace selci {
 
 /**
@@ -150,7 +149,7 @@ public:
       this->data[i] = other_data[i];
     }
   };
-  // std::vector<T> &get_data_vec() { return data; };
+  std::vector<T> &get_data_vec() { return data; };
   T *get_data() { return data.data(); };
 
   std::pair<size_t, size_t> shape() const {
@@ -161,7 +160,7 @@ public:
     ROWS = rows;
     COLS = cols;
     data.resize(rows * cols);
-  }
+  };
   void fill(const T &fill_val) {
     std::fill(data.begin(), data.end(), fill_val);
   };

@@ -1,4 +1,3 @@
-
 #ifndef PYCI_MATRIX_H
 #define PYCI_MATRIX_H
 namespace selci {
@@ -18,7 +17,7 @@ public:
   MATRIX(size_t rows, size_t cols) {
     ROWS = rows;
     COLS = cols;
-  }
+  };
 
 private:
   size_t ROWS;

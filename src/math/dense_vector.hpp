@@ -1,7 +1,6 @@
+#ifndef PYCI_DENSE_VECTOR_H
+#define PYCI_DENSE_VECTOR_H
 #include <math/vector.hpp>
-
-#ifndef PYCI_DENSE_VECTOR_STL_H
-#define PYCI_DENSE_VECTOR_STL_H
 namespace selci {
 
 /**
@@ -20,7 +19,7 @@ public:
   void resize(size_t n) {
     N = n;
     data.resize(n);
-  }
+  };
   void fill(const T &fill_val) {
     std::fill(data.begin(), data.end(), fill_val);
   };

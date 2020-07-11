@@ -1,14 +1,11 @@
-#include <math/dense_matrix.hpp>
-#include <math/dense_vector.hpp>
-
-#include <blas.hh>
-#include <lapack.hh>
-
-#include <complex>
-#include <cstdint>
-
 #ifndef PYCI_DENSE_MATRIX_OPERATIONS_H
 #define PYCI_DENSE_MATRIX_OPERATIONS_H
+#include <blas.hh>
+#include <complex>
+#include <cstdint>
+#include <lapack.hh>
+#include <math/dense_matrix.hpp>
+#include <math/dense_vector.hpp>
 namespace selci {
 
 int symmetric_matrix_triangular_idx(const int &i, const int &j) {
@@ -17,7 +14,7 @@ int symmetric_matrix_triangular_idx(const int &i, const int &j) {
   } else {
     return ((j * (j + 1)) / 2) + i;
   }
-}
+};
 /**
  * @brief define matrix operations
  *
@@ -83,7 +80,7 @@ void eigenvalues_and_eigenvectors(DENSE_MATRIX<T> &input_matrix,
       }
     }
     */
-}
+};
 /**
  * @brief define matrix operations
  *
@@ -114,6 +111,6 @@ void mm_dot(DENSE_MATRIX<T> &A, DENSE_MATRIX<T> &B, DENSE_MATRIX<T> &output,
 
   blas::gemm(layout, TRANSA, TRANSB, m, n, k, alpha, A.get_data(), lda,
              B.get_data(), ldb, beta, output.get_data(), ldc);
-
+};
 } // namespace selci
 #endif

@@ -21,6 +21,9 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(basis io)
-target_include_directories(basis PUBLIC include)
-install(TARGETS basis DESTINATION lib)
-install(FILES ${_HDRS} DESTINATION include/basis)
+# target_include_directories(basis PRIVATE include)
+install(
+  TARGETS basis
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/basis)
+# install(FILES ${_HDRS} DESTINATION include/basis)
