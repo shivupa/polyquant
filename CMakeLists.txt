@@ -29,12 +29,15 @@ set(PYCI_MPI
 set(PYCI_DEBUG
     0
     CACHE BOOL "Enable/disable debug printing")
-set(PYCI_DOCS
+set(PYCI_DOC
     0
     CACHE BOOL "Enable/disable documentation building")
 set(PYCI_USE_DENSE_MATRIX_STL
     1
     CACHE BOOL "Dense Matrix Type")
+set(PYCI_TEST
+    1
+    CACHE BOOL "Enable/disable testing")
 
 message(STATUS "Ready to build PYCI")
 
@@ -50,7 +53,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # enable testing so the tests will build should we use a flag to only build
 # tests if asked to build it? I think I would like tests to build every time.
-enable_testing()
+if(PYCI_TEST)
+  enable_testing()
+endif(PYCI_TEST)
 
 # if the debug flag is on this will use include what you use to check the
 # headers it also makes the make files verbose so you can see what the build is
@@ -115,7 +120,9 @@ find_package(cxxopts REQUIRED)
 # this will do stuff in the src/CMakeLists.txt
 add_subdirectory(src)
 # this will do stuff in the tests/CMakeLists.txt
-add_subdirectory(tests)
+if(PYCI_TEST)
+  add_subdirectory(tests)
+endif(PYCI_TEST)
 
 # if its a debug build this will print all the cmake variables
 if(PYCI_DEBUG)

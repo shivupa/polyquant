@@ -17,9 +17,9 @@ int main(int argc, char **argv) {
   }
 
   // run the input file provided and ensure only 1 input file has been provided
-  if (result.count("input")) {
-    if (result.count("input") == 1) {
-      std::string filename = result["input"].as<std::string>();
+  if (input_parameters.count("input")) {
+    if (input_parameters.count("input") == 1) {
+      std::string filename = input_parameters["input"].as<std::string>();
       // set up calculation object
       PYCI_CALCULATION calc = PYCI_CALCULATION(filename);
       // run calculation

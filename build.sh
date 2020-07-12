@@ -1,6 +1,6 @@
 #!/bin/bash
 ./format.sh
-rm -rf build
+#rm -rf build
 mkdir -p build
 cd build
 CC=mpicc \
@@ -9,7 +9,8 @@ FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
 cmake  \
 -DPYCI_DEBUG=0 \
--DPYCI_DOCS=0 \
+-DPYCI_DOC=0 \
+-DPYCI_TEST=0 \
  -DCMAKE_PREFIX_PATH=/opt/slate  \
  ..
 make -j 1

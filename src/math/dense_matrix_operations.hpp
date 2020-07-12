@@ -8,7 +8,7 @@
 #include <math/dense_vector.hpp>
 namespace selci {
 
-int symmetric_matrix_triangular_idx(const int &i, const int &j) {
+inline int symmetric_matrix_triangular_idx(const int &i, const int &j) {
   if (i > j) {
     return ((i * (i + 1)) / 2) + j;
   } else {
@@ -32,14 +32,15 @@ void eigenvalues_and_eigenvectors(DENSE_MATRIX<T> &input_matrix,
   eigenvectors.fill(0.0);
 
   int64_t lda = n;
-  int64_t ldvl = n;
+  int64_t ldvr = n;
 
   T *dummy_eigenvector;
-  int64_t ldvr = 0;
+  int64_t ldvl = n;
   // a general matrix has complex eigenvalues
   // we only need real right now so we will take real
   // TODO remove this dummy
   std::vector<std::complex<T>> dummy_eigenvalues;
+  dummy_eigenvalues.resize(n);
 
   // default to right eigenvectors
   int info =

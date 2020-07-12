@@ -28,7 +28,7 @@ public:
     return data[i * ROWS + j];
   };
 
-  void operator+=(DENSE_MATRIX<T> &other) {
+  void operator+=(DENSE_MATRIX<T> const &other) {
     auto this_shape = this->shape();
     auto other_shape = other.shape();
     assert(this_shape.first == other_shape.first);
@@ -37,7 +37,7 @@ public:
     std::transform(this->data.begin(), this->data.end(), other_vec.begin(),
                    this->data.begin(), std::plus<T>());
   };
-  void operator-=(DENSE_MATRIX<T> &other) {
+  void operator-=(DENSE_MATRIX<T> const &other) {
     auto this_shape = this->shape();
     auto other_shape = other.shape();
     assert(this_shape.first == other_shape.first);
@@ -46,7 +46,7 @@ public:
     std::transform(this->data.begin(), this->data.end(), other_vec.begin(),
                    this->data.begin(), std::minus<T>());
   };
-  void operator*=(DENSE_MATRIX<T> &other) {
+  void operator*=(DENSE_MATRIX<T> const &other) {
     auto this_shape = this->shape();
     auto other_shape = other.shape();
     assert(this_shape.first == other_shape.first);
@@ -55,7 +55,7 @@ public:
     std::transform(this->data.begin(), this->data.end(), other_vec.begin(),
                    this->data.begin(), std::multiplies<T>());
   };
-  void operator/=(DENSE_MATRIX<T> &other) {
+  void operator/=(DENSE_MATRIX<T> const &other) {
     auto this_shape = this->shape();
     auto other_shape = other.shape();
     assert(this_shape.first == other_shape.first);
@@ -150,6 +150,7 @@ public:
     }
   };
   std::vector<T> &get_data_vec() { return data; };
+  std::vector<T> get_data_vec() const { return data; };
   T *get_data() { return data.data(); };
 
   std::pair<size_t, size_t> shape() const {

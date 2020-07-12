@@ -141,4 +141,3 @@ void PYCI_RHF::run() {
     this->print_error();
   }
 }
-}

@@ -510,7 +510,7 @@ void PYCI_INTEGRAL::compute_2body_ints(DENSE_VECTOR<double> &output_vec,
 }
 
 int PYCI_INTEGRAL::idx2(const int &i, const int &j) {
-  symmetric_matrix_triangular_idx(i, j);
+  return symmetric_matrix_triangular_idx(i, j);
 }
 
 int PYCI_INTEGRAL::idx8(const int &i, const int &j, const int &k,
@@ -539,5 +539,4 @@ void PYCI_INTEGRAL::symmetric_orthogonalization() {
       }
     }
   }
-}
 }
