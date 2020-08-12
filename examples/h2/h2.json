@@ -1,0 +1,26 @@
+{
+  "schema_name": "qc_schema_input",
+  "schema_version": 1,
+  "molecule": {
+    "geometry": [
+	  0.0000000, 0.0000000, 0.0000000,
+      0.0000000, 0.0000000, 0.74140000
+    ],
+    "symbols": ["H", "H"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CIPSI",
+    "basis": "sto-3g"
+  },
+  "keywords": {
+    "mean_field" : "rhf",
+    "positron" : false,
+    "excess_electron" : false,
+    "polarization_potential": false,
+    "relax_target": false
+  }
+}
+

@@ -32,6 +32,7 @@ set(PYCI_DEBUG
 set(PYCI_DOC
     0
     CACHE BOOL "Enable/disable documentation building")
+# Todo change this to be selected based on what libraries are found
 set(PYCI_USE_DENSE_MATRIX_STL
     1
     CACHE BOOL "Dense Matrix Type")
@@ -40,6 +41,10 @@ set(PYCI_TEST
     CACHE BOOL "Enable/disable testing")
 
 message(STATUS "Ready to build PYCI")
+
+if(PYCI_USE_DENSE_MATRIX_STL)
+  add_definitions(-DPYCI_MATH_STL)
+endif(PYCI_USE_DENSE_MATRIX_STL)
 
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
@@ -71,6 +76,7 @@ if(PYCI_DEBUG)
   set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE on)
 endif(PYCI_DEBUG)
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 # if the docs flag is on this will use doxygen to build the docs
 if(PYCI_DOCS)

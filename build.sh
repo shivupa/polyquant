@@ -1,10 +1,10 @@
 #!/bin/bash
 ./format.sh
-#rm -rf build
+rm -rf build
 mkdir -p build
 cd build
-CC=mpicc \
-CXX=mpic++ \
+CC=clang \
+CXX=clang++ \
 FC=mpifort \
 CXXFLAGS="-Wall -Wextra -O3" \
 cmake  \
