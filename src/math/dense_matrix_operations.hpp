@@ -5,4 +5,8 @@
 #include <math/stl/dense_matrix_operations_stl.hpp>
 #endif
 
+#ifdef PYCI_MATH_EIGEN
+#include <math/eigen/dense_matrix_operations_eigen.hpp>
+#endif
+
 #endif

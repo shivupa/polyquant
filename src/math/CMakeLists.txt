@@ -1,7 +1,6 @@
 # file(GLOB _HDRS "*.hpp") if(PYCI_USE_DENSE_MATRIX_STL)
-# add_definitions(-DPYCI_MATH_STL)
-# file(GLOB _DENSE_MATRIX_HDRS "stl/*.hpp") list(APPEND ${_HDRS}
-# ${_DENSE_MATRIX_HDRS}) endif(PYCI_USE_DENSE_MATRIX_STL)
+# add_definitions(-DPYCI_MATH_STL) file(GLOB _DENSE_MATRIX_HDRS "stl/*.hpp")
+# list(APPEND ${_HDRS} ${_DENSE_MATRIX_HDRS}) endif(PYCI_USE_DENSE_MATRIX_STL)
 
 add_library(math INTERFACE)
 target_include_directories(

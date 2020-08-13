@@ -14,6 +14,8 @@ public:
   T &operator()(const size_t &i) { return data[i]; };
   T operator()(const size_t &i) const { return data[i]; };
 
+  std::vector<T> &get_data_vec() { return data; };
+  std::vector<T> get_data_vec() const { return data; };
   T *get_data() { return data.data(); };
   size_t size() { return N; };
   void resize(size_t n) {

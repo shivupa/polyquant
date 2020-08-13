@@ -8,7 +8,7 @@ void PYCI_RHF::form_H_core() {
   this->H_core.fill(0.0);
   this->H_core += this->input_integral.kinetic;
   this->H_core += this->input_integral.nuclear;
-  // xt::dump_npy("hcore.npy", this->H_core);
+  Selci_dump_mat(this->H_core, "H_core");
 }
 void PYCI_RHF::form_fock() {
   auto num_basis = this->input_basis.num_basis;
@@ -29,8 +29,7 @@ void PYCI_RHF::form_fock() {
     }
   }
   if (this->iteration_num <= 1) {
-
-    // xt::dump_npy("F.npy", this->F);
+    Selci_dump_mat(this->F, "F");
   }
 }
 void PYCI_RHF::diag_fock() {
@@ -63,9 +62,16 @@ void PYCI_RHF::form_DM() {
 void PYCI_RHF::calculate_E_elec() {
   this->E_elec_last = this->E_elec;
   // this->E_elec = xt::sum(this->D * (this->H_core + this->F))(0);
-  this->E_elec = (this->D * (this->H_core + this->F)).sum();
+  Selci_cout("OK");
+  auto num_basis = this->input_basis.num_basis;
+  DENSE_MATRIX<double> temp(num_basis, num_basis);
+  temp = (this->D * (this->H_core + this->F));
+  Selci_cout("OK");
+  this->E_elec = temp.sum(); //(this->D * (this->H_core + this->F)).sum();
+  Selci_cout("OK");
 }
 void PYCI_RHF::calculate_E_total() {
+  Selci_cout(this->input_molecule.E_nuc);
   this->E_total = this->E_elec + this->input_molecule.E_nuc;
 }
 void PYCI_RHF::check_stop() {
@@ -95,6 +101,8 @@ void PYCI_RHF::guess_DM() {
   auto num_basis = this->input_basis.num_basis;
   this->D.resize(num_basis, num_basis);
   this->D.fill(0.0);
+  this->D_last.resize(num_basis, num_basis);
+  this->D_last.fill(0.0);
   // compute number of atomic orbitals
   size_t nao = 0;
   for (const auto &atom : this->input_molecule.to_libint_atom()) {
@@ -120,19 +128,16 @@ void PYCI_RHF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
-
   // start the RHF process
   this->form_H_core();
   this->guess_DM();
   while (!this->stop) {
     Selci_cout(this->iteration_num);
     Selci_cout(this->E_elec);
-
     this->run_iteration();
     this->check_stop();
   }
   this->calculate_E_total();
-  Selci_cout(this->E_total);
   if (this->stop && this->converged) {
     this->print_success();
   } else if (this->stop && this->exceeded_iterations) {
@@ -140,4 +145,5 @@ void PYCI_RHF::run() {
   } else {
     this->print_error();
   }
+  Selci_cout(this->E_total);
 }

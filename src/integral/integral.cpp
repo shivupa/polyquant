@@ -523,6 +523,7 @@ void PYCI_INTEGRAL::symmetric_orthogonalization() {
   Selci_cout("Calculating Symmetric Orthogonalization Matrix...");
   if (this->orth_X.shape() == std::pair<size_t, size_t>(0, 0)) {
     auto num_basis = this->input_basis.num_basis;
+    this->orth_X.resize(num_basis, num_basis);
     DENSE_VECTOR<double> s;
     DENSE_MATRIX<double> L;
     eigenvalues_and_eigenvectors(this->overlap, s, L);
@@ -533,10 +534,6 @@ void PYCI_INTEGRAL::symmetric_orthogonalization() {
     mm_dot(this->orth_X, L, temp, false, true);
     DENSE_MATRIX<double> temp2;
     mm_dot(L, this->orth_X, temp2, false, false);
-    for (size_t i = 0; i < this->orth_X.shape().first; i++) {
-      for (size_t j = 0; j < this->orth_X.shape().second; j++) {
-        this->orth_X(i, j) = temp2(i, j);
-      }
-    }
+    this->orth_X = temp2;
   }
 }

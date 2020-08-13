@@ -34,8 +34,12 @@ set(PYCI_DOC
     CACHE BOOL "Enable/disable documentation building")
 # Todo change this to be selected based on what libraries are found
 set(PYCI_USE_DENSE_MATRIX_STL
+    0
+    CACHE BOOL "Dense Matrix Type")
+set(PYCI_USE_DENSE_MATRIX_EIGEN
     1
     CACHE BOOL "Dense Matrix Type")
+# ##############################################################################
 set(PYCI_TEST
     1
     CACHE BOOL "Enable/disable testing")
@@ -44,6 +48,8 @@ message(STATUS "Ready to build PYCI")
 
 if(PYCI_USE_DENSE_MATRIX_STL)
   add_definitions(-DPYCI_MATH_STL)
+elseif(PYCI_USE_DENSE_MATRIX_EIGEN)
+  add_definitions(-DPYCI_MATH_EIGEN)
 endif(PYCI_USE_DENSE_MATRIX_STL)
 
 # these files can reside in the bin so we know exactly what was built we could

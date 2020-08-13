@@ -30,6 +30,7 @@ void Selci_dump_json(const json &json_obj) {
   std::cout << json_obj.dump(4) << std::endl;
   //}
 }
+
 } // namespace selci
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

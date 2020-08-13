@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
       // todo throw error and quit nicely some app abort
       std::cout << "Too many input files provided!" << std::endl;
     }
+    exit(0);
   }
 
   // if no parameters have been parsed print help and exit!

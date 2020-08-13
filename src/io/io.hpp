@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <math/dense_matrix.hpp>
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
@@ -31,7 +32,8 @@ template <typename T> void Selci_cout(const T &message) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   // if (my_rank == 0) {
-  std::cout << std::setprecision(10) << message << std::endl;
+// std::cout << std::fixed << std::showpoint << std::setw(20)
+  std::cout          << std::setprecision(10) << message << std::endl;
   //}
 };
 
@@ -41,6 +43,29 @@ template <typename T> void Selci_cout(const T &message) {
  * @param json_obj The json object to print.
  */
 void Selci_dump_json(const json &json_obj);
+
+/**
+ * @brief A helper function to dump a dense matrix object to std::out.
+ *
+ * @param mat The dense matrix to print
+ **/
+template <typename T>
+void Selci_dump_mat(const DENSE_MATRIX<T> &mat, const std::string &title) {
+  // int my_rank;
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  // if (my_rank == 0) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  auto shape = mat.shape();
+  for (size_t i = 0; i < shape.first; i++) {
+    for (size_t j = 0; j < shape.second; j++) {
+      std::cout << std::fixed << std::showpoint << std::setw(20)
+                << std::setprecision(10) << mat(i, j) << "  ";
+    }
+    std::cout << std::endl;
+  }
+};
 
 /**
  * @brief A class to hold information parsed from a QCSchema json
