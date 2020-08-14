@@ -76,8 +76,7 @@ public:
    * symmetric tensor
    */
   template <typename T> T idx8(const T &i, const T &j, const T &k, const T &l) {
-    return PYCI_INTEGRAL::idx2(PYCI_INTEGRAL::idx2(i, j),
-                               PYCI_INTEGRAL::idx2(k, l));
+    return idx2(idx2(i, j), idx2(k, l));
   };
 
   /**

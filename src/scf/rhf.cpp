@@ -17,12 +17,11 @@ void PYCI_RHF::form_fock() {
     for (int j = 0; j < num_basis; j++) {
       for (int k = 0; k < num_basis; k++) {
         for (int l = 0; l < num_basis; l++) {
-          this->F(i, j) +=
-              this->D(k, l) *
-              ((2.0 * this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)),
-                0 - this->input_integral.twoelec(
-                        this->input_integral.idx8(i, k, j, l), 0)));
+          this->F(i, j) += this->D(k, l) *
+                           ((2.0 * this->input_integral.twoelec(
+                                       this->input_integral.idx8(i, j, k, l))) -
+                            this->input_integral.twoelec(
+                                this->input_integral.idx8(i, k, j, l)));
         }
       }
     }
@@ -62,14 +61,10 @@ void PYCI_RHF::form_DM() {
 void PYCI_RHF::calculate_E_elec() {
   this->E_elec_last = this->E_elec;
   // this->E_elec = xt::sum(this->D * (this->H_core + this->F))(0);
-  Selci_cout("OK");
   auto num_basis = this->input_basis.num_basis;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp(num_basis,
                                                              num_basis);
-  temp = (this->D * (this->H_core + this->F));
-  Selci_cout("OK");
-  this->E_elec = temp.sum(); //(this->D * (this->H_core + this->F)).sum();
-  Selci_cout("OK");
+  this->E_elec = (this->D.array() * (this->H_core + this->F).array()).sum();
 }
 void PYCI_RHF::calculate_E_total() {
   Selci_cout(this->input_molecule.E_nuc);

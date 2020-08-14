@@ -7,9 +7,8 @@
 python h2o.py
 
 
-rm F.npy
-rm hcore.npy
-rm kinetic.npy
-rm nuclear.npy
-rm overlap.npy
-rm twoelec.npy
+rm H_core.txt
+rm kinetic.txt
+rm nuclear.txt
+rm overlap.txt
+rm twoelec.txt
