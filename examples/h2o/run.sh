@@ -12,3 +12,4 @@ rm kinetic.txt
 rm nuclear.txt
 rm overlap.txt
 rm twoelec.txt
+rm F.txt
