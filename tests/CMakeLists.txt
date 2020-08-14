@@ -1,6 +1,6 @@
 # add the testing executable with all of the tests
 add_executable(main_test doctest_main.cpp io_test.cpp molecule_test.cpp
-                         basis_test.cpp integral_test.cpp)
+                         basis_test.cpp integral_test.cpp math_test.cpp)
 
 # find the required testing library and link the other required libraries
 find_package(doctest REQUIRED)

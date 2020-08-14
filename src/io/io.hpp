@@ -32,8 +32,8 @@ template <typename T> void Selci_cout(const T &message) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   // if (my_rank == 0) {
-// std::cout << std::fixed << std::showpoint << std::setw(20)
-  std::cout          << std::setprecision(10) << message << std::endl;
+  // std::cout << std::fixed << std::showpoint << std::setw(20)
+  std::cout << std::setprecision(10) << message << std::endl;
   //}
 };
 

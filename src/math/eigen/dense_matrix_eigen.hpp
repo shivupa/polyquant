@@ -52,11 +52,11 @@ public:
     assert(this_shape.second == other_shape.second);
     data = data.array() / other.get_data_vec().array();
   };
-  void operator^=(const T &val) { data.array().pow(val); };
-  void operator*=(const T &val) { this->data *= val; };
-  void operator/=(const T &val) { this->data /= val; };
-  void operator+=(const T &val) { this->data += val; };
-  void operator-=(const T &val) { this->data -= val; };
+  void operator^=(T const &val) { data = data.array().pow(val); };
+  void operator*=(T const val) { this->data *= val; };
+  void operator/=(T const val) { this->data /= val; };
+  void operator+=(T const val) { this->data += val; };
+  void operator-=(T const val) { this->data -= val; };
 
   void operator=(DENSE_MATRIX<T> const &other) {
     auto shape = other.shape();
