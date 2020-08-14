@@ -2,7 +2,6 @@
 #include <integral/integral.hpp>
 #include <io/io.hpp>
 #include <libint2/chemistry/sto3g_atomic_density.h>
-#include <math/dense_matrix.hpp>
 #include <molecule/molecule.hpp>
 #include <scf/scf.hpp>
 #include <string>
@@ -33,36 +32,36 @@ public:
    * @brief H_core matrix
    *
    */
-  DENSE_MATRIX<double> H_core;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H_core;
 
   /**
    * @brief One particle density matrix
    *
    */
-  DENSE_MATRIX<double> D;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  DENSE_MATRIX<double> D_last;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  DENSE_MATRIX<double> F;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  DENSE_MATRIX<double> C;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
 
   /**
    * @brief MO energy vector
    *
    */
-  DENSE_VECTOR<double> E_orbitals;
+  Eigen::Matrix<double, Eigen::Dynamic, 1> E_orbitals;
   /**
    * @brief Electronic energy
    *

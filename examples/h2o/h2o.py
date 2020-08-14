@@ -17,28 +17,28 @@ print("PYTHON CHECK WITH PYSCF")
 
 print("OVERLAP CHECK")
 b = mol.intor("int1e_ovlp_sph")
-a = np.load("overlap.npy")
+a = np.loadtxt("overlap.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
 
 print("KINETIC CHECK")
 b = mol.intor("int1e_kin_sph")
-a = np.load("kinetic.npy")
+a = np.loadtxt("kinetic.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
 
 print("NUCLEAR CHECK")
 b = mol.intor("int1e_nuc_sph")
-a = np.load("nuclear.npy")
+a = np.loadtxt("nuclear.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
 
 print("TWO ELEC CHECK")
 b = mol.intor("cint2e_sph", aosym="s8")
-a = np.load("twoelec.npy")
+a = np.loadtxt("twoelec.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
@@ -47,7 +47,7 @@ print("HCORE")
 n = mol.nelec[0]
 myhf = scf.RHF(mol)
 b = myhf.get_hcore()
-a = np.load("hcore.npy")
+a = np.loadtxt("H_core.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
@@ -55,15 +55,11 @@ print(np.max(a - b))
 print("Initial Fock")
 myhf = scf.RHF(mol)
 b = myhf.get_hcore()
-a = np.load("F.npy")
+a = np.loadtxt("F.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 
 myhf.run()
 print(myhf.e_tot)
 
-
-print("Polarization Potential")
-a = np.load("polarization_potential.npy")
-print(a)
 

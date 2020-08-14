@@ -1,6 +1,5 @@
 # add the subdirectories of things that need to be built
 add_subdirectory(io)
-add_subdirectory(math)
 add_subdirectory(molecule)
 add_subdirectory(basis)
 add_subdirectory(integral)

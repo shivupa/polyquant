@@ -7,7 +7,7 @@ if(Eigen3_FOUND)
   target_link_libraries(io Eigen3::Eigen)
 endif(Eigen3_FOUND)
 # target_include_directories(io PRIVATE include)
-target_link_libraries(io math)
+target_link_libraries(io)
 
 install(
   TARGETS io

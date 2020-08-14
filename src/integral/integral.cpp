@@ -9,7 +9,7 @@ PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
 }
 
 void PYCI_INTEGRAL::calculate_overlap() {
-  if (this->overlap.shape() == std::pair<size_t, size_t>(0, 0)) {
+  if (this->overlap.cols() == 0 && this->overlap.rows() == 0) {
     Selci_cout("Calculating One Body Overlap Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
@@ -18,13 +18,13 @@ void PYCI_INTEGRAL::calculate_overlap() {
     this->compute_1body_ints(this->overlap, this->input_basis.basis,
                              libint2::Operator::overlap);
     // TODO figure out how to write to file
-    // xt::dump_npy("overlap.npy", this->overlap);
+    Selci_dump_mat_to_file(this->overlap, "overlap.txt");
     libint2::finalize();
   }
 }
 
 void PYCI_INTEGRAL::calculate_kinetic() {
-  if (this->kinetic.shape() == std::pair<size_t, size_t>(0, 0)) {
+  if (this->kinetic.cols() == 0 && this->kinetic.rows() == 0) {
     Selci_cout("Calculating One Body Kinetic Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
@@ -32,13 +32,13 @@ void PYCI_INTEGRAL::calculate_kinetic() {
     this->kinetic.fill(0);
     this->compute_1body_ints(this->kinetic, this->input_basis.basis,
                              libint2::Operator::kinetic);
-    // xt::dump_npy("kinetic.npy", this->kinetic);
+    Selci_dump_mat_to_file(this->kinetic, "kinetic.txt");
     libint2::finalize();
   }
 }
 
 void PYCI_INTEGRAL::calculate_nuclear() {
-  if (this->nuclear.shape() == std::pair<size_t, size_t>(0, 0)) {
+  if (this->nuclear.cols() == 0 && this->nuclear.rows() == 0) {
     Selci_cout("Calculating One Body Nuclear Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
@@ -47,7 +47,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
     this->compute_1body_ints(this->nuclear, this->input_basis.basis,
                              libint2::Operator::nuclear,
                              this->input_molecule.libint_atom);
-    // xt::dump_npy("nuclear.npy", this->nuclear);
+    Selci_dump_mat_to_file(this->nuclear, "nuclear.txt");
     libint2::finalize();
   }
 }
@@ -89,13 +89,16 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //    }
 //
 //    auto num_basis = this->input_basis.num_basis;
-//    this->polarization_potential = DENSE_MATRIX<double>({num_basis,
-//    num_basis}); this->polarization_potential.fill(0); libint2::initialize();
+//    this->polarization_potential = Eigen::Matrix<double, Eigen::Dynamic,
+//    Eigen::Dynamic>({num_basis, num_basis});
+//    this->polarization_potential.fill(0); libint2::initialize();
 //
 //    for (auto i = 0; i < this->input_molecule.num_atom; i++) {
-//      DENSE_MATRIX<double> atom_polarization_potential({num_basis,
-//      num_basis}); atom_polarization_potential.fill(0); DENSE_MATRIX<double>
-//      operator_coeff; DENSE_MATRIX<double> operator_origin = {
+//      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+//      atom_polarization_potential({num_basis, num_basis});
+//      atom_polarization_potential.fill(0); Eigen::Matrix<double,
+//      Eigen::Dynamic, Eigen::Dynamic> operator_coeff; Eigen::Matrix<double,
+//      Eigen::Dynamic, Eigen::Dynamic> operator_origin = {
 //          this->input_molecule.atom_coord[i][0],
 //          this->input_molecule.atom_coord[i][1],
 //          this->input_molecule.atom_coord[i][2]};
@@ -154,7 +157,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //}
 
 void PYCI_INTEGRAL::calculate_two_electron() {
-  if (this->twoelec.size() == 0) {
+  if (this->twoelec.rows() == 0) {
     Selci_cout("Calculating Two Body Electron Repulsion Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
@@ -166,7 +169,7 @@ void PYCI_INTEGRAL::calculate_two_electron() {
     this->twoelec.resize(two_elec_size);
     this->compute_2body_ints(this->twoelec, this->input_basis.basis,
                              libint2::Operator::coulomb);
-    // xt::dump_npy("twoelec.npy", this->twoelec);
+    Selci_dump_vec_to_file(this->twoelec, "twoelec.txt");
     libint2::finalize();
   }
 }
@@ -186,8 +189,9 @@ void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
  * need to. Right now we calculate them all on each rank.
  */
 void PYCI_INTEGRAL::compute_1body_ints(
-    DENSE_MATRIX<double> &output_matrix, const libint2::BasisSet &shells,
-    libint2::Operator obtype, const std::vector<libint2::Atom> &atoms) {
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+    const libint2::BasisSet &shells, libint2::Operator obtype,
+    const std::vector<libint2::Atom> &atoms) {
 
   // This all needs to be flipped around so we are using
   // the SLEPc/PETSc get domain and calculating the integrals
@@ -240,13 +244,15 @@ void PYCI_INTEGRAL::compute_1body_ints(
 }
 
 // double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
-//    const DENSE_MATRIX<double> &origin1, const double &cont_coeff1,
-//    const double &exp1, const xt::xarray<int> &angular_momentum_1,
-//    const DENSE_MATRIX<double> &origin2, const double &cont_coeff2,
-//    const double &exp2, const xt::xarray<int> &angular_momentum_2,
-//    const DENSE_MATRIX<double> &operator_origin,
-//    const DENSE_MATRIX<double> &operator_coeff,
-//    const DENSE_MATRIX<double> &operator_exps) {
+//    const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
+//    const double &cont_coeff1, const double &exp1, const xt::xarray<int>
+//    &angular_momentum_1, const Eigen::Matrix<double, Eigen::Dynamic,
+//    Eigen::Dynamic> &origin2, const double &cont_coeff2, const double &exp2,
+//    const xt::xarray<int> &angular_momentum_2, const Eigen::Matrix<double,
+//    Eigen::Dynamic, Eigen::Dynamic> &operator_origin, const
+//    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &operator_coeff,
+//    const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+//    &operator_exps) {
 //  double integral_value = 0.0;
 //  double nu = (exp1 * exp2) / (exp1 + exp2);
 //  auto r_ab = ((exp1 * origin1) + (exp2 * origin2)) / (exp1 + exp2);
@@ -328,21 +334,25 @@ void PYCI_INTEGRAL::compute_1body_ints(
  * integral type is not a part of libint.
  */
 // void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
-//     DENSE_MATRIX<double> &output_matrix, const libint2::BasisSet &shells,
-//     const DENSE_MATRIX<double> &operator_origin,
-//     const DENSE_MATRIX<double> &operator_coeff,
-//     const DENSE_MATRIX<double> &operator_exps) {
+//     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+//     const libint2::BasisSet &shells, const Eigen::Matrix<double,
+//     Eigen::Dynamic, Eigen::Dynamic> &operator_origin, const
+//     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &operator_coeff,
+//     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+//     &operator_exps) {
 //   auto shell2bf = shells.shell2bf();
 //   // loop over unique shell pairs, {s1,s2} such that s1 >= s2
 //   // this is due to the permutational symmetry of the real integrals over
 //   // Hermitian operators: (1|2) = (2|1)
 //   for (auto s1 = 0; s1 != shells.size(); ++s1) {
 //     auto bf1 = shell2bf[s1]; // first basis function in this shell
-//     DENSE_MATRIX<double> origin1 = {shells[s1].O[0], shells[s1].O[1],
+//     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> origin1 =
+//     {shells[s1].O[0], shells[s1].O[1],
 //                                   shells[s1].O[2]};
 //     for (auto s2 = s1; s2 != shells.size(); ++s2) {
 //       auto bf2 = shell2bf[s2];
-//       DENSE_MATRIX<double> origin2 = {shells[s2].O[0], shells[s2].O[1],
+//       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> origin2 =
+//       {shells[s2].O[0], shells[s2].O[1],
 //                                     shells[s2].O[2]};
 //       for (auto contr1 = 0; contr1 != shells[s1].contr.size(); contr1++) {
 //         for (auto contr2 = 0; contr2 != shells[s2].contr.size(); contr2++) {
@@ -437,9 +447,9 @@ void PYCI_INTEGRAL::compute_1body_ints(
  * SLEPc/PETSc get domain and calculating the integrals on each process that
  * we need to. Right now we calculate them all on each rank.
  */
-void PYCI_INTEGRAL::compute_2body_ints(DENSE_VECTOR<double> &output_vec,
-                                       const libint2::BasisSet &shells,
-                                       libint2::Operator obtype) {
+void PYCI_INTEGRAL::compute_2body_ints(
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec,
+    const libint2::BasisSet &shells, libint2::Operator obtype) {
   // Following the HF test in the Libint2 repo
   // construct the overlap integrals engine
 
@@ -509,31 +519,23 @@ void PYCI_INTEGRAL::compute_2body_ints(DENSE_VECTOR<double> &output_vec,
   }
 }
 
-int PYCI_INTEGRAL::idx2(const int &i, const int &j) {
-  return symmetric_matrix_triangular_idx(i, j);
-}
-
-int PYCI_INTEGRAL::idx8(const int &i, const int &j, const int &k,
-                        const int &l) {
-  return PYCI_INTEGRAL::idx2(PYCI_INTEGRAL::idx2(i, j),
-                             PYCI_INTEGRAL::idx2(k, l));
-}
-
 void PYCI_INTEGRAL::symmetric_orthogonalization() {
   Selci_cout("Calculating Symmetric Orthogonalization Matrix...");
-  if (this->orth_X.shape() == std::pair<size_t, size_t>(0, 0)) {
+  if (this->orth_X.cols() == 0 && this->orth_X.rows() == 0) {
     auto num_basis = this->input_basis.num_basis;
     this->orth_X.resize(num_basis, num_basis);
-    DENSE_VECTOR<double> s;
-    DENSE_MATRIX<double> L;
-    eigenvalues_and_eigenvectors(this->overlap, s, L);
-    for (size_t i = 0; i < s.size(); i++) {
-      this->orth_X(i, i) = 1.0 / std::sqrt(s(i));
-    }
-    DENSE_MATRIX<double> temp;
-    mm_dot(this->orth_X, L, temp, false, true);
-    DENSE_MATRIX<double> temp2;
-    mm_dot(L, this->orth_X, temp2, false, false);
-    this->orth_X = temp2;
+    Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+    Eigen::SelfAdjointEigenSolver<
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
+        eigensolver(this->overlap);
+    if (eigensolver.info() != Eigen::Success)
+      (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
+                 "orthogonalization."));
+    s = eigensolver.eigenvalues();
+    L = eigensolver.eigenvectors();
+    s = s.array().rsqrt();
+    this->orth_X = s.asDiagonal();
+    this->orth_X = L * this->orth_X * L.transpose();
   }
 }
