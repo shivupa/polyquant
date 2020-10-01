@@ -36,7 +36,9 @@
           "charge" : 1,
           "num_particles" : 1,
           "particle_multiplicity" : 2,
-          "exchange" : true
+          "exchange" : true,
+          "electron_exchange" : false
+
         },
         { "name" : "muon",
           "spin" : 0.5,

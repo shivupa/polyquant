@@ -26,6 +26,9 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
       this->basis =
           libint2::BasisSet(this->basis_name, molecule.libint_atom, true);
       this->num_basis = libint2::nbf(this->basis);
+      for (auto s : this->basis) {
+        Selci_cout(s);
+      }
     } catch (...) {
       Selci_cout(
           "That didn't work. Trying to load a basis from load a basis from the "

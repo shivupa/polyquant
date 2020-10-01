@@ -1,0 +1,14 @@
+use pybind11 to validate qcschema jsons in test suite and at run time?
+
+restructure calculation class
+
+better printing
+
+selci/pyci -> polyquanta
+
+add quantum particle class
+
+change molecule class to have classical point charges
+                              quantum particles
+
+error  if at least 2 nuclei arent treated classical 
