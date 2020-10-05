@@ -8,7 +8,7 @@ void PYCI_MOLECULE::set_molecular_charge(const PYCI_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_charge")) {
     this->charge = input.input_data["molecule"]["molecular_charge"];
   } else {
-    App_Abort("Can't set up molecule. The molecule section of the input is "
+    APP_ABORT("Can't set up molecule. The molecule section of the input is "
               "missing 'molecular_charge'.");
   }
 }
@@ -17,17 +17,17 @@ void PYCI_MOLECULE::set_molecular_multiplicity(const PYCI_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_multiplicity")) {
     this->multiplicity = input.input_data["molecule"]["molecular_multiplicity"];
   } else {
-    App_Abort("Can't set up molecule. The molecule section of the input is "
+    APP_ABORT("Can't set up molecule. The molecule section of the input is "
               "missing 'molecular_multiplicity'.");
   }
 }
 
 void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
-  // parse centers
-  std::vector<std::vector<double>> centers;
   // Store center coordinates
   // todo check for geom and symbols
-  for (int i = 0; i < this->num_atom; ++i) {
+
+  for (int i = 0; i < input.input_data["molecule"]["geometry"].size() % 3;
+       ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
       atom.push_back(input.input_data["molecule"]["geometry"][(i * 3) + j]);
@@ -49,12 +49,19 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     if (input.input_data["keywords"].contains("quantum_nuclei")) {
       // if a label is given change all nuclei with matching label to be
       // quantum https://github.com/nlohmann/json/issues/1564
-            if (std::all_of(input.input_data["keywords"]["molecule_keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["molecule_keywords"]["quantum_nuclei"].end(), [](const json& el){
-        return el.is_string(); }){
-        for (auto quantum_label :
+      if (std::all_of(
+              input
+                  .input_data["keywords"]["molecule_keywords"]["quantum_nuclei"]
+                  .begin(),
+              input
+                  .input_data["keywords"]["molecule_keywords"]["quantum_nuclei"]
+                  .end(),
+              [](const json &el) { return el.is_string(); })) {
+        for (std::string quantum_label :
              input.input_data["keywords"]["molecule_keywords"]
                              ["quantum_nuclei"]) {
-          if (center_labels.count(quantum_label)) {
+          if (std::find(center_labels.begin(), center_labels.end(),
+                        quantum_label) != center_labels.end()) {
             // https://stackoverflow.com/questions/42871932/how-to-find-all-positions-of-an-element-using-stdfind
             auto start_it = begin(center_labels);
             bool found_at_least_once = false;
@@ -72,27 +79,33 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
                          "' was not found in the atomic labels. Skipping...");
             }
           }
-        } } else 
-            if (std::all_of(input.input_data["keywords"]["molecule_keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["molecule_keywords"]["quantum_nuclei"].end(), [](const json& el){
-        return el.is_number(); }){
+        }
+      } else if (std::all_of(input
+                                 .input_data["keywords"]["molecule_keywords"]
+                                            ["quantum_nuclei"]
+                                 .begin(),
+                             input
+                                 .input_data["keywords"]["molecule_keywords"]
+                                            ["quantum_nuclei"]
+                                 .end(),
+                             [](const json &el) { return el.is_number(); })) {
         size_t idx = 0;
         for (auto is_quantum : input.input_data["keywords"]["molecule_keywords"]
                                                ["quantum_nuclei"]) {
           quantum_nuclei[idx] = is_quantum;
           idx++;
         }
-              }
-                         else {
-        App_Abort("'Keywords'->'molecule_keywords'->'quantum_nuclei' are "
+      } else {
+        APP_ABORT("'Keywords'->'molecule_keywords'->'quantum_nuclei' are "
                   "not all strings or ints.");
-                        }
+      }
 
-            // } else {
-            //   Selci_cout("The input section 'keywords'->'molecule keywords'
-            //   did not "
-            //              "contain a section about quantum nuclei. All nuclei
-            //              will be " "treated classically!");
-            // }
+      // } else {
+      //   Selci_cout("The input section 'keywords'->'molecule keywords'
+      //   did not "
+      //              "contain a section about quantum nuclei. All nuclei
+      //              will be " "treated classically!");
+      // }
     } else {
       Selci_cout(
           "The input section 'keywords' didn't contain a section called "
@@ -173,58 +186,58 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     quantum_particles[curr_label].mass = 1.0;
     quantum_particles[curr_label].charge = -1;
 
-    auto num_parts = this->charge;
+    auto num_parts = -this->charge;
     for (auto part : classical_particles) {
-      num_parts += part.charge * part.num_parts;
+      num_parts += part.second.charge * part.second.num_parts;
     }
     for (auto part : quantum_particles) {
-      num_parts += part.charge * part.num_parts;
+      num_parts += part.second.charge * part.second.num_parts;
     }
 
-    Selci_cout("Creating " + str(num_parts) + " electrons");
+    Selci_cout("Creating " + std::to_string(num_parts) + " electrons");
     quantum_particles[curr_label].num_parts = num_parts;
     quantum_particles[curr_label].exchange = true;
   }
 }
 
 void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
-    if (input.input_data.contains ("molecule") {
+  if (input.input_data.contains("molecule")) {
     set_molecular_charge(input);
     set_molecular_multiplicity(input);
     parse_particles(input);
 
     // Calculate nuclear repulsion energy
-    this->libint_atom = this->to_libint_atom();
     this->calculate_E_nuc();
-    } else {
-    App_Abort("Cannot set up molecule. Input json missing 'molecule' section.");
-    }
-  
-  // Calculate total number of electrons
-  this->num_elec =
-      std::accumulate(this->atom_num.begin(), this->atom_num.end(), 0) -
-      this->charge;
-  // Calculate number of alpha/beta electrons
-  this->num_elec_alpha = ((this->num_elec) + (this->multiplicity - 1)) / 2;
-  this->num_elec_beta = ((this->num_elec) - (this->multiplicity - 1)) / 2;
+  } else {
+    APP_ABORT("Cannot set up molecule. Input json missing 'molecule' section.");
+  }
 }
 
 std::string PYCI_MOLECULE::dump_xyz() const {
-  std::string temp_xyz = "";
-  temp_xyz += std::to_string(this->num_atom);
-  temp_xyz += "\n";
-  temp_xyz += "PYCI Dumped XYZ";
-  for (auto i = 0; i < this->num_atom; i++) {
-
-    temp_xyz += "\n";
-    temp_xyz += this->atom_symb[i];
-    temp_xyz += "\t";
-    temp_xyz += std::to_string(this->atom_coord[i][0] * this->bohr_to_angstrom);
-    temp_xyz += "\t";
-    temp_xyz += std::to_string(this->atom_coord[i][1] * this->bohr_to_angstrom);
-    temp_xyz += "\t";
-    temp_xyz += std::to_string(this->atom_coord[i][2] * this->bohr_to_angstrom);
+  std::string header = "";
+  std::string body = "";
+  // calculate num atoms
+  int num_atom = 0;
+  for (auto classical_part : classical_particles) {
+    num_atom += classical_part.second.num_parts;
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      body += "\n";
+      body += classical_part.first;
+      body += std::to_string(centers[classical_part.second.center_idx[i]][0] *
+                             this->bohr_to_angstrom);
+      body += "    ";
+      body += std::to_string(centers[classical_part.second.center_idx[i]][1] *
+                             this->bohr_to_angstrom);
+      body += "    ";
+      body += std::to_string(centers[classical_part.second.center_idx[i]][2] *
+                             this->bohr_to_angstrom);
+    }
   }
+
+  header += std::to_string(num_atom);
+  header += "\n";
+  header += "PYCI Dumped XYZ";
+  auto temp_xyz = header + body;
   return temp_xyz;
 }
 
@@ -235,15 +248,24 @@ std::vector<libint2::Atom> PYCI_MOLECULE::to_libint_atom() const {
 
 void PYCI_MOLECULE::calculate_E_nuc() {
   this->E_nuc = 0.0;
-  for (int i = 0; i < this->num_atom; ++i) {
-    for (int j = i + 1; j < this->num_atom; ++j) {
-      auto Z_i = atom_num[i];
-      auto Z_j = atom_num[j];
-      auto dx = (this->atom_coord[j][0] - this->atom_coord[i][0]);
-      auto dy = (this->atom_coord[j][1] - this->atom_coord[i][1]);
-      auto dz = (this->atom_coord[j][2] - this->atom_coord[i][2]);
-      auto r_sq = std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
-      this->E_nuc += ((Z_i * Z_j) / r_sq);
+  for (auto classical_part_1 : classical_particles) {
+    for (auto i = 0; i < classical_part_1.second.num_parts; i++) {
+      for (auto classical_part_2 : classical_particles) {
+        for (auto j = 0; j < classical_part_2.second.num_parts; j++) {
+          auto Z_i = classical_part_1.second.charge;
+          auto Z_j = classical_part_2.second.charge;
+          auto center_idx_1 = classical_part_1.second.center_idx[i];
+          auto center_idx_2 = classical_part_2.second.center_idx[j];
+
+          if (center_idx_1 != center_idx_2) {
+            auto dx = (centers[center_idx_2][0] - centers[center_idx_1][0]);
+            auto dy = (centers[center_idx_2][1] - centers[center_idx_1][1]);
+            auto dz = (centers[center_idx_2][2] - centers[center_idx_1][2]);
+            auto r_sq = std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
+            this->E_nuc += ((Z_i * Z_j) / r_sq);
+          }
+        }
+      }
     }
   }
 }

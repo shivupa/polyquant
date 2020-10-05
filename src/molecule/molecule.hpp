@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <io/io.hpp>
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma, keep
@@ -56,6 +57,8 @@ public:
    * @return std::string containing the molecule in xyz format
    */
   std::string dump_xyz() const;
+
+  std::vector<std::vector<double>> centers;
 
   std::map<std::string, CLASSICAL_PARTICLE_SET> classical_particles;
 

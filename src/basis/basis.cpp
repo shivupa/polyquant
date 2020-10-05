@@ -24,7 +24,7 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
                  "is part of "
                  "the Libint2 library.");
       this->basis =
-          libint2::BasisSet(this->basis_name, molecule.libint_atom, true);
+          libint2::BasisSet(this->basis_name, molecule.to_libint_atom(), true);
       this->num_basis = libint2::nbf(this->basis);
       for (auto s : this->basis) {
         Selci_cout(s);
@@ -38,7 +38,7 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
       std::string cwd = std::filesystem::current_path();
       setenv("LIBINT_DATA_PATH", cwd.c_str(), 1);
       this->basis =
-          libint2::BasisSet(this->basis_name, molecule.libint_atom, true);
+          libint2::BasisSet(this->basis_name, molecule.to_libint_atom(), true);
       this->num_basis = libint2::nbf(this->basis);
       Selci_cout(this->num_basis);
     }

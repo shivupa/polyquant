@@ -46,7 +46,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
     this->nuclear.fill(0);
     this->compute_1body_ints(this->nuclear, this->input_basis.basis,
                              libint2::Operator::nuclear,
-                             this->input_molecule.libint_atom);
+                             this->input_molecule.to_libint_atom());
     Selci_dump_mat_to_file(this->nuclear, "nuclear.txt");
     libint2::finalize();
   }

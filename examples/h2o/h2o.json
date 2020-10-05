@@ -35,6 +35,7 @@
           "mass" : 1,
           "charge" : 1,
           "num_particles" : 1,
+          "num_particles" : 0,
           "particle_multiplicity" : 2,
           "exchange" : true
         },
@@ -42,7 +43,8 @@
           "spin" : 0.5,
           "mass" : 206.7682830,
           "charge" : -1,
-          "num_particles" : 1,
+          "num_particles_alpha" : 1,
+          "num_particles_beta" : 0,
           "particle_multiplicity" : 2,
           "exchange" : true
         }
