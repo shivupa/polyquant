@@ -32,48 +32,48 @@ public:
    * @brief H_core matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H_core;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > H_core;
 
   /**
    * @brief One particle density matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_last;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > C;
 
   /**
    * @brief MO energy vector
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, 1> E_orbitals;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1> > E_orbitals;
   /**
-   * @brief Electronic energy
+   * @brief Energy of the quantum particles
    *
    */
-  double E_elec = 0.0;
+  double E_particles = 0.0;
   /**
-   * @brief Electronic energy from the previous iteration
+   * @brief Energy of the quantum particles from the previous iteration
    *
    */
-  double E_elec_last = 0.0;
+  double E_particles_last = 0.0;
   /**
-   * @brief Total energy
+   * @brief Total energy including the static classical centers
    *
    */
   double E_total = 0.0;

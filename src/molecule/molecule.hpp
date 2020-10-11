@@ -35,6 +35,7 @@ public:
   void setup_molecule(const PYCI_INPUT &input);
   void set_molecular_charge(const PYCI_INPUT &input);
   void set_molecular_multiplicity(const PYCI_INPUT &input);
+  void set_molecular_restricted(const PYCI_INPUT &input);
   void parse_particles(const PYCI_INPUT &input);
 
   /**
@@ -76,11 +77,15 @@ public:
    *
    */
   int multiplicity;
+
+  bool restricted;
   /**
    * @brief the nuclear repulsion energy of the classical nuclei
    *
    */
   double E_nuc;
+
+
   /**
    * @brief bohr to angstroms conversion todo remove
    *
@@ -112,6 +117,9 @@ public:
     // if (_atm_symb_to_mass.count(key)) {
     //   return _atm_symb_to_mass[key];
     // } else {
+    (void)(key); // <- mute the unused parameter error. Eventually we might want
+                 // to assign this variable based on a key, but for now
+                 // everything gets 0.5
     return 0.50;
     // }
   };
@@ -119,6 +127,8 @@ public:
   double quantum_symb_to_mass(std::string key) {
     if (_atm_symb_to_mass.count(key)) {
       return _atm_symb_to_mass[key];
+    } else if (key == "electron") {
+      return 1.0;
     } else {
       return 0.0;
     }
@@ -127,6 +137,8 @@ public:
   int quantum_symb_to_charge(std::string key) {
     if (_atm_symb_to_num.count(key)) {
       return _atm_symb_to_num[key];
+    } else if (key == "electron") {
+      return -1.0;
     } else {
       return 0;
     }
@@ -152,6 +164,6 @@ private:
       {"S", 31.9720711744},  {"Cl", 34.968852682},   {"Ar", 39.9623831237},
       {"K", 38.9637064864},
   };
-};
+}; // namespace selci
 } // namespace selci
 #endif

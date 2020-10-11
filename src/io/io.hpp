@@ -78,7 +78,7 @@ void Selci_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
   // if (my_rank == 0) {
   std::ofstream vecfile;
   vecfile.open(filename);
-  for (size_t i = 0; i < vec.rows(); i++) {
+  for (Eigen::Index i = 0; i < vec.rows(); i++) {
     vecfile << std::fixed << std::showpoint << std::setw(20)
             << std::setprecision(10) << vec(i, 0) << std::endl;
   }
@@ -121,8 +121,8 @@ void Selci_dump_mat_to_file(
   // if (my_rank == 0) {
   std::ofstream matfile;
   matfile.open(filename);
-  for (size_t i = 0; i < mat.rows(); i++) {
-    for (size_t j = 0; j < mat.cols(); j++) {
+  for (Eigen::Index i = 0; i < mat.rows(); i++) {
+    for (Eigen::Index j = 0; j < mat.cols(); j++) {
       matfile << std::fixed << std::showpoint << std::setw(20)
               << std::setprecision(10) << mat(i, j) << "  ";
     }

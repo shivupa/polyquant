@@ -1,6 +1,20 @@
 # Set a requirement on the cmake version
 cmake_minimum_required(VERSION 3.6.0 FATAL_ERROR)
 
+# Macro
+include(FetchContent)
+# FetchContent_MakeAvailable is only availible in CMake 3.14+ This macro mimics
+# the behavior
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+  macro(FetchContent_MakeAvailable NAME)
+    FetchContent_GetProperties(${NAME})
+    if(NOT ${NAME}_POPULATED)
+      FetchContent_Populate(${NAME})
+      add_subdirectory(${${NAME}_SOURCE_DIR} ${${NAME}_BINARY_DIR})
+    endif()
+  endmacro()
+endif()
+
 # Set up the project and version info
 project(PYCI)
 set(PYCI_VERSION_MAJOR 0)
@@ -119,10 +133,14 @@ find_package(Libint2 REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # FIND xtensor find_package(xtl REQUIRED) find_package(xtensor REQUIRED)
 find_package(OpenMP REQUIRED)
-find_package(blaspp REQUIRED)
-find_package(lapackpp REQUIRED)
-# FIND cxxopts
+# find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
 find_package(cxxopts REQUIRED)
+FetchContent_Declare(
+  doctest
+  GIT_REPOSITORY https://github.com/onqtam/doctest.git
+  GIT_TAG 2.4.0)
+FetchContent_MakeAvailable(doctest)
+include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci

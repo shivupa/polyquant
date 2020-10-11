@@ -78,7 +78,7 @@ public:
    * @brief Mean-field calculation types that pyci knows about
    *
    */
-  const std::unordered_set<std::string> mean_field_methods = {"RHF"};
+  const std::unordered_set<std::string> mean_field_methods = {"SCF"};
 
   /**
    * @brief Post mean-field types that pyci knows about

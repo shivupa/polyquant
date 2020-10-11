@@ -4,13 +4,22 @@ using namespace selci;
 
 void PYCI_RHF::form_H_core() {
   auto num_basis = this->input_basis.num_basis;
-  this->H_core.setZero(num_basis, num_basis);
-  this->H_core += this->input_integral.kinetic;
-  this->H_core += this->input_integral.nuclear;
-  Selci_dump_mat_to_file(this->H_core, "H_core.txt");
+  this->H_core.resize(this->input_molecule.quantum_particles.size());
+  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  for (auto quantum_part : this->input_molecule.quantum_particles){
+    this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
+    this->H_core[quantum_part_idx] += (1.0/quantum_part.second.mass)*this->input_integral.kinetic;
+    this->H_core[quantum_part_idx] += (-quantum_part.second.charge)*this->input_integral.nuclear;
+    // Selci_dump_mat_to_file(this->H_core, "H_core.txt");
+    quantum_part_idx++;
+  }
 }
 void PYCI_RHF::form_fock() {
   auto num_basis = this->input_basis.num_basis;
+  this->F.resize(this->input_molecule.quantum_particles.size());
+  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  for (auto quantum_part : this->input_molecule.quantum_particles){
+
   this->F.setZero(num_basis, num_basis);
   this->F += this->H_core;
   for (int i = 0; i < num_basis; i++) {
@@ -96,8 +105,13 @@ void PYCI_RHF::guess_DM() {
   // TODO SAP
   // TODO move into separate functions
   auto num_basis = this->input_basis.num_basis;
-  this->D.setZero(num_basis, num_basis);
-  this->D_last.setZero(num_basis, num_basis);
+  this->D.resize(this->input_molecule.quantum_particles.size());
+  this->D_last.resize(this->input_molecule.quantum_particles.size());
+  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  for (auto quantum_part : this->input_molecule.quantum_particles){
+  this->D[quantum_part_idx].setZero(num_basis, num_basis);
+  this->D_last[quantum_part_idx].setZero(num_basis, num_basis);
+  if (quantum_part.first == "electron"){
   // compute number of atomic orbitals
   size_t nao = 0;
   for (const auto &atom : this->input_molecule.to_libint_atom()) {
@@ -111,9 +125,12 @@ void PYCI_RHF::guess_DM() {
     const auto Z = atom.atomic_number;
     const auto &occvec = libint2::sto3g_ao_occupation_vector(Z);
     for (const auto &occ : occvec) {
-      this->D(ao_offset, ao_offset) = occ;
+      this->D[quantum_part_idx](ao_offset, ao_offset) = occ;
       ++ao_offset;
     }
+  }
+  }
+  quantum_part_idx++;
   }
 }
 void PYCI_RHF::run() {
@@ -128,7 +145,7 @@ void PYCI_RHF::run() {
   this->guess_DM();
   while (!this->stop) {
     Selci_cout(this->iteration_num);
-    Selci_cout(this->E_elec);
+    Selci_cout(this->E_particles);
     this->run_iteration();
     this->check_stop();
   }

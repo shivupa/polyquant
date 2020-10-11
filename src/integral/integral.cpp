@@ -215,10 +215,10 @@ void PYCI_INTEGRAL::compute_1body_ints(
   // loop over unique shell pairs, {s1,s2} such that s1 >= s2
   // this is due to the permutational symmetry of the real integrals over
   // Hermitian operators: (1|2) = (2|1)
-  for (auto s1 = 0; s1 != shells.size(); ++s1) {
+  for (libint2::BasisSet::size_type s1 = 0; s1 != shells.size(); ++s1) {
     auto bf1 = shell2bf[s1]; // first basis function in this shell
     auto n1 = shells[s1].size();
-    for (auto s2 = s1; s2 != shells.size(); ++s2) {
+    for (libint2::BasisSet::size_type s2 = s1; s2 != shells.size(); ++s2) {
       auto bf2 = shell2bf[s2];
       auto n2 = shells[s2].size();
       // Todo use symmetry
@@ -467,16 +467,17 @@ void PYCI_INTEGRAL::compute_2body_ints(
   // loop over unique shell pairs, {s1,s2} such that s1 >= s2
   // this is due to the permutational symmetry of the real integrals over
   // Hermitian operators: (1|2) = (2|1)
-  for (auto s1 = 0; s1 != shells.size(); ++s1) {
+  for (libint2::BasisSet::size_type s1 = 0; s1 != shells.size(); ++s1) {
     auto bf1_first = shell2bf[s1]; // first basis function in this shell
     auto n1 = shells[s1].size();
-    for (auto s2 = 0; s2 <= s1; ++s2) {
+    for (libint2::BasisSet::size_type s2 = 0; s2 <= s1; ++s2) {
       auto bf2_first = shell2bf[s2];
       auto n2 = shells[s2].size();
-      for (auto s3 = 0; s3 <= s1; ++s3) {
+      for (libint2::BasisSet::size_type s3 = 0; s3 <= s1; ++s3) {
         auto bf3_first = shell2bf[s3]; // first basis function in this shell
         auto n3 = shells[s3].size();
-        for (auto s4 = 0; s4 <= (s1 == s3 ? s2 : s3); ++s4) {
+        for (libint2::BasisSet::size_type s4 = 0; s4 <= (s1 == s3 ? s2 : s3);
+             ++s4) {
           auto bf4_first = shell2bf[s4];
           auto n4 = shells[s4].size();
           // Todo use symmetry

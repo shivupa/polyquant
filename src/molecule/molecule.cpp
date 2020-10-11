@@ -22,12 +22,21 @@ void PYCI_MOLECULE::set_molecular_multiplicity(const PYCI_INPUT &input) {
   }
 }
 
+void PYCI_MOLECULE::set_molecular_restricted(const PYCI_INPUT &input) {
+  if (input.input_data["keywords"].contains("restricted")) {
+    this->multiplicity = input.input_data["molecule"]["restricted"];
+  } else {
+    APP_ABORT("Can't set up molecule. The keywords section of the input is "
+              "missing 'restricted'.");
+  }
+}
+
 void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
 
-  for (int i = 0; i < input.input_data["molecule"]["geometry"].size() % 3;
-       ++i) {
+  for (nlohmann::basic_json<>::size_type i = 0;
+       i < input.input_data["molecule"]["geometry"].size() % 3; ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
       atom.push_back(input.input_data["molecule"]["geometry"][(i * 3) + j]);
@@ -155,6 +164,32 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
       quantum_particles[curr_label].center_idx.push_back(i);
     }
   }
+  // iterate over quantum particles to set alpha/beta particles and mult
+  for (auto quantum_part : quantum_particles) {
+    quantum_part.second.num_parts_alpha = (quantum_part.second.num_parts / 2) +
+                                          (quantum_part.second.num_parts % 2);
+    quantum_part.second.num_parts_beta = (quantum_part.second.num_parts / 2);
+    if (quantum_part.second.num_parts_alpha +
+            quantum_part.second.num_parts_beta !=
+        quantum_part.second.num_parts) {
+      APP_ABORT(
+          "Could not automatically set quantum particle num alpha and beta.");
+    }
+    quantum_part.second.multiplicity =
+        (std::abs(quantum_part.second.num_parts_alpha -
+                  quantum_part.second.num_parts_beta) *
+         quantum_part.second.spin) +
+        1;
+    if (quantum_part.second.num_parts == 1){
+      quantum_part.second.restricted = false;
+    } else {
+      quantum_part.second.restricted = this->restricted;
+      // TODO remove. Only needed while Restricted open shell is not implemented
+      if(quantum_part.second.num_parts_alpha != quantum_part.second.num_parts_beta && quantum_part.second.restricted){
+        quantum_part.second.restricted = false;
+      }
+    }
+  }
   // create any other quantum particles
   if (input.input_data.contains("keywords")) {
     if (input.input_data["keywords"].contains("quantum_particles")) {
@@ -166,10 +201,25 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
           quantum_particles[curr_label].spin = qp["spin"];
           quantum_particles[curr_label].mass = qp["mass"];
           quantum_particles[curr_label].charge = qp["charge"];
-          quantum_particles[curr_label].num_parts = qp["num_particles"];
+          quantum_particles[curr_label].num_parts_alpha =
+              qp["num_particles_alpha"];
+          quantum_particles[curr_label].num_parts_beta =
+              qp["num_particles_beta"];
+          // TODO make sure a user isn't specifying num_parts or multiplicity.
+          // These will be calculated
+          quantum_particles[curr_label].num_parts =
+              quantum_particles[curr_label].num_parts_alpha +
+              quantum_particles[curr_label].num_parts_beta;
+          quantum_particles[curr_label].multiplicity =
+              (std::abs(quantum_particles[curr_label].num_parts_alpha -
+                        quantum_particles[curr_label].num_parts_beta) *
+               quantum_particles[curr_label].spin) +
+              1;
           quantum_particles[curr_label].exchange = qp["exchange"];
           quantum_particles[curr_label].electron_exchange =
               qp["electron_exchange"];
+              quantum_particles[curr_label].restricted =
+              qp["restricted"];
         }
       }
 
@@ -180,11 +230,6 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   // create electrons
   std::string curr_label = "electron";
   if (quantum_particles.count(curr_label) == 0) {
-    QUANTUM_PARTICLE_SET quantum_part;
-    quantum_particles[curr_label] = quantum_part;
-    quantum_particles[curr_label].spin = 0.5;
-    quantum_particles[curr_label].mass = 1.0;
-    quantum_particles[curr_label].charge = -1;
 
     auto num_parts = -this->charge;
     for (auto part : classical_particles) {
@@ -193,10 +238,22 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     for (auto part : quantum_particles) {
       num_parts += part.second.charge * part.second.num_parts;
     }
-
     Selci_cout("Creating " + std::to_string(num_parts) + " electrons");
+
+    QUANTUM_PARTICLE_SET quantum_part;
+    quantum_particles[curr_label] = quantum_part;
+    quantum_particles[curr_label].spin = this->quantum_symb_to_spin(curr_label);
+    quantum_particles[curr_label].mass = this->quantum_symb_to_mass(curr_label);
+    quantum_particles[curr_label].charge =
+        this->quantum_symb_to_charge(curr_label);
     quantum_particles[curr_label].num_parts = num_parts;
+    quantum_particles[curr_label].num_parts_alpha =
+        ((num_parts) + (this->multiplicity - 1)) / 2;
+    quantum_particles[curr_label].num_parts_beta =
+        ((num_parts) - (this->multiplicity - 1)) / 2;
     quantum_particles[curr_label].exchange = true;
+  } else {
+    APP_ABORT("Electrons should not have been created yet.");
   }
 }
 

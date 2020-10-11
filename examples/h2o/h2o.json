@@ -18,7 +18,7 @@
   },
   "driver": "energy",
   "model": {
-    "method": "rhf",
+    "method": "scf",
     "basis": [
                 { "elec" : "sto-3g" },
                 { "elec" : "sto-3g" , "custom" : ["even-tempered", 2.8284271247461903, 32]},
@@ -28,6 +28,7 @@
              ]
   },
   "keywords": {
+    "restricted" : false
     "quantum_nuclei" : [0,1,1,0,0,0], 
     "quantum_particles" : [ 
         { "name" : "positron",
@@ -37,7 +38,8 @@
           "num_particles" : 1,
           "num_particles" : 0,
           "particle_multiplicity" : 2,
-          "exchange" : true
+          "exchange" : true,
+          "restricted" : false
         },
         { "name" : "muon",
           "spin" : 0.5,
@@ -46,7 +48,8 @@
           "num_particles_alpha" : 1,
           "num_particles_beta" : 0,
           "particle_multiplicity" : 2,
-          "exchange" : true
+          "exchange" : true,
+          "restricted" : false
         }
     ]
   }
