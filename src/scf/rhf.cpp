@@ -15,28 +15,33 @@ void PYCI_RHF::form_H_core() {
   }
 }
 void PYCI_RHF::form_fock() {
+  //TODO
   auto num_basis = this->input_basis.num_basis;
   this->F.resize(this->input_molecule.quantum_particles.size());
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
-  for (auto quantum_part : this->input_molecule.quantum_particles){
 
-  this->F.setZero(num_basis, num_basis);
-  this->F += this->H_core;
-  for (int i = 0; i < num_basis; i++) {
-    for (int j = 0; j < num_basis; j++) {
-      for (int k = 0; k < num_basis; k++) {
-        for (int l = 0; l < num_basis; l++) {
-          this->F(i, j) += this->D(k, l) *
-                           ((2.0 * this->input_integral.twoelec(
-                                       this->input_integral.idx8(i, j, k, l))) -
-                            this->input_integral.twoelec(
-                                this->input_integral.idx8(i, k, j, l)));
+  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_a_idx = 0;
+  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_b_idx = 0;
+  for (auto quantum_part_a : this->input_molecule.quantum_particles){
+    if ()
+    this->F[quantum_part_a_idx].setZero(num_basis, num_basis);
+    this->F[quantum_part_a_idx] += this->H_core[quantum_part_a_idx];
+    for (int i = 0; i < num_basis; i++) {
+      for (int j = 0; j < num_basis; j++) {
+        for (int k = 0; k < num_basis; k++) {
+          for (int l = 0; l < num_basis; l++) {
+            this->F[quantum_part_a_idx](i, j) += this->D[quantum_part_a_idx](k, l) *
+                            ((2.0 * this->input_integral.twoelec(
+                                        this->input_integral.idx8(i, j, k, l))) -
+                              this->input_integral.twoelec(
+                                  this->input_integral.idx8(i, k, j, l)));
+          }
         }
       }
     }
-  }
-  if (this->iteration_num <= 1) {
-    Selci_dump_mat_to_file(this->F, "F.txt");
+    if (this->iteration_num <= 1) {
+      Selci_dump_mat_to_file(this->F, "F.txt");
+    }
+    quantum_part_idx++;
   }
 }
 void PYCI_RHF::diag_fock() {

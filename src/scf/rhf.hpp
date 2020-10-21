@@ -38,30 +38,30 @@ public:
    * @brief One particle density matrix
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > D;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > > D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > D_last;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > > D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > F;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >> F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > C;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > > C;
 
   /**
    * @brief MO energy vector
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1> > E_orbitals;
+  std::vector< std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1> > > E_orbitals;
   /**
    * @brief Energy of the quantum particles
    *
