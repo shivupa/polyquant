@@ -7,12 +7,16 @@ PYCI_CALCULATION::PYCI_CALCULATION(const std::string &filename) {
 }
 void PYCI_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
+  Selci_cout("SETTING UP INPUT FILE");
   this->input_params = PYCI_INPUT(filename);
   // parse molecule
+  Selci_cout("SETTING UP MOLECULE");
   this->input_molecule = PYCI_MOLECULE(this->input_params);
   // parse basis
+  Selci_cout("SETTING UP BASIS");
   this->input_basis = PYCI_BASIS(this->input_params, this->input_molecule);
   // parse integral
+  Selci_cout("SETTING UP INTEGRAL");
   this->input_integral = PYCI_INTEGRAL(this->input_params, this->input_basis,
                                        this->input_molecule);
 }
@@ -164,7 +168,7 @@ std::string PYCI_CALCULATION::parse_electronic_mean_field() {
 }
 
 void PYCI_CALCULATION::run_electronic_mean_field(std::string &mean_field_type) {
-  if (mean_field_type == "RHF") {
+  if (mean_field_type == "SCF") {
     PYCI_RHF rhf_calc = PYCI_RHF(this->input_params, this->input_molecule,
                                  this->input_basis, this->input_integral);
     rhf_calc.run();

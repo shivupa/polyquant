@@ -34,9 +34,10 @@ void PYCI_MOLECULE::set_molecular_restricted(const PYCI_INPUT &input) {
 void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
-
-  for (nlohmann::basic_json<>::size_type i = 0;
-       i < input.input_data["molecule"]["geometry"].size() % 3; ++i) {
+  Selci_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) /
+             3);
+  for (auto i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3);
+       ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
       atom.push_back(input.input_data["molecule"]["geometry"][(i * 3) + j]);
@@ -51,24 +52,17 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     center_labels.push_back(label);
     quantum_nuclei.push_back(0);
   }
-
   if (input.input_data.contains("keywords")) {
     // if (input.input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
     if (input.input_data["keywords"].contains("quantum_nuclei")) {
       // if a label is given change all nuclei with matching label to be
       // quantum https://github.com/nlohmann/json/issues/1564
-      if (std::all_of(
-              input
-                  .input_data["keywords"]["molecule_keywords"]["quantum_nuclei"]
-                  .begin(),
-              input
-                  .input_data["keywords"]["molecule_keywords"]["quantum_nuclei"]
-                  .end(),
-              [](const json &el) { return el.is_string(); })) {
+      if (std::all_of(input.input_data["keywords"]["quantum_nuclei"].begin(),
+                      input.input_data["keywords"]["quantum_nuclei"].end(),
+                      [](const json &el) { return el.is_string(); })) {
         for (std::string quantum_label :
-             input.input_data["keywords"]["molecule_keywords"]
-                             ["quantum_nuclei"]) {
+             input.input_data["keywords"]["quantum_nuclei"]) {
           if (std::find(center_labels.begin(), center_labels.end(),
                         quantum_label) != center_labels.end()) {
             // https://stackoverflow.com/questions/42871932/how-to-find-all-positions-of-an-element-using-stdfind
@@ -89,23 +83,17 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
             }
           }
         }
-      } else if (std::all_of(input
-                                 .input_data["keywords"]["molecule_keywords"]
-                                            ["quantum_nuclei"]
-                                 .begin(),
-                             input
-                                 .input_data["keywords"]["molecule_keywords"]
-                                            ["quantum_nuclei"]
-                                 .end(),
-                             [](const json &el) { return el.is_number(); })) {
+      } else if (std::all_of(
+                     input.input_data["keywords"]["quantum_nuclei"].begin(),
+                     input.input_data["keywords"]["quantum_nuclei"].end(),
+                     [](const json &el) { return el.is_number(); })) {
         size_t idx = 0;
-        for (auto is_quantum : input.input_data["keywords"]["molecule_keywords"]
-                                               ["quantum_nuclei"]) {
+        for (auto is_quantum : input.input_data["keywords"]["quantum_nuclei"]) {
           quantum_nuclei[idx] = is_quantum;
           idx++;
         }
       } else {
-        APP_ABORT("'Keywords'->'molecule_keywords'->'quantum_nuclei' are "
+        APP_ABORT("'Keywords'->'quantum_nuclei' are "
                   "not all strings or ints.");
       }
 
@@ -130,9 +118,9 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   // classical nuclei
 
   // centers, center_labels, quantum_nuclei
-
   for (auto i = 0; i < centers.size(); i++) {
     if (quantum_nuclei[i] == 0) {
+
       // classical center
       std::string curr_label = center_labels[i];
       if (classical_particles.count(curr_label) == 0) {
@@ -180,12 +168,14 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
                   quantum_part.second.num_parts_beta) *
          quantum_part.second.spin) +
         1;
-    if (quantum_part.second.num_parts == 1){
+    if (quantum_part.second.num_parts == 1) {
       quantum_part.second.restricted = false;
     } else {
       quantum_part.second.restricted = this->restricted;
       // TODO remove. Only needed while Restricted open shell is not implemented
-      if(quantum_part.second.num_parts_alpha != quantum_part.second.num_parts_beta && quantum_part.second.restricted){
+      if (quantum_part.second.num_parts_alpha !=
+              quantum_part.second.num_parts_beta &&
+          quantum_part.second.restricted) {
         quantum_part.second.restricted = false;
       }
     }
@@ -194,17 +184,65 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   if (input.input_data.contains("keywords")) {
     if (input.input_data["keywords"].contains("quantum_particles")) {
       for (auto qp : input.input_data["keywords"]["quantum_particles"]) {
-        std::string curr_label = qp["name"];
+        std::string curr_label;
+        if (qp.contains("name")) {
+          curr_label = qp["name"];
+        } else {
+          APP_ABORT("Keywords->quantum particles is missing keyword 'name'!");
+        }
+
         if (quantum_particles.count(curr_label) == 0) {
           QUANTUM_PARTICLE_SET quantum_part;
           quantum_particles[curr_label] = quantum_part;
-          quantum_particles[curr_label].spin = qp["spin"];
-          quantum_particles[curr_label].mass = qp["mass"];
-          quantum_particles[curr_label].charge = qp["charge"];
-          quantum_particles[curr_label].num_parts_alpha =
-              qp["num_particles_alpha"];
-          quantum_particles[curr_label].num_parts_beta =
-              qp["num_particles_beta"];
+          if (qp.contains("spin")) {
+            quantum_particles[curr_label].spin = qp["spin"];
+          } else {
+            APP_ABORT("Keywords->quantum particles is missing keyword 'spin'!");
+          }
+          if (qp.contains("mass")) {
+            quantum_particles[curr_label].mass = qp["mass"];
+          } else {
+            APP_ABORT("Keywords->quantum particles is missing keyword 'mass'!");
+          }
+          if (qp.contains("charge")) {
+            quantum_particles[curr_label].charge = qp["charge"];
+          } else {
+            APP_ABORT(
+                "Keywords->quantum particles is missing keyword 'charge'!");
+          }
+          if (qp.contains("num_particles_alpha")) {
+            quantum_particles[curr_label].num_parts_alpha =
+                qp["num_particles_alpha"];
+          } else {
+            APP_ABORT("Keywords->quantum particles is missing keyword "
+                      "'num_particles_alpha'!");
+          }
+          if (qp.contains("num_particles_beta")) {
+            quantum_particles[curr_label].num_parts_beta =
+                qp["num_particles_beta"];
+          } else {
+            APP_ABORT("Keywords->quantum particles is missing keyword "
+                      "'num_particles_beta'!");
+          }
+          if (qp.contains("exchange")) {
+            quantum_particles[curr_label].exchange = qp["exchange"];
+          } else {
+            APP_ABORT(
+                "Keywords->quantum particles is missing keyword 'exchange'!");
+          }
+          if (qp.contains("electron_exchange")) {
+            quantum_particles[curr_label].electron_exchange =
+                qp["electron_exchange"];
+          } else {
+            APP_ABORT("Keywords->quantum particles is missing keyword "
+                      "'electron_exchange'!");
+          }
+          if (qp.contains("restricted")) {
+            quantum_particles[curr_label].restricted = qp["restricted"];
+          } else {
+            APP_ABORT(
+                "Keywords->quantum particles is missing keyword 'restricted'!");
+          }
           // TODO make sure a user isn't specifying num_parts or multiplicity.
           // These will be calculated
           quantum_particles[curr_label].num_parts =
@@ -215,11 +253,6 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
                         quantum_particles[curr_label].num_parts_beta) *
                quantum_particles[curr_label].spin) +
               1;
-          quantum_particles[curr_label].exchange = qp["exchange"];
-          quantum_particles[curr_label].electron_exchange =
-              qp["electron_exchange"];
-              quantum_particles[curr_label].restricted =
-              qp["restricted"];
         }
       }
 
@@ -258,13 +291,14 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
 }
 
 void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
+
   if (input.input_data.contains("molecule")) {
     set_molecular_charge(input);
     set_molecular_multiplicity(input);
     parse_particles(input);
-
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
+
   } else {
     APP_ABORT("Cannot set up molecule. Input json missing 'molecule' section.");
   }

@@ -85,7 +85,6 @@ public:
    */
   double E_nuc;
 
-
   /**
    * @brief bohr to angstroms conversion todo remove
    *

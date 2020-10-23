@@ -3,6 +3,7 @@
 #include <io/io.hpp>
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <molecule/molecule.hpp>
+#include <molecule/quantum_particles.hpp>
 #include <scf/scf.hpp>
 #include <string>
 
@@ -32,46 +33,54 @@ public:
    * @brief H_core matrix
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > H_core;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> H_core;
 
   /**
    * @brief One particle density matrix
    *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > > D;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > > D_last;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >> F;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > > C;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      C;
 
   /**
    * @brief MO energy vector
    *
    */
-  std::vector< std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1> > > E_orbitals;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals;
   /**
    * @brief Energy of the quantum particles
    *
    */
-  double E_particles = 0.0;
+  std::vector<double> E_particles;
   /**
    * @brief Energy of the quantum particles from the previous iteration
    *
    */
-  double E_particles_last = 0.0;
+  std::vector<double> E_particles_last;
   /**
    * @brief Total energy including the static classical centers
    *
@@ -86,12 +95,12 @@ public:
    * @brief Iteration energy difference
    *
    */
-  double iteration_E_diff = 0.0;
+  std::vector<double> iteration_E_diff;
   /**
    * @brief Iteration rmsc DM
    *
    */
-  double iteration_rmsc_dm = 0.0;
+  std::vector<std::vector<double>> iteration_rmsc_dm;
   /**
    * @brief Stop running iterations?
    *
