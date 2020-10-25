@@ -1,9 +1,9 @@
 #ifndef PYCI_INTEGRAL_H
 #define PYCI_INTEGRAL_H
-#include <basis/basis.hpp>
-#include <io/io.hpp>
+#include "basis/basis.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
-#include <molecule/molecule.hpp>
 #include <numeric>
 #include <vector>
 

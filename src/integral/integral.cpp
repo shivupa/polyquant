@@ -1,4 +1,4 @@
-#include <integral/integral.hpp>
+#include "integral/integral.hpp"
 
 using namespace selci;
 

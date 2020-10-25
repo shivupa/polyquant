@@ -37,6 +37,16 @@ template <typename T> void Selci_cout(const T &message) {
   //}
 };
 
+int atom_symb_to_num(std::string key);
+
+double atom_symb_to_mass(std::string key);
+
+double quantum_symb_to_spin(std::string key);
+
+double quantum_symb_to_mass(std::string key);
+
+int quantum_symb_to_charge(std::string key);
+
 /**
  * @brief A helper function to dump a json object to std::out.
  *

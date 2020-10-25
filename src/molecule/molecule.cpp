@@ -1,4 +1,4 @@
-#include <molecule/molecule.hpp>
+#include "molecule/molecule.hpp"
 
 using namespace selci;
 
@@ -127,9 +127,9 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
         CLASSICAL_PARTICLE_SET classical_part;
         classical_particles[curr_label] = classical_part;
         classical_particles[curr_label].mass =
-            this->atom_symb_to_mass(center_labels[i]);
+            atom_symb_to_mass(center_labels[i]);
         classical_particles[curr_label].charge =
-            this->atom_symb_to_num(center_labels[i]);
+            atom_symb_to_num(center_labels[i]);
         classical_particles[curr_label].num_parts = 0;
       }
       classical_particles[curr_label].num_parts += 1;
@@ -141,11 +141,11 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
         QUANTUM_PARTICLE_SET quantum_part;
         quantum_particles[curr_label] = quantum_part;
         quantum_particles[curr_label].spin =
-            this->quantum_symb_to_spin(center_labels[i]);
+            quantum_symb_to_spin(center_labels[i]);
         quantum_particles[curr_label].mass =
-            this->quantum_symb_to_mass(center_labels[i]);
+            quantum_symb_to_mass(center_labels[i]);
         quantum_particles[curr_label].charge =
-            this->quantum_symb_to_charge(center_labels[i]);
+            quantum_symb_to_charge(center_labels[i]);
         quantum_particles[curr_label].num_parts = 0;
       }
       quantum_particles[curr_label].num_parts += 1;
@@ -275,10 +275,9 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
 
     QUANTUM_PARTICLE_SET quantum_part;
     quantum_particles[curr_label] = quantum_part;
-    quantum_particles[curr_label].spin = this->quantum_symb_to_spin(curr_label);
-    quantum_particles[curr_label].mass = this->quantum_symb_to_mass(curr_label);
-    quantum_particles[curr_label].charge =
-        this->quantum_symb_to_charge(curr_label);
+    quantum_particles[curr_label].spin = quantum_symb_to_spin(curr_label);
+    quantum_particles[curr_label].mass = quantum_symb_to_mass(curr_label);
+    quantum_particles[curr_label].charge = quantum_symb_to_charge(curr_label);
     quantum_particles[curr_label].num_parts = num_parts;
     quantum_particles[curr_label].num_parts_alpha =
         ((num_parts) + (this->multiplicity - 1)) / 2;
@@ -298,13 +297,12 @@ void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
     parse_particles(input);
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
-
   } else {
     APP_ABORT("Cannot set up molecule. Input json missing 'molecule' section.");
   }
 }
 
-std::string PYCI_MOLECULE::dump_xyz() const {
+std::string PYCI_MOLECULE::dump_xyz(std::string classical_part_key) const {
   std::string header = "";
   std::string body = "";
   // calculate num atoms
@@ -312,28 +310,34 @@ std::string PYCI_MOLECULE::dump_xyz() const {
   for (auto classical_part : classical_particles) {
     num_atom += classical_part.second.num_parts;
     for (auto i = 0; i < classical_part.second.num_parts; i++) {
-      body += "\n";
-      body += classical_part.first;
-      body += std::to_string(centers[classical_part.second.center_idx[i]][0] *
-                             this->bohr_to_angstrom);
-      body += "    ";
-      body += std::to_string(centers[classical_part.second.center_idx[i]][1] *
-                             this->bohr_to_angstrom);
-      body += "    ";
-      body += std::to_string(centers[classical_part.second.center_idx[i]][2] *
-                             this->bohr_to_angstrom);
+      if (classical_part_key == "all" ||
+          classical_part.first == classical_part_key) {
+        body += "\n";
+        body += classical_part.first;
+        Selci_cout(classical_part.first);
+        body += "    ";
+        body += std::to_string(centers[classical_part.second.center_idx[i]][0] *
+                               this->bohr_to_angstrom);
+        body += "    ";
+        body += std::to_string(centers[classical_part.second.center_idx[i]][1] *
+                               this->bohr_to_angstrom);
+        body += "    ";
+        body += std::to_string(centers[classical_part.second.center_idx[i]][2] *
+                               this->bohr_to_angstrom);
+      }
     }
   }
 
   header += std::to_string(num_atom);
   header += "\n";
-  header += "PYCI Dumped XYZ";
+  header += "PYCI Dumped XYZ centers = " + classical_part_key;
   auto temp_xyz = header + body;
   return temp_xyz;
 }
 
-std::vector<libint2::Atom> PYCI_MOLECULE::to_libint_atom() const {
-  std::istringstream temp_xyz_stream(this->dump_xyz());
+std::vector<libint2::Atom>
+PYCI_MOLECULE::to_libint_atom(std::string classical_part_key) const {
+  std::istringstream temp_xyz_stream(this->dump_xyz(classical_part_key));
   return libint2::read_dotxyz(temp_xyz_stream);
 }
 

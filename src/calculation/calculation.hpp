@@ -1,10 +1,10 @@
+#include "basis/basis.hpp"
+#include "integral/integral.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <algorithm>
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
-#include <molecule/molecule.hpp>
 // #include <scf/eprhf.hpp>
-#include <scf/rhf.hpp>
+#include "scf/rhf.hpp"
 #include <string>
 #include <unordered_set>
 

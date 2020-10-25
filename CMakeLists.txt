@@ -86,6 +86,7 @@ endif(PYCI_TEST)
 # headers it also makes the make files verbose so you can see what the build is
 # doing
 if(PYCI_DEBUG)
+  # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
   # https://stackoverflow.com/questions/41610822/set-cxx-include-what-you-use-
   # property-in-cmake-for-every-target
   find_program(IWYU_PATH NAMES include-what-you-use iwyu)

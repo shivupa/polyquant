@@ -1,4 +1,4 @@
-#include <scf/scf.hpp>
+#include "scf/scf.hpp"
 
 using namespace selci;
 

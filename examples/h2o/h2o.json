@@ -11,18 +11,19 @@
         0.0000000, 0.0000000,  1.0000000
     ],
     "symbols": ["O", "H", "H", "X_positron"],
-    "molecular_charge": 0,
+    "molecular_charge": 1,
     "molecular_multiplicity": 1
   },
   "driver": "energy",
   "model": {
     "method": "scf",
-    "basis": [
-                { "elec" : "sto-3g" },
-                { "elec" : "sto-3g" },
-                { "elec" : "sto-3g" },
-                { "custom" : ["even-tempered", 2.8284271247461903e-3, 32e-1]}
-             ]
+    "basis": 
+        {"O" : [{ "library" : {"type" : "sto-3g", "atom" : 6} }],
+        "H" : [{ "library" : {"type" : "sto-3g"} }],
+        "X_positron" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "positron_basis.g94"}}]}
+             
   },
   "keywords": {
     "restricted" : false,

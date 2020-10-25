@@ -1,10 +1,10 @@
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
+#include "basis/basis.hpp"
+#include "integral/integral.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
+#include "molecule/quantum_particles.hpp"
+#include "scf/scf.hpp"
 #include <libint2/chemistry/sto3g_atomic_density.h>
-#include <molecule/molecule.hpp>
-#include <molecule/quantum_particles.hpp>
-#include <scf/scf.hpp>
 #include <string>
 
 #ifndef PYCI_RHF_H

@@ -1,7 +1,7 @@
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
-#include <molecule/molecule.hpp>
+#include "basis/basis.hpp"
+#include "integral/integral.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <string>
 
 #ifndef PYCI_SCF_H
