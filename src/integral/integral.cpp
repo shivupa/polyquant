@@ -12,6 +12,7 @@ void PYCI_INTEGRAL::calculate_overlap() {
   if (this->overlap.cols() == 0 && this->overlap.rows() == 0) {
     Selci_cout("Calculating One Body Overlap Integrals...");
     auto num_basis = this->input_basis.num_basis;
+    Selci_cout(num_basis);
     libint2::initialize();
     this->overlap.resize(num_basis, num_basis);
     this->overlap.fill(0);
@@ -46,7 +47,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
     this->nuclear.fill(0);
     this->compute_1body_ints(this->nuclear, this->input_basis.basis,
                              libint2::Operator::nuclear,
-                             this->input_molecule.to_libint_atom());
+                             this->input_molecule.to_libint_atom("no_ghost"));
     Selci_dump_mat_to_file(this->nuclear, "nuclear.txt");
     libint2::finalize();
   }
@@ -166,6 +167,7 @@ void PYCI_INTEGRAL::calculate_two_electron() {
     auto two_elec_size = ((num_basis) * (num_basis + 1) *
                           ((num_basis * num_basis) + (num_basis) + 2)) /
                          8;
+
     this->twoelec.resize(two_elec_size);
     this->compute_2body_ints(this->twoelec, this->input_basis.basis,
                              libint2::Operator::coulomb);

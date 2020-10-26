@@ -145,9 +145,9 @@ std::string PYCI_CALCULATION::parse_electronic_mean_field() {
              "electrons...");
   std::string mean_field_type = "NONE";
   // check that json contains a mean field object and assign to string
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("mean_field")) {
-      mean_field_type = this->input_params.input_data["keywords"]["mean_field"];
+  if (this->input_params.input_data.contains("model")) {
+    if (this->input_params.input_data["model"].contains("method")) {
+      mean_field_type = this->input_params.input_data["model"]["method"];
       std::transform(mean_field_type.begin(), mean_field_type.end(),
                      mean_field_type.begin(), ::toupper);
     }

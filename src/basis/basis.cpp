@@ -22,37 +22,43 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
               if (center_basis["library"].contains("atom")) {
                 auto libint_atoms = molecule.to_libint_atom(classical_part_key);
                 for (auto &libint_atom : libint_atoms) {
-                  libint_atom.atomic_number = center_basis["library"]["atom"];
+                  libint_atom.atomic_number =
+                      atom_symb_to_num(center_basis["library"]["atom"]);
                 }
                 libint2::BasisSet atom_basis = libint2::BasisSet(
                     center_basis["library"]["type"], libint_atoms, true);
-                std::move(atom_basis.begin(), atom_basis.end(),
-                          std::back_inserter(this->basis));
+                // std::move(atom_basis.begin(), atom_basis.end(),
+                // std::back_inserter(this->basis));
                 // this->basis.back().move({{atoms[a].x, atoms[a].y,
                 // atoms[a].z}});
-
-                // this->basis.insert(this->basis.end(), atom_basis.begin(),
-                //                    atom_basis.end());
+                this->basis.insert(this->basis.end(), atom_basis.begin(),
+                                   atom_basis.end());
+                this->basis.set_pure(false);
                 // std::move(atom_basis.begin(), atom_basis.end(),
                 //           std::back_inserter(this->basis));
               } else {
+                auto libint_atoms = molecule.to_libint_atom(classical_part_key);
+                for (auto &libint_atom : libint_atoms) {
+                  libint_atom.atomic_number =
+                      atom_symb_to_num(classical_part_key);
+                }
                 libint2::BasisSet atom_basis = libint2::BasisSet(
-                    center_basis["library"]["type"],
-                    molecule.to_libint_atom(classical_part_key), true);
-                std::move(atom_basis.begin(), atom_basis.end(),
-                          std::back_inserter(this->basis));
+                    center_basis["library"]["type"], libint_atoms, true);
+                this->basis.insert(this->basis.end(), atom_basis.begin(),
+                                   atom_basis.end());
+                this->basis.set_pure(false);
               }
             } else if (center_basis.contains("custom")) {
-              if (center_basis["library"].contains("type")) {
-                if (center_basis["library"]["type"] == "even-tempered") {
+              if (center_basis["custom"].contains("type")) {
+                if (center_basis["custom"]["type"] == "even-tempered") {
                   // TODO
                   //{"type" : "even-tempered","end"
                   //: 2.8284271247461903e-3,"start" : 32e-1,"num_funcs" :
                   // 7,"angular_mom" : 0}
                   Selci_cout("Even tempered basis not implemented yet.");
-                } else if (center_basis["library"]["type"] == "file") {
+                } else if (center_basis["custom"]["type"] == "file") {
                   auto atom_basis = libint2::BasisSet::read_g94_basis_library(
-                      center_basis["library"]["type"]["filename"]);
+                      center_basis["custom"]["filename"]);
                   // std::copy(atom_basis.begin(), atom_basis.end(),
                   //           std::back_inserter(this->basis));
                   for (auto center_idx : classical_part.center_idx) {
@@ -68,6 +74,7 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
                       }
                     }
                   }
+                  this->basis.set_pure(false);
                 }
               } else {
                 APP_ABORT("'model->basis->" + classical_part_key +
@@ -78,9 +85,13 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
                         "->type' must be library or custom.");
             }
           }
-        }
 
-        else {
+          Selci_cout("Added basis for " + classical_part_key);
+          this->num_basis = libint2::nbf(this->basis);
+          Selci_cout("Number of basis functions: " +
+                     std::to_string(this->num_basis));
+
+        } else {
           Selci_cout("'model->basis' didn't contain a basis for: " +
                      classical_part_key);
         }
@@ -92,6 +103,9 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
   } else {
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
   }
+  // TODO dump basis
+  // Selci_cout("");
+  // Selci_cout(this->basis);
 
   // this->basis_name = input.input_data["model"]["basis"];
   // // Selci_cout(basis_name);

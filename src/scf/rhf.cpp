@@ -35,15 +35,19 @@ void PYCI_RHF::form_fock() {
         for (int j = 0; j < num_basis; j++) {
           for (int k = 0; k < num_basis; k++) {
             for (int l = 0; l < num_basis; l++) {
-              this->F[quantum_part_a_idx][0](i, j) +=
-                  this->D[quantum_part_a_idx][0](k, l) *
-                  ((this->input_integral.twoelec(
-                       this->input_integral.idx8(i, j, k, l))) -
-                   this->input_integral.twoelec(
-                       this->input_integral.idx8(i, k, j, l)));
+              // this->F[quantum_part_a_idx][0](i, j) +=
+              //     this->D[quantum_part_a_idx][0](k, l) *
+              //     ((this->input_integral.twoelec(
+              //          this->input_integral.idx8(i, j, k, l))) -
+              //      this->input_integral.twoelec(
+              //          this->input_integral.idx8(i, k, j, l)));
               quantum_part_b_idx = 0;
               for (auto const &[quantum_part_b_key, quantum_part_b] :
                    this->input_molecule.quantum_particles) {
+                if (quantum_part_a_key == quantum_part_b_key) {
+                  quantum_part_b_idx++;
+                  continue;
+                }
                 // todo deal with exchange with electrons
                 if (quantum_part_b.num_parts == 1) {
                   this->F[quantum_part_a_idx][0](i, j) +=
@@ -103,6 +107,10 @@ void PYCI_RHF::form_fock() {
               quantum_part_b_idx = 0;
               for (auto const &[quantum_part_b_key, quantum_part_b] :
                    this->input_molecule.quantum_particles) {
+                if (quantum_part_a_key == quantum_part_b_key) {
+                  quantum_part_b_idx++;
+                  continue;
+                }
                 // todo deal with exchange with electrons
                 if (quantum_part_b.num_parts == 1) {
                   this->F[quantum_part_a_idx][0](i, j) +=
@@ -163,6 +171,10 @@ void PYCI_RHF::form_fock() {
               quantum_part_b_idx = 0;
               for (auto const &[quantum_part_b_key, quantum_part_b] :
                    this->input_molecule.quantum_particles) {
+                if (quantum_part_a_key == quantum_part_b_key) {
+                  quantum_part_b_idx++;
+                  continue;
+                }
                 // todo deal with exchange with electrons
                 if (quantum_part_b.num_parts == 1) {
                   this->F[quantum_part_a_idx][0](i, j) +=
@@ -200,9 +212,11 @@ void PYCI_RHF::form_fock() {
 void PYCI_RHF::diag_fock() {
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     if (quantum_part.num_parts == 1) {
+      this->E_orbitals[quantum_part_idx].resize(1);
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_basis,
                                                                     num_basis);
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime(num_basis,
@@ -216,6 +230,7 @@ void PYCI_RHF::diag_fock() {
       C_prime = eigensolver.eigenvectors();
       this->C[quantum_part_idx][0] = this->input_integral.orth_X * C_prime;
     } else if (quantum_part.restricted == false) {
+      this->E_orbitals[quantum_part_idx].resize(2);
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_basis,
                                                                     num_basis);
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime(num_basis,
@@ -225,12 +240,14 @@ void PYCI_RHF::diag_fock() {
       Eigen::SelfAdjointEigenSolver<
           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
           eigensolver_alpha(F_prime);
+
       this->E_orbitals[quantum_part_idx][0] = eigensolver_alpha.eigenvalues();
       C_prime = eigensolver_alpha.eigenvectors();
       this->C[quantum_part_idx][0] = this->input_integral.orth_X * C_prime;
 
       F_prime = this->input_integral.orth_X * this->F[quantum_part_idx][1] *
                 this->input_integral.orth_X;
+
       Eigen::SelfAdjointEigenSolver<
           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
           eigensolver_beta(F_prime);
@@ -238,6 +255,7 @@ void PYCI_RHF::diag_fock() {
       C_prime = eigensolver_beta.eigenvectors();
       this->C[quantum_part_idx][1] = this->input_integral.orth_X * C_prime;
     } else {
+      this->E_orbitals[quantum_part_idx].resize(1);
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_basis,
                                                                     num_basis);
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime(num_basis,
@@ -352,23 +370,45 @@ void PYCI_RHF::calculate_E_total() {
 void PYCI_RHF::check_stop() {
   this->converged = true;
   this->stop = true;
+  this->iteration_E_diff.resize(this->input_molecule.quantum_particles.size());
+  this->iteration_rmsc_dm.resize(this->input_molecule.quantum_particles.size());
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-    this->iteration_E_diff[quantum_part_idx] =
-        std::abs(this->E_particles[quantum_part_idx] -
-                 this->E_particles_last[quantum_part_idx]);
+    std::stringstream buffer;
+    buffer << std::setprecision(20) << "Convergence status for "
+           << quantum_part_key << std::endl;
+    auto E_diff = this->E_particles[quantum_part_idx] -
+                  this->E_particles_last[quantum_part_idx];
+    this->iteration_E_diff[quantum_part_idx] = std::abs(E_diff);
+    buffer << "delta E = " << E_diff << " converged = " << std::boolalpha
+           << (this->iteration_E_diff[quantum_part_idx] < this->convergence_E)
+           << std::endl;
+
     if (this->iteration_E_diff[quantum_part_idx] >= this->convergence_E) {
       this->converged = false;
       this->stop = false;
     }
     if (quantum_part.num_parts == 1) {
+      this->iteration_rmsc_dm[quantum_part_idx].resize(1);
       this->iteration_rmsc_dm[quantum_part_idx][0] = std::abs(
           ((this->D[quantum_part_idx][0] - this->D_last[quantum_part_idx][0])
                .array()
                .pow(2))
               .sum());
+      buffer << "rmsc dm = " << this->iteration_rmsc_dm[quantum_part_idx][0]
+             << " converged = " << std::boolalpha
+             << (this->iteration_rmsc_dm[quantum_part_idx][0] <
+                 this->convergence_DM)
+             << std::endl;
+      if (this->iteration_rmsc_dm[quantum_part_idx][0] >=
+          this->convergence_DM) {
+        this->converged = false;
+        this->stop = false;
+      }
+
     } else if (quantum_part.restricted == false) {
+      this->iteration_rmsc_dm[quantum_part_idx].resize(2);
       this->iteration_rmsc_dm[quantum_part_idx][0] = std::abs(
           ((this->D[quantum_part_idx][0] - this->D_last[quantum_part_idx][0])
                .array()
@@ -379,14 +419,49 @@ void PYCI_RHF::check_stop() {
                .array()
                .pow(2))
               .sum());
+      buffer << "rmsc dm (alpha) = "
+             << this->iteration_rmsc_dm[quantum_part_idx][0]
+             << " converged = " << std::boolalpha
+             << (this->iteration_rmsc_dm[quantum_part_idx][0] <
+                 this->convergence_DM)
+             << std::endl;
+      buffer << "rmsc dm (beta) = "
+             << this->iteration_rmsc_dm[quantum_part_idx][1]
+             << " converged = " << std::boolalpha
+             << (this->iteration_rmsc_dm[quantum_part_idx][1] <
+                 this->convergence_DM)
+             << std::endl;
+
+      if (this->iteration_rmsc_dm[quantum_part_idx][0] >=
+          this->convergence_DM) {
+        this->converged = false;
+        this->stop = false;
+      }
+      if (this->iteration_rmsc_dm[quantum_part_idx][1] >=
+          this->convergence_DM) {
+        this->converged = false;
+        this->stop = false;
+      }
     } else {
+      this->iteration_rmsc_dm[quantum_part_idx].resize(1);
       this->iteration_rmsc_dm[quantum_part_idx][0] = std::abs(
           ((this->D[quantum_part_idx][0] - this->D_last[quantum_part_idx][0])
                .array()
                .pow(2))
               .sum());
+      buffer << "rmsc dm = " << this->iteration_rmsc_dm[quantum_part_idx][0]
+             << " converged = " << std::boolalpha
+             << (this->iteration_rmsc_dm[quantum_part_idx][0] <
+                 this->convergence_DM)
+             << std::endl;
+      if (this->iteration_rmsc_dm[quantum_part_idx][0] >=
+          this->convergence_DM) {
+        this->converged = false;
+        this->stop = false;
+      }
     }
     quantum_part_idx++;
+    Selci_cout(buffer.str());
   }
   if (this->iteration_num == this->iteration_max) {
     this->exceeded_iterations = true;
@@ -407,20 +482,47 @@ void PYCI_RHF::guess_DM() {
   auto num_basis = this->input_basis.num_basis;
   this->D.resize(this->input_molecule.quantum_particles.size());
   this->D_last.resize(this->input_molecule.quantum_particles.size());
+  this->C.resize(this->input_molecule.quantum_particles.size());
+  this->F.resize(this->input_molecule.quantum_particles.size());
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
-
+  this->E_particles.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
+    Selci_cout(quantum_part_key);
     if (quantum_part.num_parts == 1) {
+      Selci_cout("guuess dm1");
       this->D[quantum_part_idx].resize(1);
+      this->D_last[quantum_part_idx].resize(1);
+      this->C[quantum_part_idx].resize(1);
+      this->F[quantum_part_idx].resize(1);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
     } else if (quantum_part.restricted == false) {
+      Selci_cout("guuess dm2");
       this->D[quantum_part_idx].resize(2);
+      this->D_last[quantum_part_idx].resize(2);
+      this->C[quantum_part_idx].resize(2);
+      this->F[quantum_part_idx].resize(2);
+      this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
+      this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->D_last[quantum_part_idx][1].setZero(num_basis, num_basis);
     } else {
+      Selci_cout("guuess dm3");
       this->D[quantum_part_idx].resize(1);
+      this->D_last[quantum_part_idx].resize(1);
+      this->C[quantum_part_idx].resize(1);
+      this->F[quantum_part_idx].resize(1);
+      this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       // SAD for Restricted systems
       if (quantum_part_key == "electron") {
         // compute number of atomic orbitals
@@ -457,7 +559,7 @@ void PYCI_RHF::run() {
   this->form_H_core();
   this->guess_DM();
   while (!this->stop) {
-    Selci_cout(this->iteration_num);
+    Selci_cout("Iteration " + std::to_string(this->iteration_num) + " :");
     std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] :
          this->input_molecule.quantum_particles) {

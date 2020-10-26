@@ -37,6 +37,7 @@ public:
   void set_molecular_multiplicity(const PYCI_INPUT &input);
   void set_molecular_restricted(const PYCI_INPUT &input);
   void parse_particles(const PYCI_INPUT &input);
+  void print_molecule();
 
   /**
    * @brief Calculate the nuclear repulsion energy.

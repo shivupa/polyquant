@@ -135,8 +135,18 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
       classical_particles[curr_label].num_parts += 1;
       classical_particles[curr_label].center_idx.push_back(i);
     } else {
-      // quantum center
+      // classical center for basis
       std::string curr_label = center_labels[i];
+      if (classical_particles.count(curr_label) == 0) {
+        CLASSICAL_PARTICLE_SET classical_part;
+        classical_particles[curr_label] = classical_part;
+        classical_particles[curr_label].mass = 0.0;
+        classical_particles[curr_label].charge = 0.0;
+        classical_particles[curr_label].num_parts = 0;
+      }
+      classical_particles[curr_label].num_parts += 1;
+      classical_particles[curr_label].center_idx.push_back(i);
+      // quantum center
       if (quantum_particles.count(curr_label) == 0) {
         QUANTUM_PARTICLE_SET quantum_part;
         quantum_particles[curr_label] = quantum_part;
@@ -153,30 +163,28 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     }
   }
   // iterate over quantum particles to set alpha/beta particles and mult
-  for (auto quantum_part : quantum_particles) {
-    quantum_part.second.num_parts_alpha = (quantum_part.second.num_parts / 2) +
-                                          (quantum_part.second.num_parts % 2);
-    quantum_part.second.num_parts_beta = (quantum_part.second.num_parts / 2);
-    if (quantum_part.second.num_parts_alpha +
-            quantum_part.second.num_parts_beta !=
-        quantum_part.second.num_parts) {
+  for (auto &[quantum_part_key, quantum_part] : this->quantum_particles) {
+    quantum_part.num_parts_alpha =
+        (quantum_part.num_parts / 2) + (quantum_part.num_parts % 2);
+    quantum_part.num_parts_beta = (quantum_part.num_parts / 2);
+    if (quantum_part.num_parts_alpha + quantum_part.num_parts_beta !=
+        quantum_part.num_parts) {
       APP_ABORT(
           "Could not automatically set quantum particle num alpha and beta.");
     }
-    quantum_part.second.multiplicity =
-        (std::abs(quantum_part.second.num_parts_alpha -
-                  quantum_part.second.num_parts_beta) *
-         quantum_part.second.spin) +
+    quantum_part.multiplicity =
+        (std::abs(quantum_part.num_parts_alpha - quantum_part.num_parts_beta) *
+         quantum_part.spin) +
         1;
-    if (quantum_part.second.num_parts == 1) {
-      quantum_part.second.restricted = false;
+    if (quantum_part.num_parts == 1) {
+      quantum_part.restricted = false;
     } else {
-      quantum_part.second.restricted = this->restricted;
+      // quantum_part.restricted = this->restricted;
+      quantum_part.restricted = true;
       // TODO remove. Only needed while Restricted open shell is not implemented
-      if (quantum_part.second.num_parts_alpha !=
-              quantum_part.second.num_parts_beta &&
-          quantum_part.second.restricted) {
-        quantum_part.second.restricted = false;
+      if (quantum_part.num_parts_alpha != quantum_part.num_parts_beta &&
+          quantum_part.restricted) {
+        quantum_part.restricted = false;
       }
     }
   }
@@ -288,6 +296,64 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     APP_ABORT("Electrons should not have been created yet.");
   }
 }
+void PYCI_MOLECULE::print_molecule() {
+  Selci_cout("");
+  Selci_cout("Molecule parameters");
+  Selci_cout("Classical particle types");
+  auto count = 0;
+  for (auto const &[classical_part_key, classical_part] :
+       this->classical_particles) {
+    count++;
+    Selci_cout("Classical particle type  " + std::to_string(count) + ": ");
+    Selci_cout("name: " + classical_part_key);
+    Selci_cout("mass: " + std::to_string(classical_part.mass));
+    Selci_cout("charge: " + std::to_string(classical_part.charge));
+    Selci_cout("number of particles: " +
+               std::to_string(classical_part.num_parts));
+    Selci_cout("Center idx    x   y   z");
+    for (auto idx : classical_part.center_idx) {
+      Selci_cout(std::to_string(idx) + "    " +
+                 std::to_string(this->centers[idx][0]) + "    " +
+                 std::to_string(this->centers[idx][1]) + "    " +
+                 std::to_string(this->centers[idx][2]));
+    }
+    Selci_cout("");
+  }
+  Selci_cout("");
+  Selci_cout("Quantum particle types");
+  count = 0;
+  for (auto const &[quantum_part_key, quantum_part] : this->quantum_particles) {
+    count++;
+    Selci_cout("Quantum Particle type " + std::to_string(count) + ": ");
+    Selci_cout("name: " + quantum_part_key);
+    Selci_cout("mass: " + std::to_string(quantum_part.mass));
+    Selci_cout("charge: " + std::to_string(quantum_part.charge));
+    Selci_cout("spin: " + std::to_string(quantum_part.spin));
+    Selci_cout("multiplicity: " + std::to_string(quantum_part.multiplicity));
+    Selci_cout("number of particles: " +
+               std::to_string(quantum_part.num_parts));
+    Selci_cout("number of particles (alpha): " +
+               std::to_string(quantum_part.num_parts_alpha));
+    Selci_cout("number of particles (beta): " +
+               std::to_string(quantum_part.num_parts_beta));
+    Selci_cout("Center idx    x   y   z");
+    for (auto idx : quantum_part.center_idx) {
+      Selci_cout(std::to_string(idx) + "    " +
+                 std::to_string(this->centers[idx][0]) + "    " +
+                 std::to_string(this->centers[idx][1]) + "    " +
+                 std::to_string(this->centers[idx][2]));
+    }
+    std::stringstream buffer;
+    buffer << "exchange: " << std::boolalpha << quantum_part.exchange
+           << std::endl;
+    buffer << "electron exchange: " << std::boolalpha
+           << quantum_part.electron_exchange << std::endl;
+    buffer << "restricted: " << std::boolalpha << quantum_part.restricted
+           << std::endl;
+    Selci_cout(buffer.str());
+  }
+  Selci_cout("");
+}
 
 void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
 
@@ -297,6 +363,8 @@ void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
     parse_particles(input);
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
+    Selci_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));
+    print_molecule();
   } else {
     APP_ABORT("Cannot set up molecule. Input json missing 'molecule' section.");
   }
@@ -308,23 +376,29 @@ std::string PYCI_MOLECULE::dump_xyz(std::string classical_part_key) const {
   // calculate num atoms
   int num_atom = 0;
   for (auto classical_part : classical_particles) {
-    num_atom += classical_part.second.num_parts;
+    // num_atom += classical_part.second.num_parts;
     for (auto i = 0; i < classical_part.second.num_parts; i++) {
-      if (classical_part_key == "all" ||
-          classical_part.first == classical_part_key) {
-        body += "\n";
-        body += classical_part.first;
-        Selci_cout(classical_part.first);
-        body += "    ";
-        body += std::to_string(centers[classical_part.second.center_idx[i]][0] *
-                               this->bohr_to_angstrom);
-        body += "    ";
-        body += std::to_string(centers[classical_part.second.center_idx[i]][1] *
-                               this->bohr_to_angstrom);
-        body += "    ";
-        body += std::to_string(centers[classical_part.second.center_idx[i]][2] *
-                               this->bohr_to_angstrom);
+
+      if (classical_part_key == "no_ghost" && classical_part.second.mass < 1) {
+        continue;
+      } else if (classical_part_key != "all" &&
+                 classical_part_key != "no_ghost" &&
+                 classical_part.first != classical_part_key) {
+        continue;
       }
+      num_atom++;
+      body += "\n";
+      body += classical_part.first;
+
+      body += "    ";
+      body += std::to_string(centers[classical_part.second.center_idx[i]][0] *
+                             this->bohr_to_angstrom);
+      body += "    ";
+      body += std::to_string(centers[classical_part.second.center_idx[i]][1] *
+                             this->bohr_to_angstrom);
+      body += "    ";
+      body += std::to_string(centers[classical_part.second.center_idx[i]][2] *
+                             this->bohr_to_angstrom);
     }
   }
 
@@ -363,4 +437,5 @@ void PYCI_MOLECULE::calculate_E_nuc() {
       }
     }
   }
+  this->E_nuc *= 0.5;
 }

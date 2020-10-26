@@ -5,23 +5,23 @@
     "schema_name": "qcschema_molecule",
     "schema_version": 2,
     "geometry": [
-        0.0000000, 0.0000000,  0.0000000,
-        0.7569685, 0.0000000, -0.5858752,
-       -0.7569685, 0.0000000, -0.5858752
+        0.0000000, 0.0000000,  0.0000000
     ],
-    "symbols": ["O", "H", "H"],
-    "molecular_charge": 0,
+    "symbols": ["Li"],
+    "molecular_charge": -1,
     "molecular_multiplicity": 1
   },
   "driver": "energy",
   "model": {
     "method": "scf",
     "basis": 
-        {"O" : [{ "library" : {"type" : "sto-3g"} }],
-        "H" : [{ "library" : {"type" : "sto-3g"} }]}
+        {"Li" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "Li_basis.g94"}}]}
+             
   },
   "keywords": {
     "restricted" : true
-  }
+      }
 }
 
