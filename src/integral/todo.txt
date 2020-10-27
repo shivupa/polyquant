@@ -1,3 +1,0 @@
-cartesian gaussian
-
-the integral code works but its not great

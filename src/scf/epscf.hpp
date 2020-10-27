@@ -7,14 +7,14 @@
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <string>
 
-#ifndef PYCI_RHF_H
-#define PYCI_RHF_H
+#ifndef PYCI_EPSCF_H
+#define PYCI_EPSCF_H
 namespace selci {
 
-class PYCI_RHF : PYCI_SCF {
+class PYCI_EPSCF : PYCI_SCF {
 public:
-  PYCI_RHF() = default;
-  PYCI_RHF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
+  PYCI_EPSCF() = default;
+  PYCI_EPSCF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
            const PYCI_BASIS &input_basis, const PYCI_INTEGRAL &input_integral)
       : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
 

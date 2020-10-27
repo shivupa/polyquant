@@ -1,8 +1,8 @@
-#include "scf/rhf.hpp"
+#include "scf/epscf.hpp"
 
 using namespace selci;
 
-void PYCI_RHF::form_H_core() {
+void PYCI_EPSCF::form_H_core() {
   auto num_basis = this->input_basis.num_basis;
   this->H_core.resize(this->input_molecule.quantum_particles.size());
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
@@ -18,7 +18,7 @@ void PYCI_RHF::form_H_core() {
     quantum_part_idx++;
   }
 }
-double PYCI_RHF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
+double PYCI_EPSCF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
                                 double eri_ikjl, double qa, double qb,
                                 bool exchange) {
   double gamma = 0.0;
@@ -31,7 +31,7 @@ double PYCI_RHF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
          (((Da_kl + Db_kl) * eri_ijkl) - (gamma * Da_kl * eri_ikjl));
 }
 
-void PYCI_RHF::form_fock() {
+void PYCI_EPSCF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_a_idx = 0;
@@ -128,7 +128,7 @@ void PYCI_RHF::form_fock() {
   }
 }
 
-void PYCI_RHF::diag_fock() {
+void PYCI_EPSCF::diag_fock() {
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
@@ -166,7 +166,7 @@ void PYCI_RHF::diag_fock() {
   }
 }
 
-void PYCI_RHF::form_DM() {
+void PYCI_EPSCF::form_DM() {
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   for (auto const &[quantum_part_key, quantum_part] :
@@ -198,7 +198,7 @@ void PYCI_RHF::form_DM() {
     quantum_part_idx++;
   }
 }
-void PYCI_RHF::calculate_E_elec() {
+void PYCI_EPSCF::calculate_E_elec() {
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
@@ -232,7 +232,7 @@ void PYCI_RHF::calculate_E_elec() {
     quantum_part_idx++;
   }
 }
-void PYCI_RHF::calculate_E_total() {
+void PYCI_EPSCF::calculate_E_total() {
   // Selci_cout(this->input_molecule.E_nuc);
   this->E_total = 0.0;
   for (auto &E_part : E_particles) {
@@ -240,7 +240,7 @@ void PYCI_RHF::calculate_E_total() {
   }
   this->E_total += this->input_molecule.E_nuc;
 }
-void PYCI_RHF::check_stop() {
+void PYCI_EPSCF::check_stop() {
   this->converged = true;
   this->stop = true;
   this->iteration_E_diff.resize(this->input_molecule.quantum_particles.size());
@@ -347,14 +347,14 @@ void PYCI_RHF::check_stop() {
     this->stop = true;
   }
 }
-void PYCI_RHF::run_iteration() {
+void PYCI_EPSCF::run_iteration() {
   this->iteration_num += 1;
   this->form_fock();
   this->diag_fock();
   this->form_DM();
   this->calculate_E_elec();
 }
-void PYCI_RHF::guess_DM() {
+void PYCI_EPSCF::guess_DM() {
   // SAD
   // TODO SAP
   // TODO move into separate functions
@@ -423,7 +423,7 @@ void PYCI_RHF::guess_DM() {
     quantum_part_idx++;
   }
 }
-void PYCI_RHF::run() {
+void PYCI_EPSCF::run() {
   // calculate integrals we need
   this->input_integral.calculate_overlap();
   this->input_integral.symmetric_orthogonalization();

@@ -6,7 +6,7 @@
 using namespace selci;
 
 int main(int argc, char **argv) {
-  cxxopts::Options options("selci", "Multiquantum particles.");
+  cxxopts::Options options("selci", "Multiple quantum particles.");
   options.add_options()("i,input", "input filename",
                         cxxopts::value<std::string>())("h,help", "Print usage");
   auto input_parameters = options.parse(argc, argv);
