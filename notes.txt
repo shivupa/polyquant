@@ -1,0 +1,11 @@
+use pybind11 to validate qcschema jsons at run time?
+
+better printing
+
+refactor selci/pyci -> polyquanta
+
+error  if at least 2 nuclei arent treated classical 
+
+update docs
+update tests
+

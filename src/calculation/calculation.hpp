@@ -1,15 +1,17 @@
+#include "basis/basis.hpp"
+#include "integral/integral.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <algorithm>
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
-#include <molecule/molecule.hpp>
-#include <scf/eprhf.hpp>
-#include <scf/rhf.hpp>
+// #include <scf/eprhf.hpp>
+#include "scf/rhf.hpp"
 #include <string>
 #include <unordered_set>
 
 #ifndef PYCI_CALCULATION_H
 #define PYCI_CALCULATION_H
+namespace selci {
+
 /**
  * @brief A class to set up a calculation.
  *
@@ -44,6 +46,8 @@ public:
 
   void
   run_excess_electron_plus_electronic_mean_field(std::string &mean_field_type);
+  void
+  run_excess_positron_plus_electronic_mean_field(std::string &mean_field_type);
 
   std::string parse_electronic_mean_field();
   /**
@@ -74,7 +78,7 @@ public:
    * @brief Mean-field calculation types that pyci knows about
    *
    */
-  const std::unordered_set<std::string> mean_field_methods = {"RHF"};
+  const std::unordered_set<std::string> mean_field_methods = {"SCF"};
 
   /**
    * @brief Post mean-field types that pyci knows about
@@ -82,4 +86,5 @@ public:
    */
   const std::unordered_set<std::string> post_mean_field_methods = {"CIPSI"};
 };
+} // namespace selci
 #endif

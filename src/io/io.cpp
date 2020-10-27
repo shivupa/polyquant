@@ -1,23 +1,101 @@
-#include <fstream>
-#include <io/io.hpp>
+#include "io/io.hpp"
+
+using namespace selci;
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
-PetscErrorCode APP_ABORT(const std::string &reason) {
-  std::string ERROR_MESSAGE =
-      "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
-      "PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
-  SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
-           reason.c_str());
-  return 1;
+namespace selci {
+// PetscErrorCode APP_ABORT(const std::string &reason) {
+//   std::string ERROR_MESSAGE =
+//       "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
+//       "PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
+//   SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
+//            reason.c_str());
+//   return 1;
+// }
+void APP_ABORT(const std::string &reason) {
+  std::vector<std::string> ERROR_MESSAGE = {
+      "THIS IS A PYCI++ ERROR. PLEASE REPORT TO ", "PYCI++ MAINTAINERS.",
+      "ABORT REASON:"};
+  ERROR_MESSAGE.push_back(reason);
+  for (auto line : ERROR_MESSAGE) {
+    Selci_cout(line);
+  }
+  exit(1);
 }
 
 void Selci_dump_json(const json &json_obj) {
-  int my_rank;
-  MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  if (my_rank == 0) {
-    std::cout << json_obj.dump(4) << std::endl;
+  // int my_rank;
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  // if (my_rank == 0) {
+  std::cout << json_obj.dump(4) << std::endl;
+  //}
+}
+
+std::map<std::string, int> _atm_symb_to_num = {
+    {"H", 1},   {"He", 2},  {"Li", 3},  {"Be", 4},  {"B", 5},
+    {"C", 6},   {"N", 7},   {"O", 8},   {"F", 9},   {"Ne", 10},
+    {"Na", 11}, {"Mg", 12}, {"Al", 13}, {"Si", 14}, {"P", 15},
+    {"S", 16},  {"Cl", 17}, {"Ar", 18}, {"K", 19},
+};
+
+std::map<std::string, int> _atm_symb_to_mass = {
+    {"H", 1.00782503223},  {"He", 4.00260325413},  {"Li", 7.0160034366},
+    {"Be", 9.012183065},   {"B", 11.00930536},     {"C", 12.0},
+    {"N", 14.00307400443}, {"O", 15.99491461957},  {"F", 18.99840316273},
+    {"Ne", 19.9924401762}, {"Na", 22.989769282},   {"Mg", 23.985041697},
+    {"Al", 26.98153853},   {"Si", 27.97692653465}, {"P", 30.97376199842},
+    {"S", 31.9720711744},  {"Cl", 34.968852682},   {"Ar", 39.9623831237},
+    {"K", 38.9637064864},
+};
+
+int atom_symb_to_num(std::string key) {
+  if (_atm_symb_to_num.count(key)) {
+    return _atm_symb_to_num[key];
+  } else {
+    return 0;
   }
 }
+
+double atom_symb_to_mass(std::string key) {
+  if (_atm_symb_to_mass.count(key)) {
+    return _atm_symb_to_mass[key];
+  } else {
+    return 0.0;
+  }
+}
+
+double quantum_symb_to_spin(std::string key) {
+  // if (_atm_symb_to_mass.count(key)) {
+  //   return _atm_symb_to_mass[key];
+  // } else {
+  (void)(key); // <- mute the unused parameter error. Eventually we might want
+               // to assign this variable based on a key, but for now
+               // everything gets 0.5
+  return 0.50;
+  // }
+}
+
+double quantum_symb_to_mass(std::string key) {
+  if (_atm_symb_to_mass.count(key)) {
+    return _atm_symb_to_mass[key];
+  } else if (key == "electron") {
+    return 1.0;
+  } else {
+    return 0.0;
+  }
+}
+
+int quantum_symb_to_charge(std::string key) {
+  if (_atm_symb_to_num.count(key)) {
+    return _atm_symb_to_num[key];
+  } else if (key == "electron") {
+    return -1.0;
+  } else {
+    return 0;
+  }
+}
+
+} // namespace selci
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 PYCI_INPUT::PYCI_INPUT(const std::string &filename) {

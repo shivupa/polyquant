@@ -2,14 +2,6 @@ file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.[hc]pp")
 add_library(basis ${_HDRS} ${_SRCS})
 
-if(PETSC_FOUND)
-  include_directories(${PETSC_INCLUDES})
-  target_link_libraries(basis ${PETSC_LIBRARIES})
-endif(PETSC_FOUND)
-if(SLEPC_FOUND)
-  include_directories(${SLEPC_INC})
-  target_link_libraries(basis ${SLEPC_LIB})
-endif(SLEPC_FOUND)
 if(CPR_FOUND)
   include_directories(${CPR_INCLUDE_DIRS})
   target_link_libraries(basis ${CPR_LIBRARIES})
@@ -29,6 +21,9 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(basis io)
-target_include_directories(basis PUBLIC include)
-install(TARGETS basis DESTINATION lib)
-install(FILES ${_HDRS} DESTINATION include/basis)
+# target_include_directories(basis PRIVATE include)
+install(
+  TARGETS basis
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/basis)
+# install(FILES ${_HDRS} DESTINATION include/basis)

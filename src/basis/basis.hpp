@@ -1,15 +1,17 @@
+#ifndef PYCI_BASIS_H
+#define PYCI_BASIS_H
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <algorithm>
 #include <cpr/cpr.h> // IWYU pragma: keep
 #include <filesystem>
-#include <io/io.hpp>
-#include <io/io.hpp>   // IWYU pragma: keep
+#include <iterator>
 #include <libint2.hpp> // IWYU pragma: keep
-#include <molecule/molecule.hpp>
 #include <stdlib.h>
 #include <string>
 
-#ifndef PYCI_BASIS_H
-#define PYCI_BASIS_H
+namespace selci {
+
 /**
  * @brief A class to hold basis information.
  *
@@ -35,7 +37,7 @@ public:
    * @brief The name of the basis to load
    *
    */
-  std::string basis_name;
+  // std::vector<std::string> basis_name;
   /**
    * @brief the libint2 basis object
    *
@@ -47,4 +49,5 @@ public:
    */
   size_t num_basis;
 };
+} // namespace selci
 #endif

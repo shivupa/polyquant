@@ -1,17 +1,23 @@
-#include "xtensor-blas/xlinalg.hpp"
-#include "xtensor/xadapt.hpp"
-#include "xtensor/xarray.hpp"
-#include "xtensor/xview.hpp"
-#include <basis/basis.hpp>
-#include <io/io.hpp>
-#include <libint2.hpp> // IWYU pragma: keep
-#include <molecule/molecule.hpp>
-#include <numeric>
-#include <vector>
-#include <xtensor/xnpy.hpp>
-
 #ifndef PYCI_INTEGRAL_H
 #define PYCI_INTEGRAL_H
+#include "basis/basis.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
+#include <libint2.hpp> // IWYU pragma: keep
+#include <numeric>
+#include <vector>
+
+namespace selci {
+
+template <typename T>
+inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
+  if (i > j) {
+    return ((i * (i + 1)) / 2) + j;
+  } else {
+    return ((j * (j + 1)) / 2) + i;
+  }
+};
+
 /**
  * @brief A class to calculate integrals for a given molecule in a given basis.
  *
@@ -54,7 +60,9 @@ public:
    * @return int combined index for the flattened upper triangle of the
    * symmetric matrix
    */
-  int idx2(const int &i, const int &j);
+  template <typename T> T idx2(const T &i, const T &j) {
+    return symmetric_matrix_triangular_idx(i, j);
+  };
   /**
    * @brief Calculate the combined index for the vector containing the unique
    * elements of a 4D symmetric tensor with 8 fold symmetry from four indicies
@@ -67,7 +75,9 @@ public:
    * @return int combined index for the flattened unique elements of the
    * symmetric tensor
    */
-  int idx8(const int &i, const int &j, const int &k, const int &l);
+  template <typename T> T idx8(const T &i, const T &j, const T &k, const T &l) {
+    return idx2(idx2(i, j), idx2(k, l));
+  };
 
   /**
    * @brief Calculate one body integrals
@@ -79,18 +89,20 @@ public:
    * know where the nuclei are
    */
   void compute_1body_ints(
-      xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
-      libint2::Operator obtype,
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+      const libint2::BasisSet &shells, libint2::Operator obtype,
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
-  double primitive_integral_operator_expanded_in_gaussians(
-      const xt::xarray<double> &origin1, const double &cont_coeff1,
-      const double &exp1, const xt::xarray<int> &angular_momentum_1,
-      const xt::xarray<double> &origin2, const double &cont_coeff2,
-      const double &exp2, const xt::xarray<int> &angular_momentum_2,
-      const xt::xarray<double> &operator_origin,
-      const xt::xarray<double> &operator_coeff,
-      const xt::xarray<double> &operator_exps);
+  // double primitive_integral_operator_expanded_in_gaussians(
+  //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
+  //     const double &cont_coeff1, const double &exp1, const xt::xarray<int>
+  //     &angular_momentum_1, const Eigen::Matrix<double, Eigen::Dynamic,
+  //     Eigen::Dynamic> &origin2, const double &cont_coeff2, const double
+  //     &exp2, const xt::xarray<int> &angular_momentum_2, const
+  //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &operator_origin,
+  //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+  //     &operator_coeff, const Eigen::Matrix<double, Eigen::Dynamic,
+  //     Eigen::Dynamic> &operator_exps);
   /**
    * @brief Calculate one body integrals with an operator that has been expanded
    * as a sum of gaussians
@@ -102,11 +114,13 @@ public:
    * @param operator_exps the exponents of the gaussians that the operator has
    * been expanded in
    */
-  void compute_1body_ints_operator_expanded_in_gaussians(
-      xt::xarray<double> &output_matrix, const libint2::BasisSet &shells,
-      const xt::xarray<double> &operator_origin,
-      const xt::xarray<double> &operator_coeff,
-      const xt::xarray<double> &operator_exps);
+  // void compute_1body_ints_operator_expanded_in_gaussians(
+  //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+  //     const libint2::BasisSet &shells, const Eigen::Matrix<double,
+  //     Eigen::Dynamic, Eigen::Dynamic> &operator_origin, const
+  //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &operator_coeff,
+  //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+  //     &operator_exps);
   /**
    * @brief Calculate two body integrals
    *
@@ -114,7 +128,7 @@ public:
    * @param shells the basis set to ccalculate the two body integrals in
    * @param obtype the operator just the coulomb operator
    */
-  void compute_2body_ints(xt::xarray<double> &output_vec,
+  void compute_2body_ints(Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec,
                           const libint2::BasisSet &shells,
                           libint2::Operator obtype);
 
@@ -123,33 +137,33 @@ public:
    * @brief Overlap integral matrix
    *
    */
-  xt::xarray<double> overlap;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> overlap;
   /**
    * @brief Kinetic integral matrix
    *
    */
-  xt::xarray<double> kinetic;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> kinetic;
   /**
    * @brief Nuclear attraction integral matrix
    *
    */
-  xt::xarray<double> nuclear;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> nuclear;
   /**
    * @brief Polarization potential integral matrix (where the potential was
    * expanded as a sum of gaussians)
    *
    */
-  xt::xarray<double> polarization_potential;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> polarization_potential;
   /**
    * @brief Two electron integral vector
    *
    */
-  xt::xarray<double> twoelec;
+  Eigen::Matrix<double, Eigen::Dynamic, 1> twoelec;
   /**
    * @brief The orthogonalization matrix
    *
    */
-  xt::xarray<double> orth_X;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orth_X;
   /**
    * @brief the input parameters
    *
@@ -166,8 +180,9 @@ public:
    */
   PYCI_MOLECULE input_molecule;
 
-private:
-  std::unordered_map<std::string, xt::xarray<double>> alpha_miller = {
+  // private:
+  /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
+  Eigen::Dynamic>> alpha_miller = {
       {"H",
        {0.00032373615175901847, -0.001191384594906283, 0.002269474128788352,
         -0.003618386394706905,  0.005256482800147806,  -0.009916552646920785,
@@ -368,7 +383,8 @@ private:
         234880.62465473608,    -870430.1171371285,    1127874.2514611264,
         -1909092.2007334938,   5511622.900780279}}};
 
-  std::unordered_map<std::string, xt::xarray<double>> alpha_exp = {
+  std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
+  Eigen::Dynamic>> alpha_exp = {
       {"H",
        {0.00026975195853437756, -0.000993620329417148, 0.001891218910438199,
         -0.0030238143579798577, 0.004367484462405188,  -0.008373634478968167,
@@ -569,7 +585,8 @@ private:
         276999.5687520479,     -1026516.2864034787,   1330125.5718862645,
         -2251432.318005995,    6499972.106011955}}};
 
-  std::unordered_map<std::string, xt::xarray<double>> alpha_m1 = {
+  std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
+  Eigen::Dynamic>> alpha_m1 = {
       {"H",
        {0.00015227534391471046, -0.000560859433090699, 0.001067403581135526,
         -0.0017064094213278533, 0.002464436996597555,  -0.004724768488889933,
@@ -769,7 +786,8 @@ private:
         219553.67872393745,    -813628.1641536903,    1054270.8385733634,
         -1784505.571783275,    5151935.765373088}}};
 
-  std::unordered_map<std::string, xt::xarray<double>> alpha_m2 = {
+  std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
+  Eigen::Dynamic>> alpha_m2 = {
       {"H",
        {0.0002284591402997886, -0.0008414821121140717, 0.0016015201093649723,
         -0.002560258998795895, 0.0036974889839234927,  -0.00708811566931536,
@@ -969,9 +987,11 @@ private:
         309336.6851135901,     -1146351.6988797847,    1485403.8847473748,
         -2514262.917802126,    7258773.956651502}}};
 
-  xt::xarray<double> operator_exponents = {
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator_exponents = {
       0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128, 0.256,
       0.512, 1.0,   2.0,   3.0,   4.0,   5.0,   6.0,   7.0,   8.0,
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0, 250.0};
+  */
 };
+} // namespace selci
 #endif

@@ -18,6 +18,10 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(molecule io)
-target_include_directories(molecule PUBLIC include)
-install(TARGETS molecule DESTINATION lib)
-install(FILES ${_HDRS} DESTINATION include/molecule)
+# target_include_directories(molecule PUBLIC include)
+install(
+  TARGETS molecule
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/molecule)
+
+# install(FILES ${_HDRS} DESTINATION include/molecule)

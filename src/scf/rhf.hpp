@@ -1,18 +1,15 @@
-#include "xtensor-blas/xlinalg.hpp"
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
+#include "basis/basis.hpp"
+#include "integral/integral.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
+#include "molecule/quantum_particles.hpp"
+#include "scf/scf.hpp"
 #include <libint2/chemistry/sto3g_atomic_density.h>
-#include <molecule/molecule.hpp>
-#include <scf/scf.hpp>
 #include <string>
-#include <xtensor/xadapt.hpp>
-#include <xtensor/xarray.hpp>
-#include <xtensor/xnpy.hpp>
-#include <xtensor/xview.hpp>
 
 #ifndef PYCI_RHF_H
 #define PYCI_RHF_H
+namespace selci {
 
 class PYCI_RHF : PYCI_SCF {
 public:
@@ -22,6 +19,8 @@ public:
       : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
+  double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
+                        double eri_ikjl, double qa, double qb, bool exchange);
   void form_fock() override;
   void diag_fock() override;
   void form_DM() override;
@@ -36,48 +35,56 @@ public:
    * @brief H_core matrix
    *
    */
-  xt::xarray<double> H_core;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> H_core;
 
   /**
    * @brief One particle density matrix
    *
    */
-  xt::xarray<double> D;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  xt::xarray<double> D_last;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  xt::xarray<double> F;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  xt::xarray<double> C;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      C;
 
   /**
    * @brief MO energy vector
    *
    */
-  xt::xarray<double> E_orbitals;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals;
   /**
-   * @brief Electronic energy
+   * @brief Energy of the quantum particles
    *
    */
-  double E_elec = 0.0;
+  std::vector<double> E_particles;
   /**
-   * @brief Electronic energy from the previous iteration
+   * @brief Energy of the quantum particles from the previous iteration
    *
    */
-  double E_elec_last = 0.0;
+  std::vector<double> E_particles_last;
   /**
-   * @brief Total energy
+   * @brief Total energy including the static classical centers
    *
    */
   double E_total = 0.0;
@@ -90,12 +97,12 @@ public:
    * @brief Iteration energy difference
    *
    */
-  double iteration_E_diff = 0.0;
+  std::vector<double> iteration_E_diff;
   /**
    * @brief Iteration rmsc DM
    *
    */
-  double iteration_rmsc_dm = 0.0;
+  std::vector<std::vector<double>> iteration_rmsc_dm;
   /**
    * @brief Stop running iterations?
    *
@@ -106,6 +113,7 @@ public:
    *
    */
   bool converged = false;
+  bool independent_converged = false;
   /**
    * @brief Exceeded iterations?
    *
@@ -127,4 +135,5 @@ public:
    */
   int iteration_max = 500;
 };
+} // namespace selci
 #endif

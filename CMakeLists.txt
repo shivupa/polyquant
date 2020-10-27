@@ -1,6 +1,20 @@
 # Set a requirement on the cmake version
 cmake_minimum_required(VERSION 3.6.0 FATAL_ERROR)
 
+# Macro
+include(FetchContent)
+# FetchContent_MakeAvailable is only availible in CMake 3.14+ This macro mimics
+# the behavior
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+  macro(FetchContent_MakeAvailable NAME)
+    FetchContent_GetProperties(${NAME})
+    if(NOT ${NAME}_POPULATED)
+      FetchContent_Populate(${NAME})
+      add_subdirectory(${${NAME}_SOURCE_DIR} ${${NAME}_BINARY_DIR})
+    endif()
+  endmacro()
+endif()
+
 # Set up the project and version info
 project(PYCI)
 set(PYCI_VERSION_MAJOR 0)
@@ -29,11 +43,28 @@ set(PYCI_MPI
 set(PYCI_DEBUG
     0
     CACHE BOOL "Enable/disable debug printing")
-set(PYCI_DOCS
+set(PYCI_DOC
     0
     CACHE BOOL "Enable/disable documentation building")
+# Todo change this to be selected based on what libraries are found
+set(PYCI_USE_DENSE_MATRIX_STL
+    0
+    CACHE BOOL "Dense Matrix Type")
+set(PYCI_USE_DENSE_MATRIX_EIGEN
+    1
+    CACHE BOOL "Dense Matrix Type")
+# ##############################################################################
+set(PYCI_TEST
+    1
+    CACHE BOOL "Enable/disable testing")
 
 message(STATUS "Ready to build PYCI")
+
+if(PYCI_USE_DENSE_MATRIX_STL)
+  add_definitions(-DPYCI_MATH_STL)
+elseif(PYCI_USE_DENSE_MATRIX_EIGEN)
+  add_definitions(-DPYCI_MATH_EIGEN)
+endif(PYCI_USE_DENSE_MATRIX_STL)
 
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
@@ -47,12 +78,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # enable testing so the tests will build should we use a flag to only build
 # tests if asked to build it? I think I would like tests to build every time.
-enable_testing()
+if(PYCI_TEST)
+  enable_testing()
+endif(PYCI_TEST)
 
 # if the debug flag is on this will use include what you use to check the
 # headers it also makes the make files verbose so you can see what the build is
 # doing
 if(PYCI_DEBUG)
+  # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
   # https://stackoverflow.com/questions/41610822/set-cxx-include-what-you-use-
   # property-in-cmake-for-every-target
   find_program(IWYU_PATH NAMES include-what-you-use iwyu)
@@ -63,6 +97,7 @@ if(PYCI_DEBUG)
   set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE on)
 endif(PYCI_DEBUG)
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 # if the docs flag is on this will use doxygen to build the docs
 if(PYCI_DOCS)
@@ -86,11 +121,8 @@ endif(PYCI_DOCS)
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
-# Find all the things FIND PETSC
-find_package(PETSC REQUIRED)
-# FIND SLEPC
-find_package(SLEPC REQUIRED)
-# FIND nlohmann_json
+# Find all the things FIND PETSC find_package(PETSC REQUIRED) FIND SLEPC
+# find_package(SLEPC REQUIRED) FIND nlohmann_json
 find_package(nlohmann_json 3.2.0 REQUIRED)
 # FIND CPR
 find_package(CPR REQUIRED)
@@ -100,12 +132,16 @@ find_package(CURL REQUIRED)
 find_package(Libint2 REQUIRED)
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-# FIND xtensor
-find_package(xtl REQUIRED)
-find_package(xtensor REQUIRED)
-find_package(BLAS REQUIRED)
-# find_package(CBLAS REQUIRED)
-find_package(LAPACK REQUIRED)
+# FIND xtensor find_package(xtl REQUIRED) find_package(xtensor REQUIRED)
+find_package(OpenMP REQUIRED)
+# find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
+find_package(cxxopts REQUIRED)
+FetchContent_Declare(
+  doctest
+  GIT_REPOSITORY https://github.com/onqtam/doctest.git
+  GIT_TAG 2.4.0)
+FetchContent_MakeAvailable(doctest)
+include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci
@@ -115,7 +151,9 @@ find_package(LAPACK REQUIRED)
 # this will do stuff in the src/CMakeLists.txt
 add_subdirectory(src)
 # this will do stuff in the tests/CMakeLists.txt
-add_subdirectory(tests)
+if(PYCI_TEST)
+  add_subdirectory(tests)
+endif(PYCI_TEST)
 
 # if its a debug build this will print all the cmake variables
 if(PYCI_DEBUG)

@@ -1,4 +1,6 @@
-#include <scf/scf.hpp>
+#include "scf/scf.hpp"
+
+using namespace selci;
 
 PYCI_SCF::PYCI_SCF(const PYCI_INPUT &input_params,
                    const PYCI_MOLECULE &input_molecule,

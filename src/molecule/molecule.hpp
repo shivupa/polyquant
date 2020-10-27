@@ -1,12 +1,17 @@
-#include <io/io.hpp>
+#include "io/io.hpp"
+#include "molecule/classical_particles.hpp"
+#include "molecule/quantum_particles.hpp"
+#include <algorithm>
 #include <iostream>
-#include <libint2.hpp> // IWYU pragma: keep
+#include <libint2.hpp> // IWYU pragma, keep
 #include <numeric>
 #include <string>
 #include <vector>
 
 #ifndef PYCI_MOLECULE_H
 #define PYCI_MOLECULE_H
+namespace selci {
+
 /**
  * @brief A class to store information about a molecule
  *
@@ -28,6 +33,11 @@ public:
    * @param input a PYCI_INPUT instance
    */
   void setup_molecule(const PYCI_INPUT &input);
+  void set_molecular_charge(const PYCI_INPUT &input);
+  void set_molecular_multiplicity(const PYCI_INPUT &input);
+  void set_molecular_restricted(const PYCI_INPUT &input);
+  void parse_particles(const PYCI_INPUT &input);
+  void print_molecule();
 
   /**
    * @brief Calculate the nuclear repulsion energy.
@@ -39,73 +49,44 @@ public:
    * @brief Create a vector of libint atoms which is needed to use the libint
    * library.
    *
-   * @return std::vector<libint2::Atom> the vector of atoms
+   * @return std::vector<libint2,,Atom> the vector of atoms
    */
-  std::vector<libint2::Atom> to_libint_atom() const;
+  std::vector<libint2::Atom>
+  to_libint_atom(std::string classical_part_key = "all") const;
 
   /**
    * @brief Create an xyz representation of the molecule.
    *
    * @return std::string containing the molecule in xyz format
    */
-  std::string dump_xyz() const;
+  std::string dump_xyz(std::string classical_part_key = "all") const;
 
-  /**
-   * @brief a list of atomic symbols
-   *
-   */
-  std::vector<std::string> atom_symb;
+  std::vector<std::vector<double>> centers;
 
-  /**
-   * @brief the number of atoms
-   *
-   */
-  int num_atom;
-  /**
-   * @brief a list of x,y,z coordinates
-   *
-   */
-  std::vector<std::vector<double>> atom_coord;
-  /**
-   * @brief a list of atomic numbers
-   *
-   */
-  std::vector<int> atom_num;
-  /**
-   * @brief the list of libint atom objects
-   *
-   */
-  std::vector<libint2::Atom> libint_atom;
-  /**
-   * @brief the total number of electrons
-   *
-   */
-  int num_elec;
-  /**
-   * @brief the number of alpha electrons
-   *
-   */
-  int num_elec_alpha;
-  /**
-   * @brief the number of beta electrons
-   *
-   */
-  int num_elec_beta;
+  std::map<std::string, CLASSICAL_PARTICLE_SET> classical_particles;
+
+  std::map<std::string, QUANTUM_PARTICLE_SET> quantum_particles;
+
+  std::vector<libint2::Atom> libint_classical_particles;
+
   /**
    * @brief the molecular charge
    *
    */
   int charge;
   /**
-   * @brief the spin multiplicity
+   * @brief the spin multiplicity of ONLY the electrons
    *
    */
   int multiplicity;
+
+  bool restricted;
   /**
-   * @brief the nuclear repulsion energy
+   * @brief the nuclear repulsion energy of the classical nuclei
    *
    */
   double E_nuc;
+
   /**
    * @brief bohr to angstroms conversion todo remove
    *
@@ -122,9 +103,7 @@ private:
    * @brief a map from atomic symbols to atomic numbers
    *
    */
-  std::map<std::string, int> _atm_symb_to_num = {
-      {"H", 1},   {"He", 2},  {"Li", 3}, {"Be", 4},  {"B", 5},   {"C", 6},
-      {"N", 7},   {"O", 8},   {"F", 9},  {"Ne", 10}, {"Na", 11}, {"Mg", 12},
-      {"Al", 13}, {"Si", 14}, {"P", 15}, {"S", 16},  {"Cl", 17}, {"Ar", 18}};
-};
+
+}; // namespace selci
+} // namespace selci
 #endif

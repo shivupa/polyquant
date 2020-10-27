@@ -1,16 +1,16 @@
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.[hc]pp")
+
 add_library(io ${_HDRS} ${_SRCS})
 
-if(PETSC_FOUND)
-  include_directories(${PETSC_INCLUDES})
-  target_link_libraries(io ${PETSC_LIBRARIES})
-endif(PETSC_FOUND)
+if(Eigen3_FOUND)
+  target_link_libraries(io Eigen3::Eigen)
+endif(Eigen3_FOUND)
+# target_include_directories(io PRIVATE include)
+target_link_libraries(io)
 
-if(SLEPC_FOUND)
-  include_directories(${SLEPC_INC})
-  target_link_libraries(io ${SLEPC_LIB})
-endif(SLEPC_FOUND)
-target_include_directories(io PUBLIC include)
-install(TARGETS io DESTINATION lib)
-install(FILES ${_HDRS} DESTINATION include/io)
+install(
+  TARGETS io
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/io)
+# install(FILES ${_HDRS} DESTINATION include/io)

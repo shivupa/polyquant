@@ -1,11 +1,13 @@
-#include <basis/basis.hpp>
-#include <integral/integral.hpp>
-#include <io/io.hpp>
-#include <molecule/molecule.hpp>
+#include "basis/basis.hpp"
+#include "integral/integral.hpp"
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include <string>
 
 #ifndef PYCI_SCF_H
 #define PYCI_SCF_H
+namespace selci {
+
 /**
  * @brief A class to set up SCF type calculations.
  *
@@ -62,4 +64,5 @@ public:
    */
   PYCI_INTEGRAL input_integral;
 };
+} // namespace selci
 #endif

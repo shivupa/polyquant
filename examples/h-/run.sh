@@ -1,7 +1,8 @@
 #!/bin/bash
 
 
-../../build/bin/pyci -i h2o.json
+../../build/bin/pyci -i H_wpos.json
+../../build/bin/pyci -i H_wopos.json
 
 
 #python h2o.py
