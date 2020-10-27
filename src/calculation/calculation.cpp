@@ -169,7 +169,7 @@ std::string PYCI_CALCULATION::parse_electronic_mean_field() {
 
 void PYCI_CALCULATION::run_electronic_mean_field(std::string &mean_field_type) {
   if (mean_field_type == "SCF") {
-    PYCI_RHF rhf_calc = PYCI_RHF(this->input_params, this->input_molecule,
+    PYCI_EPSCF rhf_calc = PYCI_EPSCF(this->input_params, this->input_molecule,
                                  this->input_basis, this->input_integral);
     rhf_calc.run();
   }

@@ -4,7 +4,7 @@
 #include "molecule/molecule.hpp"
 #include <algorithm>
 // #include <scf/eprhf.hpp>
-#include "scf/rhf.hpp"
+#include "scf/epscf.hpp"
 #include <string>
 #include <unordered_set>
 
