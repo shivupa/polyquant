@@ -13,7 +13,8 @@ void PYCI_RHF::form_H_core() {
         (1.0 / quantum_part.mass) * this->input_integral.kinetic;
     this->H_core[quantum_part_idx] +=
         (-quantum_part.charge) * this->input_integral.nuclear;
-    // Selci_dump_mat_to_file(this->H_core, "H_core.txt");
+    Selci_dump_mat_to_file(this->H_core[quantum_part_idx],
+                           "H_core_" + quantum_part_key + ".txt");
     quantum_part_idx++;
   }
 }
@@ -21,53 +22,43 @@ void PYCI_RHF::form_H_core() {
 void PYCI_RHF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
-  this->F.resize(this->input_molecule.quantum_particles.size());
-
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_a_idx = 0;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_b_idx = 0;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
     if (quantum_part_a.num_parts == 1) {
-      this->F[quantum_part_a_idx].resize(1);
       this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
       for (int i = 0; i < num_basis; i++) {
         for (int j = 0; j < num_basis; j++) {
           for (int k = 0; k < num_basis; k++) {
             for (int l = 0; l < num_basis; l++) {
-              // this->F[quantum_part_a_idx][0](i, j) +=
-              //     this->D[quantum_part_a_idx][0](k, l) *
-              //     ((this->input_integral.twoelec(
-              //          this->input_integral.idx8(i, j, k, l))) -
-              //      this->input_integral.twoelec(
-              //          this->input_integral.idx8(i, k, j, l)));
               quantum_part_b_idx = 0;
               for (auto const &[quantum_part_b_key, quantum_part_b] :
                    this->input_molecule.quantum_particles) {
-                if (quantum_part_a_key == quantum_part_b_key) {
-                  quantum_part_b_idx++;
-                  continue;
-                }
-                // todo deal with exchange with electrons
-                if (quantum_part_b.num_parts == 1) {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                } else if (quantum_part_b.restricted == false) {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      (this->D[quantum_part_b_idx][0](k, l) +
-                       this->D[quantum_part_b_idx][1](k, l)) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                } else {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (2.0 * this->input_integral.twoelec(
-                                 this->input_integral.idx8(i, j, k, l)));
+                if (quantum_part_a_idx != quantum_part_b_idx) {
+                  // todo deal with exchange with electrons
+                  if (quantum_part_b.num_parts == 1) {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        ((quantum_part_a.charge * quantum_part_b.charge) *
+                         this->D[quantum_part_b_idx][0](k, l) *
+                         this->input_integral.twoelec(
+                             this->input_integral.idx8(i, j, k, l)));
+                  } else if (quantum_part_b.restricted == false) {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        ((quantum_part_a.charge * quantum_part_b.charge) *
+                         (this->D[quantum_part_b_idx][0](k, l) +
+                          this->D[quantum_part_b_idx][1](k, l)) *
+                         2.0 *
+                         this->input_integral.twoelec(
+                             this->input_integral.idx8(i, j, k, l)));
+                  } else {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        ((quantum_part_a.charge * quantum_part_b.charge) *
+                         this->D[quantum_part_b_idx][0](k, l) * 2.0 *
+                         this->input_integral.twoelec(
+                             this->input_integral.idx8(i, j, k, l)));
+                  }
                 }
                 quantum_part_b_idx++;
               }
@@ -75,11 +66,14 @@ void PYCI_RHF::form_fock() {
           }
         }
       }
+      if (this->iteration_num == 1) {
+        Selci_cout("Dumping1");
+        Selci_dump_mat_to_file(this->F[quantum_part_a_idx][0],
+                               "Fock_" + quantum_part_a_key + ".txt");
+      }
     } else if (quantum_part_a.restricted == false) {
-      this->F[quantum_part_a_idx].resize(2);
       this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_a_idx][1].setZero(num_basis, num_basis);
-
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
       this->F[quantum_part_a_idx][1] += this->H_core[quantum_part_a_idx];
       for (int i = 0; i < num_basis; i++) {
@@ -87,7 +81,6 @@ void PYCI_RHF::form_fock() {
           for (int k = 0; k < num_basis; k++) {
             for (int l = 0; l < num_basis; l++) {
               this->F[quantum_part_a_idx][0](i, j) +=
-
                   ((this->D[quantum_part_a_idx][0](k, l) +
                     this->D[quantum_part_a_idx][1](k, l)) *
                    this->input_integral.twoelec(
@@ -96,7 +89,6 @@ void PYCI_RHF::form_fock() {
                    this->input_integral.twoelec(
                        this->input_integral.idx8(i, k, j, l)));
               this->F[quantum_part_a_idx][1](i, j) +=
-
                   ((this->D[quantum_part_a_idx][0](k, l) +
                     this->D[quantum_part_a_idx][1](k, l)) *
                    this->input_integral.twoelec(
@@ -107,46 +99,45 @@ void PYCI_RHF::form_fock() {
               quantum_part_b_idx = 0;
               for (auto const &[quantum_part_b_key, quantum_part_b] :
                    this->input_molecule.quantum_particles) {
-                if (quantum_part_a_key == quantum_part_b_key) {
-                  quantum_part_b_idx++;
-                  continue;
-                }
-                // todo deal with exchange with electrons
-                if (quantum_part_b.num_parts == 1) {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                  this->F[quantum_part_a_idx][1](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                } else if (quantum_part_b.restricted == false) {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      (this->D[quantum_part_b_idx][0](k, l) +
-                       this->D[quantum_part_b_idx][1](k, l)) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                  this->F[quantum_part_a_idx][1](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      (this->D[quantum_part_b_idx][0](k, l) +
-                       this->D[quantum_part_b_idx][1](k, l)) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                } else {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (2.0 * this->input_integral.twoelec(
-                                 this->input_integral.idx8(i, j, k, l)));
-                  this->F[quantum_part_a_idx][1](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (2.0 * this->input_integral.twoelec(
-                                 this->input_integral.idx8(i, j, k, l)));
+                if (quantum_part_a_idx != quantum_part_b_idx) {
+                  // todo deal with exchange with electrons
+                  if (quantum_part_b.num_parts == 1) {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        this->D[quantum_part_b_idx][0](k, l) *
+                        (this->input_integral.twoelec(
+                            this->input_integral.idx8(i, j, k, l)));
+                    this->F[quantum_part_a_idx][1](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        this->D[quantum_part_b_idx][0](k, l) *
+                        (this->input_integral.twoelec(
+                            this->input_integral.idx8(i, j, k, l)));
+                  } else if (quantum_part_b.restricted == false) {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        (this->D[quantum_part_b_idx][0](k, l) +
+                         this->D[quantum_part_b_idx][1](k, l)) *
+                        2.0 *
+                        (this->input_integral.twoelec(
+                            this->input_integral.idx8(i, j, k, l)));
+                    this->F[quantum_part_a_idx][1](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        (this->D[quantum_part_b_idx][0](k, l) +
+                         this->D[quantum_part_b_idx][1](k, l)) *
+                        (this->input_integral.twoelec(
+                            this->input_integral.idx8(i, j, k, l)));
+                  } else {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        this->D[quantum_part_b_idx][0](k, l) *
+                        (2.0 * this->input_integral.twoelec(
+                                   this->input_integral.idx8(i, j, k, l)));
+                    this->F[quantum_part_a_idx][1](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        this->D[quantum_part_b_idx][0](k, l) *
+                        (2.0 * this->input_integral.twoelec(
+                                   this->input_integral.idx8(i, j, k, l)));
+                  }
                 }
                 quantum_part_b_idx++;
               }
@@ -154,8 +145,14 @@ void PYCI_RHF::form_fock() {
           }
         }
       }
+      if (this->iteration_num == 1) {
+        Selci_cout("Dumping2");
+        Selci_dump_mat_to_file(this->F[quantum_part_a_idx][0],
+                               "Fock_" + quantum_part_a_key + "_alpha.txt");
+        Selci_dump_mat_to_file(this->F[quantum_part_a_idx][1],
+                               "Fock_" + quantum_part_a_key + "_beta.txt");
+      }
     } else {
-      this->F[quantum_part_a_idx].resize(1);
       this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
       for (int i = 0; i < num_basis; i++) {
@@ -171,30 +168,34 @@ void PYCI_RHF::form_fock() {
               quantum_part_b_idx = 0;
               for (auto const &[quantum_part_b_key, quantum_part_b] :
                    this->input_molecule.quantum_particles) {
-                if (quantum_part_a_key == quantum_part_b_key) {
-                  quantum_part_b_idx++;
-                  continue;
+                if (this->iteration_num == 1) {
+                  Selci_cout(quantum_part_a_idx);
+                  Selci_cout(quantum_part_b_idx);
                 }
-                // todo deal with exchange with electrons
-                if (quantum_part_b.num_parts == 1) {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                } else if (quantum_part_b.restricted == false) {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      (this->D[quantum_part_b_idx][0](k, l) +
-                       this->D[quantum_part_b_idx][1](k, l)) *
-                      (this->input_integral.twoelec(
-                          this->input_integral.idx8(i, j, k, l)));
-                } else {
-                  this->F[quantum_part_a_idx][0](i, j) +=
-                      (quantum_part_a.charge * quantum_part_b.charge) *
-                      this->D[quantum_part_b_idx][0](k, l) *
-                      (2.0 * this->input_integral.twoelec(
-                                 this->input_integral.idx8(i, j, k, l)));
+
+                if (quantum_part_a_idx != quantum_part_b_idx) {
+                  // todo deal with exchange with electrons
+                  if (quantum_part_b.num_parts == 1) {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        this->D[quantum_part_b_idx][0](k, l) *
+                        (this->input_integral.twoelec(
+                            this->input_integral.idx8(i, j, k, l)));
+                  } else if (quantum_part_b.restricted == false) {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        (this->D[quantum_part_b_idx][0](k, l) +
+                         this->D[quantum_part_b_idx][1](k, l)) *
+                        2.0 *
+                        (this->input_integral.twoelec(
+                            this->input_integral.idx8(i, j, k, l)));
+                  } else {
+                    this->F[quantum_part_a_idx][0](i, j) +=
+                        (quantum_part_a.charge * quantum_part_b.charge) *
+                        this->D[quantum_part_b_idx][0](k, l) *
+                        (2.0 * this->input_integral.twoelec(
+                                   this->input_integral.idx8(i, j, k, l)));
+                  }
                 }
                 quantum_part_b_idx++;
               }
@@ -202,9 +203,13 @@ void PYCI_RHF::form_fock() {
           }
         }
       }
-      quantum_part_a_idx++;
+      if (this->iteration_num == 1) {
+        Selci_cout("Dumping3");
+        Selci_dump_mat_to_file(this->F[quantum_part_a_idx][0],
+                               "Fock_" + quantum_part_a_key + ".txt");
+      }
     }
-
+    quantum_part_a_idx++;
     // Selci_dump_mat_to_file(this->F, "F.txt");
   }
 }
@@ -240,14 +245,12 @@ void PYCI_RHF::diag_fock() {
       Eigen::SelfAdjointEigenSolver<
           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
           eigensolver_alpha(F_prime);
-
       this->E_orbitals[quantum_part_idx][0] = eigensolver_alpha.eigenvalues();
       C_prime = eigensolver_alpha.eigenvectors();
       this->C[quantum_part_idx][0] = this->input_integral.orth_X * C_prime;
 
       F_prime = this->input_integral.orth_X * this->F[quantum_part_idx][1] *
                 this->input_integral.orth_X;
-
       Eigen::SelfAdjointEigenSolver<
           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
           eigensolver_beta(F_prime);
@@ -488,9 +491,7 @@ void PYCI_RHF::guess_DM() {
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-    Selci_cout(quantum_part_key);
     if (quantum_part.num_parts == 1) {
-      Selci_cout("guuess dm1");
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
@@ -500,7 +501,6 @@ void PYCI_RHF::guess_DM() {
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
     } else if (quantum_part.restricted == false) {
-      Selci_cout("guuess dm2");
       this->D[quantum_part_idx].resize(2);
       this->D_last[quantum_part_idx].resize(2);
       this->C[quantum_part_idx].resize(2);
@@ -514,7 +514,6 @@ void PYCI_RHF::guess_DM() {
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][1].setZero(num_basis, num_basis);
     } else {
-      Selci_cout("guuess dm3");
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
@@ -524,25 +523,25 @@ void PYCI_RHF::guess_DM() {
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       // SAD for Restricted systems
-      if (quantum_part_key == "electron") {
-        // compute number of atomic orbitals
-        size_t nao = 0;
-        for (const auto &atom : this->input_molecule.to_libint_atom()) {
-          const auto Z = atom.atomic_number;
-          nao += libint2::sto3g_num_ao(Z);
-        }
+      // if (quantum_part_key == "electron") {
+      //   // compute number of atomic orbitals
+      //   size_t nao = 0;
+      //   for (const auto &atom : this->input_molecule.to_libint_atom()) {
+      //     const auto Z = atom.atomic_number;
+      //     nao += libint2::sto3g_num_ao(Z);
+      //   }
 
-        // compute the minimal basis density
-        size_t ao_offset = 0; // first AO of this atom
-        for (const auto &atom : this->input_molecule.to_libint_atom()) {
-          const auto Z = atom.atomic_number;
-          const auto &occvec = libint2::sto3g_ao_occupation_vector(Z);
-          for (const auto &occ : occvec) {
-            this->D[quantum_part_idx][0](ao_offset, ao_offset) = occ;
-            ++ao_offset;
-          }
-        }
-      }
+      //   // compute the minimal basis density
+      //   size_t ao_offset = 0; // first AO of this atom
+      //   for (const auto &atom : this->input_molecule.to_libint_atom()) {
+      //     const auto Z = atom.atomic_number;
+      //     const auto &occvec = libint2::sto3g_ao_occupation_vector(Z);
+      //     for (const auto &occ : occvec) {
+      //       this->D[quantum_part_idx][0](ao_offset, ao_offset) = occ;
+      //       ++ao_offset;
+      //     }
+      //   }
+      // }
     }
 
     quantum_part_idx++;
@@ -560,14 +559,16 @@ void PYCI_RHF::run() {
   this->guess_DM();
   while (!this->stop) {
     Selci_cout("Iteration " + std::to_string(this->iteration_num) + " :");
+    auto E_parts = 0.0;
     std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] :
          this->input_molecule.quantum_particles) {
       Selci_cout("E(" + quantum_part_key +
                  ") : " + std::to_string(this->E_particles[quantum_part_idx]));
+      E_parts += this->E_particles[quantum_part_idx];
       quantum_part_idx++;
     }
-    // Selci_cout(this->E_particles);
+    Selci_cout("E(particles) : " + std::to_string(E_parts));
     this->run_iteration();
     this->check_stop();
   }

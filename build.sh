@@ -18,8 +18,8 @@ cmake  \
 make -j 1
 make test
 #make Sphinx
-cd ..
-cd examples/h2o
-./run.sh
+#cd ..
+#cd examples/h2o
+#./run.sh
 #cd ../hcn
 #./run.sh

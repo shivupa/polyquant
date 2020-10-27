@@ -24,7 +24,7 @@ void PYCI_MOLECULE::set_molecular_multiplicity(const PYCI_INPUT &input) {
 
 void PYCI_MOLECULE::set_molecular_restricted(const PYCI_INPUT &input) {
   if (input.input_data["keywords"].contains("restricted")) {
-    this->multiplicity = input.input_data["molecule"]["restricted"];
+    this->restricted = input.input_data["keywords"]["restricted"];
   } else {
     APP_ABORT("Can't set up molecule. The keywords section of the input is "
               "missing 'restricted'.");
@@ -292,6 +292,8 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     quantum_particles[curr_label].num_parts_beta =
         ((num_parts) - (this->multiplicity - 1)) / 2;
     quantum_particles[curr_label].exchange = true;
+    quantum_particles[curr_label].restricted = this->restricted;
+    quantum_particles[curr_label].multiplicity = this->multiplicity;
   } else {
     APP_ABORT("Electrons should not have been created yet.");
   }
@@ -360,6 +362,7 @@ void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
   if (input.input_data.contains("molecule")) {
     set_molecular_charge(input);
     set_molecular_multiplicity(input);
+    set_molecular_restricted(input);
     parse_particles(input);
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
