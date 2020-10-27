@@ -76,7 +76,7 @@ void PYCI_RHF::form_fock() {
                   Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
             }
             // Interactions between particle types Fock Matrix elements
-            if (this->iteration_num < this->iteration_int_start) {
+            if (!independent_converged) {
               continue;
             }
             quantum_part_b_idx = 0;
@@ -336,6 +336,12 @@ void PYCI_RHF::check_stop() {
     quantum_part_idx++;
     Selci_cout(buffer.str());
   }
+  if (!this->independent_converged && this->converged && this->stop) {
+    Selci_cout("Independent densities converged. Turning on interactions.");
+    this->converged = false;
+    this->stop = false;
+    this->independent_converged = true;
+  }
   if (this->iteration_num == this->iteration_max) {
     this->exceeded_iterations = true;
     this->stop = true;
@@ -440,9 +446,7 @@ void PYCI_RHF::run() {
     }
     Selci_cout("E(particles) : " + std::to_string(E_parts));
     this->run_iteration();
-    if (this->iteration_num > this->iteration_min) {
-      this->check_stop();
-    }
+    this->check_stop();
   }
   this->calculate_E_total();
   if (this->stop && this->converged) {

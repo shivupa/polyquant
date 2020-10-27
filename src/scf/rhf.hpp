@@ -113,6 +113,7 @@ public:
    *
    */
   bool converged = false;
+  bool independent_converged = false;
   /**
    * @brief Exceeded iterations?
    *
@@ -133,8 +134,6 @@ public:
    *
    */
   int iteration_max = 500;
-  int iteration_min = 20;
-  int iteration_int_start = 10;
 };
 } // namespace selci
 #endif
