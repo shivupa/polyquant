@@ -1,3 +1,0 @@
-get a basis set that isn't in the libint library and load it
-
-load custom basis per atoms
