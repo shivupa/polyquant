@@ -1,0 +1,27 @@
+{
+  "schema_name": "qc_schema_input", 
+  "schema_version": 1,
+  "molecule": {
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H"],
+    "molecular_charge": -1,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "scf",
+    "basis": 
+        {"H" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "H_basis.g94"}}]}
+             
+  },
+  "keywords": {
+    "restricted" : true
+      }
+}
+

@@ -19,6 +19,8 @@ public:
       : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
+  double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
+                        double eri_ikjl, double qa, double qb, bool exchange);
   void form_fock() override;
   void diag_fock() override;
   void form_DM() override;
@@ -131,6 +133,8 @@ public:
    *
    */
   int iteration_max = 500;
+  int iteration_min = 20;
+  int iteration_int_start = 10;
 };
 } // namespace selci
 #endif

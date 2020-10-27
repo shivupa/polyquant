@@ -12,7 +12,6 @@ void PYCI_INTEGRAL::calculate_overlap() {
   if (this->overlap.cols() == 0 && this->overlap.rows() == 0) {
     Selci_cout("Calculating One Body Overlap Integrals...");
     auto num_basis = this->input_basis.num_basis;
-    Selci_cout(num_basis);
     libint2::initialize();
     this->overlap.resize(num_basis, num_basis);
     this->overlap.fill(0);
