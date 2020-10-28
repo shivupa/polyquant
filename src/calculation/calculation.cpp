@@ -1,30 +1,30 @@
 #include "calculation/calculation.hpp"
 
-using namespace selci;
+using namespace polyquant;
 
-PYCI_CALCULATION::PYCI_CALCULATION(const std::string &filename) {
+POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
   this->setup_calculation(filename);
 }
-void PYCI_CALCULATION::setup_calculation(const std::string &filename) {
+void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
-  Selci_cout("SETTING UP INPUT FILE");
-  this->input_params = PYCI_INPUT(filename);
+  Polyquant_cout("SETTING UP INPUT FILE");
+  this->input_params = POLYQUANT_INPUT(filename);
   // parse molecule
-  Selci_cout("SETTING UP MOLECULE");
-  this->input_molecule = PYCI_MOLECULE(this->input_params);
+  Polyquant_cout("SETTING UP MOLECULE");
+  this->input_molecule = POLYQUANT_MOLECULE(this->input_params);
   // parse basis
-  Selci_cout("SETTING UP BASIS");
-  this->input_basis = PYCI_BASIS(this->input_params, this->input_molecule);
+  Polyquant_cout("SETTING UP BASIS");
+  this->input_basis = POLYQUANT_BASIS(this->input_params, this->input_molecule);
   // parse integral
-  Selci_cout("SETTING UP INTEGRAL");
-  this->input_integral = PYCI_INTEGRAL(this->input_params, this->input_basis,
+  Polyquant_cout("SETTING UP INTEGRAL");
+  this->input_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis,
                                        this->input_molecule);
 }
 
-void PYCI_CALCULATION::run() {
+void POLYQUANT_CALCULATION::run() {
   // bool do_excess_electron = false;
   // bool do_positron = false;
-  // Selci_cout(
+  // Polyquant_cout(
   //    "Figuring out if we have positrons or (model) excess electrons...");
   // parse input to see if we intend to do a model excess electron or positron
   // calculation
@@ -60,7 +60,7 @@ void PYCI_CALCULATION::run() {
   //}
 }
 
-// void PYCI_CALCULATION::run_excess_positron_plus_electronic_mean_field(
+// void POLYQUANT_CALCULATION::run_excess_positron_plus_electronic_mean_field(
 //    std::string &mean_field_type) {
 //  if (mean_field_type == "NONE") {
 //    APP_ABORT(
@@ -68,12 +68,12 @@ void PYCI_CALCULATION::run() {
 //        "excess particle (e+ or e-). At least until orbitals can be read
 //        in.");
 //  }
-//  Selci_cout("We will be approximately treating an excess positron!");
+//  Polyquant_cout("We will be approximately treating an excess positron!");
 //  if (mean_field_type == "RHF") {
-//    PYCI_RHF rhf_calc = PYCI_RHF(this->input_params, this->input_molecule,
+//    POLYQUANT_RHF rhf_calc = POLYQUANT_RHF(this->input_params, this->input_molecule,
 //                                 this->input_basis, this->input_integral);
 //    rhf_calc.run();
-//    PYCI_EPRHF eprhf_calc = PYCI_EPRHF(this->input_params,
+//    POLYQUANT_EPRHF eprhf_calc = POLYQUANT_EPRHF(this->input_params,
 //    this->input_molecule,
 //                                       this->input_basis,
 //                                       this->input_integral);
@@ -99,7 +99,7 @@ void PYCI_CALCULATION::run() {
 //  }
 //}
 
-// void PYCI_CALCULATION::run_excess_electron_plus_electronic_mean_field(
+// void POLYQUANT_CALCULATION::run_excess_electron_plus_electronic_mean_field(
 //    std::string &mean_field_type) {
 //  if (mean_field_type == "NONE") {
 //    APP_ABORT(
@@ -107,12 +107,12 @@ void PYCI_CALCULATION::run() {
 //        "excess particle (e+ or e-). At least until orbitals can be read
 //        in.");
 //  }
-//  Selci_cout("We will be approximately treating an excess electron!");
+//  Polyquant_cout("We will be approximately treating an excess electron!");
 //  if (mean_field_type == "RHF") {
-//    PYCI_RHF rhf_calc = PYCI_RHF(this->input_params, this->input_molecule,
+//    POLYQUANT_RHF rhf_calc = POLYQUANT_RHF(this->input_params, this->input_molecule,
 //                                 this->input_basis, this->input_integral);
 //    rhf_calc.run();
-//    PYCI_EPRHF eprhf_calc = PYCI_EPRHF(this->input_params,
+//    POLYQUANT_EPRHF eprhf_calc = POLYQUANT_EPRHF(this->input_params,
 //    this->input_molecule,
 //                                       this->input_basis,
 //                                       this->input_integral);
@@ -140,8 +140,8 @@ void PYCI_CALCULATION::run() {
 //  }
 //}
 
-std::string PYCI_CALCULATION::parse_electronic_mean_field() {
-  Selci_cout("Figuring out if we need to run a mean-field calculation for the "
+std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
+  Polyquant_cout("Figuring out if we need to run a mean-field calculation for the "
              "electrons...");
   std::string mean_field_type = "NONE";
   // check that json contains a mean field object and assign to string
@@ -153,13 +153,13 @@ std::string PYCI_CALCULATION::parse_electronic_mean_field() {
     }
   }
   if (this->mean_field_methods.contains(mean_field_type)) {
-    Selci_cout("Will run a mean field calculation of type: ");
-    Selci_cout(mean_field_type);
+    Polyquant_cout("Will run a mean field calculation of type: ");
+    Polyquant_cout(mean_field_type);
   } else if (mean_field_type == "NONE") {
-    Selci_cout("Not running mean field calculation.");
+    Polyquant_cout("Not running mean field calculation.");
   } else {
-    Selci_cout("Unrecognized mean field calculation type: ");
-    Selci_cout(mean_field_type);
+    Polyquant_cout("Unrecognized mean field calculation type: ");
+    Polyquant_cout(mean_field_type);
     // APP ABORT HERE
     APP_ABORT("SELCI mean field parsing error. I can't understand the input "
               "provided. Could you double-check it?");
@@ -167,9 +167,9 @@ std::string PYCI_CALCULATION::parse_electronic_mean_field() {
   return mean_field_type;
 }
 
-void PYCI_CALCULATION::run_electronic_mean_field(std::string &mean_field_type) {
+void POLYQUANT_CALCULATION::run_electronic_mean_field(std::string &mean_field_type) {
   if (mean_field_type == "SCF") {
-    PYCI_EPSCF rhf_calc = PYCI_EPSCF(this->input_params, this->input_molecule,
+    POLYQUANT_EPSCF rhf_calc = POLYQUANT_EPSCF(this->input_params, this->input_molecule,
                                      this->input_basis, this->input_integral);
     rhf_calc.run();
   }

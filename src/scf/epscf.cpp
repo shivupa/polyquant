@@ -1,8 +1,8 @@
 #include "scf/epscf.hpp"
 
-using namespace selci;
+using namespace polyquant;
 
-void PYCI_EPSCF::form_H_core() {
+void POLYQUANT_EPSCF::form_H_core() {
   auto num_basis = this->input_basis.num_basis;
   this->H_core.resize(this->input_molecule.quantum_particles.size());
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
@@ -13,12 +13,12 @@ void PYCI_EPSCF::form_H_core() {
         (1.0 / quantum_part.mass) * this->input_integral.kinetic;
     this->H_core[quantum_part_idx] +=
         (-quantum_part.charge) * this->input_integral.nuclear;
-    Selci_dump_mat_to_file(this->H_core[quantum_part_idx],
+    Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx],
                            "H_core_" + quantum_part_key + ".txt");
     quantum_part_idx++;
   }
 }
-double PYCI_EPSCF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
+double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
                                   double eri_ikjl, double qa, double qb,
                                   bool exchange) {
   double gamma = 0.0;
@@ -31,7 +31,7 @@ double PYCI_EPSCF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
          (((Da_kl + Db_kl) * eri_ijkl) - (gamma * Da_kl * eri_ikjl));
 }
 
-void PYCI_EPSCF::form_fock() {
+void POLYQUANT_EPSCF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_a_idx = 0;
@@ -116,11 +116,11 @@ void PYCI_EPSCF::form_fock() {
     quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] :
          this->input_molecule.quantum_particles) {
-      Selci_cout("Dumping");
-      Selci_dump_mat_to_file(this->F[quantum_part_a_idx][0],
+      Polyquant_cout("Dumping");
+      Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
                              "Fock_" + quantum_part_a_key + "_alpha.txt");
       if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-        Selci_dump_mat_to_file(this->F[quantum_part_a_idx][1],
+        Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][1],
                                "Fock_" + quantum_part_a_key + "_beta.txt");
       }
       quantum_part_a_idx++;
@@ -128,7 +128,7 @@ void PYCI_EPSCF::form_fock() {
   }
 }
 
-void PYCI_EPSCF::diag_fock() {
+void POLYQUANT_EPSCF::diag_fock() {
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
@@ -166,7 +166,7 @@ void PYCI_EPSCF::diag_fock() {
   }
 }
 
-void PYCI_EPSCF::form_DM() {
+void POLYQUANT_EPSCF::form_DM() {
   auto num_basis = this->input_basis.num_basis;
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   for (auto const &[quantum_part_key, quantum_part] :
@@ -198,7 +198,7 @@ void PYCI_EPSCF::form_DM() {
     quantum_part_idx++;
   }
 }
-void PYCI_EPSCF::calculate_E_elec() {
+void POLYQUANT_EPSCF::calculate_E_elec() {
   std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
@@ -232,15 +232,15 @@ void PYCI_EPSCF::calculate_E_elec() {
     quantum_part_idx++;
   }
 }
-void PYCI_EPSCF::calculate_E_total() {
-  // Selci_cout(this->input_molecule.E_nuc);
+void POLYQUANT_EPSCF::calculate_E_total() {
+  // Polyquant_cout(this->input_molecule.E_nuc);
   this->E_total = 0.0;
   for (auto &E_part : E_particles) {
     this->E_total += E_part;
   }
   this->E_total += this->input_molecule.E_nuc;
 }
-void PYCI_EPSCF::check_stop() {
+void POLYQUANT_EPSCF::check_stop() {
   this->converged = true;
   this->stop = true;
   this->iteration_E_diff.resize(this->input_molecule.quantum_particles.size());
@@ -334,10 +334,10 @@ void PYCI_EPSCF::check_stop() {
       }
     }
     quantum_part_idx++;
-    Selci_cout(buffer.str());
+    Polyquant_cout(buffer.str());
   }
   if (!this->independent_converged && this->converged && this->stop) {
-    Selci_cout("Independent densities converged. Turning on interactions.");
+    Polyquant_cout("Independent densities converged. Turning on interactions.");
     this->converged = false;
     this->stop = false;
     this->independent_converged = true;
@@ -347,14 +347,14 @@ void PYCI_EPSCF::check_stop() {
     this->stop = true;
   }
 }
-void PYCI_EPSCF::run_iteration() {
+void POLYQUANT_EPSCF::run_iteration() {
   this->iteration_num += 1;
   this->form_fock();
   this->diag_fock();
   this->form_DM();
   this->calculate_E_elec();
 }
-void PYCI_EPSCF::guess_DM() {
+void POLYQUANT_EPSCF::guess_DM() {
   // SAD
   // TODO SAP
   // TODO move into separate functions
@@ -423,7 +423,7 @@ void PYCI_EPSCF::guess_DM() {
     quantum_part_idx++;
   }
 }
-void PYCI_EPSCF::run() {
+void POLYQUANT_EPSCF::run() {
   // calculate integrals we need
   this->input_integral.calculate_overlap();
   this->input_integral.symmetric_orthogonalization();
@@ -434,17 +434,17 @@ void PYCI_EPSCF::run() {
   this->form_H_core();
   this->guess_DM();
   while (!this->stop) {
-    Selci_cout("Iteration " + std::to_string(this->iteration_num) + " :");
+    Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
     auto E_parts = 0.0;
     std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] :
          this->input_molecule.quantum_particles) {
-      Selci_cout("E(" + quantum_part_key +
+      Polyquant_cout("E(" + quantum_part_key +
                  ") : " + std::to_string(this->E_particles[quantum_part_idx]));
       E_parts += this->E_particles[quantum_part_idx];
       quantum_part_idx++;
     }
-    Selci_cout("E(particles) : " + std::to_string(E_parts));
+    Polyquant_cout("E(particles) : " + std::to_string(E_parts));
     this->run_iteration();
     this->check_stop();
   }
@@ -456,5 +456,5 @@ void PYCI_EPSCF::run() {
   } else {
     this->print_error();
   }
-  Selci_cout(this->E_total);
+  Polyquant_cout(this->E_total);
 }

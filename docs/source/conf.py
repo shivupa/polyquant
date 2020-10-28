@@ -20,7 +20,7 @@ on_rtd = os.environ.get("READTHEDOCS") == "True"
 
 # -- Project information -----------------------------------------------------
 
-project = "Selci"
+project = "Polyquant"
 copyright = "2019, Shiv Upadhyay"
 author = "Shiv Upadhyay"
 
@@ -65,17 +65,17 @@ html_static_path = ["_static"]
 # -- Options for breathe and exhale extensions --------------------------------
 # Setup the breathe extension
 if on_rtd:
-    breathe_projects = {"Selci": "../_build/doxygenoutput/xml"}
+    breathe_projects = {"Polyquant": "../_build/doxygenoutput/xml"}
 else:
-    breathe_projects = {"Selci": "@PYCI_BINARY_DIR@/docs/doxygenoutput/xml"}
-breathe_default_project = "Selci"
+    breathe_projects = {"Polyquant": "@PYCI_BINARY_DIR@/docs/doxygenoutput/xml"}
+breathe_default_project = "Polyquant"
 
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
     "containmentFolder": "./api",
     "rootFileName": "library_root.rst",
-    "rootFileTitle": "Selci API",
+    "rootFileTitle": "Polyquant API",
     "doxygenStripFromPath": "..",
     # Suggested optional arguments
     "createTreeView": True,

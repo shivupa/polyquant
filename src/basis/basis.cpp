@@ -1,13 +1,13 @@
 #include <basis/basis.hpp>
 
-using namespace selci;
+using namespace polyquant;
 
-PYCI_BASIS::PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule) {
+POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {
   this->load_basis(input, molecule);
 }
-void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
-                            const PYCI_MOLECULE &molecule) {
-  Selci_cout("BASIS");
+void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
+                            const POLYQUANT_MOLECULE &molecule) {
+  Polyquant_cout("BASIS");
   this->basis = libint2::BasisSet();
   // parse basis name from data
   if (input.input_data.contains("model")) {
@@ -55,7 +55,7 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
                   //{"type" : "even-tempered","end"
                   //: 2.8284271247461903e-3,"start" : 32e-1,"num_funcs" :
                   // 7,"angular_mom" : 0}
-                  Selci_cout("Even tempered basis not implemented yet.");
+                  Polyquant_cout("Even tempered basis not implemented yet.");
                 } else if (center_basis["custom"]["type"] == "file") {
                   auto atom_basis = libint2::BasisSet::read_g94_basis_library(
                       center_basis["custom"]["filename"]);
@@ -86,13 +86,13 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
             }
           }
 
-          Selci_cout("Added basis for " + classical_part_key);
+          Polyquant_cout("Added basis for " + classical_part_key);
           this->num_basis = libint2::nbf(this->basis);
-          Selci_cout("Number of basis functions: " +
+          Polyquant_cout("Number of basis functions: " +
                      std::to_string(this->num_basis));
 
         } else {
-          Selci_cout("'model->basis' didn't contain a basis for: " +
+          Polyquant_cout("'model->basis' didn't contain a basis for: " +
                      classical_part_key);
         }
       }
@@ -104,21 +104,21 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
   }
   // TODO dump basis
-  // Selci_cout("");
-  // Selci_cout(this->basis);
+  // Polyquant_cout("");
+  // Polyquant_cout(this->basis);
 
   // this->basis_name = input.input_data["model"]["basis"];
-  // // Selci_cout(basis_name);
+  // // Polyquant_cout(basis_name);
   // std::transform(this->basis_name.begin(), this->basis_name.end(),
   //                this->basis_name.begin(), ::tolower);
-  // // Selci_cout(basis_name);
+  // // Polyquant_cout(basis_name);
 
   // TODO move each of these to a function.
 
   // Libint basis object
   // try {
   //   try {
-  //     Selci_cout(
+  //     Polyquant_cout(
   //         "Trying to create a Libint2 basis object assuming basis_name "
   //         "is part of "
   //         "the Libint2 library.");
@@ -126,25 +126,25 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
   //                                     molecule.to_libint_atom(), true);
   //     this->num_basis = libint2::nbf(this->basis);
   //     for (auto s : this->basis) {
-  //       Selci_cout(s);
+  //       Polyquant_cout(s);
   //     }
   //   } catch (...) {
-  //     Selci_cout("That didn't work. Trying to load a basis from load a
+  //     Polyquant_cout("That didn't work. Trying to load a basis from load a
   //     basis "
   //                "from the "
   //                "current working directory. The value of \"basis\" in the
   //                " "json file " "is taken to be the filename. Loading
   //                filename:");
-  //     Selci_cout(this->basis_name);
+  //     Polyquant_cout(this->basis_name);
   //     std::string cwd = std::filesystem::current_path();
   //     setenv("LIBINT_DATA_PATH", cwd.c_str(), 1);
   //     this->basis = libint2::BasisSet(this->basis_name,
   //                                     molecule.to_libint_atom(), true);
   //     this->num_basis = libint2::nbf(this->basis);
-  //     Selci_cout(this->num_basis);
+  //     Polyquant_cout(this->num_basis);
   //   }
   // } catch (...) {
-  //   APP_ABORT("Selci couldn't parse basis.");
+  //   APP_ABORT("Polyquant couldn't parse basis.");
   // }
 
   // Parsing custom basis
@@ -164,12 +164,12 @@ void PYCI_BASIS::load_basis(const PYCI_INPUT &input,
   if (basis_set_exchange_metadata.find(basis_name) ==
       basis_set_exchange_metadata.end()) {
     std::string message = basis_name + " key doesn't exist";
-    Selci_cout(message);
+    Polyquant_cout(message);
     // if not we should app abort
   } else {
     std::string message = basis_name + " key does exist";
-    Selci_cout(message);
-    // Selci_dump_json(basis_set_exchange_metadata[basis_name]);
+    Polyquant_cout(message);
+    // Polyquant_dump_json(basis_set_exchange_metadata[basis_name]);
   }
   */
   // std::cout << basis_set_exchange_metadata.dump(4) << std::endl;

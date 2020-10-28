@@ -8,9 +8,9 @@
 #include <vector>
 using json = nlohmann::json;
 
-#ifndef PYCI_INPUT_H
-#define PYCI_INPUT_H
-namespace selci {
+#ifndef POLYQUANT_INPUT_H
+#define POLYQUANT_INPUT_H
+namespace polyquant {
 
 // /**
 //  * @brief Abort the code and print a reason for aborting.
@@ -26,7 +26,7 @@ void APP_ABORT(const std::string &reason);
  * @tparam T the type of the thing to print out
  * @param message
  */
-template <typename T> void Selci_cout(const T &message) {
+template <typename T> void Polyquant_cout(const T &message) {
   // TODO: in these types of functions we could do a if USING_SLEPC
   // just in case its not using mpi etc
   // int my_rank;
@@ -52,7 +52,7 @@ int quantum_symb_to_charge(std::string key);
  *
  * @param json_obj The json object to print.
  */
-void Selci_dump_json(const json &json_obj);
+void Polyquant_dump_json(const json &json_obj);
 
 /**
  * @brief A helper function to dump a dense vector object to std::out.
@@ -60,7 +60,7 @@ void Selci_dump_json(const json &json_obj);
  * @param vec The dense vector to print
  **/
 template <typename T>
-void Selci_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
+void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
                     const std::string &title) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
@@ -81,7 +81,7 @@ void Selci_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
  * @param vec The dense vector to write.
  **/
 template <typename T>
-void Selci_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
+void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
                             const std::string &filename) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
@@ -100,7 +100,7 @@ void Selci_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
  * @param mat The dense matrix to print
  **/
 template <typename T>
-void Selci_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
+void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
                     const std::string &title) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
@@ -123,7 +123,7 @@ void Selci_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
  * @param mat The dense matrix to write.
  **/
 template <typename T>
-void Selci_dump_mat_to_file(
+void Polyquant_dump_mat_to_file(
     const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
     const std::string &filename) {
   // int my_rank;
@@ -144,15 +144,15 @@ void Selci_dump_mat_to_file(
  * @brief A class to hold information parsed from a QCSchema json
  *
  */
-class PYCI_INPUT {
+class POLYQUANT_INPUT {
 public:
-  PYCI_INPUT() = default;
+  POLYQUANT_INPUT() = default;
   /**
    * @brief Construct a new pyci input object using the parse_input function.
    *
    * @param filename the file to parse.
    */
-  PYCI_INPUT(const std::string &filename);
+  POLYQUANT_INPUT(const std::string &filename);
   /**
    * @brief the function where a file is actually parsed.
    *
@@ -165,5 +165,5 @@ public:
    */
   json input_data;
 };
-} // namespace selci
+} // namespace polyquant
 #endif

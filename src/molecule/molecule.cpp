@@ -1,10 +1,10 @@
 #include "molecule/molecule.hpp"
 
-using namespace selci;
+using namespace polyquant;
 
-PYCI_MOLECULE::PYCI_MOLECULE(const PYCI_INPUT &input) { setup_molecule(input); }
+POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input) { setup_molecule(input); }
 
-void PYCI_MOLECULE::set_molecular_charge(const PYCI_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_charge(const POLYQUANT_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_charge")) {
     this->charge = input.input_data["molecule"]["molecular_charge"];
   } else {
@@ -13,7 +13,7 @@ void PYCI_MOLECULE::set_molecular_charge(const PYCI_INPUT &input) {
   }
 }
 
-void PYCI_MOLECULE::set_molecular_multiplicity(const PYCI_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_multiplicity(const POLYQUANT_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_multiplicity")) {
     this->multiplicity = input.input_data["molecule"]["molecular_multiplicity"];
   } else {
@@ -22,7 +22,7 @@ void PYCI_MOLECULE::set_molecular_multiplicity(const PYCI_INPUT &input) {
   }
 }
 
-void PYCI_MOLECULE::set_molecular_restricted(const PYCI_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) {
   if (input.input_data["keywords"].contains("restricted")) {
     this->restricted = input.input_data["keywords"]["restricted"];
   } else {
@@ -31,10 +31,10 @@ void PYCI_MOLECULE::set_molecular_restricted(const PYCI_INPUT &input) {
   }
 }
 
-void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
+void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
-  Selci_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) /
+  Polyquant_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) /
              3);
   for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3);
        ++i) {
@@ -78,7 +78,7 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
               }
             }
             if (!found_at_least_once) {
-              Selci_cout("The label '" + quantum_label +
+              Polyquant_cout("The label '" + quantum_label +
                          "' was not found in the atomic labels. Skipping...");
             }
           }
@@ -98,19 +98,19 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
       }
 
       // } else {
-      //   Selci_cout("The input section 'keywords'->'molecule keywords'
+      //   Polyquant_cout("The input section 'keywords'->'molecule keywords'
       //   did not "
       //              "contain a section about quantum nuclei. All nuclei
       //              will be " "treated classically!");
       // }
     } else {
-      Selci_cout(
+      Polyquant_cout(
           "The input section 'keywords' didn't contain a section called "
           "about quantum nuclei. All nuclei are going to be treated "
           "classically. No quantum particles present besides electrons.");
     }
   } else {
-    Selci_cout("The input didn't contain a section called 'keywords'. All "
+    Polyquant_cout("The input didn't contain a section called 'keywords'. All "
                "nuclei are going to be treated classically. No quantum "
                "particles present besides electrons.");
   }
@@ -265,7 +265,7 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
       }
 
     } else {
-      Selci_cout("No additional quantum particles found.");
+      Polyquant_cout("No additional quantum particles found.");
     }
   }
   // create electrons
@@ -279,7 +279,7 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     for (auto part : quantum_particles) {
       num_parts += part.second.charge * part.second.num_parts;
     }
-    Selci_cout("Creating " + std::to_string(num_parts) + " electrons");
+    Polyquant_cout("Creating " + std::to_string(num_parts) + " electrons");
 
     QUANTUM_PARTICLE_SET quantum_part;
     quantum_particles[curr_label] = quantum_part;
@@ -298,49 +298,49 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
     APP_ABORT("Electrons should not have been created yet.");
   }
 }
-void PYCI_MOLECULE::print_molecule() {
-  Selci_cout("");
-  Selci_cout("Molecule parameters");
-  Selci_cout("Classical particle types");
+void POLYQUANT_MOLECULE::print_molecule() {
+  Polyquant_cout("");
+  Polyquant_cout("Molecule parameters");
+  Polyquant_cout("Classical particle types");
   auto count = 0;
   for (auto const &[classical_part_key, classical_part] :
        this->classical_particles) {
     count++;
-    Selci_cout("Classical particle type  " + std::to_string(count) + ": ");
-    Selci_cout("name: " + classical_part_key);
-    Selci_cout("mass: " + std::to_string(classical_part.mass));
-    Selci_cout("charge: " + std::to_string(classical_part.charge));
-    Selci_cout("number of particles: " +
+    Polyquant_cout("Classical particle type  " + std::to_string(count) + ": ");
+    Polyquant_cout("name: " + classical_part_key);
+    Polyquant_cout("mass: " + std::to_string(classical_part.mass));
+    Polyquant_cout("charge: " + std::to_string(classical_part.charge));
+    Polyquant_cout("number of particles: " +
                std::to_string(classical_part.num_parts));
-    Selci_cout("Center idx    x   y   z");
+    Polyquant_cout("Center idx    x   y   z");
     for (auto idx : classical_part.center_idx) {
-      Selci_cout(std::to_string(idx) + "    " +
+      Polyquant_cout(std::to_string(idx) + "    " +
                  std::to_string(this->centers[idx][0]) + "    " +
                  std::to_string(this->centers[idx][1]) + "    " +
                  std::to_string(this->centers[idx][2]));
     }
-    Selci_cout("");
+    Polyquant_cout("");
   }
-  Selci_cout("");
-  Selci_cout("Quantum particle types");
+  Polyquant_cout("");
+  Polyquant_cout("Quantum particle types");
   count = 0;
   for (auto const &[quantum_part_key, quantum_part] : this->quantum_particles) {
     count++;
-    Selci_cout("Quantum Particle type " + std::to_string(count) + ": ");
-    Selci_cout("name: " + quantum_part_key);
-    Selci_cout("mass: " + std::to_string(quantum_part.mass));
-    Selci_cout("charge: " + std::to_string(quantum_part.charge));
-    Selci_cout("spin: " + std::to_string(quantum_part.spin));
-    Selci_cout("multiplicity: " + std::to_string(quantum_part.multiplicity));
-    Selci_cout("number of particles: " +
+    Polyquant_cout("Quantum Particle type " + std::to_string(count) + ": ");
+    Polyquant_cout("name: " + quantum_part_key);
+    Polyquant_cout("mass: " + std::to_string(quantum_part.mass));
+    Polyquant_cout("charge: " + std::to_string(quantum_part.charge));
+    Polyquant_cout("spin: " + std::to_string(quantum_part.spin));
+    Polyquant_cout("multiplicity: " + std::to_string(quantum_part.multiplicity));
+    Polyquant_cout("number of particles: " +
                std::to_string(quantum_part.num_parts));
-    Selci_cout("number of particles (alpha): " +
+    Polyquant_cout("number of particles (alpha): " +
                std::to_string(quantum_part.num_parts_alpha));
-    Selci_cout("number of particles (beta): " +
+    Polyquant_cout("number of particles (beta): " +
                std::to_string(quantum_part.num_parts_beta));
-    Selci_cout("Center idx    x   y   z");
+    Polyquant_cout("Center idx    x   y   z");
     for (auto idx : quantum_part.center_idx) {
-      Selci_cout(std::to_string(idx) + "    " +
+      Polyquant_cout(std::to_string(idx) + "    " +
                  std::to_string(this->centers[idx][0]) + "    " +
                  std::to_string(this->centers[idx][1]) + "    " +
                  std::to_string(this->centers[idx][2]));
@@ -352,12 +352,12 @@ void PYCI_MOLECULE::print_molecule() {
            << quantum_part.electron_exchange << std::endl;
     buffer << "restricted: " << std::boolalpha << quantum_part.restricted
            << std::endl;
-    Selci_cout(buffer.str());
+    Polyquant_cout(buffer.str());
   }
-  Selci_cout("");
+  Polyquant_cout("");
 }
 
-void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
+void POLYQUANT_MOLECULE::setup_molecule(const POLYQUANT_INPUT &input) {
 
   if (input.input_data.contains("molecule")) {
     set_molecular_charge(input);
@@ -366,14 +366,14 @@ void PYCI_MOLECULE::setup_molecule(const PYCI_INPUT &input) {
     parse_particles(input);
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
-    Selci_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));
+    Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));
     print_molecule();
   } else {
     APP_ABORT("Cannot set up molecule. Input json missing 'molecule' section.");
   }
 }
 
-std::string PYCI_MOLECULE::dump_xyz(std::string classical_part_key) const {
+std::string POLYQUANT_MOLECULE::dump_xyz(std::string classical_part_key) const {
   std::string header = "";
   std::string body = "";
   // calculate num atoms
@@ -407,18 +407,18 @@ std::string PYCI_MOLECULE::dump_xyz(std::string classical_part_key) const {
 
   header += std::to_string(num_atom);
   header += "\n";
-  header += "PYCI Dumped XYZ centers = " + classical_part_key;
+  header += "POLYQUANT Dumped XYZ centers = " + classical_part_key;
   auto temp_xyz = header + body;
   return temp_xyz;
 }
 
 std::vector<libint2::Atom>
-PYCI_MOLECULE::to_libint_atom(std::string classical_part_key) const {
+POLYQUANT_MOLECULE::to_libint_atom(std::string classical_part_key) const {
   std::istringstream temp_xyz_stream(this->dump_xyz(classical_part_key));
   return libint2::read_dotxyz(temp_xyz_stream);
 }
 
-void PYCI_MOLECULE::calculate_E_nuc() {
+void POLYQUANT_MOLECULE::calculate_E_nuc() {
   this->E_nuc = 0.0;
   for (auto classical_part_1 : classical_particles) {
     for (auto i = 0; i < classical_part_1.second.num_parts; i++) {

@@ -4,24 +4,24 @@
 #include "molecule/molecule.hpp"
 #include <string>
 
-#ifndef PYCI_SCF_H
-#define PYCI_SCF_H
-namespace selci {
+#ifndef POLYQUANT_SCF_H
+#define POLYQUANT_SCF_H
+namespace polyquant {
 
 /**
  * @brief A class to set up SCF type calculations.
  *
  */
-class PYCI_SCF {
+class POLYQUANT_SCF {
 public:
-  PYCI_SCF() = default;
-  PYCI_SCF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
-           const PYCI_BASIS &input_basis, const PYCI_INTEGRAL &input_integral);
+  POLYQUANT_SCF() = default;
+  POLYQUANT_SCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule,
+           const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral);
 
-  void set_input(const PYCI_INPUT &input_params);
-  void set_molecule(const PYCI_MOLECULE &input_molecule);
-  void set_basis(const PYCI_BASIS &input_basis);
-  void set_integral(const PYCI_INTEGRAL &input_integral);
+  void set_input(const POLYQUANT_INPUT &input_params);
+  void set_molecule(const POLYQUANT_MOLECULE &input_molecule);
+  void set_basis(const POLYQUANT_BASIS &input_basis);
+  void set_integral(const POLYQUANT_INTEGRAL &input_integral);
 
   void print_start_iterations();
   void print_iteration();
@@ -44,25 +44,25 @@ public:
    * @brief the input parameters
    *
    */
-  PYCI_INPUT input_params;
+  POLYQUANT_INPUT input_params;
 
   /**
    * @brief the input molecule
    *
    */
-  PYCI_MOLECULE input_molecule;
+  POLYQUANT_MOLECULE input_molecule;
 
   /**
    * @brief the input basis
    *
    */
-  PYCI_BASIS input_basis;
+  POLYQUANT_BASIS input_basis;
 
   /**
    * @brief integrals calculated for the input molecule in the input basis
    *
    */
-  PYCI_INTEGRAL input_integral;
+  POLYQUANT_INTEGRAL input_integral;
 };
-} // namespace selci
+} // namespace polyquant
 #endif

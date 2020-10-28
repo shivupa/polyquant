@@ -7,17 +7,17 @@
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <string>
 
-#ifndef PYCI_EPSCF_H
-#define PYCI_EPSCF_H
-namespace selci {
+#ifndef POLYQUANT_EPSCF_H
+#define POLYQUANT_EPSCF_H
+namespace polyquant {
 
-class PYCI_EPSCF : PYCI_SCF {
+class POLYQUANT_EPSCF : POLYQUANT_SCF {
 public:
-  PYCI_EPSCF() = default;
-  PYCI_EPSCF(const PYCI_INPUT &input_params,
-             const PYCI_MOLECULE &input_molecule, const PYCI_BASIS &input_basis,
-             const PYCI_INTEGRAL &input_integral)
-      : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
+  POLYQUANT_EPSCF() = default;
+  POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params,
+             const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis,
+             const POLYQUANT_INTEGRAL &input_integral)
+      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
   double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
@@ -136,5 +136,5 @@ public:
    */
   int iteration_max = 500;
 };
-} // namespace selci
+} // namespace polyquant
 #endif

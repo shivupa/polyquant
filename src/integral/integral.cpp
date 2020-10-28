@@ -1,16 +1,16 @@
 #include "integral/integral.hpp"
 
-using namespace selci;
+using namespace polyquant;
 
-PYCI_INTEGRAL::PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
-                             const PYCI_MOLECULE &molecule) {
-  Selci_cout("INTEGRAL");
+POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
+                             const POLYQUANT_MOLECULE &molecule) {
+  Polyquant_cout("INTEGRAL");
   this->setup_integral(input, basis, molecule);
 }
 
-void PYCI_INTEGRAL::calculate_overlap() {
+void POLYQUANT_INTEGRAL::calculate_overlap() {
   if (this->overlap.cols() == 0 && this->overlap.rows() == 0) {
-    Selci_cout("Calculating One Body Overlap Integrals...");
+    Polyquant_cout("Calculating One Body Overlap Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     this->overlap.resize(num_basis, num_basis);
@@ -18,28 +18,28 @@ void PYCI_INTEGRAL::calculate_overlap() {
     this->compute_1body_ints(this->overlap, this->input_basis.basis,
                              libint2::Operator::overlap);
     // TODO figure out how to write to file
-    Selci_dump_mat_to_file(this->overlap, "overlap.txt");
+    Polyquant_dump_mat_to_file(this->overlap, "overlap.txt");
     libint2::finalize();
   }
 }
 
-void PYCI_INTEGRAL::calculate_kinetic() {
+void POLYQUANT_INTEGRAL::calculate_kinetic() {
   if (this->kinetic.cols() == 0 && this->kinetic.rows() == 0) {
-    Selci_cout("Calculating One Body Kinetic Integrals...");
+    Polyquant_cout("Calculating One Body Kinetic Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     this->kinetic.resize(num_basis, num_basis);
     this->kinetic.fill(0);
     this->compute_1body_ints(this->kinetic, this->input_basis.basis,
                              libint2::Operator::kinetic);
-    Selci_dump_mat_to_file(this->kinetic, "kinetic.txt");
+    Polyquant_dump_mat_to_file(this->kinetic, "kinetic.txt");
     libint2::finalize();
   }
 }
 
-void PYCI_INTEGRAL::calculate_nuclear() {
+void POLYQUANT_INTEGRAL::calculate_nuclear() {
   if (this->nuclear.cols() == 0 && this->nuclear.rows() == 0) {
-    Selci_cout("Calculating One Body Nuclear Integrals...");
+    Polyquant_cout("Calculating One Body Nuclear Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     this->nuclear.resize(num_basis, num_basis);
@@ -47,17 +47,17 @@ void PYCI_INTEGRAL::calculate_nuclear() {
     this->compute_1body_ints(this->nuclear, this->input_basis.basis,
                              libint2::Operator::nuclear,
                              this->input_molecule.to_libint_atom("no_ghost"));
-    Selci_dump_mat_to_file(this->nuclear, "nuclear.txt");
+    Polyquant_dump_mat_to_file(this->nuclear, "nuclear.txt");
     libint2::finalize();
   }
 }
 
-// void PYCI_INTEGRAL::calculate_polarization_potential() {
+// void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
 //  if (this->polarization_potential.shape() == std::vector<size_t>({})) {
-//    Selci_cout("Calculating One Body Polarization Potential Integrals...");
+//    Polyquant_cout("Calculating One Body Polarization Potential Integrals...");
 //    std::vector<std::string> atom_types = {};
 //    std::vector<std::string> polarization_types = {};
-//    Selci_cout(
+//    Polyquant_cout(
 //        "Parsing the necessary keywords atom_types and
 //        polarization_types...");
 //    if (this->input_params.input_data.contains("keywords")) {
@@ -83,7 +83,7 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //        }
 //      }
 //    } else {
-//      APP_ABORT("Selci needs keywords atom_types and polarization_types to do
+//      APP_ABORT("Polyquant needs keywords atom_types and polarization_types to do
 //      "
 //                "a polarization potential calculation.");
 //    }
@@ -105,8 +105,8 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //      if (polarization_types[i] == "MILLER") {
 //        auto search_for_key = this->alpha_miller.find(atom_types[i]);
 //        if (search_for_key == this->alpha_miller.end()) {
-//          Selci_cout("Could not find the following atom type: ");
-//          Selci_cout(atom_types[i]);
+//          Polyquant_cout("Could not find the following atom type: ");
+//          Polyquant_cout(atom_types[i]);
 //          APP_ABORT("Polarization Key is incorrect!");
 //        } else {
 //          operator_coeff = search_for_key->second;
@@ -114,8 +114,8 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //      } else if (polarization_types[i] == "EXP") {
 //        auto search_for_key = this->alpha_exp.find(atom_types[i]);
 //        if (search_for_key == this->alpha_exp.end()) {
-//          Selci_cout("Could not find the following atom type: ");
-//          Selci_cout(atom_types[i]);
+//          Polyquant_cout("Could not find the following atom type: ");
+//          Polyquant_cout(atom_types[i]);
 //          APP_ABORT("Polarization Key is incorrect!");
 //        } else {
 //          operator_coeff = search_for_key->second;
@@ -123,8 +123,8 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //      } else if (polarization_types[i] == "M1") {
 //        auto search_for_key = this->alpha_m1.find(atom_types[i]);
 //        if (search_for_key == this->alpha_m1.end()) {
-//          Selci_cout("Could not find the following atom type: ");
-//          Selci_cout(atom_types[i]);
+//          Polyquant_cout("Could not find the following atom type: ");
+//          Polyquant_cout(atom_types[i]);
 //          APP_ABORT("Polarization Key is incorrect!");
 //        } else {
 //          operator_coeff = search_for_key->second;
@@ -132,16 +132,16 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //      } else if (polarization_types[i] == "M2") {
 //        auto search_for_key = this->alpha_m2.find(atom_types[i]);
 //        if (search_for_key == this->alpha_m2.end()) {
-//          Selci_cout("Could not find the following atom type: ");
-//          Selci_cout(atom_types[i]);
+//          Polyquant_cout("Could not find the following atom type: ");
+//          Polyquant_cout(atom_types[i]);
 //          APP_ABORT("Polarization Key is incorrect!");
 //        } else {
 //          operator_coeff = search_for_key->second;
 //        }
 //      } else {
-//        Selci_cout("The following polarization type was not recognized:");
-//        Selci_cout(polarization_types[i]);
-//        APP_ABORT("Selci didn't understand what polarization type you
+//        Polyquant_cout("The following polarization type was not recognized:");
+//        Polyquant_cout(polarization_types[i]);
+//        APP_ABORT("Polyquant didn't understand what polarization type you
 //        wanted.");
 //      }
 //      this->compute_1body_ints_operator_expanded_in_gaussians(
@@ -156,9 +156,9 @@ void PYCI_INTEGRAL::calculate_nuclear() {
 //  }
 //}
 
-void PYCI_INTEGRAL::calculate_two_electron() {
+void POLYQUANT_INTEGRAL::calculate_two_electron() {
   if (this->twoelec.rows() == 0) {
-    Selci_cout("Calculating Two Body Electron Repulsion Integrals...");
+    Polyquant_cout("Calculating Two Body Electron Repulsion Integrals...");
     auto num_basis = this->input_basis.num_basis;
     libint2::initialize();
     // the upper triangle of a square matrix is size N*(N-1)/2
@@ -170,14 +170,14 @@ void PYCI_INTEGRAL::calculate_two_electron() {
     this->twoelec.resize(two_elec_size);
     this->compute_2body_ints(this->twoelec, this->input_basis.basis,
                              libint2::Operator::coulomb);
-    Selci_dump_vec_to_file(this->twoelec, "twoelec.txt");
+    Polyquant_dump_vec_to_file(this->twoelec, "twoelec.txt");
     libint2::finalize();
   }
 }
 
-void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
-                                   const PYCI_BASIS &basis,
-                                   const PYCI_MOLECULE &molecule) {
+void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
+                                   const POLYQUANT_BASIS &basis,
+                                   const POLYQUANT_MOLECULE &molecule) {
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
@@ -189,7 +189,7 @@ void PYCI_INTEGRAL::setup_integral(const PYCI_INPUT &input,
  * SLEPc/PETSc get domain and calculating the integrals on each process that we
  * need to. Right now we calculate them all on each rank.
  */
-void PYCI_INTEGRAL::compute_1body_ints(
+void POLYQUANT_INTEGRAL::compute_1body_ints(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
     const libint2::BasisSet &shells, libint2::Operator obtype,
     const std::vector<libint2::Atom> &atoms) {
@@ -244,7 +244,7 @@ void PYCI_INTEGRAL::compute_1body_ints(
   // computed_shell = xt::adapt(&buf, n1 + n2, xt::acquire_ownership(), shape);
 }
 
-// double PYCI_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
+// double POLYQUANT_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
 //    const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
 //    const double &cont_coeff1, const double &exp1, const xt::xarray<int>
 //    &angular_momentum_1, const Eigen::Matrix<double, Eigen::Dynamic,
@@ -334,7 +334,7 @@ void PYCI_INTEGRAL::compute_1body_ints(
  * integrals explicitly over basis functions. This is less efficient, but this
  * integral type is not a part of libint.
  */
-// void PYCI_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
+// void POLYQUANT_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
 //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
 //     const libint2::BasisSet &shells, const Eigen::Matrix<double,
 //     Eigen::Dynamic, Eigen::Dynamic> &operator_origin, const
@@ -448,7 +448,7 @@ void PYCI_INTEGRAL::compute_1body_ints(
  * SLEPc/PETSc get domain and calculating the integrals on each process that
  * we need to. Right now we calculate them all on each rank.
  */
-void PYCI_INTEGRAL::compute_2body_ints(
+void POLYQUANT_INTEGRAL::compute_2body_ints(
     Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec,
     const libint2::BasisSet &shells, libint2::Operator obtype) {
   // Following the HF test in the Libint2 repo
@@ -521,8 +521,8 @@ void PYCI_INTEGRAL::compute_2body_ints(
   }
 }
 
-void PYCI_INTEGRAL::symmetric_orthogonalization() {
-  Selci_cout("Calculating Symmetric Orthogonalization Matrix...");
+void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
+  Polyquant_cout("Calculating Symmetric Orthogonalization Matrix...");
   if (this->orth_X.cols() == 0 && this->orth_X.rows() == 0) {
     auto num_basis = this->input_basis.num_basis;
     this->orth_X.resize(num_basis, num_basis);

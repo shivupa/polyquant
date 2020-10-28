@@ -17,60 +17,60 @@ endif()
 
 # ##############################################################################
 # Set up the project and version info
-project(PYCI)
-set(PYCI_VERSION_MAJOR 0)
-set(PYCI_VERSION_MINOR 0)
-set(PYCI_VERSION_PATCH 1)
-set(PYCI_VERSION
-    "${PYCI_VERSION_MAJOR}.${PYCI_VERSION_MINOR}.${PYCI_VERSION_PATCH}")
+project(POLYQUANT)
+set(POLYQUANT_VERSION_MAJOR 0)
+set(POLYQUANT_VERSION_MINOR 0)
+set(POLYQUANT_VERSION_PATCH 1)
+set(POLYQUANT_VERSION
+    "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
 
 add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 
 # set up where to find Find*.cmake files and where to put the things we build
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
-    ${PYCI_BINARY_DIR}/lib
+    ${POLYQUANT_BINARY_DIR}/lib
     CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
-    ${PYCI_BINARY_DIR}/bin
+    ${POLYQUANT_BINARY_DIR}/bin
     CACHE PATH "Single output directory for building all executables.")
 
 # set some flags that we can use cmake -Dflag={0,1} to trigger special things in
 # the build this first one doesn't do anything if it was off but it would be
 # nice to have a serial build
-set(PYCI_DEBUG
+set(POLYQUANT_DEBUG
     0
     CACHE BOOL "Enable/disable debug printing")
-set(PYCI_DOC
+set(POLYQUANT_DOC
     0
     CACHE BOOL "Enable/disable documentation building")
-set(PYCI_TEST
+set(POLYQUANT_TEST
     1
     CACHE BOOL "Enable/disable testing")
 # ##############################################################################
 
-message(STATUS "Ready to build PYCI")
+message(STATUS "Ready to build POLYQUANT")
 
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
 # parts of the code, but for now we don't need to
-configure_file(${PYCI_SOURCE_DIR}/src/pyci.settings
-               ${PYCI_BINARY_DIR}/bin/pyci.settings)
-install(FILES ${PYCI_BINARY_DIR}/bin/pyci.settings DESTINATION bin)
+configure_file(${POLYQUANT_SOURCE_DIR}/src/polyquant.settings
+               ${POLYQUANT_BINARY_DIR}/bin/polyquant.settings)
+install(FILES ${POLYQUANT_BINARY_DIR}/bin/polyquant.settings DESTINATION bin)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # enable testing so the tests will build should we use a flag to only build
 # tests if asked to build it? I think I would like tests to build every time.
-if(PYCI_TEST)
+if(POLYQUANT_TEST)
   enable_testing()
-endif(PYCI_TEST)
+endif(POLYQUANT_TEST)
 
 # if the debug flag is on this will use include what you use to check the
 # headers it also makes the make files verbose so you can see what the build is
 # doing
-if(PYCI_DEBUG)
+if(POLYQUANT_DEBUG)
   # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
   # https://stackoverflow.com/questions/41610822/set-cxx-include-what-you-use-
   # property-in-cmake-for-every-target
@@ -81,26 +81,26 @@ if(PYCI_DEBUG)
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE on)
-endif(PYCI_DEBUG)
+endif(POLYQUANT_DEBUG)
 
 # if the docs flag is on this will use doxygen to build the docs
-if(PYCI_DOCS)
+if(POLYQUANT_DOCS)
   # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html
   # add_subdirectory(docs)
-  file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${PYCI_BINARY_DIR})
-  file(COPY ${PROJECT_SOURCE_DIR}/README.md DESTINATION ${PYCI_BINARY_DIR})
+  file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${POLYQUANT_BINARY_DIR})
+  file(COPY ${PROJECT_SOURCE_DIR}/README.md DESTINATION ${POLYQUANT_BINARY_DIR})
   configure_file(${PROJECT_SOURCE_DIR}/docs/source/conf.py
-                 ${PYCI_BINARY_DIR}/docs/source)
+                 ${POLYQUANT_BINARY_DIR}/docs/source)
   find_package(Sphinx REQUIRED)
-  set(SPHINX_SOURCE ${PYCI_BINARY_DIR}/docs/source)
-  set(SPHINX_BUILD ${PYCI_BINARY_DIR}/docs)
+  set(SPHINX_SOURCE ${POLYQUANT_BINARY_DIR}/docs/source)
+  set(SPHINX_BUILD ${POLYQUANT_BINARY_DIR}/docs)
   add_custom_target(
     Sphinx ALL
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
     COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${SPHINX_BUILD}
     COMMENT "Generating documentation with Sphinx")
-endif(PYCI_DOCS)
+endif(POLYQUANT_DOCS)
 
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
@@ -127,19 +127,19 @@ FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
-# include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(pyci
+# include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(polyquant
 # ${PYTHON_LIBRARIES}) endif(PythonLibs_FOUND) Done finding Done finding all the
 # things
 
 # this will do stuff in the src/CMakeLists.txt
 add_subdirectory(src)
 # this will do stuff in the tests/CMakeLists.txt
-if(PYCI_TEST)
+if(POLYQUANT_TEST)
   add_subdirectory(tests)
-endif(PYCI_TEST)
+endif(POLYQUANT_TEST)
 
 # if its a debug build this will print all the cmake variables
-if(PYCI_DEBUG)
+if(POLYQUANT_DEBUG)
   # found this useful macro on SO https://stackoverflow.com/a/31390758
   macro(print_all_variables)
     message(
@@ -152,4 +152,4 @@ if(PYCI_DEBUG)
       STATUS "print_all_variables------------------------------------------}")
   endmacro()
   print_all_variables()
-endif(PYCI_DEBUG)
+endif(POLYQUANT_DEBUG)
