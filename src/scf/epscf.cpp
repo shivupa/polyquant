@@ -19,8 +19,8 @@ void PYCI_EPSCF::form_H_core() {
   }
 }
 double PYCI_EPSCF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
-                                double eri_ikjl, double qa, double qb,
-                                bool exchange) {
+                                  double eri_ikjl, double qa, double qb,
+                                  bool exchange) {
   double gamma = 0.0;
   if (exchange) {
     gamma = 1.0;
@@ -47,10 +47,10 @@ void PYCI_EPSCF::form_fock() {
     }
     quantum_part_a_idx++;
   }
-  for (int i = 0; i < num_basis; i++) {
-    for (int j = 0; j < num_basis; j++) {
-      for (int k = 0; k < num_basis; k++) {
-        for (int l = 0; l < num_basis; l++) {
+  for (size_t i = 0; i < num_basis; i++) {
+    for (size_t j = 0; j < num_basis; j++) {
+      for (size_t k = 0; k < num_basis; k++) {
+        for (size_t l = 0; l < num_basis; l++) {
           double eri_ijkl = this->input_integral.twoelec(
               this->input_integral.idx8(i, j, k, l));
           double eri_ikjl = this->input_integral.twoelec(
@@ -175,7 +175,7 @@ void PYCI_EPSCF::form_DM() {
     this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
-        for (size_t k = 0; k < quantum_part.num_parts_alpha; k++) {
+        for (int k = 0; k < quantum_part.num_parts_alpha; k++) {
           this->D[quantum_part_idx][0](i, j) +=
               this->C[quantum_part_idx][0](i, k) *
               this->C[quantum_part_idx][0](j, k);
@@ -187,7 +187,7 @@ void PYCI_EPSCF::form_DM() {
       this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
       for (size_t i = 0; i < num_basis; i++) {
         for (size_t j = 0; j < num_basis; j++) {
-          for (size_t k = 0; k < quantum_part.num_parts_alpha; k++) {
+          for (int k = 0; k < quantum_part.num_parts_alpha; k++) {
             this->D[quantum_part_idx][1](i, j) +=
                 this->C[quantum_part_idx][1](i, k) *
                 this->C[quantum_part_idx][1](j, k);
@@ -430,7 +430,7 @@ void PYCI_EPSCF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
-  // start the RHF process
+  // start the SCF process
   this->form_H_core();
   this->guess_DM();
   while (!this->stop) {

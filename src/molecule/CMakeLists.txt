@@ -1,6 +1,6 @@
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.[hc]pp")
-add_library(molecule ${_HDRS} ${_SRCS})
+add_library(molecule OBJECT ${_HDRS} ${_SRCS})
 
 if(PETSC_FOUND)
   include_directories(${PETSC_INCLUDES})
@@ -18,10 +18,7 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(molecule io)
-# target_include_directories(molecule PUBLIC include)
-install(
-  TARGETS molecule
-  LIBRARY DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/molecule)
+# target_include_directories(molecule PUBLIC include) install( TARGETS molecule
+# LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/molecule)
 
 # install(FILES ${_HDRS} DESTINATION include/molecule)

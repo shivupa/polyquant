@@ -14,8 +14,9 @@ namespace selci {
 class PYCI_EPSCF : PYCI_SCF {
 public:
   PYCI_EPSCF() = default;
-  PYCI_EPSCF(const PYCI_INPUT &input_params, const PYCI_MOLECULE &input_molecule,
-           const PYCI_BASIS &input_basis, const PYCI_INTEGRAL &input_integral)
+  PYCI_EPSCF(const PYCI_INPUT &input_params,
+             const PYCI_MOLECULE &input_molecule, const PYCI_BASIS &input_basis,
+             const PYCI_INTEGRAL &input_integral)
       : PYCI_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;

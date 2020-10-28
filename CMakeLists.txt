@@ -15,6 +15,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
   endmacro()
 endif()
 
+# ##############################################################################
 # Set up the project and version info
 project(PYCI)
 set(PYCI_VERSION_MAJOR 0)
@@ -22,6 +23,8 @@ set(PYCI_VERSION_MINOR 0)
 set(PYCI_VERSION_PATCH 1)
 set(PYCI_VERSION
     "${PYCI_VERSION_MAJOR}.${PYCI_VERSION_MINOR}.${PYCI_VERSION_PATCH}")
+
+add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 
 # set up where to find Find*.cmake files and where to put the things we build
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
@@ -35,36 +38,18 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 # set some flags that we can use cmake -Dflag={0,1} to trigger special things in
 # the build this first one doesn't do anything if it was off but it would be
 # nice to have a serial build
-set(PYCI_MPI
-    1
-    CACHE BOOL "Enable/disable MPI")
-# There isn't currently support for OpenMP but otherwise we could do
-# set(PYCI_OMP 1 CACHE BOOL "Enable/disable OpenMP")
 set(PYCI_DEBUG
     0
     CACHE BOOL "Enable/disable debug printing")
 set(PYCI_DOC
     0
     CACHE BOOL "Enable/disable documentation building")
-# Todo change this to be selected based on what libraries are found
-set(PYCI_USE_DENSE_MATRIX_STL
-    0
-    CACHE BOOL "Dense Matrix Type")
-set(PYCI_USE_DENSE_MATRIX_EIGEN
-    1
-    CACHE BOOL "Dense Matrix Type")
-# ##############################################################################
 set(PYCI_TEST
     1
     CACHE BOOL "Enable/disable testing")
+# ##############################################################################
 
 message(STATUS "Ready to build PYCI")
-
-if(PYCI_USE_DENSE_MATRIX_STL)
-  add_definitions(-DPYCI_MATH_STL)
-elseif(PYCI_USE_DENSE_MATRIX_EIGEN)
-  add_definitions(-DPYCI_MATH_EIGEN)
-endif(PYCI_USE_DENSE_MATRIX_STL)
 
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
@@ -97,7 +82,6 @@ if(PYCI_DEBUG)
   set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE on)
 endif(PYCI_DEBUG)
-set(CMAKE_VERBOSE_MAKEFILE on)
 
 # if the docs flag is on this will use doxygen to build the docs
 if(PYCI_DOCS)
@@ -132,7 +116,6 @@ find_package(CURL REQUIRED)
 find_package(Libint2 REQUIRED)
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-# FIND xtensor find_package(xtl REQUIRED) find_package(xtensor REQUIRED)
 find_package(OpenMP REQUIRED)
 # find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
 find_package(cxxopts REQUIRED)

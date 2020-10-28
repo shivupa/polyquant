@@ -16,7 +16,7 @@ inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
   } else {
     return ((j * (j + 1)) / 2) + i;
   }
-};
+}
 
 /**
  * @brief A class to calculate integrals for a given molecule in a given basis.
@@ -62,7 +62,7 @@ public:
    */
   template <typename T> T idx2(const T &i, const T &j) {
     return symmetric_matrix_triangular_idx(i, j);
-  };
+  }
   /**
    * @brief Calculate the combined index for the vector containing the unique
    * elements of a 4D symmetric tensor with 8 fold symmetry from four indicies
@@ -77,7 +77,7 @@ public:
    */
   template <typename T> T idx8(const T &i, const T &j, const T &k, const T &l) {
     return idx2(idx2(i, j), idx2(k, l));
-  };
+  }
 
   /**
    * @brief Calculate one body integrals
