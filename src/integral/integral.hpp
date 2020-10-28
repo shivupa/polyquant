@@ -1,5 +1,5 @@
-#ifndef PYCI_INTEGRAL_H
-#define PYCI_INTEGRAL_H
+#ifndef POLYQUANT_INTEGRAL_H
+#define POLYQUANT_INTEGRAL_H
 #include "basis/basis.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
@@ -7,7 +7,7 @@
 #include <numeric>
 #include <vector>
 
-namespace selci {
+namespace polyquant {
 
 template <typename T>
 inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
@@ -22,9 +22,9 @@ inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
  * @brief A class to calculate integrals for a given molecule in a given basis.
  *
  */
-class PYCI_INTEGRAL {
+class POLYQUANT_INTEGRAL {
 public:
-  PYCI_INTEGRAL() = default;
+  POLYQUANT_INTEGRAL() = default;
   /**
    * @brief Construct a new pyci integral object by calling to setup_integral
    *
@@ -32,8 +32,8 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  PYCI_INTEGRAL(const PYCI_INPUT &input, const PYCI_BASIS &basis,
-                const PYCI_MOLECULE &molecule);
+  POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
+                const POLYQUANT_MOLECULE &molecule);
 
   void calculate_overlap();
   void calculate_kinetic();
@@ -49,8 +49,8 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  void setup_integral(const PYCI_INPUT &input, const PYCI_BASIS &basis,
-                      const PYCI_MOLECULE &molecule);
+  void setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
+                      const POLYQUANT_MOLECULE &molecule);
   /**
    * @brief Calculate the combined index for the vector containing the upper
    * triangle of a symmetric matrix from two indicies of the unflattened matrix.
@@ -168,17 +168,17 @@ public:
    * @brief the input parameters
    *
    */
-  PYCI_INPUT input_params;
+  POLYQUANT_INPUT input_params;
   /**
    * @brief the input basis
    *
    */
-  PYCI_BASIS input_basis;
+  POLYQUANT_BASIS input_basis;
   /**
    * @brief the input molecule
    *
    */
-  PYCI_MOLECULE input_molecule;
+  POLYQUANT_MOLECULE input_molecule;
 
   // private:
   /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
@@ -993,5 +993,5 @@ public:
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0, 250.0};
   */
 };
-} // namespace selci
+} // namespace polyquant
 #endif

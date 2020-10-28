@@ -1,5 +1,5 @@
-#ifndef PYCI_BASIS_H
-#define PYCI_BASIS_H
+#ifndef POLYQUANT_BASIS_H
+#define POLYQUANT_BASIS_H
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
 #include <algorithm>
@@ -10,29 +10,29 @@
 #include <stdlib.h>
 #include <string>
 
-namespace selci {
+namespace polyquant {
 
 /**
  * @brief A class to hold basis information.
  *
  */
-class PYCI_BASIS {
+class POLYQUANT_BASIS {
 public:
-  PYCI_BASIS() = default;
+  POLYQUANT_BASIS() = default;
   /**
    * @brief Construct a new pyci basis object by calling to load_basis.
    *
    * @param input the data from the input file.
    * @param molecule the molecule data.
    */
-  PYCI_BASIS(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule);
+  POLYQUANT_BASIS(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule);
   /**
    * @brief Load a basis using the libint built in basis library.
    *
    * @param input
    * @param molecule
    */
-  void load_basis(const PYCI_INPUT &input, const PYCI_MOLECULE &molecule);
+  void load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule);
   /**
    * @brief The name of the basis to load
    *
@@ -49,5 +49,5 @@ public:
    */
   size_t num_basis;
 };
-} // namespace selci
+} // namespace polyquant
 #endif

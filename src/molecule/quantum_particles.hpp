@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#ifndef PYCI_QUANTUM_PARTICLE_SET_H
-#define PYCI_QUANTUM_PARTICLE_SET_H
-namespace selci {
+#ifndef POLYQUANT_QUANTUM_PARTICLE_SET_H
+#define POLYQUANT_QUANTUM_PARTICLE_SET_H
+namespace polyquant {
 struct QUANTUM_PARTICLE_SET {
   double spin;
   double mass;
@@ -22,5 +22,5 @@ struct QUANTUM_PARTICLE_SET {
   bool restricted =
       false; // if there is only 1 of a particle it should be unrestricted.
 };
-} // namespace selci
+} // namespace polyquant
 #endif

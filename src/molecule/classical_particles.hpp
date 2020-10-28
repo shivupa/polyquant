@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#ifndef PYCI_CLASSICAL_PARTICLE_SET_H
-#define PYCI_CLASSICAL_PARTICLE_SET_H
-namespace selci {
+#ifndef POLYQUANT_CLASSICAL_PARTICLE_SET_H
+#define POLYQUANT_CLASSICAL_PARTICLE_SET_H
+namespace polyquant {
 struct CLASSICAL_PARTICLE_SET {
   // double spin; <- only quantum
   double mass;
@@ -17,5 +17,5 @@ struct CLASSICAL_PARTICLE_SET {
   // bool exchange; <- only quantum
   // bool electron_exchange; <- only quantum
 };
-} // namespace selci
+} // namespace polyquant
 #endif

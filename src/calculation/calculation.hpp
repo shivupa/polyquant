@@ -8,24 +8,24 @@
 #include <string>
 #include <unordered_set>
 
-#ifndef PYCI_CALCULATION_H
-#define PYCI_CALCULATION_H
-namespace selci {
+#ifndef POLYQUANT_CALCULATION_H
+#define POLYQUANT_CALCULATION_H
+namespace polyquant {
 
 /**
  * @brief A class to set up a calculation.
  *
  */
-class PYCI_CALCULATION {
+class POLYQUANT_CALCULATION {
 public:
-  PYCI_CALCULATION() = default;
+  POLYQUANT_CALCULATION() = default;
   /**
    * @brief Construct a new pyci calculation object using the setup_calculation
    * function.
    *
    * @param filename the input file
    */
-  PYCI_CALCULATION(const std::string &filename);
+  POLYQUANT_CALCULATION(const std::string &filename);
   /**
    * @brief Set up the calculation
    *
@@ -54,25 +54,25 @@ public:
    * @brief the input parameters
    *
    */
-  PYCI_INPUT input_params;
+  POLYQUANT_INPUT input_params;
 
   /**
    * @brief the input molecule
    *
    */
-  PYCI_MOLECULE input_molecule;
+  POLYQUANT_MOLECULE input_molecule;
 
   /**
    * @brief the input basis
    *
    */
-  PYCI_BASIS input_basis;
+  POLYQUANT_BASIS input_basis;
 
   /**
    * @brief the input integrals
    *
    */
-  PYCI_INTEGRAL input_integral;
+  POLYQUANT_INTEGRAL input_integral;
 
   /**
    * @brief Mean-field calculation types that pyci knows about
@@ -86,5 +86,5 @@ public:
    */
   const std::unordered_set<std::string> post_mean_field_methods = {"CIPSI"};
 };
-} // namespace selci
+} // namespace polyquant
 #endif

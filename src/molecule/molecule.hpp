@@ -8,35 +8,35 @@
 #include <string>
 #include <vector>
 
-#ifndef PYCI_MOLECULE_H
-#define PYCI_MOLECULE_H
-namespace selci {
+#ifndef POLYQUANT_MOLECULE_H
+#define POLYQUANT_MOLECULE_H
+namespace polyquant {
 
 /**
  * @brief A class to store information about a molecule
  *
  */
-class PYCI_MOLECULE {
+class POLYQUANT_MOLECULE {
 public:
-  PYCI_MOLECULE() = default;
+  POLYQUANT_MOLECULE() = default;
   /**
    * @brief Construct a new pyci molecule object given an input object with a
    * call to setup_molecule.
    *
-   * @param input a PYCI_INPUT instance
+   * @param input a POLYQUANT_INPUT instance
    */
-  PYCI_MOLECULE(const PYCI_INPUT &input);
+  POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input);
 
   /**
    * @brief Set the up molecule object.
    *
-   * @param input a PYCI_INPUT instance
+   * @param input a POLYQUANT_INPUT instance
    */
-  void setup_molecule(const PYCI_INPUT &input);
-  void set_molecular_charge(const PYCI_INPUT &input);
-  void set_molecular_multiplicity(const PYCI_INPUT &input);
-  void set_molecular_restricted(const PYCI_INPUT &input);
-  void parse_particles(const PYCI_INPUT &input);
+  void setup_molecule(const POLYQUANT_INPUT &input);
+  void set_molecular_charge(const POLYQUANT_INPUT &input);
+  void set_molecular_multiplicity(const POLYQUANT_INPUT &input);
+  void set_molecular_restricted(const POLYQUANT_INPUT &input);
+  void parse_particles(const POLYQUANT_INPUT &input);
   void print_molecule();
 
   /**
@@ -104,6 +104,6 @@ private:
    *
    */
 
-}; // namespace selci
-} // namespace selci
+}; // namespace polyquant
+} // namespace polyquant
 #endif

@@ -7,9 +7,9 @@ add_subdirectory(calculation)
 add_subdirectory(scf)
 
 # tell cmake what our excutable is going to be
-add_executable(pyci pyci.cpp)
+add_executable(polyquant polyquant.cpp)
 
-# target_include_directories(pyci PUBLIC include)
-target_link_libraries(pyci io calculation)
+# target_include_directories(polyquant PUBLIC include)
+target_link_libraries(polyquant io calculation)
 
-install(TARGETS pyci DESTINATION bin)
+install(TARGETS polyquant DESTINATION bin)

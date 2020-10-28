@@ -3,10 +3,10 @@
 #include <cxxopts.hpp>
 #include <string>
 
-using namespace selci;
+using namespace polyquant;
 
 int main(int argc, char **argv) {
-  cxxopts::Options options("selci", "Multiple quantum particles.");
+  cxxopts::Options options("polyquant", "Multiple quantum particles.");
   options.add_options()("i,input", "input filename",
                         cxxopts::value<std::string>())("h,help", "Print usage");
   auto input_parameters = options.parse(argc, argv);

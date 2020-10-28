@@ -1,29 +1,29 @@
 #include "io/io.hpp"
 
-using namespace selci;
+using namespace polyquant;
 
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
-namespace selci {
+namespace polyquant {
 // PetscErrorCode APP_ABORT(const std::string &reason) {
 //   std::string ERROR_MESSAGE =
-//       "\n\nTHIS IS A PYCI++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
-//       "PYCI++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
+//       "\n\nTHIS IS A POLYQUANT++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT TO "
+//       "POLYQUANT++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
 //   SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
 //            reason.c_str());
 //   return 1;
 // }
 void APP_ABORT(const std::string &reason) {
   std::vector<std::string> ERROR_MESSAGE = {
-      "THIS IS A PYCI++ ERROR. PLEASE REPORT TO ", "PYCI++ MAINTAINERS.",
+      "THIS IS A POLYQUANT++ ERROR. PLEASE REPORT TO ", "POLYQUANT++ MAINTAINERS.",
       "ABORT REASON:"};
   ERROR_MESSAGE.push_back(reason);
   for (auto line : ERROR_MESSAGE) {
-    Selci_cout(line);
+    Polyquant_cout(line);
   }
   exit(1);
 }
 
-void Selci_dump_json(const json &json_obj) {
+void Polyquant_dump_json(const json &json_obj) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   // if (my_rank == 0) {
@@ -95,22 +95,22 @@ int quantum_symb_to_charge(std::string key) {
   }
 }
 
-} // namespace selci
+} // namespace polyquant
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-PYCI_INPUT::PYCI_INPUT(const std::string &filename) {
+POLYQUANT_INPUT::POLYQUANT_INPUT(const std::string &filename) {
   this->parse_input(filename);
 }
 
-void PYCI_INPUT::parse_input(const std::string &filename) {
+void POLYQUANT_INPUT::parse_input(const std::string &filename) {
   std::ifstream inputfile(filename);
   this->input_data = json::parse(inputfile);
 
-  Selci_cout("Reading Input File: " + filename);
+  Polyquant_cout("Reading Input File: " + filename);
 
-  Selci_cout("Input file: ");
-  Selci_dump_json(this->input_data);
-  Selci_cout("End input file");
+  Polyquant_cout("Input file: ");
+  Polyquant_dump_json(this->input_data);
+  Polyquant_cout("End input file");
   /*
   std::ifstream inputfile(filename);
   std::string line;
