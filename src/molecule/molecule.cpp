@@ -36,7 +36,7 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   // todo check for geom and symbols
   Selci_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) /
              3);
-  for (auto i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3);
+  for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3);
        ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
@@ -118,7 +118,7 @@ void PYCI_MOLECULE::parse_particles(const PYCI_INPUT &input) {
   // classical nuclei
 
   // centers, center_labels, quantum_nuclei
-  for (auto i = 0; i < centers.size(); i++) {
+  for (size_t i = 0; i < centers.size(); i++) {
     if (quantum_nuclei[i] == 0) {
 
       // classical center

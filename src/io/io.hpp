@@ -35,7 +35,7 @@ template <typename T> void Selci_cout(const T &message) {
   // std::cout << std::fixed << std::showpoint << std::setw(20)
   std::cout << std::setprecision(20) << message << std::endl;
   //}
-};
+}
 
 int atom_symb_to_num(std::string key);
 
@@ -73,7 +73,7 @@ void Selci_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
     std::cout << std::fixed << std::showpoint << std::setw(20)
               << std::setprecision(10) << vec(i, 0) << std::endl;
   }
-};
+}
 
 /**
  * @brief A helper function to dump a dense vector object to file.
@@ -92,7 +92,7 @@ void Selci_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
     vecfile << std::fixed << std::showpoint << std::setw(20)
             << std::setprecision(10) << vec(i, 0) << std::endl;
   }
-};
+}
 
 /**
  * @brief A helper function to dump a dense matrix object to std::out.
@@ -115,7 +115,7 @@ void Selci_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
     }
     std::cout << std::endl;
   }
-};
+}
 
 /**
  * @brief A helper function to dump a dense matrix object to file.
@@ -138,7 +138,7 @@ void Selci_dump_mat_to_file(
     }
     matfile << std::endl;
   }
-};
+}
 
 /**
  * @brief A class to hold information parsed from a QCSchema json
