@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     if (input_parameters.count("input") == 1) {
       std::string filename = input_parameters["input"].as<std::string>();
       // set up calculation object
-      PYCI_CALCULATION calc = PYCI_CALCULATION(filename);
+      POLYQUANT_CALCULATION calc = POLYQUANT_CALCULATION(filename);
       // run calculation
       calc.run();
     } else {
