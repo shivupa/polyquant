@@ -1,11 +1,11 @@
+#ifndef POLYQUANT_SCF_H
+#define POLYQUANT_SCF_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
 #include <string>
 
-#ifndef POLYQUANT_SCF_H
-#define POLYQUANT_SCF_H
 namespace polyquant {
 
 /**
@@ -15,8 +15,10 @@ namespace polyquant {
 class POLYQUANT_SCF {
 public:
   POLYQUANT_SCF() = default;
-  POLYQUANT_SCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule,
-           const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral);
+  POLYQUANT_SCF(const POLYQUANT_INPUT &input_params,
+                const POLYQUANT_MOLECULE &input_molecule,
+                const POLYQUANT_BASIS &input_basis,
+                const POLYQUANT_INTEGRAL &input_integral);
 
   void set_input(const POLYQUANT_INPUT &input_params);
   void set_molecule(const POLYQUANT_MOLECULE &input_molecule);

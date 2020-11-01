@@ -1,17 +1,8 @@
 # polyquant
-SELected Configuration Interaction
 
 ## Dependencies
 
 ### For a production build
-- [PETSc](https://gitlab.com/petsc/petsc)
-   `PETSc`, pronounced PET-see (the S is silent), is a suite of data structures and routines for the scalable (parallel) solution of scientific applications modeled by partial differential equations.
-
-   `Polyquant` uses PETSc for MPI distributed data storage.
-- [SLEPc](https://gitlab.com/slepc/slepc)
-   Scalable Library for Eigenvalue Problem Computations
-
-   `Polyquant` uses SLEPc for MPI distributed matrix diagonalization.
 - [onqtam/doctest](https://github.com/onqtam/doctest)
    The fastest feature-rich C++11/14/17/20 single-header testing framework for unit tests and TDD 
 
@@ -28,19 +19,7 @@ SELected Configuration Interaction
    Libint is a high-performance library for computing Gaussian integrals in quantum mechanics
 
    `Polyquant` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
-- [xtensor-stack/xtensor](https://github.com/xtensor-stack/xtensor)
-   C++ tensors with broadcasting and lazy computing 
-
-   `Polyquant` uses `xtensor-stack/xtensor` to handle arrays for the SCF portion of the code.
-- [xtensor-stack/xsimd](https://github.com/xtensor-stack/xsimd)
-   C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)
-
-   `Polyquant` doesn't actually use `xtensor-stack/xsimd` yet...
-
-- [xtensor-stack/xtensor-blas](https://github.com/xtensor-stack/xtensor-blas)
-   BLAS extension to xtensor 
-
-   `Polyquant` uses `xtensor-stack/xtensor-blas` to solve eigenvalue problems.
+   To convert for qmcpack you need to configure with [-with-cartgauss-ordering=gamess](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
 ### For a debug build
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
@@ -65,6 +44,6 @@ SELected Configuration Interaction
 
 ```bash
 pacman -Syu clang
-yay -Syu petsc slepc doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use doxygen
+yay -Syu doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use doxygen
 pip install sphinx sphinx-rtd-theme breathe exhale m2r --user
 ```

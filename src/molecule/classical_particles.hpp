@@ -1,3 +1,5 @@
+#ifndef POLYQUANT_CLASSICAL_PARTICLE_SET_H
+#define POLYQUANT_CLASSICAL_PARTICLE_SET_H
 #include "io/io.hpp"
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma: keep
@@ -5,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#ifndef POLYQUANT_CLASSICAL_PARTICLE_SET_H
-#define POLYQUANT_CLASSICAL_PARTICLE_SET_H
 namespace polyquant {
 struct CLASSICAL_PARTICLE_SET {
   // double spin; <- only quantum

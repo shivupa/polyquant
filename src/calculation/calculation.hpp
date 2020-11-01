@@ -1,15 +1,14 @@
+#ifndef POLYQUANT_CALCULATION_H
+#define POLYQUANT_CALCULATION_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
-#include <algorithm>
-// #include <scf/eprhf.hpp>
 #include "scf/epscf.hpp"
+#include <algorithm>
 #include <string>
 #include <unordered_set>
 
-#ifndef POLYQUANT_CALCULATION_H
-#define POLYQUANT_CALCULATION_H
 namespace polyquant {
 
 /**
@@ -42,7 +41,8 @@ public:
    *
    * @param mean field method
    */
-  void run_electronic_mean_field(std::string &mean_field_type);
+  void run_electronic_mean_field(std::string &mean_field_type,
+                                 bool &dump_for_qmcpack);
 
   void
   run_excess_electron_plus_electronic_mean_field(std::string &mean_field_type);

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 
-../../build/bin/pyci -i h2o.json
+../../build/bin/polyquant -i h2o.json
+~/Documents/qmcpack/build/bin/convert4qmc -orbitals electron.h5
 
 
 #python h2o.py

@@ -2,11 +2,12 @@
 
 using namespace polyquant;
 
-POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {
+POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input,
+                                 const POLYQUANT_MOLECULE &molecule) {
   this->load_basis(input, molecule);
 }
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
-                            const POLYQUANT_MOLECULE &molecule) {
+                                 const POLYQUANT_MOLECULE &molecule) {
   Polyquant_cout("BASIS");
   this->basis = libint2::BasisSet();
   // parse basis name from data
@@ -89,11 +90,11 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
           Polyquant_cout("Added basis for " + classical_part_key);
           this->num_basis = libint2::nbf(this->basis);
           Polyquant_cout("Number of basis functions: " +
-                     std::to_string(this->num_basis));
+                         std::to_string(this->num_basis));
 
         } else {
           Polyquant_cout("'model->basis' didn't contain a basis for: " +
-                     classical_part_key);
+                         classical_part_key);
         }
       }
     } else {

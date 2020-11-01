@@ -1,15 +1,21 @@
+#ifndef POLYQUANT_INPUT_H
+#define POLYQUANT_INPUT_H
 #include <Eigen/Dense>
+#include <Eigen/Eigen>
 #include <algorithm>
 #include <fstream>
+#include <highfive/H5DataSet.hpp>
+#include <highfive/H5DataSpace.hpp>
+#include <highfive/H5Easy.hpp>
+#include <highfive/H5File.hpp>
 #include <iomanip>
 #include <iostream>
+#include <libint2.hpp>       // IWYU pragma: keep
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
 using json = nlohmann::json;
 
-#ifndef POLYQUANT_INPUT_H
-#define POLYQUANT_INPUT_H
 namespace polyquant {
 
 // /**
@@ -61,7 +67,7 @@ void Polyquant_dump_json(const json &json_obj);
  **/
 template <typename T>
 void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
-                    const std::string &title) {
+                        const std::string &title) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   // if (my_rank == 0) {
@@ -75,6 +81,17 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
   }
 }
 
+void Polyquant_dump_hdf5_for_QMCPACK(
+    const std::string &filename, bool pbc, bool complex, bool ecp,
+    bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
+    int num_part_beta, int num_part_total, int multiplicity, int num_atom,
+    int num_species, std::vector<std::vector<std::vector<double>>> E_orb,
+    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff,
+    std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
+    std::vector<int> atomic_charge, std::vector<int> core_elec,
+    std::vector<std::string> atomic_names,
+    std::vector<std::vector<double>> atomic_centers);
+
 /**
  * @brief A helper function to dump a dense vector object to file.
  *
@@ -82,7 +99,7 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
  **/
 template <typename T>
 void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
-                            const std::string &filename) {
+                                const std::string &filename) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   // if (my_rank == 0) {
@@ -100,8 +117,9 @@ void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
  * @param mat The dense matrix to print
  **/
 template <typename T>
-void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
-                    const std::string &title) {
+void Polyquant_dump_mat(
+    const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
+    const std::string &title) {
   // int my_rank;
   // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
   // if (my_rank == 0) {

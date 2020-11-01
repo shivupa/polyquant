@@ -14,13 +14,13 @@ void POLYQUANT_EPSCF::form_H_core() {
     this->H_core[quantum_part_idx] +=
         (-quantum_part.charge) * this->input_integral.nuclear;
     Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx],
-                           "H_core_" + quantum_part_key + ".txt");
+                               "H_core_" + quantum_part_key + ".txt");
     quantum_part_idx++;
   }
 }
-double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
-                                  double eri_ikjl, double qa, double qb,
-                                  bool exchange) {
+double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl,
+                                       double eri_ijkl, double eri_ikjl,
+                                       double qa, double qb, bool exchange) {
   double gamma = 0.0;
   if (exchange) {
     gamma = 1.0;
@@ -118,10 +118,10 @@ void POLYQUANT_EPSCF::form_fock() {
          this->input_molecule.quantum_particles) {
       Polyquant_cout("Dumping");
       Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
-                             "Fock_" + quantum_part_a_key + "_alpha.txt");
+                                 "Fock_" + quantum_part_a_key + "_alpha.txt");
       if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
         Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][1],
-                               "Fock_" + quantum_part_a_key + "_beta.txt");
+                                   "Fock_" + quantum_part_a_key + "_beta.txt");
       }
       quantum_part_a_idx++;
     }
@@ -439,8 +439,8 @@ void POLYQUANT_EPSCF::run() {
     std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] :
          this->input_molecule.quantum_particles) {
-      Polyquant_cout("E(" + quantum_part_key +
-                 ") : " + std::to_string(this->E_particles[quantum_part_idx]));
+      Polyquant_cout("E(" + quantum_part_key + ") : " +
+                     std::to_string(this->E_particles[quantum_part_idx]));
       E_parts += this->E_particles[quantum_part_idx];
       quantum_part_idx++;
     }

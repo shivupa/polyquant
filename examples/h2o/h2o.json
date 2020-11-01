@@ -21,7 +21,8 @@
         "H" : [{ "library" : {"type" : "sto-3g"} }]}
   },
   "keywords": {
-    "restricted" : true
+    "restricted" : true,
+    "dump_for_qmcpack" : true
   }
 }
 

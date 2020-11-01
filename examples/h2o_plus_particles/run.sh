@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-../../build/bin/pyci -i h2o.json
+../../build/bin/polyquant -i h2o.json
 
 
 #python h2o.py

@@ -33,7 +33,7 @@ public:
    * @param molecule the molecule to calculate integrals for
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
-                const POLYQUANT_MOLECULE &molecule);
+                     const POLYQUANT_MOLECULE &molecule);
 
   void calculate_overlap();
   void calculate_kinetic();
@@ -49,7 +49,8 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  void setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
+  void setup_integral(const POLYQUANT_INPUT &input,
+                      const POLYQUANT_BASIS &basis,
                       const POLYQUANT_MOLECULE &molecule);
   /**
    * @brief Calculate the combined index for the vector containing the upper

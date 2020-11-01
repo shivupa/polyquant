@@ -1,3 +1,5 @@
+#ifndef POLYQUANT_EPSCF_H
+#define POLYQUANT_EPSCF_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
@@ -7,17 +9,17 @@
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <string>
 
-#ifndef POLYQUANT_EPSCF_H
-#define POLYQUANT_EPSCF_H
 namespace polyquant {
 
 class POLYQUANT_EPSCF : POLYQUANT_SCF {
 public:
   POLYQUANT_EPSCF() = default;
   POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params,
-             const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis,
-             const POLYQUANT_INTEGRAL &input_integral)
-      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
+                  const POLYQUANT_MOLECULE &input_molecule,
+                  const POLYQUANT_BASIS &input_basis,
+                  const POLYQUANT_INTEGRAL &input_integral)
+      : POLYQUANT_SCF(input_params, input_molecule, input_basis,
+                      input_integral){};
 
   void form_H_core() override;
   double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,

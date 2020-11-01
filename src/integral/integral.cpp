@@ -2,8 +2,9 @@
 
 using namespace polyquant;
 
-POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
-                             const POLYQUANT_MOLECULE &molecule) {
+POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
+                                       const POLYQUANT_BASIS &basis,
+                                       const POLYQUANT_MOLECULE &molecule) {
   Polyquant_cout("INTEGRAL");
   this->setup_integral(input, basis, molecule);
 }
@@ -54,8 +55,8 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
 
 // void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
 //  if (this->polarization_potential.shape() == std::vector<size_t>({})) {
-//    Polyquant_cout("Calculating One Body Polarization Potential Integrals...");
-//    std::vector<std::string> atom_types = {};
+//    Polyquant_cout("Calculating One Body Polarization Potential
+//    Integrals..."); std::vector<std::string> atom_types = {};
 //    std::vector<std::string> polarization_types = {};
 //    Polyquant_cout(
 //        "Parsing the necessary keywords atom_types and
@@ -83,7 +84,8 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
 //        }
 //      }
 //    } else {
-//      APP_ABORT("Polyquant needs keywords atom_types and polarization_types to do
+//      APP_ABORT("Polyquant needs keywords atom_types and polarization_types to
+//      do
 //      "
 //                "a polarization potential calculation.");
 //    }
@@ -176,8 +178,8 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
 }
 
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
-                                   const POLYQUANT_BASIS &basis,
-                                   const POLYQUANT_MOLECULE &molecule) {
+                                        const POLYQUANT_BASIS &basis,
+                                        const POLYQUANT_MOLECULE &molecule) {
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;

@@ -22,9 +22,10 @@ set(POLYQUANT_VERSION_MAJOR 0)
 set(POLYQUANT_VERSION_MINOR 0)
 set(POLYQUANT_VERSION_PATCH 1)
 set(POLYQUANT_VERSION
-    "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
+    "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}"
+)
 
-add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
+# add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 
 # set up where to find Find*.cmake files and where to put the things we build
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
@@ -125,6 +126,19 @@ FetchContent_Declare(
   GIT_TAG 2.4.0)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+
+FetchContent_Declare(HighFive
+                     GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git)
+set(HIGHFIVE_USE_BOOST OFF)
+set(HIGHFIVE_USE_EIGEN ON)
+set(HIGHFIVE_USE_XTENSOR OFF)
+set(HIGHFIVE_USE_OPENCV OFF)
+set(HIGHFIVE_UNIT_TESTS OFF)
+set(HIGHFIVE_EXAMPLES OFF)
+set(HIGHFIVE_PARALLEL_HDF5 OFF)
+set(HIGHFIVE_BUILD_DOCS OFF)
+FetchContent_MakeAvailable(HighFive)
+include(${highfive_BINARY_DIR}/HighFiveConfig.cmake)
 
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(polyquant
