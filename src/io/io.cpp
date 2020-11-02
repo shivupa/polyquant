@@ -195,18 +195,17 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     char grid_type[][4] = {"log"};
     file.createDataSet<char[4]>(group + "/grid_type", DataSpace(1))
         .write(grid_type);
-shell_idx = 0;
+    shell_idx = 0;
     for (auto shell : atom_shells) {
-      
+
       std::string basis_group =
           group + "/basisGroup" + std::to_string(shell_idx);
       Polyquant_cout(basis_group);
       file.createGroup(basis_group);
 
       char btype[][9] = {"Gaussian"};
-      file.createDataSet<char[9]>(basis_group + "/type", DataSpace(1)).write(btype);
-
-      
+      file.createDataSet<char[9]>(basis_group + "/type", DataSpace(1))
+          .write(btype);
 
       const int NbRadFunc[] = {(int)shell.alpha.size()};
       file.createDataSet<int>(basis_group + "/NbRadFunc", DataSpace(1))
@@ -217,9 +216,11 @@ shell_idx = 0;
       const int l[] = {shell.contr[0].l};
       file.createDataSet<int>(basis_group + "/l", DataSpace(1)).write(l);
 
-      std::string basis_id = atomic_names[atom_idx] +std::to_string(atom_idx)  +std::to_string(shell.contr[0].l);
+      std::string basis_id = atomic_names[atom_idx] + std::to_string(atom_idx) +
+                             std::to_string(shell.contr[0].l);
       char rid[][3] = {*basis_id.c_str()};
-      file.createDataSet<char[3]>(basis_group + "/rid", DataSpace(1)).write(rid);
+      file.createDataSet<char[3]>(basis_group + "/rid", DataSpace(1))
+          .write(rid);
       std::vector<double> origin = {shell.O[0], shell.O[1], shell.O[2]};
       H5Easy::dump(file, basis_group + "/Shell_coord", origin);
 
@@ -233,94 +234,95 @@ shell_idx = 0;
                                        std::to_string(i) + "/exponent",
                                    DataSpace(1))
             .write(exponent);
-        std::cout << shell.contr.size() << " SHIV " << shell.contr[0].coeff.at(i) << std::endl;
+        std::cout << shell.contr.size() << " SHIV "
+                  << shell.contr[0].coeff.at(i) << std::endl;
         const double contraction[] = {shell.contr[0].coeff.at(i)};
         file.createDataSet<double>(basis_group + "/radfunctions/DataRad" +
                                        std::to_string(i) + "/contraction",
                                    DataSpace(1))
             .write(contraction);
       }
-        shell_idx++;
-      }
-
-      atom_idx++;
+      shell_idx++;
     }
 
-    // create a dataset ready to contains strings of the size of the vector
-
-    // H5Easy::File hdf5_outfile(filename, H5Easy::File::Overwrite);
-    // std::vector<std::string> title = {"Polyquant"};
-    // std::string title = "Polyquant";
-    // H5Easy::dump(hdf5_outfile, "application/code", title.c_str());
-    // H5Easy::dump(hdf5_outfile, "application/code", title);
-    // int my_rank;
-    // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-    // if (my_rank == 0) {
+    atom_idx++;
   }
 
-  std::map<std::string, int> _atm_symb_to_num = {
-      {"H", 1},   {"He", 2},  {"Li", 3},  {"Be", 4},  {"B", 5},
-      {"C", 6},   {"N", 7},   {"O", 8},   {"F", 9},   {"Ne", 10},
-      {"Na", 11}, {"Mg", 12}, {"Al", 13}, {"Si", 14}, {"P", 15},
-      {"S", 16},  {"Cl", 17}, {"Ar", 18}, {"K", 19},
-  };
+  // create a dataset ready to contains strings of the size of the vector
 
-  std::map<std::string, int> _atm_symb_to_mass = {
-      {"H", 1.00782503223},  {"He", 4.00260325413},  {"Li", 7.0160034366},
-      {"Be", 9.012183065},   {"B", 11.00930536},     {"C", 12.0},
-      {"N", 14.00307400443}, {"O", 15.99491461957},  {"F", 18.99840316273},
-      {"Ne", 19.9924401762}, {"Na", 22.989769282},   {"Mg", 23.985041697},
-      {"Al", 26.98153853},   {"Si", 27.97692653465}, {"P", 30.97376199842},
-      {"S", 31.9720711744},  {"Cl", 34.968852682},   {"Ar", 39.9623831237},
-      {"K", 38.9637064864},
-  };
+  // H5Easy::File hdf5_outfile(filename, H5Easy::File::Overwrite);
+  // std::vector<std::string> title = {"Polyquant"};
+  // std::string title = "Polyquant";
+  // H5Easy::dump(hdf5_outfile, "application/code", title.c_str());
+  // H5Easy::dump(hdf5_outfile, "application/code", title);
+  // int my_rank;
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  // if (my_rank == 0) {
+}
 
-  int atom_symb_to_num(std::string key) {
-    if (_atm_symb_to_num.count(key)) {
-      return _atm_symb_to_num[key];
-    } else {
-      return 0;
-    }
+std::map<std::string, int> _atm_symb_to_num = {
+    {"H", 1},   {"He", 2},  {"Li", 3},  {"Be", 4},  {"B", 5},
+    {"C", 6},   {"N", 7},   {"O", 8},   {"F", 9},   {"Ne", 10},
+    {"Na", 11}, {"Mg", 12}, {"Al", 13}, {"Si", 14}, {"P", 15},
+    {"S", 16},  {"Cl", 17}, {"Ar", 18}, {"K", 19},
+};
+
+std::map<std::string, int> _atm_symb_to_mass = {
+    {"H", 1.00782503223},  {"He", 4.00260325413},  {"Li", 7.0160034366},
+    {"Be", 9.012183065},   {"B", 11.00930536},     {"C", 12.0},
+    {"N", 14.00307400443}, {"O", 15.99491461957},  {"F", 18.99840316273},
+    {"Ne", 19.9924401762}, {"Na", 22.989769282},   {"Mg", 23.985041697},
+    {"Al", 26.98153853},   {"Si", 27.97692653465}, {"P", 30.97376199842},
+    {"S", 31.9720711744},  {"Cl", 34.968852682},   {"Ar", 39.9623831237},
+    {"K", 38.9637064864},
+};
+
+int atom_symb_to_num(std::string key) {
+  if (_atm_symb_to_num.count(key)) {
+    return _atm_symb_to_num[key];
+  } else {
+    return 0;
   }
+}
 
-  double atom_symb_to_mass(std::string key) {
-    if (_atm_symb_to_mass.count(key)) {
-      return _atm_symb_to_mass[key];
-    } else {
-      return 0.0;
-    }
+double atom_symb_to_mass(std::string key) {
+  if (_atm_symb_to_mass.count(key)) {
+    return _atm_symb_to_mass[key];
+  } else {
+    return 0.0;
   }
+}
 
-  double quantum_symb_to_spin(std::string key) {
-    // if (_atm_symb_to_mass.count(key)) {
-    //   return _atm_symb_to_mass[key];
-    // } else {
-    (void)(key); // <- mute the unused parameter error. Eventually we might want
-                 // to assign this variable based on a key, but for now
-                 // everything gets 0.5
-    return 0.50;
-    // }
-  }
+double quantum_symb_to_spin(std::string key) {
+  // if (_atm_symb_to_mass.count(key)) {
+  //   return _atm_symb_to_mass[key];
+  // } else {
+  (void)(key); // <- mute the unused parameter error. Eventually we might want
+               // to assign this variable based on a key, but for now
+               // everything gets 0.5
+  return 0.50;
+  // }
+}
 
-  double quantum_symb_to_mass(std::string key) {
-    if (_atm_symb_to_mass.count(key)) {
-      return _atm_symb_to_mass[key];
-    } else if (key == "electron") {
-      return 1.0;
-    } else {
-      return 0.0;
-    }
+double quantum_symb_to_mass(std::string key) {
+  if (_atm_symb_to_mass.count(key)) {
+    return _atm_symb_to_mass[key];
+  } else if (key == "electron") {
+    return 1.0;
+  } else {
+    return 0.0;
   }
+}
 
-  int quantum_symb_to_charge(std::string key) {
-    if (_atm_symb_to_num.count(key)) {
-      return _atm_symb_to_num[key];
-    } else if (key == "electron") {
-      return -1.0;
-    } else {
-      return 0;
-    }
+int quantum_symb_to_charge(std::string key) {
+  if (_atm_symb_to_num.count(key)) {
+    return _atm_symb_to_num[key];
+  } else if (key == "electron") {
+    return -1.0;
+  } else {
+    return 0;
   }
+}
 
 } // namespace polyquant
 #endif // DOXYGEN_SHOULD_SKIP_THIS
