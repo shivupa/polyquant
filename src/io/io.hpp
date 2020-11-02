@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
+#include <fmt/core.h>
 #include <fstream>
 #include <highfive/H5DataSet.hpp>
 #include <highfive/H5DataSpace.hpp>
@@ -14,6 +15,7 @@
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
+// TODO switch to #include <format> once it is supported
 using json = nlohmann::json;
 
 namespace polyquant {
@@ -90,7 +92,8 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
     std::vector<int> atomic_charge, std::vector<int> core_elec,
     std::vector<std::string> atomic_names,
-    std::vector<std::vector<double>> atomic_centers);
+    std::vector<std::vector<double>> atomic_centers,
+    std::vector<std::vector<libint2::Shell>> unique_shells);
 
 /**
  * @brief A helper function to dump a dense vector object to file.

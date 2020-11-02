@@ -140,6 +140,10 @@ set(HIGHFIVE_BUILD_DOCS OFF)
 FetchContent_MakeAvailable(HighFive)
 include(${highfive_BINARY_DIR}/HighFiveConfig.cmake)
 
+FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git)
+FetchContent_MakeAvailable(fmt)
+include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(polyquant
 # ${PYTHON_LIBRARIES}) endif(PythonLibs_FOUND) Done finding Done finding all the

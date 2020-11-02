@@ -259,10 +259,12 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
           std::cout << shell << std::endl;
           i++;
         }
-        auto idx = std::find(basis_shell2atom.begin(),basis_shell2atom.end(), -1);
-        if (idx != basis_shell2atom.end()){
-          Polyquant_cout("Basis shell doesn't correspond to a classical center! This shouldn't happen. Basis shell:");
-          std::string idx_string( 1, *idx );
+        auto idx =
+            std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
+        if (idx != basis_shell2atom.end()) {
+          Polyquant_cout("Basis shell doesn't correspond to a classical "
+                         "center! This shouldn't happen. Basis shell:");
+          std::string idx_string(1, *idx);
           Polyquant_cout("Shell:" + idx_string);
           Polyquant_cout(basis[*idx]);
           APP_ABORT("Shell doesn't correspond to center");
@@ -273,38 +275,51 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         classical_part_idx = 0;
         double EPSILON = 1e-6;
         for (auto const &[classical_part_key, classical_part] :
-           this->input_molecule.classical_particles) {
-             Polyquant_cout(classical_part_key);
-              for (auto shell : this->input_basis.basis){
-                  // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-                  // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0]) + " " +
-                  // std::to_string(shell.O[0] -this->input_molecule.centers[classical_part.center_idx[0]][0]) );
-                  // Polyquant_cout( std::to_string(shell.O[1]) + " " +
-                  // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1]) + " " +
-                  // std::to_string(shell.O[1] -this->input_molecule.centers[classical_part.center_idx[0]][1]) );
-                  // Polyquant_cout( std::to_string(shell.O[2]) + " " +
-                  // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2]) + " " +
-                  // std::to_string(shell.O[2] -this->input_molecule.centers[classical_part.center_idx[0]][2]) );
-                if (
-                  std::abs(shell.O[0] -this->input_molecule.centers[classical_part.center_idx[0]][0]) < EPSILON &&
-                  std::abs(shell.O[1] -this->input_molecule.centers[classical_part.center_idx[0]][1]) < EPSILON &&
-                  std::abs(shell.O[2] -this->input_molecule.centers[classical_part.center_idx[0]][2]) < EPSILON
-                 ) {
-                  
-Polyquant_cout("Unique shell on center: " + std::to_string(classical_part.center_idx[0]) + " named: " + classical_part_key);
-                Polyquant_cout(shell);
-                unique_shells[classical_part_idx].push_back(shell);
-                }
-              }
-             classical_part_idx++;
-           }
+             this->input_molecule.classical_particles) {
+          Polyquant_cout(classical_part_key);
+          for (auto shell : this->input_basis.basis) {
+            // Polyquant_cout( std::to_string(shell.O[0]) + " " +
+            // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+            // + " " + std::to_string(shell.O[0]
+            // -this->input_molecule.centers[classical_part.center_idx[0]][0])
+            // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
+            // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+            // + " " + std::to_string(shell.O[1]
+            // -this->input_molecule.centers[classical_part.center_idx[0]][1])
+            // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
+            // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+            // + " " + std::to_string(shell.O[2]
+            // -this->input_molecule.centers[classical_part.center_idx[0]][2])
+            // );
+            if (std::abs(shell.O[0] -
+                         this->input_molecule
+                             .centers[classical_part.center_idx[0]][0]) <
+                    EPSILON &&
+                std::abs(shell.O[1] -
+                         this->input_molecule
+                             .centers[classical_part.center_idx[0]][1]) <
+                    EPSILON &&
+                std::abs(shell.O[2] -
+                         this->input_molecule
+                             .centers[classical_part.center_idx[0]][2]) <
+                    EPSILON) {
+
+              Polyquant_cout("Unique shell on center: " +
+                             std::to_string(classical_part.center_idx[0]) +
+                             " named: " + classical_part_key);
+              Polyquant_cout(shell);
+              unique_shells[classical_part_idx].push_back(shell);
+            }
+          }
+          classical_part_idx++;
+        }
 
         Polyquant_dump_hdf5_for_QMCPACK(
             hdf5_filename, pbc, ecp, complex, restricted, num_ao, num_mo,
             bohr_unit, num_part_alpha, num_part_beta, num_part_total,
             multiplicity, num_atom, num_species, E_orb, mo_coeff,
             atomic_species_ids, atomic_number, atomic_charge, core_elec,
-            atomic_names, atomic_centers);
+            atomic_names, atomic_centers, unique_shells);
         quantum_part_idx++;
       }
     }
