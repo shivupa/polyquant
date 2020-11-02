@@ -110,9 +110,9 @@ include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 # find_package(SLEPC REQUIRED) FIND nlohmann_json
 find_package(nlohmann_json 3.2.0 REQUIRED)
 # FIND CPR
-find_package(CPR REQUIRED)
+#find_package(CPR REQUIRED)
 # FIND CURL
-find_package(CURL REQUIRED)
+#find_package(CURL REQUIRED)
 # FIND Libint2
 find_package(Libint2 REQUIRED)
 # FIND Eigen
