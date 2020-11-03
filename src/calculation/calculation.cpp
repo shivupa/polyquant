@@ -253,12 +253,12 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         std::string pure_or_cart = "spherical";
         //  "cartesian"
 
-        auto i = 0;
-        for (auto shell : basis) {
-          std::cout << "center :" << basis_shell2atom[i] << std::endl;
-          std::cout << shell << std::endl;
-          i++;
-        }
+        // auto i = 0;
+        // for (auto shell : basis) {
+        //   std::cout << "center :" << basis_shell2atom[i] << std::endl;
+        //   std::cout << shell << std::endl;
+        //   i++;
+        // }
         auto idx =
             std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
         if (idx != basis_shell2atom.end()) {
@@ -276,7 +276,7 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         double EPSILON = 1e-6;
         for (auto const &[classical_part_key, classical_part] :
              this->input_molecule.classical_particles) {
-          Polyquant_cout(classical_part_key);
+          // Polyquant_cout(classical_part_key);
           for (auto shell : this->input_basis.basis) {
             // Polyquant_cout( std::to_string(shell.O[0]) + " " +
             // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
@@ -304,10 +304,10 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
                              .centers[classical_part.center_idx[0]][2]) <
                     EPSILON) {
 
-              Polyquant_cout("Unique shell on center: " +
-                             std::to_string(classical_part.center_idx[0]) +
-                             " named: " + classical_part_key);
-              Polyquant_cout(shell);
+              // Polyquant_cout("Unique shell on center: " +
+              //                std::to_string(classical_part.center_idx[0]) +
+              //                " named: " + classical_part_key);
+              // Polyquant_cout(shell);
               unique_shells[classical_part_idx].push_back(shell);
             }
           }

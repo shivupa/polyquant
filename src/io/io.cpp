@@ -148,6 +148,9 @@ void Polyquant_dump_hdf5_for_QMCPACK(
   const int NbElements[] = {(int)unique_shells.size()};
   file.createDataSet<int>("basisset/NbElements", DataSpace(1))
       .write(NbElements);
+  const char basis_name[][9] = {"LCAOBSet"};
+  file.createDataSet<char[9]>("basisset/basis_name", DataSpace(1))
+      .write(basis_name);
 
   std::vector<std::vector<libint2::Shell>>::size_type atom_idx = 0;
   std::vector<libint2::Shell>::size_type shell_idx;
@@ -184,7 +187,6 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     char normalized[][3] = {"no"};
     file.createDataSet<char[3]>(group + "/normalized", DataSpace(1))
         .write(normalized);
-
     const int grid_npts[] = {1001};
     file.createDataSet<int>(group + "/grid_npts", DataSpace(1))
         .write(grid_npts);
@@ -200,14 +202,9 @@ void Polyquant_dump_hdf5_for_QMCPACK(
 
       std::string basis_group =
           group + "/basisGroup" + std::to_string(shell_idx);
-      Polyquant_cout(basis_group);
       file.createGroup(basis_group);
 
-      char btype[][9] = {"Gaussian"};
-      file.createDataSet<char[9]>(basis_group + "/type", DataSpace(1))
-          .write(btype);
-
-      const int NbRadFunc[] = {(int)shell.alpha.size()};
+            const int NbRadFunc[] = {(int)shell.alpha.size()};
       file.createDataSet<int>(basis_group + "/NbRadFunc", DataSpace(1))
           .write(NbRadFunc);
 
@@ -215,12 +212,23 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       file.createDataSet<int>(basis_group + "/n", DataSpace(1)).write(n);
       const int l[] = {shell.contr[0].l};
       file.createDataSet<int>(basis_group + "/l", DataSpace(1)).write(l);
+      const char btype[][9] = {"Gaussian"};
+      file.createDataSet<char[9]>(basis_group + "/type", DataSpace(1))
+          .write(btype);
+      //  std::vector<std::string> btype = {"Gaussian"};
+      //H5Easy::dump(file, basis_group + "/type", btype);
 
-      std::string basis_id = atomic_names[atom_idx] + std::to_string(atom_idx) +
-                             std::to_string(shell.contr[0].l);
-      char rid[][3] = {*basis_id.c_str()};
-      file.createDataSet<char[3]>(basis_group + "/rid", DataSpace(1))
-          .write(rid);
+
+
+      // std::string basis_id = atomic_names[atom_idx] + std::to_string(shell_idx) +std::to_string(shell.contr[0].l);
+      // // Polyquant_cout(basis_id);
+      // char rid[][5] = {*basis_id.c_str()};
+      // file.createDataSet<char[5]>(basis_group + "/rid", DataSpace(1))
+      //     .write(rid);
+      std::vector<std::string> basis_id = {atomic_names[atom_idx] + std::to_string(shell_idx) +std::to_string(shell.contr[0].l)};
+      H5Easy::dump(file, basis_group + "/rid", basis_id);
+
+          
       std::vector<double> origin = {shell.O[0], shell.O[1], shell.O[2]};
       H5Easy::dump(file, basis_group + "/Shell_coord", origin);
 
@@ -234,8 +242,6 @@ void Polyquant_dump_hdf5_for_QMCPACK(
                                        std::to_string(i) + "/exponent",
                                    DataSpace(1))
             .write(exponent);
-        std::cout << shell.contr.size() << " SHIV "
-                  << shell.contr[0].coeff.at(i) << std::endl;
         const double contraction[] = {shell.contr[0].coeff.at(i)};
         file.createDataSet<double>(basis_group + "/radfunctions/DataRad" +
                                        std::to_string(i) + "/contraction",
