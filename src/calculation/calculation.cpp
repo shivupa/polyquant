@@ -212,7 +212,7 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         std::string hdf5_filename = quantum_part_key + ".h5";
         bool pbc = false;
         bool ecp = false;
-        bool complex = false;
+        bool complex_vals = false;
         bool restricted = quantum_part.restricted;
         int num_ao = this->input_basis.num_basis;
         int num_mo = this->input_basis.num_basis;
@@ -223,23 +223,19 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         int multiplicity = quantum_part.multiplicity;
         int num_atom = this->input_molecule.centers.size();
         int num_species = this->input_molecule.classical_particles.size();
-        std::vector<std::vector<std::vector<double>>> E_orb;
+        std::vector<std::vector<double>> E_orb;
         if (!restricted) {
           E_orb.resize(2);
-          E_orb[0].resize(1);
-          E_orb[1].resize(1);
-          E_orb[0][0].resize(num_ao);
-          E_orb[1][0].resize(num_ao);
+          E_orb[0].resize(num_ao);
+          E_orb[1].resize(num_ao);
         } else {
           E_orb.resize(1);
-          E_orb[0].resize(1);
-          E_orb[0][0].resize(num_ao);
+          E_orb[0].resize(num_ao);
         }
         for (auto i = 0; i < num_ao; i++) {
-          E_orb[0][0][i] = scf_calc.E_orbitals[quantum_part_idx][0][i];
+          E_orb[0][i] = scf_calc.E_orbitals[quantum_part_idx][0][i];
           if (!restricted) {
-            E_orb[0][i].resize(num_ao);
-            E_orb[1][0][i] = scf_calc.E_orbitals[quantum_part_idx][1][i];
+            E_orb[1][i] = scf_calc.E_orbitals[quantum_part_idx][1][i];
           }
         }
 
@@ -315,7 +311,7 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         }
 
         Polyquant_dump_hdf5_for_QMCPACK(
-            hdf5_filename, pbc, ecp, complex, restricted, num_ao, num_mo,
+            hdf5_filename, pbc, ecp, complex_vals, restricted, num_ao, num_mo,
             bohr_unit, num_part_alpha, num_part_beta, num_part_total,
             multiplicity, num_atom, num_species, E_orb, mo_coeff,
             atomic_species_ids, atomic_number, atomic_charge, core_elec,
