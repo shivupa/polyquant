@@ -3,7 +3,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
-#include <fmt/core.h>
 #include <fstream>
 #include <h5cpp/hdf5.hpp>
 #include <iomanip>
