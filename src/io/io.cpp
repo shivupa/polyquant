@@ -32,238 +32,372 @@ void Polyquant_dump_json(const json &json_obj) {
 }
 
 void Polyquant_dump_hdf5_for_QMCPACK(
-    const std::string &filename, bool pbc, bool complex, bool ecp,
+    const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,
-    int num_species, std::vector<std::vector<std::vector<double>>> E_orb,
+    int num_species, std::vector<std::vector<double>> E_orb,
     std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff,
     std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
     std::vector<int> atomic_charge, std::vector<int> core_elec,
     std::vector<std::string> atomic_names,
     std::vector<std::vector<double>> atomic_centers,
     std::vector<std::vector<libint2::Shell>> unique_shells) {
-  using namespace HighFive;
+  using namespace hdf5;
+  auto simple_space = hdf5::dataspace::Simple({1});
+  auto bool_type = datatype::create<bool>();
+  auto int_type = datatype::create<int>();
+  auto double_type = datatype::create<double>();
+  auto vec_int_type = datatype::create<std::vector<int>>();
   // create file
   Polyquant_cout("dumping file");
-  File file(filename, File::ReadWrite | File::Create | File::Truncate);
+  file::File f = file::create(filename, file::AccessFlags::TRUNCATE);
+  node::Group root_group = f.root();
   // write generating code name
   Polyquant_cout("dumping application parameters");
-  file.createGroup("application");
-  const char title[][10] = {"Polyquant"};
-  file.createDataSet<char[10]>("application/code", DataSpace(1)).write(title);
-  // TODO add version
+  auto application_group = root_group.create_group("application");
+  {
+    std::vector<std::string> title = {"Polyquant"};
+    auto str_type = datatype::String::fixed(9);
+    str_type.padding(datatype::StringPad::NULLPAD);
+    str_type.encoding(datatype::CharacterEncoding::ASCII);
+    auto dtpl = hdf5::property::DatasetTransferList();
+    auto application_title_dataset =
+        application_group.create_dataset("code", str_type, simple_space);
+    application_title_dataset.write(title, str_type, simple_space, simple_space,
+                                    dtpl);
+    //// TODO add version
+  }
   // write PBC
   Polyquant_cout("dumping PBC parameters");
-  file.createGroup("PBC");
-  const bool PBC[] = {pbc};
-  file.createDataSet<bool>("PBC/PBC", DataSpace(1)).write(PBC);
-
-  // write COMPLEX
+  auto PBC_group = root_group.create_group("PBC");
+  {
+    //       auto bool_type = datatype::create<datatype::EBool>();
+    //  auto dtpl = hdf5::property::DatasetTransferList();
+    auto PBC_dataset = PBC_group.create_dataset("PBC", bool_type, simple_space);
+    //            PBC_dataset.write(pbc,bool_type,simple_space,simple_space,dtpl);
+    PBC_dataset.write(pbc, bool_type, simple_space);
+  }
+  // write General parameters
   Polyquant_cout("dumping general parameters");
-  file.createGroup("parameters");
-  const bool COMPLEX[] = {complex};
-  file.createDataSet<bool>("parameters/IsComplex", DataSpace(1)).write(COMPLEX);
-  // write ECP
-  const bool ECP[] = {ecp};
-  file.createDataSet<bool>("parameters/ECP", DataSpace(1)).write(ECP);
-  // write restricted
-  const bool SpinRestricted[] = {restricted};
-  file.createDataSet<bool>("parameters/SpinRestricted", DataSpace(1))
-      .write(SpinRestricted);
-  // write num_ao
-  const int numAO[] = {num_ao};
-  file.createDataSet<int>("parameters/numAO", DataSpace(1)).write(numAO);
-  // write num_mo
-  const int numMO[] = {num_mo};
-  file.createDataSet<int>("parameters/numMO", DataSpace(1)).write(numMO);
-  // write bohr_unit
-  const bool Unit[] = {bohr_unit};
-  file.createDataSet<bool>("parameters/Unit", DataSpace(1)).write(Unit);
-  // write num_part_alpha
-  const int NbAlpha[] = {num_part_alpha};
-  file.createDataSet<int>("parameters/NbAlpha", DataSpace(1)).write(NbAlpha);
-  // write num_part_beta
-  const int NbBeta[] = {num_part_beta};
-  file.createDataSet<int>("parameters/NbBeta", DataSpace(1)).write(NbBeta);
-  // write num_part_total
-  const int NbTotElec[] = {num_part_total};
-  file.createDataSet<int>("parameters/NbTotElec", DataSpace(1))
-      .write(NbTotElec);
-  // write multiplicity
-  const int spin[] = {multiplicity};
-  file.createDataSet<int>("parameters/spin", DataSpace(1)).write(spin);
-
-  // write mo_energies
+  auto parameters_group = root_group.create_group("parameters");
+  {
+    // write COMPLEX
+    auto IsComplex_dataset =
+        parameters_group.create_dataset("IsComplex", bool_type, simple_space);
+    IsComplex_dataset.write(complex_vals, bool_type, simple_space);
+    // write ECP
+    auto ECP_dataset =
+        parameters_group.create_dataset("ECP", bool_type, simple_space);
+    ECP_dataset.write(ecp, bool_type, simple_space);
+    // write restricted
+    auto SpinRestricted_dataset = parameters_group.create_dataset(
+        "SpinRestricted", bool_type, simple_space);
+    SpinRestricted_dataset.write(restricted, bool_type, simple_space);
+    // write num_ao
+    auto numAO_dataset =
+        parameters_group.create_dataset("numAO", int_type, simple_space);
+    numAO_dataset.write(num_ao, int_type, simple_space);
+    // write num_mo
+    auto numMO_dataset =
+        parameters_group.create_dataset("numMO", int_type, simple_space);
+    numMO_dataset.write(num_mo, int_type, simple_space);
+    // write bohr_unit
+    auto bohr_unit_dataset =
+        parameters_group.create_dataset("Unit", bool_type, simple_space);
+    bohr_unit_dataset.write(bohr_unit, bool_type, simple_space);
+    // write num_part_alpha
+    auto NbAlpha_dataset =
+        parameters_group.create_dataset("NbAlpha", int_type, simple_space);
+    NbAlpha_dataset.write(num_part_alpha, int_type, simple_space);
+    // write num_part_beta
+    auto NbBeta_dataset =
+        parameters_group.create_dataset("NbBeta", int_type, simple_space);
+    NbBeta_dataset.write(num_part_beta, int_type, simple_space);
+    // write num_part_total
+    auto NbTotElec_dataset =
+        parameters_group.create_dataset("NbTotElec", int_type, simple_space);
+    NbTotElec_dataset.write(num_part_total, int_type, simple_space);
+    // write multiplicity
+    auto Spin_dataset =
+        parameters_group.create_dataset("spin", int_type, simple_space);
+    Spin_dataset.write(multiplicity, int_type, simple_space);
+  }
+  // write MO parameters
   Polyquant_cout("dumping MOs");
-  file.createGroup("Super_Twist");
-  H5Easy::dump(file, "Super_Twist/eigenval_0", E_orb[0]);
-  H5Easy::dump(file, "Super_Twist/eigenset_0", mo_coeff[0]);
-  if (!restricted) {
-    H5Easy::dump(file, "Super_Twist/eigenval_1", E_orb[1]);
-    H5Easy::dump(file, "Super_Twist/eigenset_1", mo_coeff[1]);
-  }
-
-  Polyquant_cout("dumping atom parameters");
-  file.createGroup("atoms");
-  // write num_atom
-  const int number_of_atoms[] = {num_atom};
-  file.createDataSet<int>("atoms/number_of_atoms", DataSpace(1))
-      .write(number_of_atoms);
-  const int number_of_species[] = {num_species};
-  file.createDataSet<int>("atoms/number_of_species", DataSpace(1))
-      .write(number_of_species);
-  H5Easy::dump(file, "atoms/species_ids", atomic_species_ids);
-  H5Easy::dump(file, "atoms/positions", atomic_centers);
-
-  for (auto i = 0; i < atomic_number.size(); i++) {
-    std::string group = "/atoms/species_" + std::to_string(i);
-    file.createGroup(group);
-    std::string loc;
-
-    // dump atomic num
-    loc = group + "/atomic_number";
-    const int atom_number[] = {atomic_number[i]};
-    file.createDataSet<int>(loc, DataSpace(1)).write(atom_number);
-
-    // dump atomic charge
-    loc = group + "/charge";
-    const int atom_charge[] = {atomic_charge[i]};
-    file.createDataSet<int>(loc, DataSpace(1)).write(atom_charge);
-
-    // dump core elec
-    loc = group + "/core";
-    const int atom_core[] = {core_elec[i]};
-    file.createDataSet<int>(loc, DataSpace(1)).write(atom_core);
-
-    // dump atomic name
-    loc = group + "/name";
-    char name[][3] = {*atomic_names[i].c_str()};
-    // strcpy(name[0], atomic_names[i].c_str());
-    // file.createDataSet<char[3]>(loc, DataSpace(1)).write(name);
-    file.createDataSet<char[3]>(loc, DataSpace(1)).write(name);
-  }
-
-  Polyquant_cout("dumping basis parameters");
-  file.createGroup("basisset");
-  const int NbElements[] = {(int)unique_shells.size()};
-  file.createDataSet<int>("basisset/NbElements", DataSpace(1))
-      .write(NbElements);
-  const char basis_name[][9] = {"LCAOBSet"};
-  file.createDataSet<char[9]>("basisset/basis_name", DataSpace(1))
-      .write(basis_name);
-
-  std::vector<std::vector<libint2::Shell>>::size_type atom_idx = 0;
-  std::vector<libint2::Shell>::size_type shell_idx;
-  for (auto atom_shells : unique_shells) {
-    shell_idx = 0;
-    std::string group = "/basisset/atomicBasisSet" + std::to_string(atom_idx);
-    file.createGroup(group);
-    const int NbBasisGroups[] = {(int)atom_shells.size()};
-    file.createDataSet<int>(group + "/NbBasisGroups", DataSpace(1))
-        .write(NbBasisGroups);
-    if (atom_shells[0].contr[0].pure) {
-      const char cart_sph[][10] = {"spherical"};
-      file.createDataSet<char[10]>(group + "/angular", DataSpace(1))
-          .write(cart_sph);
-
-      const char expandYlm[][7] = {"pyscf"};
-      file.createDataSet<char[7]>(group + "/expandYlm", DataSpace(1))
-          .write(expandYlm);
-    } else {
-      const char cart_sph[][10] = {"cartesian"};
-      file.createDataSet<char[10]>(group + "/angular", DataSpace(1))
-          .write(cart_sph);
-
-      const char expandYlm[][7] = {"Gamess"};
-      file.createDataSet<char[7]>(group + "/expandYlm", DataSpace(1))
-          .write(expandYlm);
-    }
-    // dump atomic name
-    char elementType[][3] = {*atomic_names[atom_idx].c_str()};
-    file.createDataSet<char[3]>(group + "/elementType", DataSpace(1))
-        .write(elementType);
-    file.createDataSet<char[3]>(group + "/name", DataSpace(1))
-        .write(elementType);
-    char normalized[][3] = {"no"};
-    file.createDataSet<char[3]>(group + "/normalized", DataSpace(1))
-        .write(normalized);
-    const int grid_npts[] = {1001};
-    file.createDataSet<int>(group + "/grid_npts", DataSpace(1))
-        .write(grid_npts);
-    const double grid_rf[] = {100};
-    file.createDataSet<double>(group + "/grid_rf", DataSpace(1)).write(grid_rf);
-    const double grid_ri[] = {1.0e-6};
-    file.createDataSet<double>(group + "/grid_ri", DataSpace(1)).write(grid_ri);
-    char grid_type[][4] = {"log"};
-    file.createDataSet<char[4]>(group + "/grid_type", DataSpace(1))
-        .write(grid_type);
-    shell_idx = 0;
-    for (auto shell : atom_shells) {
-
-      std::string basis_group =
-          group + "/basisGroup" + std::to_string(shell_idx);
-      file.createGroup(basis_group);
-
-            const int NbRadFunc[] = {(int)shell.alpha.size()};
-      file.createDataSet<int>(basis_group + "/NbRadFunc", DataSpace(1))
-          .write(NbRadFunc);
-
-      const int n[] = {(int)atom_idx};
-      file.createDataSet<int>(basis_group + "/n", DataSpace(1)).write(n);
-      const int l[] = {shell.contr[0].l};
-      file.createDataSet<int>(basis_group + "/l", DataSpace(1)).write(l);
-      const char btype[][9] = {"Gaussian"};
-      file.createDataSet<char[9]>(basis_group + "/type", DataSpace(1))
-          .write(btype);
-      //  std::vector<std::string> btype = {"Gaussian"};
-      //H5Easy::dump(file, basis_group + "/type", btype);
-
-
-
-      // std::string basis_id = atomic_names[atom_idx] + std::to_string(shell_idx) +std::to_string(shell.contr[0].l);
-      // // Polyquant_cout(basis_id);
-      // char rid[][5] = {*basis_id.c_str()};
-      // file.createDataSet<char[5]>(basis_group + "/rid", DataSpace(1))
-      //     .write(rid);
-      std::vector<std::string> basis_id = {atomic_names[atom_idx] + std::to_string(shell_idx) +std::to_string(shell.contr[0].l)};
-      H5Easy::dump(file, basis_group + "/rid", basis_id);
-
-          
-      std::vector<double> origin = {shell.O[0], shell.O[1], shell.O[2]};
-      H5Easy::dump(file, basis_group + "/Shell_coord", origin);
-
-      file.createGroup(basis_group + "/radfunctions");
-      for (auto i = 0ul; i < shell.alpha.size(); ++i) {
-        file.createGroup(basis_group + "/radfunctions/DataRad" +
-                         std::to_string(i));
-
-        const double exponent[] = {shell.alpha[i]};
-        file.createDataSet<double>(basis_group + "/radfunctions/DataRad" +
-                                       std::to_string(i) + "/exponent",
-                                   DataSpace(1))
-            .write(exponent);
-        const double contraction[] = {shell.contr[0].coeff.at(i)};
-        file.createDataSet<double>(basis_group + "/radfunctions/DataRad" +
-                                       std::to_string(i) + "/contraction",
-                                   DataSpace(1))
-            .write(contraction);
+  auto super_twist_group = root_group.create_group("Super_Twist");
+  {
+    // write alpha orbital energies
+    auto E_orb_alpha_dataset = super_twist_group.create_dataset(
+        "eigenval_0", datatype::create<std::vector<double>>(),
+        hdf5::dataspace::Simple({1, E_orb[0].size()}));
+    E_orb_alpha_dataset.write(E_orb[0]);
+    // write alpha orbital coeffs
+    std::vector<double> flattened_mo_alpha_coeff;
+    for (auto i = 0ul; i < num_ao; i++) {
+      for (auto j = 0ul; j < num_mo; j++) {
+        flattened_mo_alpha_coeff.push_back(mo_coeff[0](i, j));
       }
-      shell_idx++;
     }
+    auto mo_alpha_coeff_dataset = super_twist_group.create_dataset(
+        "eigenset_0", datatype::create<std::vector<double>>(),
+        hdf5::dataspace::Simple({num_ao, num_mo}));
+    mo_alpha_coeff_dataset.write(flattened_mo_alpha_coeff);
 
-    atom_idx++;
+    if (!restricted) {
+      // write beta orbital energies
+      auto E_orb_beta_dataset = super_twist_group.create_dataset(
+          "eigenval_1", datatype::create<std::vector<double>>(),
+          hdf5::dataspace::Simple({1, E_orb[1].size()}));
+      E_orb_beta_dataset.write(E_orb[1]);
+      // write beta orbital coeffs
+      std::vector<double> flattened_mo_beta_coeff;
+      for (auto i = 0ul; i < num_ao; i++) {
+        for (auto j = 0ul; j < num_mo; j++) {
+          flattened_mo_beta_coeff.push_back(mo_coeff[1](i, j));
+        }
+      }
+      auto mo_beta_coeff_dataset = super_twist_group.create_dataset(
+          "eigenset_1", datatype::create<std::vector<double>>(),
+          hdf5::dataspace::Simple({num_ao, num_mo}));
+      mo_alpha_coeff_dataset.write(flattened_mo_beta_coeff);
+    }
   }
+  // write MO parameters
+  Polyquant_cout("dumping atom parameters");
+  auto atoms_group = root_group.create_group("atoms");
+  {
+    // write num_atom
+    auto num_atom_dataset =
+        atoms_group.create_dataset("number_of_atoms", int_type, simple_space);
+    num_atom_dataset.write(num_atom, int_type, simple_space);
+    // write num_species
+    auto num_species_dataset =
+        atoms_group.create_dataset("number_of_species", int_type, simple_space);
+    num_species_dataset.write(num_species, int_type, simple_space);
+    // write species ids
+    auto atomic_species_ids_dataset = atoms_group.create_dataset(
+        "species_ids", vec_int_type, dataspace::create(atomic_species_ids));
+    atomic_species_ids_dataset.write(atomic_species_ids);
+    // write atomic positions
+    std::vector<double> flattened_atomic_positions;
+    for (auto atomic_position : atomic_centers) {
+      flattened_atomic_positions.insert(flattened_atomic_positions.end(),
+                                        atomic_position.begin(),
+                                        atomic_position.end());
+    }
+    auto atomic_positions_dataset = atoms_group.create_dataset(
+        "positions", datatype::create<std::vector<double>>(),
+        hdf5::dataspace::Simple({atomic_centers.size(), atomic_centers[0].size()}));
+    atomic_positions_dataset.write(flattened_atomic_positions);
 
-  // create a dataset ready to contains strings of the size of the vector
+    for (auto i = 0ul; i < atomic_number.size(); i++) {
+      auto species_group =
+          atoms_group.create_group("species_" + std::to_string(i));
+      // dump atomic num
+      auto atomic_number_dataset =
+          species_group.create_dataset("atomic_number", int_type, simple_space);
+      atomic_number_dataset.write(atomic_number[i], int_type, simple_space);
+      // dump atomic charge
+      auto atomic_charge_dataset =
+          species_group.create_dataset("charge", int_type, simple_space);
+      atomic_charge_dataset.write(atomic_charge[i], int_type, simple_space);
+      // dump core elec
+      auto atomic_core_elec_dataset =
+          species_group.create_dataset("core", int_type, simple_space);
+      atomic_core_elec_dataset.write(core_elec[i], int_type, simple_space);
+      // dump atomic name
+      auto str_type = datatype::String::fixed(atomic_names[i].size());
+      str_type.padding(datatype::StringPad::NULLPAD);
+      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      auto dtpl = hdf5::property::DatasetTransferList();
+      auto atomic_name_dataset =
+          species_group.create_dataset("name", str_type, simple_space);
+      atomic_name_dataset.write(atomic_names[i], str_type, simple_space,
+                                simple_space, dtpl);
+    }
+  }
+  Polyquant_cout("dumping basis parameters");
+  auto basis_group = root_group.create_group("basisset");
+  {
+    // dump number of basis types
+    auto NbElements_dataset =
+        basis_group.create_dataset("NbElements", int_type, simple_space);
+    NbElements_dataset.write(unique_shells.size(), int_type, simple_space);
+    // dump basis name
+    std::string basis_name = "LCAOBSet";
+    auto str_type = datatype::String::fixed(basis_name.size());
+    str_type.padding(datatype::StringPad::NULLPAD);
+    str_type.encoding(datatype::CharacterEncoding::ASCII);
+    auto dtpl = hdf5::property::DatasetTransferList();
+    auto basis_name_dataset =
+        basis_group.create_dataset("name", str_type, simple_space);
+    basis_name_dataset.write(basis_name, str_type, simple_space, simple_space,
+                             dtpl);
+    // loop over shells
+    auto atom_idx = 0ul;
+    auto shell_idx = 0ul;
+    for (auto atom_shells : unique_shells) {
+      shell_idx = 0ul;
+      auto atom_basis_group =
+          basis_group.create_group("atomicBasisSet" + std::to_string(atom_idx));
+      // dump number of basis types
+      auto NbBasisGroups_dataset = atom_basis_group.create_dataset(
+          "NbBasisGroups", int_type, simple_space);
+      NbBasisGroups_dataset.write(atom_shells.size(), int_type, simple_space);
 
-  // H5Easy::File hdf5_outfile(filename, H5Easy::File::Overwrite);
-  // std::vector<std::string> title = {"Polyquant"};
-  // std::string title = "Polyquant";
-  // H5Easy::dump(hdf5_outfile, "application/code", title.c_str());
-  // H5Easy::dump(hdf5_outfile, "application/code", title);
-  // int my_rank;
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  // if (my_rank == 0) {
+      if (atom_shells[0].contr[0].pure) {
+        // dump cartesian or spherical
+        std::string cart_sph = "spherical";
+        auto str_type = datatype::String::fixed(cart_sph.size());
+        str_type.padding(datatype::StringPad::NULLPAD);
+        str_type.encoding(datatype::CharacterEncoding::ASCII);
+        auto dtpl = hdf5::property::DatasetTransferList();
+        auto cart_sph_dataset =
+            atom_basis_group.create_dataset("angular", str_type, simple_space);
+        cart_sph_dataset.write(cart_sph, str_type, simple_space, simple_space,
+                               dtpl);
+        // dump expansion type
+        std::string expandYlm = "pyscf";
+        str_type = datatype::String::fixed(expandYlm.size());
+        str_type.padding(datatype::StringPad::NULLPAD);
+        str_type.encoding(datatype::CharacterEncoding::ASCII);
+        dtpl = hdf5::property::DatasetTransferList();
+        auto expandYlm_dataset = atom_basis_group.create_dataset(
+            "expandYlm", str_type, simple_space);
+        expandYlm_dataset.write(expandYlm, str_type, simple_space, simple_space,
+                                dtpl);
+      } else {
+        // dump cartesian or spherical
+        std::string cart_sph = "cartesian";
+        auto str_type = datatype::String::fixed(cart_sph.size());
+        str_type.padding(datatype::StringPad::NULLPAD);
+        str_type.encoding(datatype::CharacterEncoding::ASCII);
+        auto dtpl = hdf5::property::DatasetTransferList();
+        auto cart_sph_dataset =
+            atom_basis_group.create_dataset("angular", str_type, simple_space);
+        cart_sph_dataset.write(cart_sph, str_type, simple_space, simple_space,
+                               dtpl);
+        // dump expansion type
+        std::string expandYlm = "Gamess";
+        str_type = datatype::String::fixed(expandYlm.size());
+        str_type.padding(datatype::StringPad::NULLPAD);
+        str_type.encoding(datatype::CharacterEncoding::ASCII);
+        dtpl = hdf5::property::DatasetTransferList();
+        auto expandYlm_dataset = atom_basis_group.create_dataset(
+            "expandYlm", str_type, simple_space);
+        expandYlm_dataset.write(expandYlm, str_type, simple_space, simple_space,
+                                dtpl);
+      }
+      // dump atom type and name
+      auto str_type = datatype::String::fixed(atomic_names[atom_idx].size());
+      str_type.padding(datatype::StringPad::NULLPAD);
+      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      auto dtpl = hdf5::property::DatasetTransferList();
+      auto atom_basis_elementType_dataset = atom_basis_group.create_dataset(
+          "elementType", str_type, simple_space);
+      atom_basis_elementType_dataset.write(atomic_names[atom_idx], str_type,
+                                           simple_space, simple_space, dtpl);
+      auto atom_basis_name_dataset =
+          atom_basis_group.create_dataset("name", str_type, simple_space);
+      atom_basis_name_dataset.write(atomic_names[atom_idx], str_type,
+                                    simple_space, simple_space, dtpl);
+      // dump normalization
+      std::string normalized = "no";
+      str_type = datatype::String::fixed(normalized.size());
+      str_type.padding(datatype::StringPad::NULLPAD);
+      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      dtpl = hdf5::property::DatasetTransferList();
+      auto atom_basis_normalization_dataset =
+          atom_basis_group.create_dataset("normalized", str_type, simple_space);
+      atom_basis_normalization_dataset.write(normalized, str_type, simple_space,
+                                             simple_space, dtpl);
+      // dump grid data
+      int grid_npts = 1001;
+      auto grid_npts_dataset =
+          atom_basis_group.create_dataset("grid_npts", int_type, simple_space);
+      grid_npts_dataset.write(grid_npts, int_type, simple_space);
+      int grid_rf = 100;
+      auto grid_rf_dataset =
+          atom_basis_group.create_dataset("grid_rf", int_type, simple_space);
+      grid_rf_dataset.write(grid_rf, int_type, simple_space);
+      double grid_ri = 1.0e-6;
+      auto grid_ri_dataset =
+          atom_basis_group.create_dataset("grid_ri", double_type, simple_space);
+      grid_rf_dataset.write(grid_ri, double_type, simple_space);
+
+      std::string grid_type = "log";
+      str_type = datatype::String::fixed(grid_type.size());
+      str_type.padding(datatype::StringPad::NULLPAD);
+      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      dtpl = hdf5::property::DatasetTransferList();
+      auto grid_type_dataset =
+          atom_basis_group.create_dataset("grid_type", str_type, simple_space);
+      grid_type_dataset.write(grid_type, str_type, simple_space, simple_space,
+                              dtpl);
+      shell_idx = 0ul;
+      for (auto shell : atom_shells) {
+        auto shell_group = atom_basis_group.create_group(
+            "basisGroup" + std::to_string(shell_idx));
+        // dump number of radial functions
+        auto NbRadFunc_dataset =
+            shell_group.create_dataset("NbRadFunc", int_type, simple_space);
+        NbRadFunc_dataset.write(shell.alpha.size(), int_type, simple_space);
+        // write n and l
+        auto n_dataset =
+            shell_group.create_dataset("n", int_type, simple_space);
+        n_dataset.write(atom_idx, int_type, simple_space);
+        auto l_dataset =
+            shell_group.create_dataset("l", int_type, simple_space);
+        l_dataset.write(shell.contr[0].l, int_type, simple_space);
+        // dump basis type
+        std::string basis_type = "Gaussian";
+        str_type = datatype::String::fixed(basis_type.size());
+        str_type.padding(datatype::StringPad::NULLPAD);
+        str_type.encoding(datatype::CharacterEncoding::ASCII);
+        dtpl = hdf5::property::DatasetTransferList();
+        auto basis_type_dataset =
+            shell_group.create_dataset("type", str_type, simple_space);
+        basis_type_dataset.write(basis_type, str_type, simple_space,
+                                 simple_space, dtpl);
+        // dump basis function id
+        std::string basis_id = atomic_names[atom_idx] +
+                               std::to_string(shell_idx) +
+                               std::to_string(shell.contr[0].l);
+        str_type = datatype::String::fixed(basis_id.size());
+        str_type.padding(datatype::StringPad::NULLPAD);
+        str_type.encoding(datatype::CharacterEncoding::ASCII);
+        dtpl = hdf5::property::DatasetTransferList();
+        auto basis_id_dataset =
+            shell_group.create_dataset("rid", str_type, simple_space);
+        basis_id_dataset.write(basis_id, str_type, simple_space, simple_space,
+                               dtpl);
+        // dump basis function location
+        std::vector<double> origin = {shell.O[0], shell.O[1], shell.O[2]};
+        auto basis_position_dataset = shell_group.create_dataset(
+            "Shell_coord", datatype::create<std::vector<double>>(),
+            dataspace::create(origin));
+        basis_position_dataset.write(origin);
+        auto rad_func_group = shell_group.create_group(
+            "radfunctions" );
+        for (auto i = 0ul; i < shell.alpha.size(); ++i) {
+          auto curr_func_group =
+              rad_func_group.create_group("DataRad" + std::to_string(i));
+          // dump exponent and contraction coefficient
+          double exponent = shell.alpha[i];
+          auto exponent_dataset = curr_func_group.create_dataset(
+              "exponent", double_type, simple_space);
+          exponent_dataset.write(exponent, double_type, simple_space);
+          double contraction = shell.contr[0].coeff.at(i);
+          auto contraction_dataset = curr_func_group.create_dataset(
+              "contraction", double_type, simple_space);
+          contraction_dataset.write(contraction, double_type, simple_space);
+        }
+        shell_idx++;
+      }
+      atom_idx++;
+    }
+    
+  }
 }
 
 std::map<std::string, int> _atm_symb_to_num = {
@@ -346,25 +480,34 @@ void POLYQUANT_INPUT::parse_input(const std::string &filename) {
   Polyquant_cout("Input file: ");
   Polyquant_dump_json(this->input_data);
   Polyquant_cout("End input file");
-  /*
-  std::ifstream inputfile(filename);
-  std::string line;
-  std::string value;
-  std::string key;
-  while(std::getline(inputfile, line)){
+}
+/*
+std::ifstream inputfile(filename);
+std::string line;
+std::string value;
+std::string key;
+while(std::getline(inputfile, line)){
+  std::istringstream linebuffer(line);
+  key = "";
+  value = "";
+  linebuffer >> key >> value;
+  std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+  std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+  if (key[0] == '#'){
+    std::cout << "FOUND COMMENT" << std::endl;
+    std::cout << line << std::endl;
+  } else if (key[0] == '!') {
+    std::cout << "FOUND INPUT BLOCK" << std::endl;
+    std::cout << line << std::endl;
+    std::getline(inputfile, line);
     std::istringstream linebuffer(line);
     key = "";
     value = "";
     linebuffer >> key >> value;
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-
-    if (key[0] == '#'){
-      std::cout << "FOUND COMMENT" << std::endl;
-      std::cout << line << std::endl;
-    } else if (key[0] == '!') {
-      std::cout << "FOUND INPUT BLOCK" << std::endl;
-      std::cout << line << std::endl;
+    while (key[0] != '!' && value != "end"){
       std::getline(inputfile, line);
       std::istringstream linebuffer(line);
       key = "";
@@ -372,23 +515,14 @@ void POLYQUANT_INPUT::parse_input(const std::string &filename) {
       linebuffer >> key >> value;
       std::transform(key.begin(), key.end(), key.begin(), ::tolower);
       std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-      while (key[0] != '!' && value != "end"){
-        std::getline(inputfile, line);
-        std::istringstream linebuffer(line);
-        key = "";
-        value = "";
-        linebuffer >> key >> value;
-        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
-        std::cout << line << std::endl;
-      }
-      std::cout << "END INPUT BLOCK" << std::endl;
-
-    } else{
-      APP_ABORT("Error Parsing input file. Are there commands outside of an
-  input block?");
+      std::cout << line << std::endl;
     }
+    std::cout << "END INPUT BLOCK" << std::endl;
+
+  } else{
+    APP_ABORT("Error Parsing input file. Are there commands outside of an
+input block?");
   }
-  */
 }
+*/

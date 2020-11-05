@@ -117,6 +117,7 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(OpenMP REQUIRED)
 # find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
 find_package(cxxopts REQUIRED)
+find_package(h5cpp REQUIRED)
 FetchContent_Declare(
   doctest
   GIT_REPOSITORY https://github.com/onqtam/doctest.git
@@ -124,22 +125,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 
-FetchContent_Declare(HighFive
-                     GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git)
-set(HIGHFIVE_USE_BOOST OFF)
-set(HIGHFIVE_USE_EIGEN ON)
-set(HIGHFIVE_USE_XTENSOR OFF)
-set(HIGHFIVE_USE_OPENCV OFF)
-set(HIGHFIVE_UNIT_TESTS OFF)
-set(HIGHFIVE_EXAMPLES OFF)
-set(HIGHFIVE_PARALLEL_HDF5 OFF)
-set(HIGHFIVE_BUILD_DOCS OFF)
-FetchContent_MakeAvailable(HighFive)
-include(${highfive_BINARY_DIR}/HighFiveConfig.cmake)
-
-FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git)
-FetchContent_MakeAvailable(fmt)
-include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+# FetchContent_Declare(HighFive GIT_REPOSITORY
+# https://github.com/BlueBrain/HighFive.git) set(HIGHFIVE_USE_BOOST OFF)
+# set(HIGHFIVE_USE_EIGEN ON) set(HIGHFIVE_USE_XTENSOR OFF)
+# set(HIGHFIVE_USE_OPENCV OFF) set(HIGHFIVE_UNIT_TESTS OFF)
+# set(HIGHFIVE_EXAMPLES OFF) set(HIGHFIVE_PARALLEL_HDF5 OFF)
+# set(HIGHFIVE_BUILD_DOCS OFF) FetchContent_MakeAvailable(HighFive)
+# include(${highfive_BINARY_DIR}/HighFiveConfig.cmake)
+#
+# FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git)
+# FetchContent_MakeAvailable(fmt)
+# include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+# FetchContent_Declare(h5cpp GIT_REPOSITORY
+# https://github.com/steven-varga/h5cpp.git) FetchContent_MakeAvailable(h5cpp)
 
 # FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
 # include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(polyquant
