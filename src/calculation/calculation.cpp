@@ -209,6 +209,7 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
           0;
       for (auto const &[quantum_part_key, quantum_part] :
            this->input_molecule.quantum_particles) {
+             Polyquant_cout("Dumping HDF5 for quantum particle type: " + quantum_part_key);
         std::string hdf5_filename = quantum_part_key + ".h5";
         bool pbc = false;
         bool ecp = false;
@@ -234,7 +235,7 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         }
         for (auto i = 0; i < num_ao; i++) {
           E_orb[0][i] = scf_calc.E_orbitals[quantum_part_idx][0][i];
-          if (!restricted) {
+          if (!restricted && num_part_total > 1) {
             E_orb[1][i] = scf_calc.E_orbitals[quantum_part_idx][1][i];
           }
         }
@@ -243,10 +244,18 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
             mo_coeff = scf_calc.C[quantum_part_idx];
 
         libint2::BasisSet basis = this->input_basis.basis;
-        std::vector<long> basis_shell2atom = this->input_basis.basis.shell2atom(
-            this->input_molecule.to_libint_atom());
-
+        // std::vector<long> basis_shell2atom = this->input_basis.basis.shell2atom(
+            // this->input_molecule.to_libint_atom("no_ghost"));
+        bool pure = true;
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("pure")) {
+      pure = this-input_params.input_data["keywords"]["pure"];
+    }
+  }
         std::string pure_or_cart = "spherical";
+        if (!pure){
+        std::string pure_or_cart = "cartesian";
+        } 
         //  "cartesian"
 
         // auto i = 0;
@@ -255,16 +264,16 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         //   std::cout << shell << std::endl;
         //   i++;
         // }
-        auto idx =
-            std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
-        if (idx != basis_shell2atom.end()) {
-          Polyquant_cout("Basis shell doesn't correspond to a classical "
-                         "center! This shouldn't happen. Basis shell:");
-          std::string idx_string(1, *idx);
-          Polyquant_cout("Shell:" + idx_string);
-          Polyquant_cout(basis[*idx]);
-          APP_ABORT("Shell doesn't correspond to center");
-        }
+        // auto idx =
+        //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
+        // if (idx != basis_shell2atom.end()) {
+        //   Polyquant_cout("Basis shell doesn't correspond to a classical "
+        //                  "center! This shouldn't happen. Basis shell:");
+        //   std::string idx_string(1, *idx);
+        //   Polyquant_cout("Shell:" + idx_string);
+        //   Polyquant_cout(basis[*idx]);
+        //   // APP_ABORT("Shell doesn't correspond to center");
+        // }
 
         std::vector<std::vector<libint2::Shell>> unique_shells;
         unique_shells.resize(this->input_molecule.classical_particles.size());

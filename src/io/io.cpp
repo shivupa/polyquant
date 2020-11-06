@@ -143,7 +143,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
         hdf5::dataspace::Simple({num_ao, num_mo}));
     mo_alpha_coeff_dataset.write(flattened_mo_alpha_coeff);
 
-    if (!restricted) {
+    if (!restricted && num_part_total > 1) {
       // write beta orbital energies
       auto E_orb_beta_dataset = super_twist_group.create_dataset(
           "eigenval_1", datatype::create<std::vector<double>>(),
@@ -388,7 +388,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
               "exponent", double_type, simple_space);
           exponent_dataset.write(exponent, double_type, simple_space);
           double contraction = shell.contr[0].coeff.at(i);
-          //double contraction = shell.contr.coeff.at(i);
+          // double contraction = shell.contr.coeff.at(i);
           auto contraction_dataset = curr_func_group.create_dataset(
               "contraction", double_type, simple_space);
           contraction_dataset.write(contraction, double_type, simple_space);
