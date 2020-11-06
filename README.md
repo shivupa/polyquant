@@ -5,21 +5,21 @@
 ### For a production build
 - [onqtam/doctest](https://github.com/onqtam/doctest)
    The fastest feature-rich C++11/14/17/20 single-header testing framework for unit tests and TDD 
-
    `Polyquant` uses doctest for testing.
 - [nlohmann/json](https://github.com/nlohmann/json)
    JSON for Modern C++
 
    `Polyquant` uses `nlohmann/json` to parse the [MolSSI/QCSchema](https://github.com/MolSSI/QCSchema)
-- [whoshuu/cpr](https://github.com/whoshuu/cpr)
-   C++ Requests: Curl for People, a spiritual port of Python Requests
-
-   `Polyquant` uses `whoshuu/cpr` to query the [MolSSI-BSE/basis_set_exchange](https://github.com/MolSSI-BSE/basis_set_exchange) for basis sets.
 - [evaleev/libint](https://github.com/evaleev/libint)
    Libint is a high-performance library for computing Gaussian integrals in quantum mechanics
 
    `Polyquant` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
    To convert for qmcpack you need to configure with [-with-cartgauss-ordering=gamess](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
+   Also which configuring the library [-DLIBINT2_SHGAUSS_ORDERING=gaussian](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
+- [ess-dmsc/h5cpp](https://github.com/ess-dmsc/h5cpp)
+   C++ wrapper for the HDF5 C-library 
+
+   `Polyquant` uses `ess-dmsc/h5cpp` to dump HDF5 files for use with QMCPACK.
 ### For a debug build
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
