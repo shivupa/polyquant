@@ -187,7 +187,8 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     }
     auto atomic_positions_dataset = atoms_group.create_dataset(
         "positions", datatype::create<std::vector<double>>(),
-        hdf5::dataspace::Simple({atomic_centers.size(), atomic_centers[0].size()}));
+        hdf5::dataspace::Simple(
+            {atomic_centers.size(), atomic_centers[0].size()}));
     atomic_positions_dataset.write(flattened_atomic_positions);
 
     for (auto i = 0ul; i < atomic_number.size(); i++) {
@@ -302,7 +303,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       atom_basis_name_dataset.write(atomic_names[atom_idx], str_type,
                                     simple_space, simple_space, dtpl);
       // dump normalization
-      std::string normalized = "no";
+      std::string normalized = "yes";
       str_type = datatype::String::fixed(normalized.size());
       str_type.padding(datatype::StringPad::NULLPAD);
       str_type.encoding(datatype::CharacterEncoding::ASCII);
@@ -377,8 +378,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
             "Shell_coord", datatype::create<std::vector<double>>(),
             dataspace::create(origin));
         basis_position_dataset.write(origin);
-        auto rad_func_group = shell_group.create_group(
-            "radfunctions" );
+        auto rad_func_group = shell_group.create_group("radfunctions");
         for (auto i = 0ul; i < shell.alpha.size(); ++i) {
           auto curr_func_group =
               rad_func_group.create_group("DataRad" + std::to_string(i));
@@ -388,6 +388,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
               "exponent", double_type, simple_space);
           exponent_dataset.write(exponent, double_type, simple_space);
           double contraction = shell.contr[0].coeff.at(i);
+          //double contraction = shell.contr.coeff.at(i);
           auto contraction_dataset = curr_func_group.create_dataset(
               "contraction", double_type, simple_space);
           contraction_dataset.write(contraction, double_type, simple_space);
@@ -396,7 +397,6 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       }
       atom_idx++;
     }
-    
   }
 }
 

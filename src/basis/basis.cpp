@@ -9,6 +9,13 @@ POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input,
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
                                  const POLYQUANT_MOLECULE &molecule) {
   Polyquant_cout("BASIS");
+  bool pure = true;
+  if (input.input_data.contains("keywords")) {
+    if (input.input_data["keywords"].contains("pure")) {
+      pure = input.input_data["keywords"]["pure"];
+    }
+  }
+
   this->basis = libint2::BasisSet();
   // parse basis name from data
   if (input.input_data.contains("model")) {
@@ -34,7 +41,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
                 // atoms[a].z}});
                 this->basis.insert(this->basis.end(), atom_basis.begin(),
                                    atom_basis.end());
-                this->basis.set_pure(false);
+                this->basis.set_pure(pure);
                 // std::move(atom_basis.begin(), atom_basis.end(),
                 //           std::back_inserter(this->basis));
               } else {
@@ -47,7 +54,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
                     center_basis["library"]["type"], libint_atoms, true);
                 this->basis.insert(this->basis.end(), atom_basis.begin(),
                                    atom_basis.end());
-                this->basis.set_pure(false);
+                this->basis.set_pure(pure);
               }
             } else if (center_basis.contains("custom")) {
               if (center_basis["custom"].contains("type")) {
@@ -75,7 +82,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
                       }
                     }
                   }
-                  this->basis.set_pure(false);
+                  this->basis.set_pure(pure);
                 }
               } else {
                 APP_ABORT("'model->basis->" + classical_part_key +
