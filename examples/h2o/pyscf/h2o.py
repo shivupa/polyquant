@@ -13,6 +13,7 @@ H  -0.7569685 0.0000000 -0.5858752"""
 mol.symmetry = 0
 mol.unit = "Angstrom"
 mol.cart=True
+mol.basis="cc-pv5z"
 #mol.cart=False
 mol.build()
 

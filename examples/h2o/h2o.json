@@ -13,8 +13,8 @@
   "model": {
     "method": "scf",
     "basis": 
-        {"O" : [{ "library" : {"type" : "sto-3g"} }],
-        "H" : [{ "library" : {"type" : "sto-3g"} }]}
+        {"O" : [{ "library" : {"type" : "cc-pv5z"} }],
+        "H" : [{ "library" : {"type" : "cc-pv5z"} }]}
   },
   "keywords": {
     "restricted" : true,
