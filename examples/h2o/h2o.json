@@ -13,8 +13,8 @@
   "model": {
     "method": "scf",
     "basis": 
-        {"O" : [{ "library" : {"type" : "cc-pv5z"} }],
-        "H" : [{ "library" : {"type" : "cc-pv5z"} }]}
+        {"O" : [{ "library" : {"type" : "cc-pvdz"} }],
+        "H" : [{ "library" : {"type" : "cc-pvdz"} }]}
   },
   "keywords": {
     "restricted" : true,

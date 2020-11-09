@@ -15,7 +15,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
       pure = input.input_data["keywords"]["pure"];
     }
   }
-
+  // libint2::Shell::do_enforce_unit_normalization(false);
   this->basis = libint2::BasisSet();
   // parse basis name from data
   if (input.input_data.contains("model")) {

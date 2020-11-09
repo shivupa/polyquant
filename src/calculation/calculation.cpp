@@ -249,7 +249,7 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         bool pure = true;
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("pure")) {
-      pure = this-input_params.input_data["keywords"]["pure"];
+      pure = this->input_params.input_data["keywords"]["pure"];
     }
   }
         std::string pure_or_cart = "spherical";

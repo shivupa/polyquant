@@ -258,7 +258,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
         cart_sph_dataset.write(cart_sph, str_type, simple_space, simple_space,
                                dtpl);
         // dump expansion type
-        std::string expandYlm = "pyscf";
+        std::string expandYlm = "natural";
         str_type = datatype::String::fixed(expandYlm.size());
         str_type.padding(datatype::StringPad::NULLPAD);
         str_type.encoding(datatype::CharacterEncoding::ASCII);
@@ -303,7 +303,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       atom_basis_name_dataset.write(atomic_names[atom_idx], str_type,
                                     simple_space, simple_space, dtpl);
       // dump normalization
-      std::string normalized = "yes";
+      std::string normalized = "no";
       str_type = datatype::String::fixed(normalized.size());
       str_type.padding(datatype::StringPad::NULLPAD);
       str_type.encoding(datatype::CharacterEncoding::ASCII);
