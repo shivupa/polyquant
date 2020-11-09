@@ -15,7 +15,6 @@
 
    `Polyquant` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
    To convert for qmcpack you need to configure with [-with-cartgauss-ordering=gamess](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
-   Also which configuring the library [-DLIBINT2_SHGAUSS_ORDERING=gaussian](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
 - [ess-dmsc/h5cpp](https://github.com/ess-dmsc/h5cpp)
    C++ wrapper for the HDF5 C-library 
 

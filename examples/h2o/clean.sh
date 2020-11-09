@@ -10,3 +10,4 @@ rm -f *txt
 rm -f *xml 
 rm -f *.chk
 rm -f *.dat
+rm -rf __pycache__

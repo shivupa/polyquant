@@ -65,7 +65,8 @@ void POLYQUANT_EPSCF::form_fock() {
             if (quantum_part_a.num_parts == 1) {
               this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
                   Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qa, exchange);
-            } else if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
+            } else if (quantum_part_a.num_parts > 1 &&
+                       quantum_part_a.restricted == false) {
               double Db_kl = this->D[quantum_part_a_idx][1](k, l);
               this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
                   Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
