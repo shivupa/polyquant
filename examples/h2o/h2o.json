@@ -19,7 +19,7 @@
   "keywords": {
     "restricted" : true,
    "dump_for_qmcpack" : true,
-   "pure" : false
+   "pure" : true
   }
 }
 
