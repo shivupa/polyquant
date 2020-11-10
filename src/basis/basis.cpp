@@ -15,7 +15,11 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
       pure = input.input_data["keywords"]["pure"];
     }
   }
-  // libint2::Shell::do_enforce_unit_normalization(false);
+  Polyquant_cout("SHIV");
+  Polyquant_cout(libint2::Shell::do_enforce_unit_normalization());
+  libint2::Shell::do_enforce_unit_normalization(false);
+  Polyquant_cout("SHIV");
+  Polyquant_cout(libint2::Shell::do_enforce_unit_normalization());
   this->basis = libint2::BasisSet();
   // parse basis name from data
   if (input.input_data.contains("model")) {
@@ -110,6 +114,11 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
     }
   } else {
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
+  }
+  for (auto atom_shells : this->basis) {
+    Polyquant_cout(atom_shells.do_enforce_unit_normalization());
+    atom_shells.do_enforce_unit_normalization(false);
+    Polyquant_cout(atom_shells.do_enforce_unit_normalization());
   }
   // TODO dump basis
   // Polyquant_cout("");

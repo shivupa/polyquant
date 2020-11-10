@@ -388,6 +388,18 @@ void Polyquant_dump_hdf5_for_QMCPACK(
               "exponent", double_type, simple_space);
           exponent_dataset.write(exponent, double_type, simple_space);
           double contraction = shell.contr[0].coeff.at(i);
+          // REMOVE NORMALIZATION FACTOR FROM LIBINT
+          // SEE SHELL.H
+          // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
+          const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
+          const auto two_alpha = 2 * exponent;
+          const auto two_alpha_to_am32 =
+              std::pow(two_alpha, shell.contr[0].l + 1) * std::sqrt(two_alpha);
+          const auto normalization_factor =
+              std::sqrt(std::pow(2, shell.contr[0].l) * two_alpha_to_am32 /
+                        (sqrt_Pi_cubed *
+                         libint2::math::df_Kminus1[2 * shell.contr[0].l]));
+          contraction /= normalization_factor;
           // double contraction = shell.contr.coeff.at(i);
           auto contraction_dataset = curr_func_group.create_dataset(
               "contraction", double_type, simple_space);
