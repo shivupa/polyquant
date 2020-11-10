@@ -209,7 +209,8 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
           0;
       for (auto const &[quantum_part_key, quantum_part] :
            this->input_molecule.quantum_particles) {
-             Polyquant_cout("Dumping HDF5 for quantum particle type: " + quantum_part_key);
+        Polyquant_cout("Dumping HDF5 for quantum particle type: " +
+                       quantum_part_key);
         std::string hdf5_filename = quantum_part_key + ".h5";
         bool pbc = false;
         bool ecp = false;
@@ -244,18 +245,19 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
             mo_coeff = scf_calc.C[quantum_part_idx];
 
         libint2::BasisSet basis = this->input_basis.basis;
-        // std::vector<long> basis_shell2atom = this->input_basis.basis.shell2atom(
-            // this->input_molecule.to_libint_atom("no_ghost"));
+        // std::vector<long> basis_shell2atom =
+        // this->input_basis.basis.shell2atom(
+        // this->input_molecule.to_libint_atom("no_ghost"));
         bool pure = true;
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("pure")) {
-      pure = this->input_params.input_data["keywords"]["pure"];
-    }
-  }
+        if (this->input_params.input_data.contains("keywords")) {
+          if (this->input_params.input_data["keywords"].contains("pure")) {
+            pure = this->input_params.input_data["keywords"]["pure"];
+          }
+        }
         std::string pure_or_cart = "spherical";
-        if (!pure){
-        std::string pure_or_cart = "cartesian";
-        } 
+        if (!pure) {
+          std::string pure_or_cart = "cartesian";
+        }
         //  "cartesian"
 
         // auto i = 0;
