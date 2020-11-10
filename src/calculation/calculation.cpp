@@ -260,11 +260,11 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
         }
         //  "cartesian"
 
-        auto i = 0ul;
-        for (auto shell : basis) {
-          std::cout << shell << std::endl;
-          i++;
-        }
+        // auto i = 0ul;
+        // for (auto shell : basis) {
+        //   std::cout << shell << std::endl;
+        //   i++;
+        // }
         // auto idx =
         //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
         // if (idx != basis_shell2atom.end()) {
