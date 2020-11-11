@@ -392,15 +392,19 @@ void Polyquant_dump_hdf5_for_QMCPACK(
           // SEE SHELL.H
           // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
           const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
-          const auto two_alpha = 2 * exponent;
+          const auto two_alpha = 2.0 * exponent;
           const auto two_alpha_to_am32 =
-              std::pow(two_alpha, shell.contr[0].l + 1) * std::sqrt(two_alpha);
+              std::pow(two_alpha, (shell.contr[0].l + 1)) *
+              std::sqrt(two_alpha);
           const auto normalization_factor =
-              std::sqrt(std::pow(2, shell.contr[0].l) * two_alpha_to_am32 /
+              std::sqrt(std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32 /
                         (sqrt_Pi_cubed *
                          libint2::math::df_Kminus1[2 * shell.contr[0].l]));
           contraction /= normalization_factor;
-          // double contraction = shell.contr.coeff.at(i);
+          std::stringstream buffer;
+          buffer << "Exponent: " << exponent << "     "
+                 << "Contraction: " << contraction << std::endl;
+          Polyquant_cout(buffer.str());
           auto contraction_dataset = curr_func_group.create_dataset(
               "contraction", double_type, simple_space);
           contraction_dataset.write(contraction, double_type, simple_space);

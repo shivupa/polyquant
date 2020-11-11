@@ -16,6 +16,10 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
     }
   }
   libint2::Shell::do_enforce_unit_normalization(false);
+  std::stringstream buffer;
+  buffer << "Enforcing unit normalization in Libint: " << std::boolalpha
+         << libint2::Shell::do_enforce_unit_normalization() << std::endl;
+  Polyquant_cout(buffer.str());
   this->basis = libint2::BasisSet();
   // parse basis name from data
   if (input.input_data.contains("model")) {
