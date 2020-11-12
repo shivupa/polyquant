@@ -10,7 +10,7 @@ sed -i 's/usedrift">no/usedrift">yes/' electron.qmc.in-wfnoj.xml
 cd pyscf
 python h2o.py
 ~/Documents/qmcpack/build/bin/convert4qmc -orbitals Default.h5
-sed -i 's/blocks">20/blocks">100/' Default.qmc.in-wfnoj.xml
+sed -i 's/blocks">20/blocks">10/' Default.qmc.in-wfnoj.xml
 sed -i 's/usedrift">no/usedrift">yes/' Default.qmc.in-wfnoj.xml
 sed -i 's/steps">50/steps">3000/' Default.qmc.in-wfnoj.xml
 cd ..

@@ -1,11 +1,10 @@
 {
   "molecule": {
     "geometry": [
-        0.0000000, 0.0000000,  0.0000000,
         0.7569685, 0.0000000, -0.5858752,
        -0.7569685, 0.0000000, -0.5858752
     ],
-    "symbols": ["O", "H", "H"],
+    "symbols": [ "H", "H"],
     "molecular_charge": 0,
     "molecular_multiplicity": 1
   },
@@ -13,8 +12,7 @@
   "model": {
     "method": "scf",
     "basis": 
-        {"O" : [{ "library" : {"type" : "sto-3g"} }],
-        "H" : [{ "library" : {"type" : "sto-3g"} }]}
+        {"H" : [{ "library" : {"type" : "cc-pv5z"} }]}
   },
   "keywords": {
     "restricted" : true,

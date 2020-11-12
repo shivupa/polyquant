@@ -135,7 +135,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     std::vector<double> flattened_mo_alpha_coeff;
     for (auto i = 0ul; i < num_ao; i++) {
       for (auto j = 0ul; j < num_mo; j++) {
-        flattened_mo_alpha_coeff.push_back(mo_coeff[0](i, j));
+        flattened_mo_alpha_coeff.push_back(mo_coeff[0](j,i));
       }
     }
     auto mo_alpha_coeff_dataset = super_twist_group.create_dataset(
@@ -153,7 +153,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       std::vector<double> flattened_mo_beta_coeff;
       for (auto i = 0ul; i < num_ao; i++) {
         for (auto j = 0ul; j < num_mo; j++) {
-          flattened_mo_beta_coeff.push_back(mo_coeff[1](i, j));
+          flattened_mo_beta_coeff.push_back(mo_coeff[1](j,i));
         }
       }
       auto mo_beta_coeff_dataset = super_twist_group.create_dataset(
@@ -317,14 +317,16 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       auto grid_npts_dataset =
           atom_basis_group.create_dataset("grid_npts", int_type, simple_space);
       grid_npts_dataset.write(grid_npts, int_type, simple_space);
+
       int grid_rf = 100;
       auto grid_rf_dataset =
           atom_basis_group.create_dataset("grid_rf", int_type, simple_space);
       grid_rf_dataset.write(grid_rf, int_type, simple_space);
+
       double grid_ri = 1.0e-6;
       auto grid_ri_dataset =
           atom_basis_group.create_dataset("grid_ri", double_type, simple_space);
-      grid_rf_dataset.write(grid_ri, double_type, simple_space);
+      grid_ri_dataset.write(grid_ri, double_type, simple_space);
 
       std::string grid_type = "log";
       str_type = datatype::String::fixed(grid_type.size());
@@ -346,7 +348,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
         // write n and l
         auto n_dataset =
             shell_group.create_dataset("n", int_type, simple_space);
-        n_dataset.write(atom_idx, int_type, simple_space);
+        n_dataset.write(shell_idx, int_type, simple_space);
         auto l_dataset =
             shell_group.create_dataset("l", int_type, simple_space);
         l_dataset.write(shell.contr[0].l, int_type, simple_space);

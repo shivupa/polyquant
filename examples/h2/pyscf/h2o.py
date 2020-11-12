@@ -7,13 +7,12 @@ mol = gto.Mole()
 mol.verbose = 1
 # mol.output = 'out_h2o'
 mol.atom = """
-O   0.0000000 0.0000000  0.0000000,
 H   0.7569685 0.0000000 -0.5858752,
 H  -0.7569685 0.0000000 -0.5858752"""
 mol.symmetry = 0
 mol.unit = "Angstrom"
 #mol.cart=True
-mol.basis="sto-3g"
+mol.basis="cc-pv5z"
 mol.cart=False
 mol.build()
 
