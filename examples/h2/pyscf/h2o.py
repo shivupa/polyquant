@@ -7,8 +7,8 @@ mol = gto.Mole()
 mol.verbose = 1
 # mol.output = 'out_h2o'
 mol.atom = """
-H   0.7569685 0.0000000 -0.5858752,
-H  -0.7569685 0.0000000 -0.5858752"""
+H        0.000000   0.00000000 0.3755,
+H        0.000000   0.00000000 -0.3755"""
 mol.symmetry = 0
 mol.unit = "Angstrom"
 #mol.cart=True

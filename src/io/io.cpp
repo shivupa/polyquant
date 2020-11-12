@@ -135,7 +135,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     std::vector<double> flattened_mo_alpha_coeff;
     for (auto i = 0ul; i < num_ao; i++) {
       for (auto j = 0ul; j < num_mo; j++) {
-        flattened_mo_alpha_coeff.push_back(mo_coeff[0](j,i));
+        flattened_mo_alpha_coeff.push_back(mo_coeff[0](j, i));
       }
     }
     auto mo_alpha_coeff_dataset = super_twist_group.create_dataset(
@@ -153,7 +153,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
       std::vector<double> flattened_mo_beta_coeff;
       for (auto i = 0ul; i < num_ao; i++) {
         for (auto j = 0ul; j < num_mo; j++) {
-          flattened_mo_beta_coeff.push_back(mo_coeff[1](j,i));
+          flattened_mo_beta_coeff.push_back(mo_coeff[1](j, i));
         }
       }
       auto mo_beta_coeff_dataset = super_twist_group.create_dataset(
@@ -404,7 +404,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
                          libint2::math::df_Kminus1[2 * shell.contr[0].l]));
           contraction /= normalization_factor;
           std::stringstream buffer;
-          buffer << "Exponent: " << exponent << "     "
+          buffer << std::setprecision(20) << "Exponent: " << exponent << "     "
                  << "Contraction: " << contraction << std::endl;
           Polyquant_cout(buffer.str());
           auto contraction_dataset = curr_func_group.create_dataset(
