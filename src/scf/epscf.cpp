@@ -47,6 +47,7 @@ void POLYQUANT_EPSCF::form_fock() {
     }
     quantum_part_a_idx++;
   }
+#pragma omp parallel for
   for (size_t i = 0; i < num_basis; i++) {
     for (size_t j = 0; j < num_basis; j++) {
       for (size_t k = 0; k < num_basis; k++) {
@@ -175,6 +176,7 @@ void POLYQUANT_EPSCF::form_DM() {
        this->input_molecule.quantum_particles) {
     this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
     this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
+#pragma omp parallel for
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
         for (int k = 0; k < quantum_part.num_parts_alpha; k++) {
@@ -187,6 +189,7 @@ void POLYQUANT_EPSCF::form_DM() {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->D_last[quantum_part_idx][1] = this->D[quantum_part_idx][1];
       this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
+#pragma omp parallel for
       for (size_t i = 0; i < num_basis; i++) {
         for (size_t j = 0; j < num_basis; j++) {
           for (int k = 0; k < quantum_part.num_parts_alpha; k++) {

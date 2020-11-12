@@ -2,10 +2,13 @@
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>
 #include <string>
+#define EIGEN_USE_MKL_ALL
+#include <Eigen/Core>
 
 using namespace polyquant;
 
 int main(int argc, char **argv) {
+  Eigen::initParallel();
   cxxopts::Options options("polyquant", "Multiple quantum particles.");
   options.add_options()("i,input", "input filename",
                         cxxopts::value<std::string>())("h,help", "Print usage");
