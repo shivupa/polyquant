@@ -126,7 +126,7 @@ public:
    * @brief Energy convergence
    *
    */
-  double convergence_E = 1e-6;
+  double convergence_E = 1e-9;
   /**
    * @brief Root mean squared change in DM convergence
    *
