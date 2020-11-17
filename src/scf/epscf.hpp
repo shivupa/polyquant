@@ -33,7 +33,7 @@ public:
   void run_iteration() override;
   void guess_DM() override;
   void run() override;
-
+  void print_params();
   /**
    * @brief H_core matrix
    *
@@ -126,7 +126,7 @@ public:
    * @brief Energy convergence
    *
    */
-  double convergence_E = 1e-9;
+  double convergence_E = 1e-10;
   /**
    * @brief Root mean squared change in DM convergence
    *

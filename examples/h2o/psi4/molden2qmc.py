@@ -614,7 +614,7 @@ ORBITAL COEFFICIENTS
 
           atomicBasisSetGroup.create_dataset('grid_type', (1,),data=np.string_('log'))
           atomicBasisSetGroup.create_dataset('name',(1,),data=np.string_('gaussian'))
-          atomicBasisSetGroup.create_dataset('normalized',(1,),data=np.string_('yes'))
+          atomicBasisSetGroup.create_dataset('normalized',(1,),data=np.string_('no'))
 
 
           nshell = self.nshell_species(atom) 
@@ -624,6 +624,9 @@ ORBITAL COEFFICIENTS
 
             contracted_coeffs = atom['SHELLS'][i]['DATA']
             NbRadFunc =len(contracted_coeffs)
+            #print("SHIV")
+            #print(contracted_coeffs)
+            #print("END SHIV")
 
             BasisGroup=atomicBasisSetGroup.create_group(f"basisGroup{i}")
             BasisGroup.create_dataset('type',(1,),data=np.string_("Gaussian"))          
@@ -640,7 +643,9 @@ ORBITAL COEFFICIENTS
             for j,(exp,contrac) in enumerate(contracted_coeffs):
                 DataRadGrp=RadGroup.create_group("DataRad"+str(j))
                 DataRadGrp.create_dataset("exponent",(1,),dtype="f8",data=exp)
-                DataRadGrp.create_dataset("contraction",(1,),dtype="f8",data=contrac*self.contractioncorrection(l_molden) )
+                #print(exp,contrac,self.contractioncorrection(l_molden),contrac*self.contractioncorrection(l_molden))
+                #DataRadGrp.create_dataset("contraction",(1,),dtype="f8",data=contrac*self.contractioncorrection(l_molden) )
+                DataRadGrp.create_dataset("contraction",(1,),dtype="f8",data=contrac)
     
           atomicBasisSetGroup.create_dataset("NbBasisGroups",(1,),dtype="i4",data=nshell)
 
@@ -1030,12 +1035,13 @@ class DefaultConverter(GWFN):
         """
         Default contraction coefficients is 'Published' in the EMSL Basis Set Library.
         """
-        for atom in self.atom_list:
-            for shell in atom['SHELLS']:
-                l = self.ang_momentum_map[shell['TYPE']]
-                w = self.whole_contraction_factor(shell['DATA'], l)
-                for primitive in shell['DATA']:
-                    primitive[1] *= w * self.m_independent_factor(primitive[0], l)
+        pass
+        #for atom in self.atom_list:
+        #    for shell in atom['SHELLS']:
+        #        l = self.ang_momentum_map[shell['TYPE']]
+        #        w = self.whole_contraction_factor(shell['DATA'], l)
+        #        for primitive in shell['DATA']:
+        #            primitive[1] *= w * self.m_independent_factor(primitive[0], l)
 
     def d_to_spherical(self, cartesian):
         """
@@ -1138,7 +1144,7 @@ class DefaultConverter(GWFN):
         if not qmcpack_normalization:
             premultiplied_factor = (0.5, 3.0, 3.0, 3.0, 6.0)
         else:
-            premultiplied_factor = (0.5*sqrt(3.0) , 1.5, 1.5, 3.0, 3.0) 
+            premultiplied_factor = (1, 1, 1, 1, 1)#(0.5*sqrt(3.0) , 1.5, 1.5, 3.0, 3.0) 
 
         return (coefficient[0] * self.m_dependent_factor(2,  0) * premultiplied_factor[0],
                 coefficient[1] * self.m_dependent_factor(2,  1) * premultiplied_factor[1],
@@ -1154,10 +1160,11 @@ class DefaultConverter(GWFN):
         if not qmcpack_normalization:
             premultiplied_factor = (1,1,1,1,1,1,1)
         else:
-            premultiplied_factor = (sqrt(15.0 / 8.0), 
-                                    1.5 * sqrt(5.0), 1.5 * sqrt(5.0), 
-                                    15.0 / sqrt(2.0), 15.0 / sqrt(2.0),
-                                    15.0 * sqrt(3.0), 15.0 * sqrt(3.0)) 
+            premultiplied_factor = (1,1,1,1,1,1,1)
+            #premultiplied_factor =  #(sqrt(15.0 / 8.0), 
+                                   # 1.5 * sqrt(5.0), 1.5 * sqrt(5.0), 
+                                   # 15.0 / sqrt(2.0), 15.0 / sqrt(2.0),
+                                   # 15.0 * sqrt(3.0), 15.0 * sqrt(3.0)) 
 
         return (coefficient[0] * self.m_dependent_factor(3,  0) * premultiplied_factor[0],
                 coefficient[1] * self.m_dependent_factor(3,  1) * premultiplied_factor[1],
@@ -1175,11 +1182,12 @@ class DefaultConverter(GWFN):
         if not qmcpack_normalization:
             premultiplied_factor = (1,1,1,1,1,1,1,1,1)
         else:
-            premultiplied_factor = (0.25 * sqrt(105.0), 
-                                    2.5 * sqrt(11.5), 2.5 * sqrt(11.5), 
-                                    7.5 * sqrt(21.0), 7.5 * sqrt(21.0),
-                                    105.0 * sqrt(1.5), 105.0 * sqrt(1.5),
-                                    210.0 * sqrt(3.0), 210.0 * sqrt(3.0))
+            premultiplied_factor = (1,1,1,1,1,1,1,1,1)
+            #premultiplied_factor = (0.25 * sqrt(105.0), 
+            #                        2.5 * sqrt(11.5), 2.5 * sqrt(11.5), 
+            #                        7.5 * sqrt(21.0), 7.5 * sqrt(21.0),
+            #                        105.0 * sqrt(1.5), 105.0 * sqrt(1.5),
+            #                        210.0 * sqrt(3.0), 210.0 * sqrt(3.0))
                                     
         return (coefficient[0] * self.m_dependent_factor(4,  0) * premultiplied_factor[0],
                 coefficient[1] * self.m_dependent_factor(4,  1) * premultiplied_factor[1],

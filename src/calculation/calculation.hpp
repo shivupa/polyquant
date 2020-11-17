@@ -41,8 +41,7 @@ public:
    *
    * @param mean field method
    */
-  void run_electronic_mean_field(std::string &mean_field_type,
-                                 bool &dump_for_qmcpack);
+  void run_electronic_mean_field(std::string &mean_field_type                                 );
 
   void
   run_excess_electron_plus_electronic_mean_field(std::string &mean_field_type);
@@ -50,6 +49,7 @@ public:
   run_excess_positron_plus_electronic_mean_field(std::string &mean_field_type);
 
   std::string parse_electronic_mean_field();
+  void dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc);
   /**
    * @brief the input parameters
    *

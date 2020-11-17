@@ -349,12 +349,25 @@ def savetoqmcpack(cell,mf,title="Default",kpts=[],kmesh=[],sp_twist=[],weight=1.
 
  
 
-    nshell = loc_cell.atom_shell_ids(MyIdx)
+    #nshell = loc_cell.atom_shell_ids(MyIdx)
+    nshell = len(loc_cell._basis[uniq_atoms[x][0]])
     n=0
-    for i in nshell:
-        l = loc_cell.bas_angular(i)   
-        contracted_coeffs = loc_cell.bas_ctr_coeff(i)
-        contracted_exp =loc_cell.bas_exp(i)
+    for i in range(nshell):
+        #l = loc_cell.bas_angular(i)   
+        l = loc_cell._basis[uniq_atoms[x][0]][i][0]
+        contracted_coeffs_and_exp = numpy.array(loc_cell._basis[uniq_atoms[x][0]][i][1::])
+        #contracted_coeffs = loc_cell.bas_ctr_coeff(i)
+        contracted_coeffs = contracted_coeffs_and_exp[:,1::]
+        #contracted_exp =loc_cell.bas_exp(i)
+        contracted_exp = contracted_coeffs_and_exp[:,0]
+        print("SHIV start")
+        print(loc_cell.bas_angular(i))
+        print(l)
+        print(loc_cell.bas_ctr_coeff(i))
+        print(contracted_coeffs)
+        print(loc_cell.bas_exp(i))
+        print(contracted_exp)
+        print("SHIV end")
         for line in zip(*contracted_coeffs):
           BasisGroup=atomicBasisSetGroup.create_group("basisGroup"+str(n))
 
@@ -376,8 +389,9 @@ def savetoqmcpack(cell,mf,title="Default",kpts=[],kmesh=[],sp_twist=[],weight=1.
             RID[0:]=(uniq_atoms[x][0]+str(n)+str(l))
 
 
-          BasisGroup.create_dataset("Shell_coord",(3,),dtype="f8",data=loc_cell.bas_coord(i))
-          BasisGroup.create_dataset("NbRadFunc",(1,),dtype="i4",data=loc_cell.bas_nprim(i))
+          #BasisGroup.create_dataset("Shell_coord",(3,),dtype="f8",data=loc_cell.bas_coord(i))
+          #BasisGroup.create_dataset("NbRadFunc",(1,),dtype="i4",data=loc_cell.bas_nprim(i))
+          BasisGroup.create_dataset("NbRadFunc",(1,),dtype="i4",data=numpy.count_nonzero(line))
           Val_l=BasisGroup.create_dataset("l",(1,),dtype="i4",data=l)
           Val_n=BasisGroup.create_dataset("n",(1,),dtype="i4",data=n)
           RadGroup=BasisGroup.create_group("radfunctions")
@@ -385,6 +399,8 @@ def savetoqmcpack(cell,mf,title="Default",kpts=[],kmesh=[],sp_twist=[],weight=1.
           IdRad=0
 
           for e,c in zip(contracted_exp,line):
+              if c == 0:
+                  continue
               DataRadGrp=RadGroup.create_group("DataRad"+str(IdRad))
               DataRadGrp.create_dataset("exponent",(1,),dtype="f8",data=e)
               DataRadGrp.create_dataset("contraction",(1,),dtype="f8",data=c)

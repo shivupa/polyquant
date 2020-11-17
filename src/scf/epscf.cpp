@@ -118,7 +118,7 @@ void POLYQUANT_EPSCF::form_fock() {
     quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] :
          this->input_molecule.quantum_particles) {
-      Polyquant_cout("Dumping");
+      Polyquant_cout("Dumping Fock Matrix");
       Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
                                  "Fock_" + quantum_part_a_key + "_alpha.txt");
       if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
@@ -425,7 +425,16 @@ void POLYQUANT_EPSCF::guess_DM() {
     quantum_part_idx++;
   }
 }
+void POLYQUANT_EPSCF::print_params() {
+    Polyquant_cout("Running SCF");
+    std::stringstream buffer;
+    buffer << "Maximum iterations = " << iteration_max << std::endl;
+    buffer << "convergence_E = " << std::scientific << this->convergence_E << std::endl;
+    buffer << "convergence_DM = " << std::scientific << this->convergence_DM << std::endl;
+    Polyquant_cout(buffer.str());
+}
 void POLYQUANT_EPSCF::run() {
+  this->print_params();
   // calculate integrals we need
   this->input_integral.calculate_overlap();
   this->input_integral.symmetric_orthogonalization();
