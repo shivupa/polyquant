@@ -172,7 +172,7 @@ std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
 }
 
 void POLYQUANT_CALCULATION::run_electronic_mean_field(
-    std::string &mean_field_type ) {
+    std::string &mean_field_type) {
   if (mean_field_type == "SCF") {
     POLYQUANT_EPSCF scf_calc =
         POLYQUANT_EPSCF(this->input_params, this->input_molecule,
@@ -182,23 +182,27 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
       if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
         if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
                 "dump_for_qmcpack")) {
-          dump_for_qmcpack = this->input_params.input_data["keywords"]["mf_keywords"]
-                                                 ["dump_for_qmcpack"];
+          dump_for_qmcpack =
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["dump_for_qmcpack"];
         }
         if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
                 "convergence_E")) {
           scf_calc.convergence_E =
-              this->input_params.input_data["keywords"]["mf_keywords"]["convergence_E"];
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["convergence_E"];
         }
         if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
                 "convergence_DM")) {
           scf_calc.convergence_DM =
-              this->input_params.input_data["keywords"]["mf_keywords"]["convergence_DM"];
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["convergence_DM"];
         }
         if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
                 "iteration_max")) {
           scf_calc.iteration_max =
-              this->input_params.input_data["keywords"]["mf_keywords"]["iteration_max"];
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["iteration_max"];
         }
       }
     }
@@ -335,10 +339,10 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc) {
                 this->input_molecule.centers[classical_part.center_idx[0]][2]) <
                 EPSILON) {
 
-          // Polyquant_cout("Unique shell on center: " +
-          //                std::to_string(classical_part.center_idx[0]) +
-          //                " named: " + classical_part_key);
-          // Polyquant_cout(shell);
+          Polyquant_cout("Unique shell on center: " +
+                         std::to_string(classical_part.center_idx[0]) +
+                         " named: " + classical_part_key);
+          Polyquant_cout(shell);
           unique_shells[classical_part_idx].push_back(shell);
         }
       }
@@ -354,4 +358,3 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc) {
     quantum_part_idx++;
   }
 }
-

@@ -115,11 +115,75 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
   } else {
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
   }
-  // for (auto atom_shells : this->basis) {
-  //   Polyquant_cout(atom_shells.do_enforce_unit_normalization());
-  //   atom_shells.do_enforce_unit_normalization(false);
-  //   Polyquant_cout(atom_shells.do_enforce_unit_normalization());
-  // }
+  // apply the shell normalization used in
+  // https://github.com/pyscf/pyscf/blob/53e2069b4a3a2e0616bdf4d8c2e3f898c10a8330/pyscf/gto/mole.py#L827
+  //_nomalize_contracted_ao in pyscf/gto/mole.py
+  // lambda for normalization
+  auto gaussianint_lambda = [](auto n, auto alpha) {
+    auto n1 = (n + 1) * 0.5;
+    return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
+  };
+  auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
+    auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
+    return 1.0/std::sqrt(gint_val);
+  };
+  std::cout << "SHIVSHIV " << gtonorm_lambda(0,1) << std::endl;
+  for (auto& shell : this->basis) {
+    // REMOVE NORMALIZATION FACTOR FROM LIBINT
+    // SEE SHELL.H
+    // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
+    const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
+
+    for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+      auto exponent = shell.alpha[p];
+      const auto two_alpha = 2.0 * exponent;
+      const auto two_alpha_to_am32 =
+          std::pow(two_alpha, (shell.contr[0].l + 1)) * std::sqrt(two_alpha);
+      const auto normalization_factor = std::sqrt(
+          std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32 /
+          (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * shell.contr[0].l]));
+      shell.contr[0].coeff.at(p) /= normalization_factor;
+    }
+
+    auto l = shell.contr[0].l;
+    // apply pyscf gtonorm
+    for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+      // std::cout << "before gto pyscf norm "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
+                // << std::endl;
+      shell.contr[0].coeff.at(p) *= gtonorm_lambda(l,shell.alpha[p]);
+      // std::cout << "after gto pyscf norm "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
+      //           << std::endl;
+    }
+  
+    // apply pyscf _nomalize_contracted_ao
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ee;
+    ee.setZero(shell.alpha.size(), shell.alpha.size());
+    for (auto i = 0ul; i < shell.alpha.size(); ++i) {
+      for (auto j = 0ul; j < shell.alpha.size(); ++j) {
+        auto n1 = l * 2 + 2;
+        auto alpha = shell.alpha[i] + shell.alpha[j];
+        ee(i, j) = gaussianint_lambda(l * 2 + 2, alpha);
+      }
+    }
+    double s1 = 0.0;
+    for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+      for (auto q = 0ul; q < shell.alpha.size(); ++q) {
+        s1 +=
+            shell.contr[0].coeff.at(p) * ee(p, q) * shell.contr[0].coeff.at(q);
+      }
+    }
+    s1 = 1.0 / std::sqrt(s1);
+    for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+      // std::cout << "before _nomalize_contracted_ao "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
+                // << std::endl;
+      shell.contr[0].coeff.at(p) *= s1;
+      std::cout << "after _nomalize_contracted_ao "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
+                << std::endl;
+    }
+  }
+  for (auto shell : this->basis) {
+    std::cout << shell << std::endl;
+  }
   // TODO dump basis
   // Polyquant_cout("");
   // Polyquant_cout(this->basis);

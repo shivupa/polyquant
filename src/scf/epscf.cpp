@@ -426,12 +426,14 @@ void POLYQUANT_EPSCF::guess_DM() {
   }
 }
 void POLYQUANT_EPSCF::print_params() {
-    Polyquant_cout("Running SCF");
-    std::stringstream buffer;
-    buffer << "Maximum iterations = " << iteration_max << std::endl;
-    buffer << "convergence_E = " << std::scientific << this->convergence_E << std::endl;
-    buffer << "convergence_DM = " << std::scientific << this->convergence_DM << std::endl;
-    Polyquant_cout(buffer.str());
+  Polyquant_cout("Running SCF");
+  std::stringstream buffer;
+  buffer << "Maximum iterations = " << iteration_max << std::endl;
+  buffer << "convergence_E = " << std::scientific << this->convergence_E
+         << std::endl;
+  buffer << "convergence_DM = " << std::scientific << this->convergence_DM
+         << std::endl;
+  Polyquant_cout(buffer.str());
 }
 void POLYQUANT_EPSCF::run() {
   this->print_params();

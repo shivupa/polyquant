@@ -41,7 +41,7 @@ public:
    *
    * @param mean field method
    */
-  void run_electronic_mean_field(std::string &mean_field_type                                 );
+  void run_electronic_mean_field(std::string &mean_field_type);
 
   void
   run_excess_electron_plus_electronic_mean_field(std::string &mean_field_type);
