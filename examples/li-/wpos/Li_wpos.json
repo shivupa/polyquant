@@ -34,7 +34,13 @@
           "electron_exchange" : false,
           "restricted" : false
         }
-    ]
-  }
+    ],
+    "mf_keywords" :{
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true
+    },
+   "pure" : true
+      }
 }
-

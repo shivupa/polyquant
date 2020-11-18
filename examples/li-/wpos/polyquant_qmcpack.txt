@@ -1,0 +1,312 @@
+Rank =    0  Free Memory =  1554 MB
+  Input file(s): electron.qmc.in-wfnoj.xml 
+
+=====================================================
+                    QMCPACK 3.9.9
+
+       (c) Copyright 2003-  QMCPACK developers
+
+                    Please cite:
+ J. Kim et al. J. Phys. Cond. Mat. 30 195901 (2018)
+      https://doi.org/10.1088/1361-648X/aab9c3
+
+  Git branch: develop
+  Last git commit: 37437cfce6618e9be6d29ced6c570d0e0fc22f8b-dirty
+  Last git commit date: Wed Oct 21 15:13:40 2020 -0700
+  Last git commit subject: Merge pull request #2737 from ye-luo/afqmc-move-warning
+=====================================================
+  Global options 
+
+  Total number of MPI ranks = 1
+  Number of MPI groups      = 1
+  MPI group ID              = 0
+  Number of ranks in group  = 1
+  MPI ranks per node        = 1
+  OMP 1st level threads     = 1
+  OMP nested threading disabled or only 1 thread on the 2nd level
+
+  Precision used in this calculation, see definitions in the manual:
+  Base precision      = double
+  Full precision      = double
+
+  CPU only build
+  Timer build option is enabled. Current timer level is coarse
+
+  Input XML = electron.qmc.in-wfnoj.xml
+
+  Project = electron
+  date    = 2020-11-18 12:24:11 EST
+  host    = jordan-wkst2
+
+
+ Random Number
+ -------------
+  Offset for the random number seeds based on time: 187
+
+  Range of prime numbers to use as seeds over processors and threads = 1129-1151
+
+
+ Particle Set
+ ------------
+  Name: ion0
+
+  All the species have the same mass 1
+  Particle set size: 1
+
+
+ Particle Set
+ ------------
+  Name: e
+
+  All the species have the same mass 1
+  Particle set size: 5
+
+
+ Many-body wavefunction
+ -------------------
+  Name: psi0   tasking: no
+
+  LCAO: SoaAtomicBasisSet<MultiQuintic,1>
+Reading BasisSet from HDF5 file:electron.h5
+<input node="atomicBasisSet" name="Li" expandYlm="natural" angular="spherical" elementType="Li" normalized="no" type="Numerical" expM="0" />
+  AO BasisSet for Li
+   Spherical Harmonics contain (-1)^m factor
+   Angular momentum m expanded as -l, ... ,l
+   Grid is created by the input paremters in h5
+    Using log grid ri = 1e-06 rf = 100 npts = 1001
+   R(n,l,m,s) 0 0 0 0
+   R(n,l,m,s) 1 0 0 0
+   R(n,l,m,s) 2 0 0 0
+   R(n,l,m,s) 3 0 0 0
+   R(n,l,m,s) 4 0 0 0
+   R(n,l,m,s) 5 0 0 0
+   R(n,l,m,s) 6 0 0 0
+   R(n,l,m,s) 7 1 0 0
+   R(n,l,m,s) 8 1 0 0
+   R(n,l,m,s) 9 1 0 0
+Expanding Ylm as -l,-l+1,...,l-1,l
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 3 spherical orbitals
+   Adding 3 spherical orbitals
+   Adding 3 spherical orbitals
+  Setting cutoff radius 1.66538e+08
+
+   Maximum Angular Momentum  = 1
+   Number of Radial functors = 10
+   Basis size                = 16
+
+  Created SPOSet builder named 'LCAOBSet' of type molecularorbital
+
+   Single Slater determinant
+   -------------------------
+
+
+     Determinant
+     -----------
+      Name: updet   Spin group: 0   SPO name: updet
+
+      Create a new SPO set updet
+
+     Single particle orbitals (SPO)
+     ------------------------------
+      Name:    Type: LCAO   Builder class name: LCAOrbitalBuilder
+
+WARNING SPOSet object name not given in the input!
+WARNING SPOSet object doesn't have a name.
+      Setting delay_rank to default value 1
+      Using rank-1 Sherman-Morrison Fahy update (SM1)
+      Running on CPU.
+
+
+     Determinant
+     -----------
+      Name: downdet   Spin group: 1   SPO name: downdet
+
+      Create a new SPO set downdet
+
+     Single particle orbitals (SPO)
+     ------------------------------
+      Name:    Type: LCAO   Builder class name: LCAOrbitalBuilder
+
+WARNING SPOSet object name not given in the input!
+WARNING SPOSet object doesn't have a name.
+      Setting delay_rank to default value 1
+      Using rank-1 Sherman-Morrison Fahy update (SM1)
+      Running on CPU.
+
+  Added a fermionic WaveFunctionComponent SlaterDet
+Reuse SPOSetBuilder "LCAOBSet" type MolecularOrbital
+
+   Single Slater determinant
+   -------------------------
+
+
+     Determinant
+     -----------
+      Name: pdet   Spin group: 0   SPO name: pdet
+
+      Create a new SPO set pdet
+
+     Single particle orbitals (SPO)
+     ------------------------------
+      Name:    Type: LCAO   Builder class name: LCAOrbitalBuilder
+
+WARNING SPOSet object name not given in the input!
+WARNING SPOSet object doesn't have a name.
+      Setting delay_rank to default value 1
+      Using rank-1 Sherman-Morrison Fahy update (SM1)
+      Running on CPU.
+
+  Added a fermionic WaveFunctionComponent SlaterDet
+  QMCHamiltonian::addOperator Kinetic to H, physical Hamiltonian 
+
+ Hamiltonian and observables
+ ---------------------------
+  Name: h0
+
+  QMCHamiltonian::addOperator ElecElec to H, physical Hamiltonian 
+QMCHamiltonian::addOperatorType added type coulomb named ElecElec
+  CoulombAA for ion0 is not created.  Number of particles == 1 and nonPeriodic
+  QMCHamiltonian::addOperator IonElec to H, physical Hamiltonian 
+QMCHamiltonian::addOperatorType added type coulomb named IonElec
+  QMCHamiltonian::addOperator IonPos to H, physical Hamiltonian 
+QMCHamiltonian::addOperatorType added type coulomb named IonPos
+  QMCHamiltonian::addOperator ElecPos to H, physical Hamiltonian 
+QMCHamiltonian::addOperatorType added type coulomb named ElecPos
+
+  QMCHamiltonian::add2WalkerProperty added
+    5 to P::PropertyList 
+    0 to P::Collectables 
+    starting Index of the observables in P::PropertyList = 9
+ParticleSetPool::randomize 1 ParticleSet.
+<init source="ion0" target="e">
+</init>
+  Initialization Execution time = 0.02047 secs
+=========================================================
+ Summary of QMC systems 
+=========================================================
+ParticleSetPool has: 
+
+  ParticleSet 'e' contains 5 particles :  u(2) d(2) p(1)
+
+    u -2.4803282156e+00  2.2897512773e+00 -3.2266044950e-01
+    u -6.6449818938e-01 -6.4463420724e-01 -1.0048286439e+00
+    d  5.8503240896e-02 -1.2337747213e+00  9.9693072786e-01
+    d -7.0101009757e-02 -6.7214523593e-01 -1.6597922933e+00
+    p  1.2784600203e-02 -4.1120694151e-01 -1.4711670550e+00
+
+  Distance table for dissimilar particles (A-B):
+    source: ion0  target: e
+    Using structure-of-arrays (SoA) data layout
+    Distance computations use open boundary conditions in 3D.
+
+  Distance table for similar particles (A-A):
+    source/target: e
+    Using structure-of-arrays (SoA) data layout
+    Distance computations use open boundary conditions in 3D.
+
+
+  ParticleSet 'ion0' contains 1 particles :  Li(1)
+
+    Li  0.0000000000e+00  0.0000000000e+00  0.0000000000e+00
+
+
+  Hamiltonian h0
+  Kinetic         Kinetic energy
+  ElecElec        CoulombAB source=e
+
+  IonElec         CoulombAA source/target ion0
+
+  IonPos          CoulombAA source/target ion0
+
+  ElecPos         CoulombAB source=e
+
+
+
+=========================================================
+  Start VMC
+  File Root electron.s000 append = no 
+=========================================================
+Resetting walkers
+  Adding 1 walkers to 0 existing sets
+  Total number of walkers: 1.0000000000e+00
+  Total weight: 1.0000000000e+00
+  Resetting Properties of the walkers 1 x 14
+
+<vmc function="put">
+  qmc_counter=0  my_counter=0
+  time step      = 5.0000000000e-01
+  blocks         = 100
+  steps          = 3000
+  substeps       = 8
+  current        = 0
+  target samples = 0.0000000000e+00
+  walkers/mpi    = 1
+
+  stepsbetweensamples = 303000
+  SpinMoves      = no
+<parameter name="blocks" condition="int">100</parameter>
+<parameter name="blocks_between_recompute" condition="int">0</parameter>
+<parameter name="check_properties" condition="int">100</parameter>
+<parameter name="checkproperties" condition="int">100</parameter>
+<parameter name="current" condition="int">0</parameter>
+<parameter name="dmcwalkersperthread" condition="real">0.0000000000e+00</parameter>
+<parameter name="maxcpusecs" condition="real">3.6000000000e+05</parameter>
+<parameter name="record_configs" condition="int">0</parameter>
+<parameter name="record_walkers" condition="int">303000</parameter>
+<parameter name="recordconfigs" condition="int">0</parameter>
+<parameter name="recordwalkers" condition="int">303000</parameter>
+<parameter name="rewind" condition="int">0</parameter>
+<parameter name="samples" condition="real">0.0000000000e+00</parameter>
+<parameter name="samplesperthread" condition="real">0.0000000000e+00</parameter>
+<parameter name="spinmass" condition="double">1.0000000000e+00</parameter>
+<parameter name="spinmoves" condition="string">no</parameter>
+<parameter name="steps" condition="int">3000</parameter>
+<parameter name="stepsbetweensamples" condition="int">303000</parameter>
+<parameter name="store_configs" condition="int">0</parameter>
+<parameter name="storeconfigs" condition="int">0</parameter>
+<parameter name="sub_steps" condition="int">8</parameter>
+<parameter name="substeps" condition="int">8</parameter>
+<parameter name="tau" condition="au">5.0000000000e-01</parameter>
+<parameter name="time_step" condition="au">5.0000000000e-01</parameter>
+<parameter name="timestep" condition="au">5.0000000000e-01</parameter>
+<parameter name="use_drift" condition="string">no</parameter>
+<parameter name="usedrift" condition="string">no</parameter>
+<parameter name="walkers" condition="int">1</parameter>
+<parameter name="warmup_steps" condition="int">100</parameter>
+<parameter name="warmupsteps" condition="int">100</parameter>
+  DumpConfig==false Nothing (configurations, state) will be saved.
+  Walker Samples are dumped every 303000 steps.
+</vmc>
+  Set drift_modifier UNR parameter a = 1.0000000000e+00
+  Initial partition of walkers 0 1 
+
+  Using Particle by Particle moves
+  Walker moves without drift
+  Total Sample Size   =0
+  Walker distribution on root = 0 1 
+[jordan-wkst2:1924653] *** Process received signal ***
+[jordan-wkst2:1924653] Signal: Segmentation fault (11)
+[jordan-wkst2:1924653] Signal code: Address not mapped (1)
+[jordan-wkst2:1924653] Failing at address: (nil)
+[jordan-wkst2:1924653] [ 0] /usr/lib/libpthread.so.0(+0x140f0)[0x7fd591df10f0]
+[jordan-wkst2:1924653] [ 1] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x6300aa)[0x5603895400aa]
+[jordan-wkst2:1924653] [ 2] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x651523)[0x560389561523]
+[jordan-wkst2:1924653] [ 3] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x3481fc)[0x5603892581fc]
+[jordan-wkst2:1924653] [ 4] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x28e31c)[0x56038919e31c]
+[jordan-wkst2:1924653] [ 5] /usr/lib/libgomp.so.1(GOMP_parallel+0x46)[0x7fd5919196b6]
+[jordan-wkst2:1924653] [ 6] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x292bd6)[0x5603891a2bd6]
+[jordan-wkst2:1924653] [ 7] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x295422)[0x5603891a5422]
+[jordan-wkst2:1924653] [ 8] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0xfabad)[0x56038900abad]
+[jordan-wkst2:1924653] [ 9] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0xfcbef)[0x56038900cbef]
+[jordan-wkst2:1924653] [10] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0x100086)[0x560389010086]
+[jordan-wkst2:1924653] [11] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0xc2003)[0x560388fd2003]
+[jordan-wkst2:1924653] [12] /usr/lib/libc.so.6(__libc_start_main+0xf2)[0x7fd59174c152]
+[jordan-wkst2:1924653] [13] /home/shiv/Documents/qmcpack/build/bin/qmcpack(+0xef37e)[0x560388fff37e]
+[jordan-wkst2:1924653] *** End of error message ***
