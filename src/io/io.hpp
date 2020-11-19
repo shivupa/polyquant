@@ -83,8 +83,11 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,
-    int num_species, std::vector<std::vector<double>> E_orb,
-    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff,
+    int num_species, std::vector<std::string> quantum_part_names,
+    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orb,
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        mo_coeff,
     std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
     std::vector<int> atomic_charge, std::vector<int> core_elec,
     std::vector<std::string> atomic_names,
