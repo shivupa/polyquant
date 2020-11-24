@@ -1,0 +1,506 @@
+SETTING UP INPUT FILE
+Reading Input File: Li_wopos.json
+Input file: 
+{
+    "driver": "energy",
+    "keywords": {
+        "mf_keywords": {
+            "convergence_DM": 1e-06,
+            "convergence_E": 1e-08,
+            "dump_for_qmcpack": true,
+            "hdf5_filename_qmcpack": "Li_wopos.h5",
+            "iteration_max": 200
+        },
+        "pure": true,
+        "restricted": true
+    },
+    "model": {
+        "basis": {
+            "Li": [
+                {
+                    "custom": {
+                        "filename": "Li_basis.g94",
+                        "type": "file"
+                    }
+                }
+            ]
+        },
+        "method": "scf"
+    },
+    "molecule": {
+        "geometry": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "molecular_charge": -1,
+        "molecular_multiplicity": 1,
+        "symbols": [
+            "Li"
+        ]
+    }
+}
+End input file
+SETTING UP MOLECULE
+1
+The input section 'keywords' didn't contain a section called about quantum nuclei. All nuclei are going to be treated classically. No quantum particles present besides electrons.
+No additional quantum particles found.
+Creating 4 electrons
+nuclear repulsion energy: 0.000000
+
+Molecule parameters
+Classical particle types
+Classical particle type  1: 
+name: Li
+mass: 7.000000
+charge: 3.000000
+number of particles: 1
+Center idx    x   y   z
+0    0.000000    0.000000    0.000000
+
+
+Quantum particle types
+Quantum Particle type 1: 
+name: electron
+mass: 1.000000
+charge: -1.000000
+spin: 0.500000
+multiplicity: 1
+number of particles: 4
+number of particles (alpha): 2
+number of particles (beta): 2
+Center idx    x   y   z
+exchange: true
+electron exchange: false
+restricted: true
+
+
+SETTING UP BASIS
+BASIS
+Enforcing unit normalization in Libint: false
+
+Added basis for Li
+Number of basis functions: 16
+SHIVSHIV 2.5264751109842586985
+after _nomalize_contracted_ao 642.41890000000000782 0.94411839904983008154
+after _nomalize_contracted_ao 96.798490000000001032 1.7295511390255777773
+after _nomalize_contracted_ao 22.091090000000001226 2.7239784030035716356
+after _nomalize_contracted_ao 6.2010699999999996379 3.3393592318172768962
+after _nomalize_contracted_ao 1.9351199999999999513 2.6671857998993417915
+after _nomalize_contracted_ao 2.1914600000000001856 0.73061314352765638347
+after _nomalize_contracted_ao 0.59613000000000004874 1.4997390859706503097
+after _nomalize_contracted_ao 0.074550000000000005151 0.36045475592422193678
+after _nomalize_contracted_ao 0.028670000000000001039 0.17602963722484091247
+after _nomalize_contracted_ao 0.0091999999999999998446 0.075050898295701953811
+after _nomalize_contracted_ao 0.0030999999999999998911 0.033192219560855502902
+after _nomalize_contracted_ao 0.00080000000000000003834 0.012018008711439081421
+after _nomalize_contracted_ao 2.1914600000000001856 0.069540294521667656014
+after _nomalize_contracted_ao 0.59613000000000004874 0.21548061533021056757
+after _nomalize_contracted_ao 0.074550000000000005151 0.10743214825690163006
+after _nomalize_contracted_ao 0.01799999999999999864 0.019234239697098465954
+after _nomalize_contracted_ao 0.0060000000000000001249 0.0048716205694106324772
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  642.41890000000000782 0.94411839904983008154
+  96.798490000000001032 1.7295511390255777773
+  22.091090000000001226 2.7239784030035716356
+  6.2010699999999996379 3.3393592318172768962
+  1.9351199999999999513 2.6671857998993417915
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  2.1914600000000001856 0.73061314352765638347
+  0.59613000000000004874 1.4997390859706503097
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.074550000000000005151 0.36045475592422193678
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.028670000000000001039 0.17602963722484091247
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0091999999999999998446 0.075050898295701953811
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0030999999999999998911 0.033192219560855502902
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.00080000000000000003834 0.012018008711439081421
+
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  2.1914600000000001856 0.069540294521667656014
+  0.59613000000000004874 0.21548061533021056757
+  0.074550000000000005151 0.10743214825690163006
+
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.01799999999999999864 0.019234239697098465954
+
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.0060000000000000001249 0.0048716205694106324772
+
+SETTING UP INTEGRAL
+INTEGRAL
+Figuring out if we need to run a mean-field calculation for the electrons...
+Will run a mean field calculation of type: 
+SCF
+Running SCF
+Maximum iterations = 200
+convergence_E = 1.000000e-08
+convergence_DM = 1.000000e-06
+
+Calculating One Body Overlap Integrals...
+Calculating Symmetric Orthogonalization Matrix...
+Calculating One Body Kinetic Integrals...
+Calculating One Body Nuclear Integrals...
+Calculating Two Body Electron Repulsion Integrals...
+Iteration 0 :
+E(electron) : 0.000000
+E(particles) : 0.000000
+Dumping Fock Matrix
+Convergence status for electron
+delta E = -11.078160420755802207 converged = false
+rmsc dm = 0.064526637456303895246 converged = false
+
+Iteration 1 :
+E(electron) : -11.078160
+E(particles) : -11.078160
+Convergence status for electron
+delta E = 4.9448466548742953108 converged = false
+rmsc dm = 0.20670509141018883481 converged = false
+
+Iteration 2 :
+E(electron) : -6.133314
+E(particles) : -6.133314
+Convergence status for electron
+delta E = -2.0252138837093358603 converged = false
+rmsc dm = 0.1551807223991444884 converged = false
+
+Iteration 3 :
+E(electron) : -8.158528
+E(particles) : -8.158528
+Convergence status for electron
+delta E = 0.8683751316876833215 converged = false
+rmsc dm = 0.0010897668115655712983 converged = false
+
+Iteration 4 :
+E(electron) : -7.290153
+E(particles) : -7.290153
+Convergence status for electron
+delta E = -0.085796246616476778968 converged = false
+rmsc dm = 0.00012490338040186034106 converged = false
+
+Iteration 5 :
+E(electron) : -7.375949
+E(particles) : -7.375949
+Convergence status for electron
+delta E = -0.031730088005003764806 converged = false
+rmsc dm = 3.2029397665011347508e-05 converged = false
+
+Iteration 6 :
+E(electron) : -7.407679
+E(particles) : -7.407679
+Convergence status for electron
+delta E = -0.010617623609541659846 converged = false
+rmsc dm = 1.1861768703982538054e-05 converged = false
+
+Iteration 7 :
+E(electron) : -7.418296
+E(particles) : -7.418296
+Convergence status for electron
+delta E = -0.0036719743147637373681 converged = false
+rmsc dm = 4.5591004102015418611e-06 converged = false
+
+Iteration 8 :
+E(electron) : -7.421968
+E(particles) : -7.421968
+Convergence status for electron
+delta E = -0.0013448640260627087173 converged = false
+rmsc dm = 1.7210253989465550122e-06 converged = false
+
+Iteration 9 :
+E(electron) : -7.423313
+E(particles) : -7.423313
+Convergence status for electron
+delta E = -0.00052460042084323532663 converged = false
+rmsc dm = 6.3224195134828034575e-07 converged = true
+
+Iteration 10 :
+E(electron) : -7.423838
+E(particles) : -7.423838
+Convergence status for electron
+delta E = -0.00021752601358837608814 converged = false
+rmsc dm = 2.2611240048309317306e-07 converged = true
+
+Iteration 11 :
+E(electron) : -7.424055
+E(particles) : -7.424055
+Convergence status for electron
+delta E = -9.5167930437511927266e-05 converged = false
+rmsc dm = 7.9033719814602058736e-08 converged = true
+
+Iteration 12 :
+E(electron) : -7.424151
+E(particles) : -7.424151
+Convergence status for electron
+delta E = -4.349643139445191764e-05 converged = false
+rmsc dm = 2.7131531151909053073e-08 converged = true
+
+Iteration 13 :
+E(electron) : -7.424194
+E(particles) : -7.424194
+Convergence status for electron
+delta E = -2.0556508760982694639e-05 converged = false
+rmsc dm = 9.1904498118999238753e-09 converged = true
+
+Iteration 14 :
+E(electron) : -7.424215
+E(particles) : -7.424215
+Convergence status for electron
+delta E = -9.948469778642277106e-06 converged = false
+rmsc dm = 3.0842357869299085618e-09 converged = true
+
+Iteration 15 :
+E(electron) : -7.424225
+E(particles) : -7.424225
+Convergence status for electron
+delta E = -4.885322264946978521e-06 converged = false
+rmsc dm = 1.0288755410114450747e-09 converged = true
+
+Iteration 16 :
+E(electron) : -7.424229
+E(particles) : -7.424229
+Convergence status for electron
+delta E = -2.4124229272004527047e-06 converged = false
+rmsc dm = 3.4213641898225268623e-10 converged = true
+
+Iteration 17 :
+E(electron) : -7.424232
+E(particles) : -7.424232
+Convergence status for electron
+delta E = -1.1865733888782870054e-06 converged = false
+rmsc dm = 1.1368521098891118363e-10 converged = true
+
+Iteration 18 :
+E(electron) : -7.424233
+E(particles) : -7.424233
+Convergence status for electron
+delta E = -5.7474798165202400924e-07 converged = false
+rmsc dm = 3.7828697063850689486e-11 converged = true
+
+Iteration 19 :
+E(electron) : -7.424234
+E(particles) : -7.424234
+Convergence status for electron
+delta E = -2.6984918566341775659e-07 converged = false
+rmsc dm = 1.2631365769697022752e-11 converged = true
+
+Iteration 20 :
+E(electron) : -7.424234
+E(particles) : -7.424234
+Convergence status for electron
+delta E = -1.1957487533464927765e-07 converged = false
+rmsc dm = 4.2411729587228738913e-12 converged = true
+
+Iteration 21 :
+E(electron) : -7.424234
+E(particles) : -7.424234
+Convergence status for electron
+delta E = -4.72286796338039494e-08 converged = false
+rmsc dm = 1.4349759273439407475e-12 converged = true
+
+Iteration 22 :
+E(electron) : -7.424234
+E(particles) : -7.424234
+Convergence status for electron
+delta E = -1.3853040492506352166e-08 converged = false
+rmsc dm = 4.9030555355342938895e-13 converged = true
+
+Iteration 23 :
+E(electron) : -7.424234
+E(particles) : -7.424234
+Convergence status for electron
+delta E = 3.7866332291969229118e-10 converged = true
+rmsc dm = 1.6954959291569867429e-13 converged = true
+
+Independent densities converged. Turning on interactions.
+Iteration 24 :
+E(electron) : -7.424234
+E(particles) : -7.424234
+Convergence status for electron
+delta E = 5.5042255198145539907e-09 converged = true
+rmsc dm = 5.9461572143019485793e-14 converged = true
+
+SCF SUCCESS
+-7.4242341139392662441
+Dumping HDF5 to filename: Li_wopos.h5
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  642.41890000000000782 0.94411839904983008154
+  96.798490000000001032 1.7295511390255777773
+  22.091090000000001226 2.7239784030035716356
+  6.2010699999999996379 3.3393592318172768962
+  1.9351199999999999513 2.6671857998993417915
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  2.1914600000000001856 0.73061314352765638347
+  0.59613000000000004874 1.4997390859706503097
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.074550000000000005151 0.36045475592422193678
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.028670000000000001039 0.17602963722484091247
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0091999999999999998446 0.075050898295701953811
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0030999999999999998911 0.033192219560855502902
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.00080000000000000003834 0.012018008711439081421
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  2.1914600000000001856 0.069540294521667656014
+  0.59613000000000004874 0.21548061533021056757
+  0.074550000000000005151 0.10743214825690163006
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.01799999999999999864 0.019234239697098465954
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.0060000000000000001249 0.0048716205694106324772
+
+dumping file
+dumping application parameters
+dumping PBC parameters
+dumping general parameters
+dumping MOs
+Spin dataset 0 corresponds to electron alpha and beta particles (restricted calculation).
+
+dumping atom parameters
+SHIVSHIVSHIV 2.5264751109842586985
+dumping basis parameters
+before unnormalizing at output 642.41890000000000782 0.94411839904983008154
+after unnormalizing at output 642.41890000000000782 0.0029285167001022582162
+before unnormalizing at output 96.798490000000001032 1.7295511390255777773
+after unnormalizing at output 96.798490000000001032 0.022182829770400747799
+before unnormalizing at output 22.091090000000001226 2.7239784030035716356
+after unnormalizing at output 22.091090000000001226 0.10580977161304046252
+before unnormalizing at output 6.2010699999999996379 3.3393592318172768962
+after unnormalizing at output 6.2010699999999996379 0.33635519612996916949
+before unnormalizing at output 1.9351199999999999513 2.6671857998993417915
+after unnormalizing at output 1.9351199999999999513 0.64343890991639285382
+before unnormalizing at output 2.1914600000000001856 0.73061314352765638347
+after unnormalizing at output 2.1914600000000001856 0.16055443090618215507
+before unnormalizing at output 0.59613000000000004874 1.4997390859706503097
+after unnormalizing at output 0.59613000000000004874 0.87497360564802550975
+before unnormalizing at output 0.074550000000000005151 0.36045475592422193678
+after unnormalizing at output 0.074550000000000005151 1
+before unnormalizing at output 0.028670000000000001039 0.17602963722484091247
+after unnormalizing at output 0.028670000000000001039 1
+before unnormalizing at output 0.0091999999999999998446 0.075050898295701953811
+after unnormalizing at output 0.0091999999999999998446 1
+before unnormalizing at output 0.0030999999999999998911 0.033192219560855502902
+after unnormalizing at output 0.0030999999999999998911 1.000000000000000222
+before unnormalizing at output 0.00080000000000000003834 0.012018008711439081421
+after unnormalizing at output 0.00080000000000000003834 1
+before unnormalizing at output 2.1914600000000001856 0.069540294521667656014
+after unnormalizing at output 2.1914600000000001856 0.0089399522288950480226
+before unnormalizing at output 0.59613000000000004874 0.21548061533021056757
+after unnormalizing at output 0.59613000000000004874 0.14100924650967455731
+before unnormalizing at output 0.074550000000000005151 0.10743214825690163006
+after unnormalizing at output 0.074550000000000005151 0.94534494849954509021
+before unnormalizing at output 0.01799999999999999864 0.019234239697098465954
+after unnormalizing at output 0.01799999999999999864 1
+before unnormalizing at output 0.0060000000000000001249 0.0048716205694106324772
+after unnormalizing at output 0.0060000000000000001249 1.000000000000000222
+Rank =    0  Free Memory =  3197 MB
+Index of ion charge 0
+Index of valence charge 1
+Using Li_wopos to name output files
+Converting Wavefunction from the Polyquant Code
+Periodic Boundary Conditions: no
+usingECP: no
+Multideterminants: no
+NUMBER OF AOs: 16
+Size of Basis Set: 16
+NUMBER OF MOs: 16
+Unit in Bohr=1
+Number of alpha electrons: 2
+Number of beta electrons: 2
+Number of electrons: 4
+SPIN MULTIPLICITY: 1
+NUMBER OF ATOMS: 1
+ QMCGaussianParserBase::dump 
+Number of alpha electrons 2
+Number of beta electrons 2
+ Generating Standard Input file containing VMC, standard optmization, and DMC blocks.
+ Modify according to the accuracy you would like to achieve. 
+ QMCGaussianParserBase::dump 
+Number of alpha electrons 2
+Number of beta electrons 2
+Adding Two-Body and One-Body jastrows with rcut="10" and size="10"
+Adding Three-Body jastrows with rcut="5"
+ Generating Standard Input file containing VMC, standard optmization, and DMC blocks.
+ Modify according to the accuracy you would like to achieve. 
+-7.424234084253866
+Using Python 3.x
+Wavefunction successfully saved to QMCPACK HDF5 Format
+Use: "convert4qmc -pyscf  Default.h5" to generate QMCPACK input files
+Rank =    0  Free Memory =  3125 MB
+Index of ion charge 0
+Index of valence charge 1
+Using Default to name output files
+Converting Wavefunction from the PySCF Code
+Periodic Boundary Conditions: no
+usingECP: no
+Multideterminants: no
+NUMBER OF AOs: 16
+Size of Basis Set: 16
+NUMBER OF MOs: 16
+Unit in Bohr=1
+Number of alpha electrons: 2
+Number of beta electrons: 2
+Number of electrons: 4
+SPIN MULTIPLICITY: 1
+NUMBER OF ATOMS: 1
+ QMCGaussianParserBase::dump 
+Number of alpha electrons 2
+Number of beta electrons 2
+ Generating Standard Input file containing VMC, standard optmization, and DMC blocks.
+ Modify according to the accuracy you would like to achieve. 
+ QMCGaussianParserBase::dump 
+Number of alpha electrons 2
+Number of beta electrons 2
+Adding Two-Body and One-Body jastrows with rcut="10" and size="10"
+Adding Three-Body jastrows with rcut="5"
+ Generating Standard Input file containing VMC, standard optmization, and DMC blocks.
+ Modify according to the accuracy you would like to achieve. 

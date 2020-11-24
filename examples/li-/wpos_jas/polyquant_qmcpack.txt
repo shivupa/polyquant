@@ -1,0 +1,1085 @@
+Rank =    0  Free Memory =  5511 MB
+  Input file(s): Li_wpos.qmc.in-wfj.xml 
+
+=====================================================
+                    QMCPACK 3.9.9
+
+       (c) Copyright 2003-  QMCPACK developers
+
+                    Please cite:
+ J. Kim et al. J. Phys. Cond. Mat. 30 195901 (2018)
+      https://doi.org/10.1088/1361-648X/aab9c3
+
+  Git branch: develop
+  Last git commit: 37437cfce6618e9be6d29ced6c570d0e0fc22f8b
+  Last git commit date: Wed Oct 21 15:13:40 2020 -0700
+  Last git commit subject: Merge pull request #2737 from ye-luo/afqmc-move-warning
+=====================================================
+  Global options 
+
+  Total number of MPI ranks = 1
+  Number of MPI groups      = 1
+  MPI group ID              = 0
+  Number of ranks in group  = 1
+  MPI ranks per node        = 1
+  OMP 1st level threads     = 1
+  OMP nested threading disabled or only 1 thread on the 2nd level
+
+  Precision used in this calculation, see definitions in the manual:
+  Base precision      = double
+  Full precision      = double
+
+  CPU only build
+  Timer build option is enabled. Current timer level is coarse
+
+  Input XML = Li_wpos.qmc.in-wfj.xml
+
+  Project = Li_wpos
+  date    = 2020-11-24 10:46:10 EST
+  host    = jordan-wkst2
+
+
+ Random Number
+ -------------
+  Offset for the random number seeds based on time: 706
+
+  Range of prime numbers to use as seeds over processors and threads = 5351-5381
+
+
+ Particle Set
+ ------------
+  Name: ion0
+
+  All the species have the same mass 1
+  Particle set size: 1
+
+
+ Particle Set
+ ------------
+  Name: e
+
+  All the species have the same mass 1
+  Particle set size: 5
+
+
+ Many-body wavefunction
+ -------------------
+  Name: psi0   tasking: no
+
+  LCAO: SoaAtomicBasisSet<MultiQuintic,1>
+Reading BasisSet from HDF5 file:Li_wpos.h5
+<input node="atomicBasisSet" name="Li" expandYlm="natural" angular="spherical" elementType="Li" normalized="no" type="Numerical" expM="0" />
+  AO BasisSet for Li
+   Spherical Harmonics contain (-1)^m factor
+   Angular momentum m expanded as -l, ... ,l
+   Grid is created by the input paremters in h5
+    Using log grid ri = 1e-06 rf = 100 npts = 1001
+   R(n,l,m,s) 0 0 0 0
+   R(n,l,m,s) 1 0 0 0
+   R(n,l,m,s) 2 0 0 0
+   R(n,l,m,s) 3 0 0 0
+   R(n,l,m,s) 4 0 0 0
+   R(n,l,m,s) 5 0 0 0
+   R(n,l,m,s) 6 0 0 0
+   R(n,l,m,s) 7 1 0 0
+   R(n,l,m,s) 8 1 0 0
+   R(n,l,m,s) 9 1 0 0
+Expanding Ylm as -l,-l+1,...,l-1,l
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 1 spherical orbitals
+   Adding 3 spherical orbitals
+   Adding 3 spherical orbitals
+   Adding 3 spherical orbitals
+  Setting cutoff radius 1.66538e+08
+
+   Maximum Angular Momentum  = 1
+   Number of Radial functors = 10
+   Basis size                = 16
+
+  Created SPOSet builder named 'LCAOBSet' of type molecularorbital
+
+   Single Slater determinant
+   -------------------------
+
+
+     Determinant
+     -----------
+      Name: updet   Spin group: 0   SPO name: updet
+
+      Create a new SPO set updet
+
+     Single particle orbitals (SPO)
+     ------------------------------
+      Name:    Type: LCAO   Builder class name: LCAOrbitalBuilder
+
+WARNING SPOSet object name not given in the input!
+        Using cusp correction.
+Reading cusp info from : ../updet.cuspInfo.xml
+Could not find precomputed cusp data for spo set: updet
+Recalculating data.
+  Number of molecular orbitals to compute correction on this rank: 2
+   Working on MO: 0 Center: 0
+   Working on MO: 1 Center: 0
+Saving resulting cusp Info xml block to: updet.cuspInfo.xml
+WARNING SPOSet object doesn't have a name.
+      Setting delay_rank to default value 1
+      Using rank-1 Sherman-Morrison Fahy update (SM1)
+      Running on CPU.
+
+
+     Determinant
+     -----------
+      Name: downdet   Spin group: 1   SPO name: downdet
+
+      Create a new SPO set downdet
+
+     Single particle orbitals (SPO)
+     ------------------------------
+      Name:    Type: LCAO   Builder class name: LCAOrbitalBuilder
+
+WARNING SPOSet object name not given in the input!
+        Using cusp correction.
+Reading cusp info from : ../downdet.cuspInfo.xml
+Could not find precomputed cusp data for spo set: downdet
+Recalculating data.
+  Number of molecular orbitals to compute correction on this rank: 2
+   Working on MO: 0 Center: 0
+   Working on MO: 1 Center: 0
+Saving resulting cusp Info xml block to: downdet.cuspInfo.xml
+WARNING SPOSet object doesn't have a name.
+      Setting delay_rank to default value 1
+      Using rank-1 Sherman-Morrison Fahy update (SM1)
+      Running on CPU.
+
+
+     Determinant
+     -----------
+      Name: pdet   Spin group: 2   SPO name: pdet
+
+      Create a new SPO set pdet
+
+     Single particle orbitals (SPO)
+     ------------------------------
+      Name:    Type: LCAO   Builder class name: LCAOrbitalBuilder
+
+WARNING SPOSet object name not given in the input!
+        Using cusp correction.
+Reading cusp info from : ../pdet.cuspInfo.xml
+Could not find precomputed cusp data for spo set: pdet
+Recalculating data.
+  Number of molecular orbitals to compute correction on this rank: 2
+   Working on MO: 0 Center: 0
+   Working on MO: 1 Center: 0
+Saving resulting cusp Info xml block to: pdet.cuspInfo.xml
+WARNING SPOSet object doesn't have a name.
+      Setting delay_rank to default value 1
+      Using rank-1 Sherman-Morrison Fahy update (SM1)
+      Running on CPU.
+
+  Added a fermionic WaveFunctionComponent SlaterDet
+
+   Jastrow
+   -------
+    Name: J2   Type: Two-Body   Function: Bspline
+
+    Radial function for species: u - u
+     Number of parameters: 10
+     Cusp: -0.25
+     Cutoff radius: 10
+
+     Name                        Value Type Recompute Use Index
+     ---- ---------------------------- ---- --------- --- -----
+     uu_0                 8.365832e-02    1         1 OFF
+     uu_1                -5.414420e-03    1         1 OFF
+     uu_2                -1.933792e-02    1         1 OFF
+     uu_3                -7.844542e-02    1         1 OFF
+     uu_4                -9.192982e-02    1         1 OFF
+     uu_5                -1.038157e-01    1         1 OFF
+     uu_6                -1.054659e-01    1         1 OFF
+     uu_7                -1.020974e-01    1         1 OFF
+     uu_8                -8.442258e-02    1         1 OFF
+     uu_9                -6.555692e-02    1         1 OFF
+
+    Radial function for species: d - d
+     Number of parameters: 10
+     Cusp: -0.25
+     Cutoff radius: 10
+
+     Name                        Value Type Recompute Use Index
+     ---- ---------------------------- ---- --------- --- -----
+     uu_0                 8.365832e-02    1         1 OFF
+     uu_1                -5.414420e-03    1         1 OFF
+     uu_2                -1.933792e-02    1         1 OFF
+     uu_3                -7.844542e-02    1         1 OFF
+     uu_4                -9.192982e-02    1         1 OFF
+     uu_5                -1.038157e-01    1         1 OFF
+     uu_6                -1.054659e-01    1         1 OFF
+     uu_7                -1.020974e-01    1         1 OFF
+     uu_8                -8.442258e-02    1         1 OFF
+     uu_9                -6.555692e-02    1         1 OFF
+
+    Radial function for species: u - d
+     Number of parameters: 10
+     Cusp: -0.5
+     Cutoff radius: 10
+
+     Name                        Value Type Recompute Use Index
+     ---- ---------------------------- ---- --------- --- -----
+     ud_0                 8.143092e-01    1         1 OFF
+     ud_1                 5.657203e-01    1         1 OFF
+     ud_2                 4.584024e-01    1         1 OFF
+     ud_3                 4.036656e-01    1         1 OFF
+     ud_4                 3.354218e-01    1         1 OFF
+     ud_5                 2.780342e-01    1         1 OFF
+     ud_6                 2.163768e-01    1         1 OFF
+     ud_7                 1.557013e-01    1         1 OFF
+     ud_8                 9.860501e-02    1         1 OFF
+     ud_9                 4.755849e-02    1         1 OFF
+
+    Radial function for species: u - p
+     Number of parameters: 10
+     Cusp: 0.5
+     Cutoff radius: 10
+
+      Name                        Value Type Recompute Use Index
+     ----- ---------------------------- ---- --------- --- -----
+     udp_0                -1.000000e-01    1         1  ON     0
+     udp_1                -1.000000e-01    1         1  ON     1
+     udp_2                -1.000000e-01    1         1  ON     2
+     udp_3                -1.000000e-01    1         1  ON     3
+     udp_4                -1.000000e-01    1         1  ON     4
+     udp_5                -1.000000e-01    1         1  ON     5
+     udp_6                -1.000000e-01    1         1  ON     6
+     udp_7                -1.000000e-01    1         1  ON     7
+     udp_8                -1.000000e-01    1         1  ON     8
+     udp_9                -1.000000e-01    1         1  ON     9
+
+    Radial function for species: d - p
+     Number of parameters: 10
+     Cusp: 0.5
+     Cutoff radius: 10
+
+      Name                        Value Type Recompute Use Index
+     ----- ---------------------------- ---- --------- --- -----
+     udp_0                -1.000000e-01    1         1  ON     0
+     udp_1                -1.000000e-01    1         1  ON     1
+     udp_2                -1.000000e-01    1         1  ON     2
+     udp_3                -1.000000e-01    1         1  ON     3
+     udp_4                -1.000000e-01    1         1  ON     4
+     udp_5                -1.000000e-01    1         1  ON     5
+     udp_6                -1.000000e-01    1         1  ON     6
+     udp_7                -1.000000e-01    1         1  ON     7
+     udp_8                -1.000000e-01    1         1  ON     8
+     udp_9                -1.000000e-01    1         1  ON     9
+
+
+   Jastrow
+   -------
+    Name: J1   Type: One-Body   Function: Bspline
+
+    Radial function for element: Li
+     Number of parameters: 10
+     Cusp: 0
+     Cutoff radius: 10
+
+      Name                        Value Type Recompute Use Index
+     ----- ---------------------------- ---- --------- --- -----
+     eLi_0                -9.714160e-01    1         1 OFF
+     eLi_1                -7.245558e-01    1         1 OFF
+     eLi_2                -7.253807e-01    1         1 OFF
+     eLi_3                -5.366087e-01    1         1 OFF
+     eLi_4                -4.540301e-01    1         1 OFF
+     eLi_5                -3.380905e-01    1         1 OFF
+     eLi_6                -2.482772e-01    1         1 OFF
+     eLi_7                -1.706970e-01    1         1 OFF
+     eLi_8                -8.983456e-02    1         1 OFF
+     eLi_9                -2.293919e-02    1         1 OFF
+
+    Radial function for element: Li
+     Number of parameters: 10
+     Cusp: 0
+     Cutoff radius: 10
+
+      Name                        Value Type Recompute Use Index
+     ----- ---------------------------- ---- --------- --- -----
+     pLi_0                -9.714160e-01    1         1  ON     0
+     pLi_1                -7.245558e-01    1         1  ON     1
+     pLi_2                -7.253807e-01    1         1  ON     2
+     pLi_3                -5.366087e-01    1         1  ON     3
+     pLi_4                -4.540301e-01    1         1  ON     4
+     pLi_5                -3.380905e-01    1         1  ON     5
+     pLi_6                -2.482772e-01    1         1  ON     6
+     pLi_7                -1.706970e-01    1         1  ON     7
+     pLi_8                -8.983456e-02    1         1  ON     8
+     pLi_9                -2.293919e-02    1         1  ON     9
+
+  QMCHamiltonian::addOperator Kinetic to H, physical Hamiltonian 
+
+ Hamiltonian and observables
+ ---------------------------
+  Name: h0
+
+  QMCHamiltonian::addOperator ElecElec to H, physical Hamiltonian 
+QMCHamiltonian::addOperatorType added type coulomb named ElecElec
+  CoulombAA for ion0 is not created.  Number of particles == 1 and nonPeriodic
+  QMCHamiltonian::addOperator IonElec to H, physical Hamiltonian 
+QMCHamiltonian::addOperatorType added type coulomb named IonElec
+
+  QMCHamiltonian::add2WalkerProperty added
+    3 to P::PropertyList 
+    0 to P::Collectables 
+    starting Index of the observables in P::PropertyList = 9
+ParticleSetPool::randomize 1 ParticleSet.
+<init source="ion0" target="e">
+</init>
+  Initialization Execution time = 0.2524 secs
+=========================================================
+ Summary of QMC systems 
+=========================================================
+ParticleSetPool has: 
+
+  ParticleSet 'e' contains 5 particles :  u(2) d(2) p(1)
+
+    u -3.5344872733e-01  1.0771206215e+00 -1.2797581037e+00
+    u -1.1191127506e+00  1.8941304672e+00 -1.0446435552e+00
+    d -1.7750221755e+00 -1.2574269592e+00 -9.9732805055e-01
+    d  1.8280481069e+00 -1.7427449917e+00 -9.7316216202e-01
+    p -9.3194586483e-01 -1.8202932491e+00 -1.3956777642e+00
+
+  Distance table for dissimilar particles (A-B):
+    source: ion0  target: e
+    Using structure-of-arrays (SoA) data layout
+    Distance computations use open boundary conditions in 3D.
+
+  Distance table for similar particles (A-A):
+    source/target: e
+    Using structure-of-arrays (SoA) data layout
+    Distance computations use open boundary conditions in 3D.
+
+
+  ParticleSet 'ion0' contains 1 particles :  Li(1)
+
+    Li  0.0000000000e+00  0.0000000000e+00  0.0000000000e+00
+
+
+  Hamiltonian h0
+  Kinetic         Kinetic energy
+  ElecElec        CoulombAB source=e
+
+  IonElec         CoulombAA source/target ion0
+
+
+
+=========================================================
+  Start VMC
+  File Root Li_wpos.s000 append = no 
+=========================================================
+Resetting walkers
+  Adding 1 walkers to 0 existing sets
+  Total number of walkers: 1.0000000000e+00
+  Total weight: 1.0000000000e+00
+  Resetting Properties of the walkers 1 x 12
+
+<vmc function="put">
+  qmc_counter=0  my_counter=0
+  time step      = 5.0000000000e-01
+  blocks         = 20
+  steps          = 50
+  substeps       = 8
+  current        = 0
+  target samples = 0.0000000000e+00
+  walkers/mpi    = 1
+
+  stepsbetweensamples = 1050
+  SpinMoves      = no
+<parameter name="blocks" condition="int">20</parameter>
+<parameter name="blocks_between_recompute" condition="int">0</parameter>
+<parameter name="check_properties" condition="int">100</parameter>
+<parameter name="checkproperties" condition="int">100</parameter>
+<parameter name="current" condition="int">0</parameter>
+<parameter name="dmcwalkersperthread" condition="real">0.0000000000e+00</parameter>
+<parameter name="maxcpusecs" condition="real">3.6000000000e+05</parameter>
+<parameter name="record_configs" condition="int">0</parameter>
+<parameter name="record_walkers" condition="int">1050</parameter>
+<parameter name="recordconfigs" condition="int">0</parameter>
+<parameter name="recordwalkers" condition="int">1050</parameter>
+<parameter name="rewind" condition="int">0</parameter>
+<parameter name="samples" condition="real">0.0000000000e+00</parameter>
+<parameter name="samplesperthread" condition="real">0.0000000000e+00</parameter>
+<parameter name="spinmass" condition="double">1.0000000000e+00</parameter>
+<parameter name="spinmoves" condition="string">no</parameter>
+<parameter name="steps" condition="int">50</parameter>
+<parameter name="stepsbetweensamples" condition="int">1050</parameter>
+<parameter name="store_configs" condition="int">0</parameter>
+<parameter name="storeconfigs" condition="int">0</parameter>
+<parameter name="sub_steps" condition="int">8</parameter>
+<parameter name="substeps" condition="int">8</parameter>
+<parameter name="tau" condition="au">5.0000000000e-01</parameter>
+<parameter name="time_step" condition="au">5.0000000000e-01</parameter>
+<parameter name="timestep" condition="au">5.0000000000e-01</parameter>
+<parameter name="use_drift" condition="string">no</parameter>
+<parameter name="usedrift" condition="string">no</parameter>
+<parameter name="walkers" condition="int">1</parameter>
+<parameter name="warmup_steps" condition="int">100</parameter>
+<parameter name="warmupsteps" condition="int">100</parameter>
+  DumpConfig==false Nothing (configurations, state) will be saved.
+  Walker Samples are dumped every 1050 steps.
+</vmc>
+  Set drift_modifier UNR parameter a = 1.0000000000e+00
+  Initial partition of walkers 0 1 
+
+  Using Particle by Particle moves
+  Walker moves without drift
+  Total Sample Size   =0
+  Walker distribution on root = 0 1 
+===== Memory Usage after the buffer registration =====
+Available memory on node 0, free + buffers : 5508 MB
+Memory footprint by rank 0 on node 0       : 35 MB
+==================================================
+  Anonymous Buffer size per walker : 17872 Bytes.
+MEMORY increase 0 MB VMC::resetRun
+====================================================
+  SimpleFixedNodeBranch::finalize after a VMC block
+    QMC counter        = 0
+    time step          = 0.5
+    reference energy   = -7.54838
+    reference variance = 0.271197
+====================================================
+  QMC Execution time = 1.0087e-01 secs
+Loop execution max-interations = 4
+BRANCH resetRun
+  Continue with the same input as the previous block.
+ SimpleFixedNodeBranch::resetRun detected changes in <parameter>'s 
+ BranchMode : 0000001100 0000001100
+ iParam (old): 100               1                 0                 0                 1                 1                 1                 0                 
+ iParam (new): 100               1                 0                 0                 1                 1                 1                 0                 
+ vParam (old): 5.0000000000e-01  5.0000000000e-01  -7.5483843771e+00 -7.5483843771e+00 1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  2.7119663334e-01  -7.5483843771e+00 1.0000000000e+00  1.0000000000e+00  1.0000000000e+01  1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  
+ vParam (new): 5.0000000000e-01  5.0000000000e-01  -7.5483843771e+00 -7.5483843771e+00 1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  2.7119663334e-01  -7.5483843771e+00 1.0000000000e+00  1.0000000000e+00  1.0000000000e+01  1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  1.0000000000e+00  
+
+=========================================================
+  Start QMCFixedSampleLinearOptimize
+  File Root Li_wpos.s001 append = no 
+=========================================================
+  Skip QMCDriver::putQMCInfo 
+  Resetting Properties of the walkers 1 x 12
+
+=========================================================
+  Start VMC
+  File Root Li_wpos.s001 append = no 
+=========================================================
+Resetting walkers
+  Using the current 1 walkers.
+  Total number of walkers: 1.0000000000e+00
+  Total weight: 1.0000000000e+00
+  Resetting Properties of the walkers 1 x 12
+
+<vmc function="put">
+  qmc_counter=0  my_counter=0
+  time step      = 5.0000000000e-01
+  blocks         = 20
+  steps          = 800
+  substeps       = 4
+  current        = 0
+  target samples = 1.6000000000e+04
+  walkers/mpi    = 1
+
+  stepsbetweensamples = 1
+  SpinMoves      = no
+<parameter name="blocks" condition="int">20</parameter>
+<parameter name="blocks_between_recompute" condition="int">0</parameter>
+<parameter name="check_properties" condition="int">100</parameter>
+<parameter name="checkproperties" condition="int">100</parameter>
+<parameter name="current" condition="int">0</parameter>
+<parameter name="dmcwalkersperthread" condition="real">1.6000000000e+04</parameter>
+<parameter name="maxcpusecs" condition="real">3.6000000000e+05</parameter>
+<parameter name="record_configs" condition="int">0</parameter>
+<parameter name="record_walkers" condition="int">1</parameter>
+<parameter name="recordconfigs" condition="int">0</parameter>
+<parameter name="recordwalkers" condition="int">1</parameter>
+<parameter name="rewind" condition="int">0</parameter>
+<parameter name="samples" condition="real">1.6000000000e+04</parameter>
+<parameter name="samplesperthread" condition="real">1.6000000000e+04</parameter>
+<parameter name="spinmass" condition="double">1.0000000000e+00</parameter>
+<parameter name="spinmoves" condition="string">no</parameter>
+<parameter name="steps" condition="int">800</parameter>
+<parameter name="stepsbetweensamples" condition="int">1</parameter>
+<parameter name="store_configs" condition="int">0</parameter>
+<parameter name="storeconfigs" condition="int">0</parameter>
+<parameter name="sub_steps" condition="int">4</parameter>
+<parameter name="substeps" condition="int">4</parameter>
+<parameter name="tau" condition="au">5.0000000000e-01</parameter>
+<parameter name="time_step" condition="au">5.0000000000e-01</parameter>
+<parameter name="timestep" condition="au">5.0000000000e-01</parameter>
+<parameter name="use_drift" condition="string">no</parameter>
+<parameter name="usedrift" condition="string">no</parameter>
+<parameter name="walkers" condition="int">1</parameter>
+<parameter name="warmup_steps" condition="int">100</parameter>
+<parameter name="warmupsteps" condition="int">100</parameter>
+  DumpConfig==false Nothing (configurations, state) will be saved.
+  Walker Samples are dumped every 1 steps.
+</vmc>
+    Restarting, cummulative properties:
+      energy     = -7.5483843771e+00
+      variance   = 0.0000000000e+00
+      r2accepted = 1.0000000000e-10
+      r2proposed = 1.0000000000e-10
+  Set drift_modifier UNR parameter a = 1.0000000000e+00
+ Using QMCCostFunction::QMCCostFunction
+ Using Default Cost Function: Cost = <|E-E_ff|^2>
+  Set drift_modifier UNR parameter a = 1.0000000000e+00
+  EstimatorManagerBase::add replace LocalEnergy estimator.
+<optimization-report>
+<vmc stage="main" blocks="20">
+  Cannot make clones again. Use existing 1 clones
+  Initial partition of walkers 0 1 
+
+  Using Particle by Particle moves
+  Walker moves without drift
+  Total Sample Size   =16000
+  Walker distribution on root = 0 1 
+===== Memory Usage after the buffer registration =====
+Available memory on node 0, free + buffers : 5508 MB
+Memory footprint by rank 0 on node 0       : 36 MB
+==================================================
+  Anonymous Buffer size per walker : 17872 Bytes.
+MEMORY increase 0 MB VMC::resetRun
+====================================================
+  SimpleFixedNodeBranch::finalize after a VMC block
+    QMC counter        = 1
+    time step          = 0.5
+    reference energy   = -7.57419
+    reference variance = 0.293019
+====================================================
+  Execution time = 8.7253e-01
+</vmc>
+<opt stage="setup">
+  <log>
+   Reading configurations from h5FileRoot Li_wpos.s001
+  QMCCostFunction is created with 1 threads.
+  Using Nonlocal PP in Opt: no
+   Number of samples loaded to each thread : 16000 
+  VMC Eavg = -7.5742e+00
+  VMC Evar = 2.9302e-01
+  Total weights = 1.6000e+04
+  Execution time = 3.9953e-01
+  </log>
+</opt>
+<opt stage="main" walkers="16000">
+  <log>
+
+*****************************************
+Building overlap and Hamiltonian matrices
+*****************************************
+
+Among totally 20 optimized parameters, largest LM parameter change : 4.8350e-02 at parameter 12
+
+******************************************************************************
+Init Cost =  -6.7875e+00    New Cost =  -6.7881e+00  Delta Cost =  -6.4628e-04
+******************************************************************************
+
+The new set of parameters is valid. Updating the trial wave function!
+
+*****************************************************************************
+Applying the update for shift_i =   1.0000e-02     and shift_s =   2.5000e-01
+*****************************************************************************
+  Execution time = 1.3800e-01
+  </log>
+  <optVariables href="Li_wpos.s001.opt.xml">
+udp_0                -1.000000e-01 1 1  ON 0
+udp_1                -1.000000e-01 1 1  ON 1
+udp_2                -1.000000e-01 1 1  ON 2
+udp_3                -1.000000e-01 1 1  ON 3
+udp_4                -1.000000e-01 1 1  ON 4
+udp_5                -1.000000e-01 1 1  ON 5
+udp_6                -1.000000e-01 1 1  ON 6
+udp_7                -1.000000e-01 1 1  ON 7
+udp_8                -1.000000e-01 1 1  ON 8
+udp_9                -1.000000e-01 1 1  ON 9
+pLi_0                -9.273561e-01 1 1  ON 10
+pLi_1                -6.785009e-01 1 1  ON 11
+pLi_2                -6.770308e-01 1 1  ON 12
+pLi_3                -5.030341e-01 1 1  ON 13
+pLi_4                -4.216348e-01 1 1  ON 14
+pLi_5                -3.071174e-01 1 1  ON 15
+pLi_6                -2.144419e-01 1 1  ON 16
+pLi_7                -1.348613e-01 1 1  ON 17
+pLi_8                -6.894737e-02 1 1  ON 18
+pLi_9                 5.659977e-04 1 1  ON 19
+  </optVariables>
+   Restore the number of walkers to 1, removing 0 walkers.
+</opt>
+</optimization-report>
+  QMC Execution time = 1.41 secs
+
+=========================================================
+  Start QMCFixedSampleLinearOptimize
+  File Root Li_wpos.s002 append = no 
+=========================================================
+  Skip QMCDriver::putQMCInfo 
+  Resetting Properties of the walkers 1 x 12
+
+=========================================================
+  Start VMC
+  File Root Li_wpos.s002 append = no 
+=========================================================
+Using existing walkers 
+  Resetting Properties of the walkers 1 x 12
+
+<vmc function="put">
+  qmc_counter=1  my_counter=0
+  time step      = 0.5
+  blocks         = 20
+  steps          = 800
+  substeps       = 4
+  current        = 0
+  target samples = 1.6e+04
+  walkers/mpi    = 1
+
+  stepsbetweensamples = 1
+  SpinMoves      = no
+<parameter name="blocks" condition="int">20</parameter>
+<parameter name="blocks_between_recompute" condition="int">0</parameter>
+<parameter name="check_properties" condition="int">100</parameter>
+<parameter name="checkproperties" condition="int">100</parameter>
+<parameter name="current" condition="int">0</parameter>
+<parameter name="dmcwalkersperthread" condition="real">1.6e+04</parameter>
+<parameter name="maxcpusecs" condition="real">3.6e+05</parameter>
+<parameter name="record_configs" condition="int">0</parameter>
+<parameter name="record_walkers" condition="int">1</parameter>
+<parameter name="recordconfigs" condition="int">0</parameter>
+<parameter name="recordwalkers" condition="int">1</parameter>
+<parameter name="rewind" condition="int">0</parameter>
+<parameter name="samples" condition="real">1.6e+04</parameter>
+<parameter name="samplesperthread" condition="real">1.6e+04</parameter>
+<parameter name="spinmass" condition="double">1</parameter>
+<parameter name="spinmoves" condition="string">no</parameter>
+<parameter name="steps" condition="int">800</parameter>
+<parameter name="stepsbetweensamples" condition="int">1</parameter>
+<parameter name="store_configs" condition="int">0</parameter>
+<parameter name="storeconfigs" condition="int">0</parameter>
+<parameter name="sub_steps" condition="int">4</parameter>
+<parameter name="substeps" condition="int">4</parameter>
+<parameter name="tau" condition="au">0.5</parameter>
+<parameter name="time_step" condition="au">0.5</parameter>
+<parameter name="timestep" condition="au">0.5</parameter>
+<parameter name="use_drift" condition="string">no</parameter>
+<parameter name="usedrift" condition="string">no</parameter>
+<parameter name="walkers" condition="int">1</parameter>
+<parameter name="warmup_steps" condition="int">100</parameter>
+<parameter name="warmupsteps" condition="int">100</parameter>
+  DumpConfig==false Nothing (configurations, state) will be saved.
+  Walker Samples are dumped every 1 steps.
+</vmc>
+    Restarting, cummulative properties:
+      energy     = -7.561
+      variance   = 0
+      r2accepted = 1e-10
+      r2proposed = 1e-10
+  Set drift_modifier UNR parameter a = 1
+ Using QMCCostFunction::QMCCostFunction
+ Using Default Cost Function: Cost = <|E-E_ff|^2>
+  Set drift_modifier UNR parameter a = 1.0000e+00
+  EstimatorManagerBase::add replace LocalEnergy estimator.
+<optimization-report>
+<vmc stage="main" blocks="20">
+  Cannot make clones again. Use existing 1 clones
+  Initial partition of walkers 0 1 
+
+  Using Particle by Particle moves
+  Walker moves without drift
+  Total Sample Size   =16000
+  Walker distribution on root = 0 1 
+===== Memory Usage after the buffer registration =====
+Available memory on node 0, free + buffers : 5493 MB
+Memory footprint by rank 0 on node 0       : 65 MB
+==================================================
+  Anonymous Buffer size per walker : 17872 Bytes.
+MEMORY increase 0 MB VMC::resetRun
+====================================================
+  SimpleFixedNodeBranch::finalize after a VMC block
+    QMC counter        = 2
+    time step          = 0.5
+    reference energy   = -7.56779
+    reference variance = 0.272551
+====================================================
+  Execution time = 8.6851e-01
+</vmc>
+<opt stage="setup">
+  <log>
+   Reading configurations from h5FileRoot Li_wpos.s002
+  QMCCostFunction is created with 1 threads.
+  Using Nonlocal PP in Opt: no
+   Number of samples loaded to each thread : 16000 
+  VMC Eavg = -7.5678e+00
+  VMC Evar = 2.7255e-01
+  Total weights = 1.6000e+04
+  Execution time = 3.6192e-01
+  </log>
+</opt>
+<opt stage="main" walkers="16000">
+  <log>
+
+*****************************************
+Building overlap and Hamiltonian matrices
+*****************************************
+
+Among totally 20 optimized parameters, largest LM parameter change : 3.7824e-02 at parameter 19
+
+******************************************************************************
+Init Cost =  -6.7838e+00    New Cost =  -6.7840e+00  Delta Cost =  -2.0788e-04
+******************************************************************************
+
+The new set of parameters is valid. Updating the trial wave function!
+
+*****************************************************************************
+Applying the update for shift_i =   1.0000e-02     and shift_s =   6.2500e-02
+*****************************************************************************
+  Execution time = 1.2070e-01
+  </log>
+  <optVariables href="Li_wpos.s002.opt.xml">
+udp_0                -1.000000e-01 1 1  ON 0
+udp_1                -1.000000e-01 1 1  ON 1
+udp_2                -1.000000e-01 1 1  ON 2
+udp_3                -1.000000e-01 1 1  ON 3
+udp_4                -1.000000e-01 1 1  ON 4
+udp_5                -1.000000e-01 1 1  ON 5
+udp_6                -1.000000e-01 1 1  ON 6
+udp_7                -1.000000e-01 1 1  ON 7
+udp_8                -1.000000e-01 1 1  ON 8
+udp_9                -1.000000e-01 1 1  ON 9
+pLi_0                -9.177838e-01 1 1  ON 10
+pLi_1                -6.756740e-01 1 1  ON 11
+pLi_2                -6.543948e-01 1 1  ON 12
+pLi_3                -4.896140e-01 1 1  ON 13
+pLi_4                -4.101410e-01 1 1  ON 14
+pLi_5                -2.857377e-01 1 1  ON 15
+pLi_6                -1.940563e-01 1 1  ON 16
+pLi_7                -1.118041e-01 1 1  ON 17
+pLi_8                -5.652377e-02 1 1  ON 18
+pLi_9                -3.725838e-02 1 1  ON 19
+  </optVariables>
+   Restore the number of walkers to 1, removing 0 walkers.
+</opt>
+</optimization-report>
+  QMC Execution time = 1.352 secs
+
+=========================================================
+  Start QMCFixedSampleLinearOptimize
+  File Root Li_wpos.s003 append = no 
+=========================================================
+  Skip QMCDriver::putQMCInfo 
+  Resetting Properties of the walkers 1 x 12
+
+=========================================================
+  Start VMC
+  File Root Li_wpos.s003 append = no 
+=========================================================
+Using existing walkers 
+  Resetting Properties of the walkers 1 x 12
+
+<vmc function="put">
+  qmc_counter=2  my_counter=0
+  time step      = 0.5
+  blocks         = 20
+  steps          = 800
+  substeps       = 4
+  current        = 0
+  target samples = 1.6e+04
+  walkers/mpi    = 1
+
+  stepsbetweensamples = 1
+  SpinMoves      = no
+<parameter name="blocks" condition="int">20</parameter>
+<parameter name="blocks_between_recompute" condition="int">0</parameter>
+<parameter name="check_properties" condition="int">100</parameter>
+<parameter name="checkproperties" condition="int">100</parameter>
+<parameter name="current" condition="int">0</parameter>
+<parameter name="dmcwalkersperthread" condition="real">1.6e+04</parameter>
+<parameter name="maxcpusecs" condition="real">3.6e+05</parameter>
+<parameter name="record_configs" condition="int">0</parameter>
+<parameter name="record_walkers" condition="int">1</parameter>
+<parameter name="recordconfigs" condition="int">0</parameter>
+<parameter name="recordwalkers" condition="int">1</parameter>
+<parameter name="rewind" condition="int">0</parameter>
+<parameter name="samples" condition="real">1.6e+04</parameter>
+<parameter name="samplesperthread" condition="real">1.6e+04</parameter>
+<parameter name="spinmass" condition="double">1</parameter>
+<parameter name="spinmoves" condition="string">no</parameter>
+<parameter name="steps" condition="int">800</parameter>
+<parameter name="stepsbetweensamples" condition="int">1</parameter>
+<parameter name="store_configs" condition="int">0</parameter>
+<parameter name="storeconfigs" condition="int">0</parameter>
+<parameter name="sub_steps" condition="int">4</parameter>
+<parameter name="substeps" condition="int">4</parameter>
+<parameter name="tau" condition="au">0.5</parameter>
+<parameter name="time_step" condition="au">0.5</parameter>
+<parameter name="timestep" condition="au">0.5</parameter>
+<parameter name="use_drift" condition="string">no</parameter>
+<parameter name="usedrift" condition="string">no</parameter>
+<parameter name="walkers" condition="int">1</parameter>
+<parameter name="warmup_steps" condition="int">100</parameter>
+<parameter name="warmupsteps" condition="int">100</parameter>
+  DumpConfig==false Nothing (configurations, state) will be saved.
+  Walker Samples are dumped every 1 steps.
+</vmc>
+    Restarting, cummulative properties:
+      energy     = -7.563
+      variance   = 0
+      r2accepted = 1e-10
+      r2proposed = 1e-10
+  Set drift_modifier UNR parameter a = 1
+ Using QMCCostFunction::QMCCostFunction
+ Using Default Cost Function: Cost = <|E-E_ff|^2>
+  Set drift_modifier UNR parameter a = 1.0000e+00
+  EstimatorManagerBase::add replace LocalEnergy estimator.
+<optimization-report>
+<vmc stage="main" blocks="20">
+  Cannot make clones again. Use existing 1 clones
+  Initial partition of walkers 0 1 
+
+  Using Particle by Particle moves
+  Walker moves without drift
+  Total Sample Size   =16000
+  Walker distribution on root = 0 1 
+===== Memory Usage after the buffer registration =====
+Available memory on node 0, free + buffers : 5488 MB
+Memory footprint by rank 0 on node 0       : 66 MB
+==================================================
+  Anonymous Buffer size per walker : 17872 Bytes.
+MEMORY increase 0 MB VMC::resetRun
+====================================================
+  SimpleFixedNodeBranch::finalize after a VMC block
+    QMC counter        = 3
+    time step          = 0.5
+    reference energy   = -7.58652
+    reference variance = 0.290666
+====================================================
+  Execution time = 8.6417e-01
+</vmc>
+<opt stage="setup">
+  <log>
+   Reading configurations from h5FileRoot Li_wpos.s003
+  QMCCostFunction is created with 1 threads.
+  Using Nonlocal PP in Opt: no
+   Number of samples loaded to each thread : 16000 
+  VMC Eavg = -7.5865e+00
+  VMC Evar = 2.9067e-01
+  Total weights = 1.6000e+04
+  Execution time = 3.5874e-01
+  </log>
+</opt>
+<opt stage="main" walkers="16000">
+  <log>
+
+*****************************************
+Building overlap and Hamiltonian matrices
+*****************************************
+
+Among totally 20 optimized parameters, largest LM parameter change : 3.0402e-02 at parameter 18
+
+******************************************************************************
+Init Cost =  -6.7988e+00    New Cost =  -6.7997e+00  Delta Cost =  -9.1328e-04
+******************************************************************************
+
+The new set of parameters is valid. Updating the trial wave function!
+
+*****************************************************************************
+Applying the update for shift_i =   1.0000e-02     and shift_s =   1.5625e-02
+*****************************************************************************
+  Execution time = 1.1972e-01
+  </log>
+  <optVariables href="Li_wpos.s003.opt.xml">
+udp_0                -1.000000e-01 1 1  ON 0
+udp_1                -1.000000e-01 1 1  ON 1
+udp_2                -1.000000e-01 1 1  ON 2
+udp_3                -1.000000e-01 1 1  ON 3
+udp_4                -1.000000e-01 1 1  ON 4
+udp_5                -1.000000e-01 1 1  ON 5
+udp_6                -1.000000e-01 1 1  ON 6
+udp_7                -1.000000e-01 1 1  ON 7
+udp_8                -1.000000e-01 1 1  ON 8
+udp_9                -1.000000e-01 1 1  ON 9
+pLi_0                -9.273491e-01 1 1  ON 10
+pLi_1                -6.713018e-01 1 1  ON 11
+pLi_2                -6.814041e-01 1 1  ON 12
+pLi_3                -5.142694e-01 1 1  ON 13
+pLi_4                -4.112722e-01 1 1  ON 14
+pLi_5                -2.728790e-01 1 1  ON 15
+pLi_6                -1.800345e-01 1 1  ON 16
+pLi_7                -8.522617e-02 1 1  ON 17
+pLi_8                -2.612168e-02 1 1  ON 18
+pLi_9                -1.643453e-02 1 1  ON 19
+  </optVariables>
+   Restore the number of walkers to 1, removing 0 walkers.
+</opt>
+</optimization-report>
+  QMC Execution time = 1.343 secs
+
+=========================================================
+  Start QMCFixedSampleLinearOptimize
+  File Root Li_wpos.s004 append = no 
+=========================================================
+  Skip QMCDriver::putQMCInfo 
+  Resetting Properties of the walkers 1 x 12
+
+=========================================================
+  Start VMC
+  File Root Li_wpos.s004 append = no 
+=========================================================
+Using existing walkers 
+  Resetting Properties of the walkers 1 x 12
+
+<vmc function="put">
+  qmc_counter=3  my_counter=0
+  time step      = 0.5
+  blocks         = 20
+  steps          = 800
+  substeps       = 4
+  current        = 0
+  target samples = 1.6e+04
+  walkers/mpi    = 1
+
+  stepsbetweensamples = 1
+  SpinMoves      = no
+<parameter name="blocks" condition="int">20</parameter>
+<parameter name="blocks_between_recompute" condition="int">0</parameter>
+<parameter name="check_properties" condition="int">100</parameter>
+<parameter name="checkproperties" condition="int">100</parameter>
+<parameter name="current" condition="int">0</parameter>
+<parameter name="dmcwalkersperthread" condition="real">1.6e+04</parameter>
+<parameter name="maxcpusecs" condition="real">3.6e+05</parameter>
+<parameter name="record_configs" condition="int">0</parameter>
+<parameter name="record_walkers" condition="int">1</parameter>
+<parameter name="recordconfigs" condition="int">0</parameter>
+<parameter name="recordwalkers" condition="int">1</parameter>
+<parameter name="rewind" condition="int">0</parameter>
+<parameter name="samples" condition="real">1.6e+04</parameter>
+<parameter name="samplesperthread" condition="real">1.6e+04</parameter>
+<parameter name="spinmass" condition="double">1</parameter>
+<parameter name="spinmoves" condition="string">no</parameter>
+<parameter name="steps" condition="int">800</parameter>
+<parameter name="stepsbetweensamples" condition="int">1</parameter>
+<parameter name="store_configs" condition="int">0</parameter>
+<parameter name="storeconfigs" condition="int">0</parameter>
+<parameter name="sub_steps" condition="int">4</parameter>
+<parameter name="substeps" condition="int">4</parameter>
+<parameter name="tau" condition="au">0.5</parameter>
+<parameter name="time_step" condition="au">0.5</parameter>
+<parameter name="timestep" condition="au">0.5</parameter>
+<parameter name="use_drift" condition="string">no</parameter>
+<parameter name="usedrift" condition="string">no</parameter>
+<parameter name="walkers" condition="int">1</parameter>
+<parameter name="warmup_steps" condition="int">100</parameter>
+<parameter name="warmupsteps" condition="int">100</parameter>
+  DumpConfig==false Nothing (configurations, state) will be saved.
+  Walker Samples are dumped every 1 steps.
+</vmc>
+    Restarting, cummulative properties:
+      energy     = -7.569
+      variance   = 0
+      r2accepted = 1e-10
+      r2proposed = 1e-10
+  Set drift_modifier UNR parameter a = 1
+ Using QMCCostFunction::QMCCostFunction
+ Using Default Cost Function: Cost = <|E-E_ff|^2>
+  Set drift_modifier UNR parameter a = 1.0000e+00
+  EstimatorManagerBase::add replace LocalEnergy estimator.
+<optimization-report>
+<vmc stage="main" blocks="20">
+  Cannot make clones again. Use existing 1 clones
+  Initial partition of walkers 0 1 
+
+  Using Particle by Particle moves
+  Walker moves without drift
+  Total Sample Size   =16000
+  Walker distribution on root = 0 1 
+===== Memory Usage after the buffer registration =====
+Available memory on node 0, free + buffers : 5455 MB
+Memory footprint by rank 0 on node 0       : 66 MB
+==================================================
+  Anonymous Buffer size per walker : 17872 Bytes.
+MEMORY increase 0 MB VMC::resetRun
+====================================================
+  SimpleFixedNodeBranch::finalize after a VMC block
+    QMC counter        = 4
+    time step          = 0.5
+    reference energy   = -7.57967
+    reference variance = 0.286132
+====================================================
+  Execution time = 8.6198e-01
+</vmc>
+<opt stage="setup">
+  <log>
+   Reading configurations from h5FileRoot Li_wpos.s004
+  QMCCostFunction is created with 1 threads.
+  Using Nonlocal PP in Opt: no
+   Number of samples loaded to each thread : 16000 
+  VMC Eavg = -7.5797e+00
+  VMC Evar = 2.8613e-01
+  Total weights = 1.6000e+04
+  Execution time = 3.6092e-01
+  </log>
+</opt>
+<opt stage="main" walkers="16000">
+  <log>
+
+*****************************************
+Building overlap and Hamiltonian matrices
+*****************************************
+
+Among totally 20 optimized parameters, largest LM parameter change : 2.1316e-02 at parameter 12
+
+******************************************************************************
+Init Cost =  -6.7931e+00    New Cost =  -6.7931e+00  Delta Cost =   1.7778e-05
+******************************************************************************
+
+The new set of parameters is valid. Updating the trial wave function!
+
+*****************************************************************************
+Applying the update for shift_i =   1.0000e-02     and shift_s =   3.9062e-03
+*****************************************************************************
+  Execution time = 1.1904e-01
+  </log>
+  <optVariables href="Li_wpos.s004.opt.xml">
+udp_0                -1.000000e-01 1 1  ON 0
+udp_1                -1.000000e-01 1 1  ON 1
+udp_2                -1.000000e-01 1 1  ON 2
+udp_3                -1.000000e-01 1 1  ON 3
+udp_4                -1.000000e-01 1 1  ON 4
+udp_5                -1.000000e-01 1 1  ON 5
+udp_6                -1.000000e-01 1 1  ON 6
+udp_7                -1.000000e-01 1 1  ON 7
+udp_8                -1.000000e-01 1 1  ON 8
+udp_9                -1.000000e-01 1 1  ON 9
+pLi_0                -9.168578e-01 1 1  ON 10
+pLi_1                -6.665335e-01 1 1  ON 11
+pLi_2                -6.600878e-01 1 1  ON 12
+pLi_3                -5.044035e-01 1 1  ON 13
+pLi_4                -4.012242e-01 1 1  ON 14
+pLi_5                -2.767087e-01 1 1  ON 15
+pLi_6                -1.762212e-01 1 1  ON 16
+pLi_7                -8.942629e-02 1 1  ON 17
+pLi_8                -3.674834e-02 1 1  ON 18
+pLi_9                -1.804638e-02 1 1  ON 19
+  </optVariables>
+   Restore the number of walkers to 1, removing 0 walkers.
+</opt>
+</optimization-report>
+  QMC Execution time = 1.342 secs
+  Total Execution time = 5.561 secs
+
+=========================================================
+  A new xml input file : Li_wpos.s004.cont.xml
+
+Use --enable-timers=<value> command line option to increase or decrease level of timing information
+Stack timer profile
+Timer                           Inclusive_time  Exclusive_time  Calls       Time_per_call
+Total                              5.8138     0.0132              1       5.813846916
+  QMCFixedSampleLinearOptimize     5.4473     5.4473              4       1.361818605
+  Startup                          0.2525     0.2525              1       0.252493581
+  VMC                              0.1009     0.1009              1       0.100862166

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<qmcsystem>
+  <wavefunction name="psi0" target="e">
+    <determinantset type="MolecularOrbital" name="LCAOBSet" source="ion0" transform="yes" cuspCorrection="yes" href="Li_wopos.h5">
+      <slaterdeterminant>
+        <determinant id="updet" size="2" cuspInfo="../updet.cuspInfo.xml">
+          <occupation mode="ground"/>
+          <coefficient size="16" spindataset="0"/>
+        </determinant>
+        <determinant id="downdet" size="2" cuspInfo="../downdet.cuspInfo.xml">
+          <occupation mode="ground"/>
+          <coefficient size="16" spindataset="0"/>
+        </determinant>
+      </slaterdeterminant>
+    </determinantset>
+    <jastrow name="J2" type="Two-Body" function="Bspline" print="yes">
+      <correlation rcut="10" size="10" speciesA="u" speciesB="u">
+        <coefficients id="uu" type="Array"> 0.1030063325 0.03441193634 0.02205961175 -0.03411125634 -0.04727550305 -0.06193273159 -0.06958157651 -0.06908206938 -0.05678868384 -0.03808623299</coefficients>
+      </correlation>
+      <correlation rcut="10" size="10" speciesA="u" speciesB="d">
+        <coefficients id="ud" type="Array"> 0.8576670407 0.6133645718 0.5047784634 0.4493726823 0.3771902773 0.3166072604 0.2502626619 0.1840886808 0.1185909449 0.06721350436</coefficients>
+      </correlation>
+    </jastrow>
+    <jastrow name="J1" type="One-Body" function="Bspline" source="ion0" print="yes">
+      <correlation rcut="10" size="10" cusp="0" elementType="Li">
+        <coefficients id="eLi" type="Array"> -0.9279127715 -0.678397246 -0.6822774261 -0.4898567522 -0.4081916441 -0.2932404663 -0.1944557428 -0.1082655351 -0.04727641971 -0.01184885379</coefficients>
+      </correlation>
+    </jastrow>
+  </wavefunction>
+</qmcsystem>
