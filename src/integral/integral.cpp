@@ -231,23 +231,29 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
     // loop over unique shell pairs, {s1,s2} such that s1 >= s2
     // this is due to the permutational symmetry of the real integrals over
     // Hermitian operators: (1|2) = (2|1)
-    for (auto s1 = 0l; s1 != shells.size(); ++s1) {
+    for (auto s1 = 0l; s1 < shells.size(); ++s1) {
       auto bf1 = shell2bf[s1]; // first basis function in this shell
       auto n1 = shells[s1].size();
       auto s1_offset = s1 * (s1 + 1) / 2;
-      for (auto s2 = s1; s2 != shells.size(); ++s2) {
+      for (auto s2 = s1; s2 < shells.size(); ++s2) {
       Polyquant_cout("OK");
         auto bf2 = shell2bf[s2];
       Polyquant_cout("OK");
         auto n2 = shells[s2].size();
       Polyquant_cout("OK");
-        auto s12 = s1_offset + s2;
+        auto s12 = s1_offset + s2+1;
+      Polyquant_cout("OK");
+        Polyquant_cout("s12: " + std::to_string(s12));
+        Polyquant_cout(     " thread_id: " + std::to_string(thread_id));
+        Polyquant_cout(" s12%thread_id: " + std::to_string(s12 % (thread_id+1)));
+        Polyquant_cout(" s1: " + std::to_string(s1));
+        Polyquant_cout(" s2: " + std::to_string(s2));
         Polyquant_cout("s12: " + std::to_string(s12) +
                        " thread_id: " + std::to_string(thread_id) +
-                       " s12%thread_id: " + std::to_string(s12 % thread_id) +
+                       " s12%thread_id: " + std::to_string(s12 % (thread_id+1)) +
                        " s1: " + std::to_string(s1) +
                        " s2: " + std::to_string(s2));
-        if (s12 % nthreads != thread_id) {
+        if (s12 % nthreads != (thread_id+1)) {
           continue;
         }
         std::string message = "OK on " + std::to_string(thread_id);
