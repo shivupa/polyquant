@@ -129,35 +129,47 @@ void Polyquant_dump_hdf5_for_QMCPACK(
   Polyquant_cout("dumping MOs");
   auto super_twist_group = root_group.create_group("Super_Twist");
   {
-    // write alpha orbital energies
-    auto E_orb_alpha_dataset = super_twist_group.create_dataset(
-        "eigenval_0", datatype::create<std::vector<double>>(),
-        hdf5::dataspace::Simple({1, E_orb[0].size()}));
-    E_orb_alpha_dataset.write(E_orb[0]);
-    // write alpha orbital coeffs
-    std::vector<double> flattened_mo_alpha_coeff;
-    for (auto i = 0ul; i < num_ao; i++) {
-      for (auto j = 0ul; j < num_mo; j++) {
-        flattened_mo_alpha_coeff.push_back(mo_coeff[0](j, i));
+    auto Spin_dataset_offset = 0;
+    for (auto idx = 0ul; idx < E_orb.size(); idx++) {
+      if (E_orb[idx].size() == 1) {
+        std::stringstream buffer;
+        buffer << "Spin dataset " << Spin_dataset_offset + 0 << " "
+               << "corresponds to " << quantum_part_names[idx]
+               << " alpha and beta particles (restricted calculation)."
+               << std::endl;
+        Polyquant_cout(buffer.str());
+      } else if (E_orb[idx].size() == 2) {
+        std::stringstream buffer;
+        buffer << "Spin dataset " << Spin_dataset_offset + 0 << " "
+               << "corresponds to " << quantum_part_names[idx]
+               << " alpha particles (unrestricted calculation)." << std::endl;
+        buffer << "Spin dataset " << Spin_dataset_offset + 1 << " "
+               << "corresponds to " << quantum_part_names[idx]
+               << " beta particles (unrestricted calculation)." << std::endl;
+        Polyquant_cout(buffer.str());
       }
       Spin_dataset_offset += 2;
     }
-    auto mo_alpha_coeff_dataset = super_twist_group.create_dataset(
-        "eigenset_0", datatype::create<std::vector<double>>(),
-        hdf5::dataspace::Simple({num_ao, num_mo}));
-    mo_alpha_coeff_dataset.write(flattened_mo_alpha_coeff);
-
-    if (!restricted && num_part_total > 1) {
-      // write beta orbital energies
-      auto E_orb_beta_dataset = super_twist_group.create_dataset(
-          "eigenval_1", datatype::create<std::vector<double>>(),
-          hdf5::dataspace::Simple({1, E_orb[1].size()}));
-      E_orb_beta_dataset.write(E_orb[1]);
-      // write beta orbital coeffs
-      std::vector<double> flattened_mo_beta_coeff;
-      for (auto i = 0ul; i < num_ao; i++) {
-        for (auto j = 0ul; j < num_mo; j++) {
-          flattened_mo_beta_coeff.push_back(mo_coeff[1](j, i));
+    // write orbital energies
+    Spin_dataset_offset = 0;
+    for (auto part_idx = 0ul; part_idx < E_orb.size(); part_idx++) {
+      for (auto spin_idx = 0ul; spin_idx < E_orb[part_idx].size(); spin_idx++) {
+        std::string tag =
+            "eigenval_" + std::to_string(Spin_dataset_offset + spin_idx);
+        std::vector<double> orbital_energies(
+            E_orb[part_idx][spin_idx].data(),
+            E_orb[part_idx][spin_idx].data() +
+                E_orb[part_idx][spin_idx].size());
+        auto E_orb_dataset = super_twist_group.create_dataset(
+            tag, datatype::create<std::vector<double>>(),
+            hdf5::dataspace::Simple({1, orbital_energies.size()}));
+        E_orb_dataset.write(orbital_energies);
+        // write orbital coeffs
+        std::vector<double> flattened_mo_coeff;
+        for (auto i = 0ul; i < num_ao; i++) {
+          for (auto j = 0ul; j < num_mo; j++) {
+            flattened_mo_coeff.push_back(mo_coeff[part_idx][spin_idx](j, i));
+          }
         }
         tag = "eigenset_" + std::to_string(Spin_dataset_offset + spin_idx);
         auto mo_coeff_dataset = super_twist_group.create_dataset(

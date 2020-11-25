@@ -195,6 +195,9 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
     const libint2::BasisSet &shells, libint2::Operator obtype,
     const std::vector<libint2::Atom> &atoms) {
+    omp_lock_t writelock;
+
+omp_init_lock(&writelock);
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -204,20 +207,19 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
       std::string message =
           "Computing on " + std::to_string(nthreads) + " threads.";
       Polyquant_cout(message);
+    }
       // construct the one body integrals engine
       engines.resize(nthreads);
-      engines[0] =
-          libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
+      engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
       // nuclear attraction ints engine needs to know where the charges sit
       // the nuclei are charges in this case; in QM/MM there will also be
       // classical charges
       if (obtype == libint2::Operator::nuclear) {
         engines[0].set_params(libint2::make_point_charges(atoms));
       }
-      for (auto i = 0ul; i++; i < nthreads) {
+      for (auto i = 1ul; i < nthreads; i++) {
         engines[i] = engines[0];
       }
-    }
     auto shell2bf = shells.shell2bf();
 
     // buf[0] points to the target shell set after every call to
@@ -230,33 +232,42 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
       auto bf1 = shell2bf[s1]; // first basis function in this shell
       auto n1 = shells[s1].size();
       auto s1_offset = s1 * (s1 + 1) / 2;
-      for (libint2::BasisSet::size_type s2 = s1; s2 != shells.size(); ++s2) {
+      for (auto s2 = s1; s2 != shells.size(); ++s2) {
         auto bf2 = shell2bf[s2];
         auto n2 = shells[s2].size();
         auto s12 = s1_offset + s2;
-        if (s12 % nthreads != thread_id)
+        Polyquant_cout("s12: " + std::to_string(s12) + " thread_id: " + std::to_string(thread_id) + " s12%thread_id: " + std::to_string(s12%thread_id)+" s1: " + std::to_string(s1) + " s2: " + std::to_string(s2));
+        if (s12 % nthreads != thread_id){
           continue;
-      std::string message =
-          "OK on " + std::to_string(thread_id);
+        }
+        std::string message = "OK on " + std::to_string(thread_id);
         Polyquant_cout(message);
+        Polyquant_cout(engines.size());
+        Polyquant_cout(shells[s1]);
+        Polyquant_cout(shells[s2]);
 
         // Todo use symmetry
         // compute shell pair
         engines[thread_id].compute(shells[s1], shells[s2]);
+        Polyquant_cout(message);
         const auto *buf_12 = buf[0];
         // Write values to the matrix
         if (buf_12 == nullptr) {
           continue; // if all integrals screened out, skip to next pair
         }
+        omp_set_lock(&writelock);
         for (size_t f1 = 0, f12 = 0; f1 != n1; ++f1) {
           for (size_t f2 = 0; f2 != n2; ++f2, ++f12) {
             output_matrix(bf1 + f1, bf2 + f2) = buf_12[f12];
             output_matrix(bf2 + f2, bf1 + f1) = buf_12[f12];
           }
         }
+        omp_unset_lock(&writelock);
       }
     }
   }
+  
+omp_destroy_lock(&writelock);
   // auto computed_shell = xt::view(output_matrix, xt::range(bf1, bf1 + n1),
   //                                xt::range(bf2, bf2 + n2));
   // std::vector<std::size_t> shape = {n1, n2};
