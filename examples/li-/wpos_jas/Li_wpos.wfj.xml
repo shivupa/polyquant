@@ -28,10 +28,10 @@
         <coefficients id="ud" type="Array" optimize="no"> 0.8143091996 0.5657202676 0.4584023897 0.4036656226 0.3354218381 0.2780341943 0.2163767884 0.1557012826 0.09860500785 0.04755848853</coefficients>
       </correlation>
       <correlation rcut="10" size="10" speciesA="u" speciesB="p">
-          <coefficients id="udp" type="Array" optimize="yes"> -0.1 -0.1 -0.1 -0.1 -0.1  -0.1 -0.1 -0.1 -0.1 -0.1 </coefficients>
+          <coefficients id="up" type="Array" optimize="yes"> -0.1 -0.1 -0.1 -0.1 -0.1  -0.1 -0.1 -0.1 -0.1 -0.1 </coefficients>
       </correlation>
       <correlation rcut="10" size="10" speciesA="d" speciesB="p">
-          <coefficients id="udp" type="Array" optimize="yes"> -0.1 -0.1 -0.1 -0.1 -0.1  -0.1 -0.1 -0.1 -0.1 -0.1 </coefficients>
+          <coefficients id="dp" type="Array" optimize="yes"> -0.1 -0.1 -0.1 -0.1 -0.1  -0.1 -0.1 -0.1 -0.1 -0.1 </coefficients>
       </correlation>
     </jastrow>
     <jastrow name="J1" type="One-Body" function="Bspline" source="ion0" print="yes">
