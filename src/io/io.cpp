@@ -135,8 +135,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
         std::stringstream buffer;
         buffer << "Spin dataset " << Spin_dataset_offset + 0 << " "
                << "corresponds to " << quantum_part_names[idx]
-               << " alpha and beta particles (restricted calculation)."
-               << std::endl;
+               << " alpha and beta particles (restricted calculation).";
         Polyquant_cout(buffer.str());
       } else if (E_orb[idx].size() == 2) {
         std::stringstream buffer;
@@ -145,7 +144,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
                << " alpha particles (unrestricted calculation)." << std::endl;
         buffer << "Spin dataset " << Spin_dataset_offset + 1 << " "
                << "corresponds to " << quantum_part_names[idx]
-               << " beta particles (unrestricted calculation)." << std::endl;
+               << " beta particles (unrestricted calculation).";
         Polyquant_cout(buffer.str());
       }
       Spin_dataset_offset += 2;
@@ -244,7 +243,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
     return 1.0 / std::sqrt(gint_val);
   };
-  std::cout << "SHIVSHIVSHIV " << gtonorm_lambda(0, 1) << std::endl;
+  // std::cout << "SHIVSHIVSHIV " << gtonorm_lambda(0, 1) << std::endl;
   Polyquant_cout("dumping basis parameters");
   auto basis_group = root_group.create_group("basisset");
   {
@@ -435,11 +434,11 @@ void Polyquant_dump_hdf5_for_QMCPACK(
           // contraction /= normalization_factor;
           // Remove pyscf norm
           // aply pyscf _nomalize_contracted_ao
-          std::cout << "before unnormalizing at output " << exponent << " "
-                    << contraction << std::endl;
+          //std::cout << "before unnormalizing at output " << exponent << " "
+          //          << contraction << std::endl;
           contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
-          std::cout << "after unnormalizing at output " << exponent << " "
-                    << contraction << std::endl;
+          // std::cout << "after unnormalizing at output " << exponent << " "
+          //           << contraction << std::endl;
           // std::stringstream buffer;
           // buffer << std::setprecision(20) << "Exponent: " << exponent << "
           // "

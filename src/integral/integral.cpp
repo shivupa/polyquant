@@ -195,9 +195,9 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
     const libint2::BasisSet &shells, libint2::Operator obtype,
     const std::vector<libint2::Atom> &atoms) {
-  omp_lock_t writelock;
+  // omp_lock_t writelock;
 
-  omp_init_lock(&writelock);
+  // omp_init_lock(&writelock);
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -218,7 +218,9 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
       engines[0].set_params(libint2::make_point_charges(atoms));
     }
     if (nthreads > 1) {
+      if (thread_id == 0) {
         Polyquant_cout("Making more engines for each thread");
+      }
       for (auto i = 1ul; i < nthreads; i++) {
         engines[i] = engines[0];
       }
@@ -234,56 +236,52 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
     for (auto s1 = 0l; s1 < shells.size(); ++s1) {
       auto bf1 = shell2bf[s1]; // first basis function in this shell
       auto n1 = shells[s1].size();
-      auto s1_offset = s1 * (s1 + 1) / 2;
+      // auto s1_offset = s1 * (s1 + 1) / 2;
       for (auto s2 = s1; s2 < shells.size(); ++s2) {
-      Polyquant_cout("OK");
         auto bf2 = shell2bf[s2];
-      Polyquant_cout("OK");
         auto n2 = shells[s2].size();
-      Polyquant_cout("OK");
-        auto s12 = s1_offset + s2+1;
-      Polyquant_cout("OK");
-        Polyquant_cout("s12: " + std::to_string(s12));
-        Polyquant_cout(     " thread_id: " + std::to_string(thread_id));
-        Polyquant_cout(" s12%thread_id: " + std::to_string(s12 % (thread_id+1)));
-        Polyquant_cout(" s1: " + std::to_string(s1));
-        Polyquant_cout(" s2: " + std::to_string(s2));
-        Polyquant_cout("s12: " + std::to_string(s12) +
-                       " thread_id: " + std::to_string(thread_id) +
-                       " s12%thread_id: " + std::to_string(s12 % (thread_id+1)) +
-                       " s1: " + std::to_string(s1) +
-                       " s2: " + std::to_string(s2));
-        if (s12 % nthreads != (thread_id+1)) {
+        auto s12 = s1 + s2; // s1_offset + s2;
+        // Polyquant_cout("s12: " + std::to_string(s12));
+        // Polyquant_cout(     " thread_id: " + std::to_string(thread_id));
+        // Polyquant_cout(" s12%nthreads: " + std::to_string(s12 % nthreads));
+        // Polyquant_cout(" s1: " + std::to_string(s1));
+        // Polyquant_cout(" s2: " + std::to_string(s2));
+        // Polyquant_cout("s12: " + std::to_string(s12) +
+        //               " thread_id: " + std::to_string(thread_id) +
+        //               " s12%nthreads: " + std::to_string(s12 % nthreads) +
+        //               " s1: " + std::to_string(s1) +
+        //               " s2: " + std::to_string(s2));
+        if (s12 % nthreads != thread_id) {
           continue;
         }
-        std::string message = "OK on " + std::to_string(thread_id);
-        Polyquant_cout(message);
-        Polyquant_cout(engines.size());
-        Polyquant_cout(shells[s1]);
-        Polyquant_cout(shells[s2]);
+        // std::string message = "OK on " + std::to_string(thread_id);
+        // Polyquant_cout(message);
+        // Polyquant_cout(engines.size());
+        // Polyquant_cout(shells[s1]);
+        // Polyquant_cout(shells[s2]);
 
         // Todo use symmetry
         // compute shell pair
         engines[thread_id].compute(shells[s1], shells[s2]);
-        Polyquant_cout(message);
+        // Polyquant_cout(message);
         const auto *buf_12 = buf[0];
         // Write values to the matrix
         if (buf_12 == nullptr) {
           continue; // if all integrals screened out, skip to next pair
         }
-        omp_set_lock(&writelock);
+        // omp_set_lock(&writelock);
         for (size_t f1 = 0, f12 = 0; f1 != n1; ++f1) {
           for (size_t f2 = 0; f2 != n2; ++f2, ++f12) {
             output_matrix(bf1 + f1, bf2 + f2) = buf_12[f12];
             output_matrix(bf2 + f2, bf1 + f1) = buf_12[f12];
           }
         }
-        omp_unset_lock(&writelock);
+        // omp_unset_lock(&writelock);
       }
     }
   }
 
-  omp_destroy_lock(&writelock);
+  // omp_destroy_lock(&writelock);
   // auto computed_shell = xt::view(output_matrix, xt::range(bf1, bf1 + n1),
   //                                xt::range(bf2, bf2 + n2));
   // std::vector<std::size_t> shape = {n1, n2};
@@ -513,10 +511,14 @@ void POLYQUANT_INTEGRAL::compute_2body_ints(
       std::string message =
           "Computing on " + std::to_string(nthreads) + " threads.";
       Polyquant_cout(message);
-      engines.resize(nthreads);
-      engines[0] =
-          libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
-      for (auto i = 0ul; i++; i < nthreads) {
+    }
+    engines.resize(nthreads);
+    engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
+    if (nthreads > 1) {
+      if (thread_id == 0) {
+        Polyquant_cout("Making more engines for each thread");
+      }
+      for (auto i = 1ul; i < nthreads; i++) {
         engines[i] = engines[0];
       }
     }
@@ -532,16 +534,21 @@ void POLYQUANT_INTEGRAL::compute_2body_ints(
     for (auto s1 = 0l, s1234 = 0l; s1 != shells.size(); ++s1) {
       auto bf1_first = shell2bf[s1]; // first basis function in this shell
       auto n1 = shells[s1].size();
-      for (libint2::BasisSet::size_type s2 = 0; s2 <= s1; ++s2) {
+      for (auto s2 = 0l; s2 <= s1; ++s2) {
         auto bf2_first = shell2bf[s2];
         auto n2 = shells[s2].size();
-        for (libint2::BasisSet::size_type s3 = 0; s3 <= s1; ++s3) {
+        for (auto s3 = 0l; s3 <= s1; ++s3) {
           auto bf3_first = shell2bf[s3]; // first basis function in this shell
           auto n3 = shells[s3].size();
-          for (libint2::BasisSet::size_type s4 = 0; s4 <= (s1 == s3 ? s2 : s3);
-               ++s4) {
+          for (auto s4 = 0l; s4 <= (s1 == s3 ? s2 : s3); ++s4) {
             auto bf4_first = shell2bf[s4];
             auto n4 = shells[s4].size();
+            // Polyquant_cout(
+            //     "s1234: " + std::to_string(s1234) +
+            //     " thread_id: " + std::to_string(thread_id) +
+            //     " s1234%nthreads: " + std::to_string(s1234 % nthreads) +
+            //     " s1: " + std::to_string(s1) + " s2: " + std::to_string(s2) +
+            //     " s3: " + std::to_string(s3) + " s4: " + std::to_string(s4));
             if ((s1234++) % nthreads != thread_id)
               continue;
             // compute shell pair
