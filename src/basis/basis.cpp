@@ -4,6 +4,8 @@ using namespace polyquant;
 
 POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input,
                                  const POLYQUANT_MOLECULE &molecule) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->load_basis(input, molecule);
 }
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,

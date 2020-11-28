@@ -5,6 +5,8 @@ using namespace polyquant;
 POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
                                        const POLYQUANT_BASIS &basis,
                                        const POLYQUANT_MOLECULE &molecule) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   Polyquant_cout("INTEGRAL");
   this->setup_integral(input, basis, molecule);
 }

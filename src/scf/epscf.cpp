@@ -49,12 +49,12 @@ void POLYQUANT_EPSCF::form_fock() {
   }
   Polyquant_cout("form fock");
   // pragma omp parallel for on the main loop wont work
-  //pragma omp parallel doesnt work without work
+  // pragma omp parallel doesnt work without work
   // for now fock build in serial
   {
-    //int nthreads = omp_get_num_threads();
-    //auto thread_id = omp_get_thread_num();
-    //if (thread_id == 0) {
+    // int nthreads = omp_get_num_threads();
+    // auto thread_id = omp_get_thread_num();
+    // if (thread_id == 0) {
     //  std::string message =
     //      "Computing on " + std::to_string(nthreads) + " threads.";
     //  Polyquant_cout(message);
@@ -64,11 +64,12 @@ void POLYQUANT_EPSCF::form_fock() {
         for (size_t k = 0; k < num_basis; k++) {
           for (size_t l = 0; l < num_basis; l++) {
 
-            //if ((ijkl_idx++) % nthreads != thread_id) {
+            // if ((ijkl_idx++) % nthreads != thread_id) {
             //  Polyquant_cout(
             //      "ijkl_idx: " + std::to_string(ijkl_idx) +
             //      " thread_id: " + std::to_string(thread_id) +
-            //      " ijkl_idx%nthreads: " + std::to_string(ijkl_idx % nthreads));
+            //      " ijkl_idx%nthreads: " + std::to_string(ijkl_idx %
+            //      nthreads));
             //  continue;
             //}
 
@@ -462,6 +463,8 @@ void POLYQUANT_EPSCF::print_params() {
   Polyquant_cout(buffer.str());
 }
 void POLYQUANT_EPSCF::run() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->print_params();
   // calculate integrals we need
   this->input_integral.calculate_overlap();

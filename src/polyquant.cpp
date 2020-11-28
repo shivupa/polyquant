@@ -8,6 +8,8 @@
 using namespace polyquant;
 
 int main(int argc, char **argv) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   Eigen::initParallel();
   cxxopts::Options options("polyquant", "Multiple quantum particles.");
   options.add_options()("i,input", "input filename",

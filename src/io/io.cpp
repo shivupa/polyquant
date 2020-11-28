@@ -434,7 +434,7 @@ void Polyquant_dump_hdf5_for_QMCPACK(
           // contraction /= normalization_factor;
           // Remove pyscf norm
           // aply pyscf _nomalize_contracted_ao
-          //std::cout << "before unnormalizing at output " << exponent << " "
+          // std::cout << "before unnormalizing at output " << exponent << " "
           //          << contraction << std::endl;
           contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
           // std::cout << "after unnormalizing at output " << exponent << " "
@@ -523,6 +523,8 @@ int quantum_symb_to_charge(std::string key) {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 POLYQUANT_INPUT::POLYQUANT_INPUT(const std::string &filename) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->parse_input(filename);
 }
 

@@ -3,6 +3,8 @@
 using namespace polyquant;
 
 POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->setup_calculation(filename);
 }
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {

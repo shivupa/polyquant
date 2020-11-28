@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <h5cpp/hdf5.hpp>
 #include <iomanip>
@@ -39,7 +40,14 @@ template <typename T> void Polyquant_cout(const T &message) {
   // std::cout << std::fixed << std::showpoint << std::setw(20)
   std::cout << std::setprecision(20) << message << std::endl;
   //}
+  //
+  //
 }
+
+// replace with C++20 std::source_location::function_name once supported
+// std::string source_loc(){
+//    return __PRETTY_FUNCTION__;
+//};
 
 int atom_symb_to_num(std::string key);
 
@@ -159,6 +167,54 @@ void Polyquant_dump_mat_to_file(
     matfile << std::endl;
   }
 }
+
+class POLYQUANT_TIMER {
+public:
+  POLYQUANT_TIMER() { this->set_start_time(); };
+  POLYQUANT_TIMER(const std::string &calling_func) {
+    this->set_start_time();
+    this->set_calling_function(calling_func);
+  };
+  ~POLYQUANT_TIMER() {
+    this->set_end_time();
+    this->print_timer_end();
+  };
+  void set_calling_function(const std::string &calling_func) {
+    this->calling_function = calling_func;
+  };
+  void set_start_time() { this->start = std::chrono::steady_clock::now(); };
+  void set_end_time() { this->end = std::chrono::steady_clock::now(); };
+  void print_timer_end() {
+    // use std::format once supported
+    // typedef duration<int, std::ratio<86400>> days;
+    auto duration = this->end - this->start;
+    auto d = std::chrono::duration_cast<std::chrono::days>(duration);
+    duration -= d;
+    auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
+    duration -= h;
+    auto m = std::chrono::duration_cast<std::chrono::minutes>(duration);
+    duration -= m;
+    auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    duration -= s;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+    duration -= ms;
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+    duration -= us;
+    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
+    duration -= ns;
+    std::stringstream buffer;
+    buffer << "Timer " << this->calling_function << "    " << d.count()
+           << "d:" << h.count() << "h:" << m.count() << "m:" << s.count()
+           << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count()
+           << "ns";
+    Polyquant_cout(buffer.str());
+  };
+
+private:
+  std::string calling_function = "UNKNOWN";
+  std::chrono::steady_clock::time_point start;
+  std::chrono::steady_clock::time_point end;
+};
 
 /**
  * @brief A class to hold information parsed from a QCSchema json
