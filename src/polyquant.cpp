@@ -1,9 +1,9 @@
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
+#define EIGEN_USE_MKL_ALL
+#include <Eigen/Core>
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>
 #include <string>
-#define EIGEN_USE_MKL_ALL
-#include <Eigen/Core>
 
 using namespace polyquant;
 

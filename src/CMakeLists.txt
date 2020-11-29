@@ -9,7 +9,8 @@ add_subdirectory(scf)
 # tell cmake what our excutable is going to be
 add_executable(polyquant polyquant.cpp)
 
-# target_include_directories(polyquant PUBLIC include)
-target_link_libraries(polyquant io calculation)
+# include_directories(${MKL_INCLUDE_DIR})
+target_link_libraries(
+  polyquant io calculation mkl::mkl_intel_64bit_omp_dyn)
 
 install(TARGETS polyquant DESTINATION bin)

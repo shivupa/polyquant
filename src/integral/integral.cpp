@@ -12,6 +12,8 @@ POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
 }
 
 void POLYQUANT_INTEGRAL::calculate_overlap() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   if (this->overlap.cols() == 0 && this->overlap.rows() == 0) {
     Polyquant_cout("Calculating One Body Overlap Integrals...");
     auto num_basis = this->input_basis.num_basis;
@@ -27,6 +29,8 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
 }
 
 void POLYQUANT_INTEGRAL::calculate_kinetic() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   if (this->kinetic.cols() == 0 && this->kinetic.rows() == 0) {
     Polyquant_cout("Calculating One Body Kinetic Integrals...");
     auto num_basis = this->input_basis.num_basis;
@@ -41,6 +45,8 @@ void POLYQUANT_INTEGRAL::calculate_kinetic() {
 }
 
 void POLYQUANT_INTEGRAL::calculate_nuclear() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   if (this->nuclear.cols() == 0 && this->nuclear.rows() == 0) {
     Polyquant_cout("Calculating One Body Nuclear Integrals...");
     auto num_basis = this->input_basis.num_basis;
@@ -161,6 +167,8 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
 //}
 
 void POLYQUANT_INTEGRAL::calculate_two_electron() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   if (this->twoelec.rows() == 0) {
     Polyquant_cout("Calculating Two Body Electron Repulsion Integrals...");
     auto num_basis = this->input_basis.num_basis;

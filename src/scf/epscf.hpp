@@ -7,6 +7,7 @@
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <libint2/chemistry/sto3g_atomic_density.h>
+#include <libint2/diis.h>
 #include <string>
 
 namespace polyquant {
