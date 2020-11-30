@@ -1,3 +1,5 @@
+#ifndef POLYQUANT_EPSCF_H
+#define POLYQUANT_EPSCF_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
@@ -5,19 +7,20 @@
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <libint2/chemistry/sto3g_atomic_density.h>
+#include <libint2/diis.h>
 #include <string>
 
-#ifndef POLYQUANT_EPSCF_H
-#define POLYQUANT_EPSCF_H
 namespace polyquant {
 
 class POLYQUANT_EPSCF : POLYQUANT_SCF {
 public:
   POLYQUANT_EPSCF() = default;
   POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params,
-             const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis,
-             const POLYQUANT_INTEGRAL &input_integral)
-      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
+                  const POLYQUANT_MOLECULE &input_molecule,
+                  const POLYQUANT_BASIS &input_basis,
+                  const POLYQUANT_INTEGRAL &input_integral)
+      : POLYQUANT_SCF(input_params, input_molecule, input_basis,
+                      input_integral){};
 
   void form_H_core() override;
   double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
@@ -31,7 +34,7 @@ public:
   void run_iteration() override;
   void guess_DM() override;
   void run() override;
-
+  void print_params();
   /**
    * @brief H_core matrix
    *
@@ -103,7 +106,11 @@ public:
    * @brief Iteration rmsc DM
    *
    */
-  std::vector<std::vector<double>> iteration_rmsc_dm;
+  std::vector<std::vector<double>> iteration_rms_error;
+
+  std::vector<std::vector<
+      libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>
+      diis;
   /**
    * @brief Stop running iterations?
    *
@@ -124,7 +131,7 @@ public:
    * @brief Energy convergence
    *
    */
-  double convergence_E = 1e-6;
+  double convergence_E = 1e-10;
   /**
    * @brief Root mean squared change in DM convergence
    *

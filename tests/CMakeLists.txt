@@ -3,14 +3,6 @@ add_executable(main_test doctest_main.cpp basis_test.cpp integral_test.cpp
                          unit_tests/io/io_test.cpp)
 
 # find the required testing library and link the other required libraries
-if(PETSC_FOUND)
-  include_directories(${PETSC_INCLUDES})
-  target_link_libraries(main_test ${PETSC_LIBRARIES})
-endif(PETSC_FOUND)
-if(SLEPC_FOUND)
-  include_directories(${SLEPC_INC})
-  target_link_libraries(main_test ${SLEPC_LIB})
-endif(SLEPC_FOUND)
 if(Libint2_FOUND)
   target_link_libraries(main_test Libint2::cxx)
 endif(Libint2_FOUND)

@@ -1,11 +1,11 @@
+#include "io/io.hpp"
 #include <doctest/doctest.h>
-#include <io/io.hpp>
 
-using namespace selci;
+using namespace polyquant;
 
 TEST_CASE("IO: Parse input data in constructor.") {
 
-  PYCI_INPUT test_inp("../../tests/unit_tests/data/h2o.json");
+  POLYQUANT_INPUT test_inp("../../tests/unit_tests/data/h2o.json");
   // Check that the fields exist don't check values. The calculation class tests
   // will do that.
   CHECK(test_inp.input_data.contains("molecule"));
@@ -27,7 +27,7 @@ TEST_CASE("IO: Parse input data in constructor.") {
   CHECK(test_inp.input_data["keywords"].contains("relax_target"));
 }
 TEST_CASE("IO: Parse input data in method.") {
-  PYCI_INPUT test_inp;
+  POLYQUANT_INPUT test_inp;
   test_inp.parse_input("../../tests/unit_tests/data/h2o.json");
   CHECK(test_inp.input_data.contains("molecule"));
   CHECK(test_inp.input_data["molecule"].contains("geometry"));

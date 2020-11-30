@@ -1,0 +1,1191 @@
+SETTING UP INPUT FILE
+Reading Input File: Li_wpos.json
+Input file: 
+{
+    "driver": "energy",
+    "keywords": {
+        "mf_keywords": {
+            "convergence_DM": 1e-06,
+            "convergence_E": 1e-08,
+            "dump_for_qmcpack": true,
+            "hdf5_filename_qmcpack": "Li_wpos.h5",
+            "iteration_max": 200
+        },
+        "pure": true,
+        "quantum_particles": [
+            {
+                "charge": 1,
+                "electron_exchange": false,
+                "exchange": true,
+                "mass": 1,
+                "name": "positron",
+                "num_particles_alpha": 1,
+                "num_particles_beta": 0,
+                "particle_multiplicity": 2,
+                "restricted": false,
+                "spin": 0.5
+            }
+        ],
+        "restricted": true
+    },
+    "model": {
+        "basis": {
+            "Li": [
+                {
+                    "custom": {
+                        "filename": "Li_basis.g94",
+                        "type": "file"
+                    }
+                }
+            ]
+        },
+        "method": "scf"
+    },
+    "molecule": {
+        "geometry": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "molecular_charge": 0,
+        "molecular_multiplicity": 1,
+        "schema_name": "qcschema_molecule",
+        "schema_version": 2,
+        "symbols": [
+            "Li"
+        ]
+    },
+    "schema_name": "qc_schema_input",
+    "schema_version": 1
+}
+End input file
+SETTING UP MOLECULE
+1
+The input section 'keywords' didn't contain a section called about quantum nuclei. All nuclei are going to be treated classically. No quantum particles present besides electrons.
+Creating 4 electrons
+nuclear repulsion energy: 0.000000
+
+Molecule parameters
+Classical particle types
+Classical particle type  1: 
+name: Li
+mass: 7.000000
+charge: 3.000000
+number of particles: 1
+Center idx    x   y   z
+0    0.000000    0.000000    0.000000
+
+
+Quantum particle types
+Quantum Particle type 1: 
+name: electron
+mass: 1.000000
+charge: -1.000000
+spin: 0.500000
+multiplicity: 1
+number of particles: 4
+number of particles (alpha): 2
+number of particles (beta): 2
+Center idx    x   y   z
+exchange: true
+electron exchange: false
+restricted: true
+
+Quantum Particle type 2: 
+name: positron
+mass: 1.000000
+charge: 1.000000
+spin: 0.500000
+multiplicity: 1
+number of particles: 1
+number of particles (alpha): 1
+number of particles (beta): 0
+Center idx    x   y   z
+exchange: true
+electron exchange: false
+restricted: false
+
+
+SETTING UP BASIS
+BASIS
+Enforcing unit normalization in Libint: false
+
+Added basis for Li
+Number of basis functions: 16
+SHIVSHIV 2.5264751109842586985
+after _nomalize_contracted_ao 642.41890000000000782 0.94411839904983008154
+after _nomalize_contracted_ao 96.798490000000001032 1.7295511390255777773
+after _nomalize_contracted_ao 22.091090000000001226 2.7239784030035716356
+after _nomalize_contracted_ao 6.2010699999999996379 3.3393592318172768962
+after _nomalize_contracted_ao 1.9351199999999999513 2.6671857998993417915
+after _nomalize_contracted_ao 2.1914600000000001856 0.73061314352765638347
+after _nomalize_contracted_ao 0.59613000000000004874 1.4997390859706503097
+after _nomalize_contracted_ao 0.074550000000000005151 0.36045475592422193678
+after _nomalize_contracted_ao 0.028670000000000001039 0.17602963722484091247
+after _nomalize_contracted_ao 0.0091999999999999998446 0.075050898295701953811
+after _nomalize_contracted_ao 0.0030999999999999998911 0.033192219560855502902
+after _nomalize_contracted_ao 0.00080000000000000003834 0.012018008711439081421
+after _nomalize_contracted_ao 2.1914600000000001856 0.069540294521667656014
+after _nomalize_contracted_ao 0.59613000000000004874 0.21548061533021056757
+after _nomalize_contracted_ao 0.074550000000000005151 0.10743214825690163006
+after _nomalize_contracted_ao 0.01799999999999999864 0.019234239697098465954
+after _nomalize_contracted_ao 0.0060000000000000001249 0.0048716205694106324772
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  642.41890000000000782 0.94411839904983008154
+  96.798490000000001032 1.7295511390255777773
+  22.091090000000001226 2.7239784030035716356
+  6.2010699999999996379 3.3393592318172768962
+  1.9351199999999999513 2.6671857998993417915
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  2.1914600000000001856 0.73061314352765638347
+  0.59613000000000004874 1.4997390859706503097
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.074550000000000005151 0.36045475592422193678
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.028670000000000001039 0.17602963722484091247
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0091999999999999998446 0.075050898295701953811
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0030999999999999998911 0.033192219560855502902
+
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.00080000000000000003834 0.012018008711439081421
+
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  2.1914600000000001856 0.069540294521667656014
+  0.59613000000000004874 0.21548061533021056757
+  0.074550000000000005151 0.10743214825690163006
+
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.01799999999999999864 0.019234239697098465954
+
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.0060000000000000001249 0.0048716205694106324772
+
+SETTING UP INTEGRAL
+INTEGRAL
+Figuring out if we need to run a mean-field calculation for the electrons...
+Will run a mean field calculation of type: 
+SCF
+Running SCF
+Maximum iterations = 200
+convergence_E = 1.000000e-08
+convergence_DM = 1.000000e-06
+
+Calculating One Body Overlap Integrals...
+Calculating Symmetric Orthogonalization Matrix...
+Calculating One Body Kinetic Integrals...
+Calculating One Body Nuclear Integrals...
+Calculating Two Body Electron Repulsion Integrals...
+Iteration 0 :
+E(electron) : 0.000000
+E(positron) : 0.000000
+E(particles) : 0.000000
+Dumping Fock Matrix
+Dumping Fock Matrix
+Convergence status for electron
+delta E = -11.078160420755802207 converged = false
+rmsc dm = 0.064526637456303895246 converged = false
+
+Convergence status for positron
+delta E = 0.084135378161478147074 converged = false
+rmsc dm = 0.22385899687120003332 converged = false
+
+Iteration 1 :
+E(electron) : -11.078160
+E(positron) : 0.084135
+E(particles) : -10.994025
+Convergence status for electron
+delta E = 4.9448466548742953108 converged = false
+rmsc dm = 0.20670509141018883481 converged = false
+
+Convergence status for positron
+delta E = 8.3266726846886740532e-17 converged = true
+rmsc dm = 1.0775776845000713345e-29 converged = true
+
+Iteration 2 :
+E(electron) : -6.133314
+E(positron) : 0.084135
+E(particles) : -6.049178
+Convergence status for electron
+delta E = -2.0252138837093358603 converged = false
+rmsc dm = 0.1551807223991444884 converged = false
+
+Convergence status for positron
+delta E = -1.1102230246251565404e-16 converged = true
+rmsc dm = 1.6976945862540870949e-30 converged = true
+
+Iteration 3 :
+E(electron) : -8.158528
+E(positron) : 0.084135
+E(particles) : -8.074392
+Convergence status for electron
+delta E = 0.8683751316876833215 converged = false
+rmsc dm = 0.0010897668115655712983 converged = false
+
+Convergence status for positron
+delta E = -2.7755575615628913511e-16 converged = true
+rmsc dm = 3.1529157695841408012e-29 converged = true
+
+Iteration 4 :
+E(electron) : -7.290153
+E(positron) : 0.084135
+E(particles) : -7.206017
+Convergence status for electron
+delta E = -0.085796246616476778968 converged = false
+rmsc dm = 0.00012490338040186034106 converged = false
+
+Convergence status for positron
+delta E = 0 converged = true
+rmsc dm = 5.9542689482247398173e-29 converged = true
+
+Iteration 5 :
+E(electron) : -7.375949
+E(positron) : 0.084135
+E(particles) : -7.291813
+Convergence status for electron
+delta E = -0.031730088005003764806 converged = false
+rmsc dm = 3.2029397665011347508e-05 converged = false
+
+Convergence status for positron
+delta E = 3.8857805861880478915e-16 converged = true
+rmsc dm = 1.089829778449620852e-29 converged = true
+
+Iteration 6 :
+E(electron) : -7.407679
+E(positron) : 0.084135
+E(particles) : -7.323543
+Convergence status for electron
+delta E = -0.010617623609541659846 converged = false
+rmsc dm = 1.1861768703982538054e-05 converged = false
+
+Convergence status for positron
+delta E = -4.4408920985006261617e-16 converged = true
+rmsc dm = 2.8086537912604759732e-30 converged = true
+
+Iteration 7 :
+E(electron) : -7.418296
+E(positron) : 0.084135
+E(particles) : -7.334161
+Convergence status for electron
+delta E = -0.0036719743147637373681 converged = false
+rmsc dm = 4.5591004102015418611e-06 converged = false
+
+Convergence status for positron
+delta E = 4.4408920985006261617e-16 converged = true
+rmsc dm = 1.2317490628948625254e-29 converged = true
+
+Iteration 8 :
+E(electron) : -7.421968
+E(positron) : 0.084135
+E(particles) : -7.337833
+Convergence status for electron
+delta E = -0.0013448640260627087173 converged = false
+rmsc dm = 1.7210253989465550122e-06 converged = false
+
+Convergence status for positron
+delta E = 8.3266726846886740532e-17 converged = true
+rmsc dm = 6.3347432869714680068e-30 converged = true
+
+Iteration 9 :
+E(electron) : -7.423313
+E(positron) : 0.084135
+E(particles) : -7.339178
+Convergence status for electron
+delta E = -0.00052460042084323532663 converged = false
+rmsc dm = 6.3224195134828034575e-07 converged = true
+
+Convergence status for positron
+delta E = -1.9428902930940239457e-16 converged = true
+rmsc dm = 7.4574362109248588783e-29 converged = true
+
+Iteration 10 :
+E(electron) : -7.423838
+E(positron) : 0.084135
+E(particles) : -7.339703
+Convergence status for electron
+delta E = -0.00021752601358837608814 converged = false
+rmsc dm = 2.2611240048309317306e-07 converged = true
+
+Convergence status for positron
+delta E = -3.0531133177191804862e-16 converged = true
+rmsc dm = 5.62006829015654949e-28 converged = true
+
+Iteration 11 :
+E(electron) : -7.424055
+E(positron) : 0.084135
+E(particles) : -7.339920
+Convergence status for electron
+delta E = -9.5167930437511927266e-05 converged = false
+rmsc dm = 7.9033719814602058736e-08 converged = true
+
+Convergence status for positron
+delta E = 6.9388939039072283776e-17 converged = true
+rmsc dm = 8.5401117242516498972e-30 converged = true
+
+Iteration 12 :
+E(electron) : -7.424151
+E(positron) : 0.084135
+E(particles) : -7.340015
+Convergence status for electron
+delta E = -4.349643139445191764e-05 converged = false
+rmsc dm = 2.7131531151909053073e-08 converged = true
+
+Convergence status for positron
+delta E = 3.8857805861880478915e-16 converged = true
+rmsc dm = 1.7308177679916424306e-28 converged = true
+
+Iteration 13 :
+E(electron) : -7.424194
+E(positron) : 0.084135
+E(particles) : -7.340059
+Convergence status for electron
+delta E = -2.0556508760982694639e-05 converged = false
+rmsc dm = 9.1904498118999238753e-09 converged = true
+
+Convergence status for positron
+delta E = -3.7470027081099033239e-16 converged = true
+rmsc dm = 1.9266780762879065664e-29 converged = true
+
+Iteration 14 :
+E(electron) : -7.424215
+E(positron) : 0.084135
+E(particles) : -7.340079
+Convergence status for electron
+delta E = -9.948469778642277106e-06 converged = false
+rmsc dm = 3.0842357869299085618e-09 converged = true
+
+Convergence status for positron
+delta E = 4.4408920985006261617e-16 converged = true
+rmsc dm = 1.6384010212399157202e-28 converged = true
+
+Iteration 15 :
+E(electron) : -7.424225
+E(positron) : 0.084135
+E(particles) : -7.340089
+Convergence status for electron
+delta E = -4.885322264946978521e-06 converged = false
+rmsc dm = 1.0288755410114450747e-09 converged = true
+
+Convergence status for positron
+delta E = -5.273559366969493567e-16 converged = true
+rmsc dm = 8.1959488176172039993e-29 converged = true
+
+Iteration 16 :
+E(electron) : -7.424229
+E(positron) : 0.084135
+E(particles) : -7.340094
+Convergence status for electron
+delta E = -2.4124229272004527047e-06 converged = false
+rmsc dm = 3.4213641898225268623e-10 converged = true
+
+Convergence status for positron
+delta E = 4.024558464266192459e-16 converged = true
+rmsc dm = 1.7671884606905988428e-28 converged = true
+
+Iteration 17 :
+E(electron) : -7.424232
+E(positron) : 0.084135
+E(particles) : -7.340097
+Convergence status for electron
+delta E = -1.1865733888782870054e-06 converged = false
+rmsc dm = 1.1368521098891118363e-10 converged = true
+
+Convergence status for positron
+delta E = -2.498001805406602216e-16 converged = true
+rmsc dm = 4.7838490724700767901e-28 converged = true
+
+Iteration 18 :
+E(electron) : -7.424233
+E(positron) : 0.084135
+E(particles) : -7.340098
+Convergence status for electron
+delta E = -5.7474798165202400924e-07 converged = false
+rmsc dm = 3.7828697063850689486e-11 converged = true
+
+Convergence status for positron
+delta E = 1.5265566588595902431e-16 converged = true
+rmsc dm = 8.0496881545600626607e-29 converged = true
+
+Iteration 19 :
+E(electron) : -7.424234
+E(positron) : 0.084135
+E(particles) : -7.340098
+Convergence status for electron
+delta E = -2.6984918566341775659e-07 converged = false
+rmsc dm = 1.2631365769697022752e-11 converged = true
+
+Convergence status for positron
+delta E = -3.6082248300317587564e-16 converged = true
+rmsc dm = 2.2640568945209576587e-28 converged = true
+
+Iteration 20 :
+E(electron) : -7.424234
+E(positron) : 0.084135
+E(particles) : -7.340099
+Convergence status for electron
+delta E = -1.1957487533464927765e-07 converged = false
+rmsc dm = 4.2411729587228738913e-12 converged = true
+
+Convergence status for positron
+delta E = 5.5511151231257827021e-16 converged = true
+rmsc dm = 1.8948492335358545883e-30 converged = true
+
+Iteration 21 :
+E(electron) : -7.424234
+E(positron) : 0.084135
+E(particles) : -7.340099
+Convergence status for electron
+delta E = -4.72286796338039494e-08 converged = false
+rmsc dm = 1.4349759273439407475e-12 converged = true
+
+Convergence status for positron
+delta E = -1.6653345369377348106e-16 converged = true
+rmsc dm = 1.0221812707888333595e-29 converged = true
+
+Iteration 22 :
+E(electron) : -7.424234
+E(positron) : 0.084135
+E(particles) : -7.340099
+Convergence status for electron
+delta E = -1.3853040492506352166e-08 converged = false
+rmsc dm = 4.9030555355342938895e-13 converged = true
+
+Convergence status for positron
+delta E = -2.2204460492503130808e-16 converged = true
+rmsc dm = 1.5401325856109867039e-30 converged = true
+
+Iteration 23 :
+E(electron) : -7.424234
+E(positron) : 0.084135
+E(particles) : -7.340099
+Convergence status for electron
+delta E = 3.7866332291969229118e-10 converged = true
+rmsc dm = 1.6954959291569867429e-13 converged = true
+
+Convergence status for positron
+delta E = 4.7184478546569152968e-16 converged = true
+rmsc dm = 3.0707707950070170545e-29 converged = true
+
+Independent densities converged. Turning on interactions.
+Iteration 24 :
+E(electron) : -7.424234
+E(positron) : 0.084135
+E(particles) : -7.340099
+Convergence status for electron
+delta E = -0.054182242251065382277 converged = false
+rmsc dm = 4.8514627014873006726e-09 converged = true
+
+Convergence status for positron
+delta E = 0.11466678954405146174 converged = false
+rmsc dm = 0.22278947338593016458 converged = false
+
+Iteration 25 :
+E(electron) : -7.478416
+E(positron) : 0.198802
+E(particles) : -7.279614
+Convergence status for electron
+delta E = -0.27633661181195545709 converged = false
+rmsc dm = 0.00018720659018312566044 converged = false
+
+Convergence status for positron
+delta E = -0.013497989794680809172 converged = false
+rmsc dm = 5.2608298615922098061e-08 converged = true
+
+Iteration 26 :
+E(electron) : -7.754753
+E(positron) : 0.185304
+E(particles) : -7.569449
+Convergence status for electron
+delta E = 0.040165297992327708698 converged = false
+rmsc dm = 4.3769307784605840123e-05 converged = false
+
+Convergence status for positron
+delta E = 0.0051783785851181873827 converged = false
+rmsc dm = 0.00022921691658663837128 converged = false
+
+Iteration 27 :
+E(electron) : -7.714588
+E(positron) : 0.190483
+E(particles) : -7.524105
+Convergence status for electron
+delta E = -0.0056402508381419025341 converged = false
+rmsc dm = 1.6118780225791987977e-05 converged = false
+
+Convergence status for positron
+delta E = 0.0071221177530886303764 converged = false
+rmsc dm = 0.00016313197927270484447 converged = false
+
+Iteration 28 :
+E(electron) : -7.720228
+E(positron) : 0.197605
+E(particles) : -7.522623
+Convergence status for electron
+delta E = -0.0066149226085840950873 converged = false
+rmsc dm = 7.3577962384921449893e-06 converged = false
+
+Convergence status for positron
+delta E = 0.0057471022591082387976 converged = false
+rmsc dm = 9.4512459179986276262e-05 converged = false
+
+Iteration 29 :
+E(electron) : -7.726843
+E(positron) : 0.203352
+E(particles) : -7.523491
+Convergence status for electron
+delta E = -0.0050842464699014655594 converged = false
+rmsc dm = 3.6470772120095127252e-06 converged = false
+
+Convergence status for positron
+delta E = 0.00436769709774412207 converged = false
+rmsc dm = 5.2417021179962639845e-05 converged = false
+
+Iteration 30 :
+E(electron) : -7.731927
+E(positron) : 0.207719
+E(particles) : -7.524208
+Convergence status for electron
+delta E = -0.0037366240734444389204 converged = false
+rmsc dm = 1.8450993526016495175e-06 converged = false
+
+Convergence status for positron
+delta E = 0.0032540041705208799794 converged = false
+rmsc dm = 2.852912333593589665e-05 converged = false
+
+Iteration 31 :
+E(electron) : -7.735664
+E(positron) : 0.210973
+E(particles) : -7.524690
+Convergence status for electron
+delta E = -0.0027212502913416258821 converged = false
+rmsc dm = 9.3881603037323854033e-07 converged = true
+
+Convergence status for positron
+delta E = 0.0023991118309001358 converged = false
+rmsc dm = 1.5342145907204747995e-05 converged = false
+
+Iteration 32 :
+E(electron) : -7.738385
+E(positron) : 0.213373
+E(particles) : -7.525012
+Convergence status for electron
+delta E = -0.0019744547240030385638 converged = false
+rmsc dm = 4.7955259887052236571e-07 converged = true
+
+Convergence status for positron
+delta E = 0.0017571918754668014451 converged = false
+rmsc dm = 8.1792792635469770677e-06 converged = false
+
+Iteration 33 :
+E(electron) : -7.740359
+E(positron) : 0.215130
+E(particles) : -7.525230
+Convergence status for electron
+delta E = -0.0014295139852622540388 converged = false
+rmsc dm = 2.4591202619847432532e-07 converged = true
+
+Convergence status for positron
+delta E = 0.0012813339765634368383 converged = false
+rmsc dm = 4.3327263389398115072e-06 converged = false
+
+Iteration 34 :
+E(electron) : -7.741789
+E(positron) : 0.216411
+E(particles) : -7.525378
+Convergence status for electron
+delta E = -0.0010335968585994947944 converged = false
+rmsc dm = 1.2655592402584149364e-07 converged = true
+
+Convergence status for positron
+delta E = 0.00093149208893650303764 converged = false
+rmsc dm = 2.2843435858231274678e-06 converged = false
+
+Iteration 35 :
+E(electron) : -7.742823
+E(positron) : 0.217343
+E(particles) : -7.525480
+Convergence status for electron
+delta E = -0.00074672761460892189689 converged = false
+rmsc dm = 6.5326636740144975904e-08 converged = true
+
+Convergence status for positron
+delta E = 0.00067572650544014956076 converged = false
+rmsc dm = 1.2002455346395979302e-06 converged = false
+
+Iteration 36 :
+E(electron) : -7.743569
+E(positron) : 0.218018
+E(particles) : -7.525551
+Convergence status for electron
+delta E = -0.00053921745682661281762 converged = false
+rmsc dm = 3.3800388865739917568e-08 converged = true
+
+Convergence status for positron
+delta E = 0.0004894545237326408671 converged = false
+rmsc dm = 6.290705316755506785e-07 converged = true
+
+Iteration 37 :
+E(electron) : -7.744108
+E(positron) : 0.218508
+E(particles) : -7.525601
+Convergence status for electron
+delta E = -0.00038926342556333537459 converged = false
+rmsc dm = 1.7519639054864261036e-08 converged = true
+
+Convergence status for positron
+delta E = 0.00035415533234908758153 converged = false
+rmsc dm = 3.291175369813463599e-07 converged = true
+
+Iteration 38 :
+E(electron) : -7.744498
+E(positron) : 0.218862
+E(particles) : -7.525636
+Convergence status for electron
+delta E = -0.00028096578630343316263 converged = false
+rmsc dm = 9.0928075211615653462e-09 converged = true
+
+Convergence status for positron
+delta E = 0.00025606398900998583734 converged = false
+rmsc dm = 1.7196654397487438971e-07 converged = true
+
+Iteration 39 :
+E(electron) : -7.744779
+E(positron) : 0.219118
+E(particles) : -7.525661
+Convergence status for electron
+delta E = -0.00020277957070202745626 converged = false
+rmsc dm = 4.723735208399908057e-09 converged = true
+
+Convergence status for positron
+delta E = 0.00018504201799005026707 converged = false
+rmsc dm = 8.9770930452918536851e-08 converged = true
+
+Iteration 40 :
+E(electron) : -7.744981
+E(positron) : 0.219303
+E(particles) : -7.525678
+Convergence status for electron
+delta E = -0.00014634357499687666859 converged = false
+rmsc dm = 2.4556878768191620423e-09 converged = true
+
+Convergence status for positron
+delta E = 0.00013366748436557940316 converged = false
+rmsc dm = 4.6831642509761722786e-08 converged = true
+
+Iteration 41 :
+E(electron) : -7.745128
+E(positron) : 0.219437
+E(particles) : -7.525691
+Convergence status for electron
+delta E = -0.00010561167204414800835 converged = false
+rmsc dm = 1.2772539169129633993e-09 converged = true
+
+Convergence status for positron
+delta E = 9.6529930822569776083e-05 converged = false
+rmsc dm = 2.4419457020948112685e-08 converged = true
+
+Iteration 42 :
+E(electron) : -7.745233
+E(positron) : 0.219533
+E(particles) : -7.525700
+Convergence status for electron
+delta E = -7.6215726084072343838e-05 converged = false
+rmsc dm = 6.6456469985780401054e-10 converged = true
+
+Convergence status for positron
+delta E = 6.9696778067424025593e-05 converged = false
+rmsc dm = 1.2728688850349972116e-08 converged = true
+
+Iteration 43 :
+E(electron) : -7.745310
+E(positron) : 0.219603
+E(particles) : -7.525707
+Convergence status for electron
+delta E = -5.5001524053466255282e-05 converged = false
+rmsc dm = 3.4586739525326946119e-10 converged = true
+
+Convergence status for positron
+delta E = 5.0315521833654841544e-05 converged = false
+rmsc dm = 6.6332151847872184665e-09 converged = true
+
+Iteration 44 :
+E(electron) : -7.745365
+E(positron) : 0.219653
+E(particles) : -7.525711
+Convergence status for electron
+delta E = -3.9692084398801341649e-05 converged = false
+rmsc dm = 1.800374710906403836e-10 converged = true
+
+Convergence status for positron
+delta E = 3.6320104432163713426e-05 converged = false
+rmsc dm = 3.4561072095026238977e-09 converged = true
+
+Iteration 45 :
+E(electron) : -7.745404
+E(positron) : 0.219690
+E(particles) : -7.525715
+Convergence status for electron
+delta E = -2.8643951260676203674e-05 converged = false
+rmsc dm = 9.3729113571294339405e-11 converged = true
+
+Convergence status for positron
+delta E = 2.6215636544701936828e-05 converged = false
+rmsc dm = 1.8005060216233631204e-09 converged = true
+
+Iteration 46 :
+E(electron) : -7.745433
+E(positron) : 0.219716
+E(particles) : -7.525717
+Convergence status for electron
+delta E = -2.0671030997121420114e-05 converged = false
+rmsc dm = 4.8800937716674207174e-11 converged = true
+
+Convergence status for positron
+delta E = 1.8921294044182968008e-05 converged = false
+rmsc dm = 9.3791120003789758019e-10 converged = true
+
+Iteration 47 :
+E(electron) : -7.745454
+E(positron) : 0.219735
+E(particles) : -7.525719
+Convergence status for electron
+delta E = -1.491734967284941149e-05 converged = false
+rmsc dm = 2.5410438174305815605e-11 converged = true
+
+Convergence status for positron
+delta E = 1.3656039689780019586e-05 converged = false
+rmsc dm = 4.8853965873508107923e-10 converged = true
+
+Iteration 48 :
+E(electron) : -7.745469
+E(positron) : 0.219748
+E(particles) : -7.525720
+Convergence status for electron
+delta E = -1.0765186072347887603e-05 converged = false
+rmsc dm = 1.323177239256316772e-11 converged = true
+
+Convergence status for positron
+delta E = 9.8556851174103066171e-06 converged = false
+rmsc dm = 2.5445849641735002671e-10 converged = true
+
+Iteration 49 :
+E(electron) : -7.745479
+E(positron) : 0.219758
+E(particles) : -7.525721
+Convergence status for electron
+delta E = -7.7687602582088288727e-06 converged = false
+rmsc dm = 6.8903245289591221403e-12 converged = true
+
+Convergence status for positron
+delta E = 7.11279512885520937e-06 converged = false
+rmsc dm = 1.3253144813092143221e-10 converged = true
+
+Iteration 50 :
+E(electron) : -7.745487
+E(positron) : 0.219765
+E(particles) : -7.525722
+Convergence status for electron
+delta E = -5.6063751605606171324e-06 converged = false
+rmsc dm = 3.5881676481889012802e-12 converged = true
+
+Convergence status for positron
+delta E = 5.1331930903952827094e-06 converged = false
+rmsc dm = 6.9025568278846985698e-11 converged = true
+
+Iteration 51 :
+E(electron) : -7.745493
+E(positron) : 0.219770
+E(particles) : -7.525722
+Convergence status for electron
+delta E = -4.0458781924712639011e-06 converged = false
+rmsc dm = 1.8685899124047685779e-12 converged = true
+
+Convergence status for positron
+delta E = 3.7045072197594564045e-06 converged = false
+rmsc dm = 3.5949523337550744772e-11 converged = true
+
+Iteration 52 :
+E(electron) : -7.745497
+E(positron) : 0.219774
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -2.9197361950394906671e-06 converged = false
+rmsc dm = 9.7310837199292357269e-13 converged = true
+
+Convergence status for positron
+delta E = 2.6734377480686077888e-06 converged = false
+rmsc dm = 1.8722790446675791634e-11 converged = true
+
+Iteration 53 :
+E(electron) : -7.745500
+E(positron) : 0.219777
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -2.1070485782814785125e-06 converged = false
+rmsc dm = 5.0677210441464896551e-13 converged = true
+
+Convergence status for positron
+delta E = 1.9293338648918023637e-06 converged = false
+rmsc dm = 9.7508818258474412782e-12 converged = true
+
+Iteration 54 :
+E(electron) : -7.745502
+E(positron) : 0.219779
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -1.5205670926832226542e-06 converged = false
+rmsc dm = 2.6391695331198695264e-13 converged = true
+
+Convergence status for positron
+delta E = 1.3923327088216641556e-06 converged = false
+rmsc dm = 5.078251825048506326e-12 converged = true
+
+Iteration 55 :
+E(electron) : -7.745503
+E(positron) : 0.219780
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -1.0973285604620741651e-06 converged = false
+rmsc dm = 1.3744346745111247507e-13 converged = true
+
+Convergence status for positron
+delta E = 1.0047949805525036027e-06 converged = false
+rmsc dm = 2.6447365810906018748e-12 converged = true
+
+Iteration 56 :
+E(electron) : -7.745504
+E(positron) : 0.219781
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -7.9189543633617631713e-07 converged = false
+rmsc dm = 7.1578490848296667768e-14 converged = true
+
+Convergence status for positron
+delta E = 7.2512189411289007523e-07 converged = false
+rmsc dm = 1.3773650648870166555e-12 converged = true
+
+Iteration 57 :
+E(electron) : -7.745505
+E(positron) : 0.219782
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -5.7147737564378076058e-07 converged = false
+rmsc dm = 3.7277100368377278166e-14 converged = true
+
+Convergence status for positron
+delta E = 5.2329182542720786842e-07 converged = false
+rmsc dm = 7.1732271115869287874e-13 converged = true
+
+Iteration 58 :
+E(electron) : -7.745506
+E(positron) : 0.219782
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -4.1241102621825120877e-07 converged = false
+rmsc dm = 1.9413442003867972571e-14 converged = true
+
+Convergence status for positron
+delta E = 3.7763864318973716649e-07 converged = false
+rmsc dm = 3.7357627097416949376e-13 converged = true
+
+Iteration 59 :
+E(electron) : -7.745506
+E(positron) : 0.219783
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -2.9761957964780094699e-07 converged = false
+rmsc dm = 1.0110289195756479544e-14 converged = true
+
+Convergence status for positron
+delta E = 2.7252640122377158605e-07 converged = false
+rmsc dm = 1.9455545802250813612e-13 converged = true
+
+Iteration 60 :
+E(electron) : -7.745506
+E(positron) : 0.219783
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -2.1477948397574664341e-07 converged = false
+rmsc dm = 5.2653235199892165588e-15 converged = true
+
+Convergence status for positron
+delta E = 1.9667107745147127673e-07 converged = false
+rmsc dm = 1.0132278401257588932e-13 converged = true
+
+Iteration 61 :
+E(electron) : -7.745507
+E(positron) : 0.219783
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -1.5499726480072695267e-07 converged = false
+rmsc dm = 2.7421227284710258259e-15 converged = true
+
+Convergence status for positron
+delta E = 1.4192935890444680069e-07 converged = false
+rmsc dm = 5.2767984966568518465e-14 converged = true
+
+Iteration 62 :
+E(electron) : -7.745507
+E(positron) : 0.219783
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -1.1185499104726659425e-07 converged = false
+rmsc dm = 1.4280680062597683807e-15 converged = true
+
+Convergence status for positron
+delta E = 1.0242450240727229982e-07 converged = false
+rmsc dm = 2.7481071932474802915e-14 converged = true
+
+Iteration 63 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -8.0721006767703329388e-08 converged = false
+rmsc dm = 7.4372271353128179422e-16 converged = true
+
+Convergence status for positron
+delta E = 7.3915479320563193255e-08 converged = false
+rmsc dm = 1.4311880449248864072e-14 converged = true
+
+Iteration 64 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -5.8252949131087916612e-08 converged = false
+rmsc dm = 3.8732304275716278308e-16 converged = true
+
+Convergence status for positron
+delta E = 5.3341702055398343418e-08 converged = false
+rmsc dm = 7.4534890554377449542e-15 converged = true
+
+Iteration 65 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -4.2038689862522460317e-08 converged = false
+rmsc dm = 2.0171382195601397391e-16 converged = true
+
+Convergence status for positron
+delta E = 3.8494464865701516487e-08 converged = false
+rmsc dm = 3.8817037146210880856e-15 converged = true
+
+Iteration 66 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -3.0337557355153421668e-08 converged = false
+rmsc dm = 1.0505053103078980728e-16 converged = true
+
+Convergence status for positron
+delta E = 2.7779836125896295584e-08 converged = false
+rmsc dm = 2.0215535571702013485e-15 converged = true
+
+Iteration 67 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -2.1893326263011658739e-08 converged = false
+rmsc dm = 5.4709222233191215666e-17 converged = true
+
+Convergence status for positron
+delta E = 2.0047537935274917231e-08 converged = false
+rmsc dm = 1.0528048484725860024e-15 converged = true
+
+Iteration 68 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -1.5799484387457596313e-08 converged = false
+rmsc dm = 2.8492025522801116692e-17 converged = true
+
+Convergence status for positron
+delta E = 1.4467463255174450865e-08 converged = false
+rmsc dm = 5.4829045425180211154e-16 converged = true
+
+Iteration 69 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -1.1401827926249552547e-08 converged = false
+rmsc dm = 1.4838359029299775762e-17 converged = true
+
+Convergence status for positron
+delta E = 1.044055869536819614e-08 converged = false
+rmsc dm = 2.8554405417191856843e-16 converged = true
+
+Iteration 70 :
+E(electron) : -7.745507
+E(positron) : 0.219784
+E(particles) : -7.525723
+Convergence status for electron
+delta E = -8.2282118896159772703e-09 converged = true
+rmsc dm = 7.7276649755646847238e-18 converged = true
+
+Convergence status for positron
+delta E = 7.5345101824275673152e-09 converged = true
+rmsc dm = 1.4870851503485190013e-16 converged = true
+
+SCF SUCCESS
+-7.5257234763075651074
+Dumping HDF5 to filename: Li_wpos.h5
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  642.41890000000000782 0.94411839904983008154
+  96.798490000000001032 1.7295511390255777773
+  22.091090000000001226 2.7239784030035716356
+  6.2010699999999996379 3.3393592318172768962
+  1.9351199999999999513 2.6671857998993417915
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  2.1914600000000001856 0.73061314352765638347
+  0.59613000000000004874 1.4997390859706503097
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.074550000000000005151 0.36045475592422193678
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.028670000000000001039 0.17602963722484091247
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0091999999999999998446 0.075050898295701953811
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.0030999999999999998911 0.033192219560855502902
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=0,sph=1}
+  0.00080000000000000003834 0.012018008711439081421
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  2.1914600000000001856 0.069540294521667656014
+  0.59613000000000004874 0.21548061533021056757
+  0.074550000000000005151 0.10743214825690163006
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.01799999999999999864 0.019234239697098465954
+
+Unique shell on center: 0 named: Li
+Shell:( O={0,0,0}
+   {l=1,sph=1}
+  0.0060000000000000001249 0.0048716205694106324772
+
+dumping file
+dumping application parameters
+dumping PBC parameters
+dumping general parameters
+dumping MOs
+Spin dataset 0 corresponds to electron alpha and beta particles (restricted calculation).
+
+Spin dataset 2 corresponds to positron alpha and beta particles (restricted calculation).
+
+dumping atom parameters
+SHIVSHIVSHIV 2.5264751109842586985
+dumping basis parameters
+before unnormalizing at output 642.41890000000000782 0.94411839904983008154
+after unnormalizing at output 642.41890000000000782 0.0029285167001022582162
+before unnormalizing at output 96.798490000000001032 1.7295511390255777773
+after unnormalizing at output 96.798490000000001032 0.022182829770400747799
+before unnormalizing at output 22.091090000000001226 2.7239784030035716356
+after unnormalizing at output 22.091090000000001226 0.10580977161304046252
+before unnormalizing at output 6.2010699999999996379 3.3393592318172768962
+after unnormalizing at output 6.2010699999999996379 0.33635519612996916949
+before unnormalizing at output 1.9351199999999999513 2.6671857998993417915
+after unnormalizing at output 1.9351199999999999513 0.64343890991639285382
+before unnormalizing at output 2.1914600000000001856 0.73061314352765638347
+after unnormalizing at output 2.1914600000000001856 0.16055443090618215507
+before unnormalizing at output 0.59613000000000004874 1.4997390859706503097
+after unnormalizing at output 0.59613000000000004874 0.87497360564802550975
+before unnormalizing at output 0.074550000000000005151 0.36045475592422193678
+after unnormalizing at output 0.074550000000000005151 1
+before unnormalizing at output 0.028670000000000001039 0.17602963722484091247
+after unnormalizing at output 0.028670000000000001039 1
+before unnormalizing at output 0.0091999999999999998446 0.075050898295701953811
+after unnormalizing at output 0.0091999999999999998446 1
+before unnormalizing at output 0.0030999999999999998911 0.033192219560855502902
+after unnormalizing at output 0.0030999999999999998911 1.000000000000000222
+before unnormalizing at output 0.00080000000000000003834 0.012018008711439081421
+after unnormalizing at output 0.00080000000000000003834 1
+before unnormalizing at output 2.1914600000000001856 0.069540294521667656014
+after unnormalizing at output 2.1914600000000001856 0.0089399522288950480226
+before unnormalizing at output 0.59613000000000004874 0.21548061533021056757
+after unnormalizing at output 0.59613000000000004874 0.14100924650967455731
+before unnormalizing at output 0.074550000000000005151 0.10743214825690163006
+after unnormalizing at output 0.074550000000000005151 0.94534494849954509021
+before unnormalizing at output 0.01799999999999999864 0.019234239697098465954
+after unnormalizing at output 0.01799999999999999864 1
+before unnormalizing at output 0.0060000000000000001249 0.0048716205694106324772
+after unnormalizing at output 0.0060000000000000001249 1.000000000000000222
+Rank =    0  Free Memory =   905 MB
+Index of ion charge 0
+Index of valence charge 1
+Using Li_wpos to name output files
+Converting Wavefunction from the Polyquant Code
+Periodic Boundary Conditions: no
+usingECP: no
+Multideterminants: no
+NUMBER OF AOs: 16
+Size of Basis Set: 16
+NUMBER OF MOs: 16
+Unit in Bohr=1
+Number of alpha electrons: 2
+Number of beta electrons: 2
+Number of electrons: 4
+SPIN MULTIPLICITY: 1
+NUMBER OF ATOMS: 1
+ QMCGaussianParserBase::dump 
+Number of alpha electrons 2
+Number of beta electrons 2
+ Generating Standard Input file containing VMC, standard optmization, and DMC blocks.
+ Modify according to the accuracy you would like to achieve. 
+ QMCGaussianParserBase::dump 
+Number of alpha electrons 2
+Number of beta electrons 2
+Adding Two-Body and One-Body jastrows with rcut="10" and size="10"
+Adding Three-Body jastrows with rcut="5"
+ Generating Standard Input file containing VMC, standard optmization, and DMC blocks.
+ Modify according to the accuracy you would like to achieve. 
+
+
+SUMMARY
+
+Polyquant
+                            LocalEnergy               Variance           ratio 
+Li_wpos  series 0  -7.526989 +/- 0.001405    1.1   1.658329 +/- 0.031603    1.0   0.2203 

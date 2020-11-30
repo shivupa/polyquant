@@ -1,0 +1,23 @@
+{
+  "molecule": {
+    "geometry": [
+        0.000000,0.00000000, 0.3755,
+        0.000000,0.00000000, -0.3755
+    ],
+    "symbols": [ "H", "H"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "scf",
+    "basis": 
+        {"H" : [{ "library" : {"type" : "cc-pv5z"} }]}
+  },
+  "keywords": {
+    "restricted" : true,
+   "dump_for_qmcpack" : true,
+   "pure" : true
+  }
+}
+

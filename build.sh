@@ -3,11 +3,13 @@
 rm -rf build
 mkdir -p build
 cd build
-cmake ..
-.
-make -j 1
+cmake \
+    -DPOLYQUANT_DEBUG=0 \
+    -DPOLYQUANT_DOC=0 \
+    -DPOLYQUANT_TEST=0 \
+    ..
+make -j 4
 #make test
-ctest
 #make Sphinx
 #cd ..
 #cd examples/h2o

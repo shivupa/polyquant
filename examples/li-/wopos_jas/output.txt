@@ -1,0 +1,1177 @@
+HDF5 "Li_wopos.h5" {
+GROUP "/" {
+   GROUP "PBC" {
+      DATASET "PBC" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 0
+         }
+      }
+   }
+   GROUP "Super_Twist" {
+      DATASET "eigenset_0" {
+         DATATYPE  H5T_IEEE_F64LE
+         DATASPACE  SIMPLE { ( 16, 16 ) / ( 16, 16 ) }
+         DATA {
+         (0,0): 0.196758, 0.102484, 0.00472908, -0.00337396, 0.00168856,
+         (0,5): -0.000732127, 0.000184546, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         (1,0): 0.0222857, 0.0321999, -0.0687765, -0.120416, -0.111152,
+         (1,5): -0.0245707, -0.00123143, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         (2,0): 0.000599193, -0.000335222, 0.0152137, -0.0642549, 0.180013,
+         (2,5): -0.394799, 0.44799, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         (3,0): -0.0047493, -0.010128, 0.0635663, -0.158726, 0.558455,
+         (3,5): -0.696867, 0.164565, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         (4,0): 0, 0, 0, 0, 0, 0, 0, -0.0368714, -8.74756e-05, -0.0160693,
+         (4,10): 0.216764, 0.000514262, 0.0944703, -0.570447, -0.00135336,
+         (4,15): -0.248613,
+         (5,0): 0, 0, 0, 0, 0, 0, 0, 0.0150888, 0.0136477, -0.0346958,
+         (5,10): -0.0887058, -0.0802336, 0.203974, 0.233443, 0.211147,
+         (5,15): -0.536788,
+         (6,0): 0, 0, 0, 0, 0, 0, 0, 0.00552806, -0.0378347, -0.0124783,
+         (6,10): -0.032499, 0.222427, 0.0733587, 0.0855261, -0.58535,
+         (6,15): -0.193055,
+         (7,0): -0.0152688, -0.0134797, -0.101581, 0.662263, -0.851005,
+         (7,5): 0.379714, -0.0857665, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         (8,0): 0, 0, 0, 0, 0, 0, 0, -0.000481589, -0.0048124, 0.0031592,
+         (8,10): -0.0538716, -0.538326, 0.353395, 0.0254599, 0.254415,
+         (8,15): -0.167016,
+         (9,0): 0, 0, 0, 0, 0, 0, 0, 0.000398975, 0.00313471, 0.00483591,
+         (9,10): 0.0446302, 0.350655, 0.540956, -0.0210924, -0.165721,
+         (9,15): -0.255658,
+         (10,0): 0, 0, 0, 0, 0, 0, 0, -0.00574287, 0.000621339, 7.10405e-05,
+         (10,10): -0.64241, 0.0695044, 0.00794674, 0.303605, -0.032848,
+         (10,15): -0.00375566,
+         (11,0): 0, 0, 0, 0, 0, 0, 0, 4.02711e-17, -0.00865288, 0.606105,
+         (11,10): -2.51078e-16, 0.00669245, -0.468784, 3.36018e-16,
+         (11,14): -0.00255436, 0.178924,
+         (12,0): 0, 0, 0, 0, 0, 0, 0, 0.606167, 1.47137e-15, 1.38752e-17,
+         (12,10): -0.468832, -8.72932e-16, -1.5649e-17, 0.178943,
+         (12,14): 3.10365e-16, 3.78055e-18,
+         (13,0): 0, 0, 0, 0, 0, 0, 0, -1.28561e-15, 0.606105, 0.00865288,
+         (13,10): 5.78234e-16, -0.468784, -0.00669245, 3.66906e-17, 0.178924,
+         (13,15): 0.00255436,
+         (14,0): 0.034322, 0.0851972, -0.749666, 0.943567, -0.500704,
+         (14,5): 0.201784, -0.0476305, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         (15,0): 0.395355, -0.506154, 0.332347, -0.290259, 0.150455,
+         (15,5): -0.0650182, 0.0162785, 0, 0, 0, 0, 0, 0, 0, 0, 0
+         }
+      }
+      DATASET "eigenval_0" {
+         DATATYPE  H5T_IEEE_F64LE
+         DATASPACE  SIMPLE { ( 1, 16 ) / ( 1, 16 ) }
+         DATA {
+         (0,0): -2.31878, -0.014542, 0.02979, 0.0635301, 0.0785557,
+         (0,5): 0.0785557, 0.0785557, 0.137903, 0.147323, 0.147323, 0.147323,
+         (0,11): 0.294013, 0.294013, 0.294013, 0.336063, 2.89912
+         }
+      }
+   }
+   GROUP "application" {
+      DATASET "code" {
+         DATATYPE  H5T_STRING {
+            STRSIZE 9;
+            STRPAD H5T_STR_NULLPAD;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): "Polyquant"
+         }
+      }
+   }
+   GROUP "atoms" {
+      DATASET "number_of_atoms" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 1
+         }
+      }
+      DATASET "number_of_species" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 1
+         }
+      }
+      DATASET "positions" {
+         DATATYPE  H5T_IEEE_F64LE
+         DATASPACE  SIMPLE { ( 1, 3 ) / ( 1, 3 ) }
+         DATA {
+         (0,0): 0, 0, 0
+         }
+      }
+      GROUP "species_0" {
+         DATASET "atomic_number" {
+            DATATYPE  H5T_STD_I32LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 3
+            }
+         }
+         DATASET "charge" {
+            DATATYPE  H5T_STD_I32LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 3
+            }
+         }
+         DATASET "core" {
+            DATATYPE  H5T_STD_I32LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 0
+            }
+         }
+         DATASET "name" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 2;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "Li"
+            }
+         }
+      }
+      DATASET "species_ids" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 0
+         }
+      }
+   }
+   GROUP "basisset" {
+      DATASET "NbElements" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 1
+         }
+      }
+      GROUP "atomicBasisSet0" {
+         DATASET "NbBasisGroups" {
+            DATATYPE  H5T_STD_I32LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 10
+            }
+         }
+         DATASET "angular" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 9;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "spherical"
+            }
+         }
+         GROUP "basisGroup0" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 5
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.00292852
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 642.419
+                     }
+                  }
+               }
+               GROUP "DataRad1" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.0221828
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 96.7985
+                     }
+                  }
+               }
+               GROUP "DataRad2" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.10581
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 22.0911
+                     }
+                  }
+               }
+               GROUP "DataRad3" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.336355
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 6.20107
+                     }
+                  }
+               }
+               GROUP "DataRad4" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.643439
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1.93512
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li00"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup1" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 2
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.160554
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 2.19146
+                     }
+                  }
+               }
+               GROUP "DataRad1" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.874974
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.59613
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li10"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup2" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 2
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.07455
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li20"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup3" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 3
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.02867
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li30"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup4" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 4
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.0092
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li40"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup5" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 5
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.0031
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li50"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup6" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 0
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 6
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.0008
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li60"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup7" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 3
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 7
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.00893995
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 2.19146
+                     }
+                  }
+               }
+               GROUP "DataRad1" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.141009
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.59613
+                     }
+                  }
+               }
+               GROUP "DataRad2" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.945345
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.07455
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li71"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup8" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 8
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.018
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li81"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         GROUP "basisGroup9" {
+            DATASET "NbRadFunc" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "Shell_coord" {
+               DATATYPE  H5T_IEEE_F64LE
+               DATASPACE  SIMPLE { ( 3 ) / ( 3 ) }
+               DATA {
+               (0): 0, 0, 0
+               }
+            }
+            DATASET "l" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 1
+               }
+            }
+            DATASET "n" {
+               DATATYPE  H5T_STD_I32LE
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): 9
+               }
+            }
+            GROUP "radfunctions" {
+               GROUP "DataRad0" {
+                  DATASET "contraction" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 1
+                     }
+                  }
+                  DATASET "exponent" {
+                     DATATYPE  H5T_IEEE_F64LE
+                     DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+                     DATA {
+                     (0): 0.006
+                     }
+                  }
+               }
+            }
+            DATASET "rid" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 4;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Li91"
+               }
+            }
+            DATASET "type" {
+               DATATYPE  H5T_STRING {
+                  STRSIZE 8;
+                  STRPAD H5T_STR_NULLPAD;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
+               }
+               DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+               DATA {
+               (0): "Gaussian"
+               }
+            }
+         }
+         DATASET "elementType" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 2;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "Li"
+            }
+         }
+         DATASET "expandYlm" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 7;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "natural"
+            }
+         }
+         DATASET "grid_npts" {
+            DATATYPE  H5T_STD_I32LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 1001
+            }
+         }
+         DATASET "grid_rf" {
+            DATATYPE  H5T_STD_I32LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 100
+            }
+         }
+         DATASET "grid_ri" {
+            DATATYPE  H5T_IEEE_F64LE
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): 1e-06
+            }
+         }
+         DATASET "grid_type" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 3;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "log"
+            }
+         }
+         DATASET "name" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 2;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "Li"
+            }
+         }
+         DATASET "normalized" {
+            DATATYPE  H5T_STRING {
+               STRSIZE 2;
+               STRPAD H5T_STR_NULLPAD;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
+            }
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+            DATA {
+            (0): "no"
+            }
+         }
+      }
+      DATASET "name" {
+         DATATYPE  H5T_STRING {
+            STRSIZE 8;
+            STRPAD H5T_STR_NULLPAD;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): "LCAOBSet"
+         }
+      }
+   }
+   GROUP "parameters" {
+      DATASET "ECP" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 0
+         }
+      }
+      DATASET "IsComplex" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 0
+         }
+      }
+      DATASET "NbAlpha" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 2
+         }
+      }
+      DATASET "NbBeta" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 2
+         }
+      }
+      DATASET "NbTotElec" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 4
+         }
+      }
+      DATASET "SpinRestricted" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 1
+         }
+      }
+      DATASET "Unit" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 1
+         }
+      }
+      DATASET "numAO" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 16
+         }
+      }
+      DATASET "numMO" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 16
+         }
+      }
+      DATASET "spin" {
+         DATATYPE  H5T_STD_I32LE
+         DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+         DATA {
+         (0): 1
+         }
+      }
+   }
+}
+}

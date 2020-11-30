@@ -1,0 +1,30 @@
+memory 1 gb
+
+molecule h2o {
+0 1
+O   0.0000000 0.0000000  0.0000000
+H   0.7569685 0.0000000 -0.5858752
+H  -0.7569685 0.0000000 -0.5858752
+}
+
+basis {
+    assign O cc-pvtz
+    assign H cc-pvtz
+}
+
+set {
+PUREAM true
+guess SAP
+reference rhf
+scf_type PK
+D_CONVERGENCE 1e-12
+E_CONVERGENCE 1e-12
+R_CONVERGENCE 1e-10
+ints_tolerance 1.0E-14
+MAXITER 200
+}
+
+E, scf_wfn = properties('scf', return_wfn=True)
+
+molden(scf_wfn, 'scf_molden.molden')
+

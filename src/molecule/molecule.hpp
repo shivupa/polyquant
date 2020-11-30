@@ -1,3 +1,5 @@
+#ifndef POLYQUANT_MOLECULE_H
+#define POLYQUANT_MOLECULE_H
 #include "io/io.hpp"
 #include "molecule/classical_particles.hpp"
 #include "molecule/quantum_particles.hpp"
@@ -8,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#ifndef POLYQUANT_MOLECULE_H
-#define POLYQUANT_MOLECULE_H
 namespace polyquant {
 
 /**

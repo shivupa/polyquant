@@ -2,7 +2,11 @@
 
 using namespace polyquant;
 
-POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input) { setup_molecule(input); }
+POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  setup_molecule(input);
+}
 
 void POLYQUANT_MOLECULE::set_molecular_charge(const POLYQUANT_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_charge")) {
@@ -13,7 +17,8 @@ void POLYQUANT_MOLECULE::set_molecular_charge(const POLYQUANT_INPUT &input) {
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_multiplicity(const POLYQUANT_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_multiplicity(
+    const POLYQUANT_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_multiplicity")) {
     this->multiplicity = input.input_data["molecule"]["molecular_multiplicity"];
   } else {
@@ -22,7 +27,8 @@ void POLYQUANT_MOLECULE::set_molecular_multiplicity(const POLYQUANT_INPUT &input
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_restricted(
+    const POLYQUANT_INPUT &input) {
   if (input.input_data["keywords"].contains("restricted")) {
     this->restricted = input.input_data["keywords"]["restricted"];
   } else {
@@ -34,8 +40,8 @@ void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) 
 void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
-  Polyquant_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) /
-             3);
+  Polyquant_cout(
+      static_cast<int>(input.input_data["molecule"]["geometry"].size()) / 3);
   for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3);
        ++i) {
     std::vector<double> atom = {};
@@ -78,8 +84,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
               }
             }
             if (!found_at_least_once) {
-              Polyquant_cout("The label '" + quantum_label +
-                         "' was not found in the atomic labels. Skipping...");
+              Polyquant_cout(
+                  "The label '" + quantum_label +
+                  "' was not found in the atomic labels. Skipping...");
             }
           }
         }
@@ -111,8 +118,8 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
     }
   } else {
     Polyquant_cout("The input didn't contain a section called 'keywords'. All "
-               "nuclei are going to be treated classically. No quantum "
-               "particles present besides electrons.");
+                   "nuclei are going to be treated classically. No quantum "
+                   "particles present besides electrons.");
   }
 
   // classical nuclei
@@ -172,10 +179,10 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
       APP_ABORT(
           "Could not automatically set quantum particle num alpha and beta.");
     }
-    quantum_part.multiplicity =
+    quantum_part.multiplicity = (int)std::round(
         (std::abs(quantum_part.num_parts_alpha - quantum_part.num_parts_beta) *
          quantum_part.spin) +
-        1;
+        1);
     if (quantum_part.num_parts == 1) {
       quantum_part.restricted = false;
     } else {
@@ -311,13 +318,13 @@ void POLYQUANT_MOLECULE::print_molecule() {
     Polyquant_cout("mass: " + std::to_string(classical_part.mass));
     Polyquant_cout("charge: " + std::to_string(classical_part.charge));
     Polyquant_cout("number of particles: " +
-               std::to_string(classical_part.num_parts));
+                   std::to_string(classical_part.num_parts));
     Polyquant_cout("Center idx    x   y   z");
     for (auto idx : classical_part.center_idx) {
       Polyquant_cout(std::to_string(idx) + "    " +
-                 std::to_string(this->centers[idx][0]) + "    " +
-                 std::to_string(this->centers[idx][1]) + "    " +
-                 std::to_string(this->centers[idx][2]));
+                     std::to_string(this->centers[idx][0]) + "    " +
+                     std::to_string(this->centers[idx][1]) + "    " +
+                     std::to_string(this->centers[idx][2]));
     }
     Polyquant_cout("");
   }
@@ -331,19 +338,20 @@ void POLYQUANT_MOLECULE::print_molecule() {
     Polyquant_cout("mass: " + std::to_string(quantum_part.mass));
     Polyquant_cout("charge: " + std::to_string(quantum_part.charge));
     Polyquant_cout("spin: " + std::to_string(quantum_part.spin));
-    Polyquant_cout("multiplicity: " + std::to_string(quantum_part.multiplicity));
+    Polyquant_cout("multiplicity: " +
+                   std::to_string(quantum_part.multiplicity));
     Polyquant_cout("number of particles: " +
-               std::to_string(quantum_part.num_parts));
+                   std::to_string(quantum_part.num_parts));
     Polyquant_cout("number of particles (alpha): " +
-               std::to_string(quantum_part.num_parts_alpha));
+                   std::to_string(quantum_part.num_parts_alpha));
     Polyquant_cout("number of particles (beta): " +
-               std::to_string(quantum_part.num_parts_beta));
+                   std::to_string(quantum_part.num_parts_beta));
     Polyquant_cout("Center idx    x   y   z");
     for (auto idx : quantum_part.center_idx) {
       Polyquant_cout(std::to_string(idx) + "    " +
-                 std::to_string(this->centers[idx][0]) + "    " +
-                 std::to_string(this->centers[idx][1]) + "    " +
-                 std::to_string(this->centers[idx][2]));
+                     std::to_string(this->centers[idx][0]) + "    " +
+                     std::to_string(this->centers[idx][1]) + "    " +
+                     std::to_string(this->centers[idx][2]));
     }
     std::stringstream buffer;
     buffer << "exchange: " << std::boolalpha << quantum_part.exchange

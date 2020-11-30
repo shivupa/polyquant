@@ -3,6 +3,8 @@
 using namespace polyquant;
 
 POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->setup_calculation(filename);
 }
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
@@ -17,8 +19,8 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   this->input_basis = POLYQUANT_BASIS(this->input_params, this->input_molecule);
   // parse integral
   Polyquant_cout("SETTING UP INTEGRAL");
-  this->input_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis,
-                                       this->input_molecule);
+  this->input_integral = POLYQUANT_INTEGRAL(
+      this->input_params, this->input_basis, this->input_molecule);
 }
 
 void POLYQUANT_CALCULATION::run() {
@@ -43,7 +45,7 @@ void POLYQUANT_CALCULATION::run() {
   std::string mean_field_type = this->parse_electronic_mean_field();
   // if (do_excess_electron && do_positron) {
   // excess electron + positron + electrons
-  //  APP_ABORT("SELCI can't handle a model excess electron and positron "
+  //  APP_ABORT("POLYQUANT can't handle a model excess electron and positron "
   //           "calculation. It isn't readily apparent if this is a physically "
   //           "meaningful calculation type.");
   //} else if (do_excess_electron) {
@@ -64,13 +66,14 @@ void POLYQUANT_CALCULATION::run() {
 //    std::string &mean_field_type) {
 //  if (mean_field_type == "NONE") {
 //    APP_ABORT(
-//        "SELCI must run a electronic mean-field calculation when treating an "
-//        "excess particle (e+ or e-). At least until orbitals can be read
+//        "POLYQUANT must run a electronic mean-field calculation when treating
+//        an " "excess particle (e+ or e-). At least until orbitals can be read
 //        in.");
 //  }
 //  Polyquant_cout("We will be approximately treating an excess positron!");
 //  if (mean_field_type == "RHF") {
-//    POLYQUANT_RHF rhf_calc = POLYQUANT_RHF(this->input_params, this->input_molecule,
+//    POLYQUANT_RHF rhf_calc = POLYQUANT_RHF(this->input_params,
+//    this->input_molecule,
 //                                 this->input_basis, this->input_integral);
 //    rhf_calc.run();
 //    POLYQUANT_EPRHF eprhf_calc = POLYQUANT_EPRHF(this->input_params,
@@ -103,13 +106,14 @@ void POLYQUANT_CALCULATION::run() {
 //    std::string &mean_field_type) {
 //  if (mean_field_type == "NONE") {
 //    APP_ABORT(
-//        "SELCI must run a electronic mean-field calculation when treating an "
-//        "excess particle (e+ or e-). At least until orbitals can be read
+//        "POLYQUANT must run a electronic mean-field calculation when treating
+//        an " "excess particle (e+ or e-). At least until orbitals can be read
 //        in.");
 //  }
 //  Polyquant_cout("We will be approximately treating an excess electron!");
 //  if (mean_field_type == "RHF") {
-//    POLYQUANT_RHF rhf_calc = POLYQUANT_RHF(this->input_params, this->input_molecule,
+//    POLYQUANT_RHF rhf_calc = POLYQUANT_RHF(this->input_params,
+//    this->input_molecule,
 //                                 this->input_basis, this->input_integral);
 //    rhf_calc.run();
 //    POLYQUANT_EPRHF eprhf_calc = POLYQUANT_EPRHF(this->input_params,
@@ -141,8 +145,9 @@ void POLYQUANT_CALCULATION::run() {
 //}
 
 std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
-  Polyquant_cout("Figuring out if we need to run a mean-field calculation for the "
-             "electrons...");
+  Polyquant_cout(
+      "Figuring out if we need to run a mean-field calculation for the "
+      "electrons...");
   std::string mean_field_type = "NONE";
   // check that json contains a mean field object and assign to string
   if (this->input_params.input_data.contains("model")) {
@@ -161,16 +166,194 @@ std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
     Polyquant_cout("Unrecognized mean field calculation type: ");
     Polyquant_cout(mean_field_type);
     // APP ABORT HERE
-    APP_ABORT("SELCI mean field parsing error. I can't understand the input "
-              "provided. Could you double-check it?");
+    APP_ABORT(
+        "POLYQUANT mean field parsing error. I can't understand the input "
+        "provided. Could you double-check it?");
   }
   return mean_field_type;
 }
 
-void POLYQUANT_CALCULATION::run_electronic_mean_field(std::string &mean_field_type) {
+void POLYQUANT_CALCULATION::run_electronic_mean_field(
+    std::string &mean_field_type) {
   if (mean_field_type == "SCF") {
-    POLYQUANT_EPSCF rhf_calc = POLYQUANT_EPSCF(this->input_params, this->input_molecule,
-                                     this->input_basis, this->input_integral);
-    rhf_calc.run();
+    POLYQUANT_EPSCF scf_calc =
+        POLYQUANT_EPSCF(this->input_params, this->input_molecule,
+                        this->input_basis, this->input_integral);
+    bool dump_for_qmcpack = false;
+    std::string hdf5_filename = "Default.h5";
+    if (this->input_params.input_data.contains("keywords")) {
+      if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
+        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+                "dump_for_qmcpack")) {
+          dump_for_qmcpack =
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["dump_for_qmcpack"];
+        }
+        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+                "hdf5_filename_qmcpack")) {
+          hdf5_filename =
+              this->input_params.input_data["keywords"]["mf_keywords"]
+                                           ["hdf5_filename_qmcpack"];
+        }
+        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+                "convergence_E")) {
+          scf_calc.convergence_E =
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["convergence_E"];
+        }
+        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+                "convergence_DM")) {
+          scf_calc.convergence_DM =
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["convergence_DM"];
+        }
+        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+                "iteration_max")) {
+          scf_calc.iteration_max =
+              this->input_params
+                  .input_data["keywords"]["mf_keywords"]["iteration_max"];
+        }
+      }
+    }
+    scf_calc.run();
+    if (dump_for_qmcpack) {
+      dump_mf_for_qmcpack(scf_calc, hdf5_filename);
+    }
   }
+}
+void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc,
+                                                std::string &filename) {
+  std::vector<int> atomic_species_ids;
+  std::vector<int> atomic_number;
+  std::vector<int> atomic_charge;
+  std::vector<int> core_elec;
+  std::vector<std::string> atomic_names;
+  std::vector<std::vector<double>> atomic_centers =
+      this->input_molecule.centers;
+  atomic_species_ids.resize(this->input_molecule.centers.size());
+  std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx =
+      0;
+  for (auto const &[classical_part_key, classical_part] :
+       this->input_molecule.classical_particles) {
+    for (auto idx : classical_part.center_idx) {
+      atomic_species_ids[idx] = classical_part_idx;
+    }
+    atomic_number.push_back((int)classical_part.charge);
+    atomic_charge.push_back((int)classical_part.charge);
+    core_elec.push_back(0);
+    atomic_names.push_back(classical_part_key);
+    classical_part_idx++;
+  }
+
+  auto electron_idx = 0ul;
+  auto count = 0ul;
+  std::vector<std::string> quantum_part_names;
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+    quantum_part_names.push_back(quantum_part_key);
+    if (quantum_part_key == "electron") {
+      electron_idx = count;
+    }
+    count++;
+  }
+  Polyquant_cout("Dumping HDF5 to filename: " + filename);
+  bool pbc = false;
+  bool ecp = false;
+  bool complex_vals = false;
+  bool restricted =
+      this->input_molecule.quantum_particles["electron"].restricted;
+  int num_ao = this->input_basis.num_basis;
+  int num_mo = this->input_basis.num_basis;
+  bool bohr_unit = true;
+  int num_part_alpha =
+      this->input_molecule.quantum_particles["electron"].num_parts_alpha;
+  int num_part_beta =
+      this->input_molecule.quantum_particles["electron"].num_parts_beta;
+  int num_part_total =
+      this->input_molecule.quantum_particles["electron"].num_parts;
+  int multiplicity =
+      this->input_molecule.quantum_particles["electron"].multiplicity;
+  int num_atom = this->input_molecule.centers.size();
+  int num_species = this->input_molecule.classical_particles.size();
+
+  libint2::BasisSet basis = this->input_basis.basis;
+  bool pure = true;
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("pure")) {
+      pure = this->input_params.input_data["keywords"]["pure"];
+    }
+  }
+  std::string pure_or_cart = "spherical";
+  if (!pure) {
+    std::string pure_or_cart = "cartesian";
+  }
+  //  "cartesian"
+
+  // auto i = 0ul;
+  // for (auto shell : basis) {
+  //   std::cout << shell << std::endl;
+  //   i++;
+  // }
+  // auto idx =
+  //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
+  // if (idx != basis_shell2atom.end()) {
+  //   Polyquant_cout("Basis shell doesn't correspond to a classical "
+  //                  "center! This shouldn't happen. Basis shell:");
+  //   std::string idx_string(1, *idx);
+  //   Polyquant_cout("Shell:" + idx_string);
+  //   Polyquant_cout(basis[*idx]);
+  //   // APP_ABORT("Shell doesn't correspond to center");
+  // }
+
+  std::vector<std::vector<libint2::Shell>> unique_shells;
+  unique_shells.resize(this->input_molecule.classical_particles.size());
+  classical_part_idx = 0;
+  double EPSILON = 1e-6;
+  for (auto const &[classical_part_key, classical_part] :
+       this->input_molecule.classical_particles) {
+    // Polyquant_cout(classical_part_key);
+    for (auto shell : this->input_basis.basis) {
+      // Polyquant_cout( std::to_string(shell.O[0]) + " " +
+      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+      // + " " + std::to_string(shell.O[0]
+      // -this->input_molecule.centers[classical_part.center_idx[0]][0])
+      // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
+      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+      // + " " + std::to_string(shell.O[1]
+      // -this->input_molecule.centers[classical_part.center_idx[0]][1])
+      // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
+      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+      // + " " + std::to_string(shell.O[2]
+      // -this->input_molecule.centers[classical_part.center_idx[0]][2])
+      // );
+      if (std::abs(
+              shell.O[0] -
+              this->input_molecule.centers[classical_part.center_idx[0]][0]) <
+              EPSILON &&
+          std::abs(
+              shell.O[1] -
+              this->input_molecule.centers[classical_part.center_idx[0]][1]) <
+              EPSILON &&
+          std::abs(
+              shell.O[2] -
+              this->input_molecule.centers[classical_part.center_idx[0]][2]) <
+              EPSILON) {
+
+        // Polyquant_cout("Unique shell on center: " +
+        //                std::to_string(classical_part.center_idx[0]) +
+        //                " named: " + classical_part_key);
+        // Polyquant_cout(shell);
+        unique_shells[classical_part_idx].push_back(shell);
+      }
+    }
+    classical_part_idx++;
+  }
+
+  Polyquant_dump_hdf5_for_QMCPACK(
+      filename, pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit,
+      num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom,
+      num_species, quantum_part_names, scf_calc.E_orbitals, scf_calc.C,
+      atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names,
+      atomic_centers, unique_shells);
+  //}
 }

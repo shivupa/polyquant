@@ -1,15 +1,14 @@
+#ifndef POLYQUANT_CALCULATION_H
+#define POLYQUANT_CALCULATION_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
-#include <algorithm>
-// #include <scf/eprhf.hpp>
 #include "scf/epscf.hpp"
+#include <algorithm>
 #include <string>
 #include <unordered_set>
 
-#ifndef POLYQUANT_CALCULATION_H
-#define POLYQUANT_CALCULATION_H
 namespace polyquant {
 
 /**
@@ -50,6 +49,7 @@ public:
   run_excess_positron_plus_electronic_mean_field(std::string &mean_field_type);
 
   std::string parse_electronic_mean_field();
+  void dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc, std::string &filename);
   /**
    * @brief the input parameters
    *

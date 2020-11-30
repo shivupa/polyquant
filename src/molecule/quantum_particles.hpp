@@ -1,3 +1,5 @@
+#ifndef POLYQUANT_QUANTUM_PARTICLE_SET_H
+#define POLYQUANT_QUANTUM_PARTICLE_SET_H
 #include "io/io.hpp"
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma: keep
@@ -5,14 +7,12 @@
 #include <string>
 #include <vector>
 
-#ifndef POLYQUANT_QUANTUM_PARTICLE_SET_H
-#define POLYQUANT_QUANTUM_PARTICLE_SET_H
 namespace polyquant {
 struct QUANTUM_PARTICLE_SET {
   double spin;
   double mass;
   double charge;
-  double multiplicity;
+  int multiplicity;
   int num_parts;
   int num_parts_alpha;
   int num_parts_beta;
