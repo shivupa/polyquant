@@ -3,6 +3,8 @@
 using namespace polyquant;
 
 POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->setup_calculation(filename);
 }
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
@@ -337,10 +339,10 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc,
               this->input_molecule.centers[classical_part.center_idx[0]][2]) <
               EPSILON) {
 
-        Polyquant_cout("Unique shell on center: " +
-                       std::to_string(classical_part.center_idx[0]) +
-                       " named: " + classical_part_key);
-        Polyquant_cout(shell);
+        // Polyquant_cout("Unique shell on center: " +
+        //                std::to_string(classical_part.center_idx[0]) +
+        //                " named: " + classical_part_key);
+        // Polyquant_cout(shell);
         unique_shells[classical_part_idx].push_back(shell);
       }
     }

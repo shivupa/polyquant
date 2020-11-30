@@ -3,6 +3,8 @@
 using namespace polyquant;
 
 POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   setup_molecule(input);
 }
 

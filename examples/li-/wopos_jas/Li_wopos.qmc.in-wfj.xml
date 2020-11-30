@@ -95,4 +95,14 @@ wavefunction file, do not reoptimize.
     <!--Sample count should match targetwalker count for DMC. Will be obtained from all nodes.-->
     <parameter name="samples">16000</parameter>
   </qmc>
+  <qmc method="dmc" move="pbyp" checkpoint="20">
+    <estimator name="LocalEnergy" hdf5="no"/>
+    <parameter name="targetwalkers">16000</parameter>
+    <parameter name="reconfiguration">no</parameter>
+    <parameter name="warmupSteps">100</parameter>
+    <parameter name="timestep">0.0005</parameter>
+    <parameter name="steps">30</parameter>
+    <parameter name="blocks">1000</parameter>
+    <parameter name="nonlocalmoves">v3</parameter>
+  </qmc>
 </simulation>

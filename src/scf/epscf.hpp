@@ -7,6 +7,7 @@
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <libint2/chemistry/sto3g_atomic_density.h>
+#include <libint2/diis.h>
 #include <string>
 
 namespace polyquant {
@@ -105,7 +106,11 @@ public:
    * @brief Iteration rmsc DM
    *
    */
-  std::vector<std::vector<double>> iteration_rmsc_dm;
+  std::vector<std::vector<double>> iteration_rms_error;
+
+  std::vector<std::vector<
+      libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>
+      diis;
   /**
    * @brief Stop running iterations?
    *
