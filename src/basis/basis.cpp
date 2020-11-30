@@ -4,6 +4,8 @@ using namespace polyquant;
 
 POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input,
                                  const POLYQUANT_MOLECULE &molecule) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->load_basis(input, molecule);
 }
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
@@ -125,10 +127,10 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
   };
   auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
     auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
-    return 1.0/std::sqrt(gint_val);
+    return 1.0 / std::sqrt(gint_val);
   };
-  std::cout << "SHIVSHIV " << gtonorm_lambda(0,1) << std::endl;
-  for (auto& shell : this->basis) {
+  // std::cout << "SHIVSHIV " << gtonorm_lambda(0, 1) << std::endl;
+  for (auto &shell : this->basis) {
     // REMOVE NORMALIZATION FACTOR FROM LIBINT
     // SEE SHELL.H
     // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
@@ -148,13 +150,15 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
     auto l = shell.contr[0].l;
     // apply pyscf gtonorm
     for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-      // std::cout << "before gto pyscf norm "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
-                // << std::endl;
-      shell.contr[0].coeff.at(p) *= gtonorm_lambda(l,shell.alpha[p]);
-      // std::cout << "after gto pyscf norm "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
+      // std::cout << "before gto pyscf norm "<< shell.alpha[p] << " " <<
+      // shell.contr[0].coeff.at(p)
+      // << std::endl;
+      shell.contr[0].coeff.at(p) *= gtonorm_lambda(l, shell.alpha[p]);
+      // std::cout << "after gto pyscf norm "<< shell.alpha[p] << " " <<
+      // shell.contr[0].coeff.at(p)
       //           << std::endl;
     }
-  
+
     // apply pyscf _nomalize_contracted_ao
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ee;
     ee.setZero(shell.alpha.size(), shell.alpha.size());
@@ -174,11 +178,12 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
     }
     s1 = 1.0 / std::sqrt(s1);
     for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-      // std::cout << "before _nomalize_contracted_ao "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
-                // << std::endl;
+      // std::cout << "before _nomalize_contracted_ao "<< shell.alpha[p] << " "
+      // << shell.contr[0].coeff.at(p)
+      // << std::endl;
       shell.contr[0].coeff.at(p) *= s1;
-      std::cout << "after _nomalize_contracted_ao "<< shell.alpha[p] << " " << shell.contr[0].coeff.at(p)
-                << std::endl;
+      // std::cout << "after _nomalize_contracted_ao " << shell.alpha[p] << " "
+      //           << shell.contr[0].coeff.at(p) << std::endl;
     }
   }
   for (auto shell : this->basis) {

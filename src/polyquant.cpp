@@ -1,4 +1,6 @@
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
+#define EIGEN_USE_MKL_ALL
+#include <Eigen/Core>
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>
 #include <string>
@@ -6,6 +8,9 @@
 using namespace polyquant;
 
 int main(int argc, char **argv) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  Eigen::initParallel();
   cxxopts::Options options("polyquant", "Multiple quantum particles.");
   options.add_options()("i,input", "input filename",
                         cxxopts::value<std::string>())("h,help", "Print usage");

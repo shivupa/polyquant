@@ -49,7 +49,7 @@ public:
   run_excess_positron_plus_electronic_mean_field(std::string &mean_field_type);
 
   std::string parse_electronic_mean_field();
-  void dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc);
+  void dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc, std::string &filename);
   /**
    * @brief the input parameters
    *

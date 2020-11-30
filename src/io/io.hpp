@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <h5cpp/hdf5.hpp>
 #include <iomanip>
@@ -39,7 +40,14 @@ template <typename T> void Polyquant_cout(const T &message) {
   // std::cout << std::fixed << std::showpoint << std::setw(20)
   std::cout << std::setprecision(20) << message << std::endl;
   //}
+  //
+  //
 }
+
+// replace with C++20 std::source_location::function_name once supported
+// std::string source_loc(){
+//    return __PRETTY_FUNCTION__;
+//};
 
 int atom_symb_to_num(std::string key);
 
@@ -83,8 +91,11 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,
-    int num_species, std::vector<std::vector<double>> E_orb,
-    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff,
+    int num_species, std::vector<std::string> quantum_part_names,
+    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orb,
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        mo_coeff,
     std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
     std::vector<int> atomic_charge, std::vector<int> core_elec,
     std::vector<std::string> atomic_names,
@@ -156,6 +167,58 @@ void Polyquant_dump_mat_to_file(
     matfile << std::endl;
   }
 }
+
+class POLYQUANT_TIMER {
+public:
+  POLYQUANT_TIMER() { this->set_start_time(); };
+  POLYQUANT_TIMER(const std::string &calling_func) {
+    this->set_start_time();
+    this->set_calling_function(calling_func);
+  };
+  ~POLYQUANT_TIMER() {
+    this->set_end_time();
+    this->print_timer_end();
+  };
+  void set_calling_function(const std::string &calling_func) {
+    this->calling_function = calling_func;
+  };
+  void set_start_time() {
+    this->start = std::chrono::high_resolution_clock::now();
+  };
+  void set_end_time() {
+    this->end = std::chrono::high_resolution_clock::now();
+  };
+  void print_timer_end() {
+    // use std::format once supported
+    // typedef duration<int, std::ratio<86400>> days;
+    auto duration = this->end - this->start;
+    auto d = std::chrono::duration_cast<std::chrono::days>(duration);
+    duration -= d;
+    auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
+    duration -= h;
+    auto m = std::chrono::duration_cast<std::chrono::minutes>(duration);
+    duration -= m;
+    auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    duration -= s;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+    duration -= ms;
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+    duration -= us;
+    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
+    duration -= ns;
+    std::stringstream buffer;
+    buffer << "Timer " << this->calling_function << "    " << d.count()
+           << "d:" << h.count() << "h:" << m.count() << "m:" << s.count()
+           << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count()
+           << "ns";
+    Polyquant_cout(buffer.str());
+  };
+
+private:
+  std::string calling_function = "UNKNOWN";
+  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  std::chrono::time_point<std::chrono::high_resolution_clock> end;
+};
 
 /**
  * @brief A class to hold information parsed from a QCSchema json

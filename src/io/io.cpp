@@ -35,8 +35,11 @@ void Polyquant_dump_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,
-    int num_species, std::vector<std::vector<double>> E_orb,
-    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff,
+    int num_species, std::vector<std::string> quantum_part_names,
+    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orb,
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        mo_coeff,
     std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
     std::vector<int> atomic_charge, std::vector<int> core_elec,
     std::vector<std::string> atomic_names,
@@ -126,43 +129,57 @@ void Polyquant_dump_hdf5_for_QMCPACK(
   Polyquant_cout("dumping MOs");
   auto super_twist_group = root_group.create_group("Super_Twist");
   {
-    // write alpha orbital energies
-    auto E_orb_alpha_dataset = super_twist_group.create_dataset(
-        "eigenval_0", datatype::create<std::vector<double>>(),
-        hdf5::dataspace::Simple({1, E_orb[0].size()}));
-    E_orb_alpha_dataset.write(E_orb[0]);
-    // write alpha orbital coeffs
-    std::vector<double> flattened_mo_alpha_coeff;
-    for (auto i = 0ul; i < num_ao; i++) {
-      for (auto j = 0ul; j < num_mo; j++) {
-        flattened_mo_alpha_coeff.push_back(mo_coeff[0](j, i));
+    auto Spin_dataset_offset = 0;
+    for (auto idx = 0ul; idx < E_orb.size(); idx++) {
+      if (E_orb[idx].size() == 1) {
+        std::stringstream buffer;
+        buffer << "Spin dataset " << Spin_dataset_offset + 0 << " "
+               << "corresponds to " << quantum_part_names[idx]
+               << " alpha and beta particles (restricted calculation).";
+        Polyquant_cout(buffer.str());
+      } else if (E_orb[idx].size() == 2) {
+        std::stringstream buffer;
+        buffer << "Spin dataset " << Spin_dataset_offset + 0 << " "
+               << "corresponds to " << quantum_part_names[idx]
+               << " alpha particles (unrestricted calculation)." << std::endl;
+        buffer << "Spin dataset " << Spin_dataset_offset + 1 << " "
+               << "corresponds to " << quantum_part_names[idx]
+               << " beta particles (unrestricted calculation).";
+        Polyquant_cout(buffer.str());
       }
+      Spin_dataset_offset += 2;
     }
-    auto mo_alpha_coeff_dataset = super_twist_group.create_dataset(
-        "eigenset_0", datatype::create<std::vector<double>>(),
-        hdf5::dataspace::Simple({num_ao, num_mo}));
-    mo_alpha_coeff_dataset.write(flattened_mo_alpha_coeff);
-
-    if (!restricted && num_part_total > 1) {
-      // write beta orbital energies
-      auto E_orb_beta_dataset = super_twist_group.create_dataset(
-          "eigenval_1", datatype::create<std::vector<double>>(),
-          hdf5::dataspace::Simple({1, E_orb[1].size()}));
-      E_orb_beta_dataset.write(E_orb[1]);
-      // write beta orbital coeffs
-      std::vector<double> flattened_mo_beta_coeff;
-      for (auto i = 0ul; i < num_ao; i++) {
-        for (auto j = 0ul; j < num_mo; j++) {
-          flattened_mo_beta_coeff.push_back(mo_coeff[1](j, i));
+    // write orbital energies
+    Spin_dataset_offset = 0;
+    for (auto part_idx = 0ul; part_idx < E_orb.size(); part_idx++) {
+      for (auto spin_idx = 0ul; spin_idx < E_orb[part_idx].size(); spin_idx++) {
+        std::string tag =
+            "eigenval_" + std::to_string(Spin_dataset_offset + spin_idx);
+        std::vector<double> orbital_energies(
+            E_orb[part_idx][spin_idx].data(),
+            E_orb[part_idx][spin_idx].data() +
+                E_orb[part_idx][spin_idx].size());
+        auto E_orb_dataset = super_twist_group.create_dataset(
+            tag, datatype::create<std::vector<double>>(),
+            hdf5::dataspace::Simple({1, orbital_energies.size()}));
+        E_orb_dataset.write(orbital_energies);
+        // write orbital coeffs
+        std::vector<double> flattened_mo_coeff;
+        for (auto i = 0ul; i < num_ao; i++) {
+          for (auto j = 0ul; j < num_mo; j++) {
+            flattened_mo_coeff.push_back(mo_coeff[part_idx][spin_idx](j, i));
+          }
         }
+        tag = "eigenset_" + std::to_string(Spin_dataset_offset + spin_idx);
+        auto mo_coeff_dataset = super_twist_group.create_dataset(
+            tag, datatype::create<std::vector<double>>(),
+            hdf5::dataspace::Simple({num_ao, num_mo}));
+        mo_coeff_dataset.write(flattened_mo_coeff);
       }
-      auto mo_beta_coeff_dataset = super_twist_group.create_dataset(
-          "eigenset_1", datatype::create<std::vector<double>>(),
-          hdf5::dataspace::Simple({num_ao, num_mo}));
-      mo_alpha_coeff_dataset.write(flattened_mo_beta_coeff);
+      Spin_dataset_offset += 2;
     }
   }
-  // write MO parameters
+  // write atom parameters
   Polyquant_cout("dumping atom parameters");
   auto atoms_group = root_group.create_group("atoms");
   {
@@ -224,9 +241,9 @@ void Polyquant_dump_hdf5_for_QMCPACK(
   };
   auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
     auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
-    return 1.0/std::sqrt(gint_val);
+    return 1.0 / std::sqrt(gint_val);
   };
-  std::cout << "SHIVSHIVSHIV " << gtonorm_lambda(0,1) << std::endl;
+  // std::cout << "SHIVSHIVSHIV " << gtonorm_lambda(0, 1) << std::endl;
   Polyquant_cout("dumping basis parameters");
   auto basis_group = root_group.create_group("basisset");
   {
@@ -404,23 +421,27 @@ void Polyquant_dump_hdf5_for_QMCPACK(
           // // SEE SHELL.H
           // //
           // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
-          // const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
-          // const auto two_alpha = 2.0 * exponent;
-          // const auto two_alpha_to_am32 =
+          // const auto sqrt_Pi_cubed =
+          // double{5.56832799683170784528481798212}; const auto two_alpha
+          // = 2.0 * exponent; const auto two_alpha_to_am32 =
           //     std::pow(two_alpha, (shell.contr[0].l + 1)) *
           //     std::sqrt(two_alpha);
           // const auto normalization_factor =
-          //     std::sqrt(std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32 /
+          //     std::sqrt(std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32
+          //     /
           //               (sqrt_Pi_cubed *
           //                libint2::math::df_Kminus1[2 * shell.contr[0].l]));
           // contraction /= normalization_factor;
           // Remove pyscf norm
           // aply pyscf _nomalize_contracted_ao
-          std::cout << "before unnormalizing at output "<< exponent << " " << contraction << std::endl;
-          contraction /= gtonorm_lambda(shell.contr[0].l,exponent);
-          std::cout << "after unnormalizing at output "<< exponent << " " << contraction << std::endl;
+          // std::cout << "before unnormalizing at output " << exponent << " "
+          //          << contraction << std::endl;
+          contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
+          // std::cout << "after unnormalizing at output " << exponent << " "
+          //           << contraction << std::endl;
           // std::stringstream buffer;
-          // buffer << std::setprecision(20) << "Exponent: " << exponent << "     "
+          // buffer << std::setprecision(20) << "Exponent: " << exponent << "
+          // "
           //        << "Contraction: " << contraction << std::endl;
           // Polyquant_cout(buffer.str());
           auto contraction_dataset = curr_func_group.create_dataset(
@@ -502,6 +523,8 @@ int quantum_symb_to_charge(std::string key) {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 POLYQUANT_INPUT::POLYQUANT_INPUT(const std::string &filename) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->parse_input(filename);
 }
 

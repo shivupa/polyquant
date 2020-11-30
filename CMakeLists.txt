@@ -124,6 +124,7 @@ FetchContent_Declare(
   GIT_TAG 2.4.0)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+find_package(MKL REQUIRED)
 
 # FetchContent_Declare(HighFive GIT_REPOSITORY
 # https://github.com/BlueBrain/HighFive.git) set(HIGHFIVE_USE_BOOST OFF)
