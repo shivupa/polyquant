@@ -17,7 +17,6 @@ int main(int argc, char **argv) {
 
   if (input_parameters.count("help")) {
     std::cout << options.help() << std::endl;
-    exit(0);
   } else if (input_parameters.count("input")) {
     if (input_parameters.count("input") == 1) {
       std::string filename = input_parameters["input"].as<std::string>();
@@ -29,7 +28,6 @@ int main(int argc, char **argv) {
       // todo throw error and quit nicely some app abort
       std::cout << "Too many input files provided!" << std::endl;
     }
-    exit(0);
   } else {
   std::cout << options.help() << std::endl;
   }
