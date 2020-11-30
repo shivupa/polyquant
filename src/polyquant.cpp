@@ -8,8 +8,7 @@
 using namespace polyquant;
 
 int main(int argc, char **argv) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
+  POLYQUANT_TIMER timer("TOTAL RUNTIME");
   Eigen::initParallel();
   cxxopts::Options options("polyquant", "Multiple quantum particles.");
   options.add_options()("i,input", "input filename",
@@ -19,10 +18,7 @@ int main(int argc, char **argv) {
   if (input_parameters.count("help")) {
     std::cout << options.help() << std::endl;
     exit(0);
-  }
-
-  // run the input file provided and ensure only 1 input file has been provided
-  if (input_parameters.count("input")) {
+  } else if (input_parameters.count("input")) {
     if (input_parameters.count("input") == 1) {
       std::string filename = input_parameters["input"].as<std::string>();
       // set up calculation object
@@ -34,10 +30,8 @@ int main(int argc, char **argv) {
       std::cout << "Too many input files provided!" << std::endl;
     }
     exit(0);
-  }
-
-  // if no parameters have been parsed print help and exit!
+  } else {
   std::cout << options.help() << std::endl;
-  exit(0);
+  }
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
