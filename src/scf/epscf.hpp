@@ -106,7 +106,11 @@ public:
    * @brief Iteration rmsc DM
    *
    */
-  std::vector<std::vector<double>> iteration_rmsc_dm;
+  std::vector<std::vector<double>> iteration_rms_error;
+
+  std::vector<std::vector<
+      libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>
+      diis;
   /**
    * @brief Stop running iterations?
    *

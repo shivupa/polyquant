@@ -10,7 +10,6 @@ add_subdirectory(scf)
 add_executable(polyquant polyquant.cpp)
 
 # include_directories(${MKL_INCLUDE_DIR})
-target_link_libraries(
-  polyquant io calculation mkl::mkl_intel_64bit_omp_dyn)
+target_link_libraries(polyquant io calculation mkl::mkl_intel_64bit_omp_dyn)
 
 install(TARGETS polyquant DESTINATION bin)

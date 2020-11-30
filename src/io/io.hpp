@@ -182,8 +182,12 @@ public:
   void set_calling_function(const std::string &calling_func) {
     this->calling_function = calling_func;
   };
-  void set_start_time() { this->start = std::chrono::steady_clock::now(); };
-  void set_end_time() { this->end = std::chrono::steady_clock::now(); };
+  void set_start_time() {
+    this->start = std::chrono::high_resolution_clock::now();
+  };
+  void set_end_time() {
+    this->end = std::chrono::high_resolution_clock::now();
+  };
   void print_timer_end() {
     // use std::format once supported
     // typedef duration<int, std::ratio<86400>> days;
@@ -212,8 +216,8 @@ public:
 
 private:
   std::string calling_function = "UNKNOWN";
-  std::chrono::steady_clock::time_point start;
-  std::chrono::steady_clock::time_point end;
+  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  std::chrono::time_point<std::chrono::high_resolution_clock> end;
 };
 
 /**
