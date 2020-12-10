@@ -13,5 +13,13 @@
         </determinant>
       </slaterdeterminant>
     </determinantset>
+    <jastrow name="J2" type="Two-Body" function="Bspline" print="yes">
+      <correlation rcut="10" size="10" speciesA="u" speciesB="u">
+          <coefficients id="uu" type="Array" optimize="yes" > 0.1 0.1 0.1 0.1 0.1  0.1 0.1 0.1 0.1 0.1 </coefficients>
+      </correlation>
+      <correlation rcut="10" size="10" speciesA="u" speciesB="d">
+        <coefficients id="ud" type="Array" optimize="yes"> 0.280700863 0.135770572 0.1094200011 0.09949927633 0.07016091085 0.04312816822 0.02026134641 -0.003752787049 -0.01275968354 -0.00850992012</coefficients>
+      </correlation>
+    </jastrow>
   </wavefunction>
 </qmcsystem>

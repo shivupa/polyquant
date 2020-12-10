@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
       std::cout << "Too many input files provided!" << std::endl;
     }
   } else {
-  std::cout << options.help() << std::endl;
+    std::cout << options.help() << std::endl;
   }
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
