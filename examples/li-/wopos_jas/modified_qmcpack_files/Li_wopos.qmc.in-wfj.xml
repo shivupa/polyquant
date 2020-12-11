@@ -51,13 +51,13 @@ count and total number of walkers
       <parameter name="walkers">1</parameter>
       <parameter name="samples">16000</parameter>
       <parameter name="substeps">4</parameter>
-      <parameter name="usedrift">yes</parameter>
+      <parameter name="usedrift">no</parameter>
       <parameter name="MinMethod">OneShiftOnly</parameter>
       <parameter name="minwalkers">0.0001</parameter>
     </qmc>
   </loop>
   <!--
-  <loop max="10">
+  <loop max="5">
     <qmc method="linear" move="pbyp" checkpoint="-1">
       <estimator name="LocalEnergy" hdf5="no"/>
       <parameter name="warmupSteps">100</parameter>
