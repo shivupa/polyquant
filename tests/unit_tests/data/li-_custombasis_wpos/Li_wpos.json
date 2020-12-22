@@ -5,29 +5,23 @@
     "schema_name": "qcschema_molecule",
     "schema_version": 2,
     "geometry": [
-        0.0000000, 0.0000000,  0.0000000,
-        0.7569685, 0.0000000, -0.5858752,
-       -0.7569685, 0.0000000, -0.5858752,
-        0.0000000, 0.0000000,  1.0000000
+        0.0000000, 0.0000000,  0.0000000
     ],
-    "symbols": ["O", "H", "H", "X_positron"],
-    "molecular_charge": 1,
+    "symbols": ["Li"],
+    "molecular_charge": 0,
     "molecular_multiplicity": 1
   },
   "driver": "energy",
   "model": {
     "method": "scf",
     "basis": 
-        {"O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }],
-        "H" : [{ "library" : {"type" : "sto-3g"} }],
-        "X_positron" : [{ "custom" : 
+        {"Li" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "positron_basis.g94"}}]}
+             "filename" : "Li_basis.g94"}}]}
              
   },
   "keywords": {
-    "restricted" : false,
-    "quantum_nuclei" : [0,1,1,0], 
+    "restricted" : true,
     "quantum_particles" : [ 
         { "name" : "positron",
           "spin" : 0.5,
@@ -40,7 +34,14 @@
           "electron_exchange" : false,
           "restricted" : false
         }
-    ]
-  }
+    ],
+    "mf_keywords" :{
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true,
+        "hdf5_filename_qmcpack" : "Li_wpos.h5"
+    },
+   "pure" : true
+      }
 }
-

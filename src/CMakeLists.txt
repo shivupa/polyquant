@@ -11,5 +11,8 @@ add_executable(polyquant polyquant.cpp)
 
 # include_directories(${MKL_INCLUDE_DIR})
 target_link_libraries(polyquant io calculation mkl::mkl_intel_64bit_omp_dyn)
+if(POLYQUANT_CODE_COVERAGE)
+  target_link_libraries(polyquant coverage_config)
+endif(POLYQUANT_CODE_COVERAGE)
 
 install(TARGETS polyquant DESTINATION bin)

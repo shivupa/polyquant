@@ -2,6 +2,7 @@
 
 using namespace polyquant;
 
+// LCOV_EXCL_START
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 namespace polyquant {
 // PetscErrorCode APP_ABORT(const std::string &reason) {
@@ -30,6 +31,7 @@ void Polyquant_dump_json(const json &json_obj) {
   std::cout << json_obj.dump(4) << std::endl;
   //}
 }
+// LCOV_EXCL_STOP
 
 void Polyquant_dump_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
@@ -462,7 +464,7 @@ std::map<std::string, int> _atm_symb_to_num = {
     {"S", 16},  {"Cl", 17}, {"Ar", 18}, {"K", 19},
 };
 
-std::map<std::string, int> _atm_symb_to_mass = {
+std::map<std::string, double> _atm_symb_to_mass = {
     {"H", 1.00782503223},  {"He", 4.00260325413},  {"Li", 7.0160034366},
     {"Be", 9.012183065},   {"B", 11.00930536},     {"C", 12.0},
     {"N", 14.00307400443}, {"O", 15.99491461957},  {"F", 18.99840316273},

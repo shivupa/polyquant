@@ -10,6 +10,9 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(integral io basis OpenMP::OpenMP_CXX)
+if(POLYQUANT_CODE_COVERAGE)
+  target_link_libraries(integral coverage_config)
+endif(POLYQUANT_CODE_COVERAGE)
 # target_include_directories(integral PRIVATE include) install( TARGETS integral
 # LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/integral)
 # install(FILES ${_HDRS} DESTINATION include/integral)

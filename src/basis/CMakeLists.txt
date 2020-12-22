@@ -21,6 +21,9 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(basis io)
+if(POLYQUANT_CODE_COVERAGE)
+  target_link_libraries(basis coverage_config)
+endif(POLYQUANT_CODE_COVERAGE)
 # target_include_directories(basis PRIVATE include) install( TARGETS basis
 # LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/basis) install(FILES
 # ${_HDRS} DESTINATION include/basis)

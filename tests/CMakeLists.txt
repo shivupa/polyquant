@@ -1,6 +1,5 @@
 # add the testing executable with all of the tests
-add_executable(main_test doctest_main.cpp basis_test.cpp integral_test.cpp
-                         unit_tests/io/io_test.cpp)
+add_executable(main_test doctest_main.cpp unit_tests/io/io_test.cpp)
 
 # find the required testing library and link the other required libraries
 if(Libint2_FOUND)

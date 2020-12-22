@@ -10,6 +10,9 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 
 target_link_libraries(calculation io molecule basis integral scf)
+if(POLYQUANT_CODE_COVERAGE)
+  target_link_libraries(calculation coverage_config)
+endif(POLYQUANT_CODE_COVERAGE)
 # target_include_directories(calculation PRIVATE include) install( TARGETS
 # calculation LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION
 # include/calculation) install(FILES ${_HDRS} DESTINATION include/calculation)
