@@ -14,17 +14,7 @@
     "method": "scf",
     "basis": 
     {"H" : [{ "library" : {"type" : "sto-3g"} }],
-        "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}
-  },
-  "keywords": {
-    "restricted" : true,
-    "mf_keywords" :{
-        "convergence_E" : 1e-8,
-        "convergence_DM" : 1e-6,
-        "iteration_max" : 200,
-        "dump_for_qmcpack" : true
-    },
-   "pure" : true
+        "O" : [{ "library" : {"type" : "sto-3g"} }]}
   }
 }
 

@@ -10,13 +10,16 @@ cmake \
     -DPOLYQUANT_CODE_COVERAGE=1 \
     ..
 make -j 4
-lcov --directory . --capture --output-file coverage.info
+lcov --capture --initial --directory . --base-directory ../src --output-file coverage_base.info
+make test
+lcov --base-directory ../src --directory . --capture --output-file coverage.info
 # filter out system and extra files.
-# To also not include test code in coverage add them with full path to the patterns: '*/tests/*'
-lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' '*/tests/*' '*build/*' --output-file coverage.info
 # output coverage data for debugging (optional)
-lcov --list coverage.info
-genhtml coverage.info -o temp
+lcov -a coverage_base.info -a coverage.info -o coverage_total.info
+# To also not include test code in coverage add them with full path to the patterns: '*/tests/*'
+lcov --remove coverage_total.info '/usr/*' "${HOME}"'/.cache/*' '*/tests/*' '*build/*' --output-file coverage_total.info
+lcov --list coverage_total.info
+genhtml coverage_total.info -o temp
 #make test
 #make Sphinx
 #cd ..

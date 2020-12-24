@@ -29,11 +29,16 @@ void POLYQUANT_MOLECULE::set_molecular_multiplicity(
 
 void POLYQUANT_MOLECULE::set_molecular_restricted(
     const POLYQUANT_INPUT &input) {
+  if (input.input_data.contains("keywords")) {
   if (input.input_data["keywords"].contains("restricted")) {
     this->restricted = input.input_data["keywords"]["restricted"];
   } else {
-    APP_ABORT("Can't set up molecule. The keywords section of the input is "
-              "missing 'restricted'.");
+    Polyquant_cout("'keywords'->'restricted' missing. Defaulting to restricted.");
+      this->restricted = true;
+  }
+  } else {
+      Polyquant_cout("The input didn't contain a section called 'keywords'. Defaulting to restricted calculation.");
+      this->restricted = true;
   }
 }
 
@@ -69,15 +74,13 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
                       [](const json &el) { return el.is_string(); })) {
         for (std::string quantum_label :
              input.input_data["keywords"]["quantum_nuclei"]) {
-          if (std::find(center_labels.begin(), center_labels.end(),
-                        quantum_label) != center_labels.end()) {
             // https://stackoverflow.com/questions/42871932/how-to-find-all-positions-of-an-element-using-stdfind
-            auto start_it = begin(center_labels);
+            auto start_it = std::begin(center_labels);
             bool found_at_least_once = false;
-            while (start_it != end(center_labels)) {
-              start_it = std::find(start_it, end(center_labels), quantum_label);
-              if (start_it != end(center_labels)) {
-                auto const pos = std::distance(begin(center_labels), start_it);
+            while (start_it != std::end(center_labels)) {
+              start_it = std::find(start_it, std::end(center_labels), quantum_label);
+              if (start_it != std::end(center_labels)) {
+                auto const pos = std::distance(std::begin(center_labels), start_it);
                 quantum_nuclei[pos] = 1;
                 ++start_it;
                 found_at_least_once = true;
@@ -88,7 +91,6 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
                   "The label '" + quantum_label +
                   "' was not found in the atomic labels. Skipping...");
             }
-          }
         }
       } else if (std::all_of(
                      input.input_data["keywords"]["quantum_nuclei"].begin(),

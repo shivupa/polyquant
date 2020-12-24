@@ -1,4 +1,24 @@
+#include "io/io.hpp"
+#include "molecule/molecule.hpp"
 #include "basis/basis.hpp"
 #include <doctest/doctest.h>
 
-TEST_CASE("BASIS TESTS") { CHECK(0 == 0); }
+using namespace polyquant;
+
+TEST_CASE("BASIS Set up basis from library.") { 
+  POLYQUANT_INPUT test_inp(
+      "../../tests/unit_tests/data/h2o_sto3glibrary/h2o.json");
+  POLYQUANT_MOLECULE test_mol(test_inp);
+  POLYQUANT_BASIS test_bas;
+  test_bas.load_basis(test_inp, test_mol);
+  CHECK(test_bas.num_basis == 7);
+  CHECK(test_bas.basis[0].O[0] == doctest::Approx(1.4304631499).epsilon(0.0001));
+}
+TEST_CASE("BASIS Set up basis from file.") { 
+  POLYQUANT_INPUT test_inp(
+      "../../tests/unit_tests/data/h2o_sto3gfile/h2o.json");
+  POLYQUANT_MOLECULE test_mol(test_inp);
+  POLYQUANT_BASIS test_bas(test_inp, test_mol);
+  CHECK(test_bas.num_basis == 7);
+  CHECK(test_bas.basis[0].O[0] == doctest::Approx(1.4304631499).epsilon(0.0001));
+}

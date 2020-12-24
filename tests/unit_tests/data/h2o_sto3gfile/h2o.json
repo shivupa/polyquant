@@ -15,10 +15,10 @@
     "basis": 
     {"H" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "H_basis.g94"}}],
+             "filename" : "../../tests/unit_tests/data/h2o_sto3gfile/H_basis.g94"}}],
     "O" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "O_basis.g94"}}]}
+             "filename" : "../../tests/unit_tests/data/h2o_sto3gfile/O_basis.g94"}}]}
   },
   "keywords": {
     "restricted" : true,
