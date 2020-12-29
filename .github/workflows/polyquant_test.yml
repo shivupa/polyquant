@@ -28,7 +28,7 @@ jobs:
       run: |
           git clone git@github.com:evaleev/libint.git
           cd libint
-          ../configure \
+          ./configure \
                 --enable-eri=1 \
                 --enable-eri2=1 \
                 --enable-eri3=1 \
