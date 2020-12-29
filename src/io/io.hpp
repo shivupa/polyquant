@@ -17,6 +17,9 @@ using json = nlohmann::json;
 
 namespace polyquant {
 
+#define POLYQUANT_TEST_EPSILON_LOOSE 0.00001
+#define POLYQUANT_TEST_EPSILON_TIGHT 0.00000001
+
 // /**
 //  * @brief Abort the code and print a reason for aborting.
 //  *

@@ -13,20 +13,15 @@
   "model": {
     "method": "scf",
     "basis": 
-    {"H" : [{ "custom" : 
-            {"type" : "file",
-             "filename" : "../../tests/unit_tests/data/h2o_sto3gfile/H_basis.g94"}}],
-    "O" : [{ "custom" : 
-            {"type" : "file",
-             "filename" : "../../tests/unit_tests/data/h2o_sto3gfile/O_basis.g94"}}]}
+    {"H" : [{ "library" : {"type" : "sto-3g"} }],
+        "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}
   },
   "keywords": {
-    "restricted" : true,
+    "restricted" : false,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
-        "iteration_max" : 200,
-        "dump_for_qmcpack" : true
+        "iteration_max" : 200
     },
    "pure" : true
   }

@@ -176,9 +176,8 @@ std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
 void POLYQUANT_CALCULATION::run_electronic_mean_field(
     std::string &mean_field_type) {
   if (mean_field_type == "SCF") {
-    POLYQUANT_EPSCF scf_calc =
-        POLYQUANT_EPSCF(this->input_params, this->input_molecule,
-                        this->input_basis, this->input_integral);
+    scf_calc.setup_calculation(this->input_params, this->input_molecule,
+                               this->input_basis, this->input_integral);
     bool dump_for_qmcpack = false;
     std::string hdf5_filename = "Default.h5";
     if (this->input_params.input_data.contains("keywords")) {
@@ -217,12 +216,11 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
     }
     scf_calc.run();
     if (dump_for_qmcpack) {
-      dump_mf_for_qmcpack(scf_calc, hdf5_filename);
+      dump_mf_for_qmcpack(hdf5_filename);
     }
   }
 }
-void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc,
-                                                std::string &filename) {
+void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_species_ids;
   std::vector<int> atomic_number;
   std::vector<int> atomic_charge;

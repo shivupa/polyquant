@@ -4,8 +4,7 @@
 using namespace polyquant;
 
 TEST_CASE("IO: Parse input data.") {
-  POLYQUANT_INPUT test_inp(
-      "../../tests/unit_tests/data/h2o_sto3glibrary/h2o.json");
+  POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
   // Check that the fields exist don't check values. The calculation class tests
   // will do that.
   CHECK(test_inp.input_data.contains("molecule"));

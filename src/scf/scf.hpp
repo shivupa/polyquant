@@ -19,17 +19,14 @@ public:
                 const POLYQUANT_MOLECULE &input_molecule,
                 const POLYQUANT_BASIS &input_basis,
                 const POLYQUANT_INTEGRAL &input_integral);
-
+  void setup_calculation(const POLYQUANT_INPUT &input_params,
+                         const POLYQUANT_MOLECULE &input_molecule,
+                         const POLYQUANT_BASIS &input_basis,
+                         const POLYQUANT_INTEGRAL &input_integral);
   void set_input(const POLYQUANT_INPUT &input_params);
   void set_molecule(const POLYQUANT_MOLECULE &input_molecule);
   void set_basis(const POLYQUANT_BASIS &input_basis);
   void set_integral(const POLYQUANT_INTEGRAL &input_integral);
-
-  void print_start_iterations();
-  void print_iteration();
-  void print_success();
-  void print_exceeded_iterations();
-  void print_error();
 
   virtual void form_H_core() = 0;
   virtual void form_fock() = 0;

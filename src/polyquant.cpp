@@ -1,3 +1,4 @@
+// LCOV_EXCL_START
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 #define EIGEN_USE_MKL_ALL
 #include <Eigen/Core>
@@ -33,3 +34,4 @@ int main(int argc, char **argv) {
   }
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+// LCOV_EXCL_STOP

@@ -12,7 +12,7 @@
 
 namespace polyquant {
 
-class POLYQUANT_EPSCF : POLYQUANT_SCF {
+class POLYQUANT_EPSCF : public POLYQUANT_SCF {
 public:
   POLYQUANT_EPSCF() = default;
   POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params,
@@ -21,7 +21,6 @@ public:
                   const POLYQUANT_INTEGRAL &input_integral)
       : POLYQUANT_SCF(input_params, input_molecule, input_basis,
                       input_integral){};
-
   void form_H_core() override;
   double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
                         double eri_ikjl, double qa, double qb, bool exchange);
@@ -34,6 +33,12 @@ public:
   void run_iteration() override;
   void guess_DM() override;
   void run() override;
+  void print_start_iterations();
+  void print_iteration();
+  void print_success();
+  void print_exceeded_iterations();
+  void print_error();
+
   void print_params();
   /**
    * @brief H_core matrix
