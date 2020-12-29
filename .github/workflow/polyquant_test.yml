@@ -1,0 +1,17 @@
+name: Polyquant CI
+
+on: [push]
+
+jobs:
+  ubuntu-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.0.0
+    - name: Build project
+      uses: nicledomaS/cmake_build_action@v1.3
+      with:
+        submodule_update: ON
+        run_tests: ON
+        unit_test_build: -DPOLYQUANT_TEST=1
+        cmake_args: -DPOLYQUANT_DEBUG=0;-DPOLYQUANT_DOC=0;-DPOLYQUANT_CODE_COVERAGE=1
