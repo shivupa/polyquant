@@ -1,11 +1,6 @@
 name: PolyQuant cmake
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+on: [push, pull_request]
 
 env:
   BUILD_TYPE: Release
