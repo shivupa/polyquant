@@ -1,17 +1,32 @@
-name: Polyquant CI
+name: PolyQuant cmake
 
 on: [push]
 
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
 jobs:
-  ubuntu-build:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2.0.0
-    - name: Build project
-      uses: nicledomaS/cmake_build_action@v1.3
-      with:
-        submodule_update: ON
-        run_tests: ON
-        unit_test_build: -DPOLYQUANT_TEST=1
-        cmake_args: -DPOLYQUANT_DEBUG=0;-DPOLYQUANT_DOC=0;-DPOLYQUANT_CODE_COVERAGE=1
+    - uses: actions/checkout@v2
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPOLYQUANT_DEBUG=0 -DPOLYQUANT_DOC=0 -DPOLYQUANT_TEST=1 -DPOLYQUANT_CODE_COVERAGE=1
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -C $BUILD_TYPE
