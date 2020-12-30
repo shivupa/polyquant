@@ -14,6 +14,7 @@ jobs:
 
     - name: Install nlohmann-json-dev
       run: |
+          sudo apt-get update
           sudo apt-get install nlohmann-json3-dev 
 
     - name: Install libh5cpp
@@ -26,6 +27,7 @@ jobs:
 
     - name: Install libint
       run: |
+          sudo apt-get install libboost-dev
           git clone https://github.com/evaleev/libint.git
           cd libint
           ./configure \
