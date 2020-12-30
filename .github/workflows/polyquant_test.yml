@@ -7,7 +7,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -20,7 +20,7 @@ jobs:
       run: |
           curl http://repos.pni-hdri.de/debian_repo.pub.gpg | sudo apt-key add - 
           cd /etc/apt/sources.list.d 
-          sudo wget http://repos.pni-hdri.de/buster-pni-hdri.list
+          sudo wget http://repos.pni-hdri.de/focal-pni-hdri.list
           sudo apt-get update
           sudo apt-get install libh5cpp0.4.0 libh5cpp0.4.0-dbg libh5cpp0.4.0-doc libh5cpp0.4.0-dev
 
