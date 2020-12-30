@@ -29,26 +29,26 @@ jobs:
           git clone git@github.com:evaleev/libint.git
           cd libint
           ./configure \
-                --enable-eri=1 \
-                --enable-eri2=1 \
-                --enable-eri3=1 \
-                --enable-fma=$FMA \
-                --with-max-am=5 \
-                --with-eri-max-am=5,4 \
-                --with-eri2-max-am=7,6 \
-                --with-eri3-max-am=7,6 \
-                --with-opt-am=3 \
-                --with-cartgauss-ordering=gamess
-        make export
-        tar xzf libint-2.7.0-beta.6.tgz
-        cd libint-2.7.0-beta.6
-        cmake . \
-             -DCMAKE_CXX_COMPILER=g++ \
-             -Denable-fortran=ON \
-             -DLIBINT2_SHGAUSS_ORDERING=gaussian \
-             -DLIBINT2_REALTYPE=double
-        cmake --build .
-        cmake --build . --target install
+            --enable-eri=1 \
+            --enable-eri2=1 \
+            --enable-eri3=1 \
+            --enable-fma=0 \
+            --with-max-am=5 \
+            --with-eri-max-am=5,4 \
+            --with-eri2-max-am=7,6 \
+            --with-eri3-max-am=7,6 \
+            --with-opt-am=3 \
+            --with-cartgauss-ordering=gamess
+          make export
+          tar xzf libint-2.7.0-beta.6.tgz
+          cd libint-2.7.0-beta.6
+          cmake . \
+               -DCMAKE_CXX_COMPILER=g++ \
+               -Denable-fortran=ON \
+               -DLIBINT2_SHGAUSS_ORDERING=gaussian \
+               -DLIBINT2_REALTYPE=double
+          cmake --build .
+          cmake --build . --target install
 
     - name: Create Build Environment
       run: |
