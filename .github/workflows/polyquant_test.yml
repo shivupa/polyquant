@@ -18,7 +18,7 @@ jobs:
 
     - name: Install libh5cpp
       run: |
-          curl http://repos.pni-hdri.de/debian_repo.pub.gpg | apt-key add - 
+          curl http://repos.pni-hdri.de/debian_repo.pub.gpg | sudo apt-key add - 
           cd /etc/apt/sources.list.d 
           sudo wget http://repos.pni-hdri.de/buster-pni-hdri.list
           sudo apt-get update
