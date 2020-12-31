@@ -30,7 +30,7 @@ void POLYQUANT_CALCULATION::run() {
   //    "Figuring out if we have positrons or (model) excess electrons...");
   // parse input to see if we intend to do a model excess electron or positron
   // calculation
-  if (this->input_params.input_data.contains("keywords")) {
+  //if (this->input_params.input_data.contains("keywords")) {
     // if
     // (this->input_params.input_data["keywords"].contains("excess_electron")) {
     //  do_excess_electron =
@@ -39,7 +39,7 @@ void POLYQUANT_CALCULATION::run() {
     // if (this->input_params.input_data["keywords"].contains("positron")) {
     //  do_positron = this->input_params.input_data["keywords"]["positron"];
     //}
-  }
+  //}
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
   std::string mean_field_type = this->parse_electronic_mean_field();
@@ -156,68 +156,82 @@ std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
       std::transform(mean_field_type.begin(), mean_field_type.end(),
                      mean_field_type.begin(), ::toupper);
     }
+  } 
+
+  if (this->input_params.input_data.contains("keywords")) {
+  if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
+  if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
+      if (!this->mean_field_methods.contains(mean_field_type)){
+          mean_field_type = "FILE";
+      } else {
+          Polyquant_cout("Ignoring keywords->mf_keywords->from_file because model->method is a valid mean field method. Set to NONE or some post MF method to read from file.");
+      }
   }
-  if (this->mean_field_methods.contains(mean_field_type)) {
-    Polyquant_cout("Will run a mean field calculation of type: ");
-    Polyquant_cout(mean_field_type);
-  } else if (mean_field_type == "NONE") {
-    Polyquant_cout("Not running mean field calculation.");
-  } else {
-    Polyquant_cout("Unrecognized mean field calculation type: ");
-    Polyquant_cout(mean_field_type);
-    // APP ABORT HERE
-    APP_ABORT(
-        "POLYQUANT mean field parsing error. I can't understand the input "
-        "provided. Could you double-check it?");
+  }
   }
   return mean_field_type;
 }
 
 void POLYQUANT_CALCULATION::run_electronic_mean_field(
     std::string &mean_field_type) {
-  if (mean_field_type == "SCF") {
-    scf_calc.setup_calculation(this->input_params, this->input_molecule,
-                               this->input_basis, this->input_integral);
-    bool dump_for_qmcpack = false;
-    std::string hdf5_filename = "Default.h5";
-    if (this->input_params.input_data.contains("keywords")) {
-      if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
-        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
-                "dump_for_qmcpack")) {
-          dump_for_qmcpack =
-              this->input_params
-                  .input_data["keywords"]["mf_keywords"]["dump_for_qmcpack"];
-        }
-        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
-                "hdf5_filename_qmcpack")) {
-          hdf5_filename =
-              this->input_params.input_data["keywords"]["mf_keywords"]
-                                           ["hdf5_filename_qmcpack"];
-        }
-        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
-                "convergence_E")) {
-          scf_calc.convergence_E =
-              this->input_params
-                  .input_data["keywords"]["mf_keywords"]["convergence_E"];
-        }
-        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
-                "convergence_DM")) {
-          scf_calc.convergence_DM =
-              this->input_params
-                  .input_data["keywords"]["mf_keywords"]["convergence_DM"];
-        }
-        if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
-                "iteration_max")) {
-          scf_calc.iteration_max =
-              this->input_params
-                  .input_data["keywords"]["mf_keywords"]["iteration_max"];
-        }
+  if (!this->mean_field_methods.contains(mean_field_type) && mean_field_type != "FILE"){
+    APP_ABORT(
+        "POLYQUANT mean field parsing error. I can't understand the input "
+        "provided. Could you double-check it?");
+  }
+  Polyquant_cout("Will run a mean field calculation of type: ");
+  Polyquant_cout(mean_field_type);
+
+  scf_calc.setup_calculation(this->input_params, this->input_molecule,
+                             this->input_basis, this->input_integral);
+  bool dump_for_qmcpack = false;
+  std::string hdf5_filename = "Default.h5";
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "dump_for_qmcpack")) {
+        dump_for_qmcpack =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["dump_for_qmcpack"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "hdf5_filename_qmcpack")) {
+        hdf5_filename =
+            this->input_params.input_data["keywords"]["mf_keywords"]
+                                         ["hdf5_filename_qmcpack"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "convergence_E")) {
+        scf_calc.convergence_E =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["convergence_E"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "convergence_DM")) {
+        scf_calc.convergence_DM =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["convergence_DM"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "iteration_max")) {
+        scf_calc.iteration_max =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["iteration_max"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "from_file")) {
+          dump_for_qmcpack = true;
+          hdf5_filename = this->input_params.input_data["keywords"]["mf_keywords"]["from_file"];
       }
     }
+  }
+  if (mean_field_type == "SCF") {
     scf_calc.run();
-    if (dump_for_qmcpack) {
-      dump_mf_for_qmcpack(hdf5_filename);
-    }
+  } else if (mean_field_type == "FILE"){
+    scf_calc.from_file(hdf5_filename);
+  }
+  if (dump_for_qmcpack) {
+    dump_mf_for_qmcpack(hdf5_filename);
   }
 }
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
