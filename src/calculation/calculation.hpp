@@ -43,13 +43,14 @@ public:
    */
   void run_electronic_mean_field(std::string &mean_field_type);
 
-  void
-  run_excess_electron_plus_electronic_mean_field(std::string &mean_field_type);
-  void
-  run_excess_positron_plus_electronic_mean_field(std::string &mean_field_type);
+  // void
+  // run_excess_electron_plus_electronic_mean_field(std::string
+  // &mean_field_type); void
+  // run_excess_positron_plus_electronic_mean_field(std::string
+  // &mean_field_type);
 
   std::string parse_electronic_mean_field();
-  void dump_mf_for_qmcpack(POLYQUANT_EPSCF &scf_calc, std::string &filename);
+  void dump_mf_for_qmcpack(std::string &filename);
   /**
    * @brief the input parameters
    *
@@ -73,6 +74,12 @@ public:
    *
    */
   POLYQUANT_INTEGRAL input_integral;
+
+  /**
+   * @brief the MF calculation
+   *
+   */
+  POLYQUANT_EPSCF scf_calc;
 
   /**
    * @brief Mean-field calculation types that pyci knows about

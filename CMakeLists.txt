@@ -48,6 +48,25 @@ set(POLYQUANT_DOC
 set(POLYQUANT_TEST
     1
     CACHE BOOL "Enable/disable testing")
+
+option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
+
+# Code Coverage Configuration
+add_library(coverage_config INTERFACE)
+if(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  # Add required flags (GCC & LLVM/Clang)
+  target_compile_options(
+    coverage_config
+    INTERFACE -O0 # no optimization
+              -g # generate debug info
+              --coverage # sets all required flags
+  )
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(coverage_config INTERFACE --coverage)
+  else()
+    target_link_libraries(coverage_config INTERFACE --coverage)
+  endif()
+endif(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 # ##############################################################################
 
 message(STATUS "Ready to build POLYQUANT")
@@ -121,7 +140,7 @@ find_package(h5cpp REQUIRED)
 FetchContent_Declare(
   doctest
   GIT_REPOSITORY https://github.com/onqtam/doctest.git
-  GIT_TAG 2.4.0)
+  GIT_TAG 2.4.3)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 find_package(MKL REQUIRED)

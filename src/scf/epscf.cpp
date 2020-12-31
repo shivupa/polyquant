@@ -491,6 +491,27 @@ void POLYQUANT_EPSCF::guess_DM() {
     quantum_part_idx++;
   }
 }
+void POLYQUANT_EPSCF::print_start_iterations() {
+  Polyquant_cout("Starting Iterations");
+}
+void POLYQUANT_EPSCF::print_iteration() {
+  Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
+  auto quantum_part_idx = 0ul;
+  auto E_parts = 0.0;
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+    Polyquant_cout("E(" + quantum_part_key + ") : " +
+                   std::to_string(this->E_particles[quantum_part_idx]));
+    E_parts += this->E_particles[quantum_part_idx];
+    quantum_part_idx++;
+  }
+  Polyquant_cout("E(particles) : " + std::to_string(E_parts));
+}
+void POLYQUANT_EPSCF::print_success() { Polyquant_cout("SCF SUCCESS"); }
+void POLYQUANT_EPSCF::print_exceeded_iterations() {
+  Polyquant_cout("Exceeded Iterations");
+}
+void POLYQUANT_EPSCF::print_error() { APP_ABORT("Something wrong!"); }
 void POLYQUANT_EPSCF::print_params() {
   Polyquant_cout("Running SCF");
   std::stringstream buffer;
@@ -514,18 +535,9 @@ void POLYQUANT_EPSCF::run() {
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
+  this->print_start_iterations();
   while (!this->stop) {
-    Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
-    auto E_parts = 0.0;
-    std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
-    for (auto const &[quantum_part_key, quantum_part] :
-         this->input_molecule.quantum_particles) {
-      Polyquant_cout("E(" + quantum_part_key + ") : " +
-                     std::to_string(this->E_particles[quantum_part_idx]));
-      E_parts += this->E_particles[quantum_part_idx];
-      quantum_part_idx++;
-    }
-    Polyquant_cout("E(particles) : " + std::to_string(E_parts));
+    this->print_iteration();
     this->run_iteration();
     this->check_stop();
   }

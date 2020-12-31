@@ -134,8 +134,9 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
     // REMOVE NORMALIZATION FACTOR FROM LIBINT
     // SEE SHELL.H
     // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
-    const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
-
+    // used in libint -> const auto sqrt_Pi_cubed =
+    // double{5.56832799683170784528481798212};
+    const auto sqrt_Pi_cubed = std::pow(std::numbers::pi_v<double>, 1.5);
     for (auto p = 0ul; p < shell.alpha.size(); ++p) {
       auto exponent = shell.alpha[p];
       const auto two_alpha = 2.0 * exponent;
