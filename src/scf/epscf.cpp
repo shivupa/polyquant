@@ -613,5 +613,4 @@ void POLYQUANT_EPSCF::from_file(std::string& filename){
     this->run_iteration();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
-  Polyquant_cout(this->input_molecule.E_nuc);
 }
