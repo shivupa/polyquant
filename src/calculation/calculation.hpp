@@ -86,12 +86,13 @@ public:
    *
    */
   const std::unordered_set<std::string> mean_field_methods = {"SCF"};
-OMG 
-  /**
-   * @brief Post mean-field types that pyci knows about
-   *
-   */
-  const std::unordered_set<std::string> post_mean_field_methods = {"CI"};
+  OMG
+      /**
+       * @brief Post mean-field types that pyci knows about
+       *
+       */
+      const std::unordered_set<std::string>
+          post_mean_field_methods = {"CI"};
 };
 } // namespace polyquant
 #endif

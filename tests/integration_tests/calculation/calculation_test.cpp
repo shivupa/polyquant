@@ -35,7 +35,8 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF.") {
   CHECK(test_calc.scf_calc.H_core[0](0, 0) ==
         doctest::Approx(-63.7952159349).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   CHECK(test_calc.scf_calc.E_total ==
-        doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+        doctest::Approx(-74.962926342808259506)
+            .epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
 }
 
 TEST_CASE("CALCULATION: H2O/sto-3g(file) SCF.") {
@@ -57,11 +58,13 @@ TEST_CASE("CALCULATION: H2O/sto-3g(file) SCF.") {
   CHECK(test_calc.scf_calc.H_core[0](0, 0) ==
         doctest::Approx(-63.7952013522).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   CHECK(test_calc.scf_calc.E_total ==
-        doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+        doctest::Approx(-74.962926342808259506)
+            .epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
 }
 
 TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumH/h2o.json");
+  POLYQUANT_CALCULATION test_calc(
+      "../../tests/data/h2o_sto3g_quantumH/h2o.json");
   test_calc.run();
   CHECK(test_calc.scf_calc.converged == true);
   CHECK(test_calc.scf_calc.independent_converged == true);
@@ -91,11 +94,13 @@ TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF.") {
   CHECK(test_calc.scf_calc.H_core[1](0, 0) ==
         doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   CHECK(test_calc.scf_calc.E_total ==
-        doctest::Approx(-72.579578543195324869).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+        doctest::Approx(-72.579578543195324869)
+            .epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
 }
 
 TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  POLYQUANT_CALCULATION test_calc(
+      "../../tests/data/li-_custombasis_wpos/Li_wpos.json");
   test_calc.run();
   CHECK(test_calc.scf_calc.converged == true);
   CHECK(test_calc.scf_calc.independent_converged == true);
@@ -129,9 +134,11 @@ TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF.") {
 }
 
 TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/li-_custombasis_wpos/Li_wpos_dumpHDF5.json");
+  POLYQUANT_CALCULATION test_calc(
+      "../../tests/data/li-_custombasis_wpos/Li_wpos_dumpHDF5.json");
   test_calc.run();
-  hdf5::file::File f1 = hdf5::file::open("Li_wpos.h5",hdf5::file::AccessFlags::READONLY);
+  hdf5::file::File f1 =
+      hdf5::file::open("Li_wpos.h5", hdf5::file::AccessFlags::READONLY);
   auto root_group = f1.root();
 
   CHECK(root_group.exists("PBC") == true);

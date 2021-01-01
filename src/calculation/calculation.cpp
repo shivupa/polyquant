@@ -30,15 +30,15 @@ void POLYQUANT_CALCULATION::run() {
   //    "Figuring out if we have positrons or (model) excess electrons...");
   // parse input to see if we intend to do a model excess electron or positron
   // calculation
-  //if (this->input_params.input_data.contains("keywords")) {
-    // if
-    // (this->input_params.input_data["keywords"].contains("excess_electron")) {
-    //  do_excess_electron =
-    //      this->input_params.input_data["keywords"]["excess_electron"];
-    //}
-    // if (this->input_params.input_data["keywords"].contains("positron")) {
-    //  do_positron = this->input_params.input_data["keywords"]["positron"];
-    //}
+  // if (this->input_params.input_data.contains("keywords")) {
+  // if
+  // (this->input_params.input_data["keywords"].contains("excess_electron")) {
+  //  do_excess_electron =
+  //      this->input_params.input_data["keywords"]["excess_electron"];
+  //}
+  // if (this->input_params.input_data["keywords"].contains("positron")) {
+  //  do_positron = this->input_params.input_data["keywords"]["positron"];
+  //}
   //}
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
@@ -156,25 +156,29 @@ std::string POLYQUANT_CALCULATION::parse_mean_field() {
       std::transform(mean_field_type.begin(), mean_field_type.end(),
                      mean_field_type.begin(), ::toupper);
     }
-  } 
+  }
 
   if (this->input_params.input_data.contains("keywords")) {
-  if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
-  if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
-      if (!this->mean_field_methods.contains(mean_field_type)){
+    if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "from_file")) {
+        if (!this->mean_field_methods.contains(mean_field_type)) {
           mean_field_type = "FILE";
-      } else {
-          Polyquant_cout("Ignoring keywords->mf_keywords->from_file because model->method is a valid mean field method. Set to NONE or some post MF method to read from file.");
+        } else {
+          Polyquant_cout("Ignoring keywords->mf_keywords->from_file because "
+                         "model->method is a valid mean field method. Set to "
+                         "NONE or some post MF method to read from file.");
+        }
       }
-  }
-  }
+    }
   }
   return mean_field_type;
 }
 
 void POLYQUANT_CALCULATION::run_electronic_mean_field(
     std::string &mean_field_type) {
-  if (!this->mean_field_methods.contains(mean_field_type) && mean_field_type != "FILE"){
+  if (!this->mean_field_methods.contains(mean_field_type) &&
+      mean_field_type != "FILE") {
     APP_ABORT(
         "POLYQUANT mean field parsing error. I can't understand the input "
         "provided. Could you double-check it?");
@@ -197,8 +201,8 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "hdf5_filename_qmcpack")) {
         hdf5_filename =
-            this->input_params.input_data["keywords"]["mf_keywords"]
-                                         ["hdf5_filename_qmcpack"];
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["hdf5_filename_qmcpack"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "convergence_E")) {
@@ -220,14 +224,15 @@ void POLYQUANT_CALCULATION::run_electronic_mean_field(
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "from_file")) {
-          dump_for_qmcpack = true;
-          hdf5_filename = this->input_params.input_data["keywords"]["mf_keywords"]["from_file"];
+        dump_for_qmcpack = true;
+        hdf5_filename = this->input_params
+                            .input_data["keywords"]["mf_keywords"]["from_file"];
       }
     }
   }
   if (mean_field_type == "SCF") {
     scf_calc.run();
-  } else if (mean_field_type == "FILE"){
+  } else if (mean_field_type == "FILE") {
     scf_calc.from_file(hdf5_filename);
   }
   if (dump_for_qmcpack) {

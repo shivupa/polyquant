@@ -552,7 +552,7 @@ void POLYQUANT_EPSCF::run() {
   Polyquant_cout(this->E_total);
 }
 
-void POLYQUANT_EPSCF::from_file(std::string& filename){
+void POLYQUANT_EPSCF::from_file(std::string &filename) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   this->print_params();
@@ -565,11 +565,13 @@ void POLYQUANT_EPSCF::from_file(std::string& filename){
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
-  hdf5::file::File hdf5_file = hdf5::file::open(filename, hdf5::file::AccessFlags::READONLY);
+  hdf5::file::File hdf5_file =
+      hdf5::file::open(filename, hdf5::file::AccessFlags::READONLY);
   auto root_group = hdf5_file.root();
   Polyquant_cout("Reading coefficients from file : " + filename);
-  if(!root_group.exists("Super_Twist")){
-    APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
+  if (!root_group.exists("Super_Twist")) {
+    APP_ABORT(
+        "Reading coefficients failed. No Super_Twist group in HDF5 file.");
   }
   auto Super_Twist_group = root_group.get_group("Super_Twist");
 
@@ -578,39 +580,45 @@ void POLYQUANT_EPSCF::from_file(std::string& filename){
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-      auto Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
-      hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
-      auto Dimensions = Dataspace.current_dimensions();
-      Polyquant_cout("Reading eigenset_"+std::to_string(idx));
-      Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " +std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
-      std::vector<double> data(Dataspace.size());
-      Dataset.read(data);
+    auto Dataset =
+        Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
+    hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
+    auto Dimensions = Dataspace.current_dimensions();
+    Polyquant_cout("Reading eigenset_" + std::to_string(idx));
+    Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " +
+                   std::to_string(Dimensions[1]) + " for quantum particle " +
+                   std::to_string(quantum_part_idx));
+    std::vector<double> data(Dataspace.size());
+    Dataset.read(data);
 #pragma omp parallel for
-      for (auto i = 0; i < num_basis; i++){
-          for (auto j= 0; j<num_basis; j++){
-            this->C[quantum_part_idx][0](j,i) = data[i*num_basis + j];
-          }
-       }
+    for (auto i = 0; i < num_basis; i++) {
+      for (auto j = 0; j < num_basis; j++) {
+        this->C[quantum_part_idx][0](j, i) = data[i * num_basis + j];
+      }
+    }
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx+1));
+      Dataset =
+          Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx + 1));
       Dataspace = Dataset.dataspace();
       Dimensions = Dataspace.current_dimensions();
-      Polyquant_cout("Reading eigenset_"+std::to_string(idx+1));
-      Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " +std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
+      Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
+      Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " +
+                     std::to_string(Dimensions[1]) + " for quantum particle " +
+                     std::to_string(quantum_part_idx));
       Dataset.read(data);
 #pragma omp parallel for
-      for (auto i = 0; i < num_basis; i++){
-          for (auto j= 0; j<num_basis; j++){
-            this->C[quantum_part_idx][1](j,i) = data[i*num_basis + j];
-          }
-       }
+      for (auto i = 0; i < num_basis; i++) {
+        for (auto j = 0; j < num_basis; j++) {
+          this->C[quantum_part_idx][1](j, i) = data[i * num_basis + j];
+        }
+      }
     }
-    idx+=2;
+    idx += 2;
     quantum_part_idx++;
   }
   this->form_DM();
   Polyquant_cout("Running a single SCF iteration");
-    this->run_iteration();
+  this->run_iteration();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
 }

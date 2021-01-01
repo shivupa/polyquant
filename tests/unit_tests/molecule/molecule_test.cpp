@@ -14,7 +14,9 @@ TEST_CASE("MOLECULE: Construct Molecule.") {
   CHECK(test_mol.charge == 0);
   CHECK(test_mol.multiplicity == 1);
   CHECK(test_mol.restricted == false);
-  CHECK(test_mol.E_nuc == doctest::Approx(9.194863688325974).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+  CHECK(
+      test_mol.E_nuc ==
+      doctest::Approx(9.194863688325974).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
 
   std::string xyz_ref = "3\nPOLYQUANT Dumped XYZ centers = all\nH    0.756969  "
                         "  0.000000    -0.585875\nH    -0.756969    0.000000   "
