@@ -49,7 +49,7 @@ public:
   // run_excess_positron_plus_electronic_mean_field(std::string
   // &mean_field_type);
 
-  std::string parse_electronic_mean_field();
+  std::string parse_mean_field();
   void dump_mf_for_qmcpack(std::string &filename);
   /**
    * @brief the input parameters
@@ -86,12 +86,12 @@ public:
    *
    */
   const std::unordered_set<std::string> mean_field_methods = {"SCF"};
-
+OMG 
   /**
    * @brief Post mean-field types that pyci knows about
    *
    */
-  const std::unordered_set<std::string> post_mean_field_methods = {"CIPSI"};
+  const std::unordered_set<std::string> post_mean_field_methods = {"CI"};
 };
 } // namespace polyquant
 #endif

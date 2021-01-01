@@ -42,7 +42,7 @@ void POLYQUANT_CALCULATION::run() {
   //}
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
-  std::string mean_field_type = this->parse_electronic_mean_field();
+  std::string mean_field_type = this->parse_mean_field();
   // if (do_excess_electron && do_positron) {
   // excess electron + positron + electrons
   //  APP_ABORT("POLYQUANT can't handle a model excess electron and positron "
@@ -144,7 +144,7 @@ void POLYQUANT_CALCULATION::run() {
 //  }
 //}
 
-std::string POLYQUANT_CALCULATION::parse_electronic_mean_field() {
+std::string POLYQUANT_CALCULATION::parse_mean_field() {
   Polyquant_cout(
       "Figuring out if we need to run a mean-field calculation for the "
       "electrons...");
