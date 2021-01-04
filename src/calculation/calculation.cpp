@@ -43,6 +43,7 @@ void POLYQUANT_CALCULATION::run() {
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
   std::string mean_field_type = this->parse_mean_field();
+  std::string post_mean_field_type = this->parse_post_mean_field();
   // if (do_excess_electron && do_positron) {
   // excess electron + positron + electrons
   //  APP_ABORT("POLYQUANT can't handle a model excess electron and positron "
@@ -145,9 +146,8 @@ void POLYQUANT_CALCULATION::run() {
 //}
 
 std::string POLYQUANT_CALCULATION::parse_mean_field() {
-  Polyquant_cout(
-      "Figuring out if we need to run a mean-field calculation for the "
-      "electrons...");
+  Polyquant_cout("Figuring out if we need to run a mean-field calculation for "
+                 "the particles...");
   std::string mean_field_type = "NONE";
   // check that json contains a mean field object and assign to string
   if (this->input_params.input_data.contains("model")) {
@@ -173,6 +173,21 @@ std::string POLYQUANT_CALCULATION::parse_mean_field() {
     }
   }
   return mean_field_type;
+}
+
+std::string POLYQUANT_CALCULATION::parse_post_mean_field() {
+  Polyquant_cout("Figuring out if we need to run a post mean-field calculation "
+                 "for the particles...");
+  std::string post_mean_field_type = "NONE";
+  // check that json contains a mean field object and assign to string
+  if (this->input_params.input_data.contains("model")) {
+    if (this->input_params.input_data["model"].contains("method")) {
+      post_mean_field_type = this->input_params.input_data["model"]["method"];
+      std::transform(post_mean_field_type.begin(), post_mean_field_type.end(),
+                     post_mean_field_type.begin(), ::toupper);
+    }
+  }
+  return post_mean_field_type;
 }
 
 void POLYQUANT_CALCULATION::run_electronic_mean_field(

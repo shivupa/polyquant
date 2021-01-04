@@ -1,0 +1,16 @@
+
+
+polyquant determinant set
+polyquant determinant operations
+polyquant mo integral object
+polyquant generating determinants
+polyquant spectra diag
+polyquant frozen core
+polyquant allow reading of custom excitation spaces (frozen/frozen virt, ras, gas)
+polyquant allow reading of bitstrings for custom CI
+polyquant allowed occ to excite from, allowed virt to excite to
+
+Guga?
+
+
+need to start using smart pointer

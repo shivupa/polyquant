@@ -1,0 +1,38 @@
+{
+  "molecule": {
+    "geometry": [
+        0.7569685, 0.0000000, -0.5858752,
+       -0.7569685, 0.0000000, -0.5858752,
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H", "H", "O"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CI",
+    "basis": 
+    {"H" : [{ "library" : {"type" : "cc-pvtz"} }],
+        "O" : [{ "library" : {"type" : "cc-pvtz"} }]}
+  },
+  "keywords": {
+    "restricted" : true,
+    "mf_keywords" :{
+        "from_file" : "Default.h5",
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true
+    },
+   "pure" : true,
+   "ci_keywords" : {
+       "convergence_E" : 1e-6,
+       "num_states" : 2,
+       "num_subspace_vec" : 4,
+       "excitation_level" : 2,
+       "excitation_level" : [1,1]
+   }
+  }
+}
+
