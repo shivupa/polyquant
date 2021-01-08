@@ -60,6 +60,121 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
     libint2::finalize();
   }
 }
+void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        &mo_coeffs) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  mo_one_body_ints.resize(mo_coeffs.size());
+  for (auto i = 0; i < mo_one_body_ints.size(); i++) {
+    mo_one_body_ints[i].resize(mo_coeffs[i].size());
+  }
+  auto quantum_part_idx = 0ul;
+#pragma omp for
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+    for (auto j = 0; j < mo_one_body_ints[i].size(); j++) {
+      mo_one_body_ints[quantum_part_idx][j] =
+          mo_coeffs[i][j].transpose() *
+          (kinetic + (-quantum_part.charge * nuclear)) *
+          mo_coeffs[quantum_part_idx][j];
+    }
+    quantum_part_idx++;
+  }
+}
+Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  auto num_basis = this->input_basis.num_basis;
+
+  Eigen::Matrix<double, Eigen::Dynamic, 1> eri;
+  eri.resize(twoelec.size());
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> X(num_basis, num_basis);
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Y(num_basis, num_basis);
+  auto tmp_size = (num_basis * (num_basis + 1) / 2);
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> TMP(num_basis,
+                                                            num_basis);
+#pragma omp for
+  for (auto i = 0, ij = 0; i < nao; i++) {
+    for (auto j = 0; j <= i; j++, ij++) {
+      for (auto k = 0, kl = 0; k < nao; k++) {
+        for (auto l = 0; l <= k; l++, kl++) {
+          auto ijkl = this->idx2(ij, kl);
+          X[k][l] = twoelec[ijkl];
+          X[l][k] = twoelec[ijkl];
+        }
+      }
+      Y = C.transpose() * X * C;
+      for (auto k = 0, kl = 0; k < nao; k++) {
+        for (auto l = 0; l <= k; l++, kl++) {
+          TMP[kl][ij] = Y[k][l];
+        }
+      }
+    }
+  }
+#pragma omp for
+  for (auto k = 0, kl = 0; k < nao; k++) {
+    for (auto l = 0; l <= k; l++, kl++) {
+      X.setZero();
+      Y.setZero();
+      for (auto i = 0, ij = 0; i < nao; i++) {
+        for (auto j = 0; j <= i; j++, ij++) {
+          X[i][j] = TMP[kl][ij];
+          X[j][i] = TMP[kl][ij];
+        }
+      }
+      Y = C.transpose() * X * C;
+      for (auto i = 0, ij = 0; i < nao; i++) {
+        for (auto j = 0; j <= i; j++, ij++) {
+          auto klij = this->idx2(kl, ij);
+          eri[klij] = X[i][j];
+        }
+      }
+    }
+  }
+  return eri;
+}
+
+void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        &mo_coeffs) {
+  mo_two_body_ints.resize(mo_coeffs.size());
+  auto num_basis = this->input_basis.num_basis;
+  auto quantum_part_a_idx = 0ul;
+  auto quantum_part_b_idx = 0ul;
+  for (auto const &[quantum_part_a_key, quantum_part_a] :
+       this->input_molecule.quantum_particles) {
+    mo_two_body_ints[quantum_part_a_idx].resize(2);
+    for (auto spin_a_idx = 0;
+         spin_a_idx < mo_coeffs[quantum_particle_a_idx].size(); spin_a_idx++) {
+      mo_two_body_ints[quantum_part_a_idx][spin_a_idx].resize(mo_coeffs.size());
+      for (auto const &[quantum_part_b_key, quantum_part_b] :
+           this->input_molecule.quantum_particles) {
+        mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
+            .resize(2);
+        for (auto spin_b_idx = 0;
+             spin_b_idx < mo_coeffs[quantum_particle_b_idx].size();
+             spin_b_idx++) {
+          if (quantum_part_b_idx < quantum_part_a_idx) {
+            continue;
+          }
+          mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
+                          [spin_b_idx] = transform_mo_2_body_integrals(
+                              mo_coeffs[quantum_part_a_idx][spin_a_idx],
+                              mo_coeffs[quantum_part_b_idx][spin_b_idx]);
+        }
+      }
+      quantum_part_b_idx++;
+    }
+    quantum_part_a_idx++;
+  }
+}
 
 // void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
 //  if (this->polarization_potential.shape() == std::vector<size_t>({})) {

@@ -34,9 +34,8 @@ double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl,
 void POLYQUANT_EPSCF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_a_idx = 0;
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_b_idx = 0;
-
+  auto quantum_part_a_idx = 0ul;
+  auto quantum_part_b_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
     this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);

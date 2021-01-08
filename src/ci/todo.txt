@@ -1,10 +1,16 @@
 
+generate hf det
+<-highest orb    lowest orb->
+00000000000000000111111111111
+generate excitations from HF
 
+ci generate dets
+ci calculate
+polyquant generating determinants
 polyquant determinant set
 polyquant determinant operations
-polyquant mo integral object
-polyquant generating determinants
 polyquant spectra diag
+
 polyquant frozen core
 polyquant allow reading of custom excitation spaces (frozen/frozen virt, ras, gas)
 polyquant allow reading of bitstrings for custom CI

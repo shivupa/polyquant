@@ -150,12 +150,6 @@ public:
    */
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> nuclear;
   /**
-   * @brief Polarization potential integral matrix (where the potential was
-   * expanded as a sum of gaussians)
-   *
-   */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> polarization_potential;
-  /**
    * @brief Two electron integral vector
    *
    */
@@ -165,6 +159,21 @@ public:
    *
    */
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orth_X;
+
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      mo_one_body_ints;
+  std::vector<std::vector<
+      std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>>>
+      mo_two_body_ints;
+  void calculate_mo_1_body_integrals(
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeff);
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+  transform_mo_2_body_integrals(
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b);
+  void calculate_mo_2_body_integrals(
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeff);
   /**
    * @brief the input parameters
    *

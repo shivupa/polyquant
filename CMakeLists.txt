@@ -133,6 +133,17 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 find_package(Libint2 REQUIRED)
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+# TODO replace with main spectra branch
+FetchContent_Declare(
+  spectra
+  GIT_REPOSITORY https://github.com/NLESC-JCER/spectra.git
+  GIT_TAG origin/6_jd_base_solver)
+FetchContent_MakeAvailable(spectra)
+FetchContent_Declare(
+  cppitertools
+  GIT_REPOSITORY https://github.com/ryanhaining/cppitertools.git
+  GIT_TAG origin/master)
+FetchContent_MakeAvailable(cppitertools)
 find_package(OpenMP REQUIRED)
 # find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
 find_package(cxxopts REQUIRED)

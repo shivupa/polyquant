@@ -41,7 +41,8 @@ public:
    *
    * @param mean field method
    */
-  void run_electronic_mean_field(std::string &mean_field_type);
+  void run_mean_field(std::string &mean_field_type);
+  void run_post_mean_field(std::string &post_mean_field_type);
 
   // void
   // run_excess_electron_plus_electronic_mean_field(std::string
@@ -52,6 +53,7 @@ public:
   std::string parse_mean_field();
   std::string parse_post_mean_field();
   void dump_mf_for_qmcpack(std::string &filename);
+  void dump_post_mf_for_qmcpack(std::string &filename) {};
   /**
    * @brief the input parameters
    *
@@ -81,6 +83,12 @@ public:
    *
    */
   POLYQUANT_EPSCF scf_calc;
+
+  /**
+   * @brief the CI calculation
+   *
+   */
+  POLYQUANT_EPCI ci_calc;
 
   /**
    * @brief Mean-field calculation types that pyci knows about
