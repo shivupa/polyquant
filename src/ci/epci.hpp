@@ -1,25 +1,18 @@
 #ifndef POLYQUANT_EPCI_H
 #define POLYQUANT_EPCI_H
 #include "basis/basis.hpp"
+#include "ci/determinant_set.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
 #include "molecule/quantum_particles.hpp"
+#include "scf/epscf.hpp"
 #include <Eigen/Core>
-#include <string>
 #include <combinations.hpp>
 #include <inttypes.h>
+#include <string>
 
 namespace polyquant {
-
-class POLYQUANT_EPCI_HAM {
-public:
-  POLYQUANT_EPCI_HAM()
-  int rows() { return 10; }
-  int cols() { return 10; }
-  // y_out = M * x_in
-  void perform_op(const double *x_in, double *y_out) {}
-}
 
 class POLYQUANT_EPCI {
 public:

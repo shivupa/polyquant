@@ -5,6 +5,7 @@ add_subdirectory(basis)
 add_subdirectory(integral)
 add_subdirectory(calculation)
 add_subdirectory(scf)
+add_subdirectory(ci)
 
 # tell cmake what our excutable is going to be
 add_executable(polyquant polyquant.cpp)

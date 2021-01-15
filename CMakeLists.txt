@@ -136,14 +136,18 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # TODO replace with main spectra branch
 FetchContent_Declare(
   spectra
-  GIT_REPOSITORY https://github.com/NLESC-JCER/spectra.git
-  GIT_TAG origin/6_jd_base_solver)
+  GIT_REPOSITORY https://github.com/shivupa/spectra.git
+  GIT_TAG origin/cmake_update)
 FetchContent_MakeAvailable(spectra)
+list(APPEND CMAKE_MODULE_PATH ${spectra_SOURCE_DIR}/cmake)
+message(${spectra_SOURCE_DIR}/cmake)
+
 FetchContent_Declare(
   cppitertools
   GIT_REPOSITORY https://github.com/ryanhaining/cppitertools.git
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(cppitertools)
+
 find_package(OpenMP REQUIRED)
 # find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
 find_package(cxxopts REQUIRED)

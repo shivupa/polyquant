@@ -13,13 +13,12 @@
   "model": {
     "method": "CI",
     "basis": 
-    {"H" : [{ "library" : {"type" : "cc-pvtz"} }],
-        "O" : [{ "library" : {"type" : "cc-pvtz"} }]}
+    {"H" : [{ "library" : {"type" : "sto-3g"} }],
+        "O" : [{ "library" : {"type" : "sto-3g"} }]}
   },
   "keywords": {
     "restricted" : true,
     "mf_keywords" :{
-        "from_file" : "Default.h5",
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
         "iteration_max" : 200,
@@ -30,8 +29,7 @@
        "convergence_E" : 1e-6,
        "num_states" : 2,
        "num_subspace_vec" : 4,
-       "excitation_level" : 2,
-       "excitation_level" : [1,1]
+       "excitation_level" : [1]
    }
   }
 }

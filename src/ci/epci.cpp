@@ -1,4 +1,4 @@
-#include "scf/epscf.hpp"
+#include "ci/epci.hpp"
 
 using namespace polyquant;
 
@@ -10,22 +10,65 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->input_integral = this->input_epscf.input_integral;
   this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C);
   this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
-  
+
   auto num_basis = this->input_basis.num_basis;
   this->detset.max_orb = num_basis;
+
+  this->setup_determinants();
 }
 
-void POLYQUANT_EPCI::setup_determinants(){
+void POLYQUANT_EPCI::setup_determinants() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
 
-  this->create_det(
-
+  std::vector<std::vector<std::vector<int>>> occ;
   auto quantum_part_idx = 0ul;
+  occ.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-
-
+    std::vector<int> this_spin_occ;
+    for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
+      this_spin_occ.push_back(i);
+    }
+    occ[quantum_part_idx].push_back(this_spin_occ);
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      if (quantum_part.num_parts_alpha == quantum_part.num_parts_beta) {
+        occ[quantum_part_idx].push_back(this_spin_occ);
+      } else {
+        this_spin_occ.clear();
+        for (auto i = 0; i < quantum_part.num_parts_beta; i++) {
+          this_spin_occ.push_back(i);
+        }
+        occ[quantum_part_idx].push_back(this_spin_occ);
+      }
+    }
+    quantum_part_idx++;
+  }
+  this->detset.create_det(occ);
+  quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+    auto ex_lvl = this->excitation_level[quantum_part_idx];
+    Polyquant_cout(ex_lvl);
+    if (ex_lvl > 0) {
+      for (auto i_ex = 1; i_ex < ex_lvl; i_ex++) {
+        auto excited_dets = this->detset.create_excitation(
+            this->detset.dets[quantum_part_idx][0][0], i_ex);
+        for (auto &e_det : excited_dets) {
+          this->detset.dets[quantum_part_idx][0].push_back(e_det);
+        }
+      }
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        for (auto i_ex = 1; i_ex < ex_lvl; i_ex++) {
+          auto excited_dets = this->detset.create_excitation(
+              this->detset.dets[quantum_part_idx][0][1], i_ex);
+          for (auto &e_det : excited_dets) {
+            this->detset.dets[quantum_part_idx][1].push_back(e_det);
+          }
+        }
+      }
+    }
+    quantum_part_idx++;
   }
 }
 
@@ -43,5 +86,4 @@ void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-
 }
