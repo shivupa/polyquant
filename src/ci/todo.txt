@@ -1,15 +1,15 @@
 
-generate hf det
-<-highest orb    lowest orb->
-00000000000000000111111111111
-generate excitations from HF
+ci finish davidson
+ci slater rules tests
+ci davidson diag tests
+ci davidson matrix vector OpenMP
 
-ci generate dets
-ci calculate
-polyquant generating determinants
-polyquant determinant set
 polyquant determinant operations
 polyquant spectra diag
+
+prune dets if duplicates arise
+https://stackoverflow.com/questions/29855908/c-unordered-set-of-vectors
+https://stackoverflow.com/questions/1041620/whats-the-most-efficient-way-to-erase-duplicates-and-sort-a-vector
 
 polyquant frozen core
 polyquant allow reading of custom excitation spaces (frozen/frozen virt, ras, gas)
