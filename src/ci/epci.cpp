@@ -15,6 +15,8 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->detset.max_orb = num_basis;
 
   this->setup_determinants();
+  Polyquant_cout("Created " + std::to_string(this->detset.N_dets) +
+                 " determinants");
   this->detset.print_determinants();
 }
 
@@ -52,21 +54,31 @@ void POLYQUANT_EPCI::setup_determinants() {
     auto ex_lvl = this->excitation_level[quantum_part_idx];
     if (ex_lvl > 0) {
       for (auto i_ex = 1; i_ex <= ex_lvl; i_ex++) {
-        auto excited_dets = this->detset.create_excitation(
-            this->detset.dets[quantum_part_idx][0][0], i_ex);
+        auto hf_det = *this->detset.dets[quantum_part_idx][0].begin();
+        auto excited_dets = this->detset.create_excitation(hf_det, i_ex);
         for (auto &e_det : excited_dets) {
-          this->detset.dets[quantum_part_idx][0].push_back(e_det);
+          this->detset.dets[quantum_part_idx][0].insert(e_det);
         }
       }
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         for (auto i_ex = 1; i_ex < ex_lvl; i_ex++) {
-          auto excited_dets = this->detset.create_excitation(
-              this->detset.dets[quantum_part_idx][0][1], i_ex);
+          auto hf_det = *this->detset.dets[quantum_part_idx][1].begin();
+          auto excited_dets = this->detset.create_excitation(hf_det, i_ex);
           for (auto &e_det : excited_dets) {
-            this->detset.dets[quantum_part_idx][1].push_back(e_det);
+            this->detset.dets[quantum_part_idx][1].insert(e_det);
           }
         }
       }
+    }
+    quantum_part_idx++;
+  }
+  quantum_part_idx = 0;
+  this->detset.N_dets = 1;
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+    this->detset.N_dets *= this->detset.dets[quantum_part_idx][0].size();
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      this->detset.N_dets *= this->detset.dets[quantum_part_idx][1].size();
     }
     quantum_part_idx++;
   }
