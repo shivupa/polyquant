@@ -101,12 +101,11 @@ void POLYQUANT_EPCI::run() {
   POLYQUANT_TIMER timer(function);
   Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(this->detset, 3, 6);
   eigs.init();
-    eigs.compute(Spectra::SortRule::LargestAlge);
-    if(eigs.info() == Spectra::CompInfo::Successful)
-    {
-        Eigen::VectorXd evalues = eigs.eigenvalues();
-        std::cout << "Eigenvalues found:\n" << evalues << std::endl;
-    }
+  eigs.compute(Spectra::SortRule::LargestAlge);
+  if (eigs.info() == Spectra::CompInfo::Successful) {
+    Eigen::VectorXd evalues = eigs.eigenvalues();
+    std::cout << "Eigenvalues found:\n" << evalues << std::endl;
+  }
   /*
   Eigen::Index num_of_eigenvalues = 5;
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(

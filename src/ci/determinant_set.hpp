@@ -45,7 +45,8 @@ public:
                    std::vector<int> &holes, std::vector<int> &parts) const;
   void get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
                     std::vector<int> &virt) const;
-  double same_part_ham_diag(int idx_part, std::vector<std::vector<int>> i_unfold,
+  double same_part_ham_diag(int idx_part,
+                            std::vector<std::vector<int>> i_unfold,
                             std::vector<std::vector<int>> j_unfold) const;
   double same_part_ham_single(int idx_part,
                               std::vector<std::vector<int>> i_unfold,
@@ -73,12 +74,14 @@ public:
   double Slater_Condon(int i_det, int j_det) const;
   // for diagonalization stuff
   using Scalar = double; // A typedef named "Scalar" is required
-  int rows() const { 
-      const int rows = this->N_dets;
-      return rows; }
-  int cols() const { 
-      const int cols = this->N_dets;
-      return cols; }
+  int rows() const {
+    const int rows = this->N_dets;
+    return rows;
+  }
+  int cols() const {
+    const int cols = this->N_dets;
+    return cols;
+  }
   int N_dets;
   // y_out = M * x_in
   void perform_op(const double *x_in, double *y_out) const;
@@ -145,7 +148,7 @@ POLYQUANT_DETSET<T>::create_excitation(std::vector<T> &det,
 
 template <typename T>
 void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj,
-                                    std::vector<int> &holes) const{
+                                    std::vector<int> &holes) const {
   for (auto i = 0; i < Di.size(); i++) {
     auto H = (Di[i] ^ Dj[i]) & Di[i];
     while (H != 0) {
@@ -157,7 +160,7 @@ void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj,
 }
 template <typename T>
 void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj,
-                                    std::vector<int> &parts) const{
+                                    std::vector<int> &parts) const {
   for (auto i = 0; i < Di.size(); i++) {
     auto P = (Di[i] ^ Dj[i]) & Dj[i];
     while (P != 0) {
@@ -170,7 +173,7 @@ void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj,
 template <typename T>
 double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj,
                                       std::vector<int> &holes,
-                                      std::vector<int> &parts) const{
+                                      std::vector<int> &parts) const {
   T nperm = 0;
   std::vector<T> mask;
   for (auto i = 0; i < holes.size(); i++) {
@@ -271,17 +274,17 @@ POLYQUANT_DETSET<T>::det_idx_unfold(std::size_t det_idx) const {
 }
 
 template <typename T>
-std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const{
+std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin,
+                                            int i) const {
   auto it = this->dets[idx_part][idx_spin].begin();
   std::advance(it, i);
   return *it;
 }
 
 template <typename T>
-double
-POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part,
-                                        std::vector<std::vector<int>> i_unfold,
-                                        std::vector<std::vector<int>> j_unfold) const {
+double POLYQUANT_DETSET<T>::same_part_ham_diag(
+    int idx_part, std::vector<std::vector<int>> i_unfold,
+    std::vector<std::vector<int>> j_unfold) const {
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->dets[idx_part].size();
 
@@ -314,7 +317,8 @@ POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part,
       elem += 0.5 *
               (this->input_integral
                    .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
-                                    [alpha_spin_idx][this->input_integral.idx8(orb_a_i, orb_a_i, orb_a_j, orb_a_j)]);
+                                    [alpha_spin_idx][this->input_integral.idx8(
+                                        orb_a_i, orb_a_i, orb_a_j, orb_a_j)]);
       elem -= 0.5 *
               (this->input_integral
                    .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
@@ -348,7 +352,7 @@ POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part,
 template <typename T>
 double POLYQUANT_DETSET<T>::same_part_ham_single(
     int idx_part, std::vector<std::vector<int>> i_unfold,
-    std::vector<std::vector<int>> j_unfold) const{
+    std::vector<std::vector<int>> j_unfold) const {
   auto elem = 0.0;
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->dets[idx_part].size();
@@ -433,7 +437,7 @@ double POLYQUANT_DETSET<T>::same_part_ham_single(
 template <typename T>
 double POLYQUANT_DETSET<T>::same_part_ham_double(
     int idx_part, std::vector<std::vector<int>> i_unfold,
-    std::vector<std::vector<int>> j_unfold) const{
+    std::vector<std::vector<int>> j_unfold) const {
   auto elem = 0.0;
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->dets[idx_part].size();
@@ -499,7 +503,7 @@ double POLYQUANT_DETSET<T>::same_part_ham_double(
 }
 
 template <typename T>
-double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const{
+double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
 
   double matrix_elem = 0.0;
   auto i_unfold = det_idx_unfold(i_det);
@@ -547,7 +551,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const{
 
 template <typename T>
 void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
-    Polyquant_cout("Performing M*v operation");
+  Polyquant_cout("Performing M*v operation");
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto matrix_elem = 0.0;
 #pragma omp parallel for reduction(+ : matrix_elem)
