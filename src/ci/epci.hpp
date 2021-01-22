@@ -8,6 +8,7 @@
 #include "molecule/quantum_particles.hpp"
 #include "scf/epscf.hpp"
 #include <Eigen/Core>
+#include <Spectra/DavidsonSymEigsSolver.h>
 #include <combinations.hpp>
 #include <inttypes.h>
 #include <string>

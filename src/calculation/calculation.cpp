@@ -322,7 +322,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
     }
     if (post_mean_field_type == "CI") {
       this->ci_calc.setup(this->scf_calc);
-      ci_calc.run();
+      this->ci_calc.run();
     } else if (post_mean_field_type == "FILE") {
       this->ci_calc.setup(this->scf_calc);
       // ci_calc.from_file(hdf5_filename);

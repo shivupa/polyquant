@@ -37,11 +37,22 @@ public:
   std::vector<std::vector<T>> create_excitation(std::vector<T> &det,
                                                 int excitation_level);
 
-  void get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes);
-  void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts);
-double get_phase(std::vector<T>& Di, std::vector<T>& Dj, std::vector<int> &holes, std::vector<int> &parts);
+  void get_holes(std::vector<T> &Di, std::vector<T> &Dj,
+                 std::vector<int> &holes);
+  void get_parts(std::vector<T> &Di, std::vector<T> &Dj,
+                 std::vector<int> &parts);
+  double get_phase(std::vector<T> &Di, std::vector<T> &Dj,
+                   std::vector<int> &holes, std::vector<int> &parts);
   void get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
                     std::vector<int> &virt);
+  double same_part_ham_diag(int idx_part, std::vector<std::vector<T>> i_unfold,
+                            std::vector<std::vector<T>> j_unfold);
+  double same_part_ham_single(int idx_part,
+                              std::vector<std::vector<T>> i_unfold,
+                              std::vector<std::vector<T>> j_unfold);
+  double same_part_ham_double(int idx_part,
+                              std::vector<std::vector<T>> i_unfold,
+                              std::vector<std::vector<T>> j_unfold);
 
   std::vector<T> get_det(int idx_part, int idx_spin, int i);
   void print_determinants();
@@ -55,12 +66,15 @@ double get_phase(std::vector<T>& Di, std::vector<T>& Dj, std::vector<int> &holes
   int max_orb;
   POLYQUANT_INTEGRAL input_integral;
 
-  void set_integral(POLYQUANT_INTEGRAL& integral) {this->input_integral = integral;};
+  void set_integral(POLYQUANT_INTEGRAL &integral) {
+    this->input_integral = integral;
+  };
 
-  void Slater_Condon(int i_det, int j_det);
+  double Slater_Condon(int i_det, int j_det);
   // for diagonalization stuff
-  int rows() { return this->N_dets; }
-  int cols() { return this->N_dets; }
+  using Scalar = double; // A typedef named "Scalar" is required
+  const int rows() { return this->N_dets; }
+  const int cols() { return this->N_dets; }
   int N_dets;
   // y_out = M * x_in
   void perform_op(const double *x_in, double *y_out);
@@ -126,52 +140,56 @@ POLYQUANT_DETSET<T>::create_excitation(std::vector<T> &det,
 }
 
 template <typename T>
-  std::vector<int> POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes){
-    for (auto i = 0; i < Di.size(); i++){
-        auto H = (Di[i] ^ Dj[i]) & Di[i];
-        while (H != 0){
-            auto position = std::countr_zero(H);
-            holes.push_back((64*i)+position);
-            H &= ~(1UL << position);
-        }
+void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj,
+                                    std::vector<int> &holes) {
+  for (auto i = 0; i < Di.size(); i++) {
+    auto H = (Di[i] ^ Dj[i]) & Di[i];
+    while (H != 0) {
+      auto position = std::countr_zero(H);
+      holes.push_back((64 * i) + position);
+      H &= ~(1UL << position);
     }
   }
+}
 template <typename T>
-  std::vector<int> POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts){
-    for (auto i = 0; i < Di.size(); i++){
-        auto P = (Di[i] ^ Dj[i]) & Dj[i];
-        while (P != 0){
-            auto position = std::countr_zero(P);
-            holes.push_back((64*i)+position);
-            P &= ~(1UL << position);
-        }
+void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj,
+                                    std::vector<int> &parts) {
+  for (auto i = 0; i < Di.size(); i++) {
+    auto P = (Di[i] ^ Dj[i]) & Dj[i];
+    while (P != 0) {
+      auto position = std::countr_zero(P);
+      parts.push_back((64 * i) + position);
+      P &= ~(1UL << position);
     }
   }
+}
 template <typename T>
-double POLYQUANT_DETSET<T>::get_phase(std::vector<T>& Di, std::vector<T>& Dj, std::vector<int> &holes, std::vector<int> &parts){
-    T nperm = 0
-    std::vector<T> mask;
-    for (auto i = 0; i < holes.size(); i++){
-        T high = std::max(parts[i], holes[i]);
-        T low = std::min(parts[i], holes[i]);
-        T k = high/64;
-        T m = high % 64;
-        T j = low /64;
-        T n = low %64;
-        for (auto l = j; l < k; l++){
-            mask[l] = ~(0ul);
-        }
-        mask[k] = (1UL << m) - 1;
-        mask[j] = mask[j] & (~(1ul << (n+1)+1));
-        for (auto l = j; j < k; l++){
-            nperm = nperm + std::popcount(Di[j] & mask[l]);
-        }
+double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj,
+                                      std::vector<int> &holes,
+                                      std::vector<int> &parts) {
+  T nperm = 0;
+  std::vector<T> mask;
+  for (auto i = 0; i < holes.size(); i++) {
+    T high = std::max(parts[i], holes[i]);
+    T low = std::min(parts[i], holes[i]);
+    T k = high / 64;
+    T m = high % 64;
+    T j = low / 64;
+    T n = low % 64;
+    for (auto l = j; l < k; l++) {
+      mask[l] = ~(0ul);
     }
-    if((holes.size() == 2) && (holes[1] < parts[0] || holes[0] > parts[1])){
-        nperm++;
+    mask[k] = (1UL << m) - 1;
+    mask[j] = mask[j] & (~(1ul << (n + 1) + 1));
+    for (auto l = j; j < k; l++) {
+      nperm = nperm + std::popcount(Di[j] & mask[l]);
     }
-    return std::pow(-1.0, nperm);
   }
+  if ((holes.size() == 2) && (holes[1] < parts[0] || holes[0] > parts[1])) {
+    nperm++;
+  }
+  return std::pow(-1.0, nperm);
+}
 
 template <typename T>
 void POLYQUANT_DETSET<T>::get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
@@ -227,7 +245,6 @@ template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
     }
     Polyquant_cout(ss.str());
   }
-
 }
 
 template <typename T>
@@ -257,160 +274,225 @@ std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) {
 }
 
 template <typename T>
-double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<std::vector<T>> i_unfold, std::vector<std::vector<T>> j_unfold){
-    auto alpha_spin_idx = 0;
-    auto beta_spin_idx = 1 % this->dets[idx_part].size();
+double
+POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part,
+                                        std::vector<std::vector<T>> i_unfold,
+                                        std::vector<std::vector<T>> j_unfold) {
+  auto alpha_spin_idx = 0;
+  auto beta_spin_idx = 1 % this->dets[idx_part].size();
 
-    std::vector<int> aocc, avirt;
-    auto det_i_a = this->get_det(idx_part, alpha_spin_idx, i_unfold[idx_part][alpha_spin_idx]);
-    this->get_occ_virt(det_i_a,aocc,avirt);
+  std::vector<int> aocc, avirt;
+  auto det_i_a = this->get_det(idx_part, alpha_spin_idx,
+                               i_unfold[idx_part][alpha_spin_idx]);
+  this->get_occ_virt(det_i_a, aocc, avirt);
 
-    std::vector<int> bocc, bvirt;
-    
+  std::vector<int> bocc, bvirt;
 
-    if (beta_spin_idx == 1){
-    auto det_i_b = this->get_det(idx_part, beta_spin_idx, i_unfold[idx_part][beta_spin_idx]);
-    this->get_occ_virt(det_i_b,bocc,bvirt);
-    } else {
-        bocc=aocc;
-        bvirt=avirt;
+  if (beta_spin_idx == 1) {
+    auto det_i_b = this->get_det(idx_part, beta_spin_idx,
+                                 i_unfold[idx_part][beta_spin_idx]);
+    this->get_occ_virt(det_i_b, bocc, bvirt);
+  } else {
+    bocc = aocc;
+    bvirt = avirt;
+  }
+  double elem = 0.0;
+  for (auto orb_a_i : aocc) {
+    elem += this->input_integral.mo_one_body_ints[idx_part][alpha_spin_idx](
+        orb_a_i, orb_a_i);
+  }
+  for (auto orb_b_i : bocc) {
+    elem += this->input_integral.mo_one_body_ints[idx_part][beta_spin_idx](
+        orb_b_i, orb_b_i);
+  }
+  for (auto orb_a_i : aocc) {
+    for (auto orb_a_j : aocc) {
+      elem += 0.5 *
+              (this->input_integral
+                   .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                    [alpha_spin_idx][this->input_integral.idx8(
+                                        orb_a_i, orb_a_i, orb_a_j, orb_a_j)]);
+      elem -= 0.5 *
+              (this->input_integral
+                   .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                    [alpha_spin_idx][this->input_integral.idx8(
+                                        orb_a_i, orb_a_j, orb_a_j, orb_a_i)]);
     }
-    double elem = 0.0;
-    for (auto orb_a_i : aocc) {
-        elem += this->input_integral.mo_one_body_ints[idx_part][alpha_spin_idx](orb_a_i, orb_a_i);
+    for (auto orb_b_j : bocc) {
+      elem += this->input_integral
+                  .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                   [beta_spin_idx][this->input_integral.idx8(
+                                       orb_a_i, orb_a_i, orb_b_j, orb_b_j)];
     }
-    for (auto orb_b_i : bocc) {
-        elem += this->input_integral.mo_one_body_ints[idx_part][beta_spin_idx](orb_b_i, orb_b_i);
+  }
+  for (auto orb_b_i : bocc) {
+    for (auto orb_b_j : bocc) {
+      elem +=
+          0.5 * (this->input_integral
+                     .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                      [beta_spin_idx][this->input_integral.idx8(
+                                          orb_b_i, orb_b_i, orb_b_j, orb_b_j)]);
+      elem -=
+          0.5 * (this->input_integral
+                     .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                      [beta_spin_idx][this->input_integral.idx8(
+                                          orb_b_i, orb_b_j, orb_b_j, orb_b_i)]);
     }
-    for (auto orb_a_i : aocc) {
-        for (auto orb_a_j : aocc) {
-            elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_a_j,orb_a_j)]);
-            elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_j,orb_a_j,orb_a_i)]);
-        }
-        for (auto orb_b_j : bocc) {
-            elem += this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_b_j,orb_b_j)];
-        }
-    }
-    for (auto orb_b_i : bocc) {
-        for (auto orb_b_j : bocc) {
-            elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_a_j,orb_a_j)]);
-            elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_j,orb_a_j,orb_a_i)]);
-        }
-    }
-    return elem;
+  }
+  return elem;
 }
 
 template <typename T>
-double POLYQUANT_DETSET<T>::same_part_ham_single(int idx_part, std::vector<std::vector<T>> i_unfold, std::vector<std::vector<T>> j_unfold){
-    auto elem = 0.0;
-    auto alpha_spin_idx = 0;
-    auto beta_spin_idx = 1 % this->dets[idx_part].size();
-    auto alpha_det_i_idx = &i_unfold[idx_part][alpha_spin_idx];
-    auto beta_det_i_idx = &i_unfold[idx_part][beta_spin_idx];
-    auto alpha_det_j_idx = &j_unfold[idx_part][alpha_spin_idx];
-    auto beta_det_j_idx = &j_unfold[idx_part][beta_spin_idx];
-    auto det_i_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_i_idx);
-    auto det_i_b = this->get_det(idx_part, beta_spin_idx, beta_det_i_idx);
-    auto det_j_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_j_idx);
-    auto det_j_b = this->get_det(idx_part, beta_spin_idx, beta_det_j_idx);
+double POLYQUANT_DETSET<T>::same_part_ham_single(
+    int idx_part, std::vector<std::vector<T>> i_unfold,
+    std::vector<std::vector<T>> j_unfold) {
+  auto elem = 0.0;
+  auto alpha_spin_idx = 0;
+  auto beta_spin_idx = 1 % this->dets[idx_part].size();
+  auto alpha_det_i_idx = &i_unfold[idx_part][alpha_spin_idx];
+  auto beta_det_i_idx = &i_unfold[idx_part][beta_spin_idx];
+  auto alpha_det_j_idx = &j_unfold[idx_part][alpha_spin_idx];
+  auto beta_det_j_idx = &j_unfold[idx_part][beta_spin_idx];
+  auto det_i_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_i_idx);
+  auto det_i_b = this->get_det(idx_part, beta_spin_idx, beta_det_i_idx);
+  auto det_j_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_j_idx);
+  auto det_j_b = this->get_det(idx_part, beta_spin_idx, beta_det_j_idx);
 
-    // spin = 0 alpha excitation, spin = 1 beta excitation
-    auto spin = 0;
-    if (alpha_det_i_idx == alpha_det_j_idx){
-        spin = 1;
-    }
+  // spin = 0 alpha excitation, spin = 1 beta excitation
+  auto spin = 0;
+  if (alpha_det_i_idx == alpha_det_j_idx) {
+    spin = 1;
+  }
 
-    std::vector<int> aocc, avirt;
-    std::vector<int> bocc, bvirt;
-    this->get_occ_virt(det_i_a,aocc,avirt);
-    if (beta_spin_idx == 1){
-    this->get_occ_virt(det_i_b,bocc,bvirt);
-    } else {
-        bocc=aocc;
-        bvirt=avirt;
-    }
+  std::vector<int> aocc, avirt;
+  std::vector<int> bocc, bvirt;
+  this->get_occ_virt(det_i_a, aocc, avirt);
+  if (beta_spin_idx == 1) {
+    this->get_occ_virt(det_i_b, bocc, bvirt);
+  } else {
+    bocc = aocc;
+    bvirt = avirt;
+  }
 
-    //get hole
-    //get part
-std::vector<int> holes, parts;
-double phase = 1.0;
-if (spin = 0){
-    get_holes(det_i_a,det_j_a,holes);
-    get_parts(det_i_a,det_j_a,parts);
+  // get hole
+  // get part
+  std::vector<int> holes, parts;
+  double phase = 1.0;
+  if (spin = 0) {
+    get_holes(det_i_a, det_j_a, holes);
+    get_parts(det_i_a, det_j_a, parts);
     phase = get_phase(det_i_a, det_j_a, holes, parts);
-    elem += this->input_integral.mo_one_body_ints[idx_part][alpha_spin_idx](parts[0], holes[0]);
-    for (auto orb_a_i : aocc){
-            elem +=this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(parts[0],holes[0],orb_a_i,orb_a_i)];
-            elem -=this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(parts[0],orb_a_i,orb_a_i,holes[0])];
+    elem += this->input_integral.mo_one_body_ints[idx_part][alpha_spin_idx](
+        parts[0], holes[0]);
+    for (auto orb_a_i : aocc) {
+      elem += this->input_integral
+                  .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                   [alpha_spin_idx][this->input_integral.idx8(
+                                       parts[0], holes[0], orb_a_i, orb_a_i)];
+      elem -= this->input_integral
+                  .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                   [alpha_spin_idx][this->input_integral.idx8(
+                                       parts[0], orb_a_i, orb_a_i, holes[0])];
     }
-    for (auto orb_b_i : bocc){
-            elem +=this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(parts[0],holes[0],orb_b_i,orb_b_i)];
+    for (auto orb_b_i : bocc) {
+      elem += this->input_integral
+                  .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                   [beta_spin_idx][this->input_integral.idx8(
+                                       parts[0], holes[0], orb_b_i, orb_b_i)];
     }
-} else {
-    get_holes(det_i_b,det_j_b,holes);
-    get_parts(det_i_b,det_j_b,parts);
+  } else {
+    get_holes(det_i_b, det_j_b, holes);
+    get_parts(det_i_b, det_j_b, parts);
     phase = get_phase(det_i_b, det_j_b, holes, parts);
-    elem += this->input_integral.mo_one_body_ints[idx_part][beta_spin_idx](parts[0], holes[0]);
-    for (auto orb_b_i : bocc){
-            elem +=this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(parts[0],holes[0],orb_b_i,orb_b_i)];
-            elem -=this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(parts[0],orb_b_i,orb_b_i,holes[0])];
+    elem += this->input_integral.mo_one_body_ints[idx_part][beta_spin_idx](
+        parts[0], holes[0]);
+    for (auto orb_b_i : bocc) {
+      elem += this->input_integral
+                  .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                   [beta_spin_idx][this->input_integral.idx8(
+                                       parts[0], holes[0], orb_b_i, orb_b_i)];
+      elem -= this->input_integral
+                  .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                   [beta_spin_idx][this->input_integral.idx8(
+                                       parts[0], orb_b_i, orb_b_i, holes[0])];
     }
-    for (auto orb_a_i : aocc){
-            elem +=this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(parts[0],holes[0],orb_a_i,orb_a_i)];
+    for (auto orb_a_i : aocc) {
+      elem += this->input_integral
+                  .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                   [alpha_spin_idx][this->input_integral.idx8(
+                                       parts[0], holes[0], orb_a_i, orb_a_i)];
     }
-}
-elem *= phase;
-    return elem;
+  }
+  elem *= phase;
+  return elem;
 }
 
 template <typename T>
-double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_part, std::vector<std::vector<T>> i_unfold, std::vector<std::vector<T>> j_unfold){
-    auto elem = 0.0;
-    auto alpha_spin_idx = 0;
-    auto beta_spin_idx = 1 % this->dets[idx_part].size();
-    auto alpha_det_i_idx = &i_unfold[idx_part][alpha_spin_idx];
-    auto beta_det_i_idx = &i_unfold[idx_part][beta_spin_idx];
-    auto alpha_det_j_idx = &j_unfold[idx_part][alpha_spin_idx];
-    auto beta_det_j_idx = &j_unfold[idx_part][beta_spin_idx];
-    auto det_i_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_i_idx);
-    auto det_i_b = this->get_det(idx_part, beta_spin_idx, beta_det_i_idx);
-    auto det_j_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_j_idx);
-    auto det_j_b = this->get_det(idx_part, beta_spin_idx, beta_det_j_idx);
+double POLYQUANT_DETSET<T>::same_part_ham_double(
+    int idx_part, std::vector<std::vector<T>> i_unfold,
+    std::vector<std::vector<T>> j_unfold) {
+  auto elem = 0.0;
+  auto alpha_spin_idx = 0;
+  auto beta_spin_idx = 1 % this->dets[idx_part].size();
+  auto alpha_det_i_idx = &i_unfold[idx_part][alpha_spin_idx];
+  auto beta_det_i_idx = &i_unfold[idx_part][beta_spin_idx];
+  auto alpha_det_j_idx = &j_unfold[idx_part][alpha_spin_idx];
+  auto beta_det_j_idx = &j_unfold[idx_part][beta_spin_idx];
+  auto det_i_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_i_idx);
+  auto det_i_b = this->get_det(idx_part, beta_spin_idx, beta_det_i_idx);
+  auto det_j_a = this->get_det(idx_part, alpha_spin_idx, alpha_det_j_idx);
+  auto det_j_b = this->get_det(idx_part, beta_spin_idx, beta_det_j_idx);
 
-    // spin = -1 mixed, spin = 0 alpha excitation, spin = 1 beta excitation
-    auto spin = -1;
-    if (alpha_det_i_idx == alpha_det_j_idx){
-        std::vector<int> holes, parts;
-        double phase = 1.0;
-        get_holes(det_i_b,det_j_b,holes);
-        get_parts(det_i_b,det_j_b,parts);
-        phase = get_phase(det_i_b, det_j_b, holes, parts);
-        elem += this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(parts[0],holes[0],part[1],holes[1])];
-        elem -= this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(parts[0],holes[1],part[1],holes[0])];
-        elem *= phase;
-    } else if (beta_det_i_idx == beta_det_j_idx){
-        std::vector<int> holes, parts;
-        double phase = 1.0;
-        get_holes(det_i_a,det_j_a,holes);
-        get_parts(det_i_a,det_j_a,parts);
-        phase = get_phase(det_i_a, det_j_a, holes, parts);
-        elem += this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(parts[0],holes[0],part[1],holes[1])];
-        elem -= this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(parts[0],holes[1],part[1],holes[0])];
-        elem *= phase;
-    } else {
-        std::vector<int> aholes, aparts;
-        std::vector<int> bholes, bparts;
-        double phase = 1.0;
-        get_holes(det_i_a,det_j_a,aholes);
-        get_parts(det_i_a,det_j_a,aparts);
-        get_holes(det_i_b,det_j_b,bholes);
-        get_parts(det_i_b,det_j_b,bparts);
-        phase *= get_phase(det_i_a, det_j_a, aholes, aparts);
-        phase *= get_phase(det_i_b, det_j_b, bholes, bparts);
-        elem += this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(aparts[0],aholes[0],bparts[0],bholes[0])];
-        elem *= phase;
-    }
-    return elem;
+  // spin = -1 mixed, spin = 0 alpha excitation, spin = 1 beta excitation
+  auto spin = -1;
+  if (alpha_det_i_idx == alpha_det_j_idx) {
+    std::vector<int> holes, parts;
+    double phase = 1.0;
+    get_holes(det_i_b, det_j_b, holes);
+    get_parts(det_i_b, det_j_b, parts);
+    phase = get_phase(det_i_b, det_j_b, holes, parts);
+    elem += this->input_integral
+                .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                 [alpha_spin_idx][this->input_integral.idx8(
+                                     parts[0], holes[0], parts[1], holes[1])];
+    elem -= this->input_integral
+                .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part]
+                                 [alpha_spin_idx][this->input_integral.idx8(
+                                     parts[0], holes[1], parts[1], holes[0])];
+    elem *= phase;
+  } else if (beta_det_i_idx == beta_det_j_idx) {
+    std::vector<int> holes, parts;
+    double phase = 1.0;
+    get_holes(det_i_a, det_j_a, holes);
+    get_parts(det_i_a, det_j_a, parts);
+    phase = get_phase(det_i_a, det_j_a, holes, parts);
+    elem += this->input_integral
+                .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                 [beta_spin_idx][this->input_integral.idx8(
+                                     parts[0], holes[0], parts[1], holes[1])];
+    elem -= this->input_integral
+                .mo_two_body_ints[idx_part][beta_spin_idx][idx_part]
+                                 [beta_spin_idx][this->input_integral.idx8(
+                                     parts[0], holes[1], parts[1], holes[0])];
+    elem *= phase;
+  } else {
+    std::vector<int> aholes, aparts;
+    std::vector<int> bholes, bparts;
+    double phase = 1.0;
+    get_holes(det_i_a, det_j_a, aholes);
+    get_parts(det_i_a, det_j_a, aparts);
+    get_holes(det_i_b, det_j_b, bholes);
+    get_parts(det_i_b, det_j_b, bparts);
+    phase *= get_phase(det_i_a, det_j_a, aholes, aparts);
+    phase *= get_phase(det_i_b, det_j_b, bholes, bparts);
+    elem +=
+        this->input_integral
+            .mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx]
+                             [this->input_integral.idx8(aparts[0], aholes[0],
+                                                        bparts[0], bholes[0])];
+    elem *= phase;
+  }
+  return elem;
 }
 
 template <typename T>
@@ -444,19 +526,20 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) {
 
       if (excitation_level == 0) {
         // do 1+2 body
-        matrix_elem += this->same_part_ham_diag(idx_part,  i_unfold, j_unfold);
+        matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);
       } else if (excitation_level == 1) {
         // do 1+2 body
-        matrix_elem += this->same_part_ham_single(idx_part,  i_unfold, j_unfold);
+        matrix_elem += this->same_part_ham_single(idx_part, i_unfold, j_unfold);
       } else if (excitation_level == 2) {
         // do 2 body
-        matrix_elem += this->same_part_ham_double(idx_part,  i_unfold, j_unfold);
+        matrix_elem += this->same_part_ham_double(idx_part, i_unfold, j_unfold);
       }
     }
     // loop over other particles
     // if all other particle dets j,k,l etc are equal then add the particle i j
     // interaction
   }
+  return matrix_elem;
 }
 
 template <typename T>
