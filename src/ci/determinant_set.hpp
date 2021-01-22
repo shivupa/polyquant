@@ -37,8 +37,9 @@ public:
   std::vector<std::vector<T>> create_excitation(std::vector<T> &det,
                                                 int excitation_level);
 
-  // std::vector<int> get_holes(std::vector<T> &Di, std::vector<T> &Dj);
-  // std::vector<int> get_parts(std::vector<T> &Di, std::vector<T> &Dj);
+  void get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes);
+  void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts);
+  double get_phase(std::vector<T> &Di, std::vector<T> &Dj);
   void get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
                     std::vector<int> &virt);
 
@@ -52,14 +53,11 @@ public:
   std::vector<std::vector<std::unordered_set<std::vector<T>, VectorHash<T>>>>
       dets;
   int max_orb;
+  POLYQUANT_INTEGRAL input_integral;
+
+  void set_integral(POLYQUANT_INTEGRAL& integral) {this->input_integral = integral;};
 
   void Slater_Condon(int i_det, int j_det);
-  std::vector<
-      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
-      mo_one_body_ints;
-  std::vector<std::vector<
-      std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>>>
-      mo_two_body_ints;
   // for diagonalization stuff
   int rows() { return this->N_dets; }
   int cols() { return this->N_dets; }
@@ -126,6 +124,33 @@ POLYQUANT_DETSET<T>::create_excitation(std::vector<T> &det,
   }
   return created_dets;
 }
+
+template <typename T>
+  std::vector<int> POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes){
+    for (auto i = 0; i < Di.size(); i++){
+        auto H = (Di[i] ^ Dj[i]) & Di[i];
+        while (H != 0){
+            auto position = std::countr_zero(H);
+            holes.push_back((64*i)+position);
+            H &= ~(1UL << position);
+        }
+    }
+  }
+template <typename T>
+  std::vector<int> POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts){
+    for (auto i = 0; i < Di.size(); i++){
+        auto P = (Di[i] ^ Dj[i]) & Dj[i];
+        while (P != 0){
+            auto position = std::countr_zero(H);
+            holes.push_back((64*i)+position);
+            P &= ~(1UL << position);
+        }
+    }
+  }
+template <typename T>
+double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj){
+  }
+
 template <typename T>
 void POLYQUANT_DETSET<T>::get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
                                        std::vector<int> &virt) {
@@ -213,7 +238,112 @@ std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) {
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) {
+double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<std::vector<T>> i_unfold, std::vector<std::vector<T>> j_unfold){
+    auto alpha_spin_idx = 0;
+    auto beta_spin_idx = 1 % this->dets[idx_part].size();
+
+    std::vector<int> aocc, avirt;
+    auto det_i_a = this->get_det(idx_part, alpha_spin_idx, i_unfold[idx_part][alpha_spin_idx]);
+    this->get_occ_virt(det_i_a,aocc,avirt);
+
+    std::vector<int> bocc, bvirt;
+    
+
+    if (beta_spin_idx == 1)
+    auto det_i_b = this->get_det(idx_part, beta_spin_idx, i_unfold[idx_part][beta_spin_idx]);
+    this->get_occ_virt(det_i_b,bocc,bvirt);
+    } else {
+        bocc=aocc;
+        bvirt=avirt;
+    }
+    double elem = 0.0;
+    for (auto orb_a_i : aocc) {
+        elem += this->input_integral.mo_one_body_ints[idx_part][alpha_spin_idx](orb_a_i, orb_a_i);
+    }
+    for (auto orb_b_i : bocc) {
+        elem += this->input_integral.mo_one_body_ints[idx_part][beta_spin_idx](orb_b_i, orb_b_i);
+    }
+    for (auto orb_a_i : aocc) {
+        for (auto orb_a_j : aocc) {
+            elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_a_j,orb_a_j)]);
+            elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_j,orb_a_j,orb_a_i)]);
+        }
+        for (auto orb_b_j : bocc) {
+            elem += this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_b_j,orb_b_j)];
+        }
+    }
+    for (auto orb_b_i : bocc) {
+        for (auto orb_b_j : bocc) {
+            elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_a_j,orb_a_j)]);
+            elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_j,orb_a_j,orb_a_i)]);
+        }
+    }
+    return elem;
+}
+
+template <typename T>
+double POLYQUANT_DETSET<T>::same_part_ham_single(int idx_part, std::vector<std::vector<T>> i_unfold, std::vector<std::vector<T>> j_unfold){
+    auto alpha_spin_idx = 0;
+    auto beta_spin_idx = 1 % this->dets[idx_part].size();
+
+    std::vector<int> aocc, avirt;
+    auto det_i_a = this->get_det(idx_part, alpha_spin_idx, i_unfold[idx_part][alpha_spin_idx]);
+    this->get_occ_virt(det_i_a,aocc,avirt);
+
+    std::vector<int> bocc, bvirt;
+    
+
+    if (beta_spin_idx == 1)
+    auto det_i_b = this->get_det(idx_part, beta_spin_idx, i_unfold[idx_part][beta_spin_idx]);
+    this->get_occ_virt(det_i_b,bocc,bvirt);
+    } else {
+        bocc=aocc;
+        bvirt=avirt;
+    }
+
+    //get hole
+    //get part
+std::vector<int> hole, part;
+    //get phase
+    double elem = 0.0;
+    for (auto orb_a_i : aocc) {
+        elem += this->input_integral.mo_one_body_ints[idx_part][alpha_spin_idx](orb_a_i, orb_a_i);
+    }
+    for (auto orb_b_i : bocc) {
+        elem += this->input_integral.mo_one_body_ints[idx_part][beta_spin_idx](orb_b_i, orb_b_i);
+    }
+    for (auto orb_a_i : aocc) {
+        for (auto orb_a_j : aocc) {
+            elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_a_j,orb_a_j)]);
+            elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_j,orb_a_j,orb_a_i)]);
+        }
+        for (auto orb_b_j : bocc) {
+            elem += this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_b_j,orb_b_j)];
+        }
+    }
+    for (auto orb_b_i : bocc) {
+        for (auto orb_b_j : bocc) {
+            elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_i,orb_a_j,orb_a_j)]);
+            elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx][this->input_integral.idx8(orb_a_i,orb_a_j,orb_a_j,orb_a_i)]);
+        }
+    }
+    return elem;
+
+    hole, part, sign, spin, aocc, bocc = hole_part_sign_spin_occ_single_sets(idet, jdet)
+    hij += hcore[part, hole]
+    for si in (aocc, bocc)[spin]:
+        hij += eri[idx4(part, hole, si, si)]
+        hij -= eri[idx4(part, si, si, hole)]
+    for si in (bocc, aocc)[spin]:
+        hij += eri[idx4(part, hole, si, si)]
+    hij *= sign
+    return hij
+}
+
+template <typename T>
+double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) {
+
+  double matrix_elem = 0.0;
   auto i_unfold = det_idx_unfold(i_det);
   auto j_unfold = det_idx_unfold(j_det);
   std::vector<bool> iequalj;
@@ -240,13 +370,14 @@ void POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) {
       }
 
       if (excitation_level == 0) {
-        // do 1 body
-        // do 2 body
+        // do 1+2 body
+        matrix_elem += this->same_part_ham_diag(idx_part,  i_unfold, j_unfold);
       } else if (excitation_level == 1) {
-        // do 1 body
-        // do 2 body
+        // do 1+2 body
+        matrix_elem += this->same_part_ham_single(idx_part,  i_unfold, j_unfold);
       } else if (excitation_level == 2) {
         // do 2 body
+        matrix_elem += this->same_part_ham_double(idx_part,  i_unfold, j_unfold);
       }
       std::cout << excitation_level << std::endl;
     }
