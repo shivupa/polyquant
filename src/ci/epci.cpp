@@ -99,6 +99,15 @@ void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(this->detset, 3, 6);
+  eigs.init();
+    eigs.compute(Spectra::SortRule::LargestAlge);
+    if(eigs.info() == Spectra::CompInfo::Successful)
+    {
+        Eigen::VectorXd evalues = eigs.eigenvalues();
+        std::cout << "Eigenvalues found:\n" << evalues << std::endl;
+    }
+  /*
   Eigen::Index num_of_eigenvalues = 5;
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(
       this->detset, num_of_eigenvalues); // Create Solver
@@ -118,5 +127,5 @@ void POLYQUANT_EPCI::run() {
     }
   } else {
     std::cout << "Calculation failed" << std::endl;
-  }
+  }*/
 }

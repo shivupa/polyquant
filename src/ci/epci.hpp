@@ -9,6 +9,7 @@
 #include "scf/epscf.hpp"
 #include <Eigen/Core>
 #include <Spectra/DavidsonSymEigsSolver.h>
+#include <Spectra/SymEigsSolver.h>
 #include <combinations.hpp>
 #include <inttypes.h>
 #include <string>
