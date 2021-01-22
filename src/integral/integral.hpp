@@ -61,7 +61,7 @@ public:
    * @return int combined index for the flattened upper triangle of the
    * symmetric matrix
    */
-  template <typename T> T idx2(const T &i, const T &j) {
+  template <typename T> const T idx2(const T &i, const T &j) const{
     return symmetric_matrix_triangular_idx(i, j);
   }
   /**
@@ -76,7 +76,7 @@ public:
    * @return int combined index for the flattened unique elements of the
    * symmetric tensor
    */
-  template <typename T> T idx8(const T &i, const T &j, const T &k, const T &l) {
+  template <typename T> const T idx8(const T &i, const T &j, const T &k, const T &l) const{
     return idx2(idx2(i, j), idx2(k, l));
   }
 
