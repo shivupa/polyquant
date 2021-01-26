@@ -162,14 +162,14 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
   auto quantum_part_b_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
-    mo_two_body_ints[quantum_part_a_idx].resize(2);
+    mo_two_body_ints[quantum_part_a_idx].resize(mo_coeffs[quantum_part_a_idx].size());
     for (auto spin_a_idx = 0; spin_a_idx < mo_coeffs[quantum_part_a_idx].size();
          spin_a_idx++) {
       mo_two_body_ints[quantum_part_a_idx][spin_a_idx].resize(mo_coeffs.size());
       for (auto const &[quantum_part_b_key, quantum_part_b] :
            this->input_molecule.quantum_particles) {
         mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
-            .resize(2);
+            .resize(mo_coeffs[quantum_part_b_idx].size());
         for (auto spin_b_idx = 0;
              spin_b_idx < mo_coeffs[quantum_part_b_idx].size(); spin_b_idx++) {
           if (quantum_part_b_idx < quantum_part_a_idx) {

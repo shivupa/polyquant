@@ -3,11 +3,14 @@
 rm -rf build
 mkdir -p build
 cd build
+export MKL_INCLUDE_DIR=/opt/intel/mkl
+export MKL_ROOT=/opt/intel/mkl
 cmake \
     -DPOLYQUANT_DEBUG=0 \
     -DPOLYQUANT_DOC=0 \
     -DPOLYQUANT_TEST=1 \
-    -DPOLYQUANT_CODE_COVERAGE=1 \
+    -DPOLYQUANT_CODE_COVERAGE=0 \
+    -DMKL_ROOT=/opt/intel/mkl \
     ..
 make -j 4
 lcov --capture --initial --directory . --base-directory ../src --output-file coverage_base.info
