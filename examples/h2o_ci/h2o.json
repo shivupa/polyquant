@@ -17,7 +17,7 @@
         "O" : [{ "library" : {"type" : "sto-3g"} }]}
   },
   "keywords": {
-    "restricted" : false,
+    "restricted" : true,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,

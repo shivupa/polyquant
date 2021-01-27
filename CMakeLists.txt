@@ -139,8 +139,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/shivupa/spectra.git
   GIT_TAG origin/cmake_update)
 FetchContent_MakeAvailable(spectra)
-list(APPEND CMAKE_MODULE_PATH ${spectra_SOURCE_DIR}/cmake)
-message(${spectra_SOURCE_DIR}/cmake)
+#list(APPEND CMAKE_MODULE_PATH ${spectra_SOURCE_DIR}/cmake)
 
 FetchContent_Declare(
   cppitertools

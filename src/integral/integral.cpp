@@ -83,6 +83,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
           mo_coeffs[quantum_part_idx][j].transpose() *
           (kinetic + (-quantum_part.charge * nuclear)) *
           mo_coeffs[quantum_part_idx][j];
+          //(kinetic + (-quantum_part.charge * nuclear)) *
     }
     quantum_part_idx++;
   }

@@ -9,6 +9,9 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->input_basis = this->input_epscf.input_basis;
   this->input_integral = this->input_epscf.input_integral;
   this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C);
+  Polyquant_dump_mat(this->input_epscf.C[0][0], "MO alpha");
+  Polyquant_dump_mat(this->input_integral.mo_one_body_ints[0][0], "MO elec alpha");
+
   this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
 
   auto num_basis = this->input_basis.num_basis;
