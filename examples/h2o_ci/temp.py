@@ -19,3 +19,7 @@ h = t + v
 
 h_mo = mf.mo_coeff.T @ h @ mf.mo_coeff
 s_mo = mf.mo_coeff.T @ mol.intor('int1e_ovlp') @ mf.mo_coeff
+
+
+eri_4fold = pyscf.ao2mo.kernel(mol, mf.mo_coeff)
+

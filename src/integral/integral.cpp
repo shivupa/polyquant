@@ -176,6 +176,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
           if (quantum_part_b_idx < quantum_part_a_idx) {
             continue;
           }
+          Polyquant_cout("OK");
           mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
                           [spin_b_idx] = transform_mo_2_body_integrals(
                               mo_coeffs[quantum_part_a_idx][spin_a_idx],
