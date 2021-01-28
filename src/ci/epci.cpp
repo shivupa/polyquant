@@ -12,7 +12,7 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
   Polyquant_dump_mat(this->input_epscf.C[0][0], "MO alpha");
   Polyquant_dump_mat(this->input_integral.mo_one_body_ints[0][0], "MO elec alpha");
-  Polyquant_dump_vec(this->input_integral.mo_two_body_ints[0][0][0][0], "MO two elec alpha");
+  Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][0][0][0], "MO two elec alpha");
 
 
   auto num_basis = this->input_basis.num_basis;
@@ -103,9 +103,10 @@ void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(this->detset, 3, 16);
+  Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(this->detset, this->num_states, this->num_subspace_vec);
   eigs.init();
-  eigs.compute(Spectra::SortRule::LargestAlge);
+  Eigen::Index maxit = this->iteration_max;
+  eigs.compute(Spectra::SortRule::LargestAlge, maxit, this->convergence_E);
   if (eigs.info() == Spectra::CompInfo::Successful) {
     Eigen::VectorXd evalues = eigs.eigenvalues();
     std::cout << "Eigenvalues found:\n" <<  std::endl;

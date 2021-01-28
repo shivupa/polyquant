@@ -165,7 +165,7 @@ public:
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
       mo_one_body_ints;
   std::vector<std::vector<
-      std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>>>
+      std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>>
       mo_two_body_ints;
   void calculate_mo_1_body_integrals(
       std::vector<
@@ -174,7 +174,7 @@ public:
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
   transform_mo_2_body_integrals(
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b);
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta);
   void calculate_mo_2_body_integrals(
       std::vector<
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>

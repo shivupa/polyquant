@@ -91,64 +91,71 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
 POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b) {
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   auto num_basis = this->input_basis.num_basis;
 
-  Eigen::Matrix<double, Eigen::Dynamic, 1> eri;
-  eri.resize(twoelec.size());
-
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> X(num_basis, num_basis);
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Y(num_basis, num_basis);
-  auto tmp_size = (num_basis * (num_basis + 1) / 2);
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> TMP(tmp_size, tmp_size);
-  X.setZero();
-  Y.setZero();
-  TMP.setZero();
-  for (auto i = 0, ij = 0; i < num_basis; i++) {
-    for (auto j = 0; j <= i; j++, ij++) {
-#pragma omp parallel for
-      for (auto k = 0; k < num_basis; k++) {
-        auto kl = 0;
-        for (auto l = 0; l <= k; l++, kl++) {
-          auto ijkl = this->idx2(ij, kl);
-          X(k, l) = twoelec[ijkl];
-          X(l, k) = twoelec[ijkl];
-        }
-      }
-      Y = mo_coeffs_a.transpose() * X * mo_coeffs_b;
-#pragma omp parallel for
-      for (auto k = 0; k < num_basis; k++) {
-        auto kl = 0;
-        for (auto l = 0; l <= k; l++, kl++) {
-          TMP(kl, ij) = Y(k, l);
-        }
-      }
-    }
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> eri;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp1;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp2;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp3;
+  auto eri_size = (num_basis * (num_basis + 1) / 2);
+  eri.resize(eri_size, eri_size);
+  temp1.resize(eri_size, eri_size);
+  temp2.resize(eri_size, eri_size);
+  temp3.resize(eri_size, eri_size);
+  eri.setZero();
+  temp1.setZero();
+  temp2.setZero();
+  temp3.setZero();
+  // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
+  // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
+  // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
+  // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
+  for (auto p = 0; p < num_basis; p++){
+  for (auto q = 0; q < num_basis; q++){
+  for (auto r = 0; r < num_basis; r++){
+  for (auto s = 0; s < num_basis; s++){
+  for (auto i = 0; i < num_basis; i++){
+    temp1(this->idx2(i,q),this->idx2(r,s)) += mo_coeffs_a(i,p) * this->twoelec(this->idx8(p,q,r,s));
   }
-  for (auto k = 0, kl = 0; k < num_basis; k++) {
-    for (auto l = 0; l <= k; l++, kl++) {
-      X.setZero();
-      Y.setZero();
-#pragma omp parallel for
-      for (auto i = 0; i < num_basis; i++) {
-        auto ij = 0;
-        for (auto j = 0; j <= i; j++, ij++) {
-          X(i, j) = TMP(kl, ij);
-          X(j, i) = TMP(kl, ij);
-        }
-      }
-      Y = mo_coeffs_a.transpose() * X * mo_coeffs_b;
-#pragma omp parallel for
-      for (auto i = 0; i < num_basis; i++) {
-        auto ij = 0;
-        for (auto j = 0; j <= i; j++, ij++) {
-          auto klij = this->idx2(kl, ij);
-          eri(klij) = X(i, j);
-        }
-      }
-    }
+  }
+  }
+  }
+  }
+  for (auto i = 0; i < num_basis; i++){
+  for (auto q = 0; q < num_basis; q++){
+  for (auto r = 0; r < num_basis; r++){
+  for (auto s = 0; s < num_basis; s++){
+  for (auto j = 0; j < num_basis; j++){
+    temp2(this->idx2(i,j),this->idx2(r,s)) += mo_coeffs_a(j,q) * temp1(this->idx2(i,q),this->idx2(r,s));
+  }
+  }
+  }
+  }
+  }
+  for (auto i = 0; i < num_basis; i++){
+  for (auto j = 0; j < num_basis; j++){
+  for (auto r = 0; r < num_basis; r++){
+  for (auto s = 0; s < num_basis; s++){
+  for (auto k = 0; k < num_basis; k++){
+    temp3(this->idx2(i,j),this->idx2(k,s)) += mo_coeffs_b(k,r) * temp2(this->idx2(i,j),this->idx2(r,s));
+  }
+  }
+  }
+  }
+  }
+  for (auto i = 0; i < num_basis; i++){
+  for (auto j = 0; j < num_basis; j++){
+  for (auto k = 0; k < num_basis; k++){
+  for (auto s = 0; s < num_basis; s++){
+  for (auto l = 0; l < num_basis; l++){
+    eri(this->idx2(i,j),this->idx2(k,l)) +=  mo_coeffs_b(l,s) * temp3(this->idx2(i,j),this->idx2(k,s));
+  }
+  }
+  }
+  }
   }
   return eri;
 }
@@ -167,12 +174,14 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
     for (auto spin_a_idx = 0; spin_a_idx < mo_coeffs[quantum_part_a_idx].size();
          spin_a_idx++) {
       mo_two_body_ints[quantum_part_a_idx][spin_a_idx].resize(mo_coeffs.size());
+      auto num_part_a = (spin_a_idx == 0) ? quantum_part_a.num_parts_alpha : quantum_part_a.num_parts_beta;
       for (auto const &[quantum_part_b_key, quantum_part_b] :
            this->input_molecule.quantum_particles) {
         mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
             .resize(mo_coeffs[quantum_part_b_idx].size());
         for (auto spin_b_idx = 0;
              spin_b_idx < mo_coeffs[quantum_part_b_idx].size(); spin_b_idx++) {
+          auto num_part_b = (spin_b_idx == 0) ? quantum_part_b.num_parts_alpha : quantum_part_b.num_parts_beta;
           if (quantum_part_b_idx < quantum_part_a_idx) {
             continue;
           }
@@ -180,7 +189,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
           mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
                           [spin_b_idx] = transform_mo_2_body_integrals(
                               mo_coeffs[quantum_part_a_idx][spin_a_idx],
-                              mo_coeffs[quantum_part_b_idx][spin_b_idx]);
+                              mo_coeffs[quantum_part_b_idx][spin_b_idx], num_part_a, num_part_b);
         }
       }
       quantum_part_b_idx++;

@@ -28,8 +28,8 @@
    "ci_keywords" : {
        "convergence_E" : 1e-6,
        "num_states" : 2,
-       "num_subspace_vec" : 4,
-       "excitation_level" : [2]
+       "num_subspace_vec" : 10,
+       "excitation_level" : [1]
    }
   }
 }

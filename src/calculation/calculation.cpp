@@ -304,6 +304,18 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
                   .input_data["keywords"]["ci_keywords"]["convergence_E"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
+                "num_states")) {
+          ci_calc.num_states =
+              this->input_params
+                  .input_data["keywords"]["ci_keywords"]["num_states"];
+        }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
+                "num_subspace_vec")) {
+          ci_calc.num_subspace_vec =
+              this->input_params
+                  .input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
+        }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
                 "excitation_level")) {
           auto ex_lvl =
               this->input_params
