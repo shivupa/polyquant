@@ -2,7 +2,7 @@
 #include <doctest/doctest.h>
 
 using namespace polyquant;
-
+TEST_SUITE("IO") { 
 TEST_CASE("IO: Parse input data.") {
   POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
   // Check that the fields exist don't check values. The calculation class tests
@@ -47,5 +47,6 @@ TEST_CASE("IO: Quantum symbol to charge conversion.") {
   CHECK(quantum_symb_to_charge("H") == 1);
   CHECK(quantum_symb_to_charge("X") == 0);
   CHECK(quantum_symb_to_charge("electron") == -1);
+}
 }
 // TODO test hdf5 dumping

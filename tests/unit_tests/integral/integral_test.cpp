@@ -6,6 +6,7 @@
 
 using namespace polyquant;
 
+TEST_SUITE("INTEGRAL") {
 TEST_CASE("INTEGRAL: triangular matrix") {
   CHECK(symmetric_matrix_triangular_idx(0, 0) == 0);
   CHECK(symmetric_matrix_triangular_idx(2, 5) == 17);
@@ -73,4 +74,5 @@ TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis") {
         doctest::Approx(0.3360854191).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   CHECK(test_int.orth_X(3, 5) ==
         doctest::Approx(-0.0444794156).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+}
 }

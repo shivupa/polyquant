@@ -153,8 +153,8 @@ find_package(cxxopts REQUIRED)
 find_package(h5cpp REQUIRED)
 FetchContent_Declare(
   doctest
-  GIT_REPOSITORY https://github.com/onqtam/doctest.git
-  GIT_TAG 2.4.3)
+  GIT_REPOSITORY https://github.com/shivupa/doctest.git
+  GIT_TAG origin/cmaketestlabels)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 find_package(MKL REQUIRED)

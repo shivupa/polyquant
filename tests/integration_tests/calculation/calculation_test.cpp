@@ -6,7 +6,7 @@
 #include <doctest/doctest.h>
 
 using namespace polyquant;
-
+TEST_SUITE("CALCULATION"){
 TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF.") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary/h2o.json");
@@ -146,4 +146,5 @@ TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {
   CHECK(root_group.exists("application") == true);
   CHECK(root_group.exists("atoms") == true);
   CHECK(root_group.exists("basisset") == true);
+}
 }

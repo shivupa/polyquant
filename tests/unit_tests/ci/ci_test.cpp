@@ -7,7 +7,8 @@
 
 using namespace polyquant;
 
-TEST_CASE("INTEGRAL: one body MO basis") {
+TEST_SUITE("CI") {
+TEST_CASE("CI: one body MO basis") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
   test_calc.run();
@@ -19,7 +20,7 @@ TEST_CASE("INTEGRAL: one body MO basis") {
         doctest::Approx(-0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
 }
 
-TEST_CASE("INTEGRAL: two body MO basis") {
+TEST_CASE("CI: two body MO basis") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
   test_calc.run();
@@ -32,4 +33,4 @@ TEST_CASE("INTEGRAL: two body MO basis") {
   CHECK(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0,2) == 
         doctest::Approx(1.00454538).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
 }
-
+}

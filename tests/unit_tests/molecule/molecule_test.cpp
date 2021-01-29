@@ -4,7 +4,7 @@
 #include <string>
 
 using namespace polyquant;
-
+TEST_SUITE("MOLECULE") {
 TEST_CASE("MOLECULE: Construct Molecule.") {
   POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
   POLYQUANT_MOLECULE test_mol;
@@ -67,4 +67,5 @@ TEST_CASE("MOLECULE: Construct Molecule with positron") {
   CHECK(test_mol.quantum_particles["positron"].num_parts_alpha == 1);
   CHECK(test_mol.quantum_particles["positron"].num_parts_beta == 0);
   CHECK(test_mol.quantum_particles["positron"].restricted == false);
+}
 }
