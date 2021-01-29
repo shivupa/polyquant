@@ -97,18 +97,15 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   auto num_basis = this->input_basis.num_basis;
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> eri;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp1;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp2;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> temp3;
+  Eigen::Tensor<double, 4> temp1;
+  Eigen::Tensor<double, 4> temp2;
   auto eri_size = (num_basis * (num_basis + 1) / 2);
   eri.resize(eri_size, eri_size);
-  temp1.resize(eri_size, eri_size);
-  temp2.resize(eri_size, eri_size);
-  temp3.resize(eri_size, eri_size);
+  temp1.resize(eri_size, eri_size,eri_size,eri_size);
+  temp2.resize(eri_size, eri_size,eri_size,eri_size);
   eri.setZero();
   temp1.setZero();
   temp2.setZero();
-  temp3.setZero();
   // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
@@ -118,7 +115,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   for (auto r = 0; r < num_basis; r++){
   for (auto s = 0; s < num_basis; s++){
   for (auto i = 0; i < num_basis; i++){
-    temp1(this->idx2(i,q),this->idx2(r,s)) += mo_coeffs_a(i,p) * this->twoelec(this->idx8(p,q,r,s));
+    temp1(i,q,r,s) += mo_coeffs_a(p,i) * this->twoelec(this->idx8(p,q,r,s));
   }
   }
   }
@@ -129,18 +126,31 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   for (auto r = 0; r < num_basis; r++){
   for (auto s = 0; s < num_basis; s++){
   for (auto j = 0; j < num_basis; j++){
-    temp2(this->idx2(i,j),this->idx2(r,s)) += mo_coeffs_a(j,q) * temp1(this->idx2(i,q),this->idx2(r,s));
+    temp2(i,j,r,s) += mo_coeffs_a(q,j) * temp1(i,q,r,s);
   }
   }
   }
   }
   }
+  temp1.setZero();
   for (auto i = 0; i < num_basis; i++){
   for (auto j = 0; j < num_basis; j++){
   for (auto r = 0; r < num_basis; r++){
   for (auto s = 0; s < num_basis; s++){
   for (auto k = 0; k < num_basis; k++){
-    temp3(this->idx2(i,j),this->idx2(k,s)) += mo_coeffs_b(k,r) * temp2(this->idx2(i,j),this->idx2(r,s));
+    temp1(i,j,k,s) += mo_coeffs_b(r,k) * temp2(i,j,r,s);
+  }
+  }
+  }
+  }
+  }
+  temp2.setZero();
+  for (auto i = 0; i < num_basis; i++){
+  for (auto j = 0; j < num_basis; j++){
+  for (auto k = 0; k < num_basis; k++){
+  for (auto s = 0; s < num_basis; s++){
+  for (auto l = 0; l < num_basis; l++){
+    temp2(i,j,k,l) += mo_coeffs_b(s,l) * temp1(i,j,k,s);
   }
   }
   }
@@ -149,10 +159,8 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   for (auto i = 0; i < num_basis; i++){
   for (auto j = 0; j < num_basis; j++){
   for (auto k = 0; k < num_basis; k++){
-  for (auto s = 0; s < num_basis; s++){
   for (auto l = 0; l < num_basis; l++){
-    eri(this->idx2(i,j),this->idx2(k,l)) +=  mo_coeffs_b(l,s) * temp3(this->idx2(i,j),this->idx2(k,s));
-  }
+    eri(this->idx2(i,j),this->idx2(k,l)) = temp2(i,j,k,l);
   }
   }
   }

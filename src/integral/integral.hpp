@@ -6,6 +6,7 @@
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>
 #include <vector>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 namespace polyquant {
 
