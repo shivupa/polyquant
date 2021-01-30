@@ -30,7 +30,6 @@ template <typename T> struct VectorHash {
 template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() = default;
-  int det_idx(std::vector<int> idx);
 
   int num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const;
   void create_det(std::vector<std::vector<std::vector<int>>> &occ);
@@ -203,12 +202,16 @@ double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj,
 template <typename T>
 void POLYQUANT_DETSET<T>::get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
                                        std::vector<int> &virt) const {
+    std::cout << "HELLO" << std::endl;
+    std::cout << sizeof(T)*8 << std::endl;
   for (auto offset = 0; offset < D.size(); offset++) {
     for (auto i = 0; i < sizeof(T) * 8; i++) {
-      if (offset * 64 + i >= max_orb) {
+        std::cout << i << std::endl;
+      if ((offset * 64) + i >= max_orb) {
         break;
       }
       auto bit = (D[offset] >> i) & 1U;
+        std::cout << bit << std::endl;
       if (bit == 1) {
         occ.push_back(i + (offset * 64));
       } else {
