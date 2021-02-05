@@ -13,8 +13,6 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   Polyquant_dump_mat(this->input_epscf.C[0][0], "MO alpha");
   Polyquant_dump_mat(this->input_integral.mo_one_body_ints[0][0], "MO elec alpha");
   Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][0][0][0], "MO two elec alpha");
-
-
   auto num_basis = this->input_basis.num_basis;
   this->detset.max_orb = num_basis;
   this->detset.set_integral(this->input_integral);
@@ -23,6 +21,8 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) +
                  " determinants");
   this->detset.print_determinants();
+    std::cout << "DUMPING HAM" << std::endl;
+  //this->dump_ham();
 }
 
 void POLYQUANT_EPCI::setup_determinants() {
@@ -39,7 +39,7 @@ void POLYQUANT_EPCI::setup_determinants() {
       this_spin_occ.push_back(i);
     }
     occ[quantum_part_idx].push_back(this_spin_occ);
-    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+    if (quantum_part.num_parts > 1 ) {
       if (quantum_part.num_parts_alpha == quantum_part.num_parts_beta) {
         occ[quantum_part_idx].push_back(this_spin_occ);
       } else {
@@ -48,8 +48,12 @@ void POLYQUANT_EPCI::setup_determinants() {
           this_spin_occ.push_back(i);
         }
         occ[quantum_part_idx].push_back(this_spin_occ);
+      } } else {
+        this_spin_occ.clear();
+        this_spin_occ.push_back(0);
+        occ[quantum_part_idx].push_back(this_spin_occ);
       }
-    }
+    
     quantum_part_idx++;
   }
   this->detset.create_det(occ);
@@ -57,34 +61,35 @@ void POLYQUANT_EPCI::setup_determinants() {
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     auto ex_lvl = this->excitation_level[quantum_part_idx];
-    if (ex_lvl > 0) {
-      for (auto i_ex = 1; i_ex <= ex_lvl; i_ex++) {
-        auto hf_det = *this->detset.dets[quantum_part_idx][0].begin();
-        auto excited_dets = this->detset.create_excitation(hf_det, i_ex);
-        for (auto &e_det : excited_dets) {
-          this->detset.dets[quantum_part_idx][0].insert(e_det);
+    auto max_alpha_ex_lvl = std::get<0>(ex_lvl);
+    auto max_beta_ex_lvl = std::get<1>(ex_lvl);
+    auto total_ex_lvl = std::get<2>(ex_lvl);
+    auto hf_det = *this->detset.dets[quantum_part_idx].begin();
+
+    for (auto alpha_ex_lvl = 0; alpha_ex_lvl <= max_alpha_ex_lvl; alpha_ex_lvl++){
+    for (auto beta_ex_lvl = 0; beta_ex_lvl <= max_beta_ex_lvl; beta_ex_lvl++){
+      std::tuple<int,int,int> this_ex_lvl = {alpha_ex_lvl, beta_ex_lvl, total_ex_lvl};
+      auto excited_dets = this->detset.create_excitation(hf_det, this_ex_lvl);
+      for (auto &e_det : excited_dets) {
+        this->detset.dets[quantum_part_idx].insert(e_det);
+        std::cout << "DET ";
+        for (auto ia : e_det.first){
+            std::cout << ia << " ";
         }
-      }
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        for (auto i_ex = 1; i_ex < ex_lvl; i_ex++) {
-          auto hf_det = *this->detset.dets[quantum_part_idx][1].begin();
-          auto excited_dets = this->detset.create_excitation(hf_det, i_ex);
-          for (auto &e_det : excited_dets) {
-            this->detset.dets[quantum_part_idx][1].insert(e_det);
-          }
+        for (auto ia : e_det.second){
+            std::cout << ia << " ";
         }
+        std::cout << std::endl;
       }
+    }
     }
     quantum_part_idx++;
   }
   quantum_part_idx = 0;
-  this->detset.N_dets = 1;
+  this->detset.N_dets = 0;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-    this->detset.N_dets *= this->detset.dets[quantum_part_idx][0].size();
-    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      this->detset.N_dets *= this->detset.dets[quantum_part_idx][1].size();
-    }
+    this->detset.N_dets += this->detset.dets[quantum_part_idx].size();
     quantum_part_idx++;
   }
 }
@@ -103,10 +108,14 @@ void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  Polyquant_cout("Starting CI calculation!");
+  //this->detset.create_ham();
+  //Spectra::SparseSymMatProd<double> op(this->detset.ham);
+  //Spectra::SymEigsSolver<Spectra::SparseSymMatProd<double>> eigs(op, this->num_states, this->num_subspace_vec);
   Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(this->detset, this->num_states, this->num_subspace_vec);
   eigs.init();
   Eigen::Index maxit = this->iteration_max;
-  eigs.compute(Spectra::SortRule::LargestAlge, maxit, this->convergence_E);
+  eigs.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
   if (eigs.info() == Spectra::CompInfo::Successful) {
     Eigen::VectorXd evalues = eigs.eigenvalues();
     std::cout << "Eigenvalues found:\n" <<  std::endl;
@@ -136,3 +145,7 @@ void POLYQUANT_EPCI::run() {
     std::cout << "Calculation failed" << std::endl;
   }*/
 }
+//void POLYQUANT_EPCI::dump_ham() {
+//    this->detset.dump_ham();
+//
+//}

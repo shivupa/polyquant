@@ -321,13 +321,19 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
               this->input_params
                   .input_data["keywords"]["ci_keywords"]["excitation_level"];
           if (ex_lvl.type() == json::value_t::array) {
-            std::vector<int> ex_lvl_vector = ex_lvl;
-            ci_calc.excitation_level = ex_lvl_vector;
+            std::vector<std::tuple<int,int,int>> ex_lvl_obj;
+            for(auto i = 0; i < this->input_molecule.quantum_particles.size(); i++){
+                std::tuple<int, int, int> ex_lvl_tup = {ex_lvl[i][0], ex_lvl[i][1], ex_lvl[i][2]};
+                ex_lvl_obj.push_back(ex_lvl_tup);
+            }
+            ci_calc.excitation_level = ex_lvl_obj;
           } else {
-            std::vector<int> ex_lvl_vector;
-            ex_lvl_vector.resize(this->input_molecule.quantum_particles.size(),
-                                 ex_lvl);
-            ci_calc.excitation_level = ex_lvl_vector;
+            std::vector<std::tuple<int,int,int>> ex_lvl_obj;
+            std::tuple<int,int,int> ex_lvl_tup = {ex_lvl, ex_lvl, ex_lvl};
+            for(auto i = 0; i < this->input_molecule.quantum_particles.size(); i++){
+                ex_lvl_obj.push_back(ex_lvl_tup);
+            }
+            ci_calc.excitation_level = ex_lvl_obj;
           }
         }
       }

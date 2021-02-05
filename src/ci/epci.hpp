@@ -10,6 +10,7 @@
 #include <Eigen/Core>
 #include <Spectra/DavidsonSymEigsSolver.h>
 #include <Spectra/SymEigsSolver.h>
+#include <Spectra/MatOp/SparseSymMatProd.h>
 #include <combinations.hpp>
 #include <inttypes.h>
 #include <string>
@@ -29,6 +30,7 @@ public:
   void print_exceeded_iterations();
   void print_error();
   void print_params();
+  void dump_ham();
 
   int iteration_num = 0;
   /**
@@ -68,7 +70,7 @@ public:
   POLYQUANT_EPSCF input_epscf;
   POLYQUANT_DETSET<uint64_t> detset;
 
-  std::vector<int> excitation_level;
+  std::vector<std::tuple<int,int,int>> excitation_level;
   /**
    * @brief Energy convergence
    *
