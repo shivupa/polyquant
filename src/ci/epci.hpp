@@ -9,8 +9,8 @@
 #include "scf/epscf.hpp"
 #include <Eigen/Core>
 #include <Spectra/DavidsonSymEigsSolver.h>
-#include <Spectra/SymEigsSolver.h>
 #include <Spectra/MatOp/SparseSymMatProd.h>
+#include <Spectra/SymEigsSolver.h>
 #include <combinations.hpp>
 #include <inttypes.h>
 #include <string>
@@ -70,7 +70,7 @@ public:
   POLYQUANT_EPSCF input_epscf;
   POLYQUANT_DETSET<uint64_t> detset;
 
-  std::vector<std::tuple<int,int,int>> excitation_level;
+  std::vector<std::tuple<int, int, int>> excitation_level;
   /**
    * @brief Energy convergence
    *

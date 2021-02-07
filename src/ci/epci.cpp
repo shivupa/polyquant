@@ -11,8 +11,10 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C);
   this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
   Polyquant_dump_mat(this->input_epscf.C[0][0], "MO alpha");
-  Polyquant_dump_mat(this->input_integral.mo_one_body_ints[0][0], "MO elec alpha");
-  Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][0][0][0], "MO two elec alpha");
+  Polyquant_dump_mat(this->input_integral.mo_one_body_ints[0][0],
+                     "MO elec alpha");
+  Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][0][0][0],
+                     "MO two elec alpha");
   auto num_basis = this->input_basis.num_basis;
   this->detset.max_orb = num_basis;
   this->detset.set_integral(this->input_integral);
@@ -37,7 +39,7 @@ void POLYQUANT_EPCI::setup_determinants() {
       this_spin_occ.push_back(i);
     }
     occ[quantum_part_idx].push_back(this_spin_occ);
-    if (quantum_part.num_parts > 1 ) {
+    if (quantum_part.num_parts > 1) {
       if (quantum_part.num_parts_alpha == quantum_part.num_parts_beta) {
         occ[quantum_part_idx].push_back(this_spin_occ);
       } else {
@@ -46,12 +48,13 @@ void POLYQUANT_EPCI::setup_determinants() {
           this_spin_occ.push_back(i);
         }
         occ[quantum_part_idx].push_back(this_spin_occ);
-      } } else {
-        this_spin_occ.clear();
-        this_spin_occ.push_back(0);
-        occ[quantum_part_idx].push_back(this_spin_occ);
       }
-    
+    } else {
+      this_spin_occ.clear();
+      this_spin_occ.push_back(0);
+      occ[quantum_part_idx].push_back(this_spin_occ);
+    }
+
     quantum_part_idx++;
   }
   this->detset.create_det(occ);
@@ -64,14 +67,17 @@ void POLYQUANT_EPCI::setup_determinants() {
     auto total_ex_lvl = std::get<2>(ex_lvl);
     auto hf_det = *this->detset.dets[quantum_part_idx].begin();
 
-    for (auto alpha_ex_lvl = 0; alpha_ex_lvl <= max_alpha_ex_lvl; alpha_ex_lvl++){
-    for (auto beta_ex_lvl = 0; beta_ex_lvl <= max_beta_ex_lvl; beta_ex_lvl++){
-      std::tuple<int,int,int> this_ex_lvl = {alpha_ex_lvl, beta_ex_lvl, total_ex_lvl};
-      auto excited_dets = this->detset.create_excitation(hf_det, this_ex_lvl);
-      for (auto &e_det : excited_dets) {
-        this->detset.dets[quantum_part_idx].insert(e_det);
+    for (auto alpha_ex_lvl = 0; alpha_ex_lvl <= max_alpha_ex_lvl;
+         alpha_ex_lvl++) {
+      for (auto beta_ex_lvl = 0; beta_ex_lvl <= max_beta_ex_lvl;
+           beta_ex_lvl++) {
+        std::tuple<int, int, int> this_ex_lvl = {alpha_ex_lvl, beta_ex_lvl,
+                                                 total_ex_lvl};
+        auto excited_dets = this->detset.create_excitation(hf_det, this_ex_lvl);
+        for (auto &e_det : excited_dets) {
+          this->detset.dets[quantum_part_idx].insert(e_det);
+        }
       }
-    }
     }
     quantum_part_idx++;
   }
@@ -99,21 +105,23 @@ void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   Polyquant_cout("Starting CI calculation!");
-  //this->detset.create_ham();
-  //Spectra::SparseSymMatProd<double> op(this->detset.ham);
-  //Spectra::SymEigsSolver<Spectra::SparseSymMatProd<double>> eigs(op, this->num_states, this->num_subspace_vec);
-  Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(this->detset, this->num_states, this->num_subspace_vec);
+  // this->detset.create_ham();
+  // Spectra::SparseSymMatProd<double> op(this->detset.ham);
+  // Spectra::SymEigsSolver<Spectra::SparseSymMatProd<double>> eigs(op,
+  // this->num_states, this->num_subspace_vec);
+  Spectra::SymEigsSolver<POLYQUANT_DETSET<uint64_t>> eigs(
+      this->detset, this->num_states, this->num_subspace_vec);
   eigs.init();
   Eigen::Index maxit = this->iteration_max;
   eigs.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
   if (eigs.info() == Spectra::CompInfo::Successful) {
     Eigen::VectorXd evalues = eigs.eigenvalues();
-    std::cout << "Eigenvalues found:\n" <<  std::endl;
+    std::cout << "Eigenvalues found:\n" << std::endl;
     for (auto e = 0; e < evalues.size(); e++) {
       Polyquant_cout(evalues[e] + this->input_molecule.E_nuc);
     }
   }
-  
+
   /*Eigen::Index num_of_eigenvalues = 5;
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(
       this->detset, num_of_eigenvalues); // Create Solver
@@ -135,7 +143,7 @@ void POLYQUANT_EPCI::run() {
     std::cout << "Calculation failed" << std::endl;
   }*/
 }
-//void POLYQUANT_EPCI::dump_ham() {
+// void POLYQUANT_EPCI::dump_ham() {
 //    this->detset.dump_ham();
 //
 //}
