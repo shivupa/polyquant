@@ -21,8 +21,6 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) +
                  " determinants");
   this->detset.print_determinants();
-    std::cout << "DUMPING HAM" << std::endl;
-  //this->dump_ham();
 }
 
 void POLYQUANT_EPCI::setup_determinants() {
@@ -72,14 +70,6 @@ void POLYQUANT_EPCI::setup_determinants() {
       auto excited_dets = this->detset.create_excitation(hf_det, this_ex_lvl);
       for (auto &e_det : excited_dets) {
         this->detset.dets[quantum_part_idx].insert(e_det);
-        std::cout << "DET ";
-        for (auto ia : e_det.first){
-            std::cout << ia << " ";
-        }
-        for (auto ia : e_det.second){
-            std::cout << ia << " ";
-        }
-        std::cout << std::endl;
       }
     }
     }

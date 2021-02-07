@@ -176,31 +176,26 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
   auto num_basis = this->input_basis.num_basis;
   auto quantum_part_a_idx = 0ul;
   auto quantum_part_b_idx = 0ul;
-  for (auto const &[quantum_part_a_key, quantum_part_a] :
-       this->input_molecule.quantum_particles) {
-    mo_two_body_ints[quantum_part_a_idx].resize(mo_coeffs[quantum_part_a_idx].size());
-    for (auto spin_a_idx = 0; spin_a_idx < mo_coeffs[quantum_part_a_idx].size();
-         spin_a_idx++) {
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+        mo_two_body_ints[quantum_part_a_idx].resize(mo_coeffs[quantum_part_a_idx].size());
+    for (auto spin_a_idx = 0; spin_a_idx < mo_coeffs[quantum_part_a_idx].size(); spin_a_idx++) {
       mo_two_body_ints[quantum_part_a_idx][spin_a_idx].resize(mo_coeffs.size());
       auto num_part_a = (spin_a_idx == 0) ? quantum_part_a.num_parts_alpha : quantum_part_a.num_parts_beta;
-      for (auto const &[quantum_part_b_key, quantum_part_b] :
-           this->input_molecule.quantum_particles) {
-        mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
-            .resize(mo_coeffs[quantum_part_b_idx].size());
-        for (auto spin_b_idx = 0;
-             spin_b_idx < mo_coeffs[quantum_part_b_idx].size(); spin_b_idx++) {
-          auto num_part_b = (spin_b_idx == 0) ? quantum_part_b.num_parts_alpha : quantum_part_b.num_parts_beta;
+      quantum_part_b_idx=0;
+      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+        mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx].resize(mo_coeffs[quantum_part_b_idx].size());
+        for (auto spin_b_idx = 0; spin_b_idx < mo_coeffs[quantum_part_b_idx].size(); spin_b_idx++) {
           if (quantum_part_b_idx < quantum_part_a_idx) {
             continue;
           }
-          Polyquant_cout("OK");
+          auto num_part_b = (spin_b_idx == 0) ? quantum_part_b.num_parts_alpha : quantum_part_b.num_parts_beta;
           mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
                           [spin_b_idx] = transform_mo_2_body_integrals(
                               mo_coeffs[quantum_part_a_idx][spin_a_idx],
                               mo_coeffs[quantum_part_b_idx][spin_b_idx], num_part_a, num_part_b);
         }
-      }
       quantum_part_b_idx++;
+      }
     }
     quantum_part_a_idx++;
   }
