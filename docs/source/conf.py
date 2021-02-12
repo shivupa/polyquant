@@ -21,7 +21,7 @@ on_rtd = os.environ.get("READTHEDOCS") == "True"
 # -- Project information -----------------------------------------------------
 
 project = "Polyquant"
-copyright = "2019, Shiv Upadhyay"
+copyright = "2021, Shiv Upadhyay"
 author = "Shiv Upadhyay"
 
 # The full version, including alpha/beta/rc tags
@@ -33,7 +33,7 @@ release = "0.0.1"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.mathjax", "breathe", "exhale", "m2r"]
+extensions = ["sphinx.ext.mathjax", "breathe", "exhale", "m2r2"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -67,7 +67,7 @@ html_static_path = ["_static"]
 if on_rtd:
     breathe_projects = {"Polyquant": "../_build/doxygenoutput/xml"}
 else:
-    breathe_projects = {"Polyquant": "@PYCI_BINARY_DIR@/docs/doxygenoutput/xml"}
+    breathe_projects = {"Polyquant": "@POLYQUANT_BINARY_DIR@/docs/doxygenoutput/xml"}
 breathe_default_project = "Polyquant"
 
 # Setup the exhale extension
@@ -93,7 +93,7 @@ if on_rtd:
 else:
     exhale_args["exhaleDoxygenStdin"] = textwrap.dedent(
         """
-        INPUT = @PYCI_SOURCE_DIR@/src
+        INPUT = @POLYQUANT_SOURCE_DIR@/src
         EXCLUDE_PATTERNS =*.txt
         """
     )

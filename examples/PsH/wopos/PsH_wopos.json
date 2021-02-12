@@ -1,0 +1,36 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H"],
+    "molecular_charge": -1,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CI",
+    "basis": 
+        {"H" : [{ "library" : {"type" : "aug-cc-pVDZ"} }]}
+             
+  },
+  "keywords": {
+    "restricted" : true,
+    "mf_keywords" :{
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true,
+        "hdf5_filename_qmcpack" : "H_wpos.h5"
+    },
+   "ci_keywords" : {
+       "convergence_E" : 1e-6,
+       "num_states" : 2,
+       "num_subspace_vec" : 12,
+       "excitation_level" : [
+           [1,1,2]
+           ]
+   },
+   "pure" : true
+      }
+}

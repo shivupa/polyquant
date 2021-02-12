@@ -3,7 +3,7 @@
     "geometry": [
         0.0000000, 0.0000000,  0.0000000
     ],
-    "symbols": ["Li"],
+    "symbols": ["H"],
     "molecular_charge": 0,
     "molecular_multiplicity": 1
   },
@@ -11,10 +11,7 @@
   "model": {
     "method": "CI",
     "basis": 
-        {"Li" : [{ "custom" : 
-            {"type" : "file",
-             "filename" : "Li_basis.g94"}}]}
-             
+        {"H" : [{ "library" : {"type" : "aug-cc-pVDZ"} }]}
   },
   "keywords": {
     "restricted" : true,
@@ -36,13 +33,16 @@
         "convergence_DM" : 1e-6,
         "iteration_max" : 200,
         "dump_for_qmcpack" : true,
-        "hdf5_filename_qmcpack" : "Li_wpos.h5"
+        "hdf5_filename_qmcpack" : "H_wpos.h5"
     },
    "ci_keywords" : {
        "convergence_E" : 1e-6,
        "num_states" : 2,
-       "num_subspace_vec" : 4,
-       "excitation_level" : [2,1]
+       "num_subspace_vec" : 14,
+       "excitation_level" : [
+           [2,2,4],
+           [1,0,1]
+           ]
    },
    "pure" : true
       }

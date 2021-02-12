@@ -104,7 +104,7 @@ if(POLYQUANT_DEBUG)
 endif(POLYQUANT_DEBUG)
 
 # if the docs flag is on this will use doxygen to build the docs
-if(POLYQUANT_DOCS)
+if(POLYQUANT_DOC)
   # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html
   # add_subdirectory(docs)
   file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${POLYQUANT_BINARY_DIR})
@@ -120,7 +120,7 @@ if(POLYQUANT_DOCS)
     COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${SPHINX_BUILD}
     COMMENT "Generating documentation with Sphinx")
-endif(POLYQUANT_DOCS)
+endif(POLYQUANT_DOC)
 
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)

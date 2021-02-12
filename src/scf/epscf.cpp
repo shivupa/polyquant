@@ -278,7 +278,7 @@ void POLYQUANT_EPSCF::form_DM() {
 #pragma omp parallel for
       for (size_t i = 0; i < num_basis; i++) {
         for (size_t j = 0; j < num_basis; j++) {
-          for (int k = 0; k < quantum_part.num_parts_alpha; k++) {
+          for (int k = 0; k < quantum_part.num_parts_beta; k++) {
             this->D[quantum_part_idx][1](i, j) +=
                 this->C[quantum_part_idx][1](i, k) *
                 this->C[quantum_part_idx][1](j, k);
