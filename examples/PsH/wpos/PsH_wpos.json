@@ -11,7 +11,7 @@
   "model": {
     "method": "CI",
     "basis": 
-        {"H" : [{ "library" : {"type" : "cc-pVDZ"}}]}
+        {"H" : [{ "library" : {"type" : "cc-pVDZ"} }]}
   },
   "keywords": {
     "restricted" : true,
@@ -29,16 +29,16 @@
         }
     ],
     "mf_keywords" :{
-        "convergence_E" : 1e-8,
-        "convergence_DM" : 1e-6,
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-10,
         "iteration_max" : 200,
-        "dump_for_qmcpack" : true,
+        "dump_for_qmcpack" : false,
         "hdf5_filename_qmcpack" : "H_wpos.h5"
     },
    "ci_keywords" : {
-       "convergence_E" : 1e-6,
-       "num_states" : 2,
-       "num_subspace_vec" : 14,
+       "convergence_E" : 1e-8,
+       "num_states" : 5,
+       "num_subspace_vec" : 20,
        "excitation_level" : [
            [2,2,4],
            [1,0,1]

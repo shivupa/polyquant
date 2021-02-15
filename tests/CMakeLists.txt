@@ -29,5 +29,5 @@ target_link_libraries(
   scf)
 
 target_include_directories(main_test PUBLIC include)
-doctest_discover_tests(main_test)
+doctest_discover_tests(main_test ADD_LABELS 1)
 # add_test(main_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/main_test)
