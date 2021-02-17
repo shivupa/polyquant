@@ -69,6 +69,8 @@ public:
    */
   POLYQUANT_EPSCF input_epscf;
   POLYQUANT_DETSET<uint64_t> detset;
+  Eigen::Matrix<double, Eigen::Dynamic, 1>> energies;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> C_ci;
 
   std::vector<std::tuple<int, int, int>> excitation_level;
   /**

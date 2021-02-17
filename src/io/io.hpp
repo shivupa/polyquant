@@ -90,7 +90,11 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
   }
 }
 
-void Polyquant_dump_hdf5_for_QMCPACK(
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( const std::string &filename,
+  std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>,PairVectorHash<T>>>
+      dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_mo);
+
+void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,
@@ -170,6 +174,43 @@ void Polyquant_dump_mat_to_file(
     matfile << std::endl;
   }
 }
+/**
+ * @brief A hasher for a vector
+ * for more info see https://stackoverflow.com/a/29855973
+ *
+ * @param v the std::vector<T> to hash
+ **/
+template <typename T> struct VectorHash {
+  size_t operator()(const std::pair<std::vector<T>, std::vector<T>> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    for (T i : v) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
+/**
+ * @brief A hasher for a pair of vectors
+ * for more info see https://stackoverflow.com/a/29855973
+ *
+ * @param v the std::pair of std::vector<T> to hash
+ **/
+template <typename T> struct PairVectorHash {
+  size_t operator()(const std::pair<std::vector<T>, std::vector<T>> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    for (T i : v.first) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    for (T i : v.second) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
 
 class POLYQUANT_TIMER {
 public:

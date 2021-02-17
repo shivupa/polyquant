@@ -58,7 +58,7 @@ void POLYQUANT_CALCULATION::run() {
   //} else {
   // only electrons
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
-    this->run_post_mean_field(mean_field_type);
+    this->run_post_mean_field(post_mean_field_type);
   } else if (post_mean_field_type == "FILE" &&
              this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
@@ -213,17 +213,17 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   std::string hdf5_filename = "Default.h5";
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
-      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+      if (this->input_params.input_data["keywords"].contains(
               "dump_for_qmcpack")) {
         dump_for_qmcpack =
             this->input_params
-                .input_data["keywords"]["mf_keywords"]["dump_for_qmcpack"];
+                .input_data["keywords"]["dump_for_qmcpack"];
       }
-      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+      if (this->input_params.input_data["keywords"].contains(
               "hdf5_filename_qmcpack")) {
         hdf5_filename =
             this->input_params
-                .input_data["keywords"]["mf_keywords"]["hdf5_filename_qmcpack"];
+                .input_data["keywords"]["hdf5_filename_qmcpack"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "convergence_E")) {
@@ -245,9 +245,13 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "from_file")) {
-        dump_for_qmcpack = true;
-        hdf5_filename = this->input_params
-                            .input_data["keywords"]["mf_keywords"]["from_file"];
+          if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]){
+              dump_for_qmcpack=true;
+              mean_field_type = "FILE";
+          } else {
+              dump_for_qmcpack=true;
+              mean_field_type="SCF";
+          }
       } else if (mean_field_type == "FILE") {
         Polyquant_cout(
             "keywords->mf_keywords->from_file not present, but mean_field_type "
@@ -285,16 +289,16 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
   if (post_mean_field_type == "CI") {
     if (this->input_params.input_data.contains("keywords")) {
       if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
+        if (this->input_params.input_data["keywords"].contains(
                 "dump_for_qmcpack")) {
           dump_for_qmcpack =
               this->input_params
-                  .input_data["keywords"]["ci_keywords"]["dump_for_qmcpack"];
+                  .input_data["keywords"]["dump_for_qmcpack"];
         }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
+        if (this->input_params.input_data["keywords"].contains(
                 "hdf5_filename_qmcpack")) {
           hdf5_filename =
-              this->input_params.input_data["keywords"]["ci_keywords"]
+              this->input_params.input_data["keywords"]
                                            ["hdf5_filename_qmcpack"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
@@ -481,11 +485,14 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     classical_part_idx++;
   }
 
-  Polyquant_dump_hdf5_for_QMCPACK(
+  Polyquant_dump_mf_to_hdf5_for_QMCPACK(
       filename, pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit,
       num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom,
       num_species, quantum_part_names, scf_calc.E_orbitals, scf_calc.C,
       atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names,
       atomic_centers, unique_shells);
   //}
+}
+void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
+    Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(filename, this->ci_calc.detset.dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.detset.max_orb);
 }

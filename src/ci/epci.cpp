@@ -147,15 +147,15 @@ void POLYQUANT_EPCI::run() {
   int nconv =  solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
 
   // Retrieve results
-  Eigen::VectorXd evalues;
   if (solver.info() == Spectra::CompInfo::Successful) {
-    evalues = solver.eigenvalues();
+    this->energies = solver.eigenvalues();
+    this->C_ci = solver.eigenvectors();
     std::cout << nconv << " Eigenvalues found:\n" << std::endl;
-    for (auto e = 0; e < evalues.size(); e++) {
-      Polyquant_cout(evalues[e] + this->input_molecule.E_nuc);
+    for (auto e = 0; e < this->energies.size(); e++) {
+      Polyquant_cout(this->energies[e] + this->input_molecule.E_nuc);
     }
   } else {
-    std::cout << "Calculation failed" << std::endl;
+    APP_ABORT("CI Calculation did not converge!");
   }
 }
 // void POLYQUANT_EPCI::dump_ham() {

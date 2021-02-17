@@ -15,8 +15,8 @@ namespace polyquant {
 // }
 void APP_ABORT(const std::string &reason) {
   std::vector<std::string> ERROR_MESSAGE = {
-      "THIS IS A POLYQUANT++ ERROR. PLEASE REPORT TO ",
-      "POLYQUANT++ MAINTAINERS.", "ABORT REASON:"};
+      "THIS IS A POLYQUANTERROR. PLEASE REPORT TO ",
+      "POLYQUANT MAINTAINERS.", "ABORT REASON:"};
   ERROR_MESSAGE.push_back(reason);
   for (auto line : ERROR_MESSAGE) {
     Polyquant_cout(line);
@@ -33,7 +33,56 @@ void Polyquant_dump_json(const json &json_obj) {
 }
 // LCOV_EXCL_STOP
 
-void Polyquant_dump_hdf5_for_QMCPACK(
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( const std::string &filename,
+  std::vector<std::unordered_set<std::pair<std::vector<uint64_t>, std::vector<uint64_t>>,PairVectorHash<T>>>
+      dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_mo){
+    using namespace hdf5;
+    file::File f = file::open(file_path,file::AccessFlags::READWRITE);
+    // write generating code name
+    node::Group root_group = f.root();
+    Polyquant_cout("dumping CI parameters");
+    auto multidet_group = root_group.create_group("MultiDet");
+    std::unordered_set<std::vector<uint64_t>, VectorHash<uint64_t>>
+    for (auto part_idx = 0; part_idx < dets.size(); part_idx++){
+    }
+
+    // write orbital energies
+    Spin_dataset_offset = 0;
+    for (auto part_idx = 0ul; part_idx < E_orb.size(); part_idx++) {
+      for (auto spin_idx = 0ul; spin_idx < E_orb[part_idx].size(); spin_idx++) {
+        std::string tag =
+            "eigenval_" + std::to_string(Spin_dataset_offset + spin_idx);
+        std::vector<double> orbital_energies(
+            E_orb[part_idx][spin_idx].data(),
+            E_orb[part_idx][spin_idx].data() +
+                E_orb[part_idx][spin_idx].size());
+        auto E_orb_dataset = super_twist_group.create_dataset(
+            tag, datatype::create<std::vector<double>>(),
+            hdf5::dataspace::Simple({1, orbital_energies.size()}));
+        E_orb_dataset.write(orbital_energies);
+        // write orbital coeffs
+        std::vector<double> flattened_mo_coeff;
+        for (auto i = 0ul; i < num_ao; i++) {
+          for (auto j = 0ul; j < num_mo; j++) {
+            flattened_mo_coeff.push_back(mo_coeff[part_idx][spin_idx](j, i));
+          }
+        }
+        tag = "eigenset_" + std::to_string(Spin_dataset_offset + spin_idx);
+        auto mo_coeff_dataset = super_twist_group.create_dataset(
+            tag, datatype::create<std::vector<double>>(),
+            hdf5::dataspace::Simple({num_ao, num_mo}));
+        mo_coeff_dataset.write(flattened_mo_coeff);
+      }
+      Spin_dataset_offset += 2;
+    }
+  }
+    auto numMO_dataset =
+        parameters_group.create_dataset("", int_type, simple_space);
+    numMO_dataset.write(num_mo, int_type, simple_space);
+
+}
+
+void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,

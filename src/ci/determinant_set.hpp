@@ -19,21 +19,6 @@
 
 namespace polyquant {
 
-// https://stackoverflow.com/a/29855973
-template <typename T> struct PairVectorHash {
-  size_t operator()(const std::pair<std::vector<T>, std::vector<T>> &v) const {
-    std::hash<T> hasher;
-    size_t seed = 0;
-    for (T i : v.first) {
-      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-    for (T i : v.second) {
-      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-    return seed;
-  }
-};
-
 template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() = default;
