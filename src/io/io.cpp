@@ -33,52 +33,58 @@ void Polyquant_dump_json(const json &json_obj) {
 }
 // LCOV_EXCL_STOP
 
-void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( const std::string &filename,
-  std::vector<std::unordered_set<std::pair<std::vector<uint64_t>, std::vector<uint64_t>>,PairVectorHash<T>>>
-      dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_mo){
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( const std::string &filename,  std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets      , Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_states, int N_mo){
     using namespace hdf5;
-    file::File f = file::open(file_path,file::AccessFlags::READWRITE);
-    // write generating code name
+  auto simple_space = hdf5::dataspace::Simple({1});
+  auto bool_type = datatype::create<bool>();
+  auto int_type = datatype::create<int>();
+  auto double_type = datatype::create<double>();
+    auto N_int_per_det = dets[0][0][0].size();
+
+    file::File f = file::open(filename,file::AccessFlags::READWRITE);
     node::Group root_group = f.root();
     Polyquant_cout("dumping CI parameters");
     auto multidet_group = root_group.create_group("MultiDet");
-    std::unordered_set<std::vector<uint64_t>, VectorHash<uint64_t>>
-    for (auto part_idx = 0; part_idx < dets.size(); part_idx++){
-    }
-
-    // write orbital energies
-    Spin_dataset_offset = 0;
-    for (auto part_idx = 0ul; part_idx < E_orb.size(); part_idx++) {
-      for (auto spin_idx = 0ul; spin_idx < E_orb[part_idx].size(); spin_idx++) {
-        std::string tag =
-            "eigenval_" + std::to_string(Spin_dataset_offset + spin_idx);
-        std::vector<double> orbital_energies(
-            E_orb[part_idx][spin_idx].data(),
-            E_orb[part_idx][spin_idx].data() +
-                E_orb[part_idx][spin_idx].size());
-        auto E_orb_dataset = super_twist_group.create_dataset(
-            tag, datatype::create<std::vector<double>>(),
-            hdf5::dataspace::Simple({1, orbital_energies.size()}));
-        E_orb_dataset.write(orbital_energies);
-        // write orbital coeffs
-        std::vector<double> flattened_mo_coeff;
-        for (auto i = 0ul; i < num_ao; i++) {
-          for (auto j = 0ul; j < num_mo; j++) {
-            flattened_mo_coeff.push_back(mo_coeff[part_idx][spin_idx](j, i));
+    for (int part_idx = 0; part_idx < dets.size(); part_idx++){
+    for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++){
+        std::string tag = "CI_" + std::to_string(part_idx*2 + spin_idx);
+        std::vector<uint64_t> flattened_dets;
+        for (int i = 0; i < N_dets; i++) {
+          for (int j = 0; j < N_int_per_det; j++) {
+            flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
           }
         }
-        tag = "eigenset_" + std::to_string(Spin_dataset_offset + spin_idx);
-        auto mo_coeff_dataset = super_twist_group.create_dataset(
-            tag, datatype::create<std::vector<double>>(),
-            hdf5::dataspace::Simple({num_ao, num_mo}));
-        mo_coeff_dataset.write(flattened_mo_coeff);
+        auto det_dataset = multidet_group.create_dataset(tag, datatype::create<std::vector<uint64_t>>(), hdf5::dataspace::Simple({N_dets, N_int_per_det}));
+        det_dataset.write(flattened_dets);
       }
-      Spin_dataset_offset += 2;
     }
-  }
-    auto numMO_dataset =
-        parameters_group.create_dataset("", int_type, simple_space);
-    numMO_dataset.write(num_mo, int_type, simple_space);
+
+    for (auto i = 0ul; i < N_states; i++) {
+    std::vector<double> coeff;
+    for (auto j = 0ul; j < N_dets; j++) {
+        coeff.push_back(C(j,i));
+    }
+    std::string tag = "Coeff";
+    if (i > 0){
+        tag += "_" + std::to_string(i);
+        }
+        auto coeff_dataset = multidet_group.create_dataset(tag, datatype::create<std::vector<double>>(), hdf5::dataspace::Simple({N_dets}));
+        coeff_dataset.write(coeff);
+        }
+
+    auto NbDet_dataset =multidet_group.create_dataset("NbDet", int_type, simple_space);
+    NbDet_dataset.write(N_dets, int_type, simple_space);
+
+    auto Nbits_dataset =multidet_group.create_dataset("Nbits", int_type, simple_space);
+    Nbits_dataset.write(N_int_per_det, int_type, simple_space);
+
+    auto nexcitedstate_dataset =multidet_group.create_dataset("nexcitedstate", int_type, simple_space);
+    nexcitedstate_dataset.write(N_states, int_type, simple_space);
+
+    auto nstate_dataset =multidet_group.create_dataset("nstate", int_type, simple_space);
+    nstate_dataset.write(N_mo, int_type, simple_space);
+
+
 
 }
 
