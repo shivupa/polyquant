@@ -11,17 +11,20 @@
   "model": {
     "method": "CI",
     "basis": 
-        {"H" : [{ "library" : {"type" : "aug-cc-pVDZ"} }]}
+        {"H" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "positron_basis.g94"}}]}
              
   },
   "keywords": {
     "restricted" : true,
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "H_wpos.h5",
     "mf_keywords" :{
         "convergence_E" : 1e-12,
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
-        "dump_for_qmcpack" : true,
-        "hdf5_filename_qmcpack" : "H_wpos.h5"
+        "dump_for_qmcpack" : true
     },
    "ci_keywords" : {
        "convergence_E" : 1e-8,

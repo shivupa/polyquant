@@ -15,8 +15,8 @@ namespace polyquant {
 // }
 void APP_ABORT(const std::string &reason) {
   std::vector<std::string> ERROR_MESSAGE = {
-      "THIS IS A POLYQUANTERROR. PLEASE REPORT TO ",
-      "POLYQUANT MAINTAINERS.", "ABORT REASON:"};
+      "THIS IS A POLYQUANTERROR. PLEASE REPORT TO ", "POLYQUANT MAINTAINERS.",
+      "ABORT REASON:"};
   ERROR_MESSAGE.push_back(reason);
   for (auto line : ERROR_MESSAGE) {
     Polyquant_cout(line);
@@ -33,59 +33,68 @@ void Polyquant_dump_json(const json &json_obj) {
 }
 // LCOV_EXCL_STOP
 
-void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( const std::string &filename,  std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets      , Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_states, int N_mo){
-    using namespace hdf5;
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
+    const std::string &filename,
+    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
+    int N_states, int N_mo) {
+  using namespace hdf5;
   auto simple_space = hdf5::dataspace::Simple({1});
   auto bool_type = datatype::create<bool>();
   auto int_type = datatype::create<int>();
   auto double_type = datatype::create<double>();
-    auto N_int_per_det = dets[0][0][0].size();
+  auto N_int_per_det = dets[0][0][0].size();
 
-    file::File f = file::open(filename,file::AccessFlags::READWRITE);
-    node::Group root_group = f.root();
-    Polyquant_cout("dumping CI parameters");
-    auto multidet_group = root_group.create_group("MultiDet");
-    for (int part_idx = 0; part_idx < dets.size(); part_idx++){
-    for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++){
-        std::string tag = "CI_" + std::to_string(part_idx*2 + spin_idx);
-        std::vector<uint64_t> flattened_dets;
-        for (int i = 0; i < N_dets; i++) {
-          for (int j = 0; j < N_int_per_det; j++) {
-            flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
-          }
+  file::File f = file::open(filename, file::AccessFlags::READWRITE);
+  node::Group root_group = f.root();
+  Polyquant_cout("dumping CI parameters");
+  auto multidet_group = root_group.create_group("MultiDet");
+  for (int part_idx = 0; part_idx < dets.size(); part_idx++) {
+    for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++) {
+      std::string tag = "CI_" + std::to_string(part_idx * 2 + spin_idx);
+      std::vector<uint64_t> flattened_dets;
+      for (int i = 0; i < N_dets; i++) {
+        for (int j = 0; j < N_int_per_det; j++) {
+          flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
         }
-        auto det_dataset = multidet_group.create_dataset(tag, datatype::create<std::vector<uint64_t>>(), hdf5::dataspace::Simple({N_dets, N_int_per_det}));
-        det_dataset.write(flattened_dets);
       }
+      auto det_dataset = multidet_group.create_dataset(
+          tag, datatype::create<std::vector<uint64_t>>(),
+          hdf5::dataspace::Simple({N_dets, N_int_per_det}));
+      det_dataset.write(flattened_dets);
     }
+  }
 
-    for (auto i = 0ul; i < N_states; i++) {
+  for (auto i = 0ul; i < N_states; i++) {
     std::vector<double> coeff;
     for (auto j = 0ul; j < N_dets; j++) {
-        coeff.push_back(C(j,i));
+      coeff.push_back(C(j, i));
     }
     std::string tag = "Coeff";
-    if (i > 0){
-        tag += "_" + std::to_string(i);
-        }
-        auto coeff_dataset = multidet_group.create_dataset(tag, datatype::create<std::vector<double>>(), hdf5::dataspace::Simple({N_dets}));
-        coeff_dataset.write(coeff);
-        }
+    if (i > 0) {
+      tag += "_" + std::to_string(i);
+    }
+    auto coeff_dataset = multidet_group.create_dataset(
+        tag, datatype::create<std::vector<double>>(),
+        hdf5::dataspace::Simple({N_dets}));
+    coeff_dataset.write(coeff);
+  }
 
-    auto NbDet_dataset =multidet_group.create_dataset("NbDet", int_type, simple_space);
-    NbDet_dataset.write(N_dets, int_type, simple_space);
+  auto NbDet_dataset =
+      multidet_group.create_dataset("NbDet", int_type, simple_space);
+  NbDet_dataset.write(N_dets, int_type, simple_space);
 
-    auto Nbits_dataset =multidet_group.create_dataset("Nbits", int_type, simple_space);
-    Nbits_dataset.write(N_int_per_det, int_type, simple_space);
+  auto Nbits_dataset =
+      multidet_group.create_dataset("Nbits", int_type, simple_space);
+  Nbits_dataset.write(N_int_per_det, int_type, simple_space);
 
-    auto nexcitedstate_dataset =multidet_group.create_dataset("nexcitedstate", int_type, simple_space);
-    nexcitedstate_dataset.write(N_states, int_type, simple_space);
+  auto nexcitedstate_dataset =
+      multidet_group.create_dataset("nexcitedstate", int_type, simple_space);
+  nexcitedstate_dataset.write(N_states, int_type, simple_space);
 
-    auto nstate_dataset =multidet_group.create_dataset("nstate", int_type, simple_space);
-    nstate_dataset.write(N_mo, int_type, simple_space);
-
-
-
+  auto nstate_dataset =
+      multidet_group.create_dataset("nstate", int_type, simple_space);
+  nstate_dataset.write(N_mo, int_type, simple_space);
 }
 
 void Polyquant_dump_mf_to_hdf5_for_QMCPACK(

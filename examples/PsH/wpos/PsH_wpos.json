@@ -11,7 +11,9 @@
   "model": {
     "method": "CI",
     "basis": 
-        {"H" : [{ "library" : {"type" : "cc-pVDZ"} }]}
+        {"H" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "positron_basis.g94"}}]}
   },
   "keywords": {
     "restricted" : true,
@@ -41,7 +43,7 @@
        "num_states" : 5,
        "num_subspace_vec" : 20,
        "excitation_level" : [
-           [2,2,4],
+           [1,1,2],
            [1,0,1]
            ]
    },

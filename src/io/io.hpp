@@ -90,7 +90,11 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
   }
 }
 
-void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( const std::string &filename,  std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets      , Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_states, int N_mo);
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
+    const std::string &filename,
+    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
+    int N_states, int N_mo);
 
 void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
@@ -192,7 +196,6 @@ template <typename T> struct PairVectorHash {
   }
 };
 
-
 class POLYQUANT_TIMER {
 public:
   POLYQUANT_TIMER() { this->set_start_time(); };
@@ -215,8 +218,10 @@ public:
   };
   void print_timer_end() {
     // use std::format once supported
-    // typedef duration<int, std::ratio<86400>> days;
+    // use std::chrono::days etc once it is used
+    //typedef std::chrono::duration<int, std::ratio<86400>> days;
     auto duration = this->end - this->start;
+    //auto d = std::chrono::duration_cast<days>(duration);
     auto d = std::chrono::duration_cast<std::chrono::days>(duration);
     duration -= d;
     auto h = std::chrono::duration_cast<std::chrono::hours>(duration);

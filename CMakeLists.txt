@@ -131,6 +131,7 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 # FIND CPR find_package(CPR REQUIRED) FIND CURL find_package(CURL REQUIRED) FIND
 # Libint2
 find_package(Libint2 REQUIRED)
+#set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig/")
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # TODO replace with main spectra branch
@@ -153,8 +154,8 @@ find_package(cxxopts REQUIRED)
 find_package(h5cpp REQUIRED)
 FetchContent_Declare(
   doctest
-  GIT_REPOSITORY https://github.com/shivupa/doctest.git
-  GIT_TAG origin/cmaketestlabels)
+  GIT_REPOSITORY https://github.com/onqtam/doctest.git
+  GIT_TAG origin/dev)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 find_package(MKL REQUIRED)

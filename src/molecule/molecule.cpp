@@ -301,7 +301,8 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
     quantum_particles[curr_label].num_parts = num_parts;
     quantum_particles[curr_label].num_parts_beta =
         ((num_parts) - (this->multiplicity - 1)) / 2;
-    quantum_particles[curr_label].num_parts_alpha = num_parts - quantum_particles[curr_label].num_parts_beta;
+    quantum_particles[curr_label].num_parts_alpha =
+        num_parts - quantum_particles[curr_label].num_parts_beta;
     quantum_particles[curr_label].exchange = true;
     quantum_particles[curr_label].restricted = this->restricted;
     quantum_particles[curr_label].multiplicity = this->multiplicity;

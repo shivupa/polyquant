@@ -1,0 +1,45 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "scf",
+    "basis": 
+        {"H" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "H_basis.g94"}}]}
+             
+  },
+  "keywords": {
+    "restricted" : true,
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "H_wpos.h5",
+    "pure" : true,
+    "quantum_particles" : [ 
+        { "name" : "positron",
+          "spin" : 0.5,
+          "mass" : 1,
+          "charge" : 1,
+          "num_particles_alpha" : 1,
+          "num_particles_beta" : 0,
+          "particle_multiplicity" : 2,
+          "exchange" : true,
+          "electron_exchange" : false,
+          "restricted" : false
+        }
+    ],
+    "mf_keywords" :{
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-10,
+        "iteration_max" : 200,
+        "from_file" : false
+    }
+  }
+}
+

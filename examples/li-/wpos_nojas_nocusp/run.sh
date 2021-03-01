@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=12
 
 ../../../build/bin/polyquant -i Li_wpos.json
 ~/Documents/qmcpack/build/bin/convert4qmc -orbitals Li_wpos.h5

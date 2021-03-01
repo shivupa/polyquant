@@ -156,9 +156,7 @@ TEST_SUITE("CI") {
     std::vector<int> distance_vec = {distance};
     auto diag_ham_elem =
         test_ci.detset.same_part_ham_diag(0, distance_vec, distance_vec);
-    for (auto i = 0;
-         i < test_ci.detset.dets[0].size() ;
-         i++) {
+    for (auto i = 0; i < test_ci.detset.dets[0].size(); i++) {
       std::cout << test_ci.detset.Slater_Condon(i, i) << std::endl;
     }
     CHECK(diag_ham_elem == doctest::Approx(-84.1577927627923)
@@ -299,24 +297,42 @@ TEST_SUITE("CI") {
     // get pos det distance
     std::bitset<18> hf_det_pos_a("0000000000000001");
     std::bitset<18> hf_det_pos_b("0000000000000000");
-    std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_pos_obj = {{hf_det_pos_a.to_ulong()}, {hf_det_pos_b.to_ulong()}};
+    std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_pos_obj = {
+        {hf_det_pos_a.to_ulong()}, {hf_det_pos_b.to_ulong()}};
     auto det_pos_pos = test_ci.detset.dets[1].find(hf_det_pos_obj);
     CHECK(det_pos_pos != test_ci.detset.dets[1].end());
-    auto pos_distance =        std::distance(test_ci.detset.dets[1].begin(), det_pos_pos);
+    auto pos_distance =
+        std::distance(test_ci.detset.dets[1].begin(), det_pos_pos);
     std::vector<int> distance_vec = {elec_distance, pos_distance};
-    int folded_idx =        elec_distance * test_ci.detset.dets[1].size() + pos_distance;
+    int folded_idx =
+        elec_distance * test_ci.detset.dets[1].size() + pos_distance;
     auto diag_ham_elem = test_ci.detset.Slater_Condon(folded_idx, folded_idx);
     for (auto i = 0;
          i < (test_ci.detset.dets[0].size() * test_ci.detset.dets[1].size());
          i++) {
-        auto e = test_ci.detset.Slater_Condon(i,i);
-        if (e>0){
-      std::cout << test_ci.detset.det_idx_unfold(i)[0] << " " << test_ci.detset.det_idx_unfold(i)[1] << " " << e   << " " << test_ci.detset.same_part_ham_diag(0, test_ci.detset.det_idx_unfold(i), test_ci.detset.det_idx_unfold(i))        << " " << test_ci.detset.same_part_ham_diag(1, test_ci.detset.det_idx_unfold(i), test_ci.detset.det_idx_unfold(i))   << " " << test_ci.detset.mixed_part_ham_diag(0, 1, test_ci.detset.det_idx_unfold(i), test_ci.detset.det_idx_unfold(i)) << std::endl;
-
-        }
+      auto e = test_ci.detset.Slater_Condon(i, i);
+      if (e > 0) {
+        std::cout << test_ci.detset.det_idx_unfold(i)[0] << " "
+                  << test_ci.detset.det_idx_unfold(i)[1] << " " << e << " "
+                  << test_ci.detset.same_part_ham_diag(
+                         0, test_ci.detset.det_idx_unfold(i),
+                         test_ci.detset.det_idx_unfold(i))
+                  << " "
+                  << test_ci.detset.same_part_ham_diag(
+                         1, test_ci.detset.det_idx_unfold(i),
+                         test_ci.detset.det_idx_unfold(i))
+                  << " "
+                  << test_ci.detset.mixed_part_ham_diag(
+                         0, 1, test_ci.detset.det_idx_unfold(i),
+                         test_ci.detset.det_idx_unfold(i))
+                  << std::endl;
+      }
     }
-    Polyquant_dump_mat(test_ci.detset.input_integral.mo_two_body_ints[0][0][1][0],"MO two elec e/p alpha");
-//Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][1][1][1],"MO two elec e/p beta");
+    Polyquant_dump_mat(
+        test_ci.detset.input_integral.mo_two_body_ints[0][0][1][0],
+        "MO two elec e/p alpha");
+    // Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][1][1][1],"MO
+    // two elec e/p beta");
 
     CHECK(diag_ham_elem == doctest::Approx(-7.5257234633357024123)
                                .epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -345,32 +361,39 @@ TEST_SUITE("CI") {
         {hf_det_pos_a.to_ulong()}, {hf_det_pos_b.to_ulong()}};
     auto det_pos_pos = test_ci.detset.dets[1].find(hf_det_pos_obj);
     CHECK(det_pos_pos != test_ci.detset.dets[1].end());
-    auto pos_distance =        std::distance(test_ci.detset.dets[1].begin(), det_pos_pos);
+    auto pos_distance =
+        std::distance(test_ci.detset.dets[1].begin(), det_pos_pos);
     // get pos single det distance
-    //std::bitset<18> single_det_pos_a("0000000000000010");
-    //std::bitset<18> single_det_pos_b("0000000000000000");
-    //std::pair<std::vector<uint64_t>, std::vector<uint64_t>> single_det_pos_obj = {
+    // std::bitset<18> single_det_pos_a("0000000000000010");
+    // std::bitset<18> single_det_pos_b("0000000000000000");
+    // std::pair<std::vector<uint64_t>, std::vector<uint64_t>>
+    // single_det_pos_obj = {
     //    {single_det_pos_a.to_ulong()}, {single_det_pos_b.to_ulong()}};
-    //auto sing_det_pos_pos = test_ci.detset.dets[1].find(single_det_pos_obj);
-    //auto sing_pos_distance =        std::distance(test_ci.detset.dets[1].begin(), sing_det_pos_pos);
-    int folded_idx =        elec_distance * test_ci.detset.dets[1].size() + pos_distance;
-    //int sing_folded_idx =        elec_distance * test_ci.detset.dets[1].size() + sing_pos_distance;
+    // auto sing_det_pos_pos = test_ci.detset.dets[1].find(single_det_pos_obj);
+    // auto sing_pos_distance = std::distance(test_ci.detset.dets[1].begin(),
+    // sing_det_pos_pos);
+    int folded_idx =
+        elec_distance * test_ci.detset.dets[1].size() + pos_distance;
+    // int sing_folded_idx =        elec_distance *
+    // test_ci.detset.dets[1].size() + sing_pos_distance;
     for (auto i = 0;
          i < (test_ci.detset.dets[0].size() * test_ci.detset.dets[1].size());
          i++) {
-        if (i != folded_idx){
+      if (i != folded_idx) {
 
-            auto excited_e_det = test_ci.detset.get_det(0, test_ci.detset.det_idx_unfold(i)[0]);
-            auto excited_p_det = test_ci.detset.get_det(1, test_ci.detset.det_idx_unfold(i)[1]);
-            auto ex = 0;
-            ex += test_ci.detset.num_excitation(hf_det_obj, excited_e_det);
-            ex += test_ci.detset.num_excitation(hf_det_pos_obj, excited_p_det);
-            if (ex == 1){
-    auto sing_ham_elem = test_ci.detset.Slater_Condon(folded_idx, i);
-    CHECK(sing_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-            }
+        auto excited_e_det =
+            test_ci.detset.get_det(0, test_ci.detset.det_idx_unfold(i)[0]);
+        auto excited_p_det =
+            test_ci.detset.get_det(1, test_ci.detset.det_idx_unfold(i)[1]);
+        auto ex = 0;
+        ex += test_ci.detset.num_excitation(hf_det_obj, excited_e_det);
+        ex += test_ci.detset.num_excitation(hf_det_pos_obj, excited_p_det);
+        if (ex == 1) {
+          auto sing_ham_elem = test_ci.detset.Slater_Condon(folded_idx, i);
+          CHECK(sing_ham_elem == doctest::Approx(0.000000000)
+                                     .epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
         }
+      }
     }
-  
   }
 }

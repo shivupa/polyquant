@@ -216,14 +216,12 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       if (this->input_params.input_data["keywords"].contains(
               "dump_for_qmcpack")) {
         dump_for_qmcpack =
-            this->input_params
-                .input_data["keywords"]["dump_for_qmcpack"];
+            this->input_params.input_data["keywords"]["dump_for_qmcpack"];
       }
       if (this->input_params.input_data["keywords"].contains(
               "hdf5_filename_qmcpack")) {
         hdf5_filename =
-            this->input_params
-                .input_data["keywords"]["hdf5_filename_qmcpack"];
+            this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "convergence_E")) {
@@ -245,13 +243,14 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "from_file")) {
-          if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]){
-              dump_for_qmcpack=true;
-              mean_field_type = "FILE";
-          } else {
-              dump_for_qmcpack=true;
-              mean_field_type="SCF";
-          }
+        if (this->input_params
+                .input_data["keywords"]["mf_keywords"]["from_file"]) {
+          dump_for_qmcpack = true;
+          mean_field_type = "FILE";
+        } else {
+          dump_for_qmcpack = true;
+          mean_field_type = "SCF";
+        }
       } else if (mean_field_type == "FILE") {
         Polyquant_cout(
             "keywords->mf_keywords->from_file not present, but mean_field_type "
@@ -292,14 +291,12 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
         if (this->input_params.input_data["keywords"].contains(
                 "dump_for_qmcpack")) {
           dump_for_qmcpack =
-              this->input_params
-                  .input_data["keywords"]["dump_for_qmcpack"];
+              this->input_params.input_data["keywords"]["dump_for_qmcpack"];
         }
         if (this->input_params.input_data["keywords"].contains(
                 "hdf5_filename_qmcpack")) {
-          hdf5_filename =
-              this->input_params.input_data["keywords"]
-                                           ["hdf5_filename_qmcpack"];
+          hdf5_filename = this->input_params
+                              .input_data["keywords"]["hdf5_filename_qmcpack"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
                 "convergence_E")) {
@@ -494,19 +491,24 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   //}
 }
 void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
-    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
-    dets.resize(this->input_molecule.quantum_particles.size());
-    for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++){
-        dets[idx_part].resize(2);
+  std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
+  dets.resize(this->input_molecule.quantum_particles.size());
+  for (int idx_part = 0;
+       idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
+    dets[idx_part].resize(2);
+  }
+  for (auto i = 0; i < this->ci_calc.detset.N_dets; i++) {
+    for (int idx_part = 0;
+         idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
+      auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
+      auto curr_det =
+          this->ci_calc.detset.get_det(idx_part, i_unfold[idx_part]);
+      dets[idx_part][0].push_back(curr_det.first);
+      dets[idx_part][1].push_back(curr_det.second);
     }
-    for (auto i = 0; i < this->ci_calc.detset.N_dets; i++){
-    for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++){
-        auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
-        auto curr_det = this->ci_calc.detset.get_det(idx_part, i_unfold[idx_part]);
-        dets[idx_part][0].push_back(curr_det.first);
-        dets[idx_part][1].push_back(curr_det.second);
-    }
-    }
-        
-    Polyquant_dump_post_mf_to_hdf5_for_QMCPACK( filename, dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states, this->ci_calc.detset.max_orb);
+  }
+
+  Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
+      filename, dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets,
+      this->ci_calc.num_states, this->ci_calc.detset.max_orb);
 }
