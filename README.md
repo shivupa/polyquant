@@ -1,5 +1,7 @@
 # polyquant
 
+Polyquant uses C++20. This is required because the CI operations use https://en.cppreference.com/w/cpp/header/bit.
+
 ## Dependencies
 
 ### For a production build
