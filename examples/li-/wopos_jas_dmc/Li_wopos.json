@@ -17,13 +17,13 @@
              
   },
   "keywords": {
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "Li_wopos.h5",
     "restricted" : true,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
-        "iteration_max" : 200,
-        "dump_for_qmcpack" : true,
-        "hdf5_filename_qmcpack" : "Li_wopos.h5"
+        "iteration_max" : 200
     },
    "pure" : true
       }

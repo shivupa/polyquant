@@ -90,7 +90,13 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
   }
 }
 
-void Polyquant_dump_hdf5_for_QMCPACK(
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
+    const std::string &filename,
+    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
+    int N_states, int N_mo);
+
+void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
     bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
     int num_part_beta, int num_part_total, int multiplicity, int num_atom,
@@ -170,6 +176,25 @@ void Polyquant_dump_mat_to_file(
     matfile << std::endl;
   }
 }
+/**
+ * @brief A hasher for a pair of vectors
+ * for more info see https://stackoverflow.com/a/29855973
+ *
+ * @param v the std::pair of std::vector<T> to hash
+ **/
+template <typename T> struct PairVectorHash {
+  size_t operator()(const std::pair<std::vector<T>, std::vector<T>> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    for (T i : v.first) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    for (T i : v.second) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
 
 class POLYQUANT_TIMER {
 public:
@@ -193,8 +218,10 @@ public:
   };
   void print_timer_end() {
     // use std::format once supported
-    // typedef duration<int, std::ratio<86400>> days;
+    // use std::chrono::days etc once it is used
+    //typedef std::chrono::duration<int, std::ratio<86400>> days;
     auto duration = this->end - this->start;
+    //auto d = std::chrono::duration_cast<days>(duration);
     auto d = std::chrono::duration_cast<std::chrono::days>(duration);
     duration -= d;
     auto h = std::chrono::duration_cast<std::chrono::hours>(duration);

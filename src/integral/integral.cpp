@@ -60,6 +60,157 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
     libint2::finalize();
   }
 }
+void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        &mo_coeffs) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  mo_one_body_ints.resize(mo_coeffs.size());
+  for (auto i = 0; i < mo_one_body_ints.size(); i++) {
+    mo_one_body_ints[i].resize(mo_coeffs[i].size());
+  }
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+#pragma omp parallel for
+    for (auto j = 0; j < mo_one_body_ints[quantum_part_idx].size(); j++) {
+      mo_one_body_ints[quantum_part_idx][j].resize(
+          mo_coeffs[quantum_part_idx][j].cols(),
+          mo_coeffs[quantum_part_idx][j].cols());
+      mo_one_body_ints[quantum_part_idx][j].setZero();
+      mo_one_body_ints[quantum_part_idx][j] =
+          mo_coeffs[quantum_part_idx][j].transpose() *
+          (kinetic + (-quantum_part.charge * nuclear)) *
+          mo_coeffs[quantum_part_idx][j];
+      //(kinetic + (-quantum_part.charge * nuclear)) *
+    }
+    quantum_part_idx++;
+  }
+}
+Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b,
+    int num_part_alpha, int num_part_beta) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  auto num_basis = this->input_basis.num_basis;
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> eri;
+  Eigen::Tensor<double, 4> temp1;
+  Eigen::Tensor<double, 4> temp2;
+  auto eri_size = (num_basis * (num_basis + 1) / 2);
+  eri.resize(eri_size, eri_size);
+  temp1.resize(eri_size, eri_size, eri_size, eri_size);
+  temp2.resize(eri_size, eri_size, eri_size, eri_size);
+  eri.setZero();
+  temp1.setZero();
+  temp2.setZero();
+  // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
+  // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
+  // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
+  // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
+  for (auto p = 0; p < num_basis; p++) {
+    for (auto q = 0; q < num_basis; q++) {
+      for (auto r = 0; r < num_basis; r++) {
+        for (auto s = 0; s < num_basis; s++) {
+          for (auto i = 0; i < num_basis; i++) {
+            temp1(i, q, r, s) +=
+                mo_coeffs_a(p, i) * this->twoelec(this->idx8(p, q, r, s));
+          }
+        }
+      }
+    }
+  }
+  for (auto i = 0; i < num_basis; i++) {
+    for (auto q = 0; q < num_basis; q++) {
+      for (auto r = 0; r < num_basis; r++) {
+        for (auto s = 0; s < num_basis; s++) {
+          for (auto j = 0; j < num_basis; j++) {
+            temp2(i, j, r, s) += mo_coeffs_a(q, j) * temp1(i, q, r, s);
+          }
+        }
+      }
+    }
+  }
+  temp1.setZero();
+  for (auto i = 0; i < num_basis; i++) {
+    for (auto j = 0; j < num_basis; j++) {
+      for (auto r = 0; r < num_basis; r++) {
+        for (auto s = 0; s < num_basis; s++) {
+          for (auto k = 0; k < num_basis; k++) {
+            temp1(i, j, k, s) += mo_coeffs_b(r, k) * temp2(i, j, r, s);
+          }
+        }
+      }
+    }
+  }
+  temp2.setZero();
+  for (auto i = 0; i < num_basis; i++) {
+    for (auto j = 0; j < num_basis; j++) {
+      for (auto k = 0; k < num_basis; k++) {
+        for (auto s = 0; s < num_basis; s++) {
+          for (auto l = 0; l < num_basis; l++) {
+            temp2(i, j, k, l) += mo_coeffs_b(s, l) * temp1(i, j, k, s);
+          }
+        }
+      }
+    }
+  }
+  for (auto i = 0; i < num_basis; i++) {
+    for (auto j = 0; j < num_basis; j++) {
+      for (auto k = 0; k < num_basis; k++) {
+        for (auto l = 0; l < num_basis; l++) {
+          eri(this->idx2(i, j), this->idx2(k, l)) = temp2(i, j, k, l);
+        }
+      }
+    }
+  }
+  return eri;
+}
+
+void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        &mo_coeffs) {
+  mo_two_body_ints.resize(mo_coeffs.size());
+  auto num_basis = this->input_basis.num_basis;
+  auto quantum_part_a_idx = 0ul;
+  auto quantum_part_b_idx = 0ul;
+  for (auto const &[quantum_part_a_key, quantum_part_a] :
+       this->input_molecule.quantum_particles) {
+    mo_two_body_ints[quantum_part_a_idx].resize(
+        mo_coeffs[quantum_part_a_idx].size());
+    for (auto spin_a_idx = 0; spin_a_idx < mo_coeffs[quantum_part_a_idx].size();
+         spin_a_idx++) {
+      mo_two_body_ints[quantum_part_a_idx][spin_a_idx].resize(mo_coeffs.size());
+      auto num_part_a = (spin_a_idx == 0) ? quantum_part_a.num_parts_alpha
+                                          : quantum_part_a.num_parts_beta;
+      quantum_part_b_idx = 0;
+      for (auto const &[quantum_part_b_key, quantum_part_b] :
+           this->input_molecule.quantum_particles) {
+        mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
+            .resize(mo_coeffs[quantum_part_b_idx].size());
+        for (auto spin_b_idx = 0;
+             spin_b_idx < mo_coeffs[quantum_part_b_idx].size(); spin_b_idx++) {
+          if (quantum_part_b_idx < quantum_part_a_idx) {
+            continue;
+          }
+          auto num_part_b = (spin_b_idx == 0) ? quantum_part_b.num_parts_alpha
+                                              : quantum_part_b.num_parts_beta;
+          mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx]
+                          [spin_b_idx] = transform_mo_2_body_integrals(
+                              mo_coeffs[quantum_part_a_idx][spin_a_idx],
+                              mo_coeffs[quantum_part_b_idx][spin_b_idx],
+                              num_part_a, num_part_b);
+        }
+        quantum_part_b_idx++;
+      }
+    }
+    quantum_part_a_idx++;
+  }
+}
 
 // void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
 //  if (this->polarization_potential.shape() == std::vector<size_t>({})) {

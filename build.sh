@@ -3,12 +3,16 @@
 rm -rf build
 mkdir -p build
 cd build
+export MKL_INCLUDE_DIR=/opt/intel/mkl
+export MKL_ROOT=/opt/intel/mkl
 cmake \
     -DPOLYQUANT_DEBUG=0 \
-    -DPOLYQUANT_DOC=0 \
+    -DPOLYQUANT_DOC=1 \
     -DPOLYQUANT_TEST=1 \
     -DPOLYQUANT_CODE_COVERAGE=1 \
+    -DMKL_ROOT=/opt/intel/mkl \
     ..
+make Sphinx
 make -j 4
 lcov --capture --initial --directory . --base-directory ../src --output-file coverage_base.info
 make test
@@ -21,7 +25,6 @@ lcov --remove coverage_total.info '/usr/*' "${HOME}"'/.cache/*' '*/tests/*' '*bu
 lcov --list coverage_total.info
 genhtml coverage_total.info -o temp
 #make test
-#make Sphinx
 #cd ..
 #cd examples/h2o
 #./run.sh

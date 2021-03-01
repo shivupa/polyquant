@@ -5,6 +5,7 @@
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>
+#include <unsupported/Eigen/CXX11/Tensor>
 #include <vector>
 
 namespace polyquant {
@@ -61,7 +62,7 @@ public:
    * @return int combined index for the flattened upper triangle of the
    * symmetric matrix
    */
-  template <typename T> T idx2(const T &i, const T &j) {
+  template <typename T> const T idx2(const T &i, const T &j) const {
     return symmetric_matrix_triangular_idx(i, j);
   }
   /**
@@ -76,7 +77,8 @@ public:
    * @return int combined index for the flattened unique elements of the
    * symmetric tensor
    */
-  template <typename T> T idx8(const T &i, const T &j, const T &k, const T &l) {
+  template <typename T>
+  const T idx8(const T &i, const T &j, const T &k, const T &l) const {
     return idx2(idx2(i, j), idx2(k, l));
   }
 
@@ -150,12 +152,6 @@ public:
    */
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> nuclear;
   /**
-   * @brief Polarization potential integral matrix (where the potential was
-   * expanded as a sum of gaussians)
-   *
-   */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> polarization_potential;
-  /**
    * @brief Two electron integral vector
    *
    */
@@ -165,6 +161,26 @@ public:
    *
    */
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orth_X;
+
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      mo_one_body_ints;
+  std::vector<std::vector<std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>>
+      mo_two_body_ints;
+  void calculate_mo_1_body_integrals(
+      std::vector<
+          std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+          &mo_coeff);
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+  transform_mo_2_body_integrals(
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b,
+      int num_part_alpha, int num_part_beta);
+  void calculate_mo_2_body_integrals(
+      std::vector<
+          std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+          &mo_coeffs);
   /**
    * @brief the input parameters
    *

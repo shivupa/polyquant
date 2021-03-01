@@ -1,0 +1,11 @@
+
+ci mixed double slater rules tests
+ci davidson diag tests vs exact
+
+https://stackoverflow.com/questions/29855908/c-unordered-set-of-vectors
+https://stackoverflow.com/questions/1041620/whats-the-most-efficient-way-to-erase-duplicates-and-sort-a-vector
+
+polyquant frozen core
+polyquant allow reading of custom excitation spaces (frozen/frozen virt, ras, gas)
+polyquant allow reading of bitstrings for custom CI
+polyquant allowed occ to excite from, allowed virt to excite to

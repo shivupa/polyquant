@@ -5,7 +5,7 @@ using namespace polyquant;
 void POLYQUANT_EPSCF::form_H_core() {
   auto num_basis = this->input_basis.num_basis;
   this->H_core.resize(this->input_molecule.quantum_particles.size());
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
@@ -34,9 +34,8 @@ double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl,
 void POLYQUANT_EPSCF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_a_idx = 0;
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_b_idx = 0;
-
+  auto quantum_part_a_idx = 0ul;
+  auto quantum_part_b_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
     this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
@@ -218,7 +217,7 @@ void POLYQUANT_EPSCF::form_fock() {
 
 void POLYQUANT_EPSCF::diag_fock() {
   auto num_basis = this->input_basis.num_basis;
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  auto quantum_part_idx = 0ul;
   this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
@@ -256,7 +255,7 @@ void POLYQUANT_EPSCF::diag_fock() {
 
 void POLYQUANT_EPSCF::form_DM() {
   auto num_basis = this->input_basis.num_basis;
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
@@ -279,7 +278,7 @@ void POLYQUANT_EPSCF::form_DM() {
 #pragma omp parallel for
       for (size_t i = 0; i < num_basis; i++) {
         for (size_t j = 0; j < num_basis; j++) {
-          for (int k = 0; k < quantum_part.num_parts_alpha; k++) {
+          for (int k = 0; k < quantum_part.num_parts_beta; k++) {
             this->D[quantum_part_idx][1](i, j) +=
                 this->C[quantum_part_idx][1](i, k) *
                 this->C[quantum_part_idx][1](j, k);
@@ -291,7 +290,7 @@ void POLYQUANT_EPSCF::form_DM() {
   }
 }
 void POLYQUANT_EPSCF::calculate_E_elec() {
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  auto quantum_part_idx = 0ul;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
@@ -336,7 +335,7 @@ void POLYQUANT_EPSCF::check_stop() {
   this->converged = true;
   this->stop = true;
   this->iteration_E_diff.resize(this->input_molecule.quantum_particles.size());
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     std::stringstream buffer;
@@ -438,7 +437,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->diis.resize(this->input_molecule.quantum_particles.size());
   libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> tempdiis(
       5);
-  std::map<std::string, QUANTUM_PARTICLE_SET>::size_type quantum_part_idx = 0;
+  auto quantum_part_idx = 0ul;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
@@ -549,5 +548,76 @@ void POLYQUANT_EPSCF::run() {
   } else {
     this->print_error();
   }
+  Polyquant_cout(this->E_total);
+}
+
+void POLYQUANT_EPSCF::from_file(std::string &filename) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  this->print_params();
+  // calculate integrals we need
+  this->input_integral.calculate_overlap();
+  this->input_integral.symmetric_orthogonalization();
+  this->input_integral.calculate_kinetic();
+  this->input_integral.calculate_nuclear();
+  this->input_integral.calculate_two_electron();
+  // start the SCF process
+  this->form_H_core();
+  this->guess_DM();
+  hdf5::file::File hdf5_file =
+      hdf5::file::open(filename, hdf5::file::AccessFlags::READONLY);
+  auto root_group = hdf5_file.root();
+  Polyquant_cout("Reading coefficients from file : " + filename);
+  if (!root_group.exists("Super_Twist")) {
+    APP_ABORT(
+        "Reading coefficients failed. No Super_Twist group in HDF5 file.");
+  }
+  auto Super_Twist_group = root_group.get_group("Super_Twist");
+
+  auto num_basis = this->input_basis.num_basis;
+  auto idx = 0;
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] :
+       this->input_molecule.quantum_particles) {
+    auto Dataset =
+        Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
+    hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
+    auto Dimensions = Dataspace.current_dimensions();
+    Polyquant_cout("Reading eigenset_" + std::to_string(idx));
+    Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " +
+                   std::to_string(Dimensions[1]) + " for quantum particle " +
+                   std::to_string(quantum_part_idx));
+    std::vector<double> data(Dataspace.size());
+    Dataset.read(data);
+#pragma omp parallel for
+    for (auto i = 0; i < num_basis; i++) {
+      for (auto j = 0; j < num_basis; j++) {
+        this->C[quantum_part_idx][0](j, i) = data[i * num_basis + j];
+      }
+    }
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      Dataset =
+          Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx + 1));
+      Dataspace = Dataset.dataspace();
+      Dimensions = Dataspace.current_dimensions();
+      Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
+      Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " +
+                     std::to_string(Dimensions[1]) + " for quantum particle " +
+                     std::to_string(quantum_part_idx));
+      Dataset.read(data);
+#pragma omp parallel for
+      for (auto i = 0; i < num_basis; i++) {
+        for (auto j = 0; j < num_basis; j++) {
+          this->C[quantum_part_idx][1](j, i) = data[i * num_basis + j];
+        }
+      }
+    }
+    idx += 2;
+    quantum_part_idx++;
+  }
+  this->form_DM();
+  Polyquant_cout("Running a single SCF iteration");
+  this->run_iteration();
+  this->calculate_E_total();
   Polyquant_cout(this->E_total);
 }

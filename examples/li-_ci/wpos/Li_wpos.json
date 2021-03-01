@@ -1,0 +1,52 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["Li"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CI",
+    "basis": 
+        {"Li" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "Li_basis.g94"}}]}
+             
+  },
+  "keywords": {
+    "restricted" : true,
+    "quantum_particles" : [ 
+        { "name" : "positron",
+          "spin" : 0.5,
+          "mass" : 1,
+          "charge" : 1,
+          "num_particles_alpha" : 1,
+          "num_particles_beta" : 0,
+          "particle_multiplicity" : 2,
+          "exchange" : true,
+          "electron_exchange" : false,
+          "restricted" : false
+        }
+    ],
+    "mf_keywords" :{
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true,
+        "hdf5_filename_qmcpack" : "Li_wpos.h5"
+    },
+   "ci_keywords" : {
+       "convergence_E" : 1e-6,
+       "num_states" : 1,
+       "num_subspace_vec" : 15,
+       "excitation_level" : [
+           [1,1,1],
+           [1,1,1]
+           ]
+   },
+   "pure" : true
+      }
+}

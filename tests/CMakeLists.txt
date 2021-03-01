@@ -6,6 +6,7 @@ add_executable(
   unit_tests/molecule/molecule_test.cpp
   unit_tests/basis/basis_test.cpp
   unit_tests/integral/integral_test.cpp
+  unit_tests/ci/ci_test.cpp
   integration_tests/calculation/calculation_test.cpp)
 
 # find the required testing library and link the other required libraries
@@ -28,5 +29,5 @@ target_link_libraries(
   scf)
 
 target_include_directories(main_test PUBLIC include)
-doctest_discover_tests(main_test)
+doctest_discover_tests(main_test ADD_LABELS 1)
 # add_test(main_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/main_test)

@@ -1,6 +1,7 @@
 #ifndef POLYQUANT_CALCULATION_H
 #define POLYQUANT_CALCULATION_H
 #include "basis/basis.hpp"
+#include "ci/epci.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
@@ -41,7 +42,8 @@ public:
    *
    * @param mean field method
    */
-  void run_electronic_mean_field(std::string &mean_field_type);
+  void run_mean_field(std::string &mean_field_type);
+  void run_post_mean_field(std::string &post_mean_field_type);
 
   // void
   // run_excess_electron_plus_electronic_mean_field(std::string
@@ -49,8 +51,10 @@ public:
   // run_excess_positron_plus_electronic_mean_field(std::string
   // &mean_field_type);
 
-  std::string parse_electronic_mean_field();
+  std::string parse_mean_field();
+  std::string parse_post_mean_field();
   void dump_mf_for_qmcpack(std::string &filename);
+  void dump_post_mf_for_qmcpack(std::string &filename);
   /**
    * @brief the input parameters
    *
@@ -82,16 +86,21 @@ public:
   POLYQUANT_EPSCF scf_calc;
 
   /**
+   * @brief the CI calculation
+   *
+   */
+  POLYQUANT_EPCI ci_calc;
+
+  /**
    * @brief Mean-field calculation types that pyci knows about
    *
    */
   const std::unordered_set<std::string> mean_field_methods = {"SCF"};
-
   /**
    * @brief Post mean-field types that pyci knows about
    *
    */
-  const std::unordered_set<std::string> post_mean_field_methods = {"CIPSI"};
+  const std::unordered_set<std::string> post_mean_field_methods = {"CI"};
 };
 } // namespace polyquant
 #endif

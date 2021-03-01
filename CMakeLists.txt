@@ -104,7 +104,7 @@ if(POLYQUANT_DEBUG)
 endif(POLYQUANT_DEBUG)
 
 # if the docs flag is on this will use doxygen to build the docs
-if(POLYQUANT_DOCS)
+if(POLYQUANT_DOC)
   # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html
   # add_subdirectory(docs)
   file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${POLYQUANT_BINARY_DIR})
@@ -120,7 +120,7 @@ if(POLYQUANT_DOCS)
     COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${SPHINX_BUILD}
     COMMENT "Generating documentation with Sphinx")
-endif(POLYQUANT_DOCS)
+endif(POLYQUANT_DOC)
 
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
@@ -131,8 +131,23 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 # FIND CPR find_package(CPR REQUIRED) FIND CURL find_package(CURL REQUIRED) FIND
 # Libint2
 find_package(Libint2 REQUIRED)
+#set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig/")
 # FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+# TODO replace with main spectra branch
+FetchContent_Declare(
+  spectra
+  GIT_REPOSITORY https://github.com/shivupa/spectra.git
+  GIT_TAG origin/cmake_update)
+FetchContent_MakeAvailable(spectra)
+# list(APPEND CMAKE_MODULE_PATH ${spectra_SOURCE_DIR}/cmake)
+
+FetchContent_Declare(
+  cppitertools
+  GIT_REPOSITORY https://github.com/ryanhaining/cppitertools.git
+  GIT_TAG origin/master)
+FetchContent_MakeAvailable(cppitertools)
+
 find_package(OpenMP REQUIRED)
 # find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
 find_package(cxxopts REQUIRED)
@@ -140,7 +155,7 @@ find_package(h5cpp REQUIRED)
 FetchContent_Declare(
   doctest
   GIT_REPOSITORY https://github.com/onqtam/doctest.git
-  GIT_TAG 2.4.3)
+  GIT_TAG origin/dev)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 find_package(MKL REQUIRED)

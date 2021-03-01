@@ -18,29 +18,34 @@
       </slaterdeterminant>
     </determinantset>
     <jastrow name="J2" type="Two-Body" function="Bspline" print="yes">
-      <correlation rcut="20" size="10" speciesA="u" speciesB="u">
-        <coefficients id="uu" type="Array" optimize="yes"> 0.06857019395 -0.0671845572 -0.08226714286 -0.1026237891 -0.1036116414 -0.08999008673 -0.07388892438 -0.05849233573 -0.0300568346 -0.04033493883</coefficients>
+      <correlation rcut="10" size="10" speciesA="u" speciesB="u">
+        <coefficients id="uu" type="Array" optimize="yes"> -0.04394751544 -0.2293588327 -0.2415899982 -0.2327119332 -0.2168766808 -0.2011956875 -0.163311522 -0.1223086648 -0.09496670597 -0.06164684842</coefficients>
       </correlation>
-      <correlation rcut="20" size="10" speciesA="d" speciesB="d">
-        <coefficients id="dd" type="Array" optimize="yes"> 0.07294556389 -0.06809533878 -0.07753713781 -0.1122061314 -0.1132150356 -0.1084712543 -0.09545727399 -0.08740446843 -0.0612409307 -0.0447552857</coefficients>
+      <correlation rcut="10" size="10" speciesA="d" speciesB="d">
+        <coefficients id="dd" type="Array" optimize="yes"> -0.05433334358 -0.1663820678 -0.1957288654 -0.1927191846 -0.1656954393 -0.1402897553 -0.1087492311 -0.08525190179 -0.06264560855 -0.02715766086</coefficients>
       </correlation>
-      <correlation rcut="20" size="10" speciesA="u" speciesB="d">
-        <coefficients id="ud" type="Array" optimize="yes"> 0.589227909 0.4338003783 0.3179570624 0.2361765649 0.1992573461 0.1633092742 0.1226670999 0.09095444624 0.0594264048 0.034650037</coefficients>
+      <correlation rcut="10" size="10" speciesA="u" speciesB="d">
+        <coefficients id="ud" type="Array" optimize="yes"> 0.3818599328 0.2278448327 0.1731601727 0.1403143757 0.1067978042 0.07853800778 0.05104164172 0.02425182222 -0.005777078517 -0.01712793327</coefficients>
       </correlation>
-      <correlation rcut="20" size="10" speciesA="u" speciesB="p">
-          <coefficients id="up" type="Array" optimize="yes"> -0.3810143191 -0.34217203 -0.1718296004 -0.1428930193 -0.09664310137 -0.0688038998 -0.03542267116 -0.007337137396 0.008015463166 0.01899674826</coefficients>
+      <correlation rcut="10" size="10" speciesA="u" speciesB="p">
+          <coefficients id="up" type="Array" optimize="yes"> -0.9478728741 -0.6388482514 -0.4997764353 -0.4353774145 -0.3781198379 -0.316203898 -0.2545560163 -0.1988223394 -0.1399946899 -0.07550352896</coefficients>
       </correlation>
-      <correlation rcut="20" size="10" speciesA="d" speciesB="p">
-          <coefficients id="dp" type="Array" optimize="yes"> -0.3810143191 -0.34217203 -0.1718296004 -0.1428930193 -0.09664310137 -0.0688038998 -0.03542267116 -0.007337137396 0.008015463166 0.01899674826</coefficients>
+      <correlation rcut="10" size="10" speciesA="d" speciesB="p">
+          <coefficients id="dp" type="Array" optimize="yes"> -1.008447388 -0.6491590546 -0.4862987766 -0.4017920282 -0.3246320725 -0.2835029247 -0.2355144189 -0.1813226057 -0.1216071979 -0.08352322729</coefficients>
       </correlation>
   </jastrow>
+  <!--
     <jastrow name="J1" type="One-Body" function="Bspline" source="ion0" print="yes">
-      <correlation rcut="20" size="10" cusp="0" elementType="Li">
-        <coefficients id="eLi" type="Array" optimize="yes"> -0.7571246861 -0.5042247774 -0.5136257716 -0.3980126345 -0.3664147464 -0.2981126892 -0.278642478 -0.249393617 -0.2055847133 -0.1608287953</coefficients>
+      <correlation rcut="10" size="10" cusp="0" speciesA="Li" speciesB="u" spin="yes">
+        <coefficients id="uLi" type="Array" optimize="yes"> -0.7571246861 -0.5042247774 -0.5136257716 -0.3980126345 -0.3664147464 -0.2981126892 -0.278642478 -0.249393617 -0.2055847133 -0.1608287953</coefficients>
       </correlation>
-      <correlation rcut="20" size="10" cusp="0" speciesA="Li" speciesB="p" spin="yes">
+      <correlation rcut="10" size="10" cusp="0" speciesA="Li" speciesB="d" spin="yes">
+        <coefficients id="dLi" type="Array" optimize="yes"> -0.7571246861 -0.5042247774 -0.5136257716 -0.3980126345 -0.3664147464 -0.2981126892 -0.278642478 -0.249393617 -0.2055847133 -0.1608287953</coefficients>
+      </correlation>
+      <correlation rcut="10" size="10" cusp="0" speciesA="Li" speciesB="p" spin="yes">
         <coefficients id="pLi" type="Array" optimize="yes"> -0.7571246861 -0.5042247774 -0.5136257716 -0.3980126345 -0.3664147464 -0.2981126892 -0.278642478 -0.249393617 -0.2055847133 -0.1608287953</coefficients>
       </correlation>
-  </jastrow>
+      </jastrow>
+      -->
   </wavefunction>
 </qmcsystem>

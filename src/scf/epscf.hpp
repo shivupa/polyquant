@@ -38,6 +38,7 @@ public:
   void print_success();
   void print_exceeded_iterations();
   void print_error();
+  void from_file(std::string &filename);
 
   void print_params();
   /**

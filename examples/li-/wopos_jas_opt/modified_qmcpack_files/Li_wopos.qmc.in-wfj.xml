@@ -56,7 +56,6 @@ count and total number of walkers
       <parameter name="minwalkers">0.0001</parameter>
     </qmc>
   </loop>
-  <!--
   <loop max="5">
     <qmc method="linear" move="pbyp" checkpoint="-1">
       <estimator name="LocalEnergy" hdf5="no"/>
@@ -80,5 +79,4 @@ count and total number of walkers
     <parameter name="timestep">0.5</parameter>
     <parameter name="usedrift">no</parameter>
   </qmc>
--->
 </simulation>
