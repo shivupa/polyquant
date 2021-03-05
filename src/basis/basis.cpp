@@ -32,34 +32,70 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
           for (auto center_basis :
                input.input_data["model"]["basis"][classical_part_key]) {
             if (center_basis.contains("library")) {
-              // library basis with atom type specified
-              if (center_basis["library"].contains("atom")) {
-                auto libint_atoms = molecule.to_libint_atom(classical_part_key);
-                for (auto &libint_atom : libint_atoms) {
-                  libint_atom.atomic_number =
-                      atom_symb_to_num(center_basis["library"]["atom"]);
+              try {
+                // library basis with atom type specified
+                if (center_basis["library"].contains("atom")) {
+                  auto libint_atoms =
+                      molecule.to_libint_atom(classical_part_key);
+                  for (auto &libint_atom : libint_atoms) {
+                    libint_atom.atomic_number =
+                        atom_symb_to_num(center_basis["library"]["atom"]);
+                  }
+                  libint2::BasisSet atom_basis = libint2::BasisSet(
+                      center_basis["library"]["type"], libint_atoms, true);
+                  // std::move(atom_basis.begin(), atom_basis.end(),
+                  // std::back_inserter(this->basis));
+                  // this->basis.back().move({{atoms[a].x, atoms[a].y,
+                  // atoms[a].z}});
+                  this->basis.insert(this->basis.end(), atom_basis.begin(),
+                                     atom_basis.end());
+                  this->basis.set_pure(pure);
+                  // std::move(atom_basis.begin(), atom_basis.end(),
+                  //           std::back_inserter(this->basis));
+                } else {
+                  auto libint_atoms =
+                      molecule.to_libint_atom(classical_part_key);
+                  for (auto &libint_atom : libint_atoms) {
+                    libint_atom.atomic_number =
+                        atom_symb_to_num(classical_part_key);
+                  }
+                  libint2::BasisSet atom_basis = libint2::BasisSet(
+                      center_basis["library"]["type"], libint_atoms, true);
+                  this->basis.insert(this->basis.end(), atom_basis.begin(),
+                                     atom_basis.end());
+                  this->basis.set_pure(pure);
                 }
-                libint2::BasisSet atom_basis = libint2::BasisSet(
-                    center_basis["library"]["type"], libint_atoms, true);
-                // std::move(atom_basis.begin(), atom_basis.end(),
-                // std::back_inserter(this->basis));
-                // this->basis.back().move({{atoms[a].x, atoms[a].y,
-                // atoms[a].z}});
-                this->basis.insert(this->basis.end(), atom_basis.begin(),
-                                   atom_basis.end());
-                this->basis.set_pure(pure);
-                // std::move(atom_basis.begin(), atom_basis.end(),
-                //           std::back_inserter(this->basis));
-              } else {
+              } catch (...) {
+                // SHIV
+                Polyquant_cout("Trying to read basis from EMSL");
                 auto libint_atoms = molecule.to_libint_atom(classical_part_key);
-                for (auto &libint_atom : libint_atoms) {
-                  libint_atom.atomic_number =
-                      atom_symb_to_num(classical_part_key);
+                if (center_basis["library"].contains("atom")) {
+                  for (auto &libint_atom : libint_atoms) {
+                    libint_atom.atomic_number =
+                        atom_symb_to_num(center_basis["library"]["atom"]);
+                  }
                 }
-                libint2::BasisSet atom_basis = libint2::BasisSet(
-                    center_basis["library"]["type"], libint_atoms, true);
-                this->basis.insert(this->basis.end(), atom_basis.begin(),
-                                   atom_basis.end());
+                std::string basis_url =
+                    "https://www.basissetexchange.org/api/basis/";
+                basis_url += center_basis["library"]["type"];
+                basis_url += "/format/gaussian94";
+                auto r = cpr::Get(cpr::Url{basis_url});
+                std::string filename = "EMSL_LOADED_BASIS_";
+                filename += classical_part_key;
+                filename += ".g94";
+                Polyquant_dump_basis_to_file(r.text, filename);
+                auto atom_basis =
+                    libint2::BasisSet::read_g94_basis_library(filename);
+                for (auto &libint_atom : libint_atoms) {
+                  // check all elements
+                  std::cout << libint_atom.atomic_number << std::endl;
+                  for (auto s : atom_basis.at(libint_atom.atomic_number)) {
+                    Polyquant_cout("Adding basis");
+                    this->basis.push_back(std::move(s));
+                    this->basis.back().move(
+                        {{libint_atom.x, libint_atom.y, libint_atom.z}});
+                  }
+                }
                 this->basis.set_pure(pure);
               }
             } else if (center_basis.contains("custom")) {
@@ -241,8 +277,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input,
   // Below code queries the metadata. Getting a basis is similar.
   /*
   // retrive metadata about basis sets contained in basis set exchange
-  auto r =
-  cpr::Get(cpr::Url{"https://www.basissetexchange.org/api/metadata"});
+  auto r = cpr::Get(cpr::Url{"https://www.basissetexchange.org/api/metadata"});
   // TODO handle a failure to retrive info
   // for now act like we have successful retrived it
   // parse data

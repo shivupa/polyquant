@@ -15,8 +15,8 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   // Polyquant_dump_vec(this->input_epscf.E_orbitals[0][0], "MO alpha E e");
   // Polyquant_dump_vec(this->input_epscf.E_orbitals[1][0], "MO alpha E p");
   // Polyquant_dump_mat(this->input_integral.mo_one_body_ints[0][0], "MO 1e elec
-  // alpha"); Polyquant_dump_mat(this->input_integral.mo_one_body_ints[1][0], "MO
-  // 1e pos alpha");
+  // alpha"); Polyquant_dump_mat(this->input_integral.mo_one_body_ints[1][0],
+  // "MO 1e pos alpha");
   // Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][0][0][0], "e MO
   // two elec alpha");
   // Polyquant_dump_mat(this->input_integral.mo_two_body_ints[1][0][1][0], "p MO

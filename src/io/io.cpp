@@ -31,6 +31,30 @@ void Polyquant_dump_json(const json &json_obj) {
   std::cout << json_obj.dump(4) << std::endl;
   //}
 }
+
+void Polyquant_dump_basis_to_file(const std::string &contents,
+                                  const std::string &filename) {
+  // int my_rank;
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
+  // if (my_rank == 0) {
+  auto ss = std::stringstream{contents};
+  std::ofstream outfile;
+  outfile.open(filename);
+  outfile << "****" << std::endl;
+  for (std::string line; std::getline(ss, line, '\n');) {
+    std::string stripped_line =
+        line.substr(0, line.find("!", 0)); // remove comments in file
+    bool all_space =
+        std::all_of(stripped_line.begin(), stripped_line.end(), isspace);
+    if (all_space) {
+      continue;
+    } else {
+      outfile << stripped_line << std::endl;
+    }
+  }
+
+  outfile.close();
+}
 // LCOV_EXCL_STOP
 
 void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
