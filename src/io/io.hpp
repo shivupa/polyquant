@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <fstream>
 #include <h5cpp/hdf5.hpp>
@@ -177,6 +178,14 @@ void Polyquant_dump_mat_to_file(
   }
 }
 /**
+ * @brief A helper function to dump a string to file.
+ *
+ * @param mat The dense matrix to write.
+ **/
+void Polyquant_dump_basis_to_file(const std::string &contents,
+                                  const std::string &filename);
+
+/**
  * @brief A hasher for a pair of vectors
  * for more info see https://stackoverflow.com/a/29855973
  *
@@ -219,9 +228,9 @@ public:
   void print_timer_end() {
     // use std::format once supported
     // use std::chrono::days etc once it is used
-    //typedef std::chrono::duration<int, std::ratio<86400>> days;
+    // typedef std::chrono::duration<int, std::ratio<86400>> days;
     auto duration = this->end - this->start;
-    //auto d = std::chrono::duration_cast<days>(duration);
+    // auto d = std::chrono::duration_cast<days>(duration);
     auto d = std::chrono::duration_cast<std::chrono::days>(duration);
     duration -= d;
     auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
