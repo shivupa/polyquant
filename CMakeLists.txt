@@ -152,8 +152,8 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # TODO replace with main spectra branch
 FetchContent_Declare(
   spectra
-  GIT_REPOSITORY https://github.com/shivupa/spectra.git
-  GIT_TAG origin/cmake_update)
+  GIT_REPOSITORY https://github.com/yixuan/spectra.git
+  GIT_TAG origin/master)
 FetchContent_MakeAvailable(spectra)
 # list(APPEND CMAKE_MODULE_PATH ${spectra_SOURCE_DIR}/cmake)
 
