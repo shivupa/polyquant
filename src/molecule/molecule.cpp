@@ -439,8 +439,8 @@ void POLYQUANT_MOLECULE::calculate_E_nuc() {
         for (auto j = 0; j < classical_part_2.second.num_parts; j++) {
           auto Z_i = classical_part_1.second.charge;
           auto Z_j = classical_part_2.second.charge;
-          if(Z_i == 0 || Z_j == 0){
-              continue;
+          if (Z_i == 0 || Z_j == 0) {
+            continue;
           }
           auto center_idx_1 = classical_part_1.second.center_idx[i];
           auto center_idx_2 = classical_part_2.second.center_idx[j];
