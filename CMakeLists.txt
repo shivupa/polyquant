@@ -126,9 +126,21 @@ endif(POLYQUANT_DOC)
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
 # Find all the things FIND PETSC find_package(PETSC REQUIRED) FIND SLEPC
-# find_package(SLEPC REQUIRED) FIND nlohmann_json
-find_package(nlohmann_json 3.2.0 REQUIRED)
-# FIND CPR
+# find_package(SLEPC REQUIRED) FIND nlohmann_json find_package(nlohmann_json
+# 3.2.0 REQUIRED)
+FetchContent_Declare(
+  nlohmann_json
+  GIT_REPOSITORY
+    https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+  GIT_TAG v3.9.1)
+FetchContent_GetProperties(nlohmann_json)
+set(JSON_BuildTests OFF)
+if(NOT nlohmann_json_POPULATED)
+  FetchContent_Populate(nlohmann_json)
+  add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR}
+                   EXCLUDE_FROM_ALL)
+endif()
+# include(${nlohmann_json_BINARY_DIR}/nlohmann_jsonConfig.cmake) FIND CPR
 find_package(CPR REQUIRED)
 # FIND CURL
 find_package(CURL REQUIRED)
