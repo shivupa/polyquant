@@ -48,6 +48,7 @@ set(POLYQUANT_DOC
 set(POLYQUANT_TEST
     1
     CACHE BOOL "Enable/disable testing")
+set(FETCHCONTENT_QUIET on)
 
 option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
 
