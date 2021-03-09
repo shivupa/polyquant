@@ -1,50 +1,37 @@
-# polyquant
+Libint - a library for the evaluation of molecular integrals of many-body operators over Gaussian functions
 
-Polyquant uses C++20. This is required because the CI operations use https://en.cppreference.com/w/cpp/header/bit.
+- master status: [![Build Status](https://travis-ci.org/evaleev/libint.svg?branch=master)](https://travis-ci.org/evaleev/libint)
+- project page: http://libint.valeyev.net/
+- e-mail - libint@valeyev.net
 
-## Dependencies
+See [the wiki](https://github.com/evaleev/libint/wiki) for the installation and usage instructions.
 
-### For a production build
-- [onqtam/doctest](https://github.com/onqtam/doctest)
-   The fastest feature-rich C++11/14/17/20 single-header testing framework for unit tests and TDD 
-   `Polyquant` uses doctest for testing.
-- [nlohmann/json](https://github.com/nlohmann/json)
-   JSON for Modern C++
+Copyright (C) 2004-2020 Edward F. Valeev
 
-   `Polyquant` uses `nlohmann/json` to parse the [MolSSI/QCSchema](https://github.com/MolSSI/QCSchema)
-- [evaleev/libint](https://github.com/evaleev/libint)
-   Libint is a high-performance library for computing Gaussian integrals in quantum mechanics
 
-   `Polyquant` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
-   To convert for qmcpack you need to configure with [-with-cartgauss-ordering=gamess](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
-- [ess-dmsc/h5cpp](https://github.com/ess-dmsc/h5cpp)
-   C++ wrapper for the HDF5 C-library 
+# Configured for PolyQuant
 
-   `Polyquant` uses `ess-dmsc/h5cpp` to dump HDF5 files for use with QMCPACK.
-### For a debug build
-- [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
-   `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
+This version has been configured for PolyQuant
+```
+./configure \
+    --enable-eri=1 \
+    --enable-eri2=1 \
+    --enable-eri3=1 \
+    --enable-fma=$FMA \
+    --with-max-am=5 \
+    --with-eri-max-am=5,4 \
+    --with-eri2-max-am=7,6 \
+    --with-eri3-max-am=7,6 \
+    --with-opt-am=3 \
+    --with-cartgauss-ordering=gamess
+```
 
-### For documentation:
-`Polyquant` uses a combination of libraries to generate documentations from comments included in the source:
-- [doxygen](http://www.doxygen.nl/)
-- [breathe](https://github.com/michaeljones/breathe)
-- [exhale](https://github.com/svenevs/exhale)
-- [sphinx](http://www.sphinx-doc.org/en/master/)
-- [m2r](https://github.com/miyakogi/m2r)
-
-### For formatting the source
-- [clang-format](https://clang.llvm.org/)
-   
-   `Polyquant` uses `clang-format` to format all of the `hpp` and `cpp` files
-- [cmake-format](https://github.com/cheshirekow/cmake_format)
-
-   `Polyquant` uses `cmake-format` to format all of the `CMakeLists.txt`
-
-### To install dependencies on Arch:
-
-```bash
-pacman -Syu clang
-yay -Syu doctest nlohmann-json cpr-git libint2 cmake-format include-what-you-use doxygen
-pip install sphinx sphinx-rtd-theme breathe exhale m2r --user
+Build it like
+```
+mkdir -p build
+cd build
+cmake .. -Denable-fortran=ON -DLIBINT2_REALTYPE=double -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON -G Ninja
+cmake --build .
+cmake --build . --target check
+cmake --build . --target install
 ```

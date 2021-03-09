@@ -1,0 +1,26 @@
+                     CITING RESULTS PRODUCED WITH LIBINT
+
+If you publish results using LIBINT, please cite it using:
+
+An unmodified standard release:
+
+Libint: A library for the evaluation of molecular integrals of many-body operators over Gaussian functions, Version X.Y.Z
+Edward F. Valeev, http://libint.valeyev.net/ .
+
+A modified release:
+
+Libint: A library for the evaluation of molecular integrals of many-body operators over Gaussian functions, Version X.Y.Z
+Edward F. Valeev, http://libint.valeyev.net/ . Modified by An Author, institution, location, year.
+
+The literature citation for the present version in bibtex format is:
+
+@Misc{Libint2,
+  author = "E.~F.~Valeev",
+  title = "Libint: A library for the evaluation of molecular integrals of many-body operators over Gaussian functions",
+  howpublished = "http://libint.valeyev.net/",
+  note = "version 2.7.0-beta.6",
+  year =         2020
+}
+
+Also, please include the scientific citations for the methods and basis
+sets you use.
