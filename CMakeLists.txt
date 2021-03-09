@@ -126,6 +126,8 @@ endif(POLYQUANT_DOC)
 # set include paths
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 # Find all the things FIND PETSC find_package(PETSC REQUIRED) FIND SLEPC
 # find_package(SLEPC REQUIRED) FIND nlohmann_json find_package(nlohmann_json
 # 3.2.0 REQUIRED)
@@ -142,7 +144,14 @@ if(NOT nlohmann_json_POPULATED)
                    EXCLUDE_FROM_ALL)
 endif()
 # include(${nlohmann_json_BINARY_DIR}/nlohmann_jsonConfig.cmake) FIND CPR
-find_package(CPR REQUIRED)
+# find_package(CPR REQUIRED)
+FetchContent_Declare(
+  CPR
+  GIT_REPOSITORY https://github.com/whoshuu/cpr.git
+  GIT_TAG 1.5.2)
+set(BUILD_CPR_TESTS OFF)
+set(BUILD_CPR_TESTS_SSL OFF)
+FetchContent_MakeAvailable(CPR)
 # FIND CURL
 find_package(CURL REQUIRED)
 # FIND Libint2
