@@ -147,18 +147,12 @@ FetchContent_Declare(
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(spectra)
 
-set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME})
-set(POLYQUANT_GIT_PASSWORD $ENV{GIT_PASSWORD})
-FetchContent_Declare(
-  libint2
-  GIT_REPOSITORY https://github.com/shivupa/polyquant.git
-  GIT_TAG origin/libint
-  HTTP_USERNAME ${POLYQUANT_GIT_USERNAME}
-  HTTP_PASSWORD ${POLYQUANT_GIT_PASSWORD})
-set(enable-fortran ON)
-set(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS ON)
-set(LIBINT2_REALTYPE double)
-FetchContent_MakeAvailable(libint2)
+set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME}) set(POLYQUANT_GIT_PASSWORD
+$ENV{GIT_PASSWORD}) FetchContent_Declare( libint2 GIT_REPOSITORY
+https://github.com/shivupa/polyquant.git GIT_TAG origin/libint HTTP_USERNAME
+${POLYQUANT_GIT_USERNAME} HTTP_PASSWORD ${POLYQUANT_GIT_PASSWORD})
+set(enable-fortran ON) set(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS ON)
+set(LIBINT2_REALTYPE double) FetchContent_MakeAvailable(libint2)
 
 FetchContent_Declare(
   cppitertools
@@ -189,7 +183,7 @@ FetchContent_Declare(
   GIT_TAG origin/optional_docs)
 FetchContent_MakeAvailable(h5cpp)
 
-find_package(h5cpp REQUIRED)
+
 FetchContent_Declare(
   doctest
   GIT_REPOSITORY https://github.com/onqtam/doctest.git
