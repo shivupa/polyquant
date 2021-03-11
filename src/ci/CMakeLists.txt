@@ -11,9 +11,7 @@ target_link_libraries(
   OpenMP::OpenMP_CXX
   cppitertools::cppitertools
   Spectra)
-if(Libint2_FOUND)
-  target_link_libraries(ci Libint2::cxx)
-endif(Libint2_FOUND)
+target_link_libraries(ci Libint2::cxx)
 if(POLYQUANT_CODE_COVERAGE)
   target_link_libraries(ci coverage_config)
 endif(POLYQUANT_CODE_COVERAGE)
