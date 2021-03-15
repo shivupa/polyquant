@@ -48,7 +48,7 @@ set(POLYQUANT_DOC
 set(POLYQUANT_TEST
     1
     CACHE BOOL "Enable/disable testing")
-set(FETCHCONTENT_QUIET on)
+set(FETCHCONTENT_QUIET ON)
 
 option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
 
@@ -101,7 +101,7 @@ if(POLYQUANT_DEBUG)
   endif()
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
-  set(CMAKE_VERBOSE_MAKEFILE on)
+  set(CMAKE_VERBOSE_MAKEFILE ON)
 endif(POLYQUANT_DEBUG)
 
 # if the docs flag is on this will use doxygen to build the docs
@@ -128,6 +128,8 @@ include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
+# Clean these up and find libraries if the user doesn't want to use the
+
 # Find all the things FIND PETSC find_package(PETSC REQUIRED) FIND SLEPC
 # find_package(SLEPC REQUIRED) FIND nlohmann_json find_package(nlohmann_json
 # 3.2.0 REQUIRED)
@@ -152,20 +154,35 @@ FetchContent_Declare(
 set(BUILD_CPR_TESTS OFF)
 set(BUILD_CPR_TESTS_SSL OFF)
 FetchContent_MakeAvailable(CPR)
-# FIND CURL
-find_package(CURL REQUIRED)
-# FIND Libint2
-find_package(Libint2 REQUIRED)
-# set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig/")
-# FIND Eigen
+# FIND CURL find_package(CURL REQUIRED) FIND Libint2 find_package(Libint2
+# REQUIRED) set(ENV{PKG_CONFIG_PATH}
+# "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig/") FIND Eigen
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-# TODO replace with main spectra branch
+find_package(OpenMP REQUIRED)
+find_package(MKL REQUIRED)
+# FetchContent_Declare( Eigen GIT_REPOSITORY
+# https://gitlab.com/libeigen/eigen.git GIT_TAG master GIT_SHALLOW TRUE
+# GIT_PROGRESS TRUE) set(EIGEN_BUILD_DOC OFF) set(BUILD_TESTING OFF)
+# set(EIGEN_BUILD_PKGCONFIG OFF) FetchContent_MakeAvailable(Eigen) TODO replace
+# with main spectra branch
 FetchContent_Declare(
   spectra
   GIT_REPOSITORY https://github.com/yixuan/spectra.git
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(spectra)
-# list(APPEND CMAKE_MODULE_PATH ${spectra_SOURCE_DIR}/cmake)
+
+set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME})
+set(POLYQUANT_GIT_PASSWORD $ENV{GIT_PASSWORD})
+FetchContent_Declare(
+  libint2
+  GIT_REPOSITORY https://github.com/shivupa/polyquant.git
+  GIT_TAG origin/libint
+  HTTP_USERNAME ${POLYQUANT_GIT_USERNAME}
+  HTTP_PASSWORD ${POLYQUANT_GIT_PASSWORD})
+set(enable-fortran ON)
+set(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS ON)
+set(LIBINT2_REALTYPE double)
+FetchContent_MakeAvailable(libint2)
 
 FetchContent_Declare(
   cppitertools
@@ -173,17 +190,36 @@ FetchContent_Declare(
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(cppitertools)
 
-find_package(OpenMP REQUIRED)
-# find_package(blaspp REQUIRED) find_package(lapackpp REQUIRED) FIND cxxopts
-find_package(cxxopts REQUIRED)
-find_package(h5cpp REQUIRED)
+FetchContent_Declare(
+  cxxopts
+  GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+  GIT_TAG origin/master)
+FetchContent_MakeAvailable(cxxopts)
+
+set(CONAN
+    "DISABLE"
+    CACHE
+      STRING
+      "conan options AUTO (conan must be in path), MANUAL (expects conanbuildinfo.c make in build directory) or DISABLE"
+)
+set(DISABLE_TESTS
+    True
+    CACHE BOOL "Disable building unit tests")
+set(BUILD_DOCS
+    False
+    CACHE BOOL "Build documentation")
+FetchContent_Declare(
+  h5cpp
+  GIT_REPOSITORY https://github.com/shivupa/h5cpp
+  GIT_TAG origin/optional_docs)
+FetchContent_MakeAvailable(h5cpp)
+
 FetchContent_Declare(
   doctest
   GIT_REPOSITORY https://github.com/onqtam/doctest.git
   GIT_TAG origin/dev)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
-find_package(MKL REQUIRED)
 
 # FetchContent_Declare(HighFive GIT_REPOSITORY
 # https://github.com/BlueBrain/HighFive.git) set(HIGHFIVE_USE_BOOST OFF)
