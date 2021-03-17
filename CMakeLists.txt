@@ -1,20 +1,7 @@
 # Set a requirement on the cmake version
-cmake_minimum_required(VERSION 3.6.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14.0 FATAL_ERROR)
 
-# Macro
 include(FetchContent)
-# FetchContent_MakeAvailable is only availible in CMake 3.14+ This macro mimics
-# the behavior
-if(${CMAKE_VERSION} VERSION_LESS 3.14)
-  macro(FetchContent_MakeAvailable NAME)
-    FetchContent_GetProperties(${NAME})
-    if(NOT ${NAME}_POPULATED)
-      FetchContent_Populate(${NAME})
-      add_subdirectory(${${NAME}_SOURCE_DIR} ${${NAME}_BINARY_DIR})
-    endif()
-  endmacro()
-endif()
-
 # ##############################################################################
 # Set up the project and version info
 project(POLYQUANT)
@@ -130,9 +117,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 # Clean these up and find libraries if the user doesn't want to use the
 
-# Find all the things FIND PETSC find_package(PETSC REQUIRED) FIND SLEPC
-# find_package(SLEPC REQUIRED) FIND nlohmann_json find_package(nlohmann_json
-# 3.2.0 REQUIRED)
 FetchContent_Declare(
   nlohmann_json
   GIT_REPOSITORY
@@ -145,8 +129,6 @@ if(NOT nlohmann_json_POPULATED)
   add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR}
                    EXCLUDE_FROM_ALL)
 endif()
-# include(${nlohmann_json_BINARY_DIR}/nlohmann_jsonConfig.cmake) FIND CPR
-# find_package(CPR REQUIRED)
 FetchContent_Declare(
   CPR
   GIT_REPOSITORY https://github.com/whoshuu/cpr.git
@@ -154,17 +136,11 @@ FetchContent_Declare(
 set(BUILD_CPR_TESTS OFF)
 set(BUILD_CPR_TESTS_SSL OFF)
 FetchContent_MakeAvailable(CPR)
-# FIND CURL find_package(CURL REQUIRED) FIND Libint2 find_package(Libint2
-# REQUIRED) set(ENV{PKG_CONFIG_PATH}
-# "$ENV{PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig/") FIND Eigen
+
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(OpenMP REQUIRED)
 find_package(MKL REQUIRED)
-# FetchContent_Declare( Eigen GIT_REPOSITORY
-# https://gitlab.com/libeigen/eigen.git GIT_TAG master GIT_SHALLOW TRUE
-# GIT_PROGRESS TRUE) set(EIGEN_BUILD_DOC OFF) set(BUILD_TESTING OFF)
-# set(EIGEN_BUILD_PKGCONFIG OFF) FetchContent_MakeAvailable(Eigen) TODO replace
-# with main spectra branch
+
 FetchContent_Declare(
   spectra
   GIT_REPOSITORY https://github.com/yixuan/spectra.git
@@ -195,7 +171,6 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(cxxopts)
-
 set(CONAN
     "DISABLE"
     CACHE
@@ -220,25 +195,6 @@ FetchContent_Declare(
   GIT_TAG origin/dev)
 FetchContent_MakeAvailable(doctest)
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
-
-# FetchContent_Declare(HighFive GIT_REPOSITORY
-# https://github.com/BlueBrain/HighFive.git) set(HIGHFIVE_USE_BOOST OFF)
-# set(HIGHFIVE_USE_EIGEN ON) set(HIGHFIVE_USE_XTENSOR OFF)
-# set(HIGHFIVE_USE_OPENCV OFF) set(HIGHFIVE_UNIT_TESTS OFF)
-# set(HIGHFIVE_EXAMPLES OFF) set(HIGHFIVE_PARALLEL_HDF5 OFF)
-# set(HIGHFIVE_BUILD_DOCS OFF) FetchContent_MakeAvailable(HighFive)
-# include(${highfive_BINARY_DIR}/HighFiveConfig.cmake)
-#
-# FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git)
-# FetchContent_MakeAvailable(fmt)
-# include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
-# FetchContent_Declare(h5cpp GIT_REPOSITORY
-# https://github.com/steven-varga/h5cpp.git) FetchContent_MakeAvailable(h5cpp)
-
-# FIND PythonLibs find_package(PythonLibs) if(PythonLibs_FOUND)
-# include_directories(${PYTHON_INCLUDE_DIRS}) target_link_libraries(polyquant
-# ${PYTHON_LIBRARIES}) endif(PythonLibs_FOUND) Done finding Done finding all the
-# things
 
 # this will do stuff in the src/CMakeLists.txt
 add_subdirectory(src)

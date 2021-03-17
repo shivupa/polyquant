@@ -10,9 +10,7 @@ add_executable(
   integration_tests/calculation/calculation_test.cpp)
 
 # find the required testing library and link the other required libraries
-if(Libint2_FOUND)
-  target_link_libraries(main_test Libint2::cxx)
-endif(Libint2_FOUND)
+target_link_libraries(main_test Libint2::cxx)
 if(Eigen3_FOUND)
   include_directories(${Eigen3_INC})
   target_link_libraries(main_test Eigen3::Eigen)
