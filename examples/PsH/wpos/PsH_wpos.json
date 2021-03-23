@@ -9,14 +9,14 @@
   },
   "driver": "energy",
   "model": {
-    "method": "CI",
+    "method": "SCF",
     "basis": 
         {"H" : [{ "custom" : 
             {"type" : "file",
              "filename" : "positron_basis.g94"}}]}
   },
   "keywords": {
-    "restricted" : true,
+    "restricted" : false,
     "dump_for_qmcpack" : true,
     "hdf5_filename_qmcpack" : "H_wpos.h5",
     "quantum_particles" : [ 

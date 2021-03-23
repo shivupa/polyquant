@@ -58,54 +58,44 @@ void POLYQUANT_EPSCF::form_fock() {
     //      "Computing on " + std::to_string(nthreads) + " threads.";
     //  Polyquant_cout(message);
     //}
-    for (size_t i = 0, ijkl_idx = 0; i < num_basis; i++) {
-      for (size_t j = 0; j < num_basis; j++) {
-        for (size_t k = 0; k < num_basis; k++) {
-          for (size_t l = 0; l < num_basis; l++) {
-
-            // if ((ijkl_idx++) % nthreads != thread_id) {
-            //  Polyquant_cout(
-            //      "ijkl_idx: " + std::to_string(ijkl_idx) +
-            //      " thread_id: " + std::to_string(thread_id) +
-            //      " ijkl_idx%nthreads: " + std::to_string(ijkl_idx %
-            //      nthreads));
-            //  continue;
-            //}
-
-            double eri_ijkl = this->input_integral.twoelec(
-                this->input_integral.idx8(i, j, k, l));
-            double eri_ikjl = this->input_integral.twoelec(
-                this->input_integral.idx8(i, k, j, l));
-            quantum_part_a_idx = 0;
-            for (auto const &[quantum_part_a_key, quantum_part_a] :
-                 this->input_molecule.quantum_particles) {
-              // Normal Fock Matrix elements
-              double Da_kl = this->D[quantum_part_a_idx][0](k, l);
-              double qa = quantum_part_a.charge;
-              bool exchange = quantum_part_a.exchange;
-              if (quantum_part_a.num_parts == 1) {
-                this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                    Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qa, exchange);
-              } else if (quantum_part_a.num_parts > 1 &&
-                         quantum_part_a.restricted == false) {
-                double Db_kl = this->D[quantum_part_a_idx][1](k, l);
-                this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                    Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-                this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
-                    Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-              } else {
-                this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                    Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-              }
-              // Interactions between particle types Fock Matrix elements
-              if (!independent_converged) {
-                quantum_part_a_idx++;
-                continue;
-              }
-              quantum_part_b_idx = 0;
-              for (auto const &[quantum_part_b_key, quantum_part_b] :
-                   this->input_molecule.quantum_particles) {
-                if (quantum_part_a_idx != quantum_part_b_idx) {
+    quantum_part_a_idx = 0;
+    for (auto const &[quantum_part_a_key, quantum_part_a] :
+         this->input_molecule.quantum_particles) {
+      quantum_part_b_idx = 0;
+      for (auto const &[quantum_part_b_key, quantum_part_b] :
+           this->input_molecule.quantum_particles) {
+        for (size_t i = 0; i < num_basis; i++) {
+          for (size_t j = 0; j < num_basis; j++) {
+            double matrix_elem_alpha = 0.0;
+            double matrix_elem_beta = 0.0;
+# pragma omp parallel reduction(+:matrix_elem_alpha) reduction(+:matrix_elem_beta)
+            for (size_t k = 0; k < num_basis; k++) {
+              for (size_t l = 0; l < num_basis; l++) {
+                double eri_ijkl = this->input_integral.twoelec(
+                    this->input_integral.idx8(i, j, k, l));
+                double eri_ikjl = this->input_integral.twoelec(
+                    this->input_integral.idx8(i, k, j, l));
+                // Normal Fock Matrix elements
+                double Da_kl = this->D[quantum_part_a_idx][0](k, l);
+                double qa = quantum_part_a.charge;
+                bool exchange = quantum_part_a.exchange;
+                if (quantum_part_a.num_parts == 1) {
+                  matrix_elem_alpha += form_fock_elem(
+                      Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qa, exchange);
+                } else if (quantum_part_a.num_parts > 1 &&
+                           quantum_part_a.restricted == false) {
+                  double Db_kl = this->D[quantum_part_a_idx][1](k, l);
+                  matrix_elem_alpha += form_fock_elem(
+                      Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+                  matrix_elem_beta += form_fock_elem(
+                      Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+                } else {
+                  matrix_elem_alpha += form_fock_elem(
+                      Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+                }
+                // Interactions between particle types Fock Matrix elements
+                if (independent_converged &&
+                    quantum_part_a_idx != quantum_part_b_idx) {
                   // todo add exchange with electrons if desired?
                   double elem = 0.0;
                   double Da_kl = this->D[quantum_part_b_idx][0](k, l);
@@ -121,19 +111,24 @@ void POLYQUANT_EPSCF::form_fock() {
                     elem = form_fock_elem(Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa,
                                           qb, false);
                   }
-                  this->F[quantum_part_a_idx][0](i, j) += elem;
+                  matrix_elem_alpha += elem;
                   if (quantum_part_a.num_parts > 1 &&
                       quantum_part_a.restricted == false) {
-                    this->F[quantum_part_a_idx][1](i, j) += elem;
+                    matrix_elem_beta += elem;
                   }
                 }
-                quantum_part_b_idx++;
               }
-              quantum_part_a_idx++;
+            }
+            this->F[quantum_part_a_idx][0](i, j) += matrix_elem_alpha;
+            if (quantum_part_a.num_parts > 1 &&
+                quantum_part_a.restricted == false) {
+              this->F[quantum_part_a_idx][1](i, j) += matrix_elem_beta;
             }
           }
         }
+        quantum_part_b_idx++;
       }
+      quantum_part_a_idx++;
     }
   }
   // compute energy with non-extrapolated Fock matrix
