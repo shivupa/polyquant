@@ -143,8 +143,8 @@ find_package(MKL REQUIRED)
 
 FetchContent_Declare(
   spectra
-  GIT_REPOSITORY https://github.com/yixuan/spectra.git
-  GIT_TAG origin/master)
+  GIT_REPOSITORY https://github.com/shivupa/spectra.git
+  GIT_TAG origin/Davidsonspacesize)
 FetchContent_MakeAvailable(spectra)
 
 set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME})

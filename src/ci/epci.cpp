@@ -145,8 +145,10 @@ void POLYQUANT_EPCI::run() {
   */
 
   // Eigen::Index num_of_eigenvalues = 5;
+  Eigen::Index initialsubspacevec = this->num_subspace_vec;
+  // todo Eigen::Index maxsubspace = this->iteration_max;
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(
-      this->detset, this->num_states); // Create Solver
+      this->detset, this->num_states, initialsubspacevec); // Create Solver
   Eigen::Index maxit = this->iteration_max;
   int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit,
                              this->convergence_E);
