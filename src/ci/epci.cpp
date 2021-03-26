@@ -147,6 +147,8 @@ void POLYQUANT_EPCI::run() {
   // Eigen::Index num_of_eigenvalues = 5;
   Eigen::Index initialsubspacevec = this->num_subspace_vec;
   Eigen::Index maxsubspacevec = 10*this->num_states;
+  Polyquant_cout("Initial subspace");
+  Polyquant_cout(initialsubspacevec);
   // todo Eigen::Index maxsubspace = this->iteration_max;
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(
       this->detset, this->num_states, initialsubspacevec, maxsubspacevec); // Create Solver
