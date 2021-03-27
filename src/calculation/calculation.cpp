@@ -21,6 +21,12 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   Polyquant_cout("SETTING UP INTEGRAL");
   this->input_integral = POLYQUANT_INTEGRAL(
       this->input_params, this->input_basis, this->input_molecule);
+  // parse 2e tolerance
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
+      this->tolerance_2e = this->input_params["keywords"]["tolerance_2e"];
+    }
+  }
 }
 
 void POLYQUANT_CALCULATION::run() {

@@ -673,6 +673,7 @@ void POLYQUANT_INTEGRAL::compute_2body_ints(
     }
     engines.resize(nthreads);
     engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
+    engines[0].set_precision(this->tolerance_2e);
     if (nthreads > 1) {
       if (thread_id == 0) {
         Polyquant_cout("Making more engines for each thread");
