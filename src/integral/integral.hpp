@@ -215,7 +215,6 @@ public:
    */
   POLYQUANT_MOLECULE input_molecule;
 
-private:
   double tolerance_2e = 1e-8;
   /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
   Eigen::Dynamic>> alpha_miller = {
