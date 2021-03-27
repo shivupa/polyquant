@@ -505,7 +505,7 @@ void POLYQUANT_EPSCF::reset_diis() {
     this->diis.clear();
     this->diis.resize(this->input_molecule.quantum_particles.size());
     libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
-        tempdiis(this - diis_start, this->diis_size, this->diis_damping, 1, 1,
+        tempdiis(this->diis_start, this->diis_size, this->diis_damping, 1, 1,
                  this->diis_mixing_fraction);
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] :
