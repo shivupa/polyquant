@@ -267,7 +267,8 @@ class POLYQUANT_INPUT {
 public:
   POLYQUANT_INPUT() = default;
   /**
-   * @brief Construct a new pyci input object using the parse_input function.
+   * @brief Construct a new polyquant input object using the parse_input
+   * function.
    *
    * @param filename the file to parse.
    */

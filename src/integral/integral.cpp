@@ -348,9 +348,8 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
 
 /**
  * @details This follows the HF test in the Libint2 repo. It constructs the
- * integral engine. This all needs to be flipped around so we are using the
- * SLEPc/PETSc get domain and calculating the integrals on each process that we
- * need to. Right now we calculate them all on each rank.
+ * integral engines for each OpenMP rank and splits up the calulation of
+ * integrals.
  */
 void POLYQUANT_INTEGRAL::compute_1body_ints(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
@@ -649,9 +648,8 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
 
 /**
  * @details This follows the HF test in the Libint2 repo. It constructs the
- * integral engine. This all needs to be flipped around so we are using the
- * SLEPc/PETSc get domain and calculating the integrals on each process that
- * we need to. Right now we calculate them all on each rank.
+ * integral engines and splits up the calculation of integrals on each OpenMP
+ * rank.
  */
 void POLYQUANT_INTEGRAL::compute_2body_ints(
     Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec,

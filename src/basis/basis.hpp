@@ -22,7 +22,7 @@ class POLYQUANT_BASIS {
 public:
   POLYQUANT_BASIS() = default;
   /**
-   * @brief Construct a new pyci basis object by calling to load_basis.
+   * @brief Construct a new polyquant basis object by calling to load_basis.
    *
    * @param input the data from the input file.
    * @param molecule the molecule data.

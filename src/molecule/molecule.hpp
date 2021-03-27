@@ -20,8 +20,8 @@ class POLYQUANT_MOLECULE {
 public:
   POLYQUANT_MOLECULE() = default;
   /**
-   * @brief Construct a new pyci molecule object given an input object with a
-   * call to setup_molecule.
+   * @brief Construct a new polyquant molecule object given an input object with
+   * a call to setup_molecule.
    *
    * @param input a POLYQUANT_INPUT instance
    */

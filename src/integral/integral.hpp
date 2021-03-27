@@ -27,7 +27,8 @@ class POLYQUANT_INTEGRAL {
 public:
   POLYQUANT_INTEGRAL() = default;
   /**
-   * @brief Construct a new pyci integral object by calling to setup_integral
+   * @brief Construct a new polyquant integral object by calling to
+   * setup_integral
    *
    * @param input the input parameters
    * @param basis the basis to calculate integrals in

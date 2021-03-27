@@ -20,8 +20,8 @@ class POLYQUANT_CALCULATION {
 public:
   POLYQUANT_CALCULATION() = default;
   /**
-   * @brief Construct a new pyci calculation object using the setup_calculation
-   * function.
+   * @brief Construct a new polyquant calculation object using the
+   * setup_calculation function.
    *
    * @param filename the input file
    */
@@ -92,12 +92,12 @@ public:
   POLYQUANT_EPCI ci_calc;
 
   /**
-   * @brief Mean-field calculation types that pyci knows about
+   * @brief Mean-field calculation types that polyquant knows about
    *
    */
   const std::unordered_set<std::string> mean_field_methods = {"SCF"};
   /**
-   * @brief Post mean-field types that pyci knows about
+   * @brief Post mean-field types that polyquant knows about
    *
    */
   const std::unordered_set<std::string> post_mean_field_methods = {"CI"};
