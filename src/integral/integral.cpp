@@ -28,6 +28,23 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
   }
 }
 
+void POLYQUANT_INTEGRAL::calculate_Schwarz() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  if (this->Schwarz.cols() == 0 && this->Schwarz.rows() == 0) {
+    Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
+    auto num_basis = this->input_basis.num_basis;
+    libint2::initialize();
+    this->Schwarz.resize(num_basis, num_basis);
+    this->Schwarz.fill(0);
+    this->compute_Schwarz(this->Schwarz, this->input_basis.basis,
+                          libint2::Operator::coulomb);
+    // TODO figure out how to write to file
+    Polyquant_dump_mat_to_file(this->Schwarz, "Schwarz.txt");
+    libint2::finalize();
+  }
+}
+
 void POLYQUANT_INTEGRAL::calculate_kinetic() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -338,6 +355,54 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
   }
 }
 
+void POLYQUANT_INTEGRAL::compute_Schwarz(
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+    const libint2::BasisSet &shells, libint2::Operator obtype) {
+  // Following the HF test in the Libint2 repo
+  // construct the overlap integrals engine
+#pragma omp parallel
+  {
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
+
+    std::vector<libint2::Engine> engines;
+    if (thread_id == 0) {
+      std::string message =
+          "Computing on " + std::to_string(nthreads) + " threads.";
+      Polyquant_cout(message);
+    }
+    engines.resize(nthreads);
+    engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
+    if (nthreads > 1) {
+      if (thread_id == 0) {
+        Polyquant_cout("Making more engines for each thread");
+      }
+      for (auto i = 1ul; i < nthreads; i++) {
+        engines[i] = engines[0];
+      }
+    }
+
+    auto shell2bf = shells.shell2bf();
+    for (auto s1 = 0l, s12 = 0l; s1 != shells.size(); ++s1) {
+      auto n1 = shells[s1].size();
+      for (auto s2 = 0; s2 <= s1; ++s2, ++s12) {
+        if (s12 % nthreads != thread_id) {
+          continue;
+        }
+        auto n2 = shells[s2].size();
+        auto n12 = n1 * n2;
+
+        engines[thread_id].compute2<Kernel, BraKet::xx_xx, 0>(
+            shells[s1], shells[s2], shells[s1], shells[s2]);
+
+        Eigen::Map<const Matrix> buf_mat(buf[0], n12, n12);
+        auto norm = buf_mat.lpNorm<Eigen::Infinity>();
+        output_matrix(s1, s2) = std::sqrt(norm);
+        output_matrix(s2, s1) = std::sqrt(norm);
+      }
+    }
+  }
+}
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
                                         const POLYQUANT_BASIS &basis,
                                         const POLYQUANT_MOLECULE &molecule) {
@@ -396,32 +461,13 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
     for (auto s1 = 0l; s1 < shells.size(); ++s1) {
       auto bf1 = shell2bf[s1]; // first basis function in this shell
       auto n1 = shells[s1].size();
-      // auto s1_offset = s1 * (s1 + 1) / 2;
       for (auto s2 = s1; s2 < shells.size(); ++s2) {
         auto bf2 = shell2bf[s2];
         auto n2 = shells[s2].size();
         auto s12 = s1 + s2; // s1_offset + s2;
-        // Polyquant_cout("s12: " + std::to_string(s12));
-        // Polyquant_cout(     " thread_id: " + std::to_string(thread_id));
-        // Polyquant_cout(" s12%nthreads: " + std::to_string(s12 % nthreads));
-        // Polyquant_cout(" s1: " + std::to_string(s1));
-        // Polyquant_cout(" s2: " + std::to_string(s2));
-        // Polyquant_cout("s12: " + std::to_string(s12) +
-        //               " thread_id: " + std::to_string(thread_id) +
-        //               " s12%nthreads: " + std::to_string(s12 % nthreads) +
-        //               " s1: " + std::to_string(s1) +
-        //               " s2: " + std::to_string(s2));
         if (s12 % nthreads != thread_id) {
           continue;
         }
-        // std::string message = "OK on " + std::to_string(thread_id);
-        // Polyquant_cout(message);
-        // Polyquant_cout(engines.size());
-        // Polyquant_cout(shells[s1]);
-        // Polyquant_cout(shells[s2]);
-
-        // Todo use symmetry
-        // compute shell pair
         engines[thread_id].compute(shells[s1], shells[s2]);
         // Polyquant_cout(message);
         const auto *buf_12 = buf[0];
@@ -429,23 +475,15 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(
         if (buf_12 == nullptr) {
           continue; // if all integrals screened out, skip to next pair
         }
-        // omp_set_lock(&writelock);
         for (size_t f1 = 0, f12 = 0; f1 != n1; ++f1) {
           for (size_t f2 = 0; f2 != n2; ++f2, ++f12) {
             output_matrix(bf1 + f1, bf2 + f2) = buf_12[f12];
             output_matrix(bf2 + f2, bf1 + f1) = buf_12[f12];
           }
         }
-        // omp_unset_lock(&writelock);
       }
     }
   }
-
-  // omp_destroy_lock(&writelock);
-  // auto computed_shell = xt::view(output_matrix, xt::range(bf1, bf1 + n1),
-  //                                xt::range(bf2, bf2 + n2));
-  // std::vector<std::size_t> shape = {n1, n2};
-  // computed_shell = xt::adapt(&buf, n1 + n2, xt::acquire_ownership(), shape);
 }
 
 // double POLYQUANT_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
@@ -662,10 +700,6 @@ void POLYQUANT_INTEGRAL::compute_2body_ints(
     auto thread_id = omp_get_thread_num();
 
     std::vector<libint2::Engine> engines;
-    // This also needs to be flipped around so we are using
-    // the SLEPc/PETSc get domain and calculating the integrals
-    // on each process that we need to. This is harder cause
-    // we have to go from an idx8 to the ijkl separated.
     if (thread_id == 0) {
       std::string message =
           "Computing on " + std::to_string(nthreads) + " threads.";
@@ -703,12 +737,6 @@ void POLYQUANT_INTEGRAL::compute_2body_ints(
           for (auto s4 = 0l; s4 <= (s1 == s3 ? s2 : s3); ++s4) {
             auto bf4_first = shell2bf[s4];
             auto n4 = shells[s4].size();
-            // Polyquant_cout(
-            //     "s1234: " + std::to_string(s1234) +
-            //     " thread_id: " + std::to_string(thread_id) +
-            //     " s1234%nthreads: " + std::to_string(s1234 % nthreads) +
-            //     " s1: " + std::to_string(s1) + " s2: " + std::to_string(s2) +
-            //     " s3: " + std::to_string(s3) + " s4: " + std::to_string(s4));
             if ((s1234++) % nthreads != thread_id)
               continue;
             // compute shell pair
@@ -731,20 +759,6 @@ void POLYQUANT_INTEGRAL::compute_2body_ints(
                 }
               }
             }
-            // std::vector<PetscInt> insert_idx(n1 + n2 + n3 + n4);
-            // for (auto i : Petsc_bf1) {
-            //   for (auto j : Petsc_bf2) {
-            //     for (auto k : Petsc_bf3) {
-            //       for (auto l : Petsc_bf4) {
-            //         insert_idx.push_back(this->idx8(i, j, k, l));
-            //       }
-            //     }
-            //   }
-            // }
-            // std::cout << insert_idx.size() << std::endl;
-
-            // VecSetValues(output_vec, insert_idx.size(), insert_idx.data(),
-            // buf[0], INSERT_VALUES);
           }
         }
       }

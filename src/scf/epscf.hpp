@@ -30,6 +30,7 @@ public:
   void calculate_E_elec() override;
   void calculate_E_total() override;
   void check_stop() override;
+  void reset_diis();
   void run_iteration() override;
   void guess_DM() override;
   void run() override;
@@ -128,6 +129,19 @@ public:
    */
   bool converged = false;
   bool independent_converged = false;
+
+  bool diis_extrapolation = true;
+  int diis_start = 1;
+  double diis_damping = 1.0;
+  double diis_mixing_fraction = 0.0;
+  int diis_size = 5;
+  bool incremental_fock = true;
+  std::vector<std::vector<bool>> incremental_fock_reset;
+  std::vector<std::vector<double>> incremental_fock_reset_threshold;
+  std::vector<std::vector<int>> incremental_fock_reset_iteration;
+  int incremental_fock_reset_freq = 8;
+  int incremental_fock_initial_onset_thresh = 1e-5;
+
   /**
    * @brief Exceeded iterations?
    *

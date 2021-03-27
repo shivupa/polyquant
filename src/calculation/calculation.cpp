@@ -248,6 +248,55 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
                 .input_data["keywords"]["mf_keywords"]["iteration_max"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_extrapolation")) {
+        scf_calc.diis_extrapolation =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_extrapolation"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_start")) {
+        scf_calc.diis_start =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_start"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_damping")) {
+        scf_calc.diis_damping =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_damping"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_mixing_fraction")) {
+        scf_calc.diis_mixing_fraction =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_mixing_fraction"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_size")) {
+        scf_calc.diis_size =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_size"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "incremental_fock")) {
+        scf_calc.incremental_fock =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["incremental_fock"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "incremental_fock_reset_freq")) {
+        scf_calc.incremental_fock_reset_freq =
+            this->input_params.input_data["keywords"]["mf_keywords"]
+                                         ["incremental_fock_reset_freq"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "incremental_fock_initial_onset_thresh")) {
+        scf_calc.incremental_fock_initial_onset_thresh =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]
+                           ["incremental_fock_initial_onset_thresh"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "from_file")) {
         if (this->input_params
                 .input_data["keywords"]["mf_keywords"]["from_file"]) {

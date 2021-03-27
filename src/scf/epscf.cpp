@@ -38,26 +38,34 @@ void POLYQUANT_EPSCF::form_fock() {
   auto quantum_part_b_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
-    this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
-    this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
+    if (!this->incremental_fock ||
+        incremental_fock_reset[quantum_part_a_idx][0]) {
+      this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
+      this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
+      if (this->incremental_fock) {
+        this->incremental_fock_reset_threshold[quantum_part_a_idx][0] =
+            this->iteration_rms_error[quantum_part_a_idx][0];
+        this->incremental_fock_reset_iteration[quantum_part_a_idx][0] =
+            this->iteration_num;
+      }
+    }
     if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-      this->F[quantum_part_a_idx][1].setZero(num_basis, num_basis);
-      this->F[quantum_part_a_idx][1] += this->H_core[quantum_part_a_idx];
+      if (!this->incremental_fock ||
+          incremental_fock_reset[quantum_part_a_idx][1]) {
+        this->F[quantum_part_a_idx][1].setZero(num_basis, num_basis);
+        this->F[quantum_part_a_idx][1] += this->H_core[quantum_part_a_idx];
+        if (this->incremental_fock) {
+          this->incremental_fock_reset_threshold[quantum_part_a_idx][1] =
+              this->iteration_rms_error[quantum_part_a_idx][0];
+          this->incremental_fock_reset_iteration[quantum_part_a_idx][1] =
+              this->iteration_num;
+        }
+      }
     }
     quantum_part_a_idx++;
   }
-  Polyquant_cout("form fock");
-  // pragma omp parallel for on the main loop wont work
-  // pragma omp parallel doesnt work without work
-  // for now fock build in serial
+  // Polyquant_cout("forming fock");
   {
-    // int nthreads = omp_get_num_threads();
-    // auto thread_id = omp_get_thread_num();
-    // if (thread_id == 0) {
-    //  std::string message =
-    //      "Computing on " + std::to_string(nthreads) + " threads.";
-    //  Polyquant_cout(message);
-    //}
 #pragma omp parallel for
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
@@ -76,7 +84,13 @@ void POLYQUANT_EPSCF::form_fock() {
               std::advance(quantum_part_a_it, quantum_part_a_idx);
               auto quantum_part_a = quantum_part_a_it->second;
               // Normal Fock Matrix elements
-              double Da_kl = this->D[quantum_part_a_idx][0](k, l);
+              if (this->incremental_fock &&
+                  !incremental_fock_reset[quantum_part_a_idx][0]) {
+                double Da_kl = this->D[quantum_part_a_idx][0](k, l) -
+                               this->D_last[quantum_part_a_idx][0](k, l);
+              } else {
+                double Da_kl = this->D[quantum_part_a_idx][0](k, l);
+              }
               double qa = quantum_part_a.charge;
               bool exchange = quantum_part_a.exchange;
               if (quantum_part_a.num_parts == 1) {
@@ -85,8 +99,25 @@ void POLYQUANT_EPSCF::form_fock() {
               } else if (quantum_part_a.num_parts > 1 &&
                          quantum_part_a.restricted == false) {
                 double Db_kl = this->D[quantum_part_a_idx][1](k, l);
+                if (this->incremental_fock &&
+                    !incremental_fock_reset[quantum_part_a_idx][0]) {
+                  double Db_kl = this->D[quantum_part_a_idx][1](k, l) -
+                                 this->D_last[quantum_part_a_idx][1](k, l);
+                } else {
+                  double Db_kl = this->D[quantum_part_a_idx][1](k, l);
+                }
                 this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
                     Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+                if (this->incremental_fock &&
+                    !incremental_fock_reset[quantum_part_a_idx][1]) {
+                  double Da_kl = this->D[quantum_part_a_idx][0](k, l) -
+                                 this->D_last[quantum_part_a_idx][0](k, l);
+                  double Db_kl = this->D[quantum_part_a_idx][1](k, l) -
+                                 this->D_last[quantum_part_a_idx][1](k, l);
+                } else {
+                  double Da_kl = this->D[quantum_part_a_idx][0](k, l);
+                  double Db_kl = this->D[quantum_part_a_idx][1](k, l);
+                }
                 this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
                     Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
               } else {
@@ -109,24 +140,79 @@ void POLYQUANT_EPSCF::form_fock() {
                   continue;
                 }
                 // todo add exchange with electrons if desired?
-                double elem = 0.0;
-                double Da_kl = this->D[quantum_part_b_idx][0](k, l);
                 double qb = quantum_part_b.charge;
                 if (quantum_part_b.num_parts == 1) {
-                  elem = form_fock_elem(Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb,
-                                        false);
+                  if (this->incremental_fock &&
+                      !incremental_fock_reset[quantum_part_a_idx][0]) {
+                    double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                   this->D_last[quantum_part_b_idx][0](k, l);
+                  } else {
+                    double Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                  }
+                  this->F[quantum_part_a_idx][0] += form_fock_elem(
+                      Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+                  if (quantum_part_a.num_parts > 1 &&
+                      quantum_part_a.restricted == false) {
+                    if (this->incremental_fock &&
+                        !incremental_fock_reset[quantum_part_a_idx][1]) {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                     this->D_last[quantum_part_b_idx][0](k, l);
+                    } else {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                    }
+                    this->F[quantum_part_a_idx][1] += form_fock_elem(
+                        Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+                  }
                 } else if (quantum_part_b.restricted == false) {
-                  double Db_kl = this->D[quantum_part_b_idx][1](k, l);
-                  elem = form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa,
-                                        qb, false);
+                  if (this->incremental_fock &&
+                      !incremental_fock_reset[quantum_part_a_idx][0]) {
+                    double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                   this->D_last[quantum_part_b_idx][0](k, l);
+                    double Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+                                   this->D_last[quantum_part_b_idx][1](k, l);
+                  } else {
+                    double Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                    double Db_kl = this->D[quantum_part_b_idx][1](k, l);
+                  }
+                  this->F[quantum_part_a_idx][0] += form_fock_elem(
+                      Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                  if (quantum_part_a.num_parts > 1 &&
+                      quantum_part_a.restricted == false) {
+                    if (this->incremental_fock &&
+                        !incremental_fock_reset[quantum_part_a_idx][1]) {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                     this->D_last[quantum_part_b_idx][0](k, l);
+                      double Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+                                     this->D_last[quantum_part_b_idx][1](k, l);
+                    } else {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                      double Db_kl = this->D[quantum_part_b_idx][1](k, l);
+                    }
+                    this->F[quantum_part_a_idx][1] += form_fock_elem(
+                        Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                  }
                 } else {
-                  elem = form_fock_elem(Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa,
-                                        qb, false);
-                }
-                this->F[quantum_part_a_idx][0](i, j) += elem;
-                if (quantum_part_a.num_parts > 1 &&
-                    quantum_part_a.restricted == false) {
-                  this->F[quantum_part_a_idx][1](i, j) += elem;
+                  if (this->incremental_fock &&
+                      !incremental_fock_reset[quantum_part_a_idx][0]) {
+                    double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                   this->D_last[quantum_part_b_idx][0](k, l);
+                  } else {
+                    double Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                  }
+                  this->F[quantum_part_a_idx][0] += form_fock_elem(
+                      Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                  if (quantum_part_a.num_parts > 1 &&
+                      quantum_part_a.restricted == false) {
+                    if (this->incremental_fock &&
+                        !incremental_fock_reset[quantum_part_a_idx][1]) {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                     this->D_last[quantum_part_b_idx][0](k, l);
+                    } else {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                    }
+                    this->F[quantum_part_a_idx][1] += form_fock_elem(
+                        Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                  }
                 }
               }
             }
@@ -138,66 +224,6 @@ void POLYQUANT_EPSCF::form_fock() {
   // compute energy with non-extrapolated Fock matrix
   this->calculate_E_elec();
   //
-  quantum_part_a_idx = 0;
-  for (auto const &[quantum_part_key, quantum_part] :
-       this->input_molecule.quantum_particles) {
-    if (quantum_part.num_parts == 1) {
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis =
-          this->F[quantum_part_a_idx][0];
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator =
-          this->F[quantum_part_a_idx][0] * this->D[quantum_part_a_idx][0] *
-              this->input_integral.overlap -
-          this->input_integral.overlap * this->D[quantum_part_a_idx][0] *
-              this->F[quantum_part_a_idx][0];
-      this->iteration_rms_error[quantum_part_a_idx][0] =
-          FD_commutator.norm() / (num_basis * num_basis);
-      this->diis[quantum_part_a_idx][0].extrapolate(F_diis, FD_commutator);
-      this->F[quantum_part_a_idx][0] =
-          F_diis; // note: extrapolated Fock matrix can't be used for
-                  // incremental fock build in future
-    } else if (quantum_part.restricted == false) {
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis =
-          this->F[quantum_part_a_idx][0];
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator =
-          this->F[quantum_part_a_idx][0] * this->D[quantum_part_a_idx][0] *
-              this->input_integral.overlap -
-          this->input_integral.overlap * this->D[quantum_part_a_idx][0] *
-              this->F[quantum_part_a_idx][0];
-      this->iteration_rms_error[quantum_part_a_idx][0] =
-          FD_commutator.norm() / (num_basis * num_basis);
-      this->diis[quantum_part_a_idx][0].extrapolate(F_diis, FD_commutator);
-      this->F[quantum_part_a_idx][0] =
-          F_diis; // note: extrapolated Fock matrix can't be used for
-                  // incremental fock build in future
-      F_diis = this->F[quantum_part_a_idx][1];
-      FD_commutator =
-          this->F[quantum_part_a_idx][1] * this->D[quantum_part_a_idx][1] *
-              this->input_integral.overlap -
-          this->input_integral.overlap * this->D[quantum_part_a_idx][1] *
-              this->F[quantum_part_a_idx][1];
-      this->iteration_rms_error[quantum_part_a_idx][1] =
-          FD_commutator.norm() / (num_basis * num_basis);
-      this->diis[quantum_part_a_idx][1].extrapolate(F_diis, FD_commutator);
-      this->F[quantum_part_a_idx][1] =
-          F_diis; // note: extrapolated Fock matrix can't be used for
-                  // incremental fock build in future
-    } else {
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis =
-          this->F[quantum_part_a_idx][0];
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator =
-          this->F[quantum_part_a_idx][0] * this->D[quantum_part_a_idx][0] *
-              this->input_integral.overlap -
-          this->input_integral.overlap * this->D[quantum_part_a_idx][0] *
-              this->F[quantum_part_a_idx][0];
-      this->iteration_rms_error[quantum_part_a_idx][0] =
-          FD_commutator.norm() / (num_basis * num_basis);
-      this->diis[quantum_part_a_idx][0].extrapolate(F_diis, FD_commutator);
-      this->F[quantum_part_a_idx][0] =
-          F_diis; // note: extrapolated Fock matrix can't be used for
-                  // incremental fock build in future
-    }
-    quantum_part_a_idx++;
-  }
   if (this->iteration_num == 1) {
     quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] :
@@ -230,8 +256,32 @@ void POLYQUANT_EPSCF::diag_fock() {
                                                                   num_basis);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime(num_basis,
                                                                   num_basis);
-    F_prime = this->input_integral.orth_X * this->F[quantum_part_idx][0] *
-              this->input_integral.orth_X;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis =
+        this->F[quantum_part_a_idx][0];
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator =
+        this->F[quantum_part_a_idx][0] * this->D[quantum_part_a_idx][0] *
+            this->input_integral.overlap -
+        this->input_integral.overlap * this->D[quantum_part_a_idx][0] *
+            this->F[quantum_part_a_idx][0];
+    this->iteration_rms_error[quantum_part_a_idx][0] =
+        FD_commutator.norm() / (num_basis * num_basis);
+    if (this->incremental_fock) {
+      if (this->iteration_rms_error[quantum_part_a_idx][0] <
+              this->incremental_fock_reset_threshold[quantum_part_a_idx][0] ||
+          this->iteration_num -
+                  this->incremental_fock_reset_iteration[quantum_part_a_idx]
+                                                        [0] >
+              this->incremental_fock_reset_freq) {
+        this->incremental_fock_reset[quantum_part_a_idx][0] = true;
+      } else {
+        this->incremental_fock_reset[quantum_part_a_idx][0] = false;
+      }
+    }
+    if (this->diis_extrapolation) {
+      this->diis[quantum_part_a_idx][0].extrapolate(F_diis, FD_commutator);
+    }
+    F_prime =
+        this->input_integral.orth_X * F_diis * this->input_integral.orth_X;
     Eigen::SelfAdjointEigenSolver<
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
         eigensolver(F_prime);
@@ -239,8 +289,32 @@ void POLYQUANT_EPSCF::diag_fock() {
     C_prime = eigensolver.eigenvectors();
     this->C[quantum_part_idx][0] = this->input_integral.orth_X * C_prime;
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      F_prime = this->input_integral.orth_X * this->F[quantum_part_idx][1] *
-                this->input_integral.orth_X;
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis =
+          this->F[quantum_part_a_idx][1];
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator =
+          this->F[quantum_part_a_idx][1] * this->D[quantum_part_a_idx][1] *
+              this->input_integral.overlap -
+          this->input_integral.overlap * this->D[quantum_part_a_idx][1] *
+              this->F[quantum_part_a_idx][1];
+      this->iteration_rms_error[quantum_part_a_idx][1] =
+          FD_commutator.norm() / (num_basis * num_basis);
+      if (this->incremental_fock) {
+        if (this->iteration_rms_error[quantum_part_a_idx][1] <
+                this->incremental_fock_reset_threshold[quantum_part_a_idx][1] ||
+            this->iteration_num -
+                    this->incremental_fock_reset_iteration[quantum_part_a_idx]
+                                                          [1] >
+                this->incremental_fock_reset_freq) {
+          this->incremental_fock_reset[quantum_part_a_idx][1] = true;
+        } else {
+          this->incremental_fock_reset[quantum_part_a_idx][1] = false;
+        }
+      }
+      if (this->diis_extrapolation) {
+        this->diis[quantum_part_a_idx][1].extrapolate(F_diis, FD_commutator);
+      }
+      F_prime =
+          this->input_integral.orth_X * F_diis * this->input_integral.orth_X;
       Eigen::SelfAdjointEigenSolver<
           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
           eigensolver_beta(F_prime);
@@ -259,7 +333,6 @@ void POLYQUANT_EPSCF::form_DM() {
        this->input_molecule.quantum_particles) {
     this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
     this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
-    Polyquant_cout("form DM");
 #pragma omp parallel for
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
@@ -273,7 +346,6 @@ void POLYQUANT_EPSCF::form_DM() {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->D_last[quantum_part_idx][1] = this->D[quantum_part_idx][1];
       this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
-      Polyquant_cout("form DM2");
 #pragma omp parallel for
       for (size_t i = 0; i < num_basis; i++) {
         for (size_t j = 0; j < num_basis; j++) {
@@ -409,12 +481,42 @@ void POLYQUANT_EPSCF::check_stop() {
     this->converged = false;
     this->stop = false;
     this->independent_converged = true;
+    // reset DIIS since we now have interactions so extrapolating with
+    // noninteracting
+    this->reset_diis();
   }
   if (this->iteration_num == this->iteration_max) {
     this->exceeded_iterations = true;
     this->stop = true;
   }
 }
+
+void POLYQUANT_EPSCF::reset_diis() {
+  if (this->diis_extrapolation) {
+    this - diis.clear();
+    this->diis.resize(this->input_molecule.quantum_particles.size());
+    libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
+        tempdiis(this - diis_start, this->diis_size, this->diis_damping, 1, 1,
+                 this->diis_mixing_factor);
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] :
+         this->input_molecule.quantum_particles) {
+      if (quantum_part.num_parts == 1) {
+        this->diis[quantum_part_idx].resize(1);
+        this->diis[quantum_part_idx].push_back(tempdiis);
+      } else if (quantum_part.restricted == false) {
+        this->diis[quantum_part_idx].resize(2);
+        this->diis[quantum_part_idx].push_back(tempdiis);
+        this->diis[quantum_part_idx].push_back(tempdiis);
+      } else {
+        this->diis[quantum_part_idx].resize(1);
+        this->diis[quantum_part_idx].push_back(tempdiis);
+      }
+      quantum_part_idx++;
+    }
+  }
+}
+
 void POLYQUANT_EPSCF::run_iteration() {
   this->iteration_num += 1;
   this->form_fock();
@@ -433,9 +535,16 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->F.resize(this->input_molecule.quantum_particles.size());
   this->iteration_rms_error.resize(
       this->input_molecule.quantum_particles.size());
-  this->diis.resize(this->input_molecule.quantum_particles.size());
-  libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> tempdiis(
-      5);
+  if (this->incremental_fock) {
+    incremental_fock_reset.resize(
+        this->input_molecule.quantum_particles.size());
+    incremental_fock_reset_threshold.resize(
+        this->input_molecule.quantum_particles.size());
+    incremental_fock_reset_iteration.resize(
+        this->input_molecule.quantum_particles.size());
+  }
+  this->reset_diis();
+
   auto quantum_part_idx = 0ul;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
@@ -445,22 +554,25 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
       this->F[quantum_part_idx].resize(1);
-      this->diis[quantum_part_idx].resize(1);
-      this->diis[quantum_part_idx].push_back(tempdiis);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
+      if (this->incremental_fock) {
+        incremental_fock_reset[quantum_part_idx].resize(1);
+        incremental_fock_reset_threshold[quantum_part_idx].resize(1);
+        incremental_fock_reset_iteration[quantum_part_idx].resize(1);
+        incremental_fock_reset[quantum_part_idx][0] = true;
+        incremental_fock_reset_threshold[quantum_part_idx][0] = false;
+        incremental_fock_reset_iteration[quantum_part_idx][0] = 0;
+      }
     } else if (quantum_part.restricted == false) {
       this->D[quantum_part_idx].resize(2);
       this->D_last[quantum_part_idx].resize(2);
       this->C[quantum_part_idx].resize(2);
       this->F[quantum_part_idx].resize(2);
-      this->diis[quantum_part_idx].resize(2);
-      this->diis[quantum_part_idx].push_back(tempdiis);
-      this->diis[quantum_part_idx].push_back(tempdiis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
@@ -472,19 +584,36 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->iteration_rms_error[quantum_part_idx].resize(2);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
+      if (this->incremental_fock) {
+        incremental_fock_reset[quantum_part_idx].resize(2);
+        incremental_fock_reset_threshold[quantum_part_idx].resize(2);
+        incremental_fock_reset_iteration[quantum_part_idx].resize(2);
+        incremental_fock_reset[quantum_part_idx][0] = true;
+        incremental_fock_reset_threshold[quantum_part_idx][0] = false;
+        incremental_fock_reset_iteration[quantum_part_idx][0] = 0;
+        incremental_fock_reset[quantum_part_idx][1] = true;
+        incremental_fock_reset_threshold[quantum_part_idx][1] = false;
+        incremental_fock_reset_iteration[quantum_part_idx][1] = 0;
+      }
     } else {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
       this->F[quantum_part_idx].resize(1);
-      this->diis[quantum_part_idx].resize(1);
-      this->diis[quantum_part_idx].push_back(tempdiis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
+      if (this->incremental_fock) {
+        incremental_fock_reset[quantum_part_idx].resize(1);
+        incremental_fock_reset_threshold[quantum_part_idx].resize(1);
+        incremental_fock_reset_iteration[quantum_part_idx].resize(1);
+        incremental_fock_reset[quantum_part_idx][0] = true;
+        incremental_fock_reset_threshold[quantum_part_idx][0] = false;
+        incremental_fock_reset_iteration[quantum_part_idx][0] = 0;
+      }
     }
     quantum_part_idx++;
   }
@@ -530,6 +659,9 @@ void POLYQUANT_EPSCF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
+  if (this->incremental_fock) {
+    this->input_integral.calculate_Schwarz();
+  }
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
