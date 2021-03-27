@@ -383,6 +383,7 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
     }
 
     auto shell2bf = shells.shell2bf();
+    const auto& buf = engines[thread_id].results();
     for (auto s1 = 0l, s12 = 0l; s1 != shells.size(); ++s1) {
       auto n1 = shells[s1].size();
       for (auto s2 = 0; s2 <= s1; ++s2, ++s12) {
@@ -392,10 +393,10 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
         auto n2 = shells[s2].size();
         auto n12 = n1 * n2;
 
-        engines[thread_id].compute2<Kernel, BraKet::xx_xx, 0>(
+        engines[thread_id].compute2<libint2::Operator::coulomb, BraKet::xx_xx, 0>(
             shells[s1], shells[s2], shells[s1], shells[s2]);
 
-        Eigen::Map<const Matrix> buf_mat(buf[0], n12, n12);
+        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n12, n12);
         auto norm = buf_mat.lpNorm<Eigen::Infinity>();
         output_matrix(s1, s2) = std::sqrt(norm);
         output_matrix(s2, s1) = std::sqrt(norm);

@@ -38,7 +38,7 @@ public:
                      const POLYQUANT_MOLECULE &molecule);
 
   void calculate_overlap();
-  void calculate_schwarz();
+  void calculate_Schwarz();
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
