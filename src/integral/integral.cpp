@@ -37,7 +37,7 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
     libint2::initialize();
     this->Schwarz.resize(num_basis, num_basis);
     this->Schwarz.fill(0);
-    this->compute_Schwarz(this->Schwarz, this->input_basis.basis,
+    this->compute_Schwarz_ints(this->Schwarz, this->input_basis.basis,
                           libint2::Operator::coulomb);
     // TODO figure out how to write to file
     Polyquant_dump_mat_to_file(this->Schwarz, "Schwarz.txt");
@@ -393,7 +393,7 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
         auto n2 = shells[s2].size();
         auto n12 = n1 * n2;
 
-        engines[thread_id].compute2<libint2::Operator::coulomb, BraKet::xx_xx, 0>(
+        engines[thread_id].compute2<libint2::Operator::coulomb, Libint2::BraKet::xx_xx, 0>(
             shells[s1], shells[s2], shells[s1], shells[s2]);
 
         Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n12, n12);
