@@ -393,7 +393,7 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
         auto n2 = shells[s2].size();
         auto n12 = n1 * n2;
 
-        engines[thread_id].compute2<libint2::Operator::coulomb, Libint2::BraKet::xx_xx, 0>(
+        engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(
             shells[s1], shells[s2], shells[s1], shells[s2]);
 
         Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n12, n12);
