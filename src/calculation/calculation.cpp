@@ -24,7 +24,8 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse 2e tolerance
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
-      this->tolerance_2e = this->input_params["keywords"]["tolerance_2e"];
+      this->input_integral.tolerance_2e =
+          this->input_params.input_data["keywords"]["tolerance_2e"];
     }
   }
 }
