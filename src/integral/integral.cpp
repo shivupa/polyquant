@@ -355,7 +355,7 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
   }
 }
 
-void POLYQUANT_INTEGRAL::compute_Schwarz(
+void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
     const libint2::BasisSet &shells, libint2::Operator obtype) {
   // Following the HF test in the Libint2 repo
