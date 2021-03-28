@@ -668,9 +668,9 @@ void POLYQUANT_EPSCF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
-  if (this->incremental_fock) {
-    this->input_integral.calculate_Schwarz();
-  }
+  //if (this->incremental_fock) {
+  //  this->input_integral.calculate_Schwarz();
+  //}
   // start the SCF process
   this->form_H_core();
   this->guess_DM();

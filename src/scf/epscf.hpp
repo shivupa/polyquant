@@ -141,6 +141,8 @@ public:
   std::vector<std::vector<int>> incremental_fock_reset_iteration;
   int incremental_fock_reset_freq = 8;
   int incremental_fock_initial_onset_thresh = 1e-5;
+  //bool Cauchy_Schwarz_screening = true
+  //double Cauchy_Schwarz_threshold = 1e-7;
 
   /**
    * @brief Exceeded iterations?

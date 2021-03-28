@@ -28,22 +28,22 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
   }
 }
 
-void POLYQUANT_INTEGRAL::calculate_Schwarz() {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  if (this->Schwarz.cols() == 0 && this->Schwarz.rows() == 0) {
-    Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
-    auto num_basis = this->input_basis.num_basis;
-    libint2::initialize();
-    this->Schwarz.resize(num_basis, num_basis);
-    this->Schwarz.fill(0);
-    this->compute_Schwarz_ints(this->Schwarz, this->input_basis.basis,
-                               libint2::Operator::coulomb);
-    // TODO figure out how to write to file
-    Polyquant_dump_mat_to_file(this->Schwarz, "Schwarz.txt");
-    libint2::finalize();
-  }
-}
+//void POLYQUANT_INTEGRAL::calculate_Schwarz() {
+//  auto function = __PRETTY_FUNCTION__;
+//  POLYQUANT_TIMER timer(function);
+//  if (this->Schwarz.cols() == 0 && this->Schwarz.rows() == 0) {
+//    Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
+//    auto num_basis = this->input_basis.num_basis;
+//    libint2::initialize();
+//    this->Schwarz.resize(num_basis, num_basis);
+//    this->Schwarz.fill(0);
+//    this->compute_Schwarz_ints(this->Schwarz, this->input_basis.basis,
+//                               libint2::Operator::coulomb);
+//    // TODO figure out how to write to file
+//    Polyquant_dump_mat_to_file(this->Schwarz, "Schwarz.txt");
+//    libint2::finalize();
+//  }
+//}
 
 void POLYQUANT_INTEGRAL::calculate_kinetic() {
   auto function = __PRETTY_FUNCTION__;
@@ -355,57 +355,57 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
   }
 }
 
-void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
-    const libint2::BasisSet &shells, libint2::Operator obtype) {
-  // Following the HF test in the Libint2 repo
-  // construct the overlap integrals engine
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
-
-    std::vector<libint2::Engine> engines;
-    if (thread_id == 0) {
-      std::string message =
-          "Computing on " + std::to_string(nthreads) + " threads.";
-      Polyquant_cout(message);
-    }
-    engines.resize(nthreads);
-    engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
-    if (nthreads > 1) {
-      if (thread_id == 0) {
-        Polyquant_cout("Making more engines for each thread");
-      }
-      for (auto i = 1ul; i < nthreads; i++) {
-        engines[i] = engines[0];
-      }
-    }
-
-    auto shell2bf = shells.shell2bf();
-    const auto &buf = engines[thread_id].results();
-    for (auto s1 = 0l, s12 = 0l; s1 != shells.size(); ++s1) {
-      auto n1 = shells[s1].size();
-      for (auto s2 = 0; s2 <= s1; ++s2, ++s12) {
-        if (s12 % nthreads != thread_id) {
-          continue;
-        }
-        auto n2 = shells[s2].size();
-        auto n12 = n1 * n2;
-
-        engines[thread_id]
-            .compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(
-                shells[s1], shells[s2], shells[s1], shells[s2]);
-
-        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
-            buf_mat(buf[0], n12, n12);
-        auto norm = buf_mat.lpNorm<Eigen::Infinity>();
-        output_matrix(s1, s2) = std::sqrt(norm);
-        output_matrix(s2, s1) = std::sqrt(norm);
-      }
-    }
-  }
-}
+//void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
+//    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+//    const libint2::BasisSet &shells, libint2::Operator obtype) {
+//  // Following the HF test in the Libint2 repo
+//  // construct the overlap integrals engine
+//#pragma omp parallel
+//  {
+//    int nthreads = omp_get_num_threads();
+//    auto thread_id = omp_get_thread_num();
+//
+//    std::vector<libint2::Engine> engines;
+//    if (thread_id == 0) {
+//      std::string message =
+//          "Computing on " + std::to_string(nthreads) + " threads.";
+//      Polyquant_cout(message);
+//    }
+//    engines.resize(nthreads);
+//    engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
+//    if (nthreads > 1) {
+//      if (thread_id == 0) {
+//        Polyquant_cout("Making more engines for each thread");
+//      }
+//      for (auto i = 1ul; i < nthreads; i++) {
+//        engines[i] = engines[0];
+//      }
+//    }
+//
+//    auto shell2bf = shells.shell2bf();
+//    const auto &buf = engines[thread_id].results();
+//    for (auto s1 = 0l, s12 = 0l; s1 != shells.size(); ++s1) {
+//      auto n1 = shells[s1].size();
+//      for (auto s2 = 0; s2 <= s1; ++s2, ++s12) {
+//        if (s12 % nthreads != thread_id) {
+//          continue;
+//        }
+//        auto n2 = shells[s2].size();
+//        auto n12 = n1 * n2;
+//
+//        engines[thread_id]
+//            .compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(
+//                shells[s1], shells[s2], shells[s1], shells[s2]);
+//
+//        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
+//            buf_mat(buf[0], n12, n12);
+//        auto norm = buf_mat.lpNorm<Eigen::Infinity>();
+//        output_matrix(s1, s2) = std::sqrt(norm);
+//        output_matrix(s2, s1) = std::sqrt(norm);
+//      }
+//    }
+//  }
+//}
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
                                         const POLYQUANT_BASIS &basis,
                                         const POLYQUANT_MOLECULE &molecule) {
