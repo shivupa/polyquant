@@ -498,7 +498,7 @@ void POLYQUANT_EPSCF::check_stop() {
     this->independent_converged = true;
     // reset DIIS since we now have interactions so extrapolating with
     // noninteracting
-    Polyquant_cout("Resetting DIIS and incremental fock building.")
+    Polyquant_cout("Resetting DIIS and incremental fock building.");
     this->reset_diis();
     this->reset_incfock();
   }
