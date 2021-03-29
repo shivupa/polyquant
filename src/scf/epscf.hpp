@@ -31,6 +31,7 @@ public:
   void calculate_E_total() override;
   void check_stop() override;
   void reset_diis();
+  void reset_incfock();
   void run_iteration() override;
   void guess_DM() override;
   void run() override;
