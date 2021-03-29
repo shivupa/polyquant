@@ -40,6 +40,9 @@ void POLYQUANT_EPSCF::form_fock() {
        this->input_molecule.quantum_particles) {
     if (!this->incremental_fock ||
         incremental_fock_reset[quantum_part_a_idx][0]) {
+        std::stringstream ss;
+        ss << "Resetting Incremental Fock build for Particle " << quantum_part_a_idx << " spin " << 0 << std::endl;
+      Polyquant_cout(ss.str());
       this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
       if (this->incremental_fock) {
@@ -52,6 +55,9 @@ void POLYQUANT_EPSCF::form_fock() {
     if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
       if (!this->incremental_fock ||
           incremental_fock_reset[quantum_part_a_idx][1]) {
+        std::stringstream ss;
+        ss << "Resetting Incremental Fock build for Particle " << quantum_part_a_idx << " spin " << 1 << std::endl;
+      Polyquant_cout(ss.str());
         this->F[quantum_part_a_idx][1].setZero(num_basis, num_basis);
         this->F[quantum_part_a_idx][1] += this->H_core[quantum_part_a_idx];
         if (this->incremental_fock) {
@@ -492,6 +498,7 @@ void POLYQUANT_EPSCF::check_stop() {
     this->independent_converged = true;
     // reset DIIS since we now have interactions so extrapolating with
     // noninteracting
+    Polyquant_cout("Resetting DIIS and incremental fock building.")
     this->reset_diis();
     this->reset_incfock();
   }
