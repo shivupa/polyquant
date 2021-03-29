@@ -493,6 +493,7 @@ void POLYQUANT_EPSCF::check_stop() {
     // reset DIIS since we now have interactions so extrapolating with
     // noninteracting
     this->reset_diis();
+    this->reset_incfock();
   }
   if (this->iteration_num == this->iteration_max) {
     this->exceeded_iterations = true;
@@ -525,6 +526,48 @@ void POLYQUANT_EPSCF::reset_diis() {
     }
   }
 }
+void POLYQUANT_EPSCF::reset_incfock() {
+  if (this->incremental_fock) {
+      incremental_fock.clear();
+    incremental_fock_reset.resize(
+        this->input_molecule.quantum_particles.size());
+    incremental_fock_reset_threshold.resize(
+        this->input_molecule.quantum_particles.size());
+    incremental_fock_reset_iteration.resize(
+        this->input_molecule.quantum_particles.size());
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] :
+         this->input_molecule.quantum_particles) {
+      if (quantum_part.num_parts == 1) {
+        this->incremental_fock_reset[quantum_part_idx].resize(1);
+        this->incremental_fock_reset[quantum_part_idx][0] = true;
+        this->incremental_fock_reset_threshold[quantum_part_idx].resize(1);
+        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_iteration[quantum_part_idx].resize(1);
+        this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
+      } else if (quantum_part.restricted == false) {
+        this->incremental_fock_reset[quantum_part_idx].resize(2);
+        this->incremental_fock_reset[quantum_part_idx][0] = true;
+        this->incremental_fock_reset[quantum_part_idx][1] = true;
+        this->incremental_fock_reset_threshold[quantum_part_idx].resize(2);
+        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_iteration[quantum_part_idx].resize(2);
+        this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
+        this->incremental_fock_reset_iteration[quantum_part_idx][2] = this->iteration_num;
+      } else {
+        this->incremental_fock_reset[quantum_part_idx].resize(1);
+        this->incremental_fock_reset[quantum_part_idx][0] = true;
+        this->incremental_fock_reset_threshold[quantum_part_idx].resize(1);
+        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_iteration[quantum_part_idx].resize(1);
+        this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
+      }
+      quantum_part_idx++;
+    }
+  }
+}
+
 
 void POLYQUANT_EPSCF::run_iteration() {
   this->iteration_num += 1;
@@ -544,15 +587,9 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->F.resize(this->input_molecule.quantum_particles.size());
   this->iteration_rms_error.resize(
       this->input_molecule.quantum_particles.size());
-  if (this->incremental_fock) {
-    incremental_fock_reset.resize(
-        this->input_molecule.quantum_particles.size());
-    incremental_fock_reset_threshold.resize(
-        this->input_molecule.quantum_particles.size());
-    incremental_fock_reset_iteration.resize(
-        this->input_molecule.quantum_particles.size());
-  }
+  
   this->reset_diis();
+  this->reset_incfock();
 
   auto quantum_part_idx = 0ul;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
@@ -569,14 +606,6 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
-      if (this->incremental_fock) {
-        incremental_fock_reset[quantum_part_idx].resize(1);
-        incremental_fock_reset_threshold[quantum_part_idx].resize(1);
-        incremental_fock_reset_iteration[quantum_part_idx].resize(1);
-        incremental_fock_reset[quantum_part_idx][0] = true;
-        incremental_fock_reset_threshold[quantum_part_idx][0] = false;
-        incremental_fock_reset_iteration[quantum_part_idx][0] = 0;
-      }
     } else if (quantum_part.restricted == false) {
       this->D[quantum_part_idx].resize(2);
       this->D_last[quantum_part_idx].resize(2);
@@ -593,17 +622,6 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->iteration_rms_error[quantum_part_idx].resize(2);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
-      if (this->incremental_fock) {
-        incremental_fock_reset[quantum_part_idx].resize(2);
-        incremental_fock_reset_threshold[quantum_part_idx].resize(2);
-        incremental_fock_reset_iteration[quantum_part_idx].resize(2);
-        incremental_fock_reset[quantum_part_idx][0] = true;
-        incremental_fock_reset_threshold[quantum_part_idx][0] = false;
-        incremental_fock_reset_iteration[quantum_part_idx][0] = 0;
-        incremental_fock_reset[quantum_part_idx][1] = true;
-        incremental_fock_reset_threshold[quantum_part_idx][1] = false;
-        incremental_fock_reset_iteration[quantum_part_idx][1] = 0;
-      }
     } else {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
@@ -615,14 +633,6 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
-      if (this->incremental_fock) {
-        incremental_fock_reset[quantum_part_idx].resize(1);
-        incremental_fock_reset_threshold[quantum_part_idx].resize(1);
-        incremental_fock_reset_iteration[quantum_part_idx].resize(1);
-        incremental_fock_reset[quantum_part_idx][0] = true;
-        incremental_fock_reset_threshold[quantum_part_idx][0] = false;
-        incremental_fock_reset_iteration[quantum_part_idx][0] = 0;
-      }
     }
     quantum_part_idx++;
   }
