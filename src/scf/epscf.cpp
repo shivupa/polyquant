@@ -528,7 +528,9 @@ void POLYQUANT_EPSCF::reset_diis() {
 }
 void POLYQUANT_EPSCF::reset_incfock() {
   if (this->incremental_fock) {
-      incremental_fock.clear();
+      incremental_fock_reset.clear();
+      incremental_fock_reset_threshold.clear();
+      incremental_fock_reset_iteration.clear();
     incremental_fock_reset.resize(
         this->input_molecule.quantum_particles.size());
     incremental_fock_reset_threshold.resize(
