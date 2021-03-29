@@ -281,7 +281,7 @@ void POLYQUANT_EPSCF::diag_fock() {
             this->F[quantum_part_idx][0];
     this->iteration_rms_error[quantum_part_idx][0] =
         FD_commutator.norm() / (num_basis * num_basis);
-    if (this->incremental_fock && this->iteration_num > 1) {
+    if (this->incremental_fock && this->iteration_num > 2) {
       if (this->iteration_rms_error[quantum_part_idx][0] <
               this->incremental_fock_reset_threshold[quantum_part_idx][0] ||
           this->iteration_num -
@@ -313,7 +313,7 @@ void POLYQUANT_EPSCF::diag_fock() {
               this->F[quantum_part_idx][1];
       this->iteration_rms_error[quantum_part_idx][1] =
           FD_commutator.norm() / (num_basis * num_basis);
-      if (this->incremental_fock && this->iteration_num > 1) {
+      if (this->incremental_fock && this->iteration_num > 2) {
         if (this->iteration_rms_error[quantum_part_idx][1] <
                 this->incremental_fock_reset_threshold[quantum_part_idx][1] ||
             this->iteration_num -
