@@ -303,8 +303,13 @@ void POLYQUANT_EPSCF::diag_fock() {
               this->incremental_fock_reset_freq) {
         this->incremental_fock_reset[quantum_part_idx][0] = true;
       } else {
-        this->incremental_fock_reset[quantum_part_idx][0] = false;
-        this->incremental_fock_start[quantum_part_idx][0] = true;
+        if (independent_converged_iteration_num < 0 ||
+            iteration_num >
+                independent_converged_iteration_num +
+                    incremental_fock_delay_after_independent_converged) {
+          this->incremental_fock_reset[quantum_part_idx][0] = false;
+          this->incremental_fock_start[quantum_part_idx][0] = true;
+        }
       }
     }
     if (this->diis_extrapolation) {
@@ -512,6 +517,7 @@ void POLYQUANT_EPSCF::check_stop() {
     this->converged = false;
     this->stop = false;
     this->independent_converged = true;
+    this->independent_converged_iteration_num = this->iteration_num;
     // reset DIIS since we now have interactions so extrapolating with
     // noninteracting
     Polyquant_cout("Resetting DIIS and incremental fock building.");

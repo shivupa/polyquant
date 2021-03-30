@@ -130,6 +130,7 @@ public:
    */
   bool converged = false;
   bool independent_converged = false;
+  int independent_converged_iteration_num = -1;
 
   bool diis_extrapolation = true;
   int diis_start = 1;
@@ -142,7 +143,8 @@ public:
   std::vector<std::vector<int>> incremental_fock_reset_iteration;
   std::vector<std::vector<int>> incremental_fock_start;
   int incremental_fock_reset_freq = 8;
-  int incremental_fock_initial_onset_thresh = 1e-5;
+  int incremental_fock_delay_after_independent_converged = 4;
+  int incremental_fock_initial_onset_thresh = 1e-4;
   // bool Cauchy_Schwarz_screening = true
   // double Cauchy_Schwarz_threshold = 1e-7;
 
