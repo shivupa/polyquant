@@ -153,60 +153,41 @@ void POLYQUANT_EPSCF::form_fock() {
                     this->input_molecule.quantum_particles.begin();
                 std::advance(quantum_part_b_it, quantum_part_b_idx);
                 auto quantum_part_b = quantum_part_b_it->second;
-                if (quantum_part_a_idx == quantum_part_b_idx) {
-                  continue;
-                }
-                // todo add exchange with electrons if desired?
-                double qb = quantum_part_b.charge;
-                if (quantum_part_b.num_parts == 1) {
-                  double Da_kl = 0.0;
-                  if (this->incremental_fock &&
-                      incremental_fock_start[quantum_part_a_idx][0] &&
-                      !incremental_fock_reset[quantum_part_a_idx][0]) {
-                    Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                            this->D_last[quantum_part_b_idx][0](k, l);
-                  } else {
-                    Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                  }
-                  this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                      Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
-                  if (quantum_part_a.num_parts > 1 &&
-                      quantum_part_a.restricted == false) {
+                if (quantum_part_a_idx != quantum_part_b_idx) {
+                  // todo add exchange with electrons if desired?
+                  double qb = quantum_part_b.charge;
+                  if (quantum_part_b.num_parts == 1) {
                     double Da_kl = 0.0;
                     if (this->incremental_fock &&
-                        incremental_fock_start[quantum_part_a_idx][1] &&
-                        !incremental_fock_reset[quantum_part_a_idx][1]) {
+                        incremental_fock_start[quantum_part_a_idx][0] &&
+                        !incremental_fock_reset[quantum_part_a_idx][0]) {
                       Da_kl = this->D[quantum_part_b_idx][0](k, l) -
                               this->D_last[quantum_part_b_idx][0](k, l);
                     } else {
                       Da_kl = this->D[quantum_part_b_idx][0](k, l);
                     }
-                    this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
+                    this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
                         Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
-                  }
-                } else if (quantum_part_b.restricted == false) {
-                  double Da_kl = 0.0;
-                  double Db_kl = 0.0;
-                  if (this->incremental_fock &&
-                      incremental_fock_start[quantum_part_a_idx][0] &&
-                      !incremental_fock_reset[quantum_part_a_idx][0]) {
-                    Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                            this->D_last[quantum_part_b_idx][0](k, l);
-                    Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-                            this->D_last[quantum_part_b_idx][1](k, l);
-                  } else {
-                    Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                    Db_kl = this->D[quantum_part_b_idx][1](k, l);
-                  }
-                  this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                      Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                  if (quantum_part_a.num_parts > 1 &&
-                      quantum_part_a.restricted == false) {
+                    if (quantum_part_a.num_parts > 1 &&
+                        quantum_part_a.restricted == false) {
+                      double Da_kl = 0.0;
+                      if (this->incremental_fock &&
+                          incremental_fock_start[quantum_part_a_idx][1] &&
+                          !incremental_fock_reset[quantum_part_a_idx][1]) {
+                        Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                this->D_last[quantum_part_b_idx][0](k, l);
+                      } else {
+                        Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                      }
+                      this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
+                          Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+                    }
+                  } else if (quantum_part_b.restricted == false) {
                     double Da_kl = 0.0;
                     double Db_kl = 0.0;
                     if (this->incremental_fock &&
-                        incremental_fock_start[quantum_part_a_idx][1] &&
-                        !incremental_fock_reset[quantum_part_a_idx][1]) {
+                        incremental_fock_start[quantum_part_a_idx][0] &&
+                        !incremental_fock_reset[quantum_part_a_idx][0]) {
                       Da_kl = this->D[quantum_part_b_idx][0](k, l) -
                               this->D_last[quantum_part_b_idx][0](k, l);
                       Db_kl = this->D[quantum_part_b_idx][1](k, l) -
@@ -215,34 +196,52 @@ void POLYQUANT_EPSCF::form_fock() {
                       Da_kl = this->D[quantum_part_b_idx][0](k, l);
                       Db_kl = this->D[quantum_part_b_idx][1](k, l);
                     }
-                    this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
+                    this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
                         Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                  }
-                } else {
-                  double Da_kl = 0.0;
-                  if (this->incremental_fock &&
-                      incremental_fock_start[quantum_part_a_idx][0] &&
-                      !incremental_fock_reset[quantum_part_a_idx][0]) {
-                    double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                                   this->D_last[quantum_part_b_idx][0](k, l);
+                    if (quantum_part_a.num_parts > 1 &&
+                        quantum_part_a.restricted == false) {
+                      double Da_kl = 0.0;
+                      double Db_kl = 0.0;
+                      if (this->incremental_fock &&
+                          incremental_fock_start[quantum_part_a_idx][1] &&
+                          !incremental_fock_reset[quantum_part_a_idx][1]) {
+                        Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                this->D_last[quantum_part_b_idx][0](k, l);
+                        Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+                                this->D_last[quantum_part_b_idx][1](k, l);
+                      } else {
+                        Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                        Db_kl = this->D[quantum_part_b_idx][1](k, l);
+                      }
+                      this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
+                          Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                    }
                   } else {
-                    double Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                  }
-                  this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                      Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                  if (quantum_part_a.num_parts > 1 &&
-                      quantum_part_a.restricted == false) {
                     double Da_kl = 0.0;
                     if (this->incremental_fock &&
-                        incremental_fock_start[quantum_part_a_idx][1] &&
-                        !incremental_fock_reset[quantum_part_a_idx][1]) {
-                      Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                              this->D_last[quantum_part_b_idx][0](k, l);
+                        incremental_fock_start[quantum_part_a_idx][0] &&
+                        !incremental_fock_reset[quantum_part_a_idx][0]) {
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                     this->D_last[quantum_part_b_idx][0](k, l);
                     } else {
-                      Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                      double Da_kl = this->D[quantum_part_b_idx][0](k, l);
                     }
-                    this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
+                    this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
                         Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                    if (quantum_part_a.num_parts > 1 &&
+                        quantum_part_a.restricted == false) {
+                      double Da_kl = 0.0;
+                      if (this->incremental_fock &&
+                          incremental_fock_start[quantum_part_a_idx][1] &&
+                          !incremental_fock_reset[quantum_part_a_idx][1]) {
+                        Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+                                this->D_last[quantum_part_b_idx][0](k, l);
+                      } else {
+                        Da_kl = this->D[quantum_part_b_idx][0](k, l);
+                      }
+                      this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
+                          Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+                    }
                   }
                 }
               }
