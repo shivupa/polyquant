@@ -28,7 +28,7 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
   }
 }
 
-//void POLYQUANT_INTEGRAL::calculate_Schwarz() {
+// void POLYQUANT_INTEGRAL::calculate_Schwarz() {
 //  auto function = __PRETTY_FUNCTION__;
 //  POLYQUANT_TIMER timer(function);
 //  if (this->Schwarz.cols() == 0 && this->Schwarz.rows() == 0) {
@@ -355,7 +355,7 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
   }
 }
 
-//void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
+// void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
 //    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
 //    const libint2::BasisSet &shells, libint2::Operator obtype) {
 //  // Following the HF test in the Libint2 repo
@@ -372,8 +372,8 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
 //      Polyquant_cout(message);
 //    }
 //    engines.resize(nthreads);
-//    engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
-//    if (nthreads > 1) {
+//    engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(),
+//    0); if (nthreads > 1) {
 //      if (thread_id == 0) {
 //        Polyquant_cout("Making more engines for each thread");
 //      }
@@ -397,7 +397,8 @@ void POLYQUANT_INTEGRAL::calculate_two_electron() {
 //            .compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(
 //                shells[s1], shells[s2], shells[s1], shells[s2]);
 //
-//        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
+//        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic,
+//        Eigen::Dynamic>>
 //            buf_mat(buf[0], n12, n12);
 //        auto norm = buf_mat.lpNorm<Eigen::Infinity>();
 //        output_matrix(s1, s2) = std::sqrt(norm);

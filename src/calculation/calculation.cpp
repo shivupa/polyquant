@@ -297,14 +297,14 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
                 .input_data["keywords"]["mf_keywords"]
                            ["incremental_fock_initial_onset_thresh"];
       }
-      //if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+      // if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
       //        "Cauchy_Schwarz_screening")) {
       //  scf_calc.incremental_fock_initial_onset_thresh =
       //      this->input_params
       //          .input_data["keywords"]["mf_keywords"]
       //                     ["Cauchy_Schwarz_screening"];
       //}
-      //if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+      // if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
       //        "Cauchy_Schwarz_threshold")) {
       //  scf_calc.incremental_fock_initial_onset_thresh =
       //      this->input_params
