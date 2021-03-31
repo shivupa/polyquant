@@ -342,8 +342,13 @@ void POLYQUANT_EPSCF::diag_fock() {
                 this->incremental_fock_reset_freq) {
           this->incremental_fock_reset[quantum_part_idx][1] = true;
         } else {
-          this->incremental_fock_reset[quantum_part_idx][1] = false;
-          this->incremental_fock_start[quantum_part_idx][1] = true;
+          if (independent_converged_iteration_num < 0 ||
+              iteration_num >
+                  independent_converged_iteration_num +
+                      incremental_fock_delay_after_independent_converged) {
+            this->incremental_fock_reset[quantum_part_idx][1] = false;
+            this->incremental_fock_start[quantum_part_idx][1] = true;
+          }
         }
       }
       if (this->diis_extrapolation) {
