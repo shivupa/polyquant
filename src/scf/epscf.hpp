@@ -24,6 +24,13 @@ public:
   void form_H_core() override;
   double form_fock_elem(double Da_kl, double Db_kl, double eri_ijkl,
                         double eri_ikjl, double qa, double qb, bool exchange);
+  std::pair<double, double> form_fock_helper(size_t i, size_t j, size_t k,
+                                             size_t l,
+                                             size_t quantum_part_a_idx);
+  std::pair<double, double> form_mixed_fock_helper(size_t i, size_t j, size_t k,
+                                                   size_t l,
+                                                   size_t quantum_part_a_idx,
+                                                   size_t quantum_part_b_idx);
   void form_fock() override;
   void diag_fock() override;
   void form_DM() override;

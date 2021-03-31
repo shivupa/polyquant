@@ -31,6 +31,155 @@ double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl,
          (((Da_kl + Db_kl) * eri_ijkl) - (gamma * Da_kl * eri_ikjl));
 }
 
+std::pair<double, double>
+POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
+                                  size_t quantum_part_a_idx) {
+  double alpha_elem = 0.0;
+  double beta_elem = 0.0;
+  double eri_ijkl =
+      this->input_integral.twoelec(this->input_integral.idx8(i, j, k, l));
+  double eri_ikjl =
+      this->input_integral.twoelec(this->input_integral.idx8(i, k, j, l));
+  auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
+  std::advance(quantum_part_a_it, quantum_part_a_idx);
+  auto quantum_part_a = quantum_part_a_it->second;
+  double qa = quantum_part_a.charge;
+  bool exchange = quantum_part_a.exchange;
+  // "NORMAL" Fock Elements
+  // Form alpha element
+  double Da_kl = 0.0;
+  double Db_kl = 0.0;
+  if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
+      !incremental_fock_reset[quantum_part_a_idx][0]) {
+    Da_kl = this->D[quantum_part_a_idx][0](k, l) -
+            this->D_last[quantum_part_a_idx][0](k, l);
+    if (quantum_part_a.num_parts == 1) {
+      Db_kl = 0.0;
+    } else if (quantum_part_a.num_parts > 1 &&
+               quantum_part_a.restricted == false) {
+      Db_kl = this->D[quantum_part_a_idx][1](k, l) -
+              this->D_last[quantum_part_a_idx][1](k, l);
+      ;
+    } else {
+      Db_kl = Da_kl;
+    }
+  } else {
+    Da_kl = this->D[quantum_part_a_idx][0](k, l);
+    if (quantum_part_a.num_parts == 1) {
+      Db_kl = 0.0;
+    } else if (quantum_part_a.num_parts > 1 &&
+               quantum_part_a.restricted == false) {
+      Db_kl = this->D[quantum_part_a_idx][1](k, l);
+    } else {
+      Db_kl = Da_kl;
+    }
+  }
+  alpha_elem +=
+      form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+  // Form Beta Element
+  if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
+    if (this->incremental_fock &&
+        incremental_fock_start[quantum_part_a_idx][1] &&
+        !incremental_fock_reset[quantum_part_a_idx][1]) {
+      Da_kl = this->D[quantum_part_a_idx][0](k, l) -
+              this->D_last[quantum_part_a_idx][0](k, l);
+      Db_kl = this->D[quantum_part_a_idx][1](k, l) -
+              this->D_last[quantum_part_a_idx][1](k, l);
+    } else {
+      Da_kl = this->D[quantum_part_a_idx][0](k, l);
+      Db_kl = this->D[quantum_part_a_idx][1](k, l);
+    }
+  }
+  beta_elem +=
+      form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+
+  std::pair<double, double> fock_elements(alpha_elem, beta_elem);
+  return fock_elements;
+}
+
+std::pair<double, double>
+POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
+                                        size_t quantum_part_a_idx,
+                                        size_t quantum_part_b_idx) {
+  double alpha_elem = 0.0;
+  double beta_elem = 0.0;
+  double eri_ijkl =
+      this->input_integral.twoelec(this->input_integral.idx8(i, j, k, l));
+  double eri_ikjl =
+      this->input_integral.twoelec(this->input_integral.idx8(i, k, j, l));
+  auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
+  std::advance(quantum_part_a_it, quantum_part_a_idx);
+  auto quantum_part_a = quantum_part_a_it->second;
+  double qa = quantum_part_a.charge;
+  auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
+  std::advance(quantum_part_b_it, quantum_part_b_idx);
+  auto quantum_part_b = quantum_part_b_it->second;
+  double qb = quantum_part_b.charge;
+
+  if (!independent_converged || quantum_part_a_idx == quantum_part_b_idx) {
+    std::pair<double, double> fock_elements(alpha_elem, beta_elem);
+    return fock_elements;
+  }
+  if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
+      !incremental_fock_reset[quantum_part_a_idx][0]) {
+    Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+            this->D_last[quantum_part_b_idx][0](k, l);
+    if (quantum_part_b.num_parts == 1) {
+      Db_kl = 0.0;
+    } else if (quantum_part_b.num_parts > 1 &&
+               quantum_part_b.restricted == false) {
+      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+              this->D_last[quantum_part_b_idx][1](k, l);
+      ;
+    } else {
+      Db_kl = Da_kl;
+    }
+  } else {
+    Da_kl = this->D[quantum_part_b_idx][0](k, l);
+    if (quantum_part_b.num_parts == 1) {
+      Db_kl = 0.0;
+    } else if (quantum_part_b.num_parts > 1 &&
+               quantum_part_b.restricted == false) {
+      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+              this->D_last[quantum_part_b_idx][1](k, l);
+      ;
+    } else {
+      Db_kl = Da_kl;
+    }
+  }
+  alpha_elem += form_fock_elem(Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+  if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][1] &&
+      !incremental_fock_reset[quantum_part_a_idx][1]) {
+    Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+            this->D_last[quantum_part_b_idx][0](k, l);
+    if (quantum_part_b.num_parts == 1) {
+      Db_kl = 0.0;
+    } else if (quantum_part_b.num_parts > 1 &&
+               quantum_part_b.restricted == false) {
+      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+              this->D_last[quantum_part_b_idx][1](k, l);
+      ;
+    } else {
+      Db_kl = Da_kl;
+    }
+  } else {
+    Da_kl = this->D[quantum_part_b_idx][0](k, l);
+    if (quantum_part_b.num_parts == 1) {
+      Db_kl = 0.0;
+    } else if (quantum_part_b.num_parts > 1 &&
+               quantum_part_b.restricted == false) {
+      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+              this->D_last[quantum_part_b_idx][1](k, l);
+      ;
+    } else {
+      Db_kl = Da_kl;
+    }
+  }
+  beta_elem += form_fock_elem(Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+  std::pair<double, double> fock_elements(alpha_elem, beta_elem);
+  return fock_elements;
+}
+
 void POLYQUANT_EPSCF::form_fock() {
   // TODO
   auto num_basis = this->input_basis.num_basis;
@@ -78,170 +227,32 @@ void POLYQUANT_EPSCF::form_fock() {
   }
   // Polyquant_cout("forming fock");
   {
+#pragma omp parallel for
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
         for (size_t k = 0; k < num_basis; k++) {
           for (size_t l = 0; l < num_basis; l++) {
-            double eri_ijkl = this->input_integral.twoelec(
-                this->input_integral.idx8(i, j, k, l));
-            double eri_ikjl = this->input_integral.twoelec(
-                this->input_integral.idx8(i, k, j, l));
             for (auto quantum_part_a_idx = 0;
                  quantum_part_a_idx <
                  this->input_molecule.quantum_particles.size();
                  quantum_part_a_idx++) {
-              auto quantum_part_a_it =
-                  this->input_molecule.quantum_particles.begin();
-              std::advance(quantum_part_a_it, quantum_part_a_idx);
-              auto quantum_part_a = quantum_part_a_it->second;
-              // Normal Fock Matrix elements
-              double Da_kl = 0.0;
-              if (this->incremental_fock &&
-                  incremental_fock_start[quantum_part_a_idx][0] &&
-                  !incremental_fock_reset[quantum_part_a_idx][0]) {
-                Da_kl = this->D[quantum_part_a_idx][0](k, l) -
-                        this->D_last[quantum_part_a_idx][0](k, l);
-              } else {
-                Da_kl = this->D[quantum_part_a_idx][0](k, l);
-              }
-              double qa = quantum_part_a.charge;
-              bool exchange = quantum_part_a.exchange;
-              if (quantum_part_a.num_parts == 1) {
-                this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                    Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qa, exchange);
-              } else if (quantum_part_a.num_parts > 1 &&
-                         quantum_part_a.restricted == false) {
-                double Db_kl = 0.0;
-                if (this->incremental_fock &&
-                    incremental_fock_start[quantum_part_a_idx][0] &&
-                    !incremental_fock_reset[quantum_part_a_idx][0]) {
-                  Db_kl = this->D[quantum_part_a_idx][1](k, l) -
-                          this->D_last[quantum_part_a_idx][1](k, l);
-                } else {
-                  Db_kl = this->D[quantum_part_a_idx][1](k, l);
-                }
-                this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                    Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-                double Da_kl = 0.0;
-                if (this->incremental_fock &&
-                    incremental_fock_start[quantum_part_a_idx][1] &&
-                    !incremental_fock_reset[quantum_part_a_idx][1]) {
-                  Da_kl = this->D[quantum_part_a_idx][0](k, l) -
-                          this->D_last[quantum_part_a_idx][0](k, l);
-                  Db_kl = this->D[quantum_part_a_idx][1](k, l) -
-                          this->D_last[quantum_part_a_idx][1](k, l);
-                } else {
-                  Da_kl = this->D[quantum_part_a_idx][0](k, l);
-                  Db_kl = this->D[quantum_part_a_idx][1](k, l);
-                }
-                this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
-                    Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-              } else {
-                this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                    Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+              auto elements = form_fock_helper(i, j, k, l, quantum_part_a_idx);
+              this->F[quantum_part_a_idx][0](i, j) += elements.first;
+              if (quantum_part_a.num_parts > 1 &&
+                  quantum_part_a.restricted == false) {
+                this->F[quantum_part_a_idx][1](i, j) += elements.second;
               }
               // Interactions between particle types Fock Matrix elements
               for (auto quantum_part_b_idx = 0;
                    quantum_part_b_idx <
                    this->input_molecule.quantum_particles.size();
                    quantum_part_b_idx++) {
-                if (independent_converged) {
-                  auto quantum_part_b_it =
-                      this->input_molecule.quantum_particles.begin();
-                  std::advance(quantum_part_b_it, quantum_part_b_idx);
-                  auto quantum_part_b = quantum_part_b_it->second;
-                  if (quantum_part_a_idx != quantum_part_b_idx) {
-                    // todo add exchange with electrons if desired?
-                    double qb = quantum_part_b.charge;
-                    if (quantum_part_b.num_parts == 1) {
-                      double Da_kl = 0.0;
-                      if (this->incremental_fock &&
-                          incremental_fock_start[quantum_part_a_idx][0] &&
-                          !incremental_fock_reset[quantum_part_a_idx][0]) {
-                        Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                                this->D_last[quantum_part_b_idx][0](k, l);
-                      } else {
-                        Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                      }
-                      this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                          Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
-                      if (quantum_part_a.num_parts > 1 &&
-                          quantum_part_a.restricted == false) {
-                        double Da_kl = 0.0;
-                        if (this->incremental_fock &&
-                            incremental_fock_start[quantum_part_a_idx][1] &&
-                            !incremental_fock_reset[quantum_part_a_idx][1]) {
-                          Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                                  this->D_last[quantum_part_b_idx][0](k, l);
-                        } else {
-                          Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                        }
-                        this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
-                            Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
-                      }
-                    } else if (quantum_part_b.restricted == false) {
-                      double Da_kl = 0.0;
-                      double Db_kl = 0.0;
-                      if (this->incremental_fock &&
-                          incremental_fock_start[quantum_part_a_idx][0] &&
-                          !incremental_fock_reset[quantum_part_a_idx][0]) {
-                        Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                                this->D_last[quantum_part_b_idx][0](k, l);
-                        Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-                                this->D_last[quantum_part_b_idx][1](k, l);
-                      } else {
-                        Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                        Db_kl = this->D[quantum_part_b_idx][1](k, l);
-                      }
-                      this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                          Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                      if (quantum_part_a.num_parts > 1 &&
-                          quantum_part_a.restricted == false) {
-                        double Da_kl = 0.0;
-                        double Db_kl = 0.0;
-                        if (this->incremental_fock &&
-                            incremental_fock_start[quantum_part_a_idx][1] &&
-                            !incremental_fock_reset[quantum_part_a_idx][1]) {
-                          Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                                  this->D_last[quantum_part_b_idx][0](k, l);
-                          Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-                                  this->D_last[quantum_part_b_idx][1](k, l);
-                        } else {
-                          Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                          Db_kl = this->D[quantum_part_b_idx][1](k, l);
-                        }
-                        this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
-                            Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                      }
-                    } else {
-                      double Da_kl = 0.0;
-                      if (this->incremental_fock &&
-                          incremental_fock_start[quantum_part_a_idx][0] &&
-                          !incremental_fock_reset[quantum_part_a_idx][0]) {
-                        double Da_kl =
-                            this->D[quantum_part_b_idx][0](k, l) -
-                            this->D_last[quantum_part_b_idx][0](k, l);
-                      } else {
-                        double Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                      }
-                      this->F[quantum_part_a_idx][0](i, j) += form_fock_elem(
-                          Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                      if (quantum_part_a.num_parts > 1 &&
-                          quantum_part_a.restricted == false) {
-                        double Da_kl = 0.0;
-                        if (this->incremental_fock &&
-                            incremental_fock_start[quantum_part_a_idx][1] &&
-                            !incremental_fock_reset[quantum_part_a_idx][1]) {
-                          Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-                                  this->D_last[quantum_part_b_idx][0](k, l);
-                        } else {
-                          Da_kl = this->D[quantum_part_b_idx][0](k, l);
-                        }
-                        this->F[quantum_part_a_idx][1](i, j) += form_fock_elem(
-                            Da_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-                      }
-                    }
-                  }
+                auto elements = form_mixed_fock_helper(
+                    i, j, k, l, quantum_part_a_idx, quantum_part_b_idx);
+                this->F[quantum_part_a_idx][0](i, j) += elements.first;
+                if (quantum_part_a.num_parts > 1 &&
+                    quantum_part_a.restricted == false) {
+                  this->F[quantum_part_a_idx][1](i, j) += elements.second;
                 }
               }
             }
