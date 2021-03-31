@@ -78,7 +78,6 @@ void POLYQUANT_EPSCF::form_fock() {
   }
   // Polyquant_cout("forming fock");
   {
-#pragma omp parallel for
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
         for (size_t k = 0; k < num_basis; k++) {
