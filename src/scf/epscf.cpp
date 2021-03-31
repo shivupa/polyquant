@@ -26,7 +26,7 @@ double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl,
     gamma = 1.0;
   }
   // note if the beta element is desired call the function with the beta element
-  // as Da_ij
+  // as Da_kl
   return (qa * qb) *
          (((Da_kl + Db_kl) * eri_ijkl) - (gamma * Da_kl * eri_ikjl));
 }
@@ -103,6 +103,8 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
                                         size_t quantum_part_b_idx) {
   double alpha_elem = 0.0;
   double beta_elem = 0.0;
+  double Da_kl = 0.0;
+  double Db_kl = 0.0;
   double eri_ijkl =
       this->input_integral.twoelec(this->input_integral.idx8(i, j, k, l));
   double eri_ikjl =
@@ -237,6 +239,7 @@ void POLYQUANT_EPSCF::form_fock() {
                  this->input_molecule.quantum_particles.size();
                  quantum_part_a_idx++) {
               auto elements = form_fock_helper(i, j, k, l, quantum_part_a_idx);
+              auto quantum_part_a = quantum_part_a_it->second;
               this->F[quantum_part_a_idx][0](i, j) += elements.first;
               if (quantum_part_a.num_parts > 1 &&
                   quantum_part_a.restricted == false) {
