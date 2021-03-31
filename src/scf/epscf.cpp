@@ -89,9 +89,9 @@ POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Da_kl = this->D[quantum_part_a_idx][0](k, l);
       Db_kl = this->D[quantum_part_a_idx][1](k, l);
     }
+    beta_elem +=
+        form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
   }
-  beta_elem +=
-      form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
 
   std::pair<double, double> fock_elements(alpha_elem, beta_elem);
   return fock_elements;
