@@ -239,6 +239,9 @@ void POLYQUANT_EPSCF::form_fock() {
                  this->input_molecule.quantum_particles.size();
                  quantum_part_a_idx++) {
               auto elements = form_fock_helper(i, j, k, l, quantum_part_a_idx);
+              auto quantum_part_a_it =
+                  this->input_molecule.quantum_particles.begin();
+              std::advance(quantum_part_a_it, quantum_part_a_idx);
               auto quantum_part_a = quantum_part_a_it->second;
               this->F[quantum_part_a_idx][0](i, j) += elements.first;
               if (quantum_part_a.num_parts > 1 &&
