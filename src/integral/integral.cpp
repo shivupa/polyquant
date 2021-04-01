@@ -119,8 +119,6 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   Eigen::Tensor<double, 4> temp2;
   auto eri_size = (num_basis * (num_basis + 1) / 2);
   Polyquant_cout("2elec trans ok");
-  eri.resize(eri_size, eri_size);
-  Polyquant_cout("2elec trans ok");
   Polyquant_cout(eri_size);
   temp1.resize(num_basis, num_basis, num_basis, num_basis);
   Polyquant_cout("2elec trans ok");
@@ -180,7 +178,9 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     }
   }
   // temp2.setZero();
-  temp2.clear();
+  temp2.resize(0,0,0,0);
+  Polyquant_cout("2elec trans ok");
+  eri.resize(eri_size, eri_size);
 #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
