@@ -162,7 +162,6 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     }
   }
   temp1.setZero();
-#pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
@@ -181,7 +180,6 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   temp2.resize(0,0,0,0);
   Polyquant_cout("2elec trans ok");
   eri.resize(eri_size, eri_size);
-#pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
