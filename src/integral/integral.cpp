@@ -121,8 +121,11 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   Polyquant_cout("2elec trans ok");
   eri.resize(eri_size, eri_size);
   Polyquant_cout("2elec trans ok");
+  Polyquant_cout(eri_size);
   temp1.resize(eri_size, eri_size, eri_size, eri_size);
+  Polyquant_cout("2elec trans ok");
   temp2.resize(eri_size, eri_size, eri_size, eri_size);
+  Polyquant_cout("2elec trans ok");
   eri.setZero();
   temp1.setZero();
   temp2.setZero();
