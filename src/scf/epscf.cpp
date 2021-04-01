@@ -149,7 +149,7 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Db_kl = Da_kl;
     }
   }
-  alpha_elem += form_fock_elem(Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+  alpha_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
   if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][1] &&
       !incremental_fock_reset[quantum_part_a_idx][1]) {
     Da_kl = this->D[quantum_part_b_idx][0](k, l) -
@@ -177,7 +177,7 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Db_kl = Da_kl;
     }
   }
-  beta_elem += form_fock_elem(Da_kl, 0.0, eri_ijkl, eri_ikjl, qa, qb, false);
+  beta_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
   std::pair<double, double> fock_elements(alpha_elem, beta_elem);
   return fock_elements;
 }
