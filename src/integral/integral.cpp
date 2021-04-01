@@ -118,12 +118,15 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   Eigen::Tensor<double, 4> temp1;
   Eigen::Tensor<double, 4> temp2;
   auto eri_size = (num_basis * (num_basis + 1) / 2);
+  Polyquant_cout("2elec trans ok");
   eri.resize(eri_size, eri_size);
+  Polyquant_cout("2elec trans ok");
   temp1.resize(eri_size, eri_size, eri_size, eri_size);
   temp2.resize(eri_size, eri_size, eri_size, eri_size);
   eri.setZero();
   temp1.setZero();
   temp2.setZero();
+  Polyquant_cout("2elec trans ok");
   // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
