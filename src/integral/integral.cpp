@@ -130,71 +130,82 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   temp1.setZero();
   temp2.setZero();
   Polyquant_cout("2elec trans ok");
+  double elem = 0.0;
   // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
   // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
-  #pragma omp parallel for
-  for (auto p = 0; p < num_basis; p++) {
-    for (auto q = 0; q < num_basis; q++) {
-      for (auto r = 0; r < num_basis; r++) {
-        for (auto s = 0; s < num_basis; s++) {
-          for (auto i = 0; i < num_basis; i++) {
-            temp1(i, q, r, s) +=
-                mo_coeffs_a(p, i) * this->twoelec(this->idx8(p, q, r, s));
-          }
-        }
-      }
-    }
-  }
-  #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto q = 0; q < num_basis; q++) {
       for (auto r = 0; r < num_basis; r++) {
         for (auto s = 0; s < num_basis; s++) {
-          for (auto j = 0; j < num_basis; j++) {
-            temp2(i, j, r, s) += mo_coeffs_a(q, j) * temp1(i, q, r, s);
+          elem = 0.0
+#pragma omp parallel for reduction(+ : elem)
+              for (auto p = 0; p < num_basis; p++) {
+            elem += mo_coeffs_a(p, i) * this->twoelec(this->idx8(p, q, r, s));
           }
+          temp1(i, q, r, s) += elem;
+        }
+      }
+    }
+  }
+  for (auto i = 0; i < num_basis; i++) {
+    for (auto j = 0; j < num_basis; j++) {
+      for (auto r = 0; r < num_basis; r++) {
+        for (auto s = 0; s < num_basis; s++) {
+          elem = 0.0
+#pragma omp parallel for reduction(+ : elem)
+              for (auto q = 0; q < num_basis; q++) {
+            elem += mo_coeffs_a(q, j) * temp1(i, q, r, s);
+          }
+          temp2(i, j, r, s) += elem;
         }
       }
     }
   }
   temp1.setZero();
-  #pragma omp parallel for
-  for (auto i = 0; i < num_basis; i++) {
-    for (auto j = 0; j < num_basis; j++) {
-      for (auto r = 0; r < num_basis; r++) {
-        for (auto s = 0; s < num_basis; s++) {
-          for (auto k = 0; k < num_basis; k++) {
-            temp1(i, j, k, s) += mo_coeffs_b(r, k) * temp2(i, j, r, s);
-          }
-        }
-      }
-    }
-  }
-  temp2.setZero();
-  #pragma omp parallel for
+#pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
         for (auto s = 0; s < num_basis; s++) {
-          for (auto l = 0; l < num_basis; l++) {
-            temp2(i, j, k, l) += mo_coeffs_b(s, l) * temp1(i, j, k, s);
+          elem = 0.0
+#pragma omp parallel for reduction(+ : elem)
+              for (auto r = 0; r < num_basis; r++) {
+            elem += mo_coeffs_b(r, k) * temp2(i, j, r, s);
           }
+          temp1(i, j, k, s) += elem;
         }
       }
     }
   }
-  #pragma omp parallel for
+  // temp2.setZero();
+  delete temp2;
+#pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
         for (auto l = 0; l < num_basis; l++) {
-          eri(this->idx2(i, j), this->idx2(k, l)) = temp2(i, j, k, l);
+          elem = 0.0
+#pragma omp parallel for reduction(+ : elem)
+              for (auto s = 0; s < num_basis; s++) {
+            elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
+          }
+          // temp2(i, j, k, l) += elem;
+          eri(this->idx2(i, j), this->idx2(k, l)) = elem;
         }
       }
     }
   }
+  // for (auto i = 0; i < num_basis; i++) {
+  //   for (auto j = 0; j < num_basis; j++) {
+  //     for (auto k = 0; k < num_basis; k++) {
+  //       for (auto l = 0; l < num_basis; l++) {
+  //         eri(this->idx2(i, j), this->idx2(k, l)) = temp2(i, j, k, l);
+  //       }
+  //     }
+  //   }
+  // }
   return eri;
 }
 
