@@ -122,9 +122,9 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   eri.resize(eri_size, eri_size);
   Polyquant_cout("2elec trans ok");
   Polyquant_cout(eri_size);
-  temp1.resize(eri_size, eri_size, eri_size, eri_size);
+  temp1.resize(num_basis, num_basis, num_basis, num_basis);
   Polyquant_cout("2elec trans ok");
-  temp2.resize(eri_size, eri_size, eri_size, eri_size);
+  temp2.resize(num_basis, num_basis, num_basis, num_basis);
   Polyquant_cout("2elec trans ok");
   eri.setZero();
   temp1.setZero();
@@ -134,6 +134,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
   // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
+  #pragma omp parallel for
   for (auto p = 0; p < num_basis; p++) {
     for (auto q = 0; q < num_basis; q++) {
       for (auto r = 0; r < num_basis; r++) {
@@ -146,6 +147,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
+  #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto q = 0; q < num_basis; q++) {
       for (auto r = 0; r < num_basis; r++) {
@@ -158,6 +160,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     }
   }
   temp1.setZero();
+  #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto r = 0; r < num_basis; r++) {
@@ -170,6 +173,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     }
   }
   temp2.setZero();
+  #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
@@ -181,6 +185,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
+  #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
