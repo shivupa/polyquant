@@ -177,7 +177,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     }
   }
   // temp2.setZero();
-  temp2.resize(0,0,0,0);
+  temp2.resize(0, 0, 0, 0);
   Polyquant_cout("2elec trans ok");
   eri.resize(eri_size, eri_size);
   for (auto i = 0; i < num_basis; i++) {
