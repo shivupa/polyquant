@@ -139,9 +139,9 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     for (auto q = 0; q < num_basis; q++) {
       for (auto r = 0; r < num_basis; r++) {
         for (auto s = 0; s < num_basis; s++) {
-          elem = 0.0
+          elem = 0.0;
 #pragma omp parallel for reduction(+ : elem)
-              for (auto p = 0; p < num_basis; p++) {
+          for (auto p = 0; p < num_basis; p++) {
             elem += mo_coeffs_a(p, i) * this->twoelec(this->idx8(p, q, r, s));
           }
           temp1(i, q, r, s) += elem;
@@ -153,9 +153,9 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     for (auto j = 0; j < num_basis; j++) {
       for (auto r = 0; r < num_basis; r++) {
         for (auto s = 0; s < num_basis; s++) {
-          elem = 0.0
+          elem = 0.0;
 #pragma omp parallel for reduction(+ : elem)
-              for (auto q = 0; q < num_basis; q++) {
+          for (auto q = 0; q < num_basis; q++) {
             elem += mo_coeffs_a(q, j) * temp1(i, q, r, s);
           }
           temp2(i, j, r, s) += elem;
@@ -169,9 +169,9 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
         for (auto s = 0; s < num_basis; s++) {
-          elem = 0.0
+          elem = 0.0;
 #pragma omp parallel for reduction(+ : elem)
-              for (auto r = 0; r < num_basis; r++) {
+          for (auto r = 0; r < num_basis; r++) {
             elem += mo_coeffs_b(r, k) * temp2(i, j, r, s);
           }
           temp1(i, j, k, s) += elem;
@@ -186,9 +186,9 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     for (auto j = 0; j < num_basis; j++) {
       for (auto k = 0; k < num_basis; k++) {
         for (auto l = 0; l < num_basis; l++) {
-          elem = 0.0
+          elem = 0.0;
 #pragma omp parallel for reduction(+ : elem)
-              for (auto s = 0; s < num_basis; s++) {
+          for (auto s = 0; s < num_basis; s++) {
             elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
           }
           // temp2(i, j, k, l) += elem;
