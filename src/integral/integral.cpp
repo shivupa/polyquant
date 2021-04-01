@@ -180,7 +180,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     }
   }
   // temp2.setZero();
-  ~temp2;
+  temp2.clear();
 #pragma omp parallel for
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
