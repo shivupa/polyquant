@@ -91,7 +91,7 @@ public:
   }
   size_t cache_size;
   std::unique_ptr<caches::fixed_sized_cache<
-      std::pair<int, int>, double, LFUCachePolicy<std::pair<int, int>>>>
+      std::pair<int, int>, double, caches::LFUCachePolicy<std::pair<int, int>>>>
       cache;
 
   double Slater_Condon(int i_det, int j_det) const;
@@ -1146,8 +1146,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   }
   try {
     return this->cache.Get(mat_idx);
-  }
-  except(std::range_error err) {
+  } catch(std::range_error err) {
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
     auto j_unfold = det_idx_unfold(j_det);
