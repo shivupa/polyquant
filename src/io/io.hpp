@@ -204,6 +204,15 @@ template <typename T> struct PairVectorHash {
     return seed;
   }
 };
+template <typename T> struct PairHash {
+  size_t operator()(const std::pair<T, T> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    seed ^= hasher(v.first) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= hasher(v.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return seed;
+  }
+};
 
 class POLYQUANT_TIMER {
 public:

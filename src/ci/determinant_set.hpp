@@ -84,17 +84,14 @@ public:
     message += std::to_string(this->cache_size);
     message += " objects";
     Polyquant_cout(message);
-    caches::fixed_sized_cache<std::pair<int, int>, double,
-                              caches::LFUCachePolicy<std::pair<int, int>>>
+    caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>
         contructed_cache(this->cache_size);
-    this->cache = std::make_unique<
-        caches::fixed_sized_cache<std::pair<int, int>, double,
-                                  caches::LFUCachePolicy<std::pair<int, int>>>>(
-        contructed_cache);
+    this->cache = std::make_unique<caches::fixed_sized_cache<
+        int, double, caches::LFUCachePolicy<int, int>>>(contructed_cache);
   }
   size_t cache_size;
-  std::unique_ptr<caches::fixed_sized_cache<
-      std::pair<int, int>, double, caches::LFUCachePolicy<std::pair<int, int>>>>
+  std::unique_ptr<
+      caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>>
       cache;
 
   double Slater_Condon(int i_det, int j_det) const;
@@ -1141,14 +1138,15 @@ POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_part, int other_idx_part,
 template <typename T>
 double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   std::pair<int, int> mat_idx;
-
+  int mat_idx_hash;
   if (j_det < i_det) {
     mat_idx = std::make_pair(j_det, i_det);
   } else {
     mat_idx = std::make_pair(i_det, j_det);
   }
+  mat_idx_hash = PairHash(mat_idx);
   try {
-    return this->cache->Get(mat_idx);
+    return this->cache->Get(mat_idx_hash);
   } catch (std::range_error err) {
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
