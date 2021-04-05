@@ -87,7 +87,7 @@ public:
     caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>
         contructed_cache(this->cache_size);
     this->cache = std::make_unique<caches::fixed_sized_cache<
-        int, double, caches::LFUCachePolicy<int, int>>>(contructed_cache);
+        int, double, caches::LFUCachePolicy<int>>>(contructed_cache);
   }
   size_t cache_size;
   std::unique_ptr<
@@ -1144,7 +1144,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   } else {
     mat_idx = std::make_pair(i_det, j_det);
   }
-  mat_idx_hash = PairHash(mat_idx);
+  mat_idx_hash = PairHash<int>(mat_idx);
   try {
     return this->cache->Get(mat_idx_hash);
   } catch (std::range_error err) {
@@ -1233,7 +1233,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
       }
       idx_part++;
     }
-    this->cache->Put(mat_idx, matrix_elem);
+    this->cache->Put(mat_idx_hash, matrix_elem);
     return matrix_elem;
   }
 }
