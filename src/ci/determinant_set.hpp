@@ -1144,7 +1144,8 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   } else {
     mat_idx = std::make_pair(i_det, j_det);
   }
-  mat_idx_hash = PairHash<int>(mat_idx);
+  PairHash<int> pairhasher;
+  mat_idx_hash = pairhasher(mat_idx);
   try {
     return this->cache->Get(mat_idx_hash);
   } catch (std::range_error err) {
