@@ -26,7 +26,7 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   auto num_basis = this->input_basis.num_basis;
   this->detset.max_orb = num_basis;
   this->detset.set_integral(this->input_integral);
-
+  this->detset.construct_cache(this->cache_size);
   this->setup_determinants();
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) +
                  " determinants");

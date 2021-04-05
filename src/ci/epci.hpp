@@ -90,6 +90,7 @@ public:
   int iteration_max = 500;
   int num_states = 1;
   int num_subspace_vec = 5;
+  size_t cache_size = 8;
 };
 } // namespace polyquant
 #endif

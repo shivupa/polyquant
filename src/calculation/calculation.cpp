@@ -387,6 +387,12 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
                   .input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
+                "cache_size")) {
+          ci_calc.cache_size =
+              this->input_params
+                  .input_data["keywords"]["ci_keywords"]["cache_size"];
+        }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
                 "excitation_level")) {
           auto ex_lvl =
               this->input_params
