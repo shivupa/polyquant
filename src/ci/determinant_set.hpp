@@ -85,7 +85,7 @@ public:
     message += " objects";
     Polyquant_cout(message);
     std::unique_ptr<caches::fixed_sized_cache<
-        std::pair<int, int>, double, LFUCachePolicy<std::pair<int, int>>>>
+        std::pair<int, int>, double, caches::LFUCachePolicy<std::pair<int, int>>>>
         contructed_cache(this->cache_size);
     this->cache->assign(contructed_cache);
   }
