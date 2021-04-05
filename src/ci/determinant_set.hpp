@@ -24,7 +24,7 @@ namespace polyquant {
 template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() { this->construct_cache(); }
-  POLYQUANT_DETSET(size_t size_in_gb) { this->construct_cache(size_in_gb); }
+  POLYQUANT_DETSET(size_t size_in_obj) { this->construct_cache(size_in_gb); }
 
   int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di,
                      std::pair<std::vector<T>, std::vector<T>> &Dj) const;
@@ -86,13 +86,12 @@ public:
     Polyquant_cout(message);
     caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>
         contructed_cache(this->cache_size);
-    this->cache = std::make_unique<caches::fixed_sized_cache<
-        int, double, caches::LFUCachePolicy<int>>>(contructed_cache);
+    this->cache = std::make_unique<
+        caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>>(
+        contructed_cache);
   }
   size_t cache_size;
-  std::unique_ptr<
-      caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>>
-      cache;
+  caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>> cache;
 
   double Slater_Condon(int i_det, int j_det) const;
   // for diagonalization stuff
