@@ -1148,7 +1148,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
     mat_idx = std::make_pair(i_det, j_det);
   }
   try {
-    return this->cache.Get(mat_idx);
+    return this->cache->Get(mat_idx);
   } catch (std::range_error err) {
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
@@ -1235,7 +1235,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
       }
       idx_part++;
     }
-    this->cache.Put(mat_idx, matrix_elem);
+    this->cache->Put(mat_idx, matrix_elem);
     return matrix_elem;
   }
 }
