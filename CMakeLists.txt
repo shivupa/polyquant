@@ -138,14 +138,14 @@ set(BUILD_CPR_TESTS_SSL OFF)
 FetchContent_MakeAvailable(CPR)
 
 FetchContent_Declare(
-    CACHES
+    caches
   GIT_REPOSITORY https://github.com/vpetrigo/caches.git
   GIT_TAG origin/master)
 set(BUILD_TEST OFF)
-FetchContent_MakeAvailable(CACHES)
+FetchContent_MakeAvailable(caches)
 add_library(caches INTERFACE) 
-target_include_directories(caches INTERFACE ${CACHES_SOURCE_DIR}/include)
-message(STATUS "shiv ${CACHES_SOURCE_DIR}")
+target_include_directories(caches INTERFACE ${caches_SOURCE_DIR}/include)
+message(STATUS "shiv ${caches_SOURCE_DIR}")
 add_library(caches::caches ALIAS caches)
 
 
