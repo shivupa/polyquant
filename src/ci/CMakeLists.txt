@@ -11,7 +11,7 @@ target_link_libraries(
   OpenMP::OpenMP_CXX
   cppitertools::cppitertools
   Spectra
-  caches)
+  caches::caches)
 target_link_libraries(ci Libint2::cxx)
 if(POLYQUANT_CODE_COVERAGE)
   target_link_libraries(ci coverage_config)

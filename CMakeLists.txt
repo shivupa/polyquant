@@ -144,7 +144,9 @@ FetchContent_Declare(
 set(BUILD_TEST OFF)
 FetchContent_MakeAvailable(CACHES)
 add_library(caches INTERFACE) 
-target_include_directories(caches INTERFACE ${CACHES_SOURCE_DIR}/include/)
+target_include_directories(caches INTERFACE ${CACHES_SOURCE_DIR}/include)
+message(${CACHES_SOURCE_DIR})
+add_library(caches::caches ALIAS caches)
 
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
