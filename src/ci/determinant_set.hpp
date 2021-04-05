@@ -3,17 +3,17 @@
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
-#include <cache.hpp>
-#include <lfu_cache_policy.hpp>
 #include "molecule/molecule.hpp"
 #include "molecule/quantum_particles.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <bit>
 #include <bitset>
+#include <cache.hpp>
 #include <combinations.hpp>
 #include <inttypes.h>
 #include <iostream>
+#include <lfu_cache_policy.hpp>
 #include <string>
 #include <tuple>
 #include <unordered_set>
@@ -84,10 +84,13 @@ public:
     message += std::to_string(this->cache_size);
     message += " objects";
     Polyquant_cout(message);
-    std::unique_ptr<caches::fixed_sized_cache<
-        std::pair<int, int>, double, caches::LFUCachePolicy<std::pair<int, int>>>>
+    caches::fixed_sized_cache<std::pair<int, int>, double,
+                              caches::LFUCachePolicy<std::pair<int, int>>>
         contructed_cache(this->cache_size);
-    this->cache->assign(contructed_cache);
+    this->cache = std::make_unique<
+        caches::fixed_sized_cache<std::pair<int, int>, double,
+                                  caches::LFUCachePolicy<std::pair<int, int>>>>(
+        contructed_cache);
   }
   size_t cache_size;
   std::unique_ptr<caches::fixed_sized_cache<
@@ -1146,7 +1149,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   }
   try {
     return this->cache.Get(mat_idx);
-  } catch(std::range_error err) {
+  } catch (std::range_error err) {
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
     auto j_unfold = det_idx_unfold(j_det);
