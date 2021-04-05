@@ -143,6 +143,8 @@ FetchContent_Declare(
   GIT_TAG origin/master)
 set(BUILD_TEST OFF)
 FetchContent_MakeAvailable(CACHES)
+add_library(caches INTERFACE) 
+target_include_directories(caches INTERFACE ${CACHES_SOURCE_DIR}/include/)
 
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
