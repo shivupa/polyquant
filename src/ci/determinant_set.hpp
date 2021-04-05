@@ -1,10 +1,10 @@
 #ifndef POLYQUANT_DETSET_H
 #define POLYQUANT_DETSET_H
 #include "basis/basis.hpp"
-#include "cache.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
-#include "lfu_cache_policy.hpp"
+#include <cache.hpp>
+#include <lfu_cache_policy.hpp>
 #include "molecule/molecule.hpp"
 #include "molecule/quantum_particles.hpp"
 #include <Eigen/Dense>
