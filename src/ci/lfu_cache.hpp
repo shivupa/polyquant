@@ -15,7 +15,7 @@ public:
     if (max_size == 0) {
       this->max_cache_size = std::numeric_limits<size_t>::max();
     } else {
-      this->max_cache_size = max_size
+      this->max_cache_size = max_size;
     }
     omp_init_lock(&writelock);
   }
@@ -112,7 +112,7 @@ protected:
 private:
   omp_lock_t writelock;
   std::multimap<std::size_t, keytype> frequency_storage;
-  std::unordered_map<keytype, std::multimap<std::size_t, keytype>::iterator, hashtype>
+  std::unordered_map<keytype, typename std::multimap<std::size_t, keytype>::iterator, hashtype>
       lfu_storage;
   std::unordered_map<keytype, valuetype, hashtype> cache_items_map;
   size_t max_cache_size;
