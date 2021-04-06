@@ -23,7 +23,7 @@ namespace polyquant {
 template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() { this->construct_cache(); }
-  POLYQUANT_DETSET(size_t size_in_obj) { this->construct_cache(size_in_gb); }
+  POLYQUANT_DETSET(size_t size_in_gb) { this->construct_cache(size_in_gb); }
 
   int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di,
                      std::pair<std::vector<T>, std::vector<T>> &Dj) const;

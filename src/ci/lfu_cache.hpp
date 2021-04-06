@@ -77,7 +77,7 @@ public:
 protected:
   void insert(const keytype &key) {
     constexpr std::size_t INIT_VAL = 1;
-    lfu_storage[keytype] = frequency_storage.emplace_hint(
+    lfu_storage[key] = frequency_storage.emplace_hint(
         std::as_const(frequency_storage.begin()), INIT_VAL, key);
   }
 
