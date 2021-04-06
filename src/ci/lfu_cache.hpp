@@ -120,7 +120,7 @@ private:
   mutable std::multimap<std::size_t, keytype> frequency_storage;
   mutable std::unordered_map<keytype, typename std::multimap<std::size_t, keytype>::iterator, hashtype>
       lfu_storage;
-  std::unordered_map<keytype, valuetype, hashtype> cache_items_map;
+  mutable std::unordered_map<keytype, valuetype, hashtype> cache_items_map;
   size_t max_cache_size;
 };
 } // namespace polyquant
