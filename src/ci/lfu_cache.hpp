@@ -66,7 +66,7 @@ public:
 
   bool remove(const keytype &key) {
     omp_set_lock(&writelock);
-    if (cache_items_map.find(key) == std::as_const(cache_items_map.end())) {
+    if (cache_items_map.find(key) == cache_items_map.cend()) {
       return false;
     }
     erase(key);
@@ -111,8 +111,8 @@ protected:
 
 private:
   mutable omp_lock_t writelock;
-  std::multimap<std::size_t, keytype> frequency_storage;
-  std::unordered_map<keytype, typename std::multimap<std::size_t, keytype>::iterator, hashtype>
+  mutable std::multimap<std::size_t, keytype> frequency_storage;
+  mutable std::unordered_map<keytype, typename std::multimap<std::size_t, keytype>::iterator, hashtype>
       lfu_storage;
   std::unordered_map<keytype, valuetype, hashtype> cache_items_map;
   size_t max_cache_size;
