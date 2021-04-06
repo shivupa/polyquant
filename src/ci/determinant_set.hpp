@@ -73,7 +73,7 @@ public:
     this->input_integral = integral;
   };
 
-  void construct_cache(size_t size_in_gb = std::numeric_limits<size_t>::max()) {
+  void construct_cache(size_t size_in_gb = std::numeric_limits<size_t>::max() / 1e9) {
     // This is actually super complicated. Some assumptions are made here that
     // doesn't quite transfer to ACTUAL size used
     // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
