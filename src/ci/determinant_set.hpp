@@ -92,7 +92,7 @@ public:
     this->cache = constructed_cache;
   }
   size_t cache_size;
-  polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
+  mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
 
   double Slater_Condon(int i_det, int j_det) const;
   // for diagonalization stuff
