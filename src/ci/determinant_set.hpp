@@ -1245,7 +1245,7 @@ void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
       auto sc_elem = this->Slater_Condon(j_det, i_det);
       if (x_in[j_det] != 0 && sc_elem != 0) {
-      matrix_elem += x_in[j_det] * sc_elem
+      matrix_elem += x_in[j_det] * sc_elem;
       }
     }
     y_out[i_det] = matrix_elem;

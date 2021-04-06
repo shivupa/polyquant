@@ -152,7 +152,7 @@ public:
   int incremental_fock_reset_freq = 8;
   int incremental_fock_delay_after_independent_converged = 4;
   int incremental_fock_initial_onset_thresh = 1e-4;
-  bool Cauchy_Schwarz_screening = true
+  bool Cauchy_Schwarz_screening = true;
   double Cauchy_Schwarz_threshold = 1e-7;
 
   /**
