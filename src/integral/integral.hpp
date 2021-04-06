@@ -68,11 +68,7 @@ public:
    */
   template <typename T> const T idx2(const T &i, const T &j) const {
     std::pair<int, int> ij_idx;
-    if (j < i) {
-      ij_idx = std::make_pair(j, i);
-    } else {
-      ij_idx = std::make_pair(i, j);
-    }
+    ij_idx = std::make_pair(j, i);
     auto cached_ij_elem = this->cache.get(ij_idx);
     if (cached_ij_elem.has_value()) {
       return cached_ij_elem.value();

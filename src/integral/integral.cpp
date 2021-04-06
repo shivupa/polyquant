@@ -154,6 +154,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
+  Polyquant_cout("2elec trans ok");
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto r = 0; r < num_basis; r++) {
@@ -168,6 +169,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
+  Polyquant_cout("2elec trans ok");
   temp1.setZero();
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
@@ -183,6 +185,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
+  Polyquant_cout("2elec trans ok");
   // temp2.setZero();
   temp2.resize(0, 0, 0, 0);
   Polyquant_cout("2elec trans ok");
@@ -202,6 +205,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
+  Polyquant_cout("2elec trans ok");
   // for (auto i = 0; i < num_basis; i++) {
   //   for (auto j = 0; j < num_basis; j++) {
   //     for (auto k = 0; k < num_basis; k++) {
