@@ -9,7 +9,6 @@ POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
   POLYQUANT_TIMER timer(function);
   Polyquant_cout("INTEGRAL");
   this->setup_integral(input, basis, molecule);
-  this->construct_cache();
 }
 
 void POLYQUANT_INTEGRAL::construct_cache(size_t size_in_gb){
@@ -445,6 +444,7 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
+  this->construct_cache();
 }
 
 /**

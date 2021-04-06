@@ -67,15 +67,15 @@ public:
    * symmetric matrix
    */
   template <typename T> const T idx2(const T &i, const T &j) const {
-    std::pair<int, int> ij_idx;
-    ij_idx = std::make_pair(j, i);
+    std::pair<T, T> ij_idx;
+    ij_idx = std::make_pair(i, j);
     auto cached_ij_elem = this->cache.get(ij_idx);
     if (cached_ij_elem.has_value()) {
       return cached_ij_elem.value();
     } else {
-      auto idx2 = symmetric_matrix_triangular_idx(i, j);
-      this->cache.set(ij_idx, idx2);
-      return idx2;
+      auto ij_elem = symmetric_matrix_triangular_idx(i, j);
+      this->cache.set(ij_idx, ij_elem);
+      return ij_elem;
     }
   }
   /**
