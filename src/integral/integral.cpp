@@ -11,6 +11,13 @@ POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
   this->setup_integral(input, basis, molecule);
 }
 
+void POLYQUANT_INTEGRAL::construct_cache(size_t size_in_gb = 10000){
+  std::pair<int, int> temp(0, 0);
+  this->cache_size = (size_in_gb * 1e9) / sizeof(temp);
+  polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> constructed_cache(this->cache_size);
+  this->cache = constructed_cache;
+}
+
 void POLYQUANT_INTEGRAL::calculate_overlap() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);

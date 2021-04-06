@@ -1,6 +1,7 @@
 #ifndef POLYQUANT_INTEGRAL_H
 #define POLYQUANT_INTEGRAL_H
 #include "basis/basis.hpp"
+#include "io/lfu_cache.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
@@ -36,6 +37,7 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
                      const POLYQUANT_MOLECULE &molecule);
+  construct_cache(size_t size_in_gb = 10000);
 
   void calculate_overlap();
   // void calculate_Schwarz();
@@ -65,7 +67,20 @@ public:
    * symmetric matrix
    */
   template <typename T> const T idx2(const T &i, const T &j) const {
-    return symmetric_matrix_triangular_idx(i, j);
+    std::pair<int, int> ij_idx;
+    if (j < i) {
+      ij_idx = std::make_pair(j, i);
+    } else {
+      ij_idx = std::make_pair(i, j);
+    }
+    auto cached_ij_elem = this->cache.get(ij_idx);
+    if (cached_ij_elem.has_value()) {
+      return cached_ij_elem.value();
+    } else {
+      auto idx2 = symmetric_matrix_triangular_idx(i, j);
+      this->cache.set(ij_idx, ij_elem);
+      return idx2;
+    }
   }
   /**
    * @brief Calculate the combined index for the vector containing the unique
@@ -199,6 +214,9 @@ public:
       std::vector<
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
           &mo_coeffs);
+
+  size_t cache_size;
+  mutable polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> cache;
   /**
    * @brief the input parameters
    *

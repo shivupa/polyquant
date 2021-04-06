@@ -1,7 +1,7 @@
 #ifndef POLYQUANT_DETSET_H
 #define POLYQUANT_DETSET_H
 #include "basis/basis.hpp"
-#include "ci/lfu_cache.hpp"
+#include "io/lfu_cache.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
@@ -1243,7 +1243,10 @@ void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
     auto matrix_elem = 0.0;
 #pragma omp parallel for reduction(+ : matrix_elem)
     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
-      matrix_elem += x_in[j_det] * this->Slater_Condon(j_det, i_det);
+      auto sc_elem = this->Slater_Condon(j_det, i_det);
+      if (x_in[j_det] != 0 && sc_elem != 0) {
+      matrix_elem += x_in[j_det] * sc_elem
+      }
     }
     y_out[i_det] = matrix_elem;
   }
