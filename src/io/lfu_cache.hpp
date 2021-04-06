@@ -4,6 +4,7 @@
 #include <limits>
 #include <memory>
 #include <unordered_map>
+#include "io/io.hpp"
 
 namespace polyquant {
 
@@ -23,6 +24,8 @@ public:
   ~polyquant_lfu_cache() = default;
 
   void set(const keytype &key, const valuetype &value) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
     auto elem_it = this->find(key);
     if (elem_it == this->cache_items_map.end()) {
@@ -39,6 +42,8 @@ public:
   }
 
   const std::optional<valuetype> get(const keytype &key) const {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
     auto elem_it = this->find(key);
 
