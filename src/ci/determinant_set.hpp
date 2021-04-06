@@ -89,7 +89,7 @@ public:
     Polyquant_cout(message);
     polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>>
         constructed_cache(this->cache_size);
-    this->cache = constucted_cache;
+    this->cache = constructed_cache;
   }
   size_t cache_size;
   polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
@@ -1143,7 +1143,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   } else {
     mat_idx = std::make_pair(i_det, j_det);
   }
-  auto cached_matrix_elem = this->cache->get(mat_idx);
+  auto cached_matrix_elem = this->cache.get(mat_idx);
   if (cached_matrix_elem.has_value()) {
     return cached_matrix_elem.value();
   } else {
@@ -1232,7 +1232,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
       }
       idx_part++;
     }
-    this->cache->set(mat_idx, matrix_elem);
+    this->cache.set(mat_idx, matrix_elem);
     return matrix_elem;
   }
 }
