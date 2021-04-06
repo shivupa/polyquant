@@ -137,18 +137,6 @@ set(BUILD_CPR_TESTS OFF)
 set(BUILD_CPR_TESTS_SSL OFF)
 FetchContent_MakeAvailable(CPR)
 
-FetchContent_Declare(
-    caches
-  GIT_REPOSITORY https://github.com/vpetrigo/caches.git
-  GIT_TAG origin/master)
-set(BUILD_TEST OFF)
-FetchContent_MakeAvailable(caches)
-add_library(caches INTERFACE) 
-target_include_directories(caches INTERFACE ${caches_SOURCE_DIR}/include)
-message(STATUS "shiv ${caches_SOURCE_DIR}")
-add_library(caches::caches ALIAS caches)
-
-
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(OpenMP REQUIRED)
 find_package(MKL REQUIRED)

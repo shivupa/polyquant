@@ -1,6 +1,7 @@
 #ifndef POLYQUANT_DETSET_H
 #define POLYQUANT_DETSET_H
 #include "basis/basis.hpp"
+#include "ci/lfu_cache.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
 #include "molecule/molecule.hpp"
@@ -9,11 +10,9 @@
 #include <Eigen/Sparse>
 #include <bit>
 #include <bitset>
-#include <cache.hpp>
 #include <combinations.hpp>
 #include <inttypes.h>
 #include <iostream>
-#include <lfu_cache_policy.hpp>
 #include <string>
 #include <tuple>
 #include <unordered_set>
@@ -74,8 +73,12 @@ public:
     this->input_integral = integral;
   };
 
-  void construct_cache(size_t size_in_gb = 8) {
-    std::string message = "Setting CI determinant elements cache size: ";
+  void construct_cache(size_t size_in_gb = std::numeric_limits<size_t>::max()) {
+    // This is actually super complicated. Some assumptions are made here that
+    // doesn't quite transfer to ACTUAL size used
+    // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
+    // It is assumed that map size() * sizeof(hashed object)
+    std::string message = "Setting CI determinant elements max cache size: ";
     message += std::to_string(size_in_gb);
     message += " GB";
     std::pair<int, int> temp(0, 0);
@@ -84,14 +87,12 @@ public:
     message += std::to_string(this->cache_size);
     message += " objects";
     Polyquant_cout(message);
-    caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>
-        contructed_cache(this->cache_size);
-    this->cache = std::make_unique<
-        caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>>>(
-        contructed_cache);
+    polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>>
+        constructed_cache(this->cache_size);
+    this->cache = constucted_cache;
   }
   size_t cache_size;
-  caches::fixed_sized_cache<int, double, caches::LFUCachePolicy<int>> cache;
+  polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
 
   double Slater_Condon(int i_det, int j_det) const;
   // for diagonalization stuff
@@ -1137,17 +1138,15 @@ POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_part, int other_idx_part,
 template <typename T>
 double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   std::pair<int, int> mat_idx;
-  int mat_idx_hash;
   if (j_det < i_det) {
     mat_idx = std::make_pair(j_det, i_det);
   } else {
     mat_idx = std::make_pair(i_det, j_det);
   }
-  PairHash<int> pairhasher;
-  mat_idx_hash = pairhasher(mat_idx);
-  try {
-    return this->cache->Get(mat_idx_hash);
-  } catch (std::range_error err) {
+  auto cached_matrix_elem = this->cache->get(mat_idx);
+  if (cached_matrix_elem.has_value()) {
+    return cached_matrix_elem.value();
+  } else {
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
     auto j_unfold = det_idx_unfold(j_det);
@@ -1233,7 +1232,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
       }
       idx_part++;
     }
-    this->cache->Put(mat_idx_hash, matrix_elem);
+    this->cache->set(mat_idx, matrix_elem);
     return matrix_elem;
   }
 }

@@ -7,19 +7,17 @@
 
 namespace polyquant {
 
-template <typename keytype, typename valuetype>
+template <typename keytype, typename valuetype, typename hashtype>
 class polyquant_lfu_cache {
 
 public:
-  using iterator = typename std::unordered_map<keytype, valuetype>::iterator;
-  using const_iterator = typename std::unordered_map<keytype, valuetype>::const_iterator;
-  explicit fixed_sized_cache(size_t max_size = 0)  {
+  explicit fixed_sized_cache(size_t max_size = 0) {
     if (max_size == 0) {
       this->max_cache_size = std::numeric_limits<size_t>::max();
-  } else {
+    } else {
       this->max_cache_size = max_size
-  }
-  omp_init_lock(&writelock);
+    }
+    omp_init_lock(&writelock);
   }
 
   ~fixed_sized_cache() = default;
@@ -27,13 +25,11 @@ public:
   void set(const keytype &key, const valuetype &value) {
     omp_set_lock(&writelock);
     auto elem_it = this->find(key);
-
     if (elem_it == this->cache_items_map.end()) {
-      // add new element to the cache
       if (this->cache_items_map.size() + 1 > this->max_cache_size) {
-          // TODO replace some fraction of the cache e.g. 90%
-        auto disp_candidate_keytype = this->least_freq_used();
-        this->erase(disp_candidate_keytype);
+        // TODO replace some fraction of the cache e.g. 90%? Investigate
+        auto least_used_key_to_delete = this->least_freq_used();
+        this->erase(least_used_key_to_delete);
       }
       this->insert(key, value);
     } else {
@@ -42,21 +38,21 @@ public:
     omp_unset_lock(&writelock);
   }
 
-  const valuetype &get(const keytype &keytype) const {
+  const std::optional<valuetype> &get(const keytype &key) const {
     omp_set_lock(&writelock);
-    auto elem_it = this->find(keytype);
+    auto elem_it = this->find(key);
 
     if (elem_it == cache_items_map.end()) {
-      throw std::range_error{"No such element in the cache"};
+      return {};
     }
-    cache_policy.increment(keytype);
+    this->increment(key);
     omp_unset_lock(&writelock);
     return elem_it->second;
   }
 
-  bool in_cache(const keytype &keytype) const {
+  bool in_cache(const keytype &key) const {
     omp_set_lock(&writelock);
-    bool in_cache = find(keytype) != cache_items_map.end();
+    bool in_cache = this->find(key) != this->cache_items_map.end();
     omp_unset_lock(&writelock);
     return in_cache;
   }
@@ -68,57 +64,56 @@ public:
     return size;
   }
 
-  bool remove(const keytype &keytype) {
-    operation_guard{safe_op};
-    if (cache_items_map.find(keytype) == cache_items_map.cend()) {
+  bool remove(const keytype &key) {
+    omp_set_lock(&writelock);
+    if (cache_items_map.find(key) == std::as_const(cache_items_map.end())) {
       return false;
     }
-    erase(keytype);
+    erase(key);
+    omp_unset_lock(&writelock);
     return true;
   }
 
 protected:
-  void insert(const keytype &keytype)  {
+  void insert(const keytype &key) {
     constexpr std::size_t INIT_VAL = 1;
-    // all new valuetype initialized with the frequency 1
     lfu_storage[keytype] = frequency_storage.emplace_hint(
-        frequency_storage.cbegin(), INIT_VAL, keytype);
+        std::as_const(frequency_storage.begin()), INIT_VAL, key);
   }
 
-  void increment(const keytype &keytype)  {
-    // get the previous frequency valuetype of a keytype
-    auto elem_for_increment = lfu_storage[keytype];
-    auto incrementd_elem =
-        std::make_pair(elem_for_increment->first + 1, elem_for_increment->second);
-    // increment the previous valuetype
-    frequency_storage.erase(elem_for_increment);
-    lfu_storage[keytype] = frequency_storage.emplace_hint(frequency_storage.cend(),
-                                                      std::move(incrementd_elem));
+  void increment(const keytype &key) {
+    auto elem_for_increment = this->lfu_storage[key];
+    auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
+                                           elem_for_increment->second);
+    this->frequency_storage.erase(elem_for_increment);
+    this->lfu_storage[key] = this->frequency_storage.emplace_hint(
+        std::as_const(this->frequency_storage.end()),
+        std::move(incremented_pair));
   }
 
-  void erase(const keytype &keytype)  {
-    frequency_storage.erase(lfu_storage[keytype]);
-    lfu_storage.erase(keytype);
+  void erase(const keytype &key) {
+    this->frequency_storage.erase(this->lfu_storage[key]);
+    this->lfu_storage.erase(key);
   }
 
-  void increment(const keytype &keytype, const valuetype &valuetype) {
-    cache_policy.increment(keytype);
-    cache_items_map[keytype] = valuetype;
+  void increment(const keytype &key, const valuetype &value) {
+    this->increment(key);
+    this->cache_items_map[key] = value;
   }
 
-  const_iterator find(const keytype &keytype) const {
-    return cache_items_map.find(keytype);
+  std::unordered_map<keytype, valuetype, hashtype>::const_iterator
+  find(const keytype &key) const {
+    return this->cache_items_map.find(key);
   }
-  const keytype &least_freq_used() const  {
-    // at the beginning of the frequency_storage we have the
-    // least frequency used valuetype
-    return frequency_storage.cbegin()->second;
+  const keytype &least_freq_used() const {
+    return std::as_const(this->frequency_storage.begin()->second);
   }
 
 private:
   omp_lock_t writelock;
   std::multimap<std::size_t, keytype> frequency_storage;
-  std::unordered_map<keytype, lfu_iterator> lfu_storage;
+  std::unordered_map<keytype, std::multimap<std::size_t, key>::iterator>
+      lfu_storage;
   std::unordered_map<keytype, valuetype, > cache_items_map;
   size_t max_cache_size;
 };
