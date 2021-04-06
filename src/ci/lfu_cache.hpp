@@ -75,7 +75,7 @@ public:
   }
 
 protected:
-  void insert(const keytype &key) {
+  void insert(const keytype &key) const{
     constexpr std::size_t INIT_VAL = 1;
     lfu_storage[key] = frequency_storage.emplace_hint(
         frequency_storage.cbegin(), INIT_VAL, key);
@@ -87,7 +87,7 @@ protected:
                                            elem_for_increment->second);
     this->frequency_storage.erase(elem_for_increment);
     this->lfu_storage[key] = this->frequency_storage.emplace_hint(
-        std::as_const(this->frequency_storage.end()),
+        this->frequency_storage.cend(),
         std::move(incremented_pair));
   }
 
