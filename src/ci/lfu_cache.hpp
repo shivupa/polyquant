@@ -38,7 +38,7 @@ public:
     omp_unset_lock(&writelock);
   }
 
-  const std::optional<valuetype> &get(const keytype &key) const {
+  const std::optional<valuetype> get(const keytype &key) const {
     omp_set_lock(&writelock);
     auto elem_it = this->find(key);
 
