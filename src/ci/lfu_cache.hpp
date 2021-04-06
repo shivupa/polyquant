@@ -78,10 +78,10 @@ protected:
   void insert(const keytype &key) {
     constexpr std::size_t INIT_VAL = 1;
     lfu_storage[key] = frequency_storage.emplace_hint(
-        std::as_const(frequency_storage.begin()), INIT_VAL, key);
+        frequency_storage.cbegin(), INIT_VAL, key);
   }
 
-  void increment(const keytype &key) {
+  void increment(const keytype &key) const {
     auto elem_for_increment = this->lfu_storage[key];
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
@@ -96,7 +96,7 @@ protected:
     this->lfu_storage.erase(key);
   }
 
-  void increment(const keytype &key, const valuetype &value) {
+  void increment(const keytype &key, const valuetype &value) const {
     this->increment(key);
     this->cache_items_map[key] = value;
   }
