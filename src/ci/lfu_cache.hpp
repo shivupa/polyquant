@@ -31,7 +31,7 @@ public:
         auto least_used_key_to_delete = this->least_freq_used();
         this->erase(least_used_key_to_delete);
       }
-      insert(key, value);
+      this->insert(key, value);
     } else {
       this->increment(key, value);
     }
@@ -45,7 +45,7 @@ public:
     if (elem_it == cache_items_map.end()) {
       return {};
     }
-    increment(key);
+    this->increment(key);
     omp_unset_lock(&writelock);
     return elem_it->second;
   }
