@@ -70,9 +70,14 @@ public:
     std::pair<T, T> ij_idx;
     ij_idx = std::make_pair(i, j);
     auto cached_ij_elem = this->cache.get(ij_idx);
+        Polyquant_cout("LOOKING FOR I J");
+        Polyquant_cout(i);
+        Polyquant_cout(j);
     if (cached_ij_elem.has_value()) {
+        Polyquant_cout("Cached");
       return cached_ij_elem.value();
     } else {
+        Polyquant_cout("Cached");
       auto ij_elem = symmetric_matrix_triangular_idx(i, j);
       this->cache.set(ij_idx, ij_elem);
       return ij_elem;
