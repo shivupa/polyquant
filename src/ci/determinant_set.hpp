@@ -1242,6 +1242,7 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
 
 template <typename T>
 void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
+    Polyquant_cout("Performing op");
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto matrix_elem = 0.0;
 #pragma omp parallel for reduction(+ : matrix_elem)
