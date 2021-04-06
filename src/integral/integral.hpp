@@ -40,7 +40,7 @@ public:
   construct_cache(size_t size_in_gb = 10000);
 
   void calculate_overlap();
-  // void calculate_Schwarz();
+  void calculate_Schwarz();
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
@@ -113,16 +113,16 @@ public:
       const libint2::BasisSet &shells, libint2::Operator obtype,
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
 
-  // /**
-  //  * @brief Calculate Schwarz integrals (diagonal 2 body ints)
-  //  *
-  //  * @param output_matrix the matrix to hold the diagonal two body ints
-  //  * @param shells the basis set to calculate the one body integrals in
-  //  * @param obtype the operator to calculate the integrals for
-  //  */
-  // void compute_Schwarz_ints(
-  //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
-  //     const libint2::BasisSet &shells, libint2::Operator obtype);
+  /**
+   * @brief Calculate Schwarz integrals (diagonal 2 body ints)
+   *
+   * @param output_matrix the matrix to hold the diagonal two body ints
+   * @param shells the basis set to calculate the one body integrals in
+   * @param obtype the operator to calculate the integrals for
+   */
+  void compute_Schwarz_ints(
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+      const libint2::BasisSet &shells, libint2::Operator obtype);
 
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,

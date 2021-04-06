@@ -49,6 +49,12 @@ POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
   // Form alpha element
   double Da_kl = 0.0;
   double Db_kl = 0.0;
+    
+  if (this->Cauchy_Schwarz_screening && std::abs(this->D[quantum_part_a_idx][0](k, l) + this->D[quantum_part_a_idx][1%this->D[quantum_part_a_idx].size()](k, l)) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
+    std::pair<double, double> fock_elements(alpha_elem, beta_elem);
+    return fock_elements;
+  }
+
   if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
       !incremental_fock_reset[quantum_part_a_idx][0]) {
     Da_kl = this->D[quantum_part_a_idx][0](k, l) -
@@ -119,6 +125,10 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
   double qb = quantum_part_b.charge;
 
   if (!independent_converged || quantum_part_a_idx == quantum_part_b_idx) {
+    std::pair<double, double> fock_elements(alpha_elem, beta_elem);
+    return fock_elements;
+  }
+  if (this->Cauchy_Schwarz_screening && std::abs(this->D[quantum_part_b_idx][0](k, l) + this->D[quantum_part_b_idx][1%this->D[quantum_part_b_idx].size()](k, l)) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
     std::pair<double, double> fock_elements(alpha_elem, beta_elem);
     return fock_elements;
   }
@@ -747,9 +757,9 @@ void POLYQUANT_EPSCF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
-  // if (this->incremental_fock) {
-  //  this->input_integral.calculate_Schwarz();
-  //}
+  if (this->Cauchy_Schwarz_screening){
+  this->input_integral.calculate_Schwarz();
+  }
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
