@@ -1137,6 +1137,7 @@ POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_part, int other_idx_part,
 }
 template <typename T>
 double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
+
   std::pair<int, int> mat_idx;
   if (j_det < i_det) {
     mat_idx = std::make_pair(j_det, i_det);
@@ -1145,8 +1146,10 @@ double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   }
   auto cached_matrix_elem = this->cache.get(mat_idx);
   if (cached_matrix_elem.has_value()) {
+      Polyquant_cout("Found in cache");
     return cached_matrix_elem.value();
   } else {
+      Polyquant_cout("Not found in cache");
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
     auto j_unfold = det_idx_unfold(j_det);

@@ -43,6 +43,7 @@ public:
     auto elem_it = this->find(key);
 
     if (elem_it == cache_items_map.end()) {
+      omp_unset_lock(&writelock);
       return {};
     }
     this->increment(key);
