@@ -11,7 +11,7 @@ template <typename keytype, typename valuetype, typename hashtype>
 class polyquant_lfu_cache {
 
 public:
-  explicit fixed_sized_cache(size_t max_size = 0) {
+  explicit polyquant_lfu_cache(size_t max_size = 0) {
     if (max_size == 0) {
       this->max_cache_size = std::numeric_limits<size_t>::max();
     } else {
@@ -20,7 +20,7 @@ public:
     omp_init_lock(&writelock);
   }
 
-  ~fixed_sized_cache() = default;
+  ~polyquant_lfu_cache() = default;
 
   void set(const keytype &key, const valuetype &value) {
     omp_set_lock(&writelock);
@@ -112,9 +112,9 @@ protected:
 private:
   omp_lock_t writelock;
   std::multimap<std::size_t, keytype> frequency_storage;
-  std::unordered_map<keytype, std::multimap<std::size_t, key>::iterator>
+  std::unordered_map<keytype, std::multimap<std::size_t, keytype>::iterator, hashtype>
       lfu_storage;
-  std::unordered_map<keytype, valuetype, > cache_items_map;
+  std::unordered_map<keytype, valuetype, hashtype> cache_items_map;
   size_t max_cache_size;
 };
 } // namespace polyquant
