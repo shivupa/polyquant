@@ -37,7 +37,7 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
                      const POLYQUANT_MOLECULE &molecule);
-  construct_cache(size_t size_in_gb = 10000);
+  void construct_cache(size_t size_in_gb = 10000);
 
   void calculate_overlap();
   void calculate_Schwarz();
@@ -78,7 +78,7 @@ public:
       return cached_ij_elem.value();
     } else {
       auto idx2 = symmetric_matrix_triangular_idx(i, j);
-      this->cache.set(ij_idx, ij_elem);
+      this->cache.set(ij_idx, idx2);
       return idx2;
     }
   }
