@@ -75,7 +75,13 @@ public:
   }
 
 protected:
-  void insert(const keytype &key) const{
+  void insert(const keytype &key, const valuetype &value)
+  {
+      this->insert(key);
+      this->cache_items_map.emplace(std::make_pair(key, value));
+  }
+
+  void insert(const keytype &key) {
     constexpr std::size_t INIT_VAL = 1;
     lfu_storage[key] = frequency_storage.emplace_hint(
         frequency_storage.cbegin(), INIT_VAL, key);
