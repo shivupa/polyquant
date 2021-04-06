@@ -44,7 +44,7 @@ public:
 
     if (elem_it == cache_items_map.end()) {
       omp_unset_lock(&writelock);
-      return {};
+      return std::nullopt;
     }
     this->increment(key);
     omp_unset_lock(&writelock);
