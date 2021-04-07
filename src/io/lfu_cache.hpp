@@ -109,12 +109,16 @@ protected:
   POLYQUANT_TIMER timer(function);
     std::cout << "in increment" << std::endl;
     auto elem_for_increment = this->lfu_storage[key];
+    std::cout << "in increment1" << std::endl;
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
+    std::cout << "in increment2" << std::endl;
     this->frequency_storage.erase(elem_for_increment);
+    std::cout << "in increment3" << std::endl;
     this->lfu_storage[key] = this->frequency_storage.emplace_hint(
         this->frequency_storage.cend(),
         std::move(incremented_pair));
+    std::cout << "in increment4" << std::endl;
   }
 
   void erase(const keytype &key) {
