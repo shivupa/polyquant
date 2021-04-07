@@ -110,7 +110,6 @@ protected:
   }
 
   void increment(const keytype &key, const valuetype &value) const {
-    omp_set_lock(&writelock);
     auto elem_for_increment = this->lfu_storage[key];
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
@@ -122,7 +121,6 @@ protected:
         this->frequency_storage.cend(),
         std::move(incremented_pair));
     this->cache_items_map[key] = value;
-    omp_unset_lock(&writelock);
   }
 
   std::unordered_map<keytype, valuetype, hashtype>::const_iterator
