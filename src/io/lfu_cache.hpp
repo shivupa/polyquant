@@ -133,7 +133,7 @@ protected:
   find(const keytype &key) const {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  Polyquant_cout(key);
+    std::cout << key.first << " " << key.second << " " << this->cache_items_map.find(key) << std::endl;
     return this->cache_items_map.find(key);
   }
   const keytype &least_freq_used() const {
