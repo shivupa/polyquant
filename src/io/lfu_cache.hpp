@@ -22,13 +22,13 @@ public:
     omp_init_lock(&writelock);
   }
 
-  ~polyquant_lfu_cache() = default;
+  ~polyquant_lfu_cache(){
+      this->clear();
+      omp_destroy_lock(&writelock);
+  }
 
   void set(const keytype &key, const valuetype &value) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
-    std::cout << "setSHIV" << std::endl;
     auto elem_it = this->find(key);
     if (elem_it == this->cache_items_map.end()) {
       if (this->cache_items_map.size() + 1 > this->max_cache_size) {
@@ -44,8 +44,6 @@ public:
   }
 
   const std::optional<valuetype> get(const keytype &key) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
     auto elem_it = this->find(key);
 
@@ -53,14 +51,13 @@ public:
       omp_unset_lock(&writelock);
       return std::nullopt;
     }
-    this->increment(key);
+    auto return_value = elem_it->second;
+    this->increment(key, return_value);
     omp_unset_lock(&writelock);
-    return elem_it->second;
+    return return_value;
   }
 
   bool in_cache(const keytype &key) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
     bool in_cache = this->find(key) != this->cache_items_map.end();
     omp_unset_lock(&writelock);
@@ -68,8 +65,6 @@ public:
   }
 
   size_t size() const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
     auto size = this->cache_items_map.size();
     omp_unset_lock(&writelock);
@@ -77,80 +72,62 @@ public:
   }
 
   bool remove(const keytype &key) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
+    bool removed = false;
     if (cache_items_map.find(key) == cache_items_map.cend()) {
-      return false;
+      return removed;
     }
     this->erase(key);
+    removed = true;
     omp_unset_lock(&writelock);
-    return true;
+    return removed;
   }
 
 protected:
-  void insert(const keytype &key, const valuetype &value)
-  {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-      this->insert(key);
-      this->cache_items_map.emplace(std::make_pair(key, value));
+  void clear() {
+    omp_set_lock(&writelock);
+    for (auto it = this->cache_items_map.begin(); it != this->cache_items_map.end(); ++it)
+    {
+        this->erase(it->first);
+    }
+    this->cache_items_map.clear();
+    omp_unset_lock(&writelock);
   }
 
-  void insert(const keytype &key) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
+  void insert(const keytype &key, const valuetype &value)
+  {
     constexpr std::size_t INIT_VAL = 1;
     lfu_storage[key] = frequency_storage.emplace_hint(
         frequency_storage.cbegin(), INIT_VAL, key);
-  }
-
-  void increment(const keytype &key) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-    std::cout << "in increment" << std::endl;
-    auto elem_for_increment = this->lfu_storage[key];
-    std::cout << "in increment1" << std::endl;
-    auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
-                                           elem_for_increment->second);
-    std::cout << "SHIV SHIV SHIV" << elem_for_increment->first << " " <<  std::endl;
-    std::cout << "in increment2" << std::endl;
-    this->frequency_storage.erase(elem_for_increment);
-    std::cout << "in increment3" << std::endl;
-    this->lfu_storage[key] = this->frequency_storage.emplace_hint(
-        this->frequency_storage.cend(),
-        std::move(incremented_pair));
-    std::cout << "in increment4" << std::endl;
+      this->cache_items_map.emplace(std::make_pair(key, value));
   }
 
   void erase(const keytype &key) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
     this->frequency_storage.erase(this->lfu_storage[key]);
     this->lfu_storage.erase(key);
     auto elem_it = this->find(key);
-    [](const keytype &, const valuetype &) {}(key, elem_it->second);
     cache_items_map.erase(elem_it);
   }
 
   void increment(const keytype &key, const valuetype &value) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-    this->increment(key);
+    auto elem_for_increment = this->lfu_storage[key];
+    auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
+                                           elem_for_increment->second);
+    std::cout << "breaks here" << std::endl;
+    this->frequency_storage.erase(elem_for_increment);
+    std::cout << "breaks here" << std::endl;
+    this->lfu_storage[key] = this->frequency_storage.emplace_hint(
+        this->frequency_storage.cend(),
+        std::move(incremented_pair));
     this->cache_items_map[key] = value;
   }
 
   std::unordered_map<keytype, valuetype, hashtype>::const_iterator
   find(const keytype &key) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-    std::cout << key.first << " " << key.second <<  (this->cache_items_map.find(key) == this->cache_items_map.end())<< std::endl;
     return this->cache_items_map.find(key);
   }
   const keytype &least_freq_used() const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-    return std::as_const(this->frequency_storage.begin()->second);
+    return this->frequency_storage.cbegin()->second;
   }
 
 private:
