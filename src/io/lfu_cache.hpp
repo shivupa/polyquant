@@ -129,7 +129,7 @@ protected:
     this->frequency_storage.erase(this->lfu_storage[key]);
     this->lfu_storage.erase(key);
     auto elem_it = this->find(key);
-    [](const Key &, const Value &) {}(key, elem_it->second);
+    [](const keytype &, const valuetype &) {}(key, elem_it->second);
     cache_items_map.erase(elem_it);
   }
 
