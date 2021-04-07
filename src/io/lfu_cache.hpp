@@ -113,7 +113,7 @@ protected:
     std::cout << "in increment1" << std::endl;
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
-    std::cout << "SHIV SHIV SHIV" << elem_for_increment->first << " " << elem_for_increment->second << std::endl;
+    std::cout << "SHIV SHIV SHIV" << elem_for_increment->first << " " <<  std::endl;
     std::cout << "in increment2" << std::endl;
     this->frequency_storage.erase(elem_for_increment);
     std::cout << "in increment3" << std::endl;
