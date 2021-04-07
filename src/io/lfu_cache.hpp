@@ -28,6 +28,7 @@ public:
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
     omp_set_lock(&writelock);
+    std::cout << "setSHIV" << std::endl;
     auto elem_it = this->find(key);
     if (elem_it == this->cache_items_map.end()) {
       if (this->cache_items_map.size() + 1 > this->max_cache_size) {
@@ -113,7 +114,6 @@ protected:
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
     std::cout << "in increment2" << std::endl;
-    std::cout << this->frequency_storage.count(elem_for_increment) << std::endl;
     this->frequency_storage.erase(elem_for_increment);
     std::cout << "in increment3" << std::endl;
     this->lfu_storage[key] = this->frequency_storage.emplace_hint(
