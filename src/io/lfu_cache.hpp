@@ -113,7 +113,7 @@ protected:
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
     std::cout << "in increment2" << std::endl;
-    std::cout << this->frequency_storage.contains(elem_for_increment) << std::endl;
+    std::cout << this->frequency_storage.count(elem_for_increment) << std::endl;
     this->frequency_storage.erase(elem_for_increment);
     std::cout << "in increment3" << std::endl;
     this->lfu_storage[key] = this->frequency_storage.emplace_hint(
