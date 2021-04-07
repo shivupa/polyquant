@@ -150,6 +150,7 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
             Polyquant_cout(this->idx8(p, q, r, s));
             Polyquant_cout(this->twoelec(this->idx8(p, q, r, s)));
             elem += mo_coeffs_a(p, i) * this->twoelec(this->idx8(p, q, r, s));
+            Polyquant_cout("OK");
           }
           temp1(i, q, r, s) += elem;
         }
