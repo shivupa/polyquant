@@ -83,7 +83,7 @@ public:
     if (cache_items_map.find(key) == cache_items_map.cend()) {
       return false;
     }
-    erase(key);
+    this->erase(key);
     omp_unset_lock(&writelock);
     return true;
   }
@@ -128,6 +128,9 @@ protected:
   POLYQUANT_TIMER timer(function);
     this->frequency_storage.erase(this->lfu_storage[key]);
     this->lfu_storage.erase(key);
+    auto elem_it = this->find(key);
+    [](const Key &, const Value &) {}(key, elem_it->second);
+    cache_items_map.erase(elem_it);
   }
 
   void increment(const keytype &key, const valuetype &value) const {
