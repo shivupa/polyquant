@@ -107,6 +107,7 @@ protected:
   void increment(const keytype &key) const {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+    std::cout << "in increment" <, std::endl;
     auto elem_for_increment = this->lfu_storage[key];
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
