@@ -4,6 +4,7 @@
 #include <limits>
 #include <memory>
 #include <unordered_map>
+#include <iostream>
 #include "io/io.hpp"
 
 namespace polyquant {
@@ -133,7 +134,7 @@ protected:
   find(const keytype &key) const {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-    std::cout << key.first << " " << key.second << " " << this->cache_items_map.find(key) << std::endl;
+    std::cout << key.first << " " << key.second << std::endl;
     return this->cache_items_map.find(key);
   }
   const keytype &least_freq_used() const {
