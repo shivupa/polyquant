@@ -125,16 +125,11 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   Eigen::Tensor<double, 4> temp1;
   Eigen::Tensor<double, 4> temp2;
   auto eri_size = (num_basis * (num_basis + 1) / 2);
-  Polyquant_cout("2elec trans ok");
-  Polyquant_cout(eri_size);
   temp1.resize(num_basis, num_basis, num_basis, num_basis);
-  Polyquant_cout("2elec trans ok");
   temp2.resize(num_basis, num_basis, num_basis, num_basis);
-  Polyquant_cout("2elec trans ok");
   eri.setZero();
   temp1.setZero();
   temp2.setZero();
-  Polyquant_cout("2elec trans ok");
   double elem = 0.0;
   // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
@@ -154,7 +149,6 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
-  Polyquant_cout("2elec trans ok");
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
       for (auto r = 0; r < num_basis; r++) {
@@ -169,7 +163,6 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
-  Polyquant_cout("2elec trans ok");
   temp1.setZero();
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
@@ -185,10 +178,8 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
-  Polyquant_cout("2elec trans ok");
   // temp2.setZero();
   temp2.resize(0, 0, 0, 0);
-  Polyquant_cout("2elec trans ok");
   eri.resize(eri_size, eri_size);
   for (auto i = 0; i < num_basis; i++) {
     for (auto j = 0; j < num_basis; j++) {
@@ -205,7 +196,6 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
       }
     }
   }
-  Polyquant_cout("2elec trans ok");
   // for (auto i = 0; i < num_basis; i++) {
   //   for (auto j = 0; j < num_basis; j++) {
   //     for (auto k = 0; k < num_basis; k++) {
