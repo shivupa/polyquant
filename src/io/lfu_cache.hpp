@@ -114,6 +114,7 @@ protected:
     auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
                                            elem_for_increment->second);
     std::cout << "breaks here" << std::endl;
+    std::cout << key.first << " " << key.second << std::endl;
     std::cout << elem_for_increment->first << std::endl;
     this->frequency_storage.erase(elem_for_increment);
     std::cout << "breaks here" << std::endl;
