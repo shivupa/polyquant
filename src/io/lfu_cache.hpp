@@ -29,12 +29,26 @@ public:
 
   void set(const keytype &key, const valuetype &value) {
     omp_set_lock(&writelock);
-    auto elem_it = this->find(key);
+    auto elem_it = this->cache_items_map.find(key);
     if (elem_it == this->cache_items_map.end()) {
       if (this->cache_items_map.size() + 1 > this->max_cache_size) {
+
+    // https://stackoverflow.com/a/11410425
+    // create a vector of iterators to the map elements (O(n))
+    // use std::nth_element to find the worst 10% (O(n))
+    // remove them all from the map (O(n log n))
+
+        std::vector < typename std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype>::iterator > cache_elements;
+        cache_elements.resize(this->cache_items_map.size());
+        size_t num_elements = this->cache_items_map.size() * this->discard_percentage / 100;
+        for (auto it = this->cache_items_map.begin(); it != this->cache_items_map.end(); ++it){
+            cache_elements.push_back(it);
+        }
+        std::nth_element(cache_elements.begin(), cache_elements.begin() + num_elements, cache_elements.end(), [](const auto& a, const auto&b) { return a->second.first < b->second.first; });
         // TODO replace some fraction of the cache e.g. 90%? Investigate
-        auto least_used_key_to_delete = this->least_freq_used();
-        this->erase(least_used_key_to_delete);
+        for (auto i = cache_elements.begin(); i !=  cache_elements.begin() + num_elements; ++i){
+            this->erase((*i)->first);
+        }
       }
       this->insert(key, value);
     } else {
@@ -45,13 +59,13 @@ public:
 
   const std::optional<valuetype> get(const keytype &key) const {
     omp_set_lock(&writelock);
-    auto elem_it = this->find(key);
+    auto elem_it = this->cache_items_map.find(key);
 
-    if (elem_it == cache_items_map.end()) {
+    if (elem_it == this->cache_items_map.end()) {
       omp_unset_lock(&writelock);
       return std::nullopt;
     }
-    auto return_value = elem_it->second;
+    auto return_value = elem_it->second.second;
     this->increment(key, return_value);
     omp_unset_lock(&writelock);
     return return_value;
@@ -59,7 +73,7 @@ public:
 
   bool in_cache(const keytype &key) const {
     omp_set_lock(&writelock);
-    bool in_cache = this->find(key) != this->cache_items_map.end();
+    bool in_cache = this->cache_items_map.find(key) != this->cache_items_map.end();
     omp_unset_lock(&writelock);
     return in_cache;
   }
@@ -74,7 +88,7 @@ public:
   bool remove(const keytype &key) {
     omp_set_lock(&writelock);
     bool removed = false;
-    if (cache_items_map.find(key) == cache_items_map.cend()) {
+    if (this->cache_items_map.find(key) == this->cache_items_map.cend()) {
       return removed;
     }
     this->erase(key);
@@ -86,59 +100,36 @@ public:
 protected:
   void clear() {
     omp_set_lock(&writelock);
-    for (auto it = this->cache_items_map.begin(); it != this->cache_items_map.end(); ++it)
-    {
-        this->erase(it->first);
-    }
     this->cache_items_map.clear();
     omp_unset_lock(&writelock);
   }
 
-  void insert(const keytype &key, const valuetype &value)
-  {
-    constexpr std::size_t INIT_VAL = 1;
-    lfu_storage[key] = frequency_storage.emplace_hint(
-        frequency_storage.cbegin(), INIT_VAL, key);
-      this->cache_items_map.emplace(std::make_pair(key, value));
+  void insert(const keytype &key, const valuetype &value)  {
+    constexpr std::size_t initial_value = 1;
+      this->cache_items_map.emplace(std::make_pair(key, std::make_pair(initial_value,value)));
   }
 
   void erase(const keytype &key) {
-    this->frequency_storage.erase(this->lfu_storage[key]);
-    this->lfu_storage.erase(key);
-    auto elem_it = this->find(key);
+    auto elem_it = this->cache_items_map.find(key);
     cache_items_map.erase(elem_it);
   }
 
   void increment(const keytype &key, const valuetype &value) const {
-    auto elem_for_increment = this->lfu_storage[key];
-    auto incremented_pair = std::make_pair(elem_for_increment->first + 1,
-                                           elem_for_increment->second);
-    std::cout << "breaks here" << std::endl;
-    std::cout << key.first << " " << key.second << std::endl;
-    std::cout << elem_for_increment->first << std::endl;
-    this->frequency_storage.erase(elem_for_increment);
-    std::cout << "breaks here" << std::endl;
-    this->lfu_storage[key] = this->frequency_storage.emplace_hint(
-        this->frequency_storage.cend(),
-        std::move(incremented_pair));
-    this->cache_items_map[key] = value;
+    this->cache_items_map[key].first += 1; 
+    this->cache_items_map[key].second = value;
   }
 
-  std::unordered_map<keytype, valuetype, hashtype>::const_iterator
+  std::unordered_map<keytype, std::pair<size_t,valuetype>, hashtype>::const_iterator
   find(const keytype &key) const {
     return this->cache_items_map.find(key);
-  }
-  const keytype &least_freq_used() const {
-    return this->frequency_storage.cbegin()->second;
   }
 
 private:
   mutable omp_lock_t writelock;
-  mutable std::multimap<std::size_t, keytype> frequency_storage;
-  mutable std::unordered_map<keytype, typename std::multimap<std::size_t, keytype>::iterator, hashtype>
-      lfu_storage;
-  mutable std::unordered_map<keytype, valuetype, hashtype> cache_items_map;
+  // store keys, pair < freq, value >
+  mutable std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype> cache_items_map;
   size_t max_cache_size;
+  size_t discard_percentage = 5;
 };
 } // namespace polyquant
 
