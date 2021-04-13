@@ -244,7 +244,7 @@ void POLYQUANT_EPSCF::form_fock() {
   }
   // Polyquant_cout("forming fock");
   {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
         for (size_t k = 0; k < num_basis; k++) {
@@ -675,6 +675,7 @@ void POLYQUANT_EPSCF::guess_DM() {
 
   auto quantum_part_idx = 0ul;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
+  this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     if (quantum_part.num_parts == 1) {
