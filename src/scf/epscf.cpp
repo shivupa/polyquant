@@ -128,10 +128,7 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
     std::pair<double, double> fock_elements(alpha_elem, beta_elem);
     return fock_elements;
   }
-  if (this->Cauchy_Schwarz_screening && std::abs(this->D[quantum_part_b_idx][0](k, l) + this->D[quantum_part_b_idx][1%this->D[quantum_part_b_idx].size()](k, l)) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
-    std::pair<double, double> fock_elements(alpha_elem, beta_elem);
-    return fock_elements;
-  }
+  
   if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
       !incremental_fock_reset[quantum_part_a_idx][0]) {
     Da_kl = this->D[quantum_part_b_idx][0](k, l) -
@@ -159,7 +156,11 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Db_kl = Da_kl;
     }
   }
-  alpha_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+  if (this->Cauchy_Schwarz_screening && std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
+      alpha_elem += 0.0;
+  } else {
+      alpha_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+  }
   if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][1] &&
       !incremental_fock_reset[quantum_part_a_idx][1]) {
     Da_kl = this->D[quantum_part_b_idx][0](k, l) -
@@ -187,7 +188,11 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Db_kl = Da_kl;
     }
   }
-  beta_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+  if (this->Cauchy_Schwarz_screening && std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
+      beta_elem += 0.0;
+  } else {
+      beta_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+  }
   std::pair<double, double> fock_elements(alpha_elem, beta_elem);
   return fock_elements;
 }
@@ -429,8 +434,6 @@ void POLYQUANT_EPSCF::form_DM() {
 }
 void POLYQUANT_EPSCF::calculate_E_elec() {
   auto quantum_part_idx = 0ul;
-  this->E_particles.resize(this->input_molecule.quantum_particles.size());
-  this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     this->E_particles_last[quantum_part_idx] =
