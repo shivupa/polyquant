@@ -49,11 +49,6 @@ POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
   // Form alpha element
   double Da_kl = 0.0;
   double Db_kl = 0.0;
-    
-  if (this->Cauchy_Schwarz_screening && std::abs(this->D[quantum_part_a_idx][0](k, l) + this->D[quantum_part_a_idx][1%this->D[quantum_part_a_idx].size()](k, l)) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
-    std::pair<double, double> fock_elements(alpha_elem, beta_elem);
-    return fock_elements;
-  }
 
   if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
       !incremental_fock_reset[quantum_part_a_idx][0]) {
@@ -65,7 +60,6 @@ POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
                quantum_part_a.restricted == false) {
       Db_kl = this->D[quantum_part_a_idx][1](k, l) -
               this->D_last[quantum_part_a_idx][1](k, l);
-      ;
     } else {
       Db_kl = Da_kl;
     }
@@ -80,8 +74,17 @@ POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Db_kl = Da_kl;
     }
   }
-  alpha_elem +=
-      form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+  if (this->Cauchy_Schwarz_screening) {
+    if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
+            this->input_integral.Schwarz(k, l) >
+        this->Cauchy_Schwarz_threshold) {
+      alpha_elem +=
+          form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+    }
+  } else {
+    alpha_elem +=
+        form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+  }
   // Form Beta Element
   if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
     if (this->incremental_fock &&
@@ -95,8 +98,17 @@ POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Da_kl = this->D[quantum_part_a_idx][0](k, l);
       Db_kl = this->D[quantum_part_a_idx][1](k, l);
     }
-    beta_elem +=
-        form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+    if (this->Cauchy_Schwarz_screening) {
+      if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
+              this->input_integral.Schwarz(k, l) >
+          this->Cauchy_Schwarz_threshold) {
+        beta_elem +=
+            form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+      }
+    } else {
+      beta_elem +=
+          form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
+    }
   }
 
   std::pair<double, double> fock_elements(alpha_elem, beta_elem);
@@ -128,7 +140,7 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
     std::pair<double, double> fock_elements(alpha_elem, beta_elem);
     return fock_elements;
   }
-  
+
   if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
       !incremental_fock_reset[quantum_part_a_idx][0]) {
     Da_kl = this->D[quantum_part_b_idx][0](k, l) -
@@ -139,7 +151,6 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
                quantum_part_b.restricted == false) {
       Db_kl = this->D[quantum_part_b_idx][1](k, l) -
               this->D_last[quantum_part_b_idx][1](k, l);
-      ;
     } else {
       Db_kl = Da_kl;
     }
@@ -149,49 +160,61 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
       Db_kl = 0.0;
     } else if (quantum_part_b.num_parts > 1 &&
                quantum_part_b.restricted == false) {
-      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-              this->D_last[quantum_part_b_idx][1](k, l);
-      ;
+      Db_kl = this->D[quantum_part_b_idx][1](k, l);
     } else {
       Db_kl = Da_kl;
     }
   }
-  if (this->Cauchy_Schwarz_screening && std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
-      alpha_elem += 0.0;
-  } else {
-      alpha_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-  }
-  if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][1] &&
-      !incremental_fock_reset[quantum_part_a_idx][1]) {
-    Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-            this->D_last[quantum_part_b_idx][0](k, l);
-    if (quantum_part_b.num_parts == 1) {
-      Db_kl = 0.0;
-    } else if (quantum_part_b.num_parts > 1 &&
-               quantum_part_b.restricted == false) {
-      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-              this->D_last[quantum_part_b_idx][1](k, l);
-      ;
-    } else {
-      Db_kl = Da_kl;
+  if (this->Cauchy_Schwarz_screening) {
+    if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
+            this->input_integral.Schwarz(k, l) >
+        this->Cauchy_Schwarz_threshold) {
+      alpha_elem +=
+          form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
     }
   } else {
-    Da_kl = this->D[quantum_part_b_idx][0](k, l);
-    if (quantum_part_b.num_parts == 1) {
-      Db_kl = 0.0;
-    } else if (quantum_part_b.num_parts > 1 &&
-               quantum_part_b.restricted == false) {
-      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-              this->D_last[quantum_part_b_idx][1](k, l);
-      ;
-    } else {
-      Db_kl = Da_kl;
-    }
+    alpha_elem +=
+        form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
   }
-  if (this->Cauchy_Schwarz_screening && std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i,j) * this->input_integral.Schwarz(k,l) < this->Cauchy_Schwarz_threshold){
-      beta_elem += 0.0;
-  } else {
-      beta_elem += form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+  // calculate beta elem
+  if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
+    if (this->incremental_fock &&
+        incremental_fock_start[quantum_part_a_idx][1] &&
+        !incremental_fock_reset[quantum_part_a_idx][1]) {
+      Da_kl = this->D[quantum_part_b_idx][0](k, l) -
+              this->D_last[quantum_part_b_idx][0](k, l);
+      if (quantum_part_b.num_parts == 1) {
+        Db_kl = 0.0;
+      } else if (quantum_part_b.num_parts > 1 &&
+                 quantum_part_b.restricted == false) {
+        Db_kl = this->D[quantum_part_b_idx][1](k, l) -
+                this->D_last[quantum_part_b_idx][1](k, l);
+        ;
+      } else {
+        Db_kl = Da_kl;
+      }
+    } else {
+      Da_kl = this->D[quantum_part_b_idx][0](k, l);
+      if (quantum_part_b.num_parts == 1) {
+        Db_kl = 0.0;
+      } else if (quantum_part_b.num_parts > 1 &&
+                 quantum_part_b.restricted == false) {
+        Db_kl = this->D[quantum_part_b_idx][1](k, l);
+      } else {
+        Db_kl = Da_kl;
+      }
+    }
+    if (this->Cauchy_Schwarz_screening) {
+      if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
+              this->input_integral.Schwarz(k, l) >
+          this->Cauchy_Schwarz_threshold) {
+        beta_elem +=
+            form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+      }
+    } else {
+      beta_elem +=
+          form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
+    }
   }
   std::pair<double, double> fock_elements(alpha_elem, beta_elem);
   return fock_elements;
@@ -215,7 +238,7 @@ void POLYQUANT_EPSCF::form_fock() {
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
     } else if (this->incremental_fock &&
                incremental_fock_start[quantum_part_a_idx][0] &&
-               incremental_fock_reset[quantum_part_a_idx][0]) {
+               !incremental_fock_reset[quantum_part_a_idx][0]) {
       this->incremental_fock_reset_threshold[quantum_part_a_idx][0] =
           this->iteration_rms_error[quantum_part_a_idx][0] / 10.0;
       this->incremental_fock_reset_iteration[quantum_part_a_idx][0] =
@@ -254,6 +277,7 @@ void POLYQUANT_EPSCF::form_fock() {
                  this->input_molecule.quantum_particles.size();
                  quantum_part_a_idx++) {
               auto elements = form_fock_helper(i, j, k, l, quantum_part_a_idx);
+              // std::cout << elements.first << " " << elements.second << std::endl;
               auto quantum_part_a_it =
                   this->input_molecule.quantum_particles.begin();
               std::advance(quantum_part_a_it, quantum_part_a_idx);
@@ -285,7 +309,7 @@ void POLYQUANT_EPSCF::form_fock() {
   // compute energy with non-extrapolated Fock matrix
   this->calculate_E_elec();
   //
-  if (this->iteration_num == 1) {
+  if (this->iteration_num <= 1) {
     quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] :
          this->input_molecule.quantum_particles) {
@@ -334,17 +358,22 @@ void POLYQUANT_EPSCF::diag_fock() {
               this->incremental_fock_reset_freq) {
         this->incremental_fock_reset[quantum_part_idx][0] = true;
       } else {
-        if (independent_converged_iteration_num < 0 ||
+        if (independent_converged_iteration_num < 0 &&
             iteration_num >
                 independent_converged_iteration_num +
                     incremental_fock_delay_after_independent_converged) {
           this->incremental_fock_reset[quantum_part_idx][0] = false;
           this->incremental_fock_start[quantum_part_idx][0] = true;
+          std::stringstream buffer;
+          buffer << "Starting incremental fock build for " << quantum_part_key
+                 << " spin " << 0 << std::endl;
+          Polyquant_cout(buffer.str());
         }
       }
     }
     if (this->diis_extrapolation) {
       this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
+      this->F[quantum_part_idx][0] = F_diis;
     }
     F_prime =
         this->input_integral.orth_X * F_diis * this->input_integral.orth_X;
@@ -373,17 +402,22 @@ void POLYQUANT_EPSCF::diag_fock() {
                 this->incremental_fock_reset_freq) {
           this->incremental_fock_reset[quantum_part_idx][1] = true;
         } else {
-          if (independent_converged_iteration_num < 0 ||
+          if (independent_converged_iteration_num < 0 &&
               iteration_num >
                   independent_converged_iteration_num +
                       incremental_fock_delay_after_independent_converged) {
             this->incremental_fock_reset[quantum_part_idx][1] = false;
             this->incremental_fock_start[quantum_part_idx][1] = true;
+            std::stringstream buffer;
+            buffer << "Starting incremental fock build for " << quantum_part_key
+                   << " spin " << 1 << std::endl;
+            Polyquant_cout(buffer.str());
           }
         }
       }
       if (this->diis_extrapolation) {
         this->diis[quantum_part_idx][1].extrapolate(F_diis, FD_commutator);
+        this->F[quantum_part_idx][1] = F_diis;
       }
       F_prime =
           this->input_integral.orth_X * F_diis * this->input_integral.orth_X;
@@ -489,7 +523,7 @@ void POLYQUANT_EPSCF::check_stop() {
            << (this->iteration_E_diff[quantum_part_idx] < this->convergence_E)
            << std::endl;
 
-    if (this->iteration_E_diff[quantum_part_idx] >= this->convergence_E) {
+    if (this->iteration_E_diff[quantum_part_idx] >= this->convergence_E || this->iteration_num < 2) {
       this->converged = false;
       this->stop = false;
     }
@@ -555,7 +589,7 @@ void POLYQUANT_EPSCF::check_stop() {
     // reset DIIS since we now have interactions so extrapolating with
     // noninteracting
     Polyquant_cout("Resetting DIIS and incremental fock building.");
-    this->reset_diis();
+    // this->reset_diis();
     this->reset_incfock();
   }
   if (this->iteration_num == this->iteration_max) {
@@ -656,7 +690,7 @@ void POLYQUANT_EPSCF::run_iteration() {
   this->form_fock();
   this->diag_fock();
   this->form_DM();
-  this->calculate_E_elec();
+  //this->calculate_E_elec();
 }
 void POLYQUANT_EPSCF::guess_DM() {
   // TODO SAD or
@@ -722,6 +756,23 @@ void POLYQUANT_EPSCF::guess_DM() {
 }
 void POLYQUANT_EPSCF::print_start_iterations() {
   Polyquant_cout("Starting Iterations");
+  std::stringstream buffer;
+  buffer << "Parameters" << std::endl;
+  buffer << "    diis_extrapolation" << this->diis_extrapolation << std::endl;
+  buffer << "    diis_start" << this->diis_start << std::endl;
+  buffer << "    diis_damping" << this->diis_damping << std::endl;
+  buffer << "    diis_mixing_fraction" << this->diis_mixing_fraction << std::endl;
+  buffer << "    diis_size" << this->diis_size << std::endl;
+  buffer << "    incremental_fock" << this->incremental_fock << std::endl;
+  buffer << "    incremental_fock_reset_freq" << this->incremental_fock_reset_freq << std::endl;
+  buffer << "    incremental_fock_delay_after_independent_converged" << this->incremental_fock_delay_after_independent_converged << std::endl;
+  buffer << "    incremental_fock_initial_onset_thresh" << this->incremental_fock_initial_onset_thresh << std::endl;
+  buffer << "    Cauchy_Schwarz_screening" << this->Cauchy_Schwarz_screening << std::endl;
+  buffer << "    Cauchy_Schwarz_threshold" << this->Cauchy_Schwarz_threshold << std::endl;
+  Polyquant_cout(buffer.str());
+  if (this->Cauchy_Schwarz_screening){
+    APP_ABORT("Cauchy_Schwarz_screening is broken right now. Please turn it off.");
+  }
 }
 void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
@@ -761,16 +812,16 @@ void POLYQUANT_EPSCF::run() {
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_two_electron();
-  if (this->Cauchy_Schwarz_screening){
-  this->input_integral.calculate_Schwarz();
+  if (this->Cauchy_Schwarz_screening) {
+    this->input_integral.calculate_Schwarz();
   }
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
   this->print_start_iterations();
   while (!this->stop) {
-    this->print_iteration();
     this->run_iteration();
+    this->print_iteration();
     this->check_stop();
   }
   this->calculate_E_total();

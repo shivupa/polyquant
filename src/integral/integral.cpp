@@ -11,10 +11,11 @@ POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
   this->setup_integral(input, basis, molecule);
 }
 
-void POLYQUANT_INTEGRAL::construct_cache(size_t size_in_gb){
+void POLYQUANT_INTEGRAL::construct_cache(size_t size_in_gb) {
   std::pair<int, int> temp(0, 0);
   this->cache_size = (size_in_gb * 1e9) / sizeof(temp);
-  polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> constructed_cache(this->cache_size);
+  polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>>
+      constructed_cache(this->cache_size);
   this->cache = constructed_cache;
 }
 

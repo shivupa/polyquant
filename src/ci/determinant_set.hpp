@@ -1,9 +1,9 @@
 #ifndef POLYQUANT_DETSET_H
 #define POLYQUANT_DETSET_H
 #include "basis/basis.hpp"
-#include "io/lfu_cache.hpp"
 #include "integral/integral.hpp"
 #include "io/io.hpp"
+#include "io/lfu_cache.hpp"
 #include "molecule/molecule.hpp"
 #include "molecule/quantum_particles.hpp"
 #include <Eigen/Dense>
@@ -73,7 +73,7 @@ public:
     this->input_integral = integral;
   };
 
-  void construct_cache(size_t size_in_gb = 10000){
+  void construct_cache(size_t size_in_gb = 10000) {
     // This is actually super complicated. Some assumptions are made here that
     // doesn't quite transfer to ACTUAL size used
     // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
@@ -1245,7 +1245,7 @@ void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
       auto sc_elem = this->Slater_Condon(j_det, i_det);
       if (x_in[j_det] != 0 && sc_elem != 0) {
-      matrix_elem += x_in[j_det] * sc_elem;
+        matrix_elem += x_in[j_det] * sc_elem;
       }
     }
     y_out[i_det] = matrix_elem;
