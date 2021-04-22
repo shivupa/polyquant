@@ -10,6 +10,7 @@ cmake \
     -DPOLYQUANT_DOC=0 \
     -DPOLYQUANT_TEST=1 \
     -DPOLYQUANT_CODE_COVERAGE=0 \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DMKL_ROOT=/opt/intel/mkl \
     ..
 #make Sphinx

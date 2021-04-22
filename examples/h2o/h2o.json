@@ -13,16 +13,19 @@
   "model": {
     "method": "scf",
     "basis": 
-    {"H" : [{ "library" : {"type" : "cc-pvtz"} }],
-        "O" : [{ "library" : {"type" : "cc-pvtz"} }]}
+    {"H" : [{ "library" : {"type" : "cc-pvdz"} }],
+        "O" : [{ "library" : {"type" : "cc-pvdz"} }]}
   },
   "keywords": {
-    "restricted" : true,
+    "restricted" : false,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
         "iteration_max" : 200,
-        "dump_for_qmcpack" : true
+        "dump_for_qmcpack" : true,
+        "diis_extrapolation" : false,
+        "Cauchy_Schwarz_screening" : false,
+        "incremental_fock" : false
     },
    "pure" : true
   }
