@@ -6,6 +6,7 @@
 #include <limits>
 #include <memory>
 #include <unordered_map>
+#include <optional>
 
 namespace polyquant {
 

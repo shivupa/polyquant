@@ -1,20 +1,62 @@
 <?xml version="1.0"?>
 <qmcsystem>
   <wavefunction name="psi0" target="e">
-      <determinantset type="MolecularOrbital" name="LCAOBSet" source="ion0" transform="yes" cuspCorrection="yes" href="H_wpos.h5">
-	    <sposet basisset="LCAOBSet" name="eigenset_0" size="5" cuspInfo="spo-e.cuspInfo.xml">
-        <occupation mode="ground"/>
-        <coefficient size="5" spindataset="0"/>
-      </sposet>
-      <sposet basisset="LCAOBSet" name="eigenset_2" size="5" cuspInfo="spo-p.cuspInfo.xml">
-        <occupation mode="ground"/>
-        <coefficient size="5" spindataset="0"/>
-      </sposet>
-      <multideterminant fast="yes" optimize="no" ngroups="3" spo_0="eigenset_0" spo_1="eigenset_0" spo_2="eigenset_2" >
-        <detlist size="125" type="DETS" nstates="5" cutoff="1e-20"  href="H_wpos.h5" algorithm="table_method" />
-        <detlist size="125" type="DETS" nstates="5" cutoff="1e-20"  href="H_wpos.h5" algorithm="table_method" />
-        <detlist size="125" type="DETS" nstates="5" cutoff="1e-20"  href="H_wpos.h5" algorithm="table_method" />
-      </multideterminant>
-    </determinantset>
+    <determinantset type="MolecularOrbital" name="LCAOBSet" source="ion0" transform="yes" cuspCorrection="yes" href="H_wpos.h5">
+      <slaterdeterminant>
+        <determinant id="updet" size="2" cuspInfo="updet.cuspInfo.xml">
+          <occupation mode="ground"/>
+          <coefficient size="5" spindataset="0"/>
+        </determinant>
+        <determinant id="downdet" size="2" cuspInfo="downdet.cuspInfo.xml">
+          <occupation mode="ground"/>
+          <coefficient size="5" spindataset="0"/>
+        </determinant>
+        <determinant id="pdet" size="1" cuspInfo="pdet.cuspInfo.xml">
+          <occupation mode="ground"/>
+          <coefficient size="5" spindataset="2"/>
+        </determinant>
+      </slaterdeterminant>
+  </determinantset>
+  <jastrow name="J2" type="Two-Body" function="pade" print="yes">
+      <correlation speciesA="ue" speciesB="de"> 
+          <var id="jud_b" name="B">3.7813696418e-01</var> 
+      </correlation>
+      <correlation speciesA="ue" speciesB="up"> 
+          <var id="jup_b" name="B">2.2403851660e-01</var> 
+      </correlation>
+      <correlation speciesA="de" speciesB="up"> 
+          <var id="jdp_b" name="B">2.2387309878e-01</var> 
+      </correlation>
+  </jastrow>
+  <jastrow name="J1" type="One-Body" function="Bspline" source="ion0" spin="yes">
+    <correlation speciesA="H" speciesB="ue" size="7" rcut="6">
+      <coefficients id="jH_ue"  type="Array">
+      0.0 0.0 0.0 0.0 0.0 0.0 0.0
+      </coefficients>
+    </correlation>
+    <correlation speciesA="H" speciesB="de" size="7" rcut="6">
+      <coefficients id="jH_de"  type="Array">
+      0.0 0.0 0.0 0.0 0.0 0.0 0.0
+      </coefficients>
+    </correlation>
+    <correlation speciesA="H" speciesB="up" size="7" rcut="6">
+      <coefficients id="jH_up"  type="Array">
+      0.0 0.0 0.0 0.0 0.0 0.0 0.0
+      </coefficients>
+    </correlation>
+</jastrow>
+<!-- 
+  <jastrow name="J1" type="One-Body" function="pade" source="ion0" Spin="yes" print="yes">
+      <correlation speciesA="H" speciesB="ue"> 
+          <var id="jH_ue" name="B">3.7813696418e-01</var> 
+      </correlation>
+      <correlation speciesA="H" speciesB="de"> 
+          <var id="jH_de" name="B">2.2403851660e-01</var> 
+      </correlation>
+      <correlation speciesA="H" speciesB="up"> 
+          <var id="jH_up" name="B">2.2387309878e-01</var> 
+      </correlation>
+    </jastrow>
+-->
   </wavefunction>
 </qmcsystem>

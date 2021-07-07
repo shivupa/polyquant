@@ -529,11 +529,9 @@ void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
           contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
           // std::cout << "after unnormalizing at output " << exponent << " "
           //           << contraction << std::endl;
-          // std::stringstream buffer;
-          // buffer << std::setprecision(20) << "Exponent: " << exponent << "
-          // "
-          //        << "Contraction: " << contraction << std::endl;
-          // Polyquant_cout(buffer.str());
+          std::stringstream buffer;
+          auto a = gtonorm_lambda(shell.contr[0].l, exponent);
+          std::cout << a << std::endl;
           auto contraction_dataset = curr_func_group.create_dataset(
               "contraction", double_type, simple_space);
           contraction_dataset.write(contraction, double_type, simple_space);
