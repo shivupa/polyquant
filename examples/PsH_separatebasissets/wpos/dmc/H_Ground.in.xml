@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<simulation>
+  <project id="PsH" series="0"/>
+    <random seed="864"/>
+
+  <include href="H_Ground.structure.xml"/>
+  <include href="H_Ground.wfnoj.xml"/>
+  <hamiltonian name="h0" type="generic" target="e">
+    <pairpot name="ElecElec" type="coulomb" source="e" target="e" physical="true"/>
+    <pairpot name="IonIon" type="coulomb" source="ion0" target="ion0"/>
+    <pairpot name="IonElec" type="coulomb" source="ion0" target="e"/>
+  </hamiltonian>
+  <!--
+ 
+Example initial VMC to measure initial energy and variance 
+
+-->
+  <qmc method="vmc" move="pbyp" checkpoint="-1">
+    <estimator name="LocalEnergy" hdf5="no"/>
+    <parameter name="warmupSteps">100</parameter>
+    <parameter name="blocks">20</parameter>
+    <parameter name="steps">50</parameter>
+    <parameter name="substeps">8</parameter>
+    <parameter name="timestep">0.5</parameter>
+    <parameter name="usedrift">no</parameter>
+  </qmc>
+  <!--
+ 
+Example initial VMC optimization 
+ 
+Number of steps required will be computed from total requested sample 
+count and total number of walkers 
+
+-->
+  <loop max="5">
+    <qmc method="linear" move="pbyp" checkpoint="-1">
+      <estimator name="LocalEnergy" hdf5="no"/>
+      <parameter name="warmupSteps">100</parameter>
+      <parameter name="blocks">200</parameter>
+      <parameter name="timestep">0.5</parameter>
+      <parameter name="walkers">1</parameter>
+      <parameter name="samples">64000</parameter>
+      <parameter name="substeps">4</parameter>
+      <parameter name="usedrift">no</parameter>
+      <parameter name="MinMethod">OneShiftOnly</parameter>
+      <parameter name="minwalkers">0.3</parameter>
+    </qmc>
+  </loop>
+  <qmc method="vmc" move="pbyp" checkpoint="-1">
+    <estimator name="LocalEnergy" hdf5="no"/>
+    <parameter name="warmupSteps">100</parameter>
+    <parameter name="blocks">400</parameter>
+    <parameter name="steps">50</parameter>
+    <parameter name="substeps">8</parameter>
+    <parameter name="timestep">0.5</parameter>
+    <parameter name="usedrift">no</parameter>
+  </qmc>
+</simulation>
