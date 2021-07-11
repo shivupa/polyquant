@@ -37,6 +37,31 @@ public:
    */
   void load_basis(const POLYQUANT_INPUT &input,
                   const POLYQUANT_MOLECULE &molecule);
+
+  void load_quantum_particle_basis(const POLYQUANT_INPUT &input,
+                                   const POLYQUANT_MOLECULE &molecule,
+                                   const std::string &quantum_part_key,
+                                   libint2::BasisSet &qp_basis);
+  void
+  load_quantum_particle_atom_basis(const POLYQUANT_INPUT &input,
+                                   const POLYQUANT_MOLECULE &molecule,
+                                   const std::string &quantum_part_key,
+                                   const std::string &classical_part_key,
+                                   const CLASSICAL_PARTICLE_SET &classical_part,
+                                   libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis_library(
+      const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule,
+      const std::string &quantum_part_key,
+      const std::string &classical_part_key, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis_custom(
+      const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule,
+      const std::string &quantum_part_key,
+      const std::string &classical_part_key,
+      const CLASSICAL_PARTICLE_SET &classical_part,
+      libint2::BasisSet &qp_basis);
+  void set_pure_from_input(const POLYQUANT_INPUT &input);
+  void set_libint_shell_norm();
+  void apply_pyscf_normalization();
   /**
    * @brief The name of the basis to load
    *
@@ -46,12 +71,13 @@ public:
    * @brief the libint2 basis object
    *
    */
-  libint2::BasisSet basis;
+  std::vector<libint2::BasisSet> basis;
   /**
    * @brief Number of basis functions
    *
    */
-  size_t num_basis;
+  std::vector<size_t> num_basis;
+  bool pure = true;
 };
 } // namespace polyquant
 #endif
