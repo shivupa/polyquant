@@ -1,19 +1,7 @@
 #ifndef POLYQUANT_INPUT_TIMER_H
 #define POLYQUANT_INPUT_TIMER_H
-#include <Eigen/Dense>
-#include <Eigen/Eigen>
-#include <algorithm>
-#include <cctype>
 #include <chrono>
-#include <fstream>
-#include <h5cpp/hdf5.hpp>
-#include <iomanip>
-#include <iostream>
-#include <libint2.hpp>       // IWYU pragma: keep
-#include <nlohmann/json.hpp> // IWYU pragma: keep
-#include <string>
-#include <vector>
-// TODO switch to #include <format> once it is supported
+#include "io/utils.hpp"
 using json = nlohmann::json;
 
 namespace polyquant {

@@ -1,5 +1,5 @@
-#ifndef POLYQUANT_INPUT_H
-#define POLYQUANT_INPUT_H
+#ifndef POLYQUANT_INPUTUTILS_H
+#define POLYQUANT_INPUTUTILS_H
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
@@ -13,7 +13,6 @@
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
-#include "io/timer.hpp"
 // TODO switch to #include <format> once it is supported
 using json = nlohmann::json;
 

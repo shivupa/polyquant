@@ -1,5 +1,8 @@
 #ifndef POLYQUANT_INPUT_HDF5_H
 #define POLYQUANT_INPUT_HDF5_H
+#include "io/utils.hpp"
+#include "io/timer.hpp"
+#include "io/lfu_cache.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
@@ -13,7 +16,6 @@
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
-#include "io/timer.hpp"
 
 namespace polyquant {
 

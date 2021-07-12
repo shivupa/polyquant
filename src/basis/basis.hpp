@@ -1,6 +1,6 @@
 #ifndef POLYQUANT_BASIS_H
 #define POLYQUANT_BASIS_H
-#include "io/io.hpp"
+#include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include <algorithm>
 #include <cpr/cpr.h> // IWYU pragma: keep
