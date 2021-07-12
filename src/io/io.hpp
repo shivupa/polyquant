@@ -26,9 +26,7 @@ namespace polyquant {
 //  * @brief Abort the code and print a reason for aborting.
 //  *
 //  * @param reason a string stating the reason to abort.
-//  * @return PetscErrorCode
 //  */
-// PetscErrorCode APP_ABORT(const std::string &reason);
 void APP_ABORT(const std::string &reason);
 /**
  * @brief A helper function to print only if we are on rank 0.
