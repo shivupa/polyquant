@@ -65,6 +65,32 @@ void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
       multidet_group.create_dataset("nstate", int_type, simple_space);
   nstate_dataset.write(N_mo, int_type, simple_space);
 }
+void hdf5dump_application(hdf5::node::Group &root_group) {
+  using namespace hdf5;
+  auto simple_space = hdf5::dataspace::Simple({1});
+  // write generating code name
+  Polyquant_cout("dumping application parameters");
+  auto application_group = root_group.create_group("application");
+  std::vector<std::string> title = {"Polyquant"};
+  auto str_type = datatype::String::fixed(9);
+  str_type.padding(datatype::StringPad::NULLPAD);
+  str_type.encoding(datatype::CharacterEncoding::ASCII);
+  auto dtpl = hdf5::property::DatasetTransferList();
+  auto application_title_dataset =
+      application_group.create_dataset("code", str_type, simple_space);
+  application_title_dataset.write(title, str_type, simple_space, simple_space,
+                                  dtpl);
+}
+void hdf5dump_PBC(hdf5::node::Group &root_group) {
+  using namespace hdf5;
+  auto simple_space = hdf5::dataspace::Simple({1});
+  auto bool_type = datatype::create<bool>();
+  // write PBC
+  Polyquant_cout("dumping PBC parameters");
+  auto PBC_group = root_group.create_group("PBC");
+  auto PBC_dataset = PBC_group.create_dataset("PBC", bool_type, simple_space);
+  PBC_dataset.write(pbc, bool_type, simple_space);
+}
 
 void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
     const std::string &filename, bool pbc, bool complex_vals, bool ecp,
@@ -90,31 +116,9 @@ void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
   Polyquant_cout("dumping file");
   file::File f = file::create(filename, file::AccessFlags::TRUNCATE);
   node::Group root_group = f.root();
-  // write generating code name
-  Polyquant_cout("dumping application parameters");
-  auto application_group = root_group.create_group("application");
-  {
-    std::vector<std::string> title = {"Polyquant"};
-    auto str_type = datatype::String::fixed(9);
-    str_type.padding(datatype::StringPad::NULLPAD);
-    str_type.encoding(datatype::CharacterEncoding::ASCII);
-    auto dtpl = hdf5::property::DatasetTransferList();
-    auto application_title_dataset =
-        application_group.create_dataset("code", str_type, simple_space);
-    application_title_dataset.write(title, str_type, simple_space, simple_space,
-                                    dtpl);
-    //// TODO add version
-  }
-  // write PBC
-  Polyquant_cout("dumping PBC parameters");
-  auto PBC_group = root_group.create_group("PBC");
-  {
-    //       auto bool_type = datatype::create<datatype::EBool>();
-    //  auto dtpl = hdf5::property::DatasetTransferList();
-    auto PBC_dataset = PBC_group.create_dataset("PBC", bool_type, simple_space);
-    //            PBC_dataset.write(pbc,bool_type,simple_space,simple_space,dtpl);
-    PBC_dataset.write(pbc, bool_type, simple_space);
-  }
+  hdf5dump_application(root_group);
+  hdf5dump_PBC(root_group);
+
   // write General parameters
   Polyquant_cout("dumping general parameters");
   auto parameters_group = root_group.create_group("parameters");

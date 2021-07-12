@@ -17,6 +17,10 @@
 
 namespace polyquant {
 
+void hdf5dump_application(hdf5::node::Group &root_group);
+void hdf5dump_PBC(hdf5::node::Group &root_group);
+void hdf5dump_basis(hdf5::node::Group &root_group);
+
 void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
     const std::string &filename,
     std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
