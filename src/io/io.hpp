@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
+#include "io/timer.hpp"
 // TODO switch to #include <format> once it is supported
 using json = nlohmann::json;
 
@@ -212,60 +213,6 @@ template <typename T> struct PairHash {
     seed ^= hasher(v.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     return seed;
   }
-};
-
-class POLYQUANT_TIMER {
-public:
-  POLYQUANT_TIMER() { this->set_start_time(); };
-  POLYQUANT_TIMER(const std::string &calling_func) {
-    this->set_start_time();
-    this->set_calling_function(calling_func);
-  };
-  ~POLYQUANT_TIMER() {
-    this->set_end_time();
-    this->print_timer_end();
-  };
-  void set_calling_function(const std::string &calling_func) {
-    this->calling_function = calling_func;
-  };
-  void set_start_time() {
-    this->start = std::chrono::high_resolution_clock::now();
-  };
-  void set_end_time() {
-    this->end = std::chrono::high_resolution_clock::now();
-  };
-  void print_timer_end() {
-    // use std::format once supported
-    // use std::chrono::days etc once it is used
-    // typedef std::chrono::duration<int, std::ratio<86400>> days;
-    auto duration = this->end - this->start;
-    // auto d = std::chrono::duration_cast<days>(duration);
-    auto d = std::chrono::duration_cast<std::chrono::days>(duration);
-    duration -= d;
-    auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
-    duration -= h;
-    auto m = std::chrono::duration_cast<std::chrono::minutes>(duration);
-    duration -= m;
-    auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
-    duration -= s;
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-    duration -= ms;
-    auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-    duration -= us;
-    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
-    duration -= ns;
-    std::stringstream buffer;
-    buffer << "Timer " << this->calling_function << "    " << d.count()
-           << "d:" << h.count() << "h:" << m.count() << "m:" << s.count()
-           << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count()
-           << "ns";
-    Polyquant_cout(buffer.str());
-  };
-
-private:
-  std::string calling_function = "UNKNOWN";
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
-  std::chrono::time_point<std::chrono::high_resolution_clock> end;
 };
 
 /**

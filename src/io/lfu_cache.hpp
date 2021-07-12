@@ -1,7 +1,7 @@
 
 #ifndef POLYQUANT_CACHE_H
 #define POLYQUANT_CACHE_H
-#include "io/io.hpp"
+#include "io/timer.hpp"
 #include <iostream>
 #include <limits>
 #include <memory>
