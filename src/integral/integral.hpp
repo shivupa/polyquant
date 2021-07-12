@@ -38,7 +38,8 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
                      const POLYQUANT_MOLECULE &molecule);
-  void construct_cache(size_t size_in_gb = 10000);
+  void construct_ijcache(size_t size_in_gb = 10000);
+  void construct_ericache(size_t size_in_gb = 10000);
 
   void calculate_overlap();
   void calculate_Schwarz();
@@ -46,9 +47,10 @@ public:
   void calculate_nuclear();
   void calculate_polarization_potential();
   void calculate_two_electron();
+  double get2e_elem(const size_t& quantum_part_a_idx, const size_t& quantum_part_b_idx, const size_t& i, const size_t& j, const size_t& k, const size_t& l);
 
   /**
-   * @brief Create the matrivies and vector to hold the integrals and call to
+   * @brief Create the matricies and vector to hold the integrals and call to
    * the functions to calculate them.
    *
    * @param input the input parameters
@@ -70,7 +72,7 @@ public:
   template <typename T> const T idx2(const T &i, const T &j) const {
     std::pair<T, T> ij_idx;
     ij_idx = std::make_pair(i, j);
-    auto cached_ij_elem = this->cache.get(ij_idx);
+    auto cached_ij_elem = this->ijcache.get(ij_idx);
     if (cached_ij_elem.has_value()) {
       return cached_ij_elem.value();
     } else {
@@ -119,7 +121,8 @@ public:
    */
   void compute_Schwarz_ints(
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
-      const libint2::BasisSet &shells, libint2::Operator obtype);
+      const libint2::BasisSet &shells_a, const libint2::BasisSet &shells_b,
+      libint2::Operator obtype);
 
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
@@ -161,40 +164,43 @@ public:
                           libint2::Operator obtype);
 
   void symmetric_orthogonalization();
+
   /**
    * @brief Overlap integral matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> overlap;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> overlap;
   /**
    * @brief Kinetic integral matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> kinetic;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> kinetic;
   /**
    * @brief Nuclear attraction integral matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> nuclear;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> nuclear;
   /**
    * @brief Schwarz screening integrals (ij|ij)
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Schwarz;
-  /**
-   * @brief Two electron integral vector
-   *
-   */
-  Eigen::Matrix<double, Eigen::Dynamic, 1> twoelec;
+  std::vector<
+      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+      Schwarz;
   /**
    * @brief The orthogonalization matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orth_X;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> orth_X;
 
   std::vector<
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
       mo_one_body_ints;
+  /**
+   * @brief The two electron MO integrals stored as
+   * [idx_part][spin_idx][idx_part][spin_idx]
+   *
+   */
   std::vector<std::vector<std::vector<
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>>
       mo_two_body_ints;
@@ -212,8 +218,10 @@ public:
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
           &mo_coeffs);
 
-  size_t cache_size;
-  mutable polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> cache;
+  size_t ijcache_size;
+  size_t ericache_size;
+  mutable polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> ijcache;
+  mutable polyquant_lfu_cache<std::pair<std::vector<size_t>, std::vector<size_t>>, double, PairVectorHash<size_t>> ericache;
   /**
    * @brief the input parameters
    *

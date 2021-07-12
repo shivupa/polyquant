@@ -10,9 +10,9 @@ void POLYQUANT_EPSCF::form_H_core() {
        this->input_molecule.quantum_particles) {
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
     this->H_core[quantum_part_idx] +=
-        (1.0 / quantum_part.mass) * this->input_integral.kinetic;
+        (1.0 / quantum_part.mass) * this->input_integral.kinetic[quantum_part_idx];
     this->H_core[quantum_part_idx] +=
-        (-quantum_part.charge) * this->input_integral.nuclear;
+        (-quantum_part.charge) * this->input_integral.nuclear[quantum_part_idx];
     Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx],
                                "H_core_" + quantum_part_key + ".txt");
     quantum_part_idx++;
