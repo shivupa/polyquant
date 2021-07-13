@@ -3,8 +3,8 @@
 #include "basis/basis.hpp"
 #include "ci/epci.hpp"
 #include "integral/integral.hpp"
-#include "io/utils.hpp"
 #include "io/timer.hpp"
+#include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include "scf/epscf.hpp"
 #include <algorithm>

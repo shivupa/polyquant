@@ -10,7 +10,8 @@ void POLYQUANT_EPSCF::form_H_core() {
        this->input_molecule.quantum_particles) {
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
     this->H_core[quantum_part_idx] +=
-        (1.0 / quantum_part.mass) * this->input_integral.kinetic[quantum_part_idx];
+        (1.0 / quantum_part.mass) *
+        this->input_integral.kinetic[quantum_part_idx];
     this->H_core[quantum_part_idx] +=
         (-quantum_part.charge) * this->input_integral.nuclear[quantum_part_idx];
     Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx],
@@ -277,7 +278,8 @@ void POLYQUANT_EPSCF::form_fock() {
                  this->input_molecule.quantum_particles.size();
                  quantum_part_a_idx++) {
               auto elements = form_fock_helper(i, j, k, l, quantum_part_a_idx);
-              // std::cout << elements.first << " " << elements.second << std::endl;
+              // std::cout << elements.first << " " << elements.second <<
+              // std::endl;
               auto quantum_part_a_it =
                   this->input_molecule.quantum_particles.begin();
               std::advance(quantum_part_a_it, quantum_part_a_idx);
@@ -523,7 +525,8 @@ void POLYQUANT_EPSCF::check_stop() {
            << (this->iteration_E_diff[quantum_part_idx] < this->convergence_E)
            << std::endl;
 
-    if (this->iteration_E_diff[quantum_part_idx] >= this->convergence_E || this->iteration_num < 2) {
+    if (this->iteration_E_diff[quantum_part_idx] >= this->convergence_E ||
+        this->iteration_num < 2) {
       this->converged = false;
       this->stop = false;
     }
@@ -690,7 +693,7 @@ void POLYQUANT_EPSCF::run_iteration() {
   this->form_fock();
   this->diag_fock();
   this->form_DM();
-  //this->calculate_E_elec();
+  // this->calculate_E_elec();
 }
 void POLYQUANT_EPSCF::guess_DM() {
   // TODO SAD or
@@ -761,17 +764,25 @@ void POLYQUANT_EPSCF::print_start_iterations() {
   buffer << "    diis_extrapolation" << this->diis_extrapolation << std::endl;
   buffer << "    diis_start" << this->diis_start << std::endl;
   buffer << "    diis_damping" << this->diis_damping << std::endl;
-  buffer << "    diis_mixing_fraction" << this->diis_mixing_fraction << std::endl;
+  buffer << "    diis_mixing_fraction" << this->diis_mixing_fraction
+         << std::endl;
   buffer << "    diis_size" << this->diis_size << std::endl;
   buffer << "    incremental_fock" << this->incremental_fock << std::endl;
-  buffer << "    incremental_fock_reset_freq" << this->incremental_fock_reset_freq << std::endl;
-  buffer << "    incremental_fock_delay_after_independent_converged" << this->incremental_fock_delay_after_independent_converged << std::endl;
-  buffer << "    incremental_fock_initial_onset_thresh" << this->incremental_fock_initial_onset_thresh << std::endl;
-  buffer << "    Cauchy_Schwarz_screening" << this->Cauchy_Schwarz_screening << std::endl;
-  buffer << "    Cauchy_Schwarz_threshold" << this->Cauchy_Schwarz_threshold << std::endl;
+  buffer << "    incremental_fock_reset_freq"
+         << this->incremental_fock_reset_freq << std::endl;
+  buffer << "    incremental_fock_delay_after_independent_converged"
+         << this->incremental_fock_delay_after_independent_converged
+         << std::endl;
+  buffer << "    incremental_fock_initial_onset_thresh"
+         << this->incremental_fock_initial_onset_thresh << std::endl;
+  buffer << "    Cauchy_Schwarz_screening" << this->Cauchy_Schwarz_screening
+         << std::endl;
+  buffer << "    Cauchy_Schwarz_threshold" << this->Cauchy_Schwarz_threshold
+         << std::endl;
   Polyquant_cout(buffer.str());
-  if (this->Cauchy_Schwarz_screening){
-    APP_ABORT("Cauchy_Schwarz_screening is broken right now. Please turn it off.");
+  if (this->Cauchy_Schwarz_screening) {
+    APP_ABORT(
+        "Cauchy_Schwarz_screening is broken right now. Please turn it off.");
   }
 }
 void POLYQUANT_EPSCF::print_iteration() {

@@ -1,7 +1,7 @@
 #ifndef POLYQUANT_INPUT_TIMER_H
 #define POLYQUANT_INPUT_TIMER_H
-#include <chrono>
 #include "io/utils.hpp"
+#include <chrono>
 using json = nlohmann::json;
 
 namespace polyquant {

@@ -5,8 +5,8 @@
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <unordered_map>
 #include <optional>
+#include <unordered_map>
 
 namespace polyquant {
 
