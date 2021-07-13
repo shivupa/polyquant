@@ -79,7 +79,7 @@ public:
       return cached_ij_elem.value();
     } else {
       auto ij_elem = symmetric_matrix_triangular_idx(i, j);
-      this->cache.set(ij_idx, ij_elem);
+      this->ijcache.set(ij_idx, ij_elem);
       return ij_elem;
     }
   }
@@ -212,6 +212,7 @@ public:
           &mo_coeff);
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
   transform_mo_2_body_integrals(
+      const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx,
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b,
       int num_part_alpha, int num_part_beta);
