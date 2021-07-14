@@ -210,6 +210,12 @@ public:
       std::vector<
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
           &mo_coeff);
+
+  std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
+             std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+  compute_shellpairs(const libint2::BasisSet &bs1, const libint2::BasisSet &bs2,
+                     const double threshold);
+
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
   transform_mo_2_body_integrals(
       const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx,

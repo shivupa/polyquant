@@ -156,6 +156,7 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
     quantum_part_idx++;
   }
 }
+
 void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
     std::vector<
         std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
@@ -185,6 +186,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
     quantum_part_idx++;
   }
 }
+
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
 POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
     const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx,
@@ -284,6 +286,113 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   //   }
   // }
   return eri;
+}
+
+std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
+           std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
+                                       const libint2::BasisSet &bs2,
+                                       const double threshold) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+#pragma omp parallel
+  {
+    const auto nsh1 = bs1.size();
+    const auto nsh2 = bs2.size();
+    const auto bs1_equiv_bs2 = (&bs1 == &bs2);
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
+    std::vector<libint2::Engine> engines;
+
+    engines.reserve(nthreads);
+    engines.emplace_back(Operator::overlap,
+                         std::max(bs1.max_nprim(), bs2.max_nprim()),
+                         std::max(bs1.max_l(), bs2.max_l()), 0);
+    for (size_t i = 1; i != nthreads; ++i) {
+      engines.push_back(engines[0]);
+    }
+
+    Polyquant_cout("Computing non-negligible shell-pair list");
+    std::unordered_map<size_t, std::vector<size_t>> splist;
+    auto &engine = engines[thread_id];
+    const auto &buf = engine.results();
+    // loop over permutationally-unique set of shells
+    for (auto s1 = 0l, s12 = 0l; s1 != nsh1; ++s1) {
+      if (splist.find(s1) == splist.end()) {
+#pragma omp critical(insert_s1)
+        { splist.insert(std::make_pair(s1, std::vector<size_t>())); }
+      }
+
+      auto n1 = bs1[s1].size(); // number of basis functions in this shell
+      auto s2_max = bs1_equiv_bs2 ? s1 : nsh2 - 1;
+      for (auto s2 = 0; s2 <= s2_max; ++s2, ++s12) {
+        if (s12 % nthreads != thread_id) {
+          continue;
+        }
+
+        auto on_same_center = (bs1[s1].O == bs2[s2].O);
+        bool significant = on_same_center;
+        if (not on_same_center) {
+          auto n2 = bs2[s2].size();
+          engines[thread_id].compute(bs1[s1], bs2[s2]);
+          Eigen::Map<const Matrix> buf_mat(buf[0], n1, n2);
+          auto norm = buf_mat.norm();
+          significant = (norm >= threshold);
+        }
+
+        if (significant) {
+#pragma omp critical(insert_s2)
+          { splist[s1].emplace_back(s2); }
+        }
+      }
+    }
+  }
+
+#pragma omp parallel
+  {
+    const auto nsh1 = bs1.size();
+    const auto nsh2 = bs2.size();
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
+    for (auto s1 = 0l; s1 != nsh1; ++s1) {
+      if (s1 % nthreads == thread_id) {
+        auto &list = splist[s1];
+        std::sort(list.begin(), list.end());
+      }
+    }
+  }
+
+#pragma omp parallel
+  {
+    const auto nsh1 = bs1.size();
+    const auto nsh2 = bs2.size();
+    for (auto s1 = 0l; s1 != nsh1; ++s1) {
+      if (s1 % nthreads == thread_id) {
+        auto &list = splist[s1];
+        std::sort(list.begin(), list.end());
+      }
+    }
+  }
+  /// to use precomputed shell pair data must decide on max precision a priori
+  const auto max_engine_precision =
+      std::numeric_limits<double>::epsilon() / 1e10;
+  const auto ln_max_engine_precision = std::log(max_engine_precision);
+  std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata(
+      splist.size());
+#pragma omp parallel
+  {
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
+    for (auto s1 = 0l; s1 != nsh1; ++s1) {
+      if (s1 % nthreads == thread_id) {
+        for (const auto &s2 : splist[s1]) {
+          spdata[s1].emplace_back(std::make_shared<libint2::ShellPair>(
+              bs1[s1], bs2[s2], ln_max_engine_precision));
+        }
+      }
+    }
+  }
+  return std::make_tuple(splist, spdata);
 }
 
 void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
