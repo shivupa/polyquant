@@ -43,6 +43,7 @@ public:
 
   void calculate_overlap();
   void calculate_Schwarz();
+  void calculate_unique_shell_pairs(const double threshold=this->tolerance_2e);
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
@@ -125,6 +126,9 @@ public:
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
       const libint2::BasisSet &shells_a, const libint2::BasisSet &shells_b,
       libint2::Operator obtype);
+  std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
+             std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+  compute_shellpairs(const libint2::BasisSet &bs1, const double threshold);
 
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
@@ -206,15 +210,16 @@ public:
   std::vector<std::vector<std::vector<
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>>
       mo_two_body_ints;
+
+  std::vector<std::tuple<
+      std::unordered_map<size_t, std::vector<size_t>>,
+      std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+      unique_shell_pairs;
+
   void calculate_mo_1_body_integrals(
       std::vector<
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
           &mo_coeff);
-
-  std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
-             std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
-  compute_shellpairs(const libint2::BasisSet &bs1, const libint2::BasisSet &bs2,
-                     const double threshold);
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
   transform_mo_2_body_integrals(
@@ -250,7 +255,7 @@ public:
    */
   POLYQUANT_MOLECULE input_molecule;
 
-  double tolerance_2e = 1e-8;
+  double tolerance_2e = 1e-16;
   /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
   Eigen::Dynamic>> alpha_miller = {
       {"H",
