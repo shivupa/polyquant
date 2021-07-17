@@ -269,25 +269,75 @@ void POLYQUANT_EPSCF::form_fock() {
     quantum_part_a_idx++;
   }
   // Polyquant_cout("forming fock");
+  // The E expression is
+  // E
+
   {
     // TODO target for hand tuned omp loop
 #pragma omp parallel for schedule(runtime)
     for (auto quantum_part_a_idx = 0;
          quantum_part_a_idx < this->input_molecule.quantum_particles.size();
          quantum_part_a_idx++) {
+      auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
+      std::advance(quantum_part_a_it, quantum_part_a_idx);
+      auto quantum_part_a = quantum_part_a_it->second;
       auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
+      auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
       for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
-        for (auto& shell_j : std::get<0>(this->input_integral[quantum_part_a_idx].unique_shell_pairs[quantum_part_a_idx])) {
+        auto shell_i_bf_start = shell2bf_a[shell_i];
+        auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][shell_i].size();
+        auto shellpairdata_ij_iter = std::get<1>(this->input_integral.unique_shell_pairs[quantum_part_a_idx]);
+        for (auto &shell_j : std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
+          auto shell_j_bf_start = shell2bf_a[shell_j];
+          auto shell_j_bf_size =
+              this->input_basis.basis[quantum_part_a_idx][shell_j].size();
+          const auto* shellpairdata_ij = shellpairdata_ij_iter->get();
+          shellpairdata_ij_iter++;
+          auto D_shell_ij_norm = 0.0;
+          if (this->Cauchy_Schwarz_screening) {
+            if (quantum_part_a.num_parts == 1) {
+              D_shell_ij_norm = this->D[quantum_part_a_idx][0]
+                                    .block(shell_i_bf_start, shell_j_bf_start,
+                                           shell_i_bf_size, shell_j_bf_size)
+                                    .lpNorm<Eigen::Infinity>()
+            } else if (quantum_part_a.num_parts > 1 &&
+                       quantum_part_a.restricted == true) {
+              D_shell_ij_norm = (this->D[quantum_part_a_idx][0] +
+                                 this->D[quantum_part_a_idx][0])
+                                    .block(shell_i_bf_start, shell_j_bf_start,
+                                           shell_i_bf_size, shell_j_bf_size)
+                                    .lpNorm<Eigen::Infinity>()
+            } else if (quantum_part_a.num_parts > 1 &&
+                       quantum_part_a.restricted == false) {
+              D_shell_ij_norm = (this->D[quantum_part_a_idx][0] +
+                                 this->D[quantum_part_a_idx][1])
+                                    .block(shell_i_bf_start, shell_j_bf_start,
+                                           shell_i_bf_size, shell_j_bf_size)
+                                    .lpNorm<Eigen::Infinity>()
+            }
+          }
           for (auto quantum_part_b_idx = 0;
                quantum_part_b_idx <
                this->input_molecule.quantum_particles.size();
                quantum_part_b_idx++) {
+            auto quantum_part_b_it =
+                this->input_molecule.quantum_particles.begin();
+            std::advance(quantum_part_b_it, quantum_part_b_idx);
+            auto quantum_part_b = quantum_part_b_it->second;
             auto num_shell_b =
                 this->input_basis.basis[quantum_part_b_idx].size();
+            auto shell2bf_b =
+                this->input_basis.basis[quantum_part_b_idx].shell2bf();
             for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
-              for (size_t shell_l = 0; shell_l < num_shell_b; shell_l++) {
-                // TODO check if shell was screened here
-                if (this->Cauchy_Schwarz_screening) {
+              for (auto &shell_l :
+                   this->input_integral
+                       .unique_shell_pairs[quantum_part_b_idx][shell_k]) {
+                // get the maximum values from the density blocks here
+                D_shell_ij_norm
+                    // D.block(s1_first, s2_first, s1_size,
+                    // s2_size).lpNorm<Eigen::Infinity>()
+                    // TODO check if shell was screened here
+                    if (this->Cauchy_Schwarz_screening) {
                   if (std::abs(Da_kl + Db_kl) *
                           this->input_integral.Schwarz[](shell_i, shell_j) *
                           this->input_integral.Schwarz(k, l) >

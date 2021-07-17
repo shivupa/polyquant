@@ -12,11 +12,12 @@ cmake \
     -DPOLYQUANT_CODE_COVERAGE=0 \
     -DCMAKE_BUILD_TYPE="Release" \
     -DMKL_ROOT=/opt/intel/mkl \
-    ..
+    .. -G Ninja
 #make Sphinx
-make -j 4
+#make -j 4
+ninja
 #lcov --capture --initial --directory . --base-directory ../src --output-file coverage_base.info
-make test
+#make test
 #lcov --base-directory ../src --directory . --capture --output-file coverage.info
 # filter out system and extra files.
 # output coverage data for debugging (optional)
