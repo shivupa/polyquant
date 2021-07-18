@@ -224,6 +224,41 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
   return fock_elements;
 }
 
+double POLYQUANT_EPSCF::get_shell_density_norm_coulomb(
+    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
+    const size &shell_a_bf_start, const size &shell_a_bf_size, ,
+    const size &shell_b_bf_start, const size &shell_b_bf_size) {
+  double norm = 0.0;
+  if (!this->Cauchy_Schwarz_screening) {
+    return norm;
+  }
+  if (quantum_part.num_parts == 1) {
+    if (this->incremental_fock && incremental_fock_start[quantum_part_idx][0] &&
+        !incremental_fock_reset[quantum_part_idx][0]) {
+      norm = (this->D[quantum_part_idx] - this->D_last[quantum_part_idx])[0]
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>()
+    } else {
+      norm = this->D[quantum_part_idx][0]
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>()
+    }
+  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+    norm = (this->D[quantum_part_idx][0] + this->D[quantum_part_idx][0])
+               .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                      shell_b_bf_size)
+               .lpNorm<Eigen::Infinity>()
+  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+    norm = (this->D[quantum_part_idx][0] + this->D[quantum_part_idx][1])
+               .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                      shell_b_bf_size)
+               .lpNorm<Eigen::Infinity>()
+  }
+  return norm;
+}
+
 void POLYQUANT_EPSCF::form_fock() {
   // TODO
 
@@ -284,16 +319,25 @@ void POLYQUANT_EPSCF::form_fock() {
       auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
       auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
       for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
+
         auto shell_i_bf_start = shell2bf_a[shell_i];
-        auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][shell_i].size();
-        auto shellpairdata_ij_iter = std::get<1>(this->input_integral.unique_shell_pairs[quantum_part_a_idx]);
-        for (auto &shell_j : std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
+        auto shell_i_bf_size =
+            this->input_basis.basis[quantum_part_a_idx][shell_i].size();
+        auto shellpairdata_ij_iter =
+            std::get<1>(this->input_integral
+                            .unique_shell_pairs[quantum_part_a_idx])[shell_i];
+
+        for (auto &shell_j : std::get<0>(
+                 this->input_integral
+                     .unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
           auto shell_j_bf_start = shell2bf_a[shell_j];
           auto shell_j_bf_size =
               this->input_basis.basis[quantum_part_a_idx][shell_j].size();
-          const auto* shellpairdata_ij = shellpairdata_ij_iter->get();
+          const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
           shellpairdata_ij_iter++;
-          auto D_shell_ij_norm = 0.0;
+          auto D_shell_ij_norm = get_shell_density_norm(
+              quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
+              shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
           if (this->Cauchy_Schwarz_screening) {
             if (quantum_part_a.num_parts == 1) {
               D_shell_ij_norm = this->D[quantum_part_a_idx][0]
@@ -320,6 +364,7 @@ void POLYQUANT_EPSCF::form_fock() {
                quantum_part_b_idx <
                this->input_molecule.quantum_particles.size();
                quantum_part_b_idx++) {
+
             auto quantum_part_b_it =
                 this->input_molecule.quantum_particles.begin();
             std::advance(quantum_part_b_it, quantum_part_b_idx);
@@ -328,19 +373,66 @@ void POLYQUANT_EPSCF::form_fock() {
                 this->input_basis.basis[quantum_part_b_idx].size();
             auto shell2bf_b =
                 this->input_basis.basis[quantum_part_b_idx].shell2bf();
+            auto shell_k_bf_start = shell2bf_b[shell_k];
+            auto shell_k_bf_size =
+                this->input_basis.basis[quantum_part_b_idx][shell_k].size();
+
+            // calculate exchange contribution only if a and b are the same
+            auto D_shell_ik_norm = 0.0;
+            auto D_shell_jk_norm = 0.0;
+            if (quantum_part_a_idx == quantum_part_b_idx) {
+              D_shell_ik_norm = get_shell_density_norm(
+                  quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
+                  shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
+              D_shell_jk_norm = get_shell_density_norm(
+                  quantum_part_a, quantum_part_a_idx, shell_j_bf_start,
+                  shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
+            }
+            auto shellpairdata_kl_iter = std::get<1>(
+                this->input_integral
+                    .unique_shell_pairs[quantum_part_b_idx])[shell_k];
+
             for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
               for (auto &shell_l :
                    this->input_integral
                        .unique_shell_pairs[quantum_part_b_idx][shell_k]) {
+                auto shell_l_bf_start = shell2bf_b[shell_l];
+                auto shell_l_bf_size =
+                    this->input_basis.basis[quantum_part_b_idx][shell_l].size();
+                const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+                shellpairdata_ij_iter++;
                 // get the maximum values from the density blocks here
-                D_shell_ij_norm
-                    // D.block(s1_first, s2_first, s1_size,
-                    // s2_size).lpNorm<Eigen::Infinity>()
-                    // TODO check if shell was screened here
-                    if (this->Cauchy_Schwarz_screening) {
-                  if (std::abs(Da_kl + Db_kl) *
-                          this->input_integral.Schwarz[](shell_i, shell_j) *
-                          this->input_integral.Schwarz(k, l) >
+                auto D_shell_kl_norm = get_shell_density_norm(
+                    quantum_part_b, quantum_part_b_idx, shell_k_bf_start,
+                    shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
+                // D_shell_ij_norm and D_shell_kl_norm now contain the coulomb
+                // contributions to screening.
+
+                // for now ignore exchange contributions if quantum_part_a_idx
+                // != quantum_part_b_idx in the future we may want to have
+                // exchange between particles that are in the same basis space
+                // but this is unsupported for now
+
+                auto D_shell_il_norm = 0.0;
+                auto D_shell_jl_norm = 0.0;
+                if (quantum_part_a_idx == quantum_part_b_idx) {
+                  auto D_shell_il_norm = get_shell_density_norm(
+                      quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
+                      shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
+                  auto D_shell_jl_norm = get_shell_density_norm(
+                      quantum_part_a, quantum_part_a_idx, shell_j_bf_start,
+                      shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
+                }
+
+                // TODO check if shell was screened here
+                if (this->Cauchy_Schwarz_screening) {
+                  if (std::max({D_shell_ij_norm, D_shell_ik_norm,
+                                D_shell_il_norm, D_shell_jk_norm,
+                                D_shell_jl_norm, D_shell_kl_norm}) *
+                          this->input_integral.Schwarz[quantum_part_a_idx](
+                              shell_i, shell_j) *
+                          this->input_integral.Schwarz[quantum_part_b_idx](k,
+                                                                           l) >
                       this->Cauchy_Schwarz_threshold) {
 
                     auto elements =

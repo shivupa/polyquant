@@ -106,18 +106,13 @@ void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(const double &threshold) {
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_a_part] :
        this->input_molecule.quantum_particles) {
-      if (std::get<0>(
-              this->unique_shell_pairs[quantum_part_a_idx])
-                  .size() == 0 &&
-          std::get<1>(
-              this->unique_shell_pairs[quantum_part_a_idx])
-                  .size() == 0) {
-        Polyquant_cout("Calculating pseudo unique shell pairs...");
-        this->unique_shell_pairs[quantum_part_a_idx] =
-            this->compute_shellpairs(
-                this->input_basis.basis[quantum_part_a_idx], threshold);
-      }
-      quantum_part_a_idx++;
+    if (std::get<0>(this->unique_shell_pairs[quantum_part_a_idx]).size() == 0 &&
+        std::get<1>(this->unique_shell_pairs[quantum_part_a_idx]).size() == 0) {
+      Polyquant_cout("Calculating pseudo unique shell pairs...");
+      this->unique_shell_pairs[quantum_part_a_idx] = this->compute_shellpairs(
+          this->input_basis.basis[quantum_part_a_idx], threshold);
+    }
+    quantum_part_a_idx++;
   }
   libint2::finalize();
 }
@@ -309,12 +304,10 @@ POLYQUANT_INTEGRAL::transform_mo_2_body_integrals(
   return eri;
 }
 
-
-
-    void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
-        std::vector<
-            std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
-            &mo_coeffs) {
+void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        &mo_coeffs) {
   mo_two_body_ints.resize(mo_coeffs.size());
   auto num_basis = this->input_basis.num_basis;
   auto quantum_part_a_idx = 0ul;
@@ -556,11 +549,14 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
 }
 
 std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
-           std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>> POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,  const double threshold) {
+           std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
+                                       const double threshold) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  // if bs2 became an argument then this could be used to calculate unique shells between basis sets, however at this time we don't require that.
-  const BasisSet& bs2 = bs1;
+  // if bs2 became an argument then this could be used to calculate unique
+  // shells between basis sets, however at this time we don't require that.
+  const BasisSet &bs2 = bs1;
 #pragma omp parallel
   {
     const auto nsh1 = bs1.size();
