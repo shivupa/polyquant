@@ -19,3 +19,4 @@ void POLYQUANT_INPUT::parse_input(const std::string &filename) {
   Polyquant_dump_json(this->input_data);
   Polyquant_cout("End input file");
 }
+}

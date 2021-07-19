@@ -44,7 +44,7 @@ public:
   void calculate_overlap();
   void calculate_Schwarz();
   void
-  calculate_unique_shell_pairs(const double threshold = this->tolerance_2e);
+  calculate_unique_shell_pairs(double threshold = -1.0);
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
@@ -214,7 +214,7 @@ public:
 
   std::vector <
       std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
-                 std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+                 std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>>
           unique_shell_pairs;
 
   void calculate_mo_1_body_integrals(

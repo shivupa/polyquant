@@ -99,7 +99,10 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
   }
   libint2::finalize();
 }
-void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(const double &threshold) {
+void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
+  if (threshold == -1){
+    threshold  = this->tolerance_2e;
+  }
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();

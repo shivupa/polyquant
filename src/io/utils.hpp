@@ -190,32 +190,5 @@ template <typename T> struct PairHash {
     return seed;
   }
 };
-
-/**
- * @brief A class to hold information parsed from a QCSchema json
- *
- */
-class POLYQUANT_INPUT {
-public:
-  POLYQUANT_INPUT() = default;
-  /**
-   * @brief Construct a new polyquant input object using the parse_input
-   * function.
-   *
-   * @param filename the file to parse.
-   */
-  POLYQUANT_INPUT(const std::string &filename);
-  /**
-   * @brief the function where a file is actually parsed.
-   *
-   * @param filename the file to parse.
-   */
-  void parse_input(const std::string &filename);
-  /**
-   * @brief the json object to store the input
-   *
-   */
-  json input_data;
-};
 } // namespace polyquant
 #endif

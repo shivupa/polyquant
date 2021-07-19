@@ -2,6 +2,7 @@
 #define POLYQUANT_MOLECULE_H
 #include "io/timer.hpp"
 #include "io/utils.hpp"
+#include "io/input.hpp"
 #include "molecule/classical_particles.hpp"
 #include "molecule/quantum_particles.hpp"
 #include <algorithm>

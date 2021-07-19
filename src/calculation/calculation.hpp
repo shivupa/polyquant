@@ -54,8 +54,8 @@ public:
 
   std::string parse_mean_field();
   std::string parse_post_mean_field();
-  void dump_mf_for_qmcpack(std::string &filename);
-  void dump_post_mf_for_qmcpack(std::string &filename);
+  //void dump_mf_for_qmcpack(std::string &filename);
+  //void dump_post_mf_for_qmcpack(std::string &filename);
   /**
    * @brief the input parameters
    *

@@ -335,7 +335,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     scf_calc.from_file(hdf5_filename);
   }
   if (dump_for_qmcpack) {
-    dump_mf_for_qmcpack(hdf5_filename);
+    //dump_mf_for_qmcpack(hdf5_filename);
   }
 }
 void POLYQUANT_CALCULATION::run_post_mean_field(
@@ -425,10 +425,11 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
       APP_ABORT("FROM_FILE for ci not implemented.");
     }
     if (dump_for_qmcpack) {
-      dump_post_mf_for_qmcpack(hdf5_filename);
+      //dump_post_mf_for_qmcpack(hdf5_filename);
     }
   }
 }
+/*
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_species_ids;
   std::vector<int> atomic_number;
@@ -586,3 +587,4 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
       filename, dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets,
       this->ci_calc.num_states, this->ci_calc.detset.max_orb);
 }
+*/

@@ -124,22 +124,6 @@ int quantum_symb_to_charge(std::string key) {
 } // namespace polyquant
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-POLYQUANT_INPUT::POLYQUANT_INPUT(const std::string &filename) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  this->parse_input(filename);
-}
-
-void POLYQUANT_INPUT::parse_input(const std::string &filename) {
-  std::ifstream inputfile(filename);
-  this->input_data = json::parse(inputfile);
-
-  Polyquant_cout("Reading Input File: " + filename);
-
-  Polyquant_cout("Input file: ");
-  Polyquant_dump_json(this->input_data);
-  Polyquant_cout("End input file");
-}
 /*
 std::ifstream inputfile(filename);
 std::string line;
