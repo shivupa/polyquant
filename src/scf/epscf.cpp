@@ -224,39 +224,153 @@ POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
   return fock_elements;
 }
 
-double POLYQUANT_EPSCF::get_shell_density_norm_coulomb(
+double POLYQUANT_EPSCF::get_shell_density_norm_exchange(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-    const size &shell_a_bf_start, const size &shell_a_bf_size, ,
-    const size &shell_b_bf_start, const size &shell_b_bf_size) {
+    const size_t &quantum_part_spin_idx, const size &shell_a_bf_start,
+    const size &shell_a_bf_size, , const size &shell_b_bf_start,
+    const size &shell_b_bf_size) {
   double norm = 0.0;
   if (!this->Cauchy_Schwarz_screening) {
     return norm;
   }
-  if (quantum_part.num_parts == 1) {
-    if (this->incremental_fock && incremental_fock_start[quantum_part_idx][0] &&
-        !incremental_fock_reset[quantum_part_idx][0]) {
-      norm = (this->D[quantum_part_idx] - this->D_last[quantum_part_idx])[0]
-                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
-                        shell_b_bf_size)
-                 .lpNorm<Eigen::Infinity>()
-    } else {
-      norm = this->D[quantum_part_idx][0]
-                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
-                        shell_b_bf_size)
-                 .lpNorm<Eigen::Infinity>()
-    }
-  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-    norm = (this->D[quantum_part_idx][0] + this->D[quantum_part_idx][0])
+  if (this->incremental_fock &&
+      incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
+      !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+    norm = (this->D[quantum_part_idx][quantum_part_spin_idx] -
+            this->D_last[quantum_part_idx])[quantum_part_spin_idx]
                .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
                       shell_b_bf_size)
                .lpNorm<Eigen::Infinity>()
-  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-    norm = (this->D[quantum_part_idx][0] + this->D[quantum_part_idx][1])
+  } else {
+    norm = this->D[quantum_part_idx][quantum_part_spin_idx]
                .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
                       shell_b_bf_size)
                .lpNorm<Eigen::Infinity>()
   }
   return norm;
+}
+
+double POLYQUANT_EPSCF::get_shell_density_norm_coulomb(
+    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
+    const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
+    const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
+    const size_t &shell_b_bf_size) {
+  double norm = 0.0;
+  if (!this->Cauchy_Schwarz_screening) {
+    return norm;
+  }
+  if (quantum_part.num_parts == 1) {
+    if (this->incremental_fock &&
+        incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
+        !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+      norm = (this->D[quantum_part_idx][quantum_part_spin_idx] -
+              this->D_last[quantum_part_idx][quantum_part_spin_idx])
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>();
+    } else {
+      norm = this->D[quantum_part_idx][quantum_part_spin_idx]
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>();
+    }
+  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+    if (this->incremental_fock &&
+        incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
+        !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+      norm = (2.0 * (this->D[quantum_part_idx][quantum_part_spin_idx] -
+                     this->D_last[quantum_part_idx][quantum_part_spin_idx]))
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>();
+    } else {
+      norm = (2.0 * this->D[quantum_part_idx][quantum_part_spin_idx])
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>();
+    }
+  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+    if (this->incremental_fock &&
+        incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
+        !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+      norm = ((this->D[quantum_part_idx][quantum_part_spin_idx] -
+               this->D_last[quantum_part_idx][quantum_part_spin_idx]) +
+              (this->D[quantum_part_idx][1 - quantum_part_spin_idx] -
+               this->D_last[quantum_part_idx][1 - quantum_part_spin_idx]))
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>();
+    } else {
+      norm = (this->D[quantum_part_idx][quantum_part_spin_idx] +
+              this->D[quantum_part_idx][1 - quantum_part_spin_idx])
+                 .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
+                        shell_b_bf_size)
+                 .lpNorm<Eigen::Infinity>();
+    }
+  }
+  return norm;
+}
+
+double POLYQUANT_EPSCF::get_density_coulomb(
+    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
+    const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b) {
+  double D_val = 0.0;
+  if (this->incremental_fock &&
+      incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
+      !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+    D_val = (this->D[quantum_part_idx][quantum_part_spin_idx](a, b) -
+             this->D_last[quantum_part_idx][quantum_part_spin_idx](a, b));
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+      D_val += D_val;
+    } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      D_val +=
+          (this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b) -
+           this->D_last[quantum_part_idx][1 - quantum_part_spin_idx](a, b));
+    }
+
+    else {
+      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](shell_i_bf,
+                                                               shell_j_bf);
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+        D_val += D_ij;
+      } else if (quantum_part.num_parts > 1 &&
+                 quantum_part.restricted == false) {
+        D_val += this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b);
+      }
+    }
+  }
+  return D_val;
+}
+
+double POLYQUANT_EPSCF::get_density_exchange(
+    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
+    const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b) {
+  double D_val = 0.0;
+  if (this->incremental_fock &&
+      incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
+      !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+    D_val = (this->D[quantum_part_idx][quantum_part_spin_idx](a, b) -
+             this->D_last[quantum_part_idx][quantum_part_spin_idx](a, b));
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+      D_val += D_ij;
+    } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      D_val +=
+          (this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b) -
+           this->D_last[quantum_part_idx][1 - quantum_part_spin_idx](a, b));
+    }
+
+    else {
+      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](shell_i_bf,
+                                                               shell_j_bf);
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+        D_val += D_ij;
+      } else if (quantum_part.num_parts > 1 &&
+                 quantum_part.restricted == false) {
+        D_val += this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b);
+      }
+    }
+  }
+  return D_val;
 }
 
 void POLYQUANT_EPSCF::form_fock() {
@@ -304,161 +418,212 @@ void POLYQUANT_EPSCF::form_fock() {
     quantum_part_a_idx++;
   }
   // Polyquant_cout("forming fock");
-  // The E expression is
-  // E
 
+#pragma omp parallel for schedule(runtime)
   {
     // TODO target for hand tuned omp loop
-#pragma omp parallel for schedule(runtime)
+    auto shell_counter_ijkl = 0;
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
     for (auto quantum_part_a_idx = 0;
          quantum_part_a_idx < this->input_molecule.quantum_particles.size();
          quantum_part_a_idx++) {
       auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
       std::advance(quantum_part_a_it, quantum_part_a_idx);
       auto quantum_part_a = quantum_part_a_it->second;
+      auto quantum_part_a_spin_lim = quantum_part_a.restricted ? 1 : 2;
       auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
       auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
-      for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
+      for (auto quantum_part_a_spin_idx = 0;
+           quantum_part_a_spin_idx < quantum_part_a_spin_lim;
+           quantum_part_a_spin_idx++) {
+        for (auto quantum_part_b_idx = 0;
+             quantum_part_b_idx < this->input_molecule.quantum_particles.size();
+             quantum_part_b_idx++) {
+          auto quantum_part_b_it =
+              this->input_molecule.quantum_particles.begin();
+          std::advance(quantum_part_b_it, quantum_part_b_idx);
+          auto quantum_part_b = quantum_part_b_it->second;
+          auto quantum_part_b_spin_lim = quantum_part_b.restricted ? 1 : 2;
+          auto num_shell_b = this->input_basis.basis[quantum_part_b_idx].size();
+          auto shell2bf_b =
+              this->input_basis.basis[quantum_part_b_idx].shell2bf();
+          for (auto quantum_part_b_spin_idx = 0;
+               quantum_part_b_spin_idx < quantum_part_b_spin_lim;
+               quantum_part_b_spin_idx++) {
 
-        auto shell_i_bf_start = shell2bf_a[shell_i];
-        auto shell_i_bf_size =
-            this->input_basis.basis[quantum_part_a_idx][shell_i].size();
-        auto shellpairdata_ij_iter =
-            std::get<1>(this->input_integral
-                            .unique_shell_pairs[quantum_part_a_idx])[shell_i];
-
-        for (auto &shell_j : std::get<0>(
-                 this->input_integral
-                     .unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
-          auto shell_j_bf_start = shell2bf_a[shell_j];
-          auto shell_j_bf_size =
-              this->input_basis.basis[quantum_part_a_idx][shell_j].size();
-          const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
-          shellpairdata_ij_iter++;
-          auto D_shell_ij_norm = get_shell_density_norm(
-              quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
-              shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
-          if (this->Cauchy_Schwarz_screening) {
-            if (quantum_part_a.num_parts == 1) {
-              D_shell_ij_norm = this->D[quantum_part_a_idx][0]
-                                    .block(shell_i_bf_start, shell_j_bf_start,
-                                           shell_i_bf_size, shell_j_bf_size)
-                                    .lpNorm<Eigen::Infinity>()
-            } else if (quantum_part_a.num_parts > 1 &&
-                       quantum_part_a.restricted == true) {
-              D_shell_ij_norm = (this->D[quantum_part_a_idx][0] +
-                                 this->D[quantum_part_a_idx][0])
-                                    .block(shell_i_bf_start, shell_j_bf_start,
-                                           shell_i_bf_size, shell_j_bf_size)
-                                    .lpNorm<Eigen::Infinity>()
-            } else if (quantum_part_a.num_parts > 1 &&
-                       quantum_part_a.restricted == false) {
-              D_shell_ij_norm = (this->D[quantum_part_a_idx][0] +
-                                 this->D[quantum_part_a_idx][1])
-                                    .block(shell_i_bf_start, shell_j_bf_start,
-                                           shell_i_bf_size, shell_j_bf_size)
-                                    .lpNorm<Eigen::Infinity>()
-            }
-          }
-          for (auto quantum_part_b_idx = 0;
-               quantum_part_b_idx <
-               this->input_molecule.quantum_particles.size();
-               quantum_part_b_idx++) {
-
-            auto quantum_part_b_it =
-                this->input_molecule.quantum_particles.begin();
-            std::advance(quantum_part_b_it, quantum_part_b_idx);
-            auto quantum_part_b = quantum_part_b_it->second;
-            auto num_shell_b =
-                this->input_basis.basis[quantum_part_b_idx].size();
-            auto shell2bf_b =
-                this->input_basis.basis[quantum_part_b_idx].shell2bf();
-            auto shell_k_bf_start = shell2bf_b[shell_k];
-            auto shell_k_bf_size =
-                this->input_basis.basis[quantum_part_b_idx][shell_k].size();
-
-            // calculate exchange contribution only if a and b are the same
-            auto D_shell_ik_norm = 0.0;
-            auto D_shell_jk_norm = 0.0;
-            if (quantum_part_a_idx == quantum_part_b_idx) {
-              D_shell_ik_norm = get_shell_density_norm(
-                  quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
-                  shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
-              D_shell_jk_norm = get_shell_density_norm(
-                  quantum_part_a, quantum_part_a_idx, shell_j_bf_start,
-                  shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
-            }
-            auto shellpairdata_kl_iter = std::get<1>(
-                this->input_integral
-                    .unique_shell_pairs[quantum_part_b_idx])[shell_k];
-
-            for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
-              for (auto &shell_l :
-                   this->input_integral
-                       .unique_shell_pairs[quantum_part_b_idx][shell_k]) {
-                auto shell_l_bf_start = shell2bf_b[shell_l];
-                auto shell_l_bf_size =
-                    this->input_basis.basis[quantum_part_b_idx][shell_l].size();
-                const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+            for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
+              auto shell_i_bf_start = shell2bf_a[shell_i];
+              auto shell_i_bf_size =
+                  this->input_basis.basis[quantum_part_a_idx][shell_i].size();
+              auto shellpairdata_ij_iter =
+                  std::get<1>(this->input_integral
+                                  .unique_shell_pairs[quantum_part_a_idx])
+                      .at(shell_i)
+                      .begin();
+              for (auto &shell_j : std::get<0>(
+                       this->input_integral
+                           .unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
+                auto shell_j_bf_start = shell2bf_a[shell_j];
+                auto shell_j_bf_size =
+                    this->input_basis.basis[quantum_part_a_idx][shell_j].size();
+                const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
                 shellpairdata_ij_iter++;
-                // get the maximum values from the density blocks here
-                auto D_shell_kl_norm = get_shell_density_norm(
-                    quantum_part_b, quantum_part_b_idx, shell_k_bf_start,
-                    shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
-                // D_shell_ij_norm and D_shell_kl_norm now contain the coulomb
-                // contributions to screening.
+                auto D_shell_ij_norm = get_shell_density_norm_coulomb(
+                    quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx,
+                    shell_i_bf_start, shell_i_bf_size, shell_j_bf_start,
+                    shell_j_bf_size);
 
-                // for now ignore exchange contributions if quantum_part_a_idx
-                // != quantum_part_b_idx in the future we may want to have
-                // exchange between particles that are in the same basis space
-                // but this is unsupported for now
+                for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
+                  auto shell_k_bf_size =
+                      this->input_basis.basis[quantum_part_b_idx][shell_k]
+                          .size();
+                  // calculate exchange contribution only if a and b are the
+                  // same
+                  auto D_shell_ik_norm = 0.0;
+                  auto D_shell_jk_norm = 0.0;
+                  if (quantum_part_a_idx == quantum_part_b_idx) {
+                    D_shell_ik_norm = get_shell_density_norm_exchange(
+                        quantum_part_a, quantum_part_a_idx,
+                        quantum_part_spin_idx, shell_i_bf_start,
+                        shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
+                    D_shell_jk_norm = get_shell_density_norm_exchange(
+                        quantum_part_a, quantum_part_a_idx,
+                        quantum_part_spin_idx, shell_j_bf_start,
+                        shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
+                  }
+                  auto shellpairdata_kl_iter =
+                      std::get<1>(this->input_integral
+                                      .unique_shell_pairs[quantum_part_b_idx])
+                          .at(shell_k)
+                          .begin();
 
-                auto D_shell_il_norm = 0.0;
-                auto D_shell_jl_norm = 0.0;
-                if (quantum_part_a_idx == quantum_part_b_idx) {
-                  auto D_shell_il_norm = get_shell_density_norm(
-                      quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
-                      shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
-                  auto D_shell_jl_norm = get_shell_density_norm(
-                      quantum_part_a, quantum_part_a_idx, shell_j_bf_start,
-                      shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
-                }
+                  for (auto &shell_l :
+                       this->input_integral
+                           .unique_shell_pairs[quantum_part_b_idx][shell_k]) {
+                    auto shell_l_bf_start = shell2bf_b[shell_l];
+                    auto shell_l_bf_size =
+                        this->input_basis.basis[quantum_part_b_idx][shell_l]
+                            .size();
+                    const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+                    shellpairdata_kl_iter++;
+                    if ((shell_counter_ijkl++) % nthreads != thread_id)
+                      continue;
+                    // get the maximum values from the density blocks here
+                    auto D_shell_kl_norm = get_shell_density_norm_coulomb(
+                        quantum_part_b, quantum_part_b_idx,
+                        quantum_part_b_spin_idx, shell_k_bf_start,
+                        shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
+                    // D_shell_ij_norm and D_shell_kl_norm now contain the
+                    // coulomb contributions to screening.
 
-                // TODO check if shell was screened here
-                if (this->Cauchy_Schwarz_screening) {
-                  if (std::max({D_shell_ij_norm, D_shell_ik_norm,
-                                D_shell_il_norm, D_shell_jk_norm,
-                                D_shell_jl_norm, D_shell_kl_norm}) *
-                          this->input_integral.Schwarz[quantum_part_a_idx](
-                              shell_i, shell_j) *
-                          this->input_integral.Schwarz[quantum_part_b_idx](k,
-                                                                           l) >
-                      this->Cauchy_Schwarz_threshold) {
-
-                    auto elements =
-                        form_fock_helper(i, j, k, l, quantum_part_a_idx);
-                    // std::cout << elements.first << " " << elements.second <<
-                    // std::endl;
-                    auto quantum_part_a_it =
-                        this->input_molecule.quantum_particles.begin();
-                    std::advance(quantum_part_a_it, quantum_part_a_idx);
-                    auto quantum_part_a = quantum_part_a_it->second;
-                    this->F[quantum_part_a_idx][0](i, j) += elements.first;
-                    if (quantum_part_a.num_parts > 1 &&
-                        quantum_part_a.restricted == false) {
-                      this->F[quantum_part_a_idx][1](i, j) += elements.second;
+                    // for now ignore exchange contributions if
+                    // quantum_part_a_idx
+                    // != quantum_part_b_idx in the future we may want to have
+                    // exchange between particles that are in the same basis
+                    // space but this is unsupported for now
+                    auto D_shell_il_norm = 0.0;
+                    auto D_shell_jl_norm = 0.0;
+                    if (quantum_part_a_idx == quantum_part_b_idx) {
+                      auto D_shell_il_norm = get_shell_density_norm_exchange(
+                          quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
+                          shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
+                      auto D_shell_jl_norm = get_shell_density_norm_exchange(
+                          quantum_part_a, quantum_part_a_idx, shell_j_bf_start,
+                          shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
                     }
-                    // Interactions between particle types Fock Matrix elements
-                    for (auto quantum_part_b_idx = 0;
-                         quantum_part_b_idx <
-                         this->input_molecule.quantum_particles.size();
-                         quantum_part_b_idx++) {
-                      auto elements = form_mixed_fock_helper(
-                          i, j, k, l, quantum_part_a_idx, quantum_part_b_idx);
-                      this->F[quantum_part_a_idx][0](i, j) += elements.first;
-                      if (quantum_part_a.num_parts > 1 &&
-                          quantum_part_a.restricted == false) {
-                        this->F[quantum_part_a_idx][1](i, j) += elements.second;
+
+                    // TODO check if shell was screened here
+                    if (this->Cauchy_Schwarz_screening) {
+                      if (std::max({D_shell_ij_norm, D_shell_ik_norm,
+                                    D_shell_il_norm, D_shell_jk_norm,
+                                    D_shell_jl_norm, D_shell_kl_norm}) *
+                              this->input_integral.Schwarz[quantum_part_a_idx](
+                                  shell_i, shell_j) *
+                              this->input_integral.Schwarz[quantum_part_b_idx](
+                                  k, l) <
+                          this->Cauchy_Schwarz_threshold) {
+                        continue;
+                      }
+                    }
+                    // compute the permutational degeneracy for the given shell
+                    // set this may look like the libint example but we are
+                    // breaking braket symmetry so we are 4 fold symmetric
+                    // instead of 8
+                    auto shell_ij_perdeg = (shell_i == shell_j) ? 1 : 2;
+                    auto shell_kl_perdeg = (shell_k == shell_l) ? 1 : 2;
+                    auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
+
+                    for (auto shell_i_bf = shell_i_bf_start, resultsbfijkl = 0;
+                         shell_i_bf < shell_i_bf_start + shell_i_bf_size;
+                         ++shell_i_bf) {
+                      for (auto shell_j_bf = shell_j_bf_start;
+                           shell_j_bf < shell_j_bf_start + shell_j_bf_size;
+                           ++shell_j_bf) {
+                        for (auto shell_k_bf = shell_k_bf_start;
+                             shell_k_bf < shell_k_bf_start + shell_k_bf_size;
+                             ++shell_k_bf) {
+                          for (auto shell_l_bf = shell_l_bf_start;
+                               shell_l_bf < shell_l_bf_start + shell_l_bf_size;
+                               ++shell_l_bf, ++resultsbfijkl) {
+                            auto eri_ijkl = this->input_integral.get2e_elem(
+                                quantum_part_a_idx, quantum_part_b_idx,
+                                shell_i_bf, shell_j_bf, shell_k_bf, shell_l_bf);
+
+                            auto D_ij = this->get_density_coulomb(
+                                quantum_part_a, quantum_part_a_idx,
+                                quantum_part_a_spin_idx, shell_i_bf,
+                                shell_j_bf);
+                            auto D_kl = this->get_density_coulomb(
+                                quantum_part_b, quantum_part_b_idx,
+                                quantum_part_b_spin_idx, shell_k_bf,
+                                shell_l_bf);
+
+                            this->Fock[quantum_part_a_idx]
+                                      [quantum_part_a_spin_idx](shell_i_bf,
+                                                                shell_j_bf) +=
+                                D_kl * shell_ijkl_perdeg * eri_ijkl;
+                            this->Fock[quantum_part_b_idx]
+                                      [quantum_part_b_spin_idx](shell_k_bf,
+                                                                shell_l_bf) +=
+                                D_ij * shell_ijkl_perdeg * eri_ijkl;
+                            // exchange terms
+                            if (quantum_part_a_idx == quantum_part_b_idx) {
+                              auto D_ik = this->get_density_exchange(
+                                  quantum_part_a, quantum_part_a_idx,
+                                  quantum_part_a_spin_idx, shell_i_bf,
+                                  shell_k_bf);
+                              auto D_jl = this->get_density_exchange(
+                                  quantum_part_a, quantum_part_a_idx,
+                                  quantum_part_a_spin_idx, shell_j_bf,
+                                  shell_l_bf);
+                              auto D_il = this->get_density_exchange(
+                                  quantum_part_a, quantum_part_a_idx,
+                                  quantum_part_a_spin_idx, shell_i_bf,
+                                  shell_l_bf);
+                              auto D_jk = this->get_density_exchange(
+                                  quantum_part_a, quantum_part_a_idx,
+                                  quantum_part_a_spin_idx, shell_j_bf,
+                                  shell_k_bf);
+                              this->Fock[quantum_part_a_idx]
+                                        [quantum_part_a_spin_idx](shell_i_bf,
+                                                                  shell_k_bf) -=
+                                  0.25 * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              this->Fock[quantum_part_a_idx]
+                                        [quantum_part_a_spin_idx](shell_j_bf,
+                                                                  shell_l_bf) -=
+                                  0.25 * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              this->Fock[quantum_part_a_idx]
+                                        [quantum_part_a_spin_idx](shell_i_bf,
+                                                                  shell_l_bf) -=
+                                  0.25 * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              this->Fock[quantum_part_a_idx]
+                                        [quantum_part_a_spin_idx](shell_j_bf,
+                                                                  shell_k_bf) -=
+                                  0.25 * D_il * shell_ijkl_perdeg * eri_ijkl;
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -467,29 +632,28 @@ void POLYQUANT_EPSCF::form_fock() {
             }
           }
         }
-        // compute energy with non-extrapolated Fock matrix
-        this->calculate_E_elec();
-        //
-        if (this->iteration_num <= 1) {
-          quantum_part_a_idx = 0;
-          for (auto const &[quantum_part_a_key, quantum_part_a] :
-               this->input_molecule.quantum_particles) {
-            Polyquant_cout("Dumping Fock Matrix");
-            Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
-                                       "Fock_" + quantum_part_a_key +
-                                           "_alpha.txt");
-            if (quantum_part_a.num_parts > 1 &&
-                quantum_part_a.restricted == false) {
-              Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][1],
-                                         "Fock_" + quantum_part_a_key +
-                                             "_beta.txt");
-            }
-            quantum_part_a_idx++;
-          }
-        }
       }
     }
   }
+}
+
+// compute energy with non-extrapolated Fock matrix
+this->calculate_E_elec();
+//
+if (this->iteration_num <= 1) {
+  quantum_part_a_idx = 0;
+  for (auto const &[quantum_part_a_key, quantum_part_a] :
+       this->input_molecule.quantum_particles) {
+    Polyquant_cout("Dumping Fock Matrix");
+    Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
+                               "Fock_" + quantum_part_a_key + "_alpha.txt");
+    if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
+      Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][1],
+                                 "Fock_" + quantum_part_a_key + "_beta.txt");
+    }
+    quantum_part_a_idx++;
+  }
+}
 }
 
 void POLYQUANT_EPSCF::diag_fock() {
