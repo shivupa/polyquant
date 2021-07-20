@@ -22,213 +22,11 @@ void POLYQUANT_EPSCF::form_H_core() {
     quantum_part_idx++;
   }
 }
-double POLYQUANT_EPSCF::form_fock_elem(double Da_kl, double Db_kl,
-                                       double eri_ijkl, double eri_ikjl,
-                                       double qa, double qb, bool exchange) {
-  double gamma = 0.0;
-  if (exchange) {
-    gamma = 1.0;
-  }
-  // note if the beta element is desired call the function with the beta element
-  // as Da_kl
-  return (qa * qb) *
-         (((Da_kl + Db_kl) * eri_ijkl) - (gamma * Da_kl * eri_ikjl));
-}
-
-std::pair<double, double>
-POLYQUANT_EPSCF::form_fock_helper(size_t i, size_t j, size_t k, size_t l,
-                                  size_t quantum_part_a_idx) {
-  double alpha_elem = 0.0;
-  double beta_elem = 0.0;
-  double eri_ijkl =
-      this->input_integral.twoelec(this->input_integral.idx8(i, j, k, l));
-  double eri_ikjl =
-      this->input_integral.twoelec(this->input_integral.idx8(i, k, j, l));
-  auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
-  std::advance(quantum_part_a_it, quantum_part_a_idx);
-  auto quantum_part_a = quantum_part_a_it->second;
-  double qa = quantum_part_a.charge;
-  bool exchange = quantum_part_a.exchange;
-  // "NORMAL" Fock Elements
-  // Form alpha element
-  double Da_kl = 0.0;
-  double Db_kl = 0.0;
-
-  if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
-      !incremental_fock_reset[quantum_part_a_idx][0]) {
-    Da_kl = this->D[quantum_part_a_idx][0](k, l) -
-            this->D_last[quantum_part_a_idx][0](k, l);
-    if (quantum_part_a.num_parts == 1) {
-      Db_kl = 0.0;
-    } else if (quantum_part_a.num_parts > 1 &&
-               quantum_part_a.restricted == false) {
-      Db_kl = this->D[quantum_part_a_idx][1](k, l) -
-              this->D_last[quantum_part_a_idx][1](k, l);
-    } else {
-      Db_kl = Da_kl;
-    }
-  } else {
-    Da_kl = this->D[quantum_part_a_idx][0](k, l);
-    if (quantum_part_a.num_parts == 1) {
-      Db_kl = 0.0;
-    } else if (quantum_part_a.num_parts > 1 &&
-               quantum_part_a.restricted == false) {
-      Db_kl = this->D[quantum_part_a_idx][1](k, l);
-    } else {
-      Db_kl = Da_kl;
-    }
-  }
-  if (this->Cauchy_Schwarz_screening) {
-    if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
-            this->input_integral.Schwarz(k, l) >
-        this->Cauchy_Schwarz_threshold) {
-      alpha_elem +=
-          form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-    }
-  } else {
-    alpha_elem +=
-        form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-  }
-  // Form Beta Element
-  if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-    if (this->incremental_fock &&
-        incremental_fock_start[quantum_part_a_idx][1] &&
-        !incremental_fock_reset[quantum_part_a_idx][1]) {
-      Da_kl = this->D[quantum_part_a_idx][0](k, l) -
-              this->D_last[quantum_part_a_idx][0](k, l);
-      Db_kl = this->D[quantum_part_a_idx][1](k, l) -
-              this->D_last[quantum_part_a_idx][1](k, l);
-    } else {
-      Da_kl = this->D[quantum_part_a_idx][0](k, l);
-      Db_kl = this->D[quantum_part_a_idx][1](k, l);
-    }
-    if (this->Cauchy_Schwarz_screening) {
-      if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
-              this->input_integral.Schwarz(k, l) >
-          this->Cauchy_Schwarz_threshold) {
-        beta_elem +=
-            form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-      }
-    } else {
-      beta_elem +=
-          form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qa, exchange);
-    }
-  }
-
-  std::pair<double, double> fock_elements(alpha_elem, beta_elem);
-  return fock_elements;
-}
-
-std::pair<double, double>
-POLYQUANT_EPSCF::form_mixed_fock_helper(size_t i, size_t j, size_t k, size_t l,
-                                        size_t quantum_part_a_idx,
-                                        size_t quantum_part_b_idx) {
-  double alpha_elem = 0.0;
-  double beta_elem = 0.0;
-  double Da_kl = 0.0;
-  double Db_kl = 0.0;
-  double eri_ijkl =
-      this->input_integral.twoelec(this->input_integral.idx8(i, j, k, l));
-  double eri_ikjl =
-      this->input_integral.twoelec(this->input_integral.idx8(i, k, j, l));
-  auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
-  std::advance(quantum_part_a_it, quantum_part_a_idx);
-  auto quantum_part_a = quantum_part_a_it->second;
-  double qa = quantum_part_a.charge;
-  auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
-  std::advance(quantum_part_b_it, quantum_part_b_idx);
-  auto quantum_part_b = quantum_part_b_it->second;
-  double qb = quantum_part_b.charge;
-
-  if (!independent_converged || quantum_part_a_idx == quantum_part_b_idx) {
-    std::pair<double, double> fock_elements(alpha_elem, beta_elem);
-    return fock_elements;
-  }
-
-  if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] &&
-      !incremental_fock_reset[quantum_part_a_idx][0]) {
-    Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-            this->D_last[quantum_part_b_idx][0](k, l);
-    if (quantum_part_b.num_parts == 1) {
-      Db_kl = 0.0;
-    } else if (quantum_part_b.num_parts > 1 &&
-               quantum_part_b.restricted == false) {
-      Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-              this->D_last[quantum_part_b_idx][1](k, l);
-    } else {
-      Db_kl = Da_kl;
-    }
-  } else {
-    Da_kl = this->D[quantum_part_b_idx][0](k, l);
-    if (quantum_part_b.num_parts == 1) {
-      Db_kl = 0.0;
-    } else if (quantum_part_b.num_parts > 1 &&
-               quantum_part_b.restricted == false) {
-      Db_kl = this->D[quantum_part_b_idx][1](k, l);
-    } else {
-      Db_kl = Da_kl;
-    }
-  }
-  if (this->Cauchy_Schwarz_screening) {
-    if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
-            this->input_integral.Schwarz(k, l) >
-        this->Cauchy_Schwarz_threshold) {
-      alpha_elem +=
-          form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-    }
-  } else {
-    alpha_elem +=
-        form_fock_elem(Da_kl, Db_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-  }
-  // calculate beta elem
-  if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-    if (this->incremental_fock &&
-        incremental_fock_start[quantum_part_a_idx][1] &&
-        !incremental_fock_reset[quantum_part_a_idx][1]) {
-      Da_kl = this->D[quantum_part_b_idx][0](k, l) -
-              this->D_last[quantum_part_b_idx][0](k, l);
-      if (quantum_part_b.num_parts == 1) {
-        Db_kl = 0.0;
-      } else if (quantum_part_b.num_parts > 1 &&
-                 quantum_part_b.restricted == false) {
-        Db_kl = this->D[quantum_part_b_idx][1](k, l) -
-                this->D_last[quantum_part_b_idx][1](k, l);
-        ;
-      } else {
-        Db_kl = Da_kl;
-      }
-    } else {
-      Da_kl = this->D[quantum_part_b_idx][0](k, l);
-      if (quantum_part_b.num_parts == 1) {
-        Db_kl = 0.0;
-      } else if (quantum_part_b.num_parts > 1 &&
-                 quantum_part_b.restricted == false) {
-        Db_kl = this->D[quantum_part_b_idx][1](k, l);
-      } else {
-        Db_kl = Da_kl;
-      }
-    }
-    if (this->Cauchy_Schwarz_screening) {
-      if (std::abs(Da_kl + Db_kl) * this->input_integral.Schwarz(i, j) *
-              this->input_integral.Schwarz(k, l) >
-          this->Cauchy_Schwarz_threshold) {
-        beta_elem +=
-            form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-      }
-    } else {
-      beta_elem +=
-          form_fock_elem(Db_kl, Da_kl, eri_ijkl, eri_ikjl, qa, qb, false);
-    }
-  }
-  std::pair<double, double> fock_elements(alpha_elem, beta_elem);
-  return fock_elements;
-}
-
 double POLYQUANT_EPSCF::get_shell_density_norm_exchange(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-    const size_t &quantum_part_spin_idx, const size &shell_a_bf_start,
-    const size &shell_a_bf_size, , const size &shell_b_bf_start,
-    const size &shell_b_bf_size) {
+    const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
+    const size_t &shell_a_bf_size , const size_t &shell_b_bf_start,
+    const size_t &shell_b_bf_size) {
   double norm = 0.0;
   if (!this->Cauchy_Schwarz_screening) {
     return norm;
@@ -237,15 +35,15 @@ double POLYQUANT_EPSCF::get_shell_density_norm_exchange(
       incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
       !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
     norm = (this->D[quantum_part_idx][quantum_part_spin_idx] -
-            this->D_last[quantum_part_idx])[quantum_part_spin_idx]
+            this->D_last[quantum_part_idx][quantum_part_spin_idx])
                .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
                       shell_b_bf_size)
-               .lpNorm<Eigen::Infinity>()
+               .lpNorm<Eigen::Infinity>();
   } else {
     norm = this->D[quantum_part_idx][quantum_part_spin_idx]
                .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size,
                       shell_b_bf_size)
-               .lpNorm<Eigen::Infinity>()
+               .lpNorm<Eigen::Infinity>();
   }
   return norm;
 }
@@ -329,10 +127,9 @@ double POLYQUANT_EPSCF::get_density_coulomb(
     }
 
     else {
-      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](shell_i_bf,
-                                                               shell_j_bf);
+      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a,b);
       if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-        D_val += D_ij;
+        D_val += D_val;
       } else if (quantum_part.num_parts > 1 &&
                  quantum_part.restricted == false) {
         D_val += this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b);
@@ -352,7 +149,7 @@ double POLYQUANT_EPSCF::get_density_exchange(
     D_val = (this->D[quantum_part_idx][quantum_part_spin_idx](a, b) -
              this->D_last[quantum_part_idx][quantum_part_spin_idx](a, b));
     if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-      D_val += D_ij;
+      D_val += D_val;
     } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       D_val +=
           (this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b) -
@@ -360,10 +157,10 @@ double POLYQUANT_EPSCF::get_density_exchange(
     }
 
     else {
-      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](shell_i_bf,
-                                                               shell_j_bf);
+      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a,
+                                                               b);
       if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-        D_val += D_ij;
+        D_val += D_val;
       } else if (quantum_part.num_parts > 1 &&
                  quantum_part.restricted == false) {
         D_val += this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b);
@@ -379,6 +176,7 @@ void POLYQUANT_EPSCF::form_fock() {
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
+  auto num_basis = this->input_basis.num_basis[quantum_part_a_idx];
     if (!this->incremental_fock ||
         !incremental_fock_start[quantum_part_a_idx][0] ||
         incremental_fock_reset[quantum_part_a_idx][0]) {
@@ -419,10 +217,11 @@ void POLYQUANT_EPSCF::form_fock() {
   }
   // Polyquant_cout("forming fock");
 
-#pragma omp parallel for schedule(runtime)
-  {
-    // TODO target for hand tuned omp loop
     auto shell_counter_ijkl = 0;
+#pragma omp parallel 
+  {
+      //for schedule(runtime)
+    // TODO target for hand tuned omp loop
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto quantum_part_a_idx = 0;
@@ -475,6 +274,7 @@ void POLYQUANT_EPSCF::form_fock() {
                     shell_j_bf_size);
 
                 for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
+                auto shell_k_bf_start = shell2bf_a[shell_k];
                   auto shell_k_bf_size =
                       this->input_basis.basis[quantum_part_b_idx][shell_k]
                           .size();
@@ -485,11 +285,11 @@ void POLYQUANT_EPSCF::form_fock() {
                   if (quantum_part_a_idx == quantum_part_b_idx) {
                     D_shell_ik_norm = get_shell_density_norm_exchange(
                         quantum_part_a, quantum_part_a_idx,
-                        quantum_part_spin_idx, shell_i_bf_start,
+                        quantum_part_a_spin_idx, shell_i_bf_start,
                         shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
                     D_shell_jk_norm = get_shell_density_norm_exchange(
                         quantum_part_a, quantum_part_a_idx,
-                        quantum_part_spin_idx, shell_j_bf_start,
+                        quantum_part_b_spin_idx, shell_j_bf_start,
                         shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
                   }
                   auto shellpairdata_kl_iter =
@@ -499,8 +299,7 @@ void POLYQUANT_EPSCF::form_fock() {
                           .begin();
 
                   for (auto &shell_l :
-                       this->input_integral
-                           .unique_shell_pairs[quantum_part_b_idx][shell_k]) {
+                       std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
                     auto shell_l_bf_start = shell2bf_b[shell_l];
                     auto shell_l_bf_size =
                         this->input_basis.basis[quantum_part_b_idx][shell_l]
@@ -657,11 +456,11 @@ if (this->iteration_num <= 1) {
 }
 
 void POLYQUANT_EPSCF::diag_fock() {
-  auto num_basis = this->input_basis.num_basis;
   auto quantum_part_idx = 0ul;
   this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
+  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->E_orbitals[quantum_part_idx].resize(2);
     } else {
@@ -764,10 +563,10 @@ void POLYQUANT_EPSCF::diag_fock() {
 }
 
 void POLYQUANT_EPSCF::form_DM() {
-  auto num_basis = this->input_basis.num_basis;
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
+  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
     this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
 #pragma omp parallel for
@@ -1028,7 +827,6 @@ void POLYQUANT_EPSCF::guess_DM() {
   // TODO SAD or
   // TODO SAP
   // TODO move into separate functions
-  auto num_basis = this->input_basis.num_basis;
   this->D.resize(this->input_molecule.quantum_particles.size());
   this->D_last.resize(this->input_molecule.quantum_particles.size());
   this->C.resize(this->input_molecule.quantum_particles.size());
@@ -1044,6 +842,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
+  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
@@ -1198,11 +997,11 @@ void POLYQUANT_EPSCF::from_file(std::string &filename) {
   }
   auto Super_Twist_group = root_group.get_group("Super_Twist");
 
-  auto num_basis = this->input_basis.num_basis;
   auto idx = 0;
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
+  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     auto Dataset =
         Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
     hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
