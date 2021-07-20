@@ -545,8 +545,8 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
     this->Schwarz[quantum_part_idx].resize(molecule.quantum_particles.size());
-    this->unique_shell_pairs[quantum_part_idx].resize(
-        molecule.quantum_particles.size());
+    //this->unique_shell_pairs[quantum_part_idx].resize(
+    //    molecule.quantum_particles.size());
     quantum_part_idx++;
   }
 }
@@ -559,18 +559,19 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
   POLYQUANT_TIMER timer(function);
   // if bs2 became an argument then this could be used to calculate unique
   // shells between basis sets, however at this time we don't require that.
-  const BasisSet &bs2 = bs1;
-#pragma omp parallel
-  {
+  const libint2::BasisSet &bs2 = bs1;
     const auto nsh1 = bs1.size();
     const auto nsh2 = bs2.size();
     const auto bs1_equiv_bs2 = (&bs1 == &bs2);
+    std::unordered_map<size_t, std::vector<size_t>> splist;
+#pragma omp parallel
+  {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     std::vector<libint2::Engine> engines;
 
     engines.reserve(nthreads);
-    engines.emplace_back(Operator::overlap,
+    engines.emplace_back(libint2::Operator::overlap,
                          std::max(bs1.max_nprim(), bs2.max_nprim()),
                          std::max(bs1.max_l(), bs2.max_l()), 0);
     for (size_t i = 1; i != nthreads; ++i) {
@@ -578,7 +579,6 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
     }
 
     Polyquant_cout("Computing non-negligible shell-pair list");
-    std::unordered_map<size_t, std::vector<size_t>> splist;
     auto &engine = engines[thread_id];
     const auto &buf = engine.results();
     // loop over permutationally-unique set of shells
@@ -600,7 +600,7 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
         if (not on_same_center) {
           auto n2 = bs2[s2].size();
           engines[thread_id].compute(bs1[s1], bs2[s2]);
-          Eigen::Map<const Matrix> buf_mat(buf[0], n1, n2);
+          Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n1, n2);
           auto norm = buf_mat.norm();
           significant = (norm >= threshold);
         }
@@ -615,8 +615,6 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
 
 #pragma omp parallel
   {
-    const auto nsh1 = bs1.size();
-    const auto nsh2 = bs2.size();
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto s1 = 0l; s1 != nsh1; ++s1) {
@@ -629,8 +627,8 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
 
 #pragma omp parallel
   {
-    const auto nsh1 = bs1.size();
-    const auto nsh2 = bs2.size();
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
     for (auto s1 = 0l; s1 != nsh1; ++s1) {
       if (s1 % nthreads == thread_id) {
         auto &list = splist[s1];
@@ -651,6 +649,7 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
     for (auto s1 = 0l; s1 != nsh1; ++s1) {
       if (s1 % nthreads == thread_id) {
         for (const auto &s2 : splist[s1]) {
+#pragma omp critical(insert_sdata)
           spdata[s1].emplace_back(std::make_shared<libint2::ShellPair>(
               bs1[s1], bs2[s2], ln_max_engine_precision));
         }
