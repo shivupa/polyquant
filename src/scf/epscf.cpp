@@ -218,7 +218,7 @@ void POLYQUANT_EPSCF::form_fock() {
   // Polyquant_cout("forming fock");
 
     auto shell_counter_ijkl = 0;
-#pragma omp parallel 
+#pragma omp parallel
   {
       //for schedule(runtime)
     // TODO target for hand tuned omp loop
