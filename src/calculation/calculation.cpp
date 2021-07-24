@@ -335,7 +335,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     scf_calc.from_file(hdf5_filename);
   }
   if (dump_for_qmcpack) {
-    //dump_mf_for_qmcpack(hdf5_filename);
+    // dump_mf_for_qmcpack(hdf5_filename);
   }
 }
 void POLYQUANT_CALCULATION::run_post_mean_field(
@@ -425,7 +425,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
       APP_ABORT("FROM_FILE for ci not implemented.");
     }
     if (dump_for_qmcpack) {
-      //dump_post_mf_for_qmcpack(hdf5_filename);
+      // dump_post_mf_for_qmcpack(hdf5_filename);
     }
   }
 }
@@ -522,15 +522,18 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     // Polyquant_cout(classical_part_key);
     for (auto shell : this->input_basis.basis) {
       // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
       // + " " + std::to_string(shell.O[0]
       // -this->input_molecule.centers[classical_part.center_idx[0]][0])
       // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
       // + " " + std::to_string(shell.O[1]
       // -this->input_molecule.centers[classical_part.center_idx[0]][1])
       // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
       // + " " + std::to_string(shell.O[2]
       // -this->input_molecule.centers[classical_part.center_idx[0]][2])
       // );

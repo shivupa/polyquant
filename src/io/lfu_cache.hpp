@@ -5,9 +5,9 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <omp.h>
 #include <optional>
 #include <unordered_map>
-#include <omp.h>
 
 namespace polyquant {
 

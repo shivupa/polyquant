@@ -25,7 +25,7 @@ void POLYQUANT_EPSCF::form_H_core() {
 double POLYQUANT_EPSCF::get_shell_density_norm_exchange(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
     const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
-    const size_t &shell_a_bf_size , const size_t &shell_b_bf_start,
+    const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
     const size_t &shell_b_bf_size) {
   double norm = 0.0;
   if (!this->Cauchy_Schwarz_screening) {
@@ -127,7 +127,7 @@ double POLYQUANT_EPSCF::get_density_coulomb(
     }
 
     else {
-      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a,b);
+      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a, b);
       if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
         D_val += D_val;
       } else if (quantum_part.num_parts > 1 &&
@@ -157,8 +157,7 @@ double POLYQUANT_EPSCF::get_density_exchange(
     }
 
     else {
-      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a,
-                                                               b);
+      D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a, b);
       if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
         D_val += D_val;
       } else if (quantum_part.num_parts > 1 &&
@@ -176,7 +175,7 @@ void POLYQUANT_EPSCF::form_fock() {
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] :
        this->input_molecule.quantum_particles) {
-  auto num_basis = this->input_basis.num_basis[quantum_part_a_idx];
+    auto num_basis = this->input_basis.num_basis[quantum_part_a_idx];
     if (!this->incremental_fock ||
         !incremental_fock_start[quantum_part_a_idx][0] ||
         incremental_fock_reset[quantum_part_a_idx][0]) {
@@ -217,10 +216,10 @@ void POLYQUANT_EPSCF::form_fock() {
   }
   // Polyquant_cout("forming fock");
 
-    auto shell_counter_ijkl = 0;
+  auto shell_counter_ijkl = 0;
 #pragma omp parallel
   {
-      //for schedule(runtime)
+    // for schedule(runtime)
     // TODO target for hand tuned omp loop
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
@@ -274,7 +273,7 @@ void POLYQUANT_EPSCF::form_fock() {
                     shell_j_bf_size);
 
                 for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
-                auto shell_k_bf_start = shell2bf_a[shell_k];
+                  auto shell_k_bf_start = shell2bf_a[shell_k];
                   auto shell_k_bf_size =
                       this->input_basis.basis[quantum_part_b_idx][shell_k]
                           .size();
@@ -289,7 +288,7 @@ void POLYQUANT_EPSCF::form_fock() {
                         shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
                     D_shell_jk_norm = get_shell_density_norm_exchange(
                         quantum_part_a, quantum_part_a_idx,
-                        quantum_part_b_spin_idx, shell_j_bf_start,
+                        quantum_part_a_spin_idx, shell_j_bf_start,
                         shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
                   }
                   auto shellpairdata_kl_iter =
@@ -299,7 +298,8 @@ void POLYQUANT_EPSCF::form_fock() {
                           .begin();
 
                   for (auto &shell_l :
-                       std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
+                       std::get<0>(this->input_integral.unique_shell_pairs
+                                       [quantum_part_b_idx])[shell_k]) {
                     auto shell_l_bf_start = shell2bf_b[shell_l];
                     auto shell_l_bf_size =
                         this->input_basis.basis[quantum_part_b_idx][shell_l]
@@ -325,10 +325,12 @@ void POLYQUANT_EPSCF::form_fock() {
                     auto D_shell_jl_norm = 0.0;
                     if (quantum_part_a_idx == quantum_part_b_idx) {
                       auto D_shell_il_norm = get_shell_density_norm_exchange(
-                          quantum_part_a, quantum_part_a_idx, shell_i_bf_start,
+                          quantum_part_a, quantum_part_a_idx,
+                          quantum_part_a_spin_idx, shell_i_bf_start,
                           shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
                       auto D_shell_jl_norm = get_shell_density_norm_exchange(
-                          quantum_part_a, quantum_part_a_idx, shell_j_bf_start,
+                          quantum_part_a, quantum_part_a_idx,
+                          quantum_part_a_spin_idx, shell_j_bf_start,
                           shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
                     }
 
@@ -340,7 +342,7 @@ void POLYQUANT_EPSCF::form_fock() {
                               this->input_integral.Schwarz[quantum_part_a_idx](
                                   shell_i, shell_j) *
                               this->input_integral.Schwarz[quantum_part_b_idx](
-                                  k, l) <
+                                  shell_k, shell_l) <
                           this->Cauchy_Schwarz_threshold) {
                         continue;
                       }
@@ -353,7 +355,8 @@ void POLYQUANT_EPSCF::form_fock() {
                     auto shell_kl_perdeg = (shell_k == shell_l) ? 1 : 2;
                     auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
 
-                    for (auto shell_i_bf = shell_i_bf_start, resultsbfijkl = 0;
+                    for (auto shell_i_bf = shell_i_bf_start,
+                              resultsbfijkl = 0ul;
                          shell_i_bf < shell_i_bf_start + shell_i_bf_size;
                          ++shell_i_bf) {
                       for (auto shell_j_bf = shell_j_bf_start;
@@ -378,13 +381,13 @@ void POLYQUANT_EPSCF::form_fock() {
                                 quantum_part_b_spin_idx, shell_k_bf,
                                 shell_l_bf);
 
-                            this->Fock[quantum_part_a_idx]
-                                      [quantum_part_a_spin_idx](shell_i_bf,
-                                                                shell_j_bf) +=
+                            this->F[quantum_part_a_idx]
+                                   [quantum_part_a_spin_idx](shell_i_bf,
+                                                             shell_j_bf) +=
                                 D_kl * shell_ijkl_perdeg * eri_ijkl;
-                            this->Fock[quantum_part_b_idx]
-                                      [quantum_part_b_spin_idx](shell_k_bf,
-                                                                shell_l_bf) +=
+                            this->F[quantum_part_b_idx]
+                                   [quantum_part_b_spin_idx](shell_k_bf,
+                                                             shell_l_bf) +=
                                 D_ij * shell_ijkl_perdeg * eri_ijkl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx) {
@@ -404,21 +407,21 @@ void POLYQUANT_EPSCF::form_fock() {
                                   quantum_part_a, quantum_part_a_idx,
                                   quantum_part_a_spin_idx, shell_j_bf,
                                   shell_k_bf);
-                              this->Fock[quantum_part_a_idx]
-                                        [quantum_part_a_spin_idx](shell_i_bf,
-                                                                  shell_k_bf) -=
+                              this->F[quantum_part_a_idx]
+                                     [quantum_part_a_spin_idx](shell_i_bf,
+                                                               shell_k_bf) -=
                                   0.25 * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                              this->Fock[quantum_part_a_idx]
-                                        [quantum_part_a_spin_idx](shell_j_bf,
-                                                                  shell_l_bf) -=
+                              this->F[quantum_part_a_idx]
+                                     [quantum_part_a_spin_idx](shell_j_bf,
+                                                               shell_l_bf) -=
                                   0.25 * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              this->Fock[quantum_part_a_idx]
-                                        [quantum_part_a_spin_idx](shell_i_bf,
-                                                                  shell_l_bf) -=
+                              this->F[quantum_part_a_idx]
+                                     [quantum_part_a_spin_idx](shell_i_bf,
+                                                               shell_l_bf) -=
                                   0.25 * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                              this->Fock[quantum_part_a_idx]
-                                        [quantum_part_a_spin_idx](shell_j_bf,
-                                                                  shell_k_bf) -=
+                              this->F[quantum_part_a_idx]
+                                     [quantum_part_a_spin_idx](shell_j_bf,
+                                                               shell_k_bf) -=
                                   0.25 * D_il * shell_ijkl_perdeg * eri_ijkl;
                             }
                           }
@@ -434,25 +437,24 @@ void POLYQUANT_EPSCF::form_fock() {
       }
     }
   }
-}
 
-// compute energy with non-extrapolated Fock matrix
-this->calculate_E_elec();
-//
-if (this->iteration_num <= 1) {
-  quantum_part_a_idx = 0;
-  for (auto const &[quantum_part_a_key, quantum_part_a] :
-       this->input_molecule.quantum_particles) {
-    Polyquant_cout("Dumping Fock Matrix");
-    Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
-                               "Fock_" + quantum_part_a_key + "_alpha.txt");
-    if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-      Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][1],
-                                 "Fock_" + quantum_part_a_key + "_beta.txt");
+  // compute energy with non-extrapolated Fock matrix
+  this->calculate_E_elec();
+  //
+  if (this->iteration_num <= 1) {
+    quantum_part_a_idx = 0;
+    for (auto const &[quantum_part_a_key, quantum_part_a] :
+         this->input_molecule.quantum_particles) {
+      Polyquant_cout("Dumping Fock Matrix");
+      Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][0],
+                                 "Fock_" + quantum_part_a_key + "_alpha.txt");
+      if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
+        Polyquant_dump_mat_to_file(this->F[quantum_part_a_idx][1],
+                                   "Fock_" + quantum_part_a_key + "_beta.txt");
+      }
+      quantum_part_a_idx++;
     }
-    quantum_part_a_idx++;
   }
-}
 }
 
 void POLYQUANT_EPSCF::diag_fock() {
@@ -460,7 +462,7 @@ void POLYQUANT_EPSCF::diag_fock() {
   this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->E_orbitals[quantum_part_idx].resize(2);
     } else {
@@ -475,8 +477,8 @@ void POLYQUANT_EPSCF::diag_fock() {
         this->F[quantum_part_idx][0];
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator =
         this->F[quantum_part_idx][0] * this->D[quantum_part_idx][0] *
-            this->input_integral.overlap -
-        this->input_integral.overlap * this->D[quantum_part_idx][0] *
+            this->input_integral.overlap[quantum_part_idx] -
+        this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][0] *
             this->F[quantum_part_idx][0];
     this->iteration_rms_error[quantum_part_idx][0] =
         FD_commutator.norm() / (num_basis * num_basis);
@@ -566,7 +568,7 @@ void POLYQUANT_EPSCF::form_DM() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
     this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
 #pragma omp parallel for
@@ -842,7 +844,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
@@ -1001,7 +1003,7 @@ void POLYQUANT_EPSCF::from_file(std::string &filename) {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-  auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     auto Dataset =
         Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
     hdf5::dataspace::Simple Dataspace(Dataset.dataspace());

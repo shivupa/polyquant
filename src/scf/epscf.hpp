@@ -17,22 +17,24 @@ public:
       : POLYQUANT_SCF(input_params, input_molecule, input_basis,
                       input_integral){};
   void form_H_core() override;
-double get_shell_density_norm_exchange(
-    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-    const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
-    const size_t &shell_a_bf_size , const size_t &shell_b_bf_start,
-    const size_t &shell_b_bf_size);
-double get_shell_density_norm_coulomb(
-    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-    const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
-    const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
-    const size_t &shell_b_bf_size);
-double get_density_coulomb(
-    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-    const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b);
-double get_density_exchange(
-    const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-    const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b);
+  double get_shell_density_norm_exchange(
+      const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
+      const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
+      const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
+      const size_t &shell_b_bf_size);
+  double get_shell_density_norm_coulomb(
+      const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
+      const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
+      const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
+      const size_t &shell_b_bf_size);
+  double get_density_coulomb(const QUANTUM_PARTICLE_SET &quantum_part,
+                             const size_t &quantum_part_idx,
+                             const size_t &quantum_part_spin_idx,
+                             const size_t &a, const size_t &b);
+  double get_density_exchange(const QUANTUM_PARTICLE_SET &quantum_part,
+                              const size_t &quantum_part_idx,
+                              const size_t &quantum_part_spin_idx,
+                              const size_t &a, const size_t &b);
   void form_fock() override;
   void diag_fock() override;
   void form_DM() override;

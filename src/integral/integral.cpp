@@ -61,47 +61,35 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
-  auto quantum_part_a_idx = 0ul;
-  for (auto const &[quantum_part_a_key, quantum_a_part] :
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] :
        this->input_molecule.quantum_particles) {
-    auto quantum_part_b_idx = 0ul;
-    for (auto const &[quantum_part_b_key, quantum_b_part] :
-         this->input_molecule.quantum_particles) {
-      if (quantum_part_a_idx > quantum_part_b_idx) {
-        continue;
-      }
-      if (this->Schwarz[quantum_part_a_idx][quantum_part_b_idx].cols() == 0 &&
-          this->Schwarz[quantum_part_a_idx][quantum_part_b_idx].rows() == 0) {
-        Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
-        auto num_basis_a = this->input_basis.basis[quantum_part_a_idx].size();
-        auto num_basis_b = this->input_basis.basis[quantum_part_b_idx].size();
-        this->Schwarz[quantum_part_a_idx][quantum_part_b_idx].resize(
-            num_basis_a, num_basis_b);
-        this->Schwarz[quantum_part_a_idx][quantum_part_b_idx].fill(0);
-        this->compute_Schwarz_ints(
-            this->Schwarz[quantum_part_a_idx][quantum_part_b_idx],
-            this->input_basis.basis[quantum_part_a_idx],
-            this->input_basis.basis[quantum_part_b_idx],
-            libint2::Operator::coulomb);
-        // TODO figure out how to write to file
-        std::stringstream filename;
-        filename << "overlap";
-        filename << quantum_part_a_idx;
-        filename << quantum_part_b_idx;
-        filename << ".txt";
-        Polyquant_dump_mat_to_file(
-            this->Schwarz[quantum_part_a_idx][quantum_part_b_idx],
-            "Schwarz.txt");
-      }
-      quantum_part_b_idx++;
+    if (this->Schwarz[quantum_part_idx].cols() == 0 &&
+        this->Schwarz[quantum_part_idx].rows() == 0) {
+      Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
+      auto num_basis_a = this->input_basis.basis[quantum_part_idx].size();
+      auto num_basis_b = this->input_basis.basis[quantum_part_idx].size();
+      this->Schwarz[quantum_part_idx].resize(num_basis_a, num_basis_b);
+      this->Schwarz[quantum_part_idx].fill(0);
+      this->compute_Schwarz_ints(this->Schwarz[quantum_part_idx],
+                                 this->input_basis.basis[quantum_part_idx],
+                                 this->input_basis.basis[quantum_part_idx],
+                                 libint2::Operator::coulomb);
+      // TODO figure out how to write to file
+      std::stringstream filename;
+      filename << "Schwarz";
+      filename << quantum_part_idx;
+      filename << ".txt";
+      Polyquant_dump_mat_to_file(this->Schwarz[quantum_part_idx],
+                                 filename.str());
     }
-    quantum_part_a_idx++;
+    quantum_part_idx++;
   }
   libint2::finalize();
 }
 void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
-  if (threshold == -1){
-    threshold  = this->tolerance_2e;
+  if (threshold == -1) {
+    threshold = this->tolerance_2e;
   }
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -542,13 +530,13 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
   this->Schwarz.resize(molecule.quantum_particles.size());
   this->unique_shell_pairs.resize(molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] :
-       this->input_molecule.quantum_particles) {
-    this->Schwarz[quantum_part_idx].resize(molecule.quantum_particles.size());
-    //this->unique_shell_pairs[quantum_part_idx].resize(
-    //    molecule.quantum_particles.size());
-    quantum_part_idx++;
-  }
+  // for (auto const &[quantum_part_key, quantum_part] :
+  //      this->input_molecule.quantum_particles) {
+  //   this->Schwarz[quantum_part_idx].resize(molecule.quantum_particles.size());
+  //   // this->unique_shell_pairs[quantum_part_idx].resize(
+  //   //    molecule.quantum_particles.size());
+  //   quantum_part_idx++;
+  // }
 }
 
 std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
@@ -560,10 +548,10 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
   // if bs2 became an argument then this could be used to calculate unique
   // shells between basis sets, however at this time we don't require that.
   const libint2::BasisSet &bs2 = bs1;
-    const auto nsh1 = bs1.size();
-    const auto nsh2 = bs2.size();
-    const auto bs1_equiv_bs2 = (&bs1 == &bs2);
-    std::unordered_map<size_t, std::vector<size_t>> splist;
+  const auto nsh1 = bs1.size();
+  const auto nsh2 = bs2.size();
+  const auto bs1_equiv_bs2 = (&bs1 == &bs2);
+  std::unordered_map<size_t, std::vector<size_t>> splist;
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -600,7 +588,9 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
         if (not on_same_center) {
           auto n2 = bs2[s2].size();
           engines[thread_id].compute(bs1[s1], bs2[s2]);
-          Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n1, n2);
+          Eigen::Map<
+              const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>
+              buf_mat(buf[0], n1, n2);
           auto norm = buf_mat.norm();
           significant = (norm >= threshold);
         }

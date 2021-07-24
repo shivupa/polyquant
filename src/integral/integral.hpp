@@ -43,8 +43,7 @@ public:
 
   void calculate_overlap();
   void calculate_Schwarz();
-  void
-  calculate_unique_shell_pairs(double threshold = -1.0);
+  void calculate_unique_shell_pairs(double threshold = -1.0);
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
@@ -191,9 +190,7 @@ public:
    * @brief Schwarz screening integrals (ij|ij)
    *
    */
-  std::vector<
-      std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
-      Schwarz;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> Schwarz;
   /**
    * @brief The orthogonalization matrix
    *
@@ -212,10 +209,10 @@ public:
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>>
       mo_two_body_ints;
 
-  std::vector <
+  std::vector<
       std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
                  std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>>
-          unique_shell_pairs;
+      unique_shell_pairs;
 
   void calculate_mo_1_body_integrals(
       std::vector<
