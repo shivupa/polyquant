@@ -9,7 +9,7 @@
   },
   "driver": "energy",
   "model": {
-    "method": "CI",
+    "method": "SCF",
     "basis": 
         { "electron" :
           {"H" : [{ "custom" : 
@@ -44,15 +44,6 @@
         "iteration_max" : 200,
         "from_file" : false
     },
-   "ci_keywords" : {
-       "convergence_E" : 1e-8,
-       "num_states" : 5,
-       "num_subspace_vec" : 20,
-       "excitation_level" : [
-           [1,1,2],
-           [1,0,1]
-           ]
-   },
    "pure" : true
       }
 }

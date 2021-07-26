@@ -1,7 +1,7 @@
 #include "io/hdf5_utilities.hpp"
 
 using namespace polyquant;
-
+/*
 void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
     const std::string &filename,
     std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
@@ -514,3 +514,4 @@ void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
                  atomic_centers);
   hdf5dump_basis(root_group, unique_shells);
 }
+*/

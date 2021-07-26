@@ -50,7 +50,7 @@ void POLYQUANT_CALCULATION::run() {
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
   std::string mean_field_type = this->parse_mean_field();
-  std::string post_mean_field_type = this->parse_post_mean_field();
+ // std::string post_mean_field_type = this->parse_post_mean_field();
   // if (do_excess_electron && do_positron) {
   // excess electron + positron + electrons
   //  APP_ABORT("POLYQUANT can't handle a model excess electron and positron "
@@ -64,6 +64,9 @@ void POLYQUANT_CALCULATION::run() {
   //  this->run_excess_positron_plus_electronic_mean_field(mean_field_type);
   //} else {
   // only electrons
+  
+  
+  /*
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
     this->run_post_mean_field(post_mean_field_type);
   } else if (post_mean_field_type == "FILE" &&
@@ -74,7 +77,11 @@ void POLYQUANT_CALCULATION::run() {
   } else if (mean_field_type != "NONE") {
     this->run_mean_field(mean_field_type);
   }
+  */
   //}
+  if (mean_field_type != "NONE") {
+    this->run_mean_field(mean_field_type);
+  }
 }
 
 // void POLYQUANT_CALCULATION::run_excess_positron_plus_electronic_mean_field(
@@ -338,6 +345,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     // dump_mf_for_qmcpack(hdf5_filename);
   }
 }
+/*
 void POLYQUANT_CALCULATION::run_post_mean_field(
     std::string &post_mean_field_type) {
   if (!this->post_mean_field_methods.contains(post_mean_field_type) &&
@@ -429,6 +437,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
     }
   }
 }
+*/
 /*
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_species_ids;
