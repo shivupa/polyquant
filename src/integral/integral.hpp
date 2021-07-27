@@ -47,7 +47,7 @@ public:
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
-//  void calculate_two_electron();
+  //  void calculate_two_electron();
   double get2e_elem(const size_t &quantum_part_a_idx,
                     const size_t &quantum_part_b_idx, const size_t &i,
                     const size_t &j, const size_t &k, const size_t &l);
@@ -253,7 +253,7 @@ public:
    */
   POLYQUANT_MOLECULE input_molecule;
 
-  double tolerance_2e = 1e-16;
+  double tolerance_2e = std::numeric_limits<double>::epsilon();
   /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
   Eigen::Dynamic>> alpha_miller = {
       {"H",

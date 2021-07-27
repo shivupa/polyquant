@@ -448,7 +448,8 @@ void hdf5dump_basis(hdf5::node::Group &root_group,
         // // REMOVE NORMALIZATION FACTOR FROM LIBINT
         // // SEE SHELL.H
         // //
-        // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
+        //
+https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
         // const auto sqrt_Pi_cubed =
         // double{5.56832799683170784528481798212}; const auto two_alpha
         // = 2.0 * exponent; const auto two_alpha_to_am32 =

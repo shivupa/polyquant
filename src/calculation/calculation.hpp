@@ -44,7 +44,7 @@ public:
    * @param mean field method
    */
   void run_mean_field(std::string &mean_field_type);
-  //void run_post_mean_field(std::string &post_mean_field_type);
+  // void run_post_mean_field(std::string &post_mean_field_type);
 
   // void
   // run_excess_electron_plus_electronic_mean_field(std::string
@@ -90,7 +90,7 @@ public:
    * @brief the CI calculation
    *
    */
-  //POLYQUANT_EPCI ci_calc;
+  // POLYQUANT_EPCI ci_calc;
 
   /**
    * @brief Mean-field calculation types that polyquant knows about

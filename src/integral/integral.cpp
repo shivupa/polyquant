@@ -614,21 +614,8 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
       }
     }
   }
-
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
-    for (auto s1 = 0l; s1 != nsh1; ++s1) {
-      if (s1 % nthreads == thread_id) {
-        auto &list = splist[s1];
-        std::sort(list.begin(), list.end());
-      }
-    }
-  }
   /// to use precomputed shell pair data must decide on max precision a priori
-  const auto max_engine_precision =
-      std::numeric_limits<double>::epsilon() / 1e10;
+  const auto max_engine_precision =tolerance_2e / 1e10;
   const auto ln_max_engine_precision = std::log(max_engine_precision);
   std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata(
       splist.size());
