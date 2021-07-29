@@ -13,8 +13,8 @@
   "model": {
     "method": "scf",
     "basis": 
-    {"H" : [{ "library" : {"type" : "sto-3g"} }],
-        "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}
+    { "electron" :{"H" : [{ "library" : {"type" : "sto-3g"} }],
+                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}}
   },
   "keywords": {
     "restricted" : false,

@@ -23,7 +23,7 @@ void POLYQUANT_EPSCF::form_H_core() {
   }
 }
 
-double POLYQUANT_EPSCF::get_shell_density_norm_exchange(
+double POLYQUANT_EPSCF::directscf_get_shell_density_norm_exchange(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
     const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
     const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
@@ -49,7 +49,7 @@ double POLYQUANT_EPSCF::get_shell_density_norm_exchange(
   return norm;
 }
 
-double POLYQUANT_EPSCF::get_shell_density_norm_coulomb(
+double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
     const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
     const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
@@ -110,44 +110,35 @@ double POLYQUANT_EPSCF::get_shell_density_norm_coulomb(
   return norm;
 }
 
-double POLYQUANT_EPSCF::get_density_coulomb(
+double POLYQUANT_EPSCF::directscf_get_density_coulomb(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
     const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b) {
-  Polyquant_cout("DEBUG dens coul 1");
   double D_val = 0.0;
   if (this->incremental_fock &&
       incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] &&
       !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
-    Polyquant_cout("DEBUG dens coul 2");
     D_val = (this->D[quantum_part_idx][quantum_part_spin_idx](a, b) -
              this->D_last[quantum_part_idx][quantum_part_spin_idx](a, b));
-    Polyquant_cout("DEBUG dens coul 3");
     if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-      Polyquant_cout("DEBUG dens coul 4");
       D_val += D_val;
     } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      Polyquant_cout("DEBUG dens coul 5");
       D_val +=
           (this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b) -
            this->D_last[quantum_part_idx][1 - quantum_part_spin_idx](a, b));
-      Polyquant_cout("DEBUG dens coul 6");
     }
   } else {
     D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a, b);
-    Polyquant_cout("DEBUG dens coul 7");
     if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
       D_val += D_val;
-      Polyquant_cout("DEBUG dens coul 8");
     } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       D_val += this->D[quantum_part_idx][1 - quantum_part_spin_idx](a, b);
-      Polyquant_cout("DEBUG dens coul 9");
     }
   }
 
   return D_val;
 }
 
-double POLYQUANT_EPSCF::get_density_exchange(
+double POLYQUANT_EPSCF::directscf_get_density_exchange(
     const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
     const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b) {
   double D_val = 0.0;
@@ -164,56 +155,48 @@ double POLYQUANT_EPSCF::get_density_exchange(
 
 void POLYQUANT_EPSCF::form_fock() {
   // TODO
-
   auto quantum_part_a_idx = 0ul;
-  for (auto const &[quantum_part_a_key, quantum_part_a] :
-       this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_a_idx];
-    if (!this->incremental_fock ||
-        !incremental_fock_start[quantum_part_a_idx][0] ||
-        incremental_fock_reset[quantum_part_a_idx][0]) {
+    if (!this->incremental_fock || !incremental_fock_start[quantum_part_a_idx][0] || incremental_fock_reset[quantum_part_a_idx][0]) {
       std::stringstream ss;
-      ss << "Resetting Incremental Fock build for Particle "
-         << quantum_part_a_idx << " spin " << 0 << std::endl;
+      ss << "Resetting Incremental Fock build for Particle " << quantum_part_a_idx << " spin " << 0 << std::endl;
       Polyquant_cout(ss.str());
       this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
-    } else if (this->incremental_fock &&
-               incremental_fock_start[quantum_part_a_idx][0] &&
-               !incremental_fock_reset[quantum_part_a_idx][0]) {
-      this->incremental_fock_reset_threshold[quantum_part_a_idx][0] =
-          this->iteration_rms_error[quantum_part_a_idx][0] / 10.0;
-      this->incremental_fock_reset_iteration[quantum_part_a_idx][0] =
-          this->iteration_num;
+    } else if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] && !incremental_fock_reset[quantum_part_a_idx][0]) {
+      this->incremental_fock_reset_threshold[quantum_part_a_idx][0] = this->iteration_rms_error[quantum_part_a_idx][0] / 10.0;
+      this->incremental_fock_reset_iteration[quantum_part_a_idx][0] = this->iteration_num;
     }
     if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-      if (!this->incremental_fock ||
-          !incremental_fock_start[quantum_part_a_idx][1] ||
-          incremental_fock_reset[quantum_part_a_idx][1]) {
+      if (!this->incremental_fock ||  !incremental_fock_start[quantum_part_a_idx][1] || incremental_fock_reset[quantum_part_a_idx][1]) {
         std::stringstream ss;
-        ss << "Resetting Incremental Fock build for Particle "
-           << quantum_part_a_idx << " spin " << 1 << std::endl;
+        ss << "Resetting Incremental Fock build for Particle " << quantum_part_a_idx << " spin " << 1 << std::endl;
         Polyquant_cout(ss.str());
         this->F[quantum_part_a_idx][1].setZero(num_basis, num_basis);
         this->F[quantum_part_a_idx][1] += this->H_core[quantum_part_a_idx];
-      } else if (this->incremental_fock &&
-                 incremental_fock_start[quantum_part_a_idx][1] &&
-                 incremental_fock_reset[quantum_part_a_idx][1]) {
-        this->incremental_fock_reset_threshold[quantum_part_a_idx][1] =
-            this->iteration_rms_error[quantum_part_a_idx][1] / 10.0;
-        this->incremental_fock_reset_iteration[quantum_part_a_idx][1] =
-            this->iteration_num;
+      } else if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][1] && incremental_fock_reset[quantum_part_a_idx][1]) {
+        this->incremental_fock_reset_threshold[quantum_part_a_idx][1] = this->iteration_rms_error[quantum_part_a_idx][1] / 10.0;
+        this->incremental_fock_reset_iteration[quantum_part_a_idx][1] = this->iteration_num;
       }
     }
     quantum_part_a_idx++;
   }
   Polyquant_cout("forming fock");
 
-  auto shell_counter_ijkl = 0;
+auto num_shell_a = this->input_basis.basis[0].size();
+for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
+  for (auto &shell_j : std::get<0>(this->input_integral.unique_shell_pairs[0])[shell_i]) {
+    std::cout << shell_i << " " << shell_j<< std::endl;
+  }
+}
+// APP_ABORT("TYE");
+
 #pragma omp parallel
   {
     // for schedule(runtime)
     // TODO target for hand tuned omp loop
+    auto shell_counter_ijkl = 0;
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule.quantum_particles.size(); quantum_part_a_idx++) {
@@ -234,6 +217,7 @@ void POLYQUANT_EPSCF::form_fock() {
           auto num_shell_b = this->input_basis.basis[quantum_part_b_idx].size();
           auto shell2bf_b = this->input_basis.basis[quantum_part_b_idx].shell2bf();
           for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < quantum_part_b_spin_lim; quantum_part_b_spin_idx++) {
+
             for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
               auto shell_i_bf_start = shell2bf_a[shell_i];
               auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][shell_i].size();
@@ -243,7 +227,7 @@ void POLYQUANT_EPSCF::form_fock() {
                 auto shell_j_bf_size = this->input_basis.basis[quantum_part_a_idx][shell_j].size();
                 const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
                 shellpairdata_ij_iter++;
-                auto D_shell_ij_norm = get_shell_density_norm_coulomb( quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
+                auto D_shell_ij_norm = directscf_get_shell_density_norm_coulomb( quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
                 for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
                   auto shell_k_bf_start = shell2bf_b[shell_k];
                   auto shell_k_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_k].size();
@@ -251,13 +235,13 @@ void POLYQUANT_EPSCF::form_fock() {
                   // same
                   auto D_shell_ik_norm = 0.0;
                   auto D_shell_jk_norm = 0.0;
-                  if (quantum_part_a_idx == quantum_part_b_idx) {
-                    D_shell_ik_norm = get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf_start,shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
-                    D_shell_jk_norm = get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf_start,shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
+                  if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+                    D_shell_ik_norm = directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf_start,shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
+                    D_shell_jk_norm = directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf_start,shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
                   }
                   auto shellpairdata_kl_iter =std::get<1>(this->input_integral.unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
                   for (auto &shell_l : std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
-                    std::cout << "SHIV ORDER" << shell_i << " " << shell_j << " " << shell_k << " " << shell_l << std::endl;
+                    std::cout << "SHIV ORDER  SHELL     " << shell_i << " " << shell_j << " " << shell_k << " " << shell_l << std::endl;
                     auto shell_l_bf_start = shell2bf_b[shell_l];
                     auto shell_l_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_l].size();
                     const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
@@ -265,7 +249,7 @@ void POLYQUANT_EPSCF::form_fock() {
                     if ((shell_counter_ijkl++) % nthreads != thread_id)
                       continue;
                     // get the maximum values from the density blocks here
-                    auto D_shell_kl_norm = get_shell_density_norm_coulomb(quantum_part_b, quantum_part_b_idx,quantum_part_b_spin_idx, shell_k_bf_start,shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
+                    auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(quantum_part_b, quantum_part_b_idx,quantum_part_b_spin_idx, shell_k_bf_start,shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
                     // D_shell_ij_norm and D_shell_kl_norm now contain the
                     // coulomb contributions to screening.
 
@@ -277,13 +261,13 @@ void POLYQUANT_EPSCF::form_fock() {
                     auto D_shell_il_norm = 0.0;
                     auto D_shell_jl_norm = 0.0;
                     if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-                      auto D_shell_il_norm = get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf_start,shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
-                      auto D_shell_jl_norm = get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf_start,shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
+                      auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf_start,shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
+                      auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf_start,shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
                     }
 
                     // TODO check if shell was screened here
                     if (this->Cauchy_Schwarz_screening) {
-                      if (std::max({D_shell_ij_norm, D_shell_ik_norm,D_shell_il_norm, D_shell_jk_norm,D_shell_jl_norm, D_shell_kl_norm}) *this->input_integral.Schwarz[quantum_part_a_idx](shell_i, shell_j) *this->input_integral.Schwarz[quantum_part_b_idx](shell_k, shell_l) <this->Cauchy_Schwarz_threshold) {
+                      if (std::max({D_shell_ij_norm, D_shell_ik_norm,D_shell_il_norm, D_shell_jk_norm,D_shell_jl_norm, D_shell_kl_norm}) * this->input_integral.Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral.Schwarz[quantum_part_b_idx](shell_k, shell_l) < this->Cauchy_Schwarz_threshold) {
                         continue;
                       }
                     }
@@ -291,30 +275,56 @@ void POLYQUANT_EPSCF::form_fock() {
                     // set this may look like the libint example but we are
                     // breaking bra-ket symmetry so we are 4 fold symmetric
                     // instead of 8
-                    auto shell_ij_perdeg = (shell_i == shell_j) ? 1 : 2;
-                    auto shell_kl_perdeg = (shell_k == shell_l) ? 1 : 2;
-                    auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
-                    for (auto shell_i_bf = shell_i_bf_start, resultsbfijkl = 0ul; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+                    const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
+                    const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
+                    // auto shell_ij_kl_perdeg =  (shell_i == shell_k) ? (shell_j == shell_l ? 1 : 2) : 2;
+                    // auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg * shell_ij_kl_perdeg;
+                    auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg;
+
+                    for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                       for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
                         for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
-                          for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf, ++resultsbfijkl) {
+                          for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
+                            std::cout << "SHIV ORDER    " << shell_i_bf << " " << shell_j_bf << " " << shell_k_bf << " " << shell_l_bf << std::endl;
                             auto eri_ijkl = this->input_integral.get2e_elem(quantum_part_a_idx, quantum_part_b_idx,shell_i_bf, shell_j_bf, shell_k_bf, shell_l_bf);
-                            auto D_ij = this->get_density_coulomb(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_j_bf);
-                            auto D_kl = this->get_density_coulomb( quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
-                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) += D_kl * shell_ijkl_perdeg * eri_ijkl;
-                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) += D_ij * shell_ijkl_perdeg * eri_ijkl;
+                            auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
+                            auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
+
+                            const auto scaleij = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_ij_perdeg;
+                            // auto a = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
+                            // auto b = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_i_bf);
+                            // if (a != b){
+                            //   std::cout << a << " "  << b << "  help" << std::endl;
+                            // }
+                            // const auto scaleij = shell_ijkl_perdeg;
+                            // const auto scaleij = 1.0;
+
+                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   0.25 * scaleij * D_kl * eri_ijkl;
+                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   0.25 * scaleij * D_kl * eri_ijkl;
+
+                            const auto scalekl = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_kl_perdeg;
+                            // const auto scalekl = shell_ijkl_perdeg;
+                            // const auto scalekl = 1.0;
+
+                            std::cout << eri_ijkl << " " << D_kl << std::endl;
+                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=   0.25 * scalekl * D_ij  * eri_ijkl;
+                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=   0.25 * scalekl * D_ij  * eri_ijkl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx ==quantum_part_b_spin_idx) {
-                              auto D_ik = this->get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_k_bf);
-                              auto D_jl = this->get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_l_bf);
-                              auto D_il = this->get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_l_bf);
-                              auto D_jk = this->get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_k_bf);
+                              auto D_ik = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_k_bf);
+                              auto D_jl = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_l_bf);
+                              auto D_il = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_l_bf);
+                              auto D_jk = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_k_bf);
                               const auto scale = 0.25;
-                              Polyquant_cout(D_jl * eri_ijkl);
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_k_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_l_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_l_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_k_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                              // Polyquant_cout(D_jl * eri_ijkl * shell_ijkl_perdeg);
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_k_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_i_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_l_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_j_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_l_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_i_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_k_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_j_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                             }
                           }
                         }
@@ -329,7 +339,7 @@ void POLYQUANT_EPSCF::form_fock() {
       }
     }
   }
-  APP_ABORT("END");
+  //APP_ABORT("END");
 
   // compute energy with non-extrapolated Fock matrix
   this->calculate_E_elec();
@@ -491,6 +501,20 @@ void POLYQUANT_EPSCF::form_DM() {
       }
     }
     quantum_part_idx++;
+  }
+  if (this->iteration_num >= 1) {
+    auto quantum_part_a_idx = 0;
+    for (auto const &[quantum_part_a_key, quantum_part_a] :
+         this->input_molecule.quantum_particles) {
+      Polyquant_cout("Dumping 1pDM Matrix");
+      Polyquant_dump_mat_to_file(this->D[quantum_part_a_idx][0],
+                                 "DM_" + quantum_part_a_key + "_alpha.txt");
+      if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
+        Polyquant_dump_mat_to_file(this->D[quantum_part_a_idx][1],
+                                   "DM_" + quantum_part_a_key + "_beta.txt");
+      }
+      quantum_part_a_idx++;
+    }
   }
 }
 

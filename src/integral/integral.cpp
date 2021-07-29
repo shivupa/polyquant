@@ -358,26 +358,34 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
 //   }
 // }
 
+std::pair<std::vector<size_t>, std::vector<size_t>> POLYQUANT_INTEGRAL::make_sorted_ijkl_idx(const size_t &quantum_part_a_idx,
+                                      const size_t &quantum_part_b_idx,
+                                      const size_t &i, const size_t &j,
+                                      const size_t &k, const size_t &l){
+    std::vector<size_t> part_one = {quantum_part_a_idx, i, j};
+    std::vector<size_t> part_two = {quantum_part_b_idx, l, k};
+    std::sort(part_one.begin() + 1, part_one.end());
+    std::sort(part_two.begin() + 1, part_two.end());
+    if (quantum_part_a_idx == quantum_part_b_idx) {
+      std::vector<size_t> combined_idxs = {i, j, k, l};
+      std::sort(combined_idxs.begin(), combined_idxs.end());
+      part_one[1] = combined_idxs[0];
+      part_one[2] = combined_idxs[1];
+      part_two[1] = combined_idxs[2];
+      part_two[2] = combined_idxs[3];
+    }
+    return std::make_pair(part_one, part_two);
+}
+
 double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
                                       const size_t &quantum_part_b_idx,
                                       const size_t &i, const size_t &j,
                                       const size_t &k, const size_t &l) {
-  std::vector<size_t> part_one = {quantum_part_a_idx, i, j};
-  std::vector<size_t> part_two = {quantum_part_b_idx, l, k};
-  std::sort(part_one.begin() + 1, part_one.end());
-  std::sort(part_two.begin() + 1, part_two.end());
-  if (quantum_part_a_idx == quantum_part_b_idx) {
-    std::vector<size_t> combined_idxs = {i, j, k, l};
-    std::sort(combined_idxs.begin(), combined_idxs.end());
-    part_one[1] = combined_idxs[0];
-    part_one[2] = combined_idxs[1];
-    part_two[1] = combined_idxs[2];
-    part_two[2] = combined_idxs[3];
-  }
-  std::pair<std::vector<size_t>, std::vector<size_t>> eri_idx =
-      std::make_pair(part_one, part_two);
+  std::pair<std::vector<size_t>, std::vector<size_t>> eri_idx = make_sorted_ijkl_idx(quantum_part_a_idx,quantum_part_b_idx,i,j,k,l);
   // finish by calculating entire shell if not present and storing entire
   // shell..
+  auto part_one = std::get<0>(eri_idx);
+  auto part_two = std::get<1>(eri_idx);
   auto cached_eri_elem = this->ericache.get(eri_idx);
   if (cached_eri_elem.has_value()) {
     return cached_eri_elem.value();
@@ -412,6 +420,8 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
         break;
       }
     }
+    // std::cout << part_one[1] << " " << shell2bf_a[s1] << " " << shells_a[s1].size() << std::endl;
+    // std::cout << part_one[2] << " " << shell2bf_a[s2] << " " << shells_a[s2].size() << std::endl;
     for (auto shell_start_b : shell2bf_b) {
       if (part_two[1] > shell_start_b) {
         s3++;
@@ -419,10 +429,12 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
       if (part_two[2] > shell_start_b) {
         s4++;
       }
-      if (part_one[1] <= shell_start_b && part_one[2] <= shell_start_b) {
+      if (part_two[1] <= shell_start_b && part_two[2] <= shell_start_b) {
         break;
       }
     }
+    // std::cout << part_two[1] << " " << shell2bf_b[s3] << " " << shells_b[s3].size() << std::endl;
+    // std::cout << part_two[2] << " " << shell2bf_b[s4] << " " << shells_b[s4].size() << std::endl;
 
     const auto &buf = engine.results();
     // loop over unique shell pairs, {s1,s2} such that s1 >= s2
@@ -440,26 +452,42 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
       for (size_t f2 = shell2bf_a[s2]; f2 < shell2bf_a[s2] + n2; ++f2) {
         std::vector<size_t> temp_part_one = {quantum_part_a_idx, f1, f2};
         for (size_t f3 = shell2bf_b[s3]; f3 < shell2bf_b[s3] + n3; ++f3) {
-          for (size_t f4 = shell2bf_b[s4]; f4 < shell2bf_b[s4] + n4;
-               ++f4, ++f1234) {
+          for (size_t f4 = shell2bf_b[s4]; f4 < shell2bf_b[s4] + n4; ++f4, ++f1234) {
             std::vector<size_t> temp_part_two = {quantum_part_b_idx, f3, f4};
-            std::pair<std::vector<size_t>, std::vector<size_t>> temp_eri_idx =
-                std::make_pair(temp_part_one, temp_part_two);
+            // std::cout << "Inserting " << f1 << " " << f2 << " "<< f3 << " "<< f4 << std::endl;
+            std::pair<std::vector<size_t>, std::vector<size_t>> temp_eri_idx =make_sorted_ijkl_idx(quantum_part_a_idx,quantum_part_b_idx,f1,f2,f3,f4);
             if (buf_1234 == nullptr) {
               this->ericache.set(temp_eri_idx, 0.0);
             } else {
               this->ericache.set(temp_eri_idx, buf_1234[f1234]);
-            }
-            if (part_one[1] == f1 && part_one[2] == f2 && part_two[1] == f3 &&
-                part_two[2] == f4) {
-              return_element = buf_1234[f1234];
             }
           }
         }
       }
     }
     libint2::finalize();
-    return return_element;
+    auto cached_eri_elem = this->ericache.get(eri_idx);
+    if (cached_eri_elem.has_value()) {
+      return cached_eri_elem.value();
+    } else {
+      std::stringstream message;
+      auto a = std::get<0>(eri_idx)[0];
+      auto i = std::get<0>(eri_idx)[1];
+      auto j = std::get<0>(eri_idx)[2];
+      auto b = std::get<1>(eri_idx)[0];
+      auto k = std::get<1>(eri_idx)[1];
+      auto l = std::get<1>(eri_idx)[2];
+      message << "(ij|kl) error : (";
+      message << a << "_ ";
+      message << i << " ";
+      message << j;
+      message << "|" << " ";
+      message << b << "_ ";
+      message << k << " ";
+      message << l;
+      message << ") should have been added to cache, but is not found!" << std::endl;
+      APP_ABORT(message.str());
+    }
   }
 }
 void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
