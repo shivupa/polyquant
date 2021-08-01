@@ -24,8 +24,9 @@
     "mf_keywords" :{
         "convergence_E" : 1e-12,
         "convergence_DM" : 1e-10,
-        "iteration_max" : 2,
-        "Cauchy_Schwarz_screening" : false
+        "iteration_max" : 200,
+        "Cauchy_Schwarz_screening" : true,
+        "incremental_fock" : true
     },
    "pure" : true
       }

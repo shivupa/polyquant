@@ -366,15 +366,12 @@ std::pair<std::vector<size_t>, std::vector<size_t>> POLYQUANT_INTEGRAL::make_sor
     std::vector<size_t> part_two = {quantum_part_b_idx, l, k};
     std::sort(part_one.begin() + 1, part_one.end());
     std::sort(part_two.begin() + 1, part_two.end());
-    if (quantum_part_a_idx == quantum_part_b_idx) {
-      std::vector<size_t> combined_idxs = {i, j, k, l};
-      std::sort(combined_idxs.begin(), combined_idxs.end());
-      part_one[1] = combined_idxs[0];
-      part_one[2] = combined_idxs[1];
-      part_two[1] = combined_idxs[2];
-      part_two[2] = combined_idxs[3];
+    std::pair<std::vector<size_t>, std::vector<size_t>> return_pair;
+    if (quantum_part_a_idx > quantum_part_b_idx) {
+      return_pair = std::make_pair(part_two, part_one);
     }
-    return std::make_pair(part_one, part_two);
+      return_pair = std::make_pair(part_one, part_two);
+    return return_pair;
 }
 
 double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
@@ -420,8 +417,6 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
         break;
       }
     }
-    // std::cout << part_one[1] << " " << shell2bf_a[s1] << " " << shells_a[s1].size() << std::endl;
-    // std::cout << part_one[2] << " " << shell2bf_a[s2] << " " << shells_a[s2].size() << std::endl;
     for (auto shell_start_b : shell2bf_b) {
       if (part_two[1] > shell_start_b) {
         s3++;
@@ -433,8 +428,6 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
         break;
       }
     }
-    // std::cout << part_two[1] << " " << shell2bf_b[s3] << " " << shells_b[s3].size() << std::endl;
-    // std::cout << part_two[2] << " " << shell2bf_b[s4] << " " << shells_b[s4].size() << std::endl;
 
     const auto &buf = engine.results();
     // loop over unique shell pairs, {s1,s2} such that s1 >= s2
@@ -454,7 +447,6 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
         for (size_t f3 = shell2bf_b[s3]; f3 < shell2bf_b[s3] + n3; ++f3) {
           for (size_t f4 = shell2bf_b[s4]; f4 < shell2bf_b[s4] + n4; ++f4, ++f1234) {
             std::vector<size_t> temp_part_two = {quantum_part_b_idx, f3, f4};
-            // std::cout << "Inserting " << f1 << " " << f2 << " "<< f3 << " "<< f4 << std::endl;
             std::pair<std::vector<size_t>, std::vector<size_t>> temp_eri_idx =make_sorted_ijkl_idx(quantum_part_a_idx,quantum_part_b_idx,f1,f2,f3,f4);
             if (buf_1234 == nullptr) {
               this->ericache.set(temp_eri_idx, 0.0);

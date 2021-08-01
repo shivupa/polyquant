@@ -277,9 +277,12 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                     // instead of 8
                     const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
                     const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
-                    // auto shell_ij_kl_perdeg =  (shell_i == shell_k) ? (shell_j == shell_l ? 1 : 2) : 2;
+                    //
+                    // auto shell_ij_kl_perdeg =  2.0;
+                    // if (quantum_part_a_idx == quantum_part_b_idx)
+                    //   shell_ij_kl_perdeg = (shell_i == shell_k) ? (shell_j == shell_l ? 1.0 : 2.0) : 2.0;
                     // auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg * shell_ij_kl_perdeg;
-                    auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg;
+                    auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg ;
 
                     for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                       for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
@@ -291,6 +294,7 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                             auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
 
                             const auto scaleij = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_ij_perdeg;
+                            const auto scalekl = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_kl_perdeg;
                             // auto a = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
                             // auto b = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_i_bf);
                             // if (a != b){
@@ -298,33 +302,37 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                             // }
                             // const auto scaleij = shell_ijkl_perdeg;
                             // const auto scaleij = 1.0;
-
-                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   0.25 * scaleij * D_kl * eri_ijkl;
-                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   0.25 * scaleij * D_kl * eri_ijkl;
-
-                            const auto scalekl = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_kl_perdeg;
+                            const auto scaleall = 0.25;
+                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   scaleall * scalekl * D_kl * eri_ijkl;
+                            std::cout << shell_i_bf << "  " << shell_j_bf << "     " << scaleall * scalekl * D_kl * eri_ijkl << " = " << scaleall << "  " << scalekl << "  " << D_kl << "  " <<  eri_ijkl<< std::endl;
+                            // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=    D_kl * eri_ijkl;
+                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   scaleall * scalekl * D_kl * eri_ijkl;
+                            std::cout << shell_j_bf << "  " << shell_i_bf << "     " << scaleall * scalekl * D_kl * eri_ijkl << " = " << scaleall << "  " << scalekl << "  " << D_kl << "  " << eri_ijkl<< std::endl;
+                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   D_kl * eri_ijkl;
                             // const auto scalekl = shell_ijkl_perdeg;
                             // const auto scalekl = 1.0;
-
-                            std::cout << eri_ijkl << " " << D_kl << std::endl;
-                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=   0.25 * scalekl * D_ij  * eri_ijkl;
-                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=   0.25 * scalekl * D_ij  * eri_ijkl;
+                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=   scaleall * scaleij * D_ij  * eri_ijkl;
+                            std::cout << shell_k_bf << "  " << shell_l_bf << "     " << scaleall * scaleij * D_ij  * eri_ijkl << " = " << scaleall << "  " <<  scaleij << "  " <<  D_ij  << "  " <<  eri_ijkl << std::endl;
+                            // this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=    D_ij  * eri_ijkl;
+                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=   scaleall * scaleij * D_ij  * eri_ijkl;
+                            std::cout << shell_l_bf << "  " << shell_k_bf << "     " << scaleall * scaleij * D_ij  * eri_ijkl << " = " << scaleall << "  " <<  scaleij << "  " <<  D_ij  << "  " <<  eri_ijkl << std::endl;
+                            // this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=    D_ij  * eri_ijkl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx ==quantum_part_b_spin_idx) {
                               auto D_ik = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_k_bf);
                               auto D_jl = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_l_bf);
                               auto D_il = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_l_bf);
                               auto D_jk = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_k_bf);
-                              const auto scale = 0.25;
+                              const auto scale = 0.125;
                               // Polyquant_cout(D_jl * eri_ijkl * shell_ijkl_perdeg);
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_k_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_i_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_l_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_j_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_l_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_i_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_k_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_j_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_k_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_i_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_l_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_j_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_l_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_i_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_k_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_j_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                             }
                           }
                         }
