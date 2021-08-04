@@ -338,26 +338,6 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(
   }
 }
 
-// void POLYQUANT_INTEGRAL::calculate_two_electron() {
-//   auto function = __PRETTY_FUNCTION__;
-//   POLYQUANT_TIMER timer(function);
-//   auto quantum_part_a_idx = 0ul;
-//   auto quantum_part_b_idx = 0ul;
-//   for (auto const &[quantum_part_a_key, quantum_part_a] :
-//        this->input_molecule.quantum_particles) {
-//     if (this->twoelec.rows() == 0) {
-//       Polyquant_cout("Calculating Two Body Electron Repulsion Integrals...");
-//       auto num_basis = this->input_basis.num_basis;
-//       libint2::initialize();
-//       this->compute_2body_ints(this->twoelec, this->input_basis.basis,
-//                                libint2::Operator::coulomb);
-//       Polyquant_dump_vec_to_file(this->twoelec, "twoelec.txt");
-//       libint2::finalize();
-//     }
-//     quantum_part_a++;
-//   }
-// }
-
 std::pair<std::vector<size_t>, std::vector<size_t>> POLYQUANT_INTEGRAL::make_sorted_ijkl_idx(const size_t &quantum_part_a_idx,
                                       const size_t &quantum_part_b_idx,
                                       const size_t &i, const size_t &j,
@@ -549,14 +529,6 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
   this->orth_X.resize(molecule.quantum_particles.size());
   this->Schwarz.resize(molecule.quantum_particles.size());
   this->unique_shell_pairs.resize(molecule.quantum_particles.size());
-  auto quantum_part_idx = 0ul;
-  // for (auto const &[quantum_part_key, quantum_part] :
-  //      this->input_molecule.quantum_particles) {
-  //   this->Schwarz[quantum_part_idx].resize(molecule.quantum_particles.size());
-  //   // this->unique_shell_pairs[quantum_part_idx].resize(
-  //   //    molecule.quantum_particles.size());
-  //   quantum_part_idx++;
-  // }
 }
 
 std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
