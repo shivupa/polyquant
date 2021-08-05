@@ -42,7 +42,9 @@
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
         "iteration_max" : 200,
-        "from_file" : false
+        "from_file" : false,
+        "incremental_fock" : true,
+        "Cauchy_Schwarz_screening" : true
     },
    "pure" : true
       }
