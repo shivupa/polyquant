@@ -64,6 +64,24 @@ TEST_SUITE("INTEGRAL") {
           for (auto l = 0; l < test_bas.num_basis[0]; l++)
             CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
+  TEST_CASE("INTEGRAL: mixed basis electron repulsion AO basis") {
+    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumHfile/h2o.json");
+    POLYQUANT_MOLECULE test_mol(test_inp);
+    POLYQUANT_BASIS test_bas(test_inp, test_mol);
+    POLYQUANT_INTEGRAL test_int(test_inp, test_bas, test_mol);
+    std::ifstream is("../../tests/unit_tests/integral/twoelec.txt");
+    std::istream_iterator<double> start(is), end;
+    std::vector<double> twoelec(start, end);
+    for (auto i = 0; i < test_bas.num_basis[0]; i++)
+      for (auto j = 0; j < test_bas.num_basis[0]; j++)
+        for (auto k = 0; k < test_bas.num_basis[0]; k++)
+          for (auto l = 0; l < test_bas.num_basis[0]; l++){
+            CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+            CHECK(test_int.get2e_elem(0, 1, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+            CHECK(test_int.get2e_elem(1, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+            CHECK(test_int.get2e_elem(1, 1, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+          }
+  }
   TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis") {
     POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
