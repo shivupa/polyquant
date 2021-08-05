@@ -208,7 +208,9 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
       auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
       auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
       for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < quantum_part_a_spin_lim; quantum_part_a_spin_idx++) {
-        for (auto quantum_part_b_idx = 0; quantum_part_b_idx < this->input_molecule.quantum_particles.size(); quantum_part_b_idx++) {
+        for (auto quantum_part_b_idx = quantum_part_a_idx; quantum_part_b_idx < this->input_molecule.quantum_particles.size(); quantum_part_b_idx++) {
+         if (!independent_converged && quantum_part_a_idx != quantum_part_b_idx) 
+             continue;
           auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
           std::advance(quantum_part_b_it, quantum_part_b_idx);
           auto quantum_part_b = quantum_part_b_it->second;
@@ -231,8 +233,6 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                 for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
                   auto shell_k_bf_start = shell2bf_b[shell_k];
                   auto shell_k_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_k].size();
-                  // calculate exchange contribution only if a and b are the
-                  // same
                   auto D_shell_ik_norm = 0.0;
                   auto D_shell_jk_norm = 0.0;
                   if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
@@ -241,31 +241,20 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                   }
                   auto shellpairdata_kl_iter =std::get<1>(this->input_integral.unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
                   for (auto &shell_l : std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
-                    std::cout << "SHIV ORDER  SHELL     " << shell_i << " " << shell_j << " " << shell_k << " " << shell_l << std::endl;
                     auto shell_l_bf_start = shell2bf_b[shell_l];
                     auto shell_l_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_l].size();
                     const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
                     shellpairdata_kl_iter++;
                     if ((shell_counter_ijkl++) % nthreads != thread_id)
                       continue;
-                    // get the maximum values from the density blocks here
                     auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(quantum_part_b, quantum_part_b_idx,quantum_part_b_spin_idx, shell_k_bf_start,shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
-                    // D_shell_ij_norm and D_shell_kl_norm now contain the
-                    // coulomb contributions to screening.
-
-                    // for now ignore exchange contributions if
-                    // quantum_part_a_idx
-                    // != quantum_part_b_idx in the future we may want to have
-                    // exchange between particles that are in the same basis
-                    // space but this is unsupported for now
+                    // for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space but this is unsupported for now
                     auto D_shell_il_norm = 0.0;
                     auto D_shell_jl_norm = 0.0;
                     if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
                       auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf_start,shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
                       auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf_start,shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
                     }
-
-                    // TODO check if shell was screened here
                     if (this->Cauchy_Schwarz_screening) {
                       if (std::max({D_shell_ij_norm, D_shell_ik_norm,D_shell_il_norm, D_shell_jk_norm,D_shell_jl_norm, D_shell_kl_norm}) * this->input_integral.Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral.Schwarz[quantum_part_b_idx](shell_k, shell_l) < this->Cauchy_Schwarz_threshold) {
                         continue;
@@ -277,13 +266,7 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                     // instead of 8
                     const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
                     const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
-                    //
-                    // auto shell_ij_kl_perdeg =  2.0;
-                    // if (quantum_part_a_idx == quantum_part_b_idx)
-                    //   shell_ij_kl_perdeg = (shell_i == shell_k) ? (shell_j == shell_l ? 1.0 : 2.0) : 2.0;
-                    // auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg * shell_ij_kl_perdeg;
                     auto shell_ijkl_perdeg =  shell_ij_perdeg * shell_kl_perdeg ;
-
                     for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                       for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
                         for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
@@ -293,30 +276,11 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                             auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
                             auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
 
-                            const auto scaleij = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_ij_perdeg;
-                            const auto scalekl = (quantum_part_a_idx == quantum_part_b_idx) ? shell_ijkl_perdeg : shell_kl_perdeg;
-                            // auto a = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
-                            // auto b = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_i_bf);
-                            // if (a != b){
-                            //   std::cout << a << " "  << b << "  help" << std::endl;
-                            // }
-                            // const auto scaleij = shell_ijkl_perdeg;
-                            // const auto scaleij = 1.0;
-                            const auto scaleall = 0.25;
-                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   scaleall * scalekl * D_kl * eri_ijkl;
-                            std::cout << shell_i_bf << "  " << shell_j_bf << "     " << scaleall * scalekl * D_kl * eri_ijkl << " = " << scaleall << "  " << scalekl << "  " << D_kl << "  " <<  eri_ijkl<< std::endl;
-                            // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=    D_kl * eri_ijkl;
-                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   scaleall * scalekl * D_kl * eri_ijkl;
-                            std::cout << shell_j_bf << "  " << shell_i_bf << "     " << scaleall * scalekl * D_kl * eri_ijkl << " = " << scaleall << "  " << scalekl << "  " << D_kl << "  " << eri_ijkl<< std::endl;
-                              // this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   D_kl * eri_ijkl;
-                            // const auto scalekl = shell_ijkl_perdeg;
-                            // const auto scalekl = 1.0;
-                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=   scaleall * scaleij * D_ij  * eri_ijkl;
-                            std::cout << shell_k_bf << "  " << shell_l_bf << "     " << scaleall * scaleij * D_ij  * eri_ijkl << " = " << scaleall << "  " <<  scaleij << "  " <<  D_ij  << "  " <<  eri_ijkl << std::endl;
-                            // this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=    D_ij  * eri_ijkl;
-                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=   scaleall * scaleij * D_ij  * eri_ijkl;
-                            std::cout << shell_l_bf << "  " << shell_k_bf << "     " << scaleall * scaleij * D_ij  * eri_ijkl << " = " << scaleall << "  " <<  scaleij << "  " <<  D_ij  << "  " <<  eri_ijkl << std::endl;
-                            // this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=    D_ij  * eri_ijkl;
+                            const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ?  0.25 : 0.5 * quantum_part_a.charge * quantum_part_b.charge;
+                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+                            this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=  scaleall * shell_ijkl_perdeg * D_ij  * eri_ijkl;
+                            this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=  scaleall * shell_ijkl_perdeg * D_ij  * eri_ijkl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx ==quantum_part_b_spin_idx) {
                               auto D_ik = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_k_bf);
@@ -324,15 +288,14 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                               auto D_il = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_i_bf,shell_l_bf);
                               auto D_jk = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx,quantum_part_a_spin_idx, shell_j_bf,shell_k_bf);
                               const auto scale = 0.125;
-                              // Polyquant_cout(D_jl * eri_ijkl * shell_ijkl_perdeg);
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_k_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_i_bf) -=scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_l_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_j_bf) -=scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_l_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_i_bf) -=scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_k_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
-                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_j_bf) -=scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_k_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_i_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_l_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_j_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_l_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_l_bf,shell_i_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_k_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                              this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_k_bf,shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                             }
                           }
                         }
