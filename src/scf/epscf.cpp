@@ -183,15 +183,6 @@ void POLYQUANT_EPSCF::form_fock() {
     quantum_part_a_idx++;
   }
   Polyquant_cout("forming fock");
-
-auto num_shell_a = this->input_basis.basis[0].size();
-for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
-  for (auto &shell_j : std::get<0>(this->input_integral.unique_shell_pairs[0])[shell_i]) {
-    std::cout << shell_i << " " << shell_j<< std::endl;
-  }
-}
-// APP_ABORT("TYE");
-
 #pragma omp parallel
   {
     // for schedule(runtime)
@@ -271,7 +262,6 @@ for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
                       for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
                         for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
                           for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
-                            std::cout << "SHIV ORDER    " << shell_i_bf << " " << shell_j_bf << " " << shell_k_bf << " " << shell_l_bf << std::endl;
                             auto eri_ijkl = this->input_integral.get2e_elem(quantum_part_a_idx, quantum_part_b_idx,shell_i_bf, shell_j_bf, shell_k_bf, shell_l_bf);
                             auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
                             auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);

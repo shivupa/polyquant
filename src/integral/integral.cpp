@@ -2,13 +2,21 @@
 
 using namespace polyquant;
 
-POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
-                                       const POLYQUANT_BASIS &basis,
-                                       const POLYQUANT_MOLECULE &molecule) {
+POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   Polyquant_cout("INTEGRAL");
+  omp_init_lock(&writelock);
+}
+
+POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input,
+                                       const POLYQUANT_BASIS &basis,
+                                       const POLYQUANT_MOLECULE &molecule) : POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(){
   this->setup_integral(input, basis, molecule);
+}
+
+POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() {
+  omp_destroy_lock(&writelock);
 }
 
 void POLYQUANT_INTEGRAL::construct_ijcache(size_t size_in_gb) {
@@ -367,6 +375,7 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
   if (cached_eri_elem.has_value()) {
     return cached_eri_elem.value();
   } else {
+    omp_set_lock(&writelock);
     libint2::initialize();
     auto shells_a = this->input_basis.basis[part_one[0]];
     auto shells_b = this->input_basis.basis[part_two[0]];
@@ -438,6 +447,7 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx,
       }
     }
     libint2::finalize();
+    omp_unset_lock(&writelock);
     auto cached_eri_elem = this->ericache.get(eri_idx);
     if (cached_eri_elem.has_value()) {
       return cached_eri_elem.value();

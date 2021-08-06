@@ -27,7 +27,7 @@ inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
  */
 class POLYQUANT_INTEGRAL {
 public:
-  POLYQUANT_INTEGRAL() = default;
+  POLYQUANT_INTEGRAL();
   /**
    * @brief Construct a new polyquant integral object by calling to
    * setup_integral
@@ -38,6 +38,7 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
                      const POLYQUANT_MOLECULE &molecule);
+  ~POLYQUANT_INTEGRAL();
   void construct_ijcache(size_t size_in_gb = 10000);
   void construct_ericache(size_t size_in_gb = 10000);
 
@@ -1068,6 +1069,7 @@ public:
       0.512, 1.0,   2.0,   3.0,   4.0,   5.0,   6.0,   7.0,   8.0,
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0, 250.0};
   */
+  mutable omp_lock_t writelock;
 };
 } // namespace polyquant
 #endif
