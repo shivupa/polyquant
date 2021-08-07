@@ -260,10 +260,8 @@ void POLYQUANT_EPSCF::form_fock() {
                             const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a.restricted == false && quantum_part_a.num_parts > 1) ? 0.5 : 1.0;
                             const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ?  0.25 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
                             this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
-                            std::cout << quantum_part_a_idx << "   " << quantum_part_a_idx << "     " << quantum_part_a_spin_idx << "   " << quantum_part_a_spin_idx << "     " << shell_i_bf << "  " << shell_j_bf << "     " << scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl << " = " << scaleall << "  " << shell_ijkl_perdeg << "  " << D_kl << "  " << eri_ijkl << std::endl;
                             this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                             this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=  scaleall * shell_ijkl_perdeg * D_ij  * eri_ijkl;
-                            std::cout << quantum_part_b_idx << "   " << quantum_part_b_idx << "     " << quantum_part_b_spin_idx << "   " << quantum_part_b_spin_idx << "     " << shell_k_bf << "  " << shell_l_bf << "     " << scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl << " = " << scaleall << "  " << shell_ijkl_perdeg << "  " << D_ij << "  " << eri_ijkl << std::endl;
                             this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=  scaleall * shell_ijkl_perdeg * D_ij  * eri_ijkl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx ==quantum_part_b_spin_idx) {
