@@ -158,6 +158,7 @@ FetchContent_Declare(
 set(enable-fortran ON)
 set(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS ON)
 set(LIBINT2_REALTYPE double)
+set(LIBINT2_BUILD_TESTS OFF)
 FetchContent_MakeAvailable(libint2)
 
 FetchContent_Declare(
