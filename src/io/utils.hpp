@@ -1,5 +1,5 @@
-#ifndef POLYQUANT_INPUT_H
-#define POLYQUANT_INPUT_H
+#ifndef POLYQUANT_INPUTUTILS_H
+#define POLYQUANT_INPUTUTILS_H
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
@@ -25,9 +25,7 @@ namespace polyquant {
 //  * @brief Abort the code and print a reason for aborting.
 //  *
 //  * @param reason a string stating the reason to abort.
-//  * @return PetscErrorCode
 //  */
-// PetscErrorCode APP_ABORT(const std::string &reason);
 void APP_ABORT(const std::string &reason);
 /**
  * @brief A helper function to print only if we are on rank 0.
@@ -90,27 +88,6 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
               << std::setprecision(10) << vec(i, 0) << std::endl;
   }
 }
-
-void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
-    const std::string &filename,
-    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
-    int N_states, int N_mo);
-
-void Polyquant_dump_mf_to_hdf5_for_QMCPACK(
-    const std::string &filename, bool pbc, bool complex_vals, bool ecp,
-    bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha,
-    int num_part_beta, int num_part_total, int multiplicity, int num_atom,
-    int num_species, std::vector<std::string> quantum_part_names,
-    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orb,
-    std::vector<
-        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
-        mo_coeff,
-    std::vector<int> atomic_species_ids, std::vector<int> atomic_number,
-    std::vector<int> atomic_charge, std::vector<int> core_elec,
-    std::vector<std::string> atomic_names,
-    std::vector<std::vector<double>> atomic_centers,
-    std::vector<std::vector<libint2::Shell>> unique_shells);
 
 /**
  * @brief A helper function to dump a dense vector object to file.
@@ -204,85 +181,14 @@ template <typename T> struct PairVectorHash {
     return seed;
   }
 };
-
-class POLYQUANT_TIMER {
-public:
-  POLYQUANT_TIMER() { this->set_start_time(); };
-  POLYQUANT_TIMER(const std::string &calling_func) {
-    this->set_start_time();
-    this->set_calling_function(calling_func);
-  };
-  ~POLYQUANT_TIMER() {
-    this->set_end_time();
-    this->print_timer_end();
-  };
-  void set_calling_function(const std::string &calling_func) {
-    this->calling_function = calling_func;
-  };
-  void set_start_time() {
-    this->start = std::chrono::high_resolution_clock::now();
-  };
-  void set_end_time() {
-    this->end = std::chrono::high_resolution_clock::now();
-  };
-  void print_timer_end() {
-    // use std::format once supported
-    // use std::chrono::days etc once it is used
-    // typedef std::chrono::duration<int, std::ratio<86400>> days;
-    auto duration = this->end - this->start;
-    // auto d = std::chrono::duration_cast<days>(duration);
-    auto d = std::chrono::duration_cast<std::chrono::days>(duration);
-    duration -= d;
-    auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
-    duration -= h;
-    auto m = std::chrono::duration_cast<std::chrono::minutes>(duration);
-    duration -= m;
-    auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
-    duration -= s;
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-    duration -= ms;
-    auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-    duration -= us;
-    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
-    duration -= ns;
-    std::stringstream buffer;
-    buffer << "Timer " << this->calling_function << "    " << d.count()
-           << "d:" << h.count() << "h:" << m.count() << "m:" << s.count()
-           << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count()
-           << "ns";
-    Polyquant_cout(buffer.str());
-  };
-
-private:
-  std::string calling_function = "UNKNOWN";
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
-  std::chrono::time_point<std::chrono::high_resolution_clock> end;
-};
-
-/**
- * @brief A class to hold information parsed from a QCSchema json
- *
- */
-class POLYQUANT_INPUT {
-public:
-  POLYQUANT_INPUT() = default;
-  /**
-   * @brief Construct a new pyci input object using the parse_input function.
-   *
-   * @param filename the file to parse.
-   */
-  POLYQUANT_INPUT(const std::string &filename);
-  /**
-   * @brief the function where a file is actually parsed.
-   *
-   * @param filename the file to parse.
-   */
-  void parse_input(const std::string &filename);
-  /**
-   * @brief the json object to store the input
-   *
-   */
-  json input_data;
+template <typename T> struct PairHash {
+  size_t operator()(const std::pair<T, T> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    seed ^= hasher(v.first) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= hasher(v.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return seed;
+  }
 };
 } // namespace polyquant
 #endif

@@ -47,7 +47,7 @@ print("HCORE")
 n = mol.nelec[0]
 myhf = scf.RHF(mol)
 b = myhf.get_hcore()
-a = np.loadtxt("H_core.txt")
+a = np.loadtxt("H_core_electron.txt")
 print(np.allclose(a, b))
 print(np.max(a - b))
 

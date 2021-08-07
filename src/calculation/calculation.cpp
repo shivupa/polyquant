@@ -21,6 +21,13 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   Polyquant_cout("SETTING UP INTEGRAL");
   this->input_integral = POLYQUANT_INTEGRAL(
       this->input_params, this->input_basis, this->input_molecule);
+  // parse 2e tolerance
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
+      this->input_integral.tolerance_2e =
+          this->input_params.input_data["keywords"]["tolerance_2e"];
+    }
+  }
 }
 
 void POLYQUANT_CALCULATION::run() {
@@ -43,7 +50,7 @@ void POLYQUANT_CALCULATION::run() {
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
   std::string mean_field_type = this->parse_mean_field();
-  std::string post_mean_field_type = this->parse_post_mean_field();
+  // std::string post_mean_field_type = this->parse_post_mean_field();
   // if (do_excess_electron && do_positron) {
   // excess electron + positron + electrons
   //  APP_ABORT("POLYQUANT can't handle a model excess electron and positron "
@@ -57,6 +64,8 @@ void POLYQUANT_CALCULATION::run() {
   //  this->run_excess_positron_plus_electronic_mean_field(mean_field_type);
   //} else {
   // only electrons
+
+  /*
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
     this->run_post_mean_field(post_mean_field_type);
   } else if (post_mean_field_type == "FILE" &&
@@ -67,7 +76,11 @@ void POLYQUANT_CALCULATION::run() {
   } else if (mean_field_type != "NONE") {
     this->run_mean_field(mean_field_type);
   }
+  */
   //}
+  if (mean_field_type != "NONE") {
+    this->run_mean_field(mean_field_type);
+  }
 }
 
 // void POLYQUANT_CALCULATION::run_excess_positron_plus_electronic_mean_field(
@@ -242,6 +255,67 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
                 .input_data["keywords"]["mf_keywords"]["iteration_max"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_extrapolation")) {
+        scf_calc.diis_extrapolation =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_extrapolation"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_start")) {
+        scf_calc.diis_start =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_start"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_damping")) {
+        scf_calc.diis_damping =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_damping"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_mixing_fraction")) {
+        scf_calc.diis_mixing_fraction =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_mixing_fraction"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "diis_size")) {
+        scf_calc.diis_size =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["diis_size"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "incremental_fock")) {
+        scf_calc.incremental_fock =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]["incremental_fock"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "incremental_fock_reset_freq")) {
+        scf_calc.incremental_fock_reset_freq =
+            this->input_params.input_data["keywords"]["mf_keywords"]
+                                         ["incremental_fock_reset_freq"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "incremental_fock_initial_onset_thresh")) {
+        scf_calc.incremental_fock_initial_onset_thresh =
+            this->input_params
+                .input_data["keywords"]["mf_keywords"]
+                           ["incremental_fock_initial_onset_thresh"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "Cauchy_Schwarz_screening")) {
+        scf_calc.Cauchy_Schwarz_screening =
+            this->input_params.input_data["keywords"]["mf_keywords"]
+                                         ["Cauchy_Schwarz_screening"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
+              "Cauchy_Schwarz_threshold")) {
+        scf_calc.Cauchy_Schwarz_threshold =
+            this->input_params.input_data["keywords"]["mf_keywords"]
+                                         ["Cauchy_Schwarz_threshold"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains(
               "from_file")) {
         if (this->input_params
                 .input_data["keywords"]["mf_keywords"]["from_file"]) {
@@ -267,9 +341,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     scf_calc.from_file(hdf5_filename);
   }
   if (dump_for_qmcpack) {
-    dump_mf_for_qmcpack(hdf5_filename);
+    // dump_mf_for_qmcpack(hdf5_filename);
   }
 }
+/*
 void POLYQUANT_CALCULATION::run_post_mean_field(
     std::string &post_mean_field_type) {
   if (!this->post_mean_field_methods.contains(post_mean_field_type) &&
@@ -317,6 +392,12 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
                   .input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
+                "cache_size")) {
+          ci_calc.cache_size =
+              this->input_params
+                  .input_data["keywords"]["ci_keywords"]["cache_size"];
+        }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains(
                 "excitation_level")) {
           auto ex_lvl =
               this->input_params
@@ -351,10 +432,12 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
       APP_ABORT("FROM_FILE for ci not implemented.");
     }
     if (dump_for_qmcpack) {
-      dump_post_mf_for_qmcpack(hdf5_filename);
+      // dump_post_mf_for_qmcpack(hdf5_filename);
     }
   }
 }
+*/
+/*
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_species_ids;
   std::vector<int> atomic_number;
@@ -447,15 +530,18 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     // Polyquant_cout(classical_part_key);
     for (auto shell : this->input_basis.basis) {
       // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
       // + " " + std::to_string(shell.O[0]
       // -this->input_molecule.centers[classical_part.center_idx[0]][0])
       // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
       // + " " + std::to_string(shell.O[1]
       // -this->input_molecule.centers[classical_part.center_idx[0]][1])
       // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
       // + " " + std::to_string(shell.O[2]
       // -this->input_molecule.centers[classical_part.center_idx[0]][2])
       // );
@@ -512,3 +598,4 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
       filename, dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets,
       this->ci_calc.num_states, this->ci_calc.detset.max_orb);
 }
+*/

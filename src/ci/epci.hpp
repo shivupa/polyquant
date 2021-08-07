@@ -3,7 +3,8 @@
 #include "basis/basis.hpp"
 #include "ci/determinant_set.hpp"
 #include "integral/integral.hpp"
-#include "io/io.hpp"
+#include "io/timer.hpp"
+#include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include "molecule/quantum_particles.hpp"
 #include "scf/epscf.hpp"
@@ -90,6 +91,7 @@ public:
   int iteration_max = 500;
   int num_states = 1;
   int num_subspace_vec = 5;
+  size_t cache_size = std::numeric_limits<size_t>::max();
 };
 } // namespace polyquant
 #endif

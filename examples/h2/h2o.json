@@ -12,10 +12,10 @@
   "model": {
     "method": "scf",
     "basis": 
-        {"H" : [{ "library" : {"type" : "cc-pv5z"} }]}
+        {"H" : [{ "library" : {"type" : "cc-pvdz"} }]}
   },
   "keywords": {
-    "restricted" : true,
+    "restricted" : false,
    "dump_for_qmcpack" : true,
    "pure" : true
   }

@@ -4,8 +4,8 @@
         0.0000000, 0.0000000,  0.0000000
     ],
     "symbols": ["Li"],
-    "molecular_charge": 0,
-    "molecular_multiplicity": 2
+    "molecular_charge": -1,
+    "molecular_multiplicity": 1
   },
   "driver": "energy",
   "model": {
@@ -17,7 +17,7 @@
              
   },
   "keywords": {
-    "restricted" : false,
+    "restricted" : true,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
@@ -27,8 +27,8 @@
     },
    "ci_keywords" : {
        "convergence_E" : 1e-6,
-       "num_states" : 2,
-       "num_subspace_vec" : 14,
+       "num_states" : 5,
+       "num_subspace_vec" : 30,
        "excitation_level" : [
            [1,1,1]
            ]

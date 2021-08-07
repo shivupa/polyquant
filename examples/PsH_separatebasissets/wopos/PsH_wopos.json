@@ -1,0 +1,33 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H"],
+    "molecular_charge": -1,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "SCF",
+    "basis": 
+        { "electron" :
+          {"H" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}]}
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "H_wpos.h5",
+    "mf_keywords" :{
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-10,
+        "iteration_max" : 200,
+        "Cauchy_Schwarz_screening" : true,
+        "incremental_fock" : true
+    },
+   "pure" : true
+      }
+}

@@ -1,7 +1,9 @@
 #ifndef POLYQUANT_INTEGRAL_H
 #define POLYQUANT_INTEGRAL_H
 #include "basis/basis.hpp"
-#include "io/io.hpp"
+#include "io/lfu_cache.hpp"
+#include "io/timer.hpp"
+#include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>
@@ -25,9 +27,10 @@ inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
  */
 class POLYQUANT_INTEGRAL {
 public:
-  POLYQUANT_INTEGRAL() = default;
+  POLYQUANT_INTEGRAL();
   /**
-   * @brief Construct a new pyci integral object by calling to setup_integral
+   * @brief Construct a new polyquant integral object by calling to
+   * setup_integral
    *
    * @param input the input parameters
    * @param basis the basis to calculate integrals in
@@ -35,15 +38,26 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis,
                      const POLYQUANT_MOLECULE &molecule);
+  ~POLYQUANT_INTEGRAL();
+  void construct_ijcache(size_t size_in_gb = 10000);
+  void construct_ericache(size_t size_in_gb = 10000);
 
   void calculate_overlap();
+  void calculate_Schwarz();
+  void calculate_unique_shell_pairs(double threshold = -1.0);
   void calculate_kinetic();
   void calculate_nuclear();
   void calculate_polarization_potential();
-  void calculate_two_electron();
+  //  void calculate_two_electron();
+  std::pair<std::vector<size_t>, std::vector<size_t>> make_sorted_ijkl_idx(const size_t &quantum_part_a_idx,
+                    const size_t &quantum_part_b_idx, const size_t &i,
+                    const size_t &j, const size_t &k, const size_t &l);
+  double get2e_elem(const size_t &quantum_part_a_idx,
+                    const size_t &quantum_part_b_idx, const size_t &i,
+                    const size_t &j, const size_t &k, const size_t &l);
 
   /**
-   * @brief Create the matrivies and vector to hold the integrals and call to
+   * @brief Create the matricies and vector to hold the integrals and call to
    * the functions to calculate them.
    *
    * @param input the input parameters
@@ -63,7 +77,16 @@ public:
    * symmetric matrix
    */
   template <typename T> const T idx2(const T &i, const T &j) const {
-    return symmetric_matrix_triangular_idx(i, j);
+    std::pair<T, T> ij_idx;
+    ij_idx = std::make_pair(i, j);
+    auto cached_ij_elem = this->ijcache.get(ij_idx);
+    if (cached_ij_elem.has_value()) {
+      return cached_ij_elem.value();
+    } else {
+      auto ij_elem = symmetric_matrix_triangular_idx(i, j);
+      this->ijcache.set(ij_idx, ij_elem);
+      return ij_elem;
+    }
   }
   /**
    * @brief Calculate the combined index for the vector containing the unique
@@ -95,6 +118,21 @@ public:
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
       const libint2::BasisSet &shells, libint2::Operator obtype,
       const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
+
+  /**
+   * @brief Calculate Schwarz integrals (diagonal 2 body ints)
+   *
+   * @param output_matrix the matrix to hold the diagonal two body ints
+   * @param shells the basis set to calculate the one body integrals in
+   * @param obtype the operator to calculate the integrals for
+   */
+  void compute_Schwarz_ints(
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
+      const libint2::BasisSet &shells_a, const libint2::BasisSet &shells_b,
+      libint2::Operator obtype);
+  std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
+             std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>
+  compute_shellpairs(const libint2::BasisSet &bs1, const double threshold);
 
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
@@ -136,44 +174,58 @@ public:
                           libint2::Operator obtype);
 
   void symmetric_orthogonalization();
+
   /**
    * @brief Overlap integral matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> overlap;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> overlap;
   /**
    * @brief Kinetic integral matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> kinetic;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> kinetic;
   /**
    * @brief Nuclear attraction integral matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> nuclear;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> nuclear;
   /**
-   * @brief Two electron integral vector
+   * @brief Schwarz screening integrals (ij|ij)
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, 1> twoelec;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> Schwarz;
   /**
    * @brief The orthogonalization matrix
    *
    */
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orth_X;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> orth_X;
 
   std::vector<
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
       mo_one_body_ints;
+  /**
+   * @brief The two electron MO integrals stored as
+   * [idx_part][spin_idx][idx_part][spin_idx]
+   *
+   */
   std::vector<std::vector<std::vector<
       std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>>
       mo_two_body_ints;
+
+  std::vector<
+      std::tuple<std::unordered_map<size_t, std::vector<size_t>>,
+                 std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>>
+      unique_shell_pairs;
+
   void calculate_mo_1_body_integrals(
       std::vector<
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
           &mo_coeff);
+
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
   transform_mo_2_body_integrals(
+      const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx,
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b,
       int num_part_alpha, int num_part_beta);
@@ -181,6 +233,14 @@ public:
       std::vector<
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
           &mo_coeffs);
+
+  size_t ijcache_size;
+  size_t ericache_size;
+  mutable polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> ijcache;
+  mutable polyquant_lfu_cache<
+      std::pair<std::vector<size_t>, std::vector<size_t>>, double,
+      PairVectorHash<size_t>>
+      ericache;
   /**
    * @brief the input parameters
    *
@@ -197,7 +257,7 @@ public:
    */
   POLYQUANT_MOLECULE input_molecule;
 
-  // private:
+  double tolerance_2e = std::numeric_limits<double>::epsilon();
   /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,
   Eigen::Dynamic>> alpha_miller = {
       {"H",
@@ -1009,6 +1069,7 @@ public:
       0.512, 1.0,   2.0,   3.0,   4.0,   5.0,   6.0,   7.0,   8.0,
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0, 250.0};
   */
+  mutable omp_lock_t writelock;
 };
 } // namespace polyquant
 #endif

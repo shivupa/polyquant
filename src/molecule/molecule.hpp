@@ -1,6 +1,8 @@
 #ifndef POLYQUANT_MOLECULE_H
 #define POLYQUANT_MOLECULE_H
-#include "io/io.hpp"
+#include "io/input.hpp"
+#include "io/timer.hpp"
+#include "io/utils.hpp"
 #include "molecule/classical_particles.hpp"
 #include "molecule/quantum_particles.hpp"
 #include <algorithm>
@@ -20,8 +22,8 @@ class POLYQUANT_MOLECULE {
 public:
   POLYQUANT_MOLECULE() = default;
   /**
-   * @brief Construct a new pyci molecule object given an input object with a
-   * call to setup_molecule.
+   * @brief Construct a new polyquant molecule object given an input object with
+   * a call to setup_molecule.
    *
    * @param input a POLYQUANT_INPUT instance
    */

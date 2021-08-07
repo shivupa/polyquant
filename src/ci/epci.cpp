@@ -26,7 +26,7 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   auto num_basis = this->input_basis.num_basis;
   this->detset.max_orb = num_basis;
   this->detset.set_integral(this->input_integral);
-
+  this->detset.construct_cache(this->cache_size);
   this->setup_determinants();
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) +
                  " determinants");
@@ -145,8 +145,14 @@ void POLYQUANT_EPCI::run() {
   */
 
   // Eigen::Index num_of_eigenvalues = 5;
+  Eigen::Index initialsubspacevec = this->num_subspace_vec;
+  Eigen::Index maxsubspacevec = 10 * this->num_states;
+  Polyquant_cout("Initial subspace");
+  Polyquant_cout(initialsubspacevec);
+  // todo Eigen::Index maxsubspace = this->iteration_max;
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(
-      this->detset, this->num_states); // Create Solver
+      this->detset, this->num_states, initialsubspacevec,
+      maxsubspacevec); // Create Solver
   Eigen::Index maxit = this->iteration_max;
   int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit,
                              this->convergence_E);

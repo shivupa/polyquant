@@ -40,7 +40,8 @@
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
-        "iteration_max" : 200
+        "iteration_max" : 200,
+        "diis_size" : 12
     },
    "pure" : true
       }
