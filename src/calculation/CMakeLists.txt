@@ -13,8 +13,8 @@ target_link_libraries(
   molecule
   basis
   integral
-  scf
-  ci)
+  scf)
+#  ci)
 if(POLYQUANT_CODE_COVERAGE)
   target_link_libraries(calculation coverage_config)
 endif(POLYQUANT_CODE_COVERAGE)

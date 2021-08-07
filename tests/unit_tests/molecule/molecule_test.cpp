@@ -1,4 +1,5 @@
-#include "io/io.hpp"
+#include "io/utils.hpp"
+#include "io/input.hpp"
 #include "molecule/molecule.hpp"
 #include <doctest/doctest.h>
 #include <string>

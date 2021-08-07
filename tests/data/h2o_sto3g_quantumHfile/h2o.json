@@ -14,16 +14,15 @@
     "method": "scf",
     "basis": 
     { "electron" :{"H" : [{ "library" : {"type" : "sto-3g"} }],
-                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}}
+                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]},
+    "H" :{"H" : [{ "library" : {"type" : "sto-3g"} }],
+                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}
+    }
   },
   "keywords": {
     "restricted" : false,
-    "mf_keywords" :{
-        "convergence_E" : 1e-8,
-        "convergence_DM" : 1e-6,
-        "iteration_max" : 200
-    },
-   "pure" : true
+    "quantum_nuclei" : [1,1,0],
+    "pure" : true
   }
 }
 

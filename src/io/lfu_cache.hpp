@@ -1,12 +1,13 @@
 
 #ifndef POLYQUANT_CACHE_H
 #define POLYQUANT_CACHE_H
-#include "io/io.hpp"
+#include "io/timer.hpp"
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <unordered_map>
+#include <omp.h>
 #include <optional>
+#include <unordered_map>
 
 namespace polyquant {
 

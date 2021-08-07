@@ -13,8 +13,16 @@
   "model": {
     "method": "scf",
     "basis": 
-    {"H" : [{ "library" : {"type" : "cc-pvdz"} }],
-        "O" : [{ "library" : {"type" : "cc-pvdz"} }]}
+        { "electron" :
+          {
+            "H" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}],
+            "O" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}]
+          }
+        }
   },
   "keywords": {
     "restricted" : false,
@@ -23,9 +31,12 @@
         "convergence_DM" : 1e-6,
         "iteration_max" : 200,
         "dump_for_qmcpack" : true,
-        "diis_extrapolation" : false,
-        "Cauchy_Schwarz_screening" : false,
-        "incremental_fock" : false
+        "diis_extrapolation" : true,
+        "diis_size" : 10,
+        "diis_damping" : 10.00,
+        "diis_mixing_fraction" : 0.2,
+        "Cauchy_Schwarz_screening" : true,
+        "incremental_fock" : true
     },
    "pure" : true
   }

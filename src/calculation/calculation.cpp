@@ -50,7 +50,7 @@ void POLYQUANT_CALCULATION::run() {
   // std::cout << do_excess_electron << std::endl;
   // std::cout << do_positron << std::endl;
   std::string mean_field_type = this->parse_mean_field();
-  std::string post_mean_field_type = this->parse_post_mean_field();
+  // std::string post_mean_field_type = this->parse_post_mean_field();
   // if (do_excess_electron && do_positron) {
   // excess electron + positron + electrons
   //  APP_ABORT("POLYQUANT can't handle a model excess electron and positron "
@@ -64,6 +64,8 @@ void POLYQUANT_CALCULATION::run() {
   //  this->run_excess_positron_plus_electronic_mean_field(mean_field_type);
   //} else {
   // only electrons
+
+  /*
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
     this->run_post_mean_field(post_mean_field_type);
   } else if (post_mean_field_type == "FILE" &&
@@ -74,7 +76,11 @@ void POLYQUANT_CALCULATION::run() {
   } else if (mean_field_type != "NONE") {
     this->run_mean_field(mean_field_type);
   }
+  */
   //}
+  if (mean_field_type != "NONE") {
+    this->run_mean_field(mean_field_type);
+  }
 }
 
 // void POLYQUANT_CALCULATION::run_excess_positron_plus_electronic_mean_field(
@@ -335,9 +341,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     scf_calc.from_file(hdf5_filename);
   }
   if (dump_for_qmcpack) {
-    dump_mf_for_qmcpack(hdf5_filename);
+    // dump_mf_for_qmcpack(hdf5_filename);
   }
 }
+/*
 void POLYQUANT_CALCULATION::run_post_mean_field(
     std::string &post_mean_field_type) {
   if (!this->post_mean_field_methods.contains(post_mean_field_type) &&
@@ -425,10 +432,12 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
       APP_ABORT("FROM_FILE for ci not implemented.");
     }
     if (dump_for_qmcpack) {
-      dump_post_mf_for_qmcpack(hdf5_filename);
+      // dump_post_mf_for_qmcpack(hdf5_filename);
     }
   }
 }
+*/
+/*
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_species_ids;
   std::vector<int> atomic_number;
@@ -521,15 +530,18 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     // Polyquant_cout(classical_part_key);
     for (auto shell : this->input_basis.basis) {
       // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
       // + " " + std::to_string(shell.O[0]
       // -this->input_molecule.centers[classical_part.center_idx[0]][0])
       // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
       // + " " + std::to_string(shell.O[1]
       // -this->input_molecule.centers[classical_part.center_idx[0]][1])
       // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-      // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+      //
+std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
       // + " " + std::to_string(shell.O[2]
       // -this->input_molecule.centers[classical_part.center_idx[0]][2])
       // );
@@ -586,3 +598,4 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
       filename, dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets,
       this->ci_calc.num_states, this->ci_calc.detset.max_orb);
 }
+*/

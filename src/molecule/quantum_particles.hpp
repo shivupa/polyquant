@@ -1,6 +1,6 @@
 #ifndef POLYQUANT_QUANTUM_PARTICLE_SET_H
 #define POLYQUANT_QUANTUM_PARTICLE_SET_H
-#include "io/io.hpp"
+#include "io/utils.hpp"
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>

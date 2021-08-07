@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<simulation>
+  <project id="PsH" series="0"/>
+    <random seed="864"/>
+
+  <include href="H_Ground.structure.xml"/>
+  <include href="H_Ground.wfnoj.xml"/>
+  <hamiltonian name="h0" type="generic" target="e">
+    <pairpot name="ElecElec" type="coulomb" source="e" target="e" physical="true"/>
+    <pairpot name="IonIon" type="coulomb" source="ion0" target="ion0"/>
+    <pairpot name="IonElec" type="coulomb" source="ion0" target="e"/>
+  </hamiltonian>
+   <qmc method="vmc" move="pbyp">
+      <estimator name="LocalEnergy" hdf5="no"/>
+      <parameter name="walkers"             >    1               </parameter>
+      <parameter name="blocks"              >    15000               </parameter>
+      <parameter name="steps"               >    300               </parameter>
+      <parameter name="subSteps"            >    2               </parameter>
+      <parameter name="timestep"            >    0.3             </parameter>
+      <parameter name="warmupSteps"         >    3               </parameter>
+   </qmc>
+</simulation>
