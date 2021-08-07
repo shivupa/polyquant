@@ -183,13 +183,7 @@ void POLYQUANT_EPSCF::form_fock() {
     quantum_part_a_idx++;
   }
   Polyquant_cout("forming fock");
-#pragma omp parallel
-  {
-    // for schedule(runtime)
-    // TODO target for hand tuned omp loop
-    auto shell_counter_ijkl = 0;
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
+#pragma omp parallel for schedule(runtime)
     for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule.quantum_particles.size(); quantum_part_a_idx++) {
       auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
       std::advance(quantum_part_a_it, quantum_part_a_idx);
@@ -236,8 +230,6 @@ void POLYQUANT_EPSCF::form_fock() {
                     auto shell_l_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_l].size();
                     const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
                     shellpairdata_kl_iter++;
-                    if ((shell_counter_ijkl++) % nthreads != thread_id)
-                      continue;
                     auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(quantum_part_b, quantum_part_b_idx,quantum_part_b_spin_idx, shell_k_bf_start,shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
                     // for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space but this is unsupported for now
                     auto D_shell_il_norm = 0.0;
@@ -265,11 +257,13 @@ void POLYQUANT_EPSCF::form_fock() {
                             auto eri_ijkl = this->input_integral.get2e_elem(quantum_part_a_idx, quantum_part_b_idx,shell_i_bf, shell_j_bf, shell_k_bf, shell_l_bf);
                             auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
                             auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
-
-                            const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ?  0.25 : 0.5 * quantum_part_a.charge * quantum_part_b.charge;
+                            const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a.restricted == false && quantum_part_a.num_parts > 1) ? 0.5 : 1.0;
+                            const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ?  0.25 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
                             this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_i_bf,shell_j_bf) +=   scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+                            std::cout << quantum_part_a_idx << "   " << quantum_part_a_idx << "     " << quantum_part_a_spin_idx << "   " << quantum_part_a_spin_idx << "     " << shell_i_bf << "  " << shell_j_bf << "     " << scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl << " = " << scaleall << "  " << shell_ijkl_perdeg << "  " << D_kl << "  " << eri_ijkl << std::endl;
                             this->F[quantum_part_a_idx][quantum_part_a_spin_idx](shell_j_bf,shell_i_bf) +=   scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                             this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_k_bf, shell_l_bf) +=  scaleall * shell_ijkl_perdeg * D_ij  * eri_ijkl;
+                            std::cout << quantum_part_b_idx << "   " << quantum_part_b_idx << "     " << quantum_part_b_spin_idx << "   " << quantum_part_b_spin_idx << "     " << shell_k_bf << "  " << shell_l_bf << "     " << scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl << " = " << scaleall << "  " << shell_ijkl_perdeg << "  " << D_ij << "  " << eri_ijkl << std::endl;
                             this->F[quantum_part_b_idx][quantum_part_b_spin_idx](shell_l_bf, shell_k_bf) +=  scaleall * shell_ijkl_perdeg * D_ij  * eri_ijkl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx ==quantum_part_b_spin_idx) {
@@ -299,7 +293,6 @@ void POLYQUANT_EPSCF::form_fock() {
         }
       }
     }
-  }
   //APP_ABORT("END");
 
   // compute energy with non-extrapolated Fock matrix

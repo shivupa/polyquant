@@ -493,6 +493,7 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
     engines[0] = libint2::Engine(
         obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()),
         std::max(shells_a.max_l(), shells_b.max_l()), 0);
+    engines[0].set_precision(0.0);
     if (nthreads > 1) {
       if (thread_id == 0) {
         Polyquant_cout("Making more engines for each thread");
@@ -547,6 +548,7 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
                                        const double threshold) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  Polyquant_cout("Computing non-negligible shell-pair list");
   // if bs2 became an argument then this could be used to calculate unique
   // shells between basis sets, however at this time we don't require that.
   const libint2::BasisSet &bs2 = bs1;
@@ -554,37 +556,28 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
   const auto nsh2 = bs2.size();
   const auto bs1_equiv_bs2 = (&bs1 == &bs2);
   std::unordered_map<size_t, std::vector<size_t>> splist;
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
-    std::vector<libint2::Engine> engines;
-
-    engines.reserve(nthreads);
-    engines.emplace_back(libint2::Operator::overlap,
-                         std::max(bs1.max_nprim(), bs2.max_nprim()),
-                         std::max(bs1.max_l(), bs2.max_l()), 0);
-    for (size_t i = 1; i != nthreads; ++i) {
-      engines.push_back(engines[0]);
-    }
-
-    Polyquant_cout("Computing non-negligible shell-pair list");
-    auto &engine = engines[thread_id];
-    const auto &buf = engine.results();
+  int nthreads = omp_get_max_threads();
+  std::vector<libint2::Engine> engines;
+  engines.reserve(nthreads);
+  std::cout << nthreads << std::endl;
+  engines.emplace_back(libint2::Operator::overlap,
+                       std::max(bs1.max_nprim(), bs2.max_nprim()),
+                       std::max(bs1.max_l(), bs2.max_l()), 0);
+  for (size_t i = 1; i != nthreads; ++i) {
+    engines.push_back(engines[0]);
+  }
     // loop over permutationally-unique set of shells
-    for (auto s1 = 0l, s12 = 0l; s1 != nsh1; ++s1) {
+    for (auto s1 = 0l;  s1 != nsh1; ++s1) {
       if (splist.find(s1) == splist.end()) {
-#pragma omp critical(insert_s1)
-        { splist.insert(std::make_pair(s1, std::vector<size_t>())); }
+         splist.insert(std::make_pair(s1, std::vector<size_t>())); 
       }
-
       auto n1 = bs1[s1].size(); // number of basis functions in this shell
       auto s2_max = bs1_equiv_bs2 ? s1 : nsh2 - 1;
-      for (auto s2 = 0; s2 <= s2_max; ++s2, ++s12) {
-        if (s12 % nthreads != thread_id) {
-          continue;
-        }
-
+#pragma omp parallel for
+      for (auto s2 = 0l; s2 <= s2_max; ++s2){
+        auto thread_id = omp_get_thread_num();
+        auto &engine = engines[thread_id];
+        const auto &buf = engine.results();
         auto on_same_center = (bs1[s1].O == bs2[s2].O);
         bool significant = on_same_center;
         if (not on_same_center) {
@@ -596,14 +589,13 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
           auto norm = buf_mat.norm();
           significant = (norm >= threshold);
         }
-
         if (significant) {
-#pragma omp critical(insert_s2)
-          { splist[s1].emplace_back(s2); }
+    omp_set_lock(&writelock);
+           splist[s1].emplace_back(s2); 
+    omp_unset_lock(&writelock);
         }
       }
     }
-  }
 
 #pragma omp parallel
   {
