@@ -344,7 +344,6 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     // dump_mf_for_qmcpack(hdf5_filename);
   }
 }
-/*
 void POLYQUANT_CALCULATION::run_post_mean_field(
     std::string &post_mean_field_type) {
   if (!this->post_mean_field_methods.contains(post_mean_field_type) &&
@@ -436,7 +435,6 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
     }
   }
 }
-*/
 /*
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_species_ids;
