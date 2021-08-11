@@ -5,10 +5,9 @@ add_executable(
   unit_tests/io/io_test.cpp
   unit_tests/molecule/molecule_test.cpp
   unit_tests/basis/basis_test.cpp
-  unit_tests/integral/integral_test.cpp)
-  #  integration_tests/calculation/calculation_test.cpp)
-
-  #unit_tests/ci/ci_test.cpp
+  unit_tests/integral/integral_test.cpp
+  unit_tests/ci/ci_test.cpp
+  integration_tests/calculation/calculation_test.cpp)
 # find the required testing library and link the other required libraries
 target_link_libraries(main_test Libint2::cxx)
 if(Eigen3_FOUND)
@@ -24,7 +23,8 @@ target_link_libraries(
   basis
   integral
   calculation
-  scf)
+  scf
+  ci)
 
 target_include_directories(main_test PUBLIC include)
 doctest_discover_tests(main_test ADD_LABELS 1)

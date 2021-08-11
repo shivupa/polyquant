@@ -37,7 +37,7 @@ TEST_SUITE("MOLECULE") {
   }
   TEST_CASE("MOLECULE: Construct Molecule with quantum nuclei specificed by "
             "center list.") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumH/h2o.json");
+    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumHlibrary/h2o.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
     CHECK(test_mol.centers[1][0] ==
           doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
@@ -48,7 +48,7 @@ TEST_SUITE("MOLECULE") {
   TEST_CASE("MOLECULE: Construct Molecule with quantum nuclei specificed by "
             "center label.") {
     POLYQUANT_INPUT test_inp(
-        "../../tests/data/h2o_sto3g_quantumH/h2o_alternate.json");
+        "../../tests/data/h2o_sto3g_quantumHlibrary/h2o_alternate.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
     CHECK(test_mol.centers[1][0] ==
           doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));

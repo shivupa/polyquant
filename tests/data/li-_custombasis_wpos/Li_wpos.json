@@ -15,10 +15,12 @@
   "model": {
     "method": "scf",
     "basis": 
-        {"Li" : [{ "custom" : 
+    {"electron": {"Li" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "../../tests/data/li-_custombasis_wpos/Li_basis.g94"}}]}
-             
+             "filename" : "../../tests/data/li-_custombasis_wpos/Li_basis.g94"}}]},
+    "positron" : {"Li" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "../../tests/data/li-_custombasis_wpos/Li_basis.g94"}}]}}
   },
   "keywords": {
     "restricted" : true,

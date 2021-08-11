@@ -23,7 +23,10 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   // two elec alpha");
   // Polyquant_dump_mat(this->input_integral.mo_two_body_ints[0][0][1][0], "ep
   // MO two elec alpha");
-  auto num_basis = this->input_basis.num_basis;
+  std::vector<int> num_basis;
+  for (auto i : this->input_basis.num_basis){
+      num_basis.push_back(i);
+  }
   this->detset.max_orb = num_basis;
   this->detset.set_integral(this->input_integral);
   this->detset.construct_cache(this->cache_size);
@@ -89,7 +92,7 @@ void POLYQUANT_EPCI::setup_determinants() {
            beta_ex_lvl++) {
         std::tuple<int, int, int> this_ex_lvl = {alpha_ex_lvl, beta_ex_lvl,
                                                  total_ex_lvl};
-        auto excited_dets = this->detset.create_excitation(hf_det, this_ex_lvl);
+        auto excited_dets = this->detset.create_excitation(quantum_part_idx, hf_det, this_ex_lvl);
         for (auto &e_det : excited_dets) {
           this->detset.dets[quantum_part_idx].insert(e_det);
         }

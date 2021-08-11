@@ -30,7 +30,7 @@ public:
                      std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void create_det(std::vector<std::vector<std::vector<int>>> &occ);
   std::vector<std::pair<std::vector<T>, std::vector<T>>>
-  create_excitation(std::pair<std::vector<T>, std::vector<T>> det,
+  create_excitation(int idx_part, std::pair<std::vector<T>, std::vector<T>> det,
                     std::tuple<int, int, int> excitation_level);
 
   void get_holes(std::vector<T> &Di, std::vector<T> &Dj,
@@ -39,7 +39,7 @@ public:
                  std::vector<int> &parts) const;
   double get_phase(std::vector<T> &Di, std::vector<T> &Dj,
                    std::vector<int> &holes, std::vector<int> &parts) const;
-  void get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
+  void get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ,
                     std::vector<int> &virt) const;
   double same_part_ham_diag(int idx_part, std::vector<int> i_unfold,
                             std::vector<int> j_unfold) const;
@@ -67,7 +67,7 @@ public:
   std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>,
                                  PairVectorHash<T>>>
       dets;
-  int max_orb;
+  std::vector<int> max_orb;
   POLYQUANT_INTEGRAL input_integral;
 
   void set_integral(POLYQUANT_INTEGRAL &integral) {
@@ -153,8 +153,8 @@ void POLYQUANT_DETSET<T>::create_det(
   dets.resize(occ.size());
   for (auto i_part = 0; i_part < occ.size(); i_part++) {
     std::string alpha_bit_string, beta_bit_string;
-    alpha_bit_string.resize(max_orb, '0');
-    beta_bit_string.resize(max_orb, '0');
+    alpha_bit_string.resize(max_orb[i_part], '0');
+    beta_bit_string.resize(max_orb[i_part], '0');
     for (auto i_occ : occ[i_part][0]) {
       alpha_bit_string[i_occ] = '1';
     }
@@ -176,7 +176,7 @@ void POLYQUANT_DETSET<T>::create_det(
 }
 template <typename T>
 std::vector<std::pair<std::vector<T>, std::vector<T>>>
-POLYQUANT_DETSET<T>::create_excitation(
+POLYQUANT_DETSET<T>::create_excitation( int idx_part,
     std::pair<std::vector<T>, std::vector<T>> det,
     std::tuple<int, int, int> excitation_level) {
   std::vector<std::pair<std::vector<T>, std::vector<T>>> created_dets;
@@ -194,7 +194,7 @@ POLYQUANT_DETSET<T>::create_excitation(
   // alpha
   occ.clear();
   virt.clear();
-  this->get_occ_virt(det.first, occ, virt);
+  this->get_occ_virt(idx_part, det.first, occ, virt);
   if (alpha_ex_lvl > virt.size()) {
     APP_ABORT("Alpha Excitation level exceeds virtual size!");
   }
@@ -214,7 +214,7 @@ POLYQUANT_DETSET<T>::create_excitation(
   // beta
   occ.clear();
   virt.clear();
-  this->get_occ_virt(det.second, occ, virt);
+  this->get_occ_virt(idx_part, det.second, occ, virt);
   if (beta_ex_lvl > virt.size()) {
     APP_ABORT("Beta excitation level exceeds virtual size!");
   }
@@ -295,12 +295,12 @@ double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj,
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::get_occ_virt(std::vector<T> &D, std::vector<int> &occ,
+void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ,
                                        std::vector<int> &virt) const {
   for (auto i = 0; i < D.size(); i++) {
     std::bitset<64> D_bitset(D[i]);
     for (auto j = 0; j < D_bitset.size(); j++) {
-      if ((i * 64) + j >= this->max_orb) {
+      if ((i * 64) + j >= this->max_orb[idx_part]) {
         break;
       }
       if (D_bitset[j] == 1) {
@@ -393,10 +393,10 @@ POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<int> i_unfold,
       1 % this->input_integral.mo_one_body_ints[idx_part].size();
 
   std::vector<int> aocc, avirt;
-  this->get_occ_virt(det_i_a, aocc, avirt);
+  this->get_occ_virt(idx_part, det_i_a, aocc, avirt);
 
   std::vector<int> bocc, bvirt;
-  this->get_occ_virt(det_i_b, bocc, bvirt);
+  this->get_occ_virt(idx_part, det_i_b, bocc, bvirt);
 
   double elem = 0.0;
   for (auto orb_a_i : aocc) {
@@ -464,8 +464,8 @@ double POLYQUANT_DETSET<T>::same_part_ham_single(
 
   std::vector<int> aocc, avirt;
   std::vector<int> bocc, bvirt;
-  this->get_occ_virt(det_i_a, aocc, avirt);
-  this->get_occ_virt(det_i_b, bocc, bvirt);
+  this->get_occ_virt(idx_part, det_i_a, aocc, avirt);
+  this->get_occ_virt(idx_part, det_i_b, bocc, bvirt);
 
   // get hole
   // get part
@@ -640,12 +640,12 @@ POLYQUANT_DETSET<T>::mixed_part_ham_diag(int idx_part, int other_idx_part,
   std::vector<int> other_idx_part_bocc, other_idx_part_bvirt;
   std::vector<int> idx_part_aocc, idx_part_avirt;
   std::vector<int> idx_part_bocc, idx_part_bvirt;
-  this->get_occ_virt(other_idx_part_det_i_a, other_idx_part_aocc,
+  this->get_occ_virt(other_idx_part, other_idx_part_det_i_a, other_idx_part_aocc,
                      other_idx_part_avirt);
-  this->get_occ_virt(other_idx_part_det_i_b, other_idx_part_bocc,
+  this->get_occ_virt(other_idx_part, other_idx_part_det_i_b, other_idx_part_bocc,
                      other_idx_part_bvirt);
-  this->get_occ_virt(idx_part_det_i_a, idx_part_aocc, idx_part_avirt);
-  this->get_occ_virt(idx_part_det_i_b, idx_part_bocc, idx_part_bvirt);
+  this->get_occ_virt(idx_part, idx_part_det_i_a, idx_part_aocc, idx_part_avirt);
+  this->get_occ_virt(idx_part, idx_part_det_i_b, idx_part_bocc, idx_part_bvirt);
 
   for (auto orb_a_i : idx_part_aocc) {
     for (auto orb_a_j : other_idx_part_aocc) {
@@ -762,8 +762,8 @@ POLYQUANT_DETSET<T>::mixed_part_ham_single(int idx_part, int other_idx_part,
       other_idx_part_det_i_b == other_idx_part_det_j_b) {
     std::vector<int> aocc, avirt;
     std::vector<int> bocc, bvirt;
-    this->get_occ_virt(other_idx_part_det_i_a, aocc, avirt);
-    this->get_occ_virt(other_idx_part_det_i_b, bocc, bvirt);
+    this->get_occ_virt(other_idx_part, other_idx_part_det_i_a, aocc, avirt);
+    this->get_occ_virt(other_idx_part, other_idx_part_det_i_b, bocc, bvirt);
     std::vector<int> idx_part_holes, idx_part_parts;
     double phase = 1.0;
     if (idx_part_det_i_a == idx_part_det_j_a) {
@@ -849,8 +849,8 @@ POLYQUANT_DETSET<T>::mixed_part_ham_single(int idx_part, int other_idx_part,
   } else {
     std::vector<int> aocc, avirt;
     std::vector<int> bocc, bvirt;
-    this->get_occ_virt(idx_part_det_i_a, aocc, avirt);
-    this->get_occ_virt(idx_part_det_i_b, bocc, bvirt);
+    this->get_occ_virt(idx_part, idx_part_det_i_a, aocc, avirt);
+    this->get_occ_virt(idx_part, idx_part_det_i_b, bocc, bvirt);
     std::vector<int> other_idx_part_holes, other_idx_part_parts;
     double phase = 1.0;
     if (other_idx_part_det_i_b == other_idx_part_det_j_b) {
