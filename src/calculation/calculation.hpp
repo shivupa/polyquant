@@ -1,7 +1,7 @@
 #ifndef POLYQUANT_CALCULATION_H
 #define POLYQUANT_CALCULATION_H
 #include "basis/basis.hpp"
-//#include "ci/epci.hpp"
+#include "ci/epci.hpp"
 #include "integral/integral.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"

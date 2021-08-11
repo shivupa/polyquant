@@ -16,10 +16,10 @@ TEST_SUITE("CI") {
     test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(
         test_calc.scf_calc.C);
 
-    CHECK(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0) ==
-          doctest::Approx(-32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 1) ==
-          doctest::Approx(-0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0)) ==
+          doctest::Approx(32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 1)) ==
+          doctest::Approx(0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
   TEST_CASE("CI: two body MO basis") {
@@ -30,13 +30,13 @@ TEST_SUITE("CI") {
         test_calc.scf_calc.C);
 
     CHECK(
-        test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 0) ==
+        std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 0)) ==
         doctest::Approx(4.74449478).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(
-        test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 1) ==
+        std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 1)) ==
         doctest::Approx(0.4166223).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(
-        test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 2) ==
+        std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 2)) ==
         doctest::Approx(1.00454538).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: setup/detset construction ") {
@@ -47,7 +47,7 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
-    CHECK(test_ci.detset.max_orb == 7);
+    CHECK(test_ci.detset.max_orb[0] == 7);
     CHECK(test_ci.detset.N_dets == 21);
     CHECK(test_ci.detset.dets[0].size() == 21);
     std::bitset<8> hf_det("0011111");
@@ -124,11 +124,11 @@ TEST_SUITE("CI") {
   }
   TEST_CASE("CI: get occ virt ") {
     POLYQUANT_DETSET<uint64_t> detset;
-    detset.max_orb = 7;
+    detset.max_orb.push_back(7);
     std::bitset<8> hf_det("0011111");
     std::vector<uint64_t> hf_det_vec = {hf_det.to_ulong()};
     std::vector<int> occ, virt;
-    detset.get_occ_virt(hf_det_vec, occ, virt);
+    detset.get_occ_virt(0, hf_det_vec, occ, virt);
     CHECK(occ.size() == 5);
     CHECK(virt.size() == 2);
     for (auto i = 0; i < occ.size(); i++) {
