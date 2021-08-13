@@ -5,14 +5,6 @@ using namespace polyquant;
 // LCOV_EXCL_START
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 namespace polyquant {
-// PetscErrorCode APP_ABORT(const std::string &reason) {
-//   std::string ERROR_MESSAGE =
-//       "\n\nTHIS IS A POLYQUANT++ ERROR NOT A PETSC/SLEPC ERROR. PLEASE REPORT
-//       TO " "POLYQUANT++ MAINTAINERS.\n      ABORT REASON: %s\n\n\n";
-//   SETERRQ1(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONG, ERROR_MESSAGE.c_str(),
-//            reason.c_str());
-//   return 1;
-// }
 void APP_ABORT(const std::string &reason) {
   std::vector<std::string> ERROR_MESSAGE = {
       "THIS IS A POLYQUANTERROR. PLEASE REPORT TO ", "POLYQUANT MAINTAINERS.",
