@@ -1,16 +1,27 @@
 #include "io/hdf5_utilities.hpp"
 
 using namespace polyquant;
+
+POLYQUANT_HDF5::POLYQUANT_HDF5(const std::string &filename){
+    this->create_file(filename);
+}
+
+void POLYQUANT_HDF5::create_file(const std::string &filename){
+    if (std::filesystem::exists(filename)){
+        std::stringstream s;
+        s << "HDF5 file " << filename << " exists. Appending to it." << std::endl;
+        Polyquant_cout(s.str());
+    }
+    this->hdf5_file = hdf5::file::open(filename, file::AccessFlags::READWRITE);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
     const std::string &filename,
     std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
     int N_states, int N_mo) {
-  using namespace hdf5;
-  auto simple_space = hdf5::dataspace::Simple({1});
-  auto bool_type = datatype::create<bool>();
-  auto int_type = datatype::create<int>();
-  auto double_type = datatype::create<double>();
   auto N_int_per_det = dets[0][0][0].size();
 
   file::File f = file::open(filename, file::AccessFlags::READWRITE);
@@ -98,6 +109,7 @@ void hdf5dump_generalparameters(hdf5::node::Group &root_group,
   using namespace hdf5;
   auto simple_space = hdf5::dataspace::Simple({1});
   auto bool_type = datatype::create<bool>();
+  auto int_type = datatype::create<int>();
   // write General parameters
   Polyquant_cout("dumping general parameters");
   auto parameters_group = root_group.create_group("parameters");
@@ -144,10 +156,12 @@ void hdf5dump_generalparameters(hdf5::node::Group &root_group,
 }
 void hdf5dump_MOs(
     hdf5::node::Group &root_group, std::vector<std::string> quantum_part_names,
+    int num_ao, int num_mo,
     std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orb,
     std::vector<
         std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
         mo_coeff) {
+  using namespace hdf5;
   // write MO parameters
   Polyquant_cout("dumping MOs");
   auto super_twist_group = root_group.create_group("Super_Twist");
@@ -207,6 +221,10 @@ void hdf5dump_atoms(hdf5::node::Group &root_group, int num_atom,
                     std::vector<int> atomic_charge, std::vector<int> core_elec,
                     std::vector<std::string> atomic_names,
                     std::vector<std::vector<double>> atomic_centers) {
+  using namespace hdf5;
+  auto simple_space = hdf5::dataspace::Simple({1});
+  auto int_type = datatype::create<int>();
+  auto vec_int_type = datatype::create<std::vector<int>>();
   // write atom parameters
   Polyquant_cout("dumping atom parameters");
   auto atoms_group = root_group.create_group("atoms");
@@ -264,6 +282,9 @@ void hdf5dump_atoms(hdf5::node::Group &root_group, int num_atom,
 }
 void hdf5dump_basis(hdf5::node::Group &root_group,
                     std::vector<std::vector<libint2::Shell>> unique_shells) {
+                      using namespace hdf5;
+                      auto simple_space = hdf5::dataspace::Simple({1});
+                      auto int_type = datatype::create<int>();
   // lambda for removing normalization
   // auto gaussianint_lambda = [](auto n, auto alpha) {
   //   auto n1 = (n + 1) * 0.5;

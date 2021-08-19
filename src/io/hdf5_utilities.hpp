@@ -16,12 +16,65 @@
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
+#include <filesystem>
 
 namespace polyquant {
+
+/**
+ * @brief A class to assist with HDF5 dumping
+ *
+ */
+class POLYQUANT_HDF5 {
+public:
+  POLYQUANT_HDF5() = default;
+  /**
+   * @brief Construct a HDF5 object using the create_file function.
+   *
+   * @param filename the file to write to.
+   */
+  POLYQUANT_HDF5(const std::string &filename);
+  /**
+   * @brief creates a HDF5 file
+   *
+   * @param filename the file to write to.
+   */
+  void create_file(const std::string &filename);
+  /**
+   * @brief the hdf5 file object
+   *
+   */
+  hdf5::file::File hdf5_file;
+};
+void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
+      const std::string &filename,
+      std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
+      int N_states, int N_mo);
 
 void hdf5dump_application(hdf5::node::Group &root_group);
 
 void hdf5dump_PBC(hdf5::node::Group &root_group);
+
+void hdf5dump_generalparameters(hdf5::node::Group &root_group,
+                                bool complex_vals, bool ecp, bool restricted,
+                                int num_ao, int num_mo, bool bohr_unit,
+                                int num_part_alpha, int num_part_beta,
+                                int num_part_total, int multiplicity);
+
+void hdf5dump_MOs(
+    hdf5::node::Group &root_group, std::vector<std::string> quantum_part_names,
+    int num_ao, int num_mo,
+    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orb,
+    std::vector<
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>
+        mo_coeff);
+
+void hdf5dump_atoms(hdf5::node::Group &root_group, int num_atom,
+                    int num_species, std::vector<int> atomic_species_ids,
+                    std::vector<int> atomic_number,
+                    std::vector<int> atomic_charge, std::vector<int> core_elec,
+                    std::vector<std::string> atomic_names,
+                    std::vector<std::vector<double>> atomic_centers);
 
 void hdf5dump_basis(hdf5::node::Group &root_group);
 
