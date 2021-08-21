@@ -6,7 +6,6 @@
 #include <cctype>
 #include <chrono>
 #include <fstream>
-#include <h5cpp/hdf5.hpp>
 #include <iomanip>
 #include <iostream>
 #include <libint2.hpp>       // IWYU pragma: keep

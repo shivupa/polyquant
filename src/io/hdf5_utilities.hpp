@@ -44,6 +44,16 @@ public:
    *
    */
   hdf5::file::File hdf5_file;
+
+  void dump_application();
+  void dump_PBC();
+  
+private:
+  hdf5::node::Group root_group;
+  
+  auto simple_space = hdf5::dataspace::Simple({1});
+  auto bool_type = hdf5::datatype::create<bool>();
+
 };
 void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
       const std::string &filename,
@@ -51,9 +61,7 @@ void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
       int N_states, int N_mo);
 
-void hdf5dump_application(hdf5::node::Group &root_group);
 
-void hdf5dump_PBC(hdf5::node::Group &root_group);
 
 void hdf5dump_generalparameters(hdf5::node::Group &root_group,
                                 bool complex_vals, bool ecp, bool restricted,

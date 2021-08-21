@@ -13,8 +13,31 @@ void POLYQUANT_HDF5::create_file(const std::string &filename){
         Polyquant_cout(s.str());
     }
     this->hdf5_file = hdf5::file::open(filename, file::AccessFlags::READWRITE);
+    this->root_group = this->hdf5_file.root();
 }
 
+void POLYQUANT_HDF5::dump_application() {
+  // write generating code name
+  Polyquant_cout("dumping application parameters");
+  auto application_group = root_group.create_group("application");
+  std::vector<std::string> title = {"Polyquant"};
+  auto str_type = hdf5::datatype::String::fixed(9);
+  str_type.padding(datatype::StringPad::NULLPAD);
+  str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
+  auto dtpl = hdf5::property::DatasetTransferList();
+  auto application_title_dataset =  application_group.create_dataset("code", str_type, simple_space);
+  application_title_dataset.write(title, str_type, simple_space, simple_space, dtpl);
+}
+
+void POLYQUANT_HDF5::dump_PBC(bool pbc) {
+  // write PBC
+  Polyquant_cout("dumping PBC parameters");
+  auto PBC_group = root_group.create_group("PBC");
+  auto PBC_dataset = PBC_group.create_dataset("PBC", bool_type, simple_space);
+  PBC_dataset.write(pbc, bool_type, simple_space);
+}
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
@@ -74,22 +97,6 @@ void Polyquant_dump_post_mf_to_hdf5_for_QMCPACK(
   auto nstate_dataset =
       multidet_group.create_dataset("nstate", int_type, simple_space);
   nstate_dataset.write(N_mo, int_type, simple_space);
-}
-void hdf5dump_application(hdf5::node::Group &root_group) {
-  using namespace hdf5;
-  auto simple_space = hdf5::dataspace::Simple({1});
-  // write generating code name
-  Polyquant_cout("dumping application parameters");
-  auto application_group = root_group.create_group("application");
-  std::vector<std::string> title = {"Polyquant"};
-  auto str_type = datatype::String::fixed(9);
-  str_type.padding(datatype::StringPad::NULLPAD);
-  str_type.encoding(datatype::CharacterEncoding::ASCII);
-  auto dtpl = hdf5::property::DatasetTransferList();
-  auto application_title_dataset =
-      application_group.create_dataset("code", str_type, simple_space);
-  application_title_dataset.write(title, str_type, simple_space, simple_space,
-                                  dtpl);
 }
 void hdf5dump_PBC(hdf5::node::Group &root_group, bool pbc) {
   using namespace hdf5;
