@@ -40,24 +40,17 @@ public:
         // use std::nth_element to find the worst 10% (O(n))
         // remove them all from the map (O(n log n))
 
-        std::vector<typename std::unordered_map<
-            keytype, std::pair<size_t, valuetype>, hashtype>::iterator>
-            cache_elements;
+        std::vector<typename std::unordered_map< keytype, std::pair<size_t, valuetype>, hashtype>::iterator> cache_elements;
         cache_elements.resize(this->cache_items_map.size());
-        size_t num_elements =
-            this->cache_items_map.size() * this->discard_percentage / 100;
-        for (auto it = this->cache_items_map.begin();
-             it != this->cache_items_map.end(); ++it) {
+        size_t num_elements = this->cache_items_map.size() * this->discard_percentage / 100;
+        for (auto it = this->cache_items_map.begin(); it != this->cache_items_map.end(); ++it) {
           cache_elements.push_back(it);
         }
-        std::nth_element(
-            cache_elements.begin(), cache_elements.begin() + num_elements,
-            cache_elements.end(), [](const auto &a, const auto &b) {
+        std::nth_element( cache_elements.begin(), cache_elements.begin() + num_elements, cache_elements.end(), [](const auto &a, const auto &b) {
               return a->second.first < b->second.first;
             });
         // TODO replace some fraction of the cache e.g. 90%? Investigate
-        for (auto i = cache_elements.begin();
-             i != cache_elements.begin() + num_elements; ++i) {
+        for (auto i = cache_elements.begin(); i != cache_elements.begin() + num_elements; ++i) {
           this->erase((*i)->first);
         }
       }
@@ -84,8 +77,7 @@ public:
 
   bool in_cache(const keytype &key) const {
     omp_set_lock(&writelock);
-    bool in_cache =
-        this->cache_items_map.find(key) != this->cache_items_map.end();
+    bool in_cache = this->cache_items_map.find(key) != this->cache_items_map.end();
     omp_unset_lock(&writelock);
     return in_cache;
   }
@@ -118,8 +110,7 @@ protected:
 
   void insert(const keytype &key, const valuetype &value) {
     constexpr std::size_t initial_value = 1;
-    this->cache_items_map.emplace(
-        std::make_pair(key, std::make_pair(initial_value, value)));
+    this->cache_items_map.emplace( std::make_pair(key, std::make_pair(initial_value, value)));
   }
 
   void erase(const keytype &key) {
@@ -132,8 +123,7 @@ protected:
     this->cache_items_map[key].second = value;
   }
 
-  std::unordered_map<keytype, std::pair<size_t, valuetype>,
-                     hashtype>::const_iterator
+  std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype>::const_iterator
   find(const keytype &key) const {
     return this->cache_items_map.find(key);
   }
@@ -141,8 +131,7 @@ protected:
 private:
   mutable omp_lock_t writelock;
   // store keys, pair < freq, value >
-  mutable std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype>
-      cache_items_map;
+  mutable std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype> cache_items_map;
   size_t max_cache_size;
   size_t discard_percentage = 5;
 };
