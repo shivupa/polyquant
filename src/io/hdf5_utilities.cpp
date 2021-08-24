@@ -3,17 +3,17 @@
 using namespace polyquant;
 
 POLYQUANT_HDF5::POLYQUANT_HDF5(const std::string &fname){
-    this->create_file(filename);
+    this->create_file(fname);
 }
 
 void POLYQUANT_HDF5::create_file(const std::string &fname){
-  this->filename = filename;
+  this->filename = fname;
     if (std::filesystem::exists(filename)){
         std::stringstream s;
-        s << "HDF5 file " << filename << " exists. Appending to it." << std::endl;
+        s << "HDF5 file " << filename << " exists. Overwriting it." << std::endl;
         Polyquant_cout(s.str());
     }
-    this->hdf5_file = hdf5::file::open(filename, file::AccessFlags::READWRITE);
+    this->hdf5_file = hdf5::file::create(this->filename, hdf5::file::AccessFlags::TRUNCATE);
     this->root_group = this->hdf5_file.root();
 }
 
@@ -23,7 +23,7 @@ void POLYQUANT_HDF5::dump_application() {
   auto application_group = root_group.create_group("application");
   std::vector<std::string> title = {"Polyquant"};
   auto str_type = hdf5::datatype::String::fixed(9);
-  str_type.padding(datatype::StringPad::NULLPAD);
+  str_type.padding(hdf5::datatype::StringPad::NULLPAD);
   str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
   auto dtpl = hdf5::property::DatasetTransferList();
   auto application_title_dataset =  application_group.create_dataset("code", str_type, simple_space);
@@ -49,7 +49,7 @@ void POLYQUANT_HDF5::dump_atoms(int num_atom, int num_species, std::vector<int> 
   auto num_species_dataset = atoms_group.create_dataset("number_of_species", int_type, simple_space);
   num_species_dataset.write(num_species, int_type, simple_space);
   // write species ids
-  auto atomic_species_ids_dataset = atoms_group.create_dataset("species_ids", vec_int_type, dataspace::create(atomic_species_ids));
+  auto atomic_species_ids_dataset = atoms_group.create_dataset("species_ids", vec_int_type, hdf5::dataspace::create(atomic_species_ids));
   atomic_species_ids_dataset.write(atomic_species_ids);
   // write atomic positions
   std::vector<double> flattened_atomic_positions;
@@ -71,19 +71,16 @@ void POLYQUANT_HDF5::dump_atoms(int num_atom, int num_species, std::vector<int> 
     auto atomic_core_elec_dataset = species_group.create_dataset("core", int_type, simple_space);
     atomic_core_elec_dataset.write(core_elec[i], int_type, simple_space);
     // dump atomic name
-    auto str_type = datatype::String::fixed(atomic_names[i].size());
-    str_type.padding(datatype::StringPad::NULLPAD);
-    str_type.encoding(datatype::CharacterEncoding::ASCII);
+    auto str_type = hdf5::datatype::String::fixed(atomic_names[i].size());
+    str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+    str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
     auto dtpl = hdf5::property::DatasetTransferList();
     auto atomic_name_dataset = species_group.create_dataset("name", str_type, simple_space);
     atomic_name_dataset.write(atomic_names[i], str_type, simple_space, simple_space, dtpl);
   }
 }
 //TODO
-void POLYQUANT_HDF5::dump_generalparameters(bool complex_vals, bool ecp, bool restricted,
-                                int num_ao, int num_mo, bool bohr_unit,
-                                int num_part_alpha, int num_part_beta,
-                                int num_part_total, int multiplicity) {
+void POLYQUANT_HDF5::dump_generalparameters(bool complex_vals, bool ecp, bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha, int num_part_beta, int num_part_total, int multiplicity) {
   // write General parameters
   Polyquant_cout("dumping general parameters");
   auto parameters_group = root_group.create_group("parameters");
@@ -141,12 +138,12 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
         }
       }
       tag = "eigenset_" + std::to_string(spin_idx);
-      auto mo_coeff_dataset = super_twist_group.create_dataset(tag, vec_double_type, hdf5::dataspace::Simple({num_ao, num_mo}));
+      auto mo_coeff_dataset = super_twist_group.create_dataset(tag, vec_double_type, hdf5::dataspace::Simple({static_cast<size_t>(num_ao) , static_cast<size_t>(num_mo)}));
       mo_coeff_dataset.write(flattened_mo_coeff);
     }
   }
 //TODO
-void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
+void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
   // lambda for removing normalization
   // auto gaussianint_lambda = [](auto n, auto alpha) {
   //   auto n1 = (n + 1) * 0.5;
@@ -164,9 +161,9 @@ void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
   NbElements_dataset.write(unique_shells.size(), int_type, simple_space);
   // dump basis name
   std::string basis_name = "LCAOBSet";
-  auto str_type = datatype::String::fixed(basis_name.size());
-  str_type.padding(datatype::StringPad::NULLPAD);
-  str_type.encoding(datatype::CharacterEncoding::ASCII);
+  auto str_type = hdf5::datatype::String::fixed(basis_name.size());
+  str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+  str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
   auto dtpl = hdf5::property::DatasetTransferList();
   auto basis_name_dataset = basis_group.create_dataset("name", str_type, simple_space);
   basis_name_dataset.write(basis_name, str_type, simple_space, simple_space, dtpl);
@@ -184,46 +181,45 @@ void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
     if (atom_shells[0].contr[0].pure) {
       // dump cartesian or spherical
       std::string cart_sph = "spherical";
-      auto str_type = datatype::String::fixed(cart_sph.size());
-      str_type.padding(datatype::StringPad::NULLPAD);
-      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      auto str_type = hdf5::datatype::String::fixed(cart_sph.size());
+      str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+      str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
       auto dtpl = hdf5::property::DatasetTransferList();
       auto cart_sph_dataset = atom_basis_group.create_dataset("angular", str_type, simple_space);
       cart_sph_dataset.write(cart_sph, str_type, simple_space, simple_space,
                              dtpl);
       // dump expansion type
       std::string expandYlm = "natural";
-      str_type = datatype::String::fixed(expandYlm.size());
-      str_type.padding(datatype::StringPad::NULLPAD);
-      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      str_type = hdf5::datatype::String::fixed(expandYlm.size());
+      str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+      str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
       dtpl = hdf5::property::DatasetTransferList();
       auto expandYlm_dataset =  atom_basis_group.create_dataset("expandYlm", str_type, simple_space);
-      expandYlm_dataset.write(expandYlm, str_type, simple_space, simple_space,
-                              dtpl);
+      expandYlm_dataset.write(expandYlm, str_type, simple_space, simple_space, dtpl);
     } else {
       // dump cartesian or spherical
       std::string cart_sph = "cartesian";
-      auto str_type = datatype::String::fixed(cart_sph.size());
-      str_type.padding(datatype::StringPad::NULLPAD);
-      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      auto str_type = hdf5::datatype::String::fixed(cart_sph.size());
+      str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+      str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
       auto dtpl = hdf5::property::DatasetTransferList();
       auto cart_sph_dataset = atom_basis_group.create_dataset("angular", str_type, simple_space);
       cart_sph_dataset.write(cart_sph, str_type, simple_space, simple_space,
                              dtpl);
       // dump expansion type
       std::string expandYlm = "Gamess";
-      str_type = datatype::String::fixed(expandYlm.size());
-      str_type.padding(datatype::StringPad::NULLPAD);
-      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      str_type = hdf5::datatype::String::fixed(expandYlm.size());
+      str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+      str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
       dtpl = hdf5::property::DatasetTransferList();
       auto expandYlm_dataset = atom_basis_group.create_dataset("expandYlm", str_type, simple_space);
       expandYlm_dataset.write(expandYlm, str_type, simple_space, simple_space,
                               dtpl);
     }
     // dump atom type and name
-    auto str_type = datatype::String::fixed(atomic_names[atom_idx].size());
-    str_type.padding(datatype::StringPad::NULLPAD);
-    str_type.encoding(datatype::CharacterEncoding::ASCII);
+    auto str_type = hdf5::datatype::String::fixed(atomic_names[atom_idx].size());
+    str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+    str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
     auto dtpl = hdf5::property::DatasetTransferList();
     auto atom_basis_elementType_dataset = atom_basis_group.create_dataset("elementType", str_type, simple_space);
     atom_basis_elementType_dataset.write(atomic_names[atom_idx], str_type,
@@ -232,9 +228,9 @@ void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
     atom_basis_name_dataset.write(atomic_names[atom_idx], str_type, simple_space, simple_space, dtpl);
     // dump normalization
     std::string normalized = "no";
-    str_type = datatype::String::fixed(normalized.size());
-    str_type.padding(datatype::StringPad::NULLPAD);
-    str_type.encoding(datatype::CharacterEncoding::ASCII);
+    str_type = hdf5::datatype::String::fixed(normalized.size());
+    str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+    str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
     dtpl = hdf5::property::DatasetTransferList();
     auto atom_basis_normalization_dataset = atom_basis_group.create_dataset("normalized", str_type, simple_space);
     atom_basis_normalization_dataset.write(normalized, str_type, simple_space,
@@ -253,9 +249,9 @@ void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
     grid_ri_dataset.write(grid_ri, double_type, simple_space);
 
     std::string grid_type = "log";
-    str_type = datatype::String::fixed(grid_type.size());
-    str_type.padding(datatype::StringPad::NULLPAD);
-    str_type.encoding(datatype::CharacterEncoding::ASCII);
+    str_type = hdf5::datatype::String::fixed(grid_type.size());
+    str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+    str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
     dtpl = hdf5::property::DatasetTransferList();
     auto grid_type_dataset = atom_basis_group.create_dataset("grid_type", str_type, simple_space);
     grid_type_dataset.write(grid_type, str_type, simple_space, simple_space, dtpl);
@@ -272,23 +268,23 @@ void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
       l_dataset.write(shell.contr[0].l, int_type, simple_space);
       // dump basis type
       std::string basis_type = "Gaussian";
-      str_type = datatype::String::fixed(basis_type.size());
-      str_type.padding(datatype::StringPad::NULLPAD);
-      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      str_type = hdf5::datatype::String::fixed(basis_type.size());
+      str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+      str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
       dtpl = hdf5::property::DatasetTransferList();
       auto basis_type_dataset = shell_group.create_dataset("type", str_type, simple_space);
       basis_type_dataset.write(basis_type, str_type, simple_space, simple_space, dtpl);
       // dump basis function id
       std::string basis_id = atomic_names[atom_idx] + std::to_string(shell_idx) + std::to_string(shell.contr[0].l);
-      str_type = datatype::String::fixed(basis_id.size());
-      str_type.padding(datatype::StringPad::NULLPAD);
-      str_type.encoding(datatype::CharacterEncoding::ASCII);
+      str_type = hdf5::datatype::String::fixed(basis_id.size());
+      str_type.padding(hdf5::datatype::StringPad::NULLPAD);
+      str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
       dtpl = hdf5::property::DatasetTransferList();
       auto basis_id_dataset = shell_group.create_dataset("rid", str_type, simple_space);
       basis_id_dataset.write(basis_id, str_type, simple_space, simple_space, dtpl);
       // dump basis function location
       std::vector<double> origin = {shell.O[0], shell.O[1], shell.O[2]};
-      auto basis_position_dataset = shell_group.create_dataset("Shell_coord", datatype::create<std::vector<double>>(),dataspace::create(origin));
+      auto basis_position_dataset = shell_group.create_dataset("Shell_coord", hdf5::datatype::create<std::vector<double>>(), hdf5::dataspace::create(origin));
       basis_position_dataset.write(origin);
       auto rad_func_group = shell_group.create_group("radfunctions");
       for (auto i = 0ul; i < shell.alpha.size(); ++i) {
@@ -332,27 +328,19 @@ void POLYQUANT_HDF5::dump_basis(std::vector<libint2::Shell> unique_shells) {
   }
 }
 //TODO
-void POLYQUANT_HDF5::dump_mf_to_hdf5_for_QMCPACK(bool pbc, bool complex_vals, bool ecp, bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha, int num_part_beta, int num_part_total, int multiplicity, int num_atom, std::string quantum_part_name, std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> E_orb, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff, std::vector<int> atomic_species_ids, std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec, std::vector<std::string> atomic_names, std::vector<std::vector<double>> atomic_centers, std::vector<libint2::Shell> unique_shells) {
+void POLYQUANT_HDF5::dump_mf_to_hdf5_for_QMCPACK(bool pbc, bool complex_vals, bool ecp, bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha, int num_part_beta, int num_part_total, int multiplicity, int num_atom, int num_species, std::string quantum_part_name, std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> E_orb, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff, std::vector<int> atomic_species_ids, std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec, std::vector<std::string> atomic_names, std::vector<std::vector<double>> atomic_centers, std::vector<std::vector<libint2::Shell>> unique_shells) {
   // create file
   Polyquant_cout("dumping file");
   this->dump_application();
   this->dump_PBC(pbc);
-  this->dump_generalparameters(complex_vals, ecp, restricted, num_ao,
-                             num_mo, bohr_unit, num_part_alpha, num_part_beta,
-                             num_part_total, multiplicity);
-  this->dump_MOs(quantum_part_names, E_orb, mo_coeff);
-  this->dump_atoms(num_atom, num_species, atomic_species_ids,
-                 atomic_number, atomic_charge, core_elec, atomic_names,
-                 atomic_centers);
-  this->dump_basis(root_group, unique_shells);
+  this->dump_generalparameters(complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity);
+  this->dump_MOs(quantum_part_name, num_ao, num_mo, E_orb, mo_coeff);
+  this->dump_atoms(num_atom, num_species, atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names, atomic_centers);
+  this->dump_basis(atomic_names, unique_shells);
 }
 //TODO
-void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(
-    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets,
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
-    int N_states, int N_mo) {
+void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK( std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_states, int N_mo) {
   auto N_int_per_det = dets[0][0][0].size();
-  node::Group root_group = f.root();
   Polyquant_cout("dumping CI parameters");
   auto multidet_group = root_group.create_group("MultiDet");
   for (int part_idx = 0; part_idx < dets.size(); part_idx++) {
@@ -364,9 +352,7 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(
           flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
         }
       }
-      auto det_dataset = multidet_group.create_dataset(
-          tag, datatype::create<std::vector<uint64_t>>(),
-          hdf5::dataspace::Simple({N_dets, N_int_per_det}));
+      auto det_dataset = multidet_group.create_dataset( tag, hdf5::datatype::create<std::vector<uint64_t>>(), hdf5::dataspace::Simple({static_cast<size_t>(N_dets), static_cast<size_t>(N_int_per_det)}));
       det_dataset.write(flattened_dets);
     }
   }
@@ -380,9 +366,7 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(
     if (i > 0) {
       tag += "_" + std::to_string(i);
     }
-    auto coeff_dataset = multidet_group.create_dataset(
-        tag, datatype::create<std::vector<double>>(),
-        hdf5::dataspace::Simple({N_dets}));
+    auto coeff_dataset = multidet_group.create_dataset( tag, hdf5::datatype::create<std::vector<double>>(), hdf5::dataspace::Simple({static_cast<size_t>(N_dets)}));
     coeff_dataset.write(coeff);
   }
 
