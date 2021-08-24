@@ -6,8 +6,8 @@ include(FetchContent)
 # Set up the project and version info
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
-set(POLYQUANT_VERSION_MINOR 0)
-set(POLYQUANT_VERSION_PATCH 1)
+set(POLYQUANT_VERSION_MINOR 1)
+set(POLYQUANT_VERSION_PATCH 0)
 set(POLYQUANT_VERSION
     "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}"
 )
@@ -84,10 +84,11 @@ if(POLYQUANT_DEBUG)
   # property-in-cmake-for-every-target
   find_program(IWYU_PATH NAMES include-what-you-use iwyu)
   if(NOT IWYU_PATH)
-    message(FATAL_ERROR "Could not find the program include-what-you-use.")
+      message(STATUS "Could not find the program include-what-you-use. Not using it.")
+  else(NOT IWYU_PATH)
+      set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
+      set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   endif()
-  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
-  set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE ON)
 endif(POLYQUANT_DEBUG)
 
