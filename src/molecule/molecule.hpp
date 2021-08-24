@@ -53,8 +53,7 @@ public:
    *
    * @return std::vector<libint2,,Atom> the vector of atoms
    */
-  std::vector<libint2::Atom>
-  to_libint_atom(std::string classical_part_key = "all") const;
+  std::vector<libint2::Atom> to_libint_atom(std::string classical_part_key = "all") const;
 
   /**
    * @brief Create an xyz representation of the molecule.
@@ -100,12 +99,6 @@ public:
    */
   double angstrom_to_bohr = 1 / bohr_to_angstrom;
 
-private:
-  /**
-   * @brief a map from atomic symbols to atomic numbers
-   *
-   */
-
-}; // namespace polyquant
+}; 
 } // namespace polyquant
 #endif
