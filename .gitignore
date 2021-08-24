@@ -31,7 +31,8 @@
 *.out
 *.app
 
-build/*
+build/
 
 docs/source/api
 docs/_build
+.vscode/
