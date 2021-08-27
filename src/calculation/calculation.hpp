@@ -5,6 +5,7 @@
 #include "integral/integral.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
+#include "io/hdf5_utilities.hpp"
 #include "molecule/molecule.hpp"
 #include "scf/epscf.hpp"
 #include <algorithm>
@@ -54,8 +55,8 @@ public:
 
   std::string parse_mean_field();
   std::string parse_post_mean_field();
-  // void dump_mf_for_qmcpack(std::string &filename);
-  // void dump_post_mf_for_qmcpack(std::string &filename);
+  void dump_mf_for_qmcpack(std::string &filename);
+  void dump_post_mf_for_qmcpack(std::string &filename);
   /**
    * @brief the input parameters
    *

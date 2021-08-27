@@ -11,7 +11,3 @@ target_link_libraries(molecule io)
 if(POLYQUANT_CODE_COVERAGE)
   target_link_libraries(molecule coverage_config)
 endif(POLYQUANT_CODE_COVERAGE)
-# target_include_directories(molecule PUBLIC include) install( TARGETS molecule
-# LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/molecule)
-
-# install(FILES ${_HDRS} DESTINATION include/molecule)

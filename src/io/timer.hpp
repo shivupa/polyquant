@@ -9,23 +9,29 @@ namespace polyquant {
 class POLYQUANT_TIMER {
 public:
   POLYQUANT_TIMER() { this->set_start_time(); };
+
   POLYQUANT_TIMER(const std::string &calling_func) {
     this->set_start_time();
     this->set_calling_function(calling_func);
   };
+
   ~POLYQUANT_TIMER() {
     this->set_end_time();
     this->print_timer_end();
   };
+
   void set_calling_function(const std::string &calling_func) {
     this->calling_function = calling_func;
   };
+
   void set_start_time() {
     this->start = std::chrono::high_resolution_clock::now();
   };
+
   void set_end_time() {
     this->end = std::chrono::high_resolution_clock::now();
   };
+
   void print_timer_end() {
     // use std::format once supported
     // use std::chrono::days etc once it is used
@@ -47,10 +53,7 @@ public:
     auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
     duration -= ns;
     std::stringstream buffer;
-    buffer << "Timer " << this->calling_function << "    " << d.count()
-           << "d:" << h.count() << "h:" << m.count() << "m:" << s.count()
-           << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count()
-           << "ns";
+    buffer << "Timer " << this->calling_function << "    " << d.count() << "d:" << h.count() << "h:" << m.count() << "m:" << s.count() << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count() << "ns";
     Polyquant_cout(buffer.str());
   };
 

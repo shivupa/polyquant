@@ -6,8 +6,8 @@ include(FetchContent)
 # Set up the project and version info
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
-set(POLYQUANT_VERSION_MINOR 0)
-set(POLYQUANT_VERSION_PATCH 1)
+set(POLYQUANT_VERSION_MINOR 1)
+set(POLYQUANT_VERSION_PATCH 0)
 set(POLYQUANT_VERSION
     "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}"
 )
@@ -26,9 +26,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 # set some flags that we can use cmake -Dflag={0,1} to trigger special things in
 # the build this first one doesn't do anything if it was off but it would be
 # nice to have a serial build
-set(POLYQUANT_DEBUG
-    0
-    CACHE BOOL "Enable/disable debug printing")
 set(POLYQUANT_DOC
     0
     CACHE BOOL "Enable/disable documentation building")
@@ -36,7 +33,6 @@ set(POLYQUANT_TEST
     1
     CACHE BOOL "Enable/disable testing")
 set(FETCHCONTENT_QUIET ON)
-
 option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
 
 # Code Coverage Configuration
@@ -59,6 +55,17 @@ endif(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 message(STATUS "Ready to build POLYQUANT")
 
+message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
+  message("Debug build.")
+ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
+  message("Release build.")
+ELSE()
+  set( CMAKE_BUILD_TYPE Release FORCE )
+  message("CMAKE_BUILD_TYPE not set. Setting to = ${CMAKE_BUILD_TYPE}")
+ENDIF()
+
+
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
 # parts of the code, but for now we don't need to
@@ -78,18 +85,22 @@ endif(POLYQUANT_TEST)
 # if the debug flag is on this will use include what you use to check the
 # headers it also makes the make files verbose so you can see what the build is
 # doing
-if(POLYQUANT_DEBUG)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
   # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
   # https://stackoverflow.com/questions/41610822/set-cxx-include-what-you-use-
   # property-in-cmake-for-every-target
   find_program(IWYU_PATH NAMES include-what-you-use iwyu)
   if(NOT IWYU_PATH)
-    message(FATAL_ERROR "Could not find the program include-what-you-use.")
+      message(STATUS "Could not find the program include-what-you-use. Not using it.")
+  else(NOT IWYU_PATH)
+      set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
+      set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   endif()
-  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
-  set(CMAKE_C_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
   set(CMAKE_VERBOSE_MAKEFILE ON)
-endif(POLYQUANT_DEBUG)
+  # ASAN
+  # set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  # set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # if the docs flag is on this will use doxygen to build the docs
 if(POLYQUANT_DOC)
@@ -139,6 +150,11 @@ FetchContent_MakeAvailable(CPR)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(OpenMP REQUIRED)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 find_package(MKL REQUIRED)
 
 FetchContent_Declare(
@@ -147,19 +163,27 @@ FetchContent_Declare(
   GIT_TAG origin/Davidsonspacesize)
 FetchContent_MakeAvailable(spectra)
 
-set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME})
-set(POLYQUANT_GIT_PASSWORD $ENV{GIT_PASSWORD})
-FetchContent_Declare(
-  libint2
-  GIT_REPOSITORY https://github.com/shivupa/polyquant.git
-  GIT_TAG origin/libint
-  HTTP_USERNAME ${POLYQUANT_GIT_USERNAME}
-  HTTP_PASSWORD ${POLYQUANT_GIT_PASSWORD})
-set(enable-fortran ON)
-set(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS ON)
-set(LIBINT2_REALTYPE double)
-set(LIBINT2_BUILD_TESTS OFF)
-FetchContent_MakeAvailable(libint2)
+find_package(libint2)
+if (LIBINT2_FOUND)
+    INCLUDE_DIRECTORIES(${LIBINT2_INCLUDE_DIRS})
+    add_definitions(${LIBINT2_EXTRA_DEFINITIONS})
+    message("Libint2 library found in system. Using system installed Libint2.")
+else (LIBINT2_FOUND)
+    set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME})
+    set(POLYQUANT_GIT_PASSWORD $ENV{GIT_PASSWORD})
+    FetchContent_Declare(
+      libint2
+      GIT_REPOSITORY https://github.com/shivupa/polyquant.git
+      GIT_TAG origin/libint
+      HTTP_USERNAME ${POLYQUANT_GIT_USERNAME}
+      HTTP_PASSWORD ${POLYQUANT_GIT_PASSWORD})
+    set(enable-fortran ON)
+    set(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS ON)
+    set(LIBINT2_REALTYPE double)
+    set(LIBINT2_BUILD_TESTS OFF)
+    FetchContent_MakeAvailable(libint2)
+    message("Libint2 library NOT found in system. Building Libint2.")
+endif ()
 
 FetchContent_Declare(
   cppitertools
@@ -205,7 +229,7 @@ if(POLYQUANT_TEST)
 endif(POLYQUANT_TEST)
 
 # if its a debug build this will print all the cmake variables
-if(POLYQUANT_DEBUG)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
   # found this useful macro on SO https://stackoverflow.com/a/31390758
   macro(print_all_variables)
     message(
@@ -218,4 +242,4 @@ if(POLYQUANT_DEBUG)
       STATUS "print_all_variables------------------------------------------}")
   endmacro()
   print_all_variables()
-endif(POLYQUANT_DEBUG)
+endif(CMAKE_BUILD_TYPE MATCHES Debug)

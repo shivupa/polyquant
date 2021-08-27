@@ -8,11 +8,7 @@ if(Eigen3_FOUND)
 endif(Eigen3_FOUND)
 target_link_libraries(io nlohmann_json::nlohmann_json)
 target_link_libraries(io Libint2::cxx)
-# target_include_directories(io PRIVATE include)
 target_link_libraries(io h5cpp)
 if(POLYQUANT_CODE_COVERAGE)
   target_link_libraries(io coverage_config)
 endif(POLYQUANT_CODE_COVERAGE)
-
-# install( TARGETS io LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION
-# include/io) install(FILES ${_HDRS} DESTINATION include/io)

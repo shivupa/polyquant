@@ -6,7 +6,6 @@
 #include <cctype>
 #include <chrono>
 #include <fstream>
-#include <h5cpp/hdf5.hpp>
 #include <iomanip>
 #include <iostream>
 #include <libint2.hpp>       // IWYU pragma: keep
@@ -34,16 +33,7 @@ void APP_ABORT(const std::string &reason);
  * @param message
  */
 template <typename T> void Polyquant_cout(const T &message) {
-  // TODO: in these types of functions we could do a if USING_SLEPC
-  // just in case its not using mpi etc
-  // int my_rank;
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  // if (my_rank == 0) {
-  // std::cout << std::fixed << std::showpoint << std::setw(20)
   std::cout << std::setprecision(20) << message << std::endl;
-  //}
-  //
-  //
 }
 
 // replace with C++20 std::source_location::function_name once supported
@@ -74,18 +64,12 @@ void Polyquant_dump_json(const json &json_obj);
  * @param vec The dense vector to print
  **/
 template <typename T>
-void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
-                        const std::string &title) {
-  // int my_rank;
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  // if (my_rank == 0) {
+void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   for (size_t i = 0; i < vec.rows(); i++) {
-
-    std::cout << std::fixed << std::showpoint << std::setw(20)
-              << std::setprecision(10) << vec(i, 0) << std::endl;
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec(i, 0) << std::endl;
   }
 }
 
@@ -95,16 +79,11 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
  * @param vec The dense vector to write.
  **/
 template <typename T>
-void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,
-                                const std::string &filename) {
-  // int my_rank;
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  // if (my_rank == 0) {
+void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, const std::string &filename) {
   std::ofstream vecfile;
   vecfile.open(filename);
   for (Eigen::Index i = 0; i < vec.rows(); i++) {
-    vecfile << std::fixed << std::showpoint << std::setw(20)
-            << std::setprecision(10) << vec(i, 0) << std::endl;
+    vecfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec(i, 0) << std::endl;
   }
 }
 
@@ -117,16 +96,12 @@ template <typename T>
 void Polyquant_dump_mat(
     const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
     const std::string &title) {
-  // int my_rank;
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  // if (my_rank == 0) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   for (size_t i = 0; i < mat.rows(); i++) {
     for (size_t j = 0; j < mat.cols(); j++) {
-      std::cout << std::fixed << std::showpoint << std::setw(20)
-                << std::setprecision(10) << mat(i, j) << "  ";
+      std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat(i, j) << "  ";
     }
     std::cout << std::endl;
   }
@@ -138,18 +113,12 @@ void Polyquant_dump_mat(
  * @param mat The dense matrix to write.
  **/
 template <typename T>
-void Polyquant_dump_mat_to_file(
-    const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
-    const std::string &filename) {
-  // int my_rank;
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &my_rank);
-  // if (my_rank == 0) {
+void Polyquant_dump_mat_to_file( const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &filename) {
   std::ofstream matfile;
   matfile.open(filename);
   for (Eigen::Index i = 0; i < mat.rows(); i++) {
     for (Eigen::Index j = 0; j < mat.cols(); j++) {
-      matfile << std::fixed << std::showpoint << std::setw(20)
-              << std::setprecision(10) << mat(i, j) << "  ";
+      matfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat(i, j) << "  ";
     }
     matfile << std::endl;
   }
@@ -159,8 +128,7 @@ void Polyquant_dump_mat_to_file(
  *
  * @param mat The dense matrix to write.
  **/
-void Polyquant_dump_basis_to_file(const std::string &contents,
-                                  const std::string &filename);
+void Polyquant_dump_basis_to_file(const std::string &contents, const std::string &filename);
 
 /**
  * @brief A hasher for a pair of vectors
