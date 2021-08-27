@@ -16,8 +16,7 @@ void POLYQUANT_MOLECULE::set_molecular_charge(const POLYQUANT_INPUT &input) {
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_multiplicity(
-    const POLYQUANT_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_multiplicity(const POLYQUANT_INPUT &input) {
   if (input.input_data["molecule"].contains("molecular_multiplicity")) {
     this->multiplicity = input.input_data["molecule"]["molecular_multiplicity"];
   } else {
@@ -25,8 +24,7 @@ void POLYQUANT_MOLECULE::set_molecular_multiplicity(
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_restricted(
-    const POLYQUANT_INPUT &input) {
+void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) {
   if (input.input_data.contains("keywords")) {
     if (input.input_data["keywords"].contains("restricted")) {
       this->restricted = input.input_data["keywords"]["restricted"];
@@ -83,7 +81,7 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
             Polyquant_cout("The label '" + quantum_label + "' was not found in the atomic labels. Skipping...");
           }
         }
-      } else if (std::all_of( input.input_data["keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_number(); })) {
+      } else if (std::all_of(input.input_data["keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_number(); })) {
         size_t idx = 0;
         for (auto is_quantum : input.input_data["keywords"]["quantum_nuclei"]) {
           quantum_nuclei[idx] = is_quantum;
@@ -93,7 +91,8 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         APP_ABORT("'Keywords'->'quantum_nuclei' are not all strings or ints.");
       }
     } else {
-      Polyquant_cout("The input section 'keywords' didn't contain a section called about quantum nuclei. All nuclei are going to be treated classically. No quantum particles present besides electrons.");
+      Polyquant_cout(
+          "The input section 'keywords' didn't contain a section called about quantum nuclei. All nuclei are going to be treated classically. No quantum particles present besides electrons.");
     }
   } else {
     Polyquant_cout("The input didn't contain a section called 'keywords'. All nuclei are going to be treated classically. No quantum particles present besides electrons.");
@@ -142,12 +141,12 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   }
   // iterate over quantum particles to set alpha/beta particles and mult
   for (auto &[quantum_part_key, quantum_part] : this->quantum_particles) {
-    quantum_part.num_parts_alpha =(quantum_part.num_parts / 2) + (quantum_part.num_parts % 2);
+    quantum_part.num_parts_alpha = (quantum_part.num_parts / 2) + (quantum_part.num_parts % 2);
     quantum_part.num_parts_beta = (quantum_part.num_parts / 2);
-    if (quantum_part.num_parts_alpha + quantum_part.num_parts_beta !=quantum_part.num_parts) {
+    if (quantum_part.num_parts_alpha + quantum_part.num_parts_beta != quantum_part.num_parts) {
       APP_ABORT("Could not automatically set quantum particle num alpha and beta.");
     }
-    quantum_part.multiplicity = (int)std::round( (std::abs(quantum_part.num_parts_alpha - quantum_part.num_parts_beta) * quantum_part.spin) + 1);
+    quantum_part.multiplicity = (int)std::round((std::abs(quantum_part.num_parts_alpha - quantum_part.num_parts_beta) * quantum_part.spin) + 1);
     if (quantum_part.num_parts == 1) {
       quantum_part.restricted = false;
     } else {
@@ -189,13 +188,12 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
             APP_ABORT("Keywords->quantum particles is missing keyword 'charge'!");
           }
           if (qp.contains("num_particles_alpha")) {
-            quantum_particles[curr_label].num_parts_alpha =
-                qp["num_particles_alpha"];
+            quantum_particles[curr_label].num_parts_alpha = qp["num_particles_alpha"];
           } else {
             APP_ABORT("Keywords->quantum particles is missing keyword 'num_particles_alpha'!");
           }
           if (qp.contains("num_particles_beta")) {
-            quantum_particles[curr_label].num_parts_beta =qp["num_particles_beta"];
+            quantum_particles[curr_label].num_parts_beta = qp["num_particles_beta"];
           } else {
             APP_ABORT("Keywords->quantum particles is missing keyword 'num_particles_beta'!");
           }
@@ -205,7 +203,7 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
             APP_ABORT("Keywords->quantum particles is missing keyword 'exchange'!");
           }
           if (qp.contains("electron_exchange")) {
-            quantum_particles[curr_label].electron_exchange =qp["electron_exchange"];
+            quantum_particles[curr_label].electron_exchange = qp["electron_exchange"];
           } else {
             APP_ABORT("Keywords->quantum particles is missing keyword 'electron_exchange'!");
           }
@@ -216,8 +214,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
           }
           // TODO make sure a user isn't specifying num_parts or multiplicity.
           // These will be calculated
-          quantum_particles[curr_label].num_parts =quantum_particles[curr_label].num_parts_alpha +quantum_particles[curr_label].num_parts_beta;
-          quantum_particles[curr_label].multiplicity =(std::abs(quantum_particles[curr_label].num_parts_alpha -quantum_particles[curr_label].num_parts_beta) *quantum_particles[curr_label].spin) +1;
+          quantum_particles[curr_label].num_parts = quantum_particles[curr_label].num_parts_alpha + quantum_particles[curr_label].num_parts_beta;
+          quantum_particles[curr_label].multiplicity =
+              (std::abs(quantum_particles[curr_label].num_parts_alpha - quantum_particles[curr_label].num_parts_beta) * quantum_particles[curr_label].spin) + 1;
         }
       }
     } else {
@@ -345,8 +344,7 @@ std::string POLYQUANT_MOLECULE::dump_xyz(std::string classical_part_key) const {
   return temp_xyz;
 }
 
-std::vector<libint2::Atom>
-POLYQUANT_MOLECULE::to_libint_atom(std::string classical_part_key) const {
+std::vector<libint2::Atom> POLYQUANT_MOLECULE::to_libint_atom(std::string classical_part_key) const {
   std::istringstream temp_xyz_stream(this->dump_xyz(classical_part_key));
   return libint2::read_dotxyz(temp_xyz_stream);
 }
