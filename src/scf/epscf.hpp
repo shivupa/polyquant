@@ -155,7 +155,7 @@ public:
   std::vector<std::vector<int>> incremental_fock_start;
   int incremental_fock_reset_freq = 8;
   int incremental_fock_delay_after_independent_converged = 10;
-  int incremental_fock_initial_onset_thresh = 1e-4;
+  double incremental_fock_initial_onset_thresh = 1e-4;
   bool Cauchy_Schwarz_screening = false;
   double Cauchy_Schwarz_threshold = 1e-12;
 

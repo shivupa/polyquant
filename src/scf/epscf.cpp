@@ -322,10 +322,12 @@ void POLYQUANT_EPSCF::form_DM() {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
     this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
+    auto num_parts_alpha = quantum_part.num_parts_alpha;
+    auto num_parts_beta = quantum_part.num_parts_beta;
 #pragma omp parallel for
     for (size_t i = 0; i < num_basis; i++) {
       for (size_t j = 0; j < num_basis; j++) {
-        for (int k = 0; k < quantum_part.num_parts_alpha; k++) {
+        for (int k = 0; k < num_parts_alpha; k++) {
           this->D[quantum_part_idx][0](i, j) += this->C[quantum_part_idx][0](i, k) * this->C[quantum_part_idx][0](j, k);
         }
       }
@@ -336,7 +338,7 @@ void POLYQUANT_EPSCF::form_DM() {
 #pragma omp parallel for
       for (size_t i = 0; i < num_basis; i++) {
         for (size_t j = 0; j < num_basis; j++) {
-          for (int k = 0; k < quantum_part.num_parts_beta; k++) {
+          for (int k = 0; k < num_parts_beta; k++) {
             this->D[quantum_part_idx][1](i, j) += this->C[quantum_part_idx][1](i, k) * this->C[quantum_part_idx][1](j, k);
           }
         }
