@@ -123,8 +123,7 @@ protected:
     this->cache_items_map[key].second = value;
   }
 
-  std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype>::const_iterator
-  find(const keytype &key) const {
+  typename std::unordered_map<keytype, std::pair<size_t, valuetype>, hashtype>::const_iterator find(const keytype &key) const {
     return this->cache_items_map.find(key);
   }
 
