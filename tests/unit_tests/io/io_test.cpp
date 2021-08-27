@@ -1,4 +1,5 @@
 #include "io/input.hpp"
+#include "io/lfu_cache.hpp"
 #include <doctest/doctest.h>
 
 using namespace polyquant;
@@ -47,6 +48,15 @@ TEST_SUITE("IO") {
     CHECK(quantum_symb_to_charge("H") == 1);
     CHECK(quantum_symb_to_charge("X") == 0);
     CHECK(quantum_symb_to_charge("electron") == -1);
+  }
+  TEST_CASE("IO: LFU cache.") {
+      polyquant_lfu_cache<int, int, std::hash<int>> cache;
+      auto val = cache.get(1);
+      CHECK(val.has_value() == false);
+      cache.set(1,10);
+      auto val2 = cache.get(1);
+      CHECK(val2.has_value() == true);
+      CHECK(val2.value() == 10);
   }
 }
 // TODO test hdf5 dumping

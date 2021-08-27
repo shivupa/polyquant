@@ -164,11 +164,11 @@ TEST_SUITE("CI") {
     auto hf_det_pos = test_ci.detset.dets[0].find(hf_det_obj);
     CHECK(hf_det_pos != test_ci.detset.dets[0].end());
     auto hf_distance = std::distance(test_ci.detset.dets[0].begin(), hf_det_pos);
-    std::vector<int> hf_distance_vec = {hf_distance};
+    std::vector<int> hf_distance_vec= {static_cast<int>(hf_distance)};
     auto se_det_pos = test_ci.detset.dets[0].find(single_ext_obj);
     auto se_distance =std::distance(test_ci.detset.dets[0].begin(), se_det_pos);
     CHECK(se_det_pos != test_ci.detset.dets[0].end());
-    std::vector<int> se_distance_vec = {se_distance};
+    std::vector<int> se_distance_vec = {static_cast<int>(se_distance)};
 
     auto off_diag_ham_single_elem = test_ci.detset.same_part_ham_single(0, hf_distance_vec, se_distance_vec);
     CHECK(off_diag_ham_single_elem ==doctest::Approx(3.042582036923841e-08).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -197,11 +197,11 @@ TEST_SUITE("CI") {
     auto hf_det_pos = test_ci.detset.dets[0].find(hf_det_obj);
     CHECK(hf_det_pos != test_ci.detset.dets[0].end());
     auto hf_distance = std::distance(test_ci.detset.dets[0].begin(), hf_det_pos);
-    std::vector<int> hf_distance_vec = {hf_distance};
+    std::vector<int> hf_distance_vec = {static_cast<int>(hf_distance)};
     auto double_det_pos = test_ci.detset.dets[0].find(double_ext_obj);
     auto double_distance = std::distance(test_ci.detset.dets[0].begin(), double_det_pos);
     CHECK(double_det_pos != test_ci.detset.dets[0].end());
-    std::vector<int> double_distance_vec = {double_distance};
+    std::vector<int> double_distance_vec = {static_cast<int>(double_distance)};
 
     auto off_diag_ham_double_elem = test_ci.detset.same_part_ham_double(0, hf_distance_vec, double_distance_vec);
     CHECK(off_diag_ham_double_elem ==doctest::Approx(0.010855436090541142).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -253,7 +253,7 @@ TEST_SUITE("CI") {
     auto det_pos_pos = test_ci.detset.dets[1].find(hf_det_pos_obj);
     CHECK(det_pos_pos != test_ci.detset.dets[1].end());
     auto pos_distance =std::distance(test_ci.detset.dets[1].begin(), det_pos_pos);
-    std::vector<int> distance_vec = {elec_distance, pos_distance};
+    std::vector<int> distance_vec = {static_cast<int>(elec_distance), static_cast<int>(pos_distance)};
     int folded_idx =elec_distance * test_ci.detset.dets[1].size() + pos_distance;
     auto diag_ham_elem = test_ci.detset.Slater_Condon(folded_idx, folded_idx);
     CHECK(diag_ham_elem == doctest::Approx(-7.5257234633357024123).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
