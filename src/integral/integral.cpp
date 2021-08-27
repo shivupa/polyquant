@@ -2,13 +2,6 @@
 
 using namespace polyquant;
 
-POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL() {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  Polyquant_cout("INTEGRAL");
-  omp_init_lock(&writelock);
-}
-
 POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) : POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(){
   this->setup_integral(input, basis, molecule);
 }
@@ -158,11 +151,12 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(
   }
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-#pragma omp parallel for
+      auto charge = quantum_part.charge;
+      // this next loop will be parallel if eigen is linked to parallel blas/lapack
     for (auto j = 0; j < mo_one_body_ints[quantum_part_idx].size(); j++) {
       mo_one_body_ints[quantum_part_idx][j].resize( mo_coeffs[quantum_part_idx][j].cols(), mo_coeffs[quantum_part_idx][j].cols());
       mo_one_body_ints[quantum_part_idx][j].setZero();
-      mo_one_body_ints[quantum_part_idx][j] = mo_coeffs[quantum_part_idx][j].transpose() * (kinetic[quantum_part_idx] + (-quantum_part.charge * nuclear[quantum_part_idx])) * mo_coeffs[quantum_part_idx][j];
+      mo_one_body_ints[quantum_part_idx][j] = mo_coeffs[quantum_part_idx][j].transpose() * (kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_coeffs[quantum_part_idx][j];
     }
     quantum_part_idx++;
   }
@@ -373,27 +367,7 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx, const si
     libint2::finalize();
     omp_unset_lock(&writelock);
     auto cached_eri_elem = this->ericache.get(eri_idx);
-    if (cached_eri_elem.has_value()) {
-      return cached_eri_elem.value();
-    } else {
-      std::stringstream message;
-      auto a = std::get<0>(eri_idx)[0];
-      auto i = std::get<0>(eri_idx)[1];
-      auto j = std::get<0>(eri_idx)[2];
-      auto b = std::get<1>(eri_idx)[0];
-      auto k = std::get<1>(eri_idx)[1];
-      auto l = std::get<1>(eri_idx)[2];
-      message << "(ij|kl) error : (";
-      message << a << "_ ";
-      message << i << " ";
-      message << j;
-      message << "|" << " ";
-      message << b << "_ ";
-      message << k << " ";
-      message << l;
-      message << ") should have been added to cache, but is not found!" << std::endl;
-      APP_ABORT(message.str());
-    }
+    return cached_eri_elem.value();
   }
 }
 void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
@@ -447,6 +421,9 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input,
                                         const POLYQUANT_BASIS &basis,
                                         const POLYQUANT_MOLECULE &molecule) {
+    omp_init_lock(&writelock);
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
@@ -505,40 +482,26 @@ POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
         }
         if (significant) {
     omp_set_lock(&writelock);
-           splist[s1].emplace_back(s2);
+            splist[s1].emplace_back(s2);
     omp_unset_lock(&writelock);
         }
       }
     }
 
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
+#pragma omp parallel for
     for (auto s1 = 0l; s1 != nsh1; ++s1) {
-      if (s1 % nthreads == thread_id) {
         auto &list = splist[s1];
         std::sort(list.begin(), list.end());
-      }
     }
-  }
   /// to use precomputed shell pair data must decide on max precision a priori
   const auto max_engine_precision =tolerance_2e / 1e10;
   const auto ln_max_engine_precision = std::log(max_engine_precision);
   std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata( splist.size());
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
     for (auto s1 = 0l; s1 != nsh1; ++s1) {
-      if (s1 % nthreads == thread_id) {
         for (const auto &s2 : splist[s1]) {
-#pragma omp critical(insert_sdata)
           spdata[s1].emplace_back(std::make_shared<libint2::ShellPair>( bs1[s1], bs2[s2], ln_max_engine_precision));
-        }
       }
     }
-  }
   return std::make_tuple(splist, spdata);
 }
 /**

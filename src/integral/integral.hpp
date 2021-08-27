@@ -27,7 +27,7 @@ inline int symmetric_matrix_triangular_idx(const T &i, const T &j) {
  */
 class POLYQUANT_INTEGRAL {
 public:
-  POLYQUANT_INTEGRAL();
+  POLYQUANT_INTEGRAL() = default;
   /**
    * @brief Construct a new polyquant integral object by calling to
    * setup_integral
