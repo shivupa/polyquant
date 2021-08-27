@@ -254,7 +254,7 @@ double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj, st
       mask[l] = ~(0ul);
     }
     mask[k] = (1UL << m) - 1;
-    mask[j] = mask[j] & (~(1ul << (n + 1) + 1));
+    mask[j] = mask[j] & (~(1ul << ((n + 1) + 1)));
     for (auto l = j; j < k; l++) {
       nperm = nperm + std::popcount(Di[j] & mask[l]);
     }
