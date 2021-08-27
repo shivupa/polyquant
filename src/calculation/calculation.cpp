@@ -19,12 +19,11 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   this->input_basis = POLYQUANT_BASIS(this->input_params, this->input_molecule);
   // parse integral
   Polyquant_cout("SETTING UP INTEGRAL");
-  this->input_integral = POLYQUANT_INTEGRAL(
-      this->input_params, this->input_basis, this->input_molecule);
+  this->input_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis, this->input_molecule);
   // parse 2e tolerance
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
-      this->input_integral.tolerance_2e =this->input_params.input_data["keywords"]["tolerance_2e"];
+      this->input_integral.tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
     }
   }
 }
@@ -56,7 +55,7 @@ std::string POLYQUANT_CALCULATION::parse_mean_field() {
 
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
-      if (this->input_params.input_data["keywords"]["mf_keywords"].contains( "from_file")) {
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (!this->mean_field_methods.contains(mean_field_type)) {
           mean_field_type = "FILE";
         } else {
@@ -93,50 +92,50 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   std::string hdf5_filename = "Default.h5";
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
-      if (this->input_params.input_data["keywords"].contains( "dump_for_qmcpack")) {
+      if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
         dump_for_qmcpack = this->input_params.input_data["keywords"]["dump_for_qmcpack"];
       }
-      if (this->input_params.input_data["keywords"].contains( "hdf5_filename_qmcpack")) {
+      if (this->input_params.input_data["keywords"].contains("hdf5_filename_qmcpack")) {
         hdf5_filename = this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
       }
-      if (this->input_params.input_data["keywords"]["mf_keywords"].contains( "convergence_E")) {
-        scf_calc.convergence_E = this->input_params .input_data["keywords"]["mf_keywords"]["convergence_E"];
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("convergence_E")) {
+        scf_calc.convergence_E = this->input_params.input_data["keywords"]["mf_keywords"]["convergence_E"];
       }
-      if (this->input_params.input_data["keywords"]["mf_keywords"].contains( "convergence_DM")) {
-        scf_calc.convergence_DM =this->input_params.input_data["keywords"]["mf_keywords"]["convergence_DM"];
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("convergence_DM")) {
+        scf_calc.convergence_DM = this->input_params.input_data["keywords"]["mf_keywords"]["convergence_DM"];
       }
-      if (this->input_params.input_data["keywords"]["mf_keywords"].contains( "iteration_max")) {
-        scf_calc.iteration_max = this->input_params .input_data["keywords"]["mf_keywords"]["iteration_max"];
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("iteration_max")) {
+        scf_calc.iteration_max = this->input_params.input_data["keywords"]["mf_keywords"]["iteration_max"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("diis_extrapolation")) {
-        scf_calc.diis_extrapolation = this->input_params .input_data["keywords"]["mf_keywords"]["diis_extrapolation"];
+        scf_calc.diis_extrapolation = this->input_params.input_data["keywords"]["mf_keywords"]["diis_extrapolation"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("diis_start")) {
-        scf_calc.diis_start =this->input_params.input_data["keywords"]["mf_keywords"]["diis_start"];
+        scf_calc.diis_start = this->input_params.input_data["keywords"]["mf_keywords"]["diis_start"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("diis_damping")) {
-        scf_calc.diis_damping =this->input_params.input_data["keywords"]["mf_keywords"]["diis_damping"];
+        scf_calc.diis_damping = this->input_params.input_data["keywords"]["mf_keywords"]["diis_damping"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("diis_mixing_fraction")) {
-        scf_calc.diis_mixing_fraction =this->input_params.input_data["keywords"]["mf_keywords"]["diis_mixing_fraction"];
+        scf_calc.diis_mixing_fraction = this->input_params.input_data["keywords"]["mf_keywords"]["diis_mixing_fraction"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("diis_size")) {
-        scf_calc.diis_size =this->input_params.input_data["keywords"]["mf_keywords"]["diis_size"];
+        scf_calc.diis_size = this->input_params.input_data["keywords"]["mf_keywords"]["diis_size"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("incremental_fock")) {
-        scf_calc.incremental_fock =this->input_params.input_data["keywords"]["mf_keywords"]["incremental_fock"];
+        scf_calc.incremental_fock = this->input_params.input_data["keywords"]["mf_keywords"]["incremental_fock"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("incremental_fock_reset_freq")) {
-        scf_calc.incremental_fock_reset_freq =this->input_params.input_data["keywords"]["mf_keywords"]["incremental_fock_reset_freq"];
+        scf_calc.incremental_fock_reset_freq = this->input_params.input_data["keywords"]["mf_keywords"]["incremental_fock_reset_freq"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("incremental_fock_initial_onset_thresh")) {
-        scf_calc.incremental_fock_initial_onset_thresh =this->input_params.input_data["keywords"]["mf_keywords"]["incremental_fock_initial_onset_thresh"];
+        scf_calc.incremental_fock_initial_onset_thresh = this->input_params.input_data["keywords"]["mf_keywords"]["incremental_fock_initial_onset_thresh"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_screening")) {
-        scf_calc.Cauchy_Schwarz_screening =this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
+        scf_calc.Cauchy_Schwarz_screening = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
-        scf_calc.Cauchy_Schwarz_threshold =this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_threshold"];
+        scf_calc.Cauchy_Schwarz_threshold = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_threshold"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]) {
@@ -163,10 +162,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     dump_mf_for_qmcpack(hdf5_filename);
   }
 }
-void POLYQUANT_CALCULATION::run_post_mean_field(
-    std::string &post_mean_field_type) {
-  if (!this->post_mean_field_methods.contains(post_mean_field_type) &&
-      post_mean_field_type != "FILE") {
+void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_type) {
+  if (!this->post_mean_field_methods.contains(post_mean_field_type) && post_mean_field_type != "FILE") {
     APP_ABORT("POLYQUANT post mean field parsing error. I can't understand the input provided. Could you double-check it?");
   }
   Polyquant_cout("Will run a post mean field calculation of type: ");
@@ -180,28 +177,28 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
     if (this->input_params.input_data.contains("keywords")) {
       if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
         if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
-          dump_for_qmcpack =this->input_params.input_data["keywords"]["dump_for_qmcpack"];
+          dump_for_qmcpack = this->input_params.input_data["keywords"]["dump_for_qmcpack"];
         }
         if (this->input_params.input_data["keywords"].contains("hdf5_filename_qmcpack")) {
           hdf5_filename = this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("convergence_E")) {
-          ci_calc.convergence_E =this->input_params.input_data["keywords"]["ci_keywords"]["convergence_E"];
+          ci_calc.convergence_E = this->input_params.input_data["keywords"]["ci_keywords"]["convergence_E"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_states")) {
-          ci_calc.num_states =this->input_params.input_data["keywords"]["ci_keywords"]["num_states"];
+          ci_calc.num_states = this->input_params.input_data["keywords"]["ci_keywords"]["num_states"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
-          ci_calc.num_subspace_vec =this->input_params.input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
+          ci_calc.num_subspace_vec = this->input_params.input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("cache_size")) {
-          ci_calc.cache_size =this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
+          ci_calc.cache_size = this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
-          auto ex_lvl =this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
+          auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
           if (ex_lvl.type() == json::value_t::array) {
             std::vector<std::tuple<int, int, int>> ex_lvl_obj;
-            for (auto i = 0; i < this->input_molecule.quantum_particles.size();i++) {
+            for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
               std::tuple<int, int, int> ex_lvl_tup = {ex_lvl[i][0], ex_lvl[i][1], ex_lvl[i][2]};
               ex_lvl_obj.push_back(ex_lvl_tup);
             }
@@ -209,7 +206,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(
           } else {
             std::vector<std::tuple<int, int, int>> ex_lvl_obj;
             std::tuple<int, int, int> ex_lvl_tup = {ex_lvl, ex_lvl, ex_lvl};
-            for (auto i = 0; i < this->input_molecule.quantum_particles.size();i++) {
+            for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
               ex_lvl_obj.push_back(ex_lvl_tup);
             }
             ci_calc.excitation_level = ex_lvl_obj;
@@ -329,7 +326,9 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     std::string particle_filename = quantum_part_key + "_" + filename;
     Polyquant_cout("Dumping HDF5 to filename: " + particle_filename);
     POLYQUANT_HDF5 hdf5_f(particle_filename);
-    hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit,num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom,num_species, quantum_part_name, scf_calc.E_orbitals[quantum_part_idx], scf_calc.C[quantum_part_idx],atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names,atomic_centers, unique_shells);
+    hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
+                                       quantum_part_name, scf_calc.E_orbitals[quantum_part_idx], scf_calc.C[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge, core_elec,
+                                       atomic_names, atomic_centers, unique_shells);
     quantum_part_idx++;
   }
 }
@@ -340,15 +339,15 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
     dets[idx_part].resize(2);
   }
   for (auto i = 0; i < this->ci_calc.detset.N_dets; i++) {
-    for (int idx_part = 0;idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
+    for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
       auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
-      auto curr_det =this->ci_calc.detset.get_det(idx_part, i_unfold[idx_part]);
+      auto curr_det = this->ci_calc.detset.get_det(idx_part, i_unfold[idx_part]);
       dets[idx_part][0].push_back(curr_det.first);
       dets[idx_part][1].push_back(curr_det.second);
     }
   }
-  std::string particle_filename =  "Multidet_" + filename;
+  std::string particle_filename = "Multidet_" + filename;
   Polyquant_cout("Dumping post MF HDF5 to filename: " + particle_filename);
   POLYQUANT_HDF5 hdf5_f(particle_filename);
-  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets,this->ci_calc.num_states, this->ci_calc.detset.max_orb);
+  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states, this->ci_calc.detset.max_orb);
 }

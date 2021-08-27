@@ -37,9 +37,12 @@ public:
   void load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule);
 
   void load_quantum_particle_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, libint2::BasisSet &qp_basis);
-  void load_quantum_particle_atom_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key, const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
-  void load_quantum_particle_atom_basis_library( const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key, const int &center_basis_idx, libint2::BasisSet &qp_basis);
-  void load_quantum_particle_atom_basis_custom( const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key, const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
+                                        const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis_library(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
+                                                const int &center_basis_idx, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis_custom(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
+                                               const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
   void set_pure_from_input(const POLYQUANT_INPUT &input);
   void set_libint_shell_norm();
   void apply_pyscf_normalization();

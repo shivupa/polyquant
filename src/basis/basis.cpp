@@ -2,54 +2,56 @@
 
 using namespace polyquant;
 
-POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input,const POLYQUANT_MOLECULE &molecule) {
+POLYQUANT_BASIS::POLYQUANT_BASIS(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   this->load_basis(input, molecule);
 }
 
-void POLYQUANT_BASIS::load_quantum_particle_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule,const std::string &quantum_part_key, libint2::BasisSet &qp_basis) {
-  for (auto const &[classical_part_key, classical_part] :molecule.classical_particles) {
+void POLYQUANT_BASIS::load_quantum_particle_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, libint2::BasisSet &qp_basis) {
+  for (auto const &[classical_part_key, classical_part] : molecule.classical_particles) {
     if (input.input_data["model"]["basis"].contains(quantum_part_key)) {
-      load_quantum_particle_atom_basis(input, molecule, quantum_part_key,classical_part_key, classical_part,qp_basis);
+      load_quantum_particle_atom_basis(input, molecule, quantum_part_key, classical_part_key, classical_part, qp_basis);
     } else {
-      APP_ABORT("'model->basis' didn't contain a basis for: " +quantum_part_key);
+      APP_ABORT("'model->basis' didn't contain a basis for: " + quantum_part_key);
     }
   }
 }
-void POLYQUANT_BASIS::load_quantum_particle_atom_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule,const std::string &quantum_part_key, const std::string &classical_part_key,const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis) {
+void POLYQUANT_BASIS::load_quantum_particle_atom_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
+                                                       const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis) {
   if (input.input_data["model"]["basis"][quantum_part_key].contains(classical_part_key)) {
     auto center_basis_idx = 0;
-    for (auto center_basis :input.input_data["model"]["basis"][quantum_part_key][classical_part_key]) {
+    for (auto center_basis : input.input_data["model"]["basis"][quantum_part_key][classical_part_key]) {
       if (center_basis.contains("library")) {
-        load_quantum_particle_atom_basis_library(input, molecule, quantum_part_key, classical_part_key,center_basis_idx, qp_basis);
+        load_quantum_particle_atom_basis_library(input, molecule, quantum_part_key, classical_part_key, center_basis_idx, qp_basis);
       } else if (center_basis.contains("custom")) {
-        load_quantum_particle_atom_basis_custom(input, molecule, quantum_part_key, classical_part_key,center_basis_idx, classical_part, qp_basis);
+        load_quantum_particle_atom_basis_custom(input, molecule, quantum_part_key, classical_part_key, center_basis_idx, classical_part, qp_basis);
       } else {
-        APP_ABORT("'model->basis->" + quantum_part_key + "->" +classical_part_key + "->type' must be library or custom.");
+        APP_ABORT("'model->basis->" + quantum_part_key + "->" + classical_part_key + "->type' must be library or custom.");
       }
       center_basis_idx++;
     }
   } else {
-    Polyquant_cout("'model->basis->" + quantum_part_key +"' didn't contain a basis for: " + classical_part_key);
+    Polyquant_cout("'model->basis->" + quantum_part_key + "' didn't contain a basis for: " + classical_part_key);
   }
 }
 
-void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule,const std::string &quantum_part_key, const std::string &classical_part_key,const int &center_basis_idx, libint2::BasisSet &qp_basis) {
+void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key,
+                                                               const std::string &classical_part_key, const int &center_basis_idx, libint2::BasisSet &qp_basis) {
   auto center_basis = input.input_data["model"]["basis"][quantum_part_key][classical_part_key][center_basis_idx];
   try {
     // library basis with atom type specified
     if (center_basis["library"].contains("atom")) {
       auto libint_atoms = molecule.to_libint_atom(classical_part_key);
       for (auto &libint_atom : libint_atoms) {
-        libint_atom.atomic_number =atom_symb_to_num(center_basis["library"]["atom"]);
+        libint_atom.atomic_number = atom_symb_to_num(center_basis["library"]["atom"]);
       }
-      auto temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"],libint_atoms, true);
+      auto temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
       // std::move(atom_basis.begin(), atom_basis.end(),
       // std::back_inserter(this->basis));
       // this->basis.back().move({{atoms[a].x, atoms[a].y,
       // atoms[a].z}});
-      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(),temp_atom_basis.end());
+      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
       qp_basis.set_pure(pure);
       // std::move(atom_basis.begin(), atom_basis.end(),
       //           std::back_inserter(this->basis));
@@ -59,7 +61,7 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
         libint_atom.atomic_number = atom_symb_to_num(classical_part_key);
       }
       libint2::BasisSet temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
-      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(),temp_atom_basis.end());
+      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
       qp_basis.set_pure(pure);
     }
   } catch (...) {
@@ -93,7 +95,9 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
     qp_basis.set_pure(pure);
   }
 }
-void POLYQUANT_BASIS::load_quantum_particle_atom_basis_custom(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule,const std::string &quantum_part_key, const std::string &classical_part_key,const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part,libint2::BasisSet &qp_basis) {
+void POLYQUANT_BASIS::load_quantum_particle_atom_basis_custom(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key,
+                                                              const std::string &classical_part_key, const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part,
+                                                              libint2::BasisSet &qp_basis) {
   libint2::BasisSet atom_basis = libint2::BasisSet();
   auto center_basis = input.input_data["model"]["basis"][quantum_part_key][classical_part_key][center_basis_idx];
   if (center_basis["custom"].contains("type")) {
@@ -165,7 +169,7 @@ void POLYQUANT_BASIS::apply_pyscf_normalization() {
         auto exponent = shell.alpha[p];
         const auto two_alpha = 2.0 * exponent;
         const auto two_alpha_to_am32 = std::pow(two_alpha, (shell.contr[0].l + 1)) * std::sqrt(two_alpha);
-        const auto normalization_factor = std::sqrt( std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32 / (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * shell.contr[0].l]));
+        const auto normalization_factor = std::sqrt(std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32 / (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * shell.contr[0].l]));
         shell.contr[0].coeff.at(p) /= normalization_factor;
       }
 
@@ -194,8 +198,7 @@ void POLYQUANT_BASIS::apply_pyscf_normalization() {
       double s1 = 0.0;
       for (auto p = 0ul; p < shell.alpha.size(); ++p) {
         for (auto q = 0ul; q < shell.alpha.size(); ++q) {
-          s1 += shell.contr[0].coeff.at(p) * ee(p, q) *
-                shell.contr[0].coeff.at(q);
+          s1 += shell.contr[0].coeff.at(p) * ee(p, q) * shell.contr[0].coeff.at(q);
         }
       }
       s1 = 1.0 / std::sqrt(s1);
@@ -233,7 +236,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
         this->num_basis.emplace_back(nb);
       }
     } else {
-      APP_ABORT( "Cannot set up basis. Input json missing 'model->basis' section.");
+      APP_ABORT("Cannot set up basis. Input json missing 'model->basis' section.");
     }
   } else {
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");

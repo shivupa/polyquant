@@ -11,8 +11,8 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C);
   this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
   std::vector<int> num_basis;
-  for (auto i : this->input_basis.num_basis){
-      num_basis.push_back(i);
+  for (auto i : this->input_basis.num_basis) {
+    num_basis.push_back(i);
   }
   this->detset.max_orb = *std::max_element(num_basis.begin(), num_basis.end());
   this->detset.set_integral(this->input_integral);
@@ -79,14 +79,10 @@ void POLYQUANT_EPCI::setup_determinants() {
   }
 }
 
-void POLYQUANT_EPCI::print_start_iterations() {
-  Polyquant_cout("Starting CI Iterations");
-}
+void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
 void POLYQUANT_EPCI::print_success() { Polyquant_cout("SCF SUCCESS"); }
-void POLYQUANT_EPCI::print_exceeded_iterations() {
-  Polyquant_cout("Exceeded Iterations");
-}
+void POLYQUANT_EPCI::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
 void POLYQUANT_EPCI::print_error() { APP_ABORT("Something wrong!"); }
 void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 
@@ -123,9 +119,9 @@ void POLYQUANT_EPCI::run() {
   Polyquant_cout("Initial subspace");
   Polyquant_cout(initialsubspacevec);
   // todo Eigen::Index maxsubspace = this->iteration_max;
-  Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec,maxsubspacevec); // Create Solver
+  Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec); // Create Solver
   Eigen::Index maxit = this->iteration_max;
-  int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit,this->convergence_E);
+  int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
 
   // Retrieve results
   if (solver.info() == Spectra::CompInfo::Successful) {

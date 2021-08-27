@@ -32,9 +32,7 @@ void APP_ABORT(const std::string &reason);
  * @tparam T the type of the thing to print out
  * @param message
  */
-template <typename T> void Polyquant_cout(const T &message) {
-  std::cout << std::setprecision(20) << message << std::endl;
-}
+template <typename T> void Polyquant_cout(const T &message) { std::cout << std::setprecision(20) << message << std::endl; }
 
 // replace with C++20 std::source_location::function_name once supported
 // std::string source_loc(){
@@ -63,8 +61,7 @@ void Polyquant_dump_json(const json &json_obj);
  *
  * @param vec The dense vector to print
  **/
-template <typename T>
-void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,const std::string &title) {
+template <typename T> void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
@@ -78,8 +75,7 @@ void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec,const std
  *
  * @param vec The dense vector to write.
  **/
-template <typename T>
-void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, const std::string &filename) {
+template <typename T> void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, const std::string &filename) {
   std::ofstream vecfile;
   vecfile.open(filename);
   for (Eigen::Index i = 0; i < vec.rows(); i++) {
@@ -92,10 +88,7 @@ void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, 
  *
  * @param mat The dense matrix to print
  **/
-template <typename T>
-void Polyquant_dump_mat(
-    const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat,
-    const std::string &title) {
+template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
@@ -112,8 +105,7 @@ void Polyquant_dump_mat(
  *
  * @param mat The dense matrix to write.
  **/
-template <typename T>
-void Polyquant_dump_mat_to_file( const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &filename) {
+template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &filename) {
   std::ofstream matfile;
   matfile.open(filename);
   for (Eigen::Index i = 0; i < mat.rows(); i++) {

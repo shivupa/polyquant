@@ -98,7 +98,6 @@ public:
    *
    */
   double angstrom_to_bohr = 1 / bohr_to_angstrom;
-
-}; 
+};
 } // namespace polyquant
 #endif

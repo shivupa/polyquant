@@ -2,9 +2,9 @@
 #define POLYQUANT_EPSCF_H
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
+#include <h5cpp/hdf5.hpp>
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <libint2/diis.h>
-#include <h5cpp/hdf5.hpp>
 
 namespace polyquant {
 
@@ -12,18 +12,16 @@ class POLYQUANT_EPSCF : public POLYQUANT_SCF {
 public:
   POLYQUANT_EPSCF() = default;
 
-  POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral) : POLYQUANT_SCF(input_params, input_molecule, input_basis,
-                      input_integral){};
+  POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral)
+      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
 
-  double directscf_get_shell_density_norm_exchange( const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start, const size_t &shell_a_bf_size, const size_t &shell_b_bf_start, const size_t &shell_b_bf_size);
+  double directscf_get_shell_density_norm_exchange(const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
+                                                   const size_t &shell_a_bf_size, const size_t &shell_b_bf_start, const size_t &shell_b_bf_size);
 
-  double directscf_get_shell_density_norm_coulomb(
-      const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx,
-      const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
-      const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
-      const size_t &shell_b_bf_size);
+  double directscf_get_shell_density_norm_coulomb(const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start,
+                                                  const size_t &shell_a_bf_size, const size_t &shell_b_bf_start, const size_t &shell_b_bf_size);
 
   double directscf_get_density_coulomb(const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b);
 
@@ -74,24 +72,24 @@ public:
    * @brief One particle density matrix
    *
    */
-  std::vector< std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
    */
-  std::vector< std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D_last;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D_last;
 
   /**
    * @brief Fock matrix
    *
    */
-  std::vector< std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> F;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> F;
 
   /**
    * @brief MO Coefficient matrix
    *
    */
-  std::vector< std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
 
   /**
    * @brief MO energy vector
@@ -129,7 +127,7 @@ public:
    */
   std::vector<std::vector<double>> iteration_rms_error;
 
-  std::vector<std::vector< libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> diis;
+  std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> diis;
   /**
    * @brief Stop running iterations?
    *
