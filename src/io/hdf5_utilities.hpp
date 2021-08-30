@@ -67,9 +67,9 @@ private:
   hdf5::dataspace::Simple simple_space = hdf5::dataspace::Simple({1});
   hdf5::datatype::Datatype bool_type = hdf5::datatype::create<bool>();
   hdf5::datatype::Datatype int_type = hdf5::datatype::create<int>();
-  hdf5::datatype::Datatype double_type = hdf5::datatype::create<int>();
+  hdf5::datatype::Datatype double_type = hdf5::datatype::create<double>();
   hdf5::datatype::Datatype vec_int_type = hdf5::datatype::create<std::vector<int>>();
-  hdf5::datatype::Datatype vec_double_type = hdf5::datatype::create<std::vector<int>>();
+  hdf5::datatype::Datatype vec_double_type = hdf5::datatype::create<std::vector<double>>();
 };
 } // namespace polyquant
 #endif
