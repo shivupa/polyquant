@@ -45,7 +45,6 @@ jobs:
         shell: bash
         run: |
           mkdir build
-          mkdir instdir
           cd build && \
           cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
@@ -59,26 +58,13 @@ jobs:
         shell: bash
         working-directory: build
         run: cmake --build . --config ${{ matrix.config.build_type }}
-        # - name: Test
-        #   shell: bash
-        #   working-directory: build
-        #   run: cmake --build . --target check
-      - name: Install
-        shell: bash
-        working-directory: build
-        run: cmake --build . --target install/strip
-      - name: Pack
-        shell: bash
-        working-directory: instdir
-        run: |
-          ls -laR
-          tar -czf ../polyquant_libint.tar.gz .
       - name: Create RPM
         shell: bash
         run: |
-          fpm -s dir -t deb -n polyquant_libint -v 0.0.1 -C polyquant_libint.tar.gz
+          fpm -s dir -t deb -n polyquant-libint -v 0.0.1 -C build
+          mv polyquant-libint_0.0.1_amd64.deb polyquant_libint.rpm
       - name: Upload
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           path: ./${{ matrix.config.artifact }}
           name: ${{ matrix.config.artifact }}
