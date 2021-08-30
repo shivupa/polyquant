@@ -1,0 +1,84 @@
+name: Polyquant configured libint build
+on:
+  push:
+    branches:
+      - libint
+
+jobs:
+  libint-build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu_Latest_GCC",
+            os: ubuntu-latest,
+            artifact: "polyquant_libint.rpm",
+            build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
+            generators: "Ninja"
+          }
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v2
+        with:
+          ref: 'libint'
+      - name: Print env
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake
+          ninja --version
+          cmake --version
+          gcc --version
+          sudo apt-get install -y ruby-dev build-essential
+          sudo gem i fpm -f
+          sudo apt-get install -y libeigen3-dev
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir build
+          mkdir instdir
+          cd build && \
+          cmake \
+          -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+          -DENABLE_FORTRAN=OFF \
+          -DLIBINT2_REALTYPE=double \
+          -DLIBINT2_BUILD_TESTS=OFF \
+          -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
+          -G "${{ matrix.config.generators }}" \
+          ..
+      - name: Build
+        shell: bash
+        working-directory: build
+        run: cmake --build . --config ${{ matrix.config.build_type }}
+        # - name: Test
+        #   shell: bash
+        #   working-directory: build
+        #   run: cmake --build . --target check
+      - name: Install
+        shell: bash
+        working-directory: build
+        run: cmake --build . --target install/strip
+      - name: Pack
+        shell: bash
+        working-directory: instdir
+        run: |
+          ls -laR
+          tar -czf ../polyquant_libint.tar.gz .
+      - name: Create RPM
+        shell: bash
+        run: |
+          fpm -s dir -t deb -n polyquant_libint -v 0.0.1 -C polyquant_libint.tar.gz
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          path: ./${{ matrix.config.artifact }}
+          name: ${{ matrix.config.artifact }}
