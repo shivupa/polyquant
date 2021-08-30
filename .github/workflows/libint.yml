@@ -51,6 +51,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
           -DENABLE_FORTRAN=OFF \
           -DLIBINT2_REALTYPE=double \
+          -DLIBINT2_BUILD_TESTS=OFF \
           -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
           -G "${{ matrix.config.generators }}" \
           ..
