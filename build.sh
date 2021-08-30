@@ -11,13 +11,12 @@ cmake \
     -DPOLYQUANT_CODE_COVERAGE=0 \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
-    -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_BUILD_TYPE="Debug" \
     -DMKL_ROOT=/opt/intel/mkl \
-    .. 
-#    .. -G Ninja
+   .. -G Ninja
 #ninja Sphinx
-#ninja
-make -j12 
+ninja
+#make -j12 
 # lcov --capture --initial --directory . --base-directory ../src --output-file coverage_base.info
 # ninja test
 # lcov --base-directory ../src --directory . --capture --output-file coverage.info
