@@ -30,7 +30,7 @@ Build it like
 ```
 mkdir -p build
 cd build
-cmake .. -Denable-fortran=ON -DLIBINT2_REALTYPE=double -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON -G Ninja
+cmake -DENABLE_FORTRAN=ON -DLIBINT2_REALTYPE=double -DLIBINT2_BUILD_TESTS=OFF -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON -GNinja ..
 cmake --build .
 cmake --build . --target check
 cmake --build . --target install
