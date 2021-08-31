@@ -15,7 +15,7 @@ jobs:
       matrix:
         config: 
         - {
-            name: "Ubuntu_Latest_GCC_Release",
+            name: "Ubuntu_Latest_GCC_Release_Ninja",
             os: ubuntu-latest,
             build_type: "Release",
             cc: "gcc",
@@ -23,7 +23,7 @@ jobs:
             generators: "Ninja"
           }
         - {
-            name: "Ubuntu_Latest_GCC_Debug",
+            name: "Ubuntu_Latest_GCC_Debug_Ninja",
             os: ubuntu-latest,
             build_type: "Debug",
             cc: "gcc",
@@ -66,7 +66,6 @@ jobs:
             -DCMAKE_CXX_COMPILER=g++ \
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
             -G "${{ matrix.config.generators }}" \
-            -DMKL_ROOT=/opt/intel/mkl \
             .. 
       - name: Build
         shell: bash
