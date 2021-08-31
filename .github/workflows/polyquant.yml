@@ -38,11 +38,14 @@ jobs:
         run: |
           echo github.event.action: ${{ github.event.action }}
           echo github.event_name: ${{ github.event_name }}
+      - uses: actions/download-artifact@v2
+        with:
+          name: polyquant_libint.deb
       - name: Install dependencies on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build cmake 
+          sudo apt-get install ninja-build cmake libeigen3-dev libboost-all-dev intel-mkl
           ninja --version
           cmake --version
           gcc --version
@@ -50,14 +53,16 @@ jobs:
         shell: bash
         run: |
           mkdir build
-          mkdir instdir
           cmake \
-            -S . \
-            -B . \
+            -DPOLYQUANT_DOC=0 \
+            -DPOLYQUANT_TEST=1 \
+            -DPOLYQUANT_CODE_COVERAGE=0 \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++ \
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
             -G "${{ matrix.config.generators }}" \
-            -DCMAKE_INSTALL_PREFIX:PATH=instdir
-      - name: Build
+            -DMKL_ROOT=/opt/intel/mkl \
+            .. -G Ninja
+      - name: Test
         shell: bash
-        run: cmake --build . --config ${{ matrix.config.build_type }}
-
+        run: ctest
