@@ -41,27 +41,33 @@ jobs:
           sudo apt-get install -y ruby-dev build-essential
           sudo gem i fpm -f
           sudo apt-get install -y libeigen3-dev
+          mkdir builddir
+          mkdir installdir
       - name: Configure
         shell: bash
+        working-directory: builddir
         run: |
-          mkdir build
-          cd build && \
           cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
           -DENABLE_FORTRAN=OFF \
           -DLIBINT2_REALTYPE=double \
           -DLIBINT2_BUILD_TESTS=OFF \
           -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/installdir
           -G "${{ matrix.config.generators }}" \
           ..
       - name: Build
         shell: bash
-        working-directory: build
+        working-directory: builddir
         run: cmake --build . --config ${{ matrix.config.build_type }}
+      - name: Install
+        shell: bash
+        working-directory: builddir
+        run: cmake --install . 
       - name: Create RPM
         shell: bash
         run: |
-          fpm -s dir -t deb -n polyquant-libint -v 0.0.1 -C build
+          fpm -s dir -t deb -n polyquant-libint -v 0.0.1 -C installdir
           mv polyquant-libint_0.0.1_amd64.deb polyquant_libint.deb
       - name: Upload
         uses: actions/upload-artifact@v2
