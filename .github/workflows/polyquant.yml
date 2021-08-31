@@ -1,20 +1,20 @@
 name: Polyquant CMake Build
-on: 
+on:
   push:
   pull_request:
   release:
     tags:
-    - 'v*' 
+      - 'v*'
 
 jobs:
   cmake-build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }} 
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
-        config: 
-        - {
+        config:
+          - {
             name: "Ubuntu_Latest_GCC_Release_Ninja",
             os: ubuntu-latest,
             build_type: "Release",
@@ -22,7 +22,7 @@ jobs:
             cxx: "g++",
             generators: "Ninja"
           }
-        - {
+          - {
             name: "Ubuntu_Latest_GCC_Debug_Ninja",
             os: ubuntu-latest,
             build_type: "Debug",
@@ -34,6 +34,8 @@ jobs:
     steps:
       - name: checkout project
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Print env
         run: |
           echo github.event.action: ${{ github.event.action }}
@@ -48,7 +50,12 @@ jobs:
         if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build cmake libeigen3-dev libboost-all-dev intel-mkl
+          sudo apt-get install \
+            ninja-build \
+            cmake \
+            libeigen3-dev \
+            libboost-all-dev \
+            intel-mkl
           ninja --version
           cmake --version
           gcc --version
@@ -66,7 +73,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=g++ \
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
             -G "${{ matrix.config.generators }}" \
-            .. 
+            ..
       - name: Build
         shell: bash
         working-directory: build
