@@ -39,6 +39,7 @@ message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 # set up where to find Find*.cmake files and where to put the things we build
 # add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/cmake-modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
 ################################################################################
@@ -134,8 +135,10 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 # OpenMP for parallelization
 find_package(OpenMP REQUIRED)
 ########################################
-# MKL
-find_package(MKL REQUIRED)
+# LinAlg
+# set this list to prioritize a BLAS type
+# set( LinAlg_BLAS_PREFERENCE_LIST "IntelMKL" "IBMESSL" "BLIS" "OpenBLAS" "ReferenceBLAS" )
+find_package(LinAlg REQUIRED)
 ########################################
 # Spectra for sparse math
 FetchContent_Declare(

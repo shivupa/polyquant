@@ -1,0 +1,3 @@
+[submodule "CMake/cmake-modules"]
+	path = CMake/cmake-modules
+	url = https://github.com/wavefunction91/cmake-modules

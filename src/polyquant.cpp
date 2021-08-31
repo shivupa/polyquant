@@ -1,6 +1,7 @@
 // LCOV_EXCL_START
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
-#define EIGEN_USE_MKL_ALL
+#define EIGEN_USE_BLAS
+#define EIGEN_USE_LAPACKE
 #include <Eigen/Core>
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>

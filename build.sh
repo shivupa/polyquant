@@ -12,8 +12,8 @@ cmake \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_BUILD_TYPE="Debug" \
-    -DMKL_ROOT=/opt/intel/mkl \
-   .. -G Ninja
+    -G Ninja \
+    ..
 #ninja Sphinx
 ninja
 #make -j12 
