@@ -60,10 +60,10 @@ jobs:
           cmake --version
           gcc --version
           sudo apt-get install ./polyquant_libint.deb
-          mkdir build
+          mkdir builddir
       - name: Configure
         shell: bash
-        working-directory: build
+        working-directory: builddir
         run: |
           cmake \
             -DPOLYQUANT_DOC=0 \
@@ -76,9 +76,9 @@ jobs:
             ..
       - name: Build
         shell: bash
-        working-directory: build
+        working-directory: builddir
         run: cmake --build . --config ${{ matrix.config.build_type }}
       - name: Test
         shell: bash
-        working-directory: build
+        working-directory: builddir
         run: ctest
