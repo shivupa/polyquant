@@ -48,14 +48,14 @@ jobs:
         working-directory: builddir
         run: |
           cmake \
-          -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
-          -DENABLE_FORTRAN=OFF \
-          -DLIBINT2_REALTYPE=double \
-          -DLIBINT2_BUILD_TESTS=OFF \
-          -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/installdir
-          -G "${{ matrix.config.generators }}" \
-          ..
+            -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+            -DENABLE_FORTRAN=OFF \
+            -DLIBINT2_REALTYPE=double \
+            -DLIBINT2_BUILD_TESTS=OFF \
+            -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/installdir
+            -G "${{ matrix.config.generators }}" \
+            ..
       - name: Build
         shell: bash
         working-directory: builddir
@@ -63,7 +63,7 @@ jobs:
       - name: Install
         shell: bash
         working-directory: builddir
-        run: cmake --install . 
+        run: cmake --install .
       - name: Create RPM
         shell: bash
         run: |
