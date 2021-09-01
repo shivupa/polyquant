@@ -53,9 +53,9 @@ jobs:
             -DLIBINT2_REALTYPE=double \
             -DLIBINT2_BUILD_TESTS=OFF \
             -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/installdir
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/installdir \
             -G "${{ matrix.config.generators }}" \
-            ..
+            $GITHUB_WORKSPACE
       - name: Build
         shell: bash
         working-directory: builddir
