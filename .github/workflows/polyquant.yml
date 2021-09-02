@@ -66,7 +66,7 @@ jobs:
         shell: bash
         working-directory: builddir
         run: |
-          PKG_CONFIG_PATH=$GITHUB_WORKSPACE/installdir:$PKG_CONFIG_PATH \
+          LIBINT2_INCLUDE_DIR=$GITHUB_WORKSPACE/installdir \
           cmake \
             -DPOLYQUANT_DOC=0 \
             -DPOLYQUANT_TEST=1 \
