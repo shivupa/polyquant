@@ -66,7 +66,6 @@ jobs:
         shell: bash
         working-directory: builddir
         run: |
-          LIBINT2_INCLUDE_DIR=$GITHUB_WORKSPACE/installdir \
           cmake \
             -DPOLYQUANT_DOC=0 \
             -DPOLYQUANT_TEST=1 \
@@ -74,6 +73,7 @@ jobs:
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++ \
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+            -DLIBINT2_INCLUDE_DIR=$GITHUB_WORKSPACE/installdir \
             -G "${{ matrix.config.generators }}" \
             ..
       - name: Build
