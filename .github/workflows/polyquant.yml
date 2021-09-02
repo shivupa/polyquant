@@ -62,7 +62,10 @@ jobs:
           gcc --version
           tar -xzf polyquant-libint.tar.gz
           mkdir builddir
+          echo $MKLROOT
           ls
+          ls installdir
+          ls installdir/libint2
       - name: Configure
         shell: bash
         working-directory: builddir
