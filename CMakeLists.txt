@@ -148,7 +148,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spectra)
 ########################################
 # libint for gaussian AO integrals
-find_package(libint2)
+find_package(Libint2)
 if (LIBINT2_FOUND)
     INCLUDE_DIRECTORIES(${LIBINT2_INCLUDE_DIRS})
     add_definitions(${LIBINT2_EXTRA_DEFINITIONS})
