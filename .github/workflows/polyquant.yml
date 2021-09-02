@@ -62,6 +62,7 @@ jobs:
           gcc --version
           tar -xzf polyquant-libint.tar.gz
           mkdir builddir
+          ls
       - name: Configure
         shell: bash
         working-directory: builddir
