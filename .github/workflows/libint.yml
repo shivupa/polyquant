@@ -15,7 +15,7 @@ jobs:
           - {
             name: "Ubuntu_Latest_GCC",
             os: ubuntu-latest,
-            artifact: "polyquant_libint.deb",
+            artifact: "polyquant_libint.tar.gz",
             build_type: "Release",
             cc: "gcc",
             cxx: "g++",
@@ -38,8 +38,6 @@ jobs:
           ninja --version
           cmake --version
           gcc --version
-          sudo apt-get install -y ruby-dev build-essential
-          sudo gem i fpm -f
           sudo apt-get install -y libeigen3-dev
           mkdir builddir
           mkdir installdir
@@ -64,11 +62,10 @@ jobs:
         shell: bash
         working-directory: builddir
         run: cmake --install .
-      - name: Create RPM
+      - name: Create tar
         shell: bash
         run: |
-          fpm -s dir -t deb -n polyquant-libint -v 0.0.1 -C installdir
-          mv polyquant-libint_0.0.1_amd64.deb polyquant_libint.deb
+          tar -czf polyquant-libint.tar.gz installdir
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
