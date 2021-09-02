@@ -45,7 +45,7 @@ jobs:
         with:
           workflow: libint.yml
           workflow_conclusion: success
-          name: polyquant_libint.deb
+          name: polyquant_libint.tar.gz
       - name: Install dependencies on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
         run: |
@@ -60,12 +60,13 @@ jobs:
           ninja --version
           cmake --version
           gcc --version
-          sudo apt-get install ./polyquant_libint.deb
+          tar -xzf polyquant_libint.tar.gz
           mkdir builddir
       - name: Configure
         shell: bash
         working-directory: builddir
         run: |
+          PKG_CONFIG_PATH=$GITHUB_WORKSPACE/installdir:$PKG_CONFIG_PATH \
           cmake \
             -DPOLYQUANT_DOC=0 \
             -DPOLYQUANT_TEST=1 \
