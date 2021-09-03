@@ -57,10 +57,14 @@ jobs:
         shell: bash
         working-directory: builddir
         run: cmake --build . --config ${{ matrix.config.build_type }}
-      - name: Create tar
+      - name: Build deb
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --target package
+      - name: Rename deb
         shell: bash
         run: |
-          tar -czf polyquant-libint.tar.gz builddir
+          mv Libint-2.7.0-Linux.deb ${{ matrix.config.artifact }}
       - name: Upload
         uses: actions/upload-artifact@v2
         with:

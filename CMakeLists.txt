@@ -26,6 +26,22 @@ include(RedefaultableOption)
 include(CMakePushCheckState)
 include(AddCustomTargetSubproject)
 
+# Packaging ==============================================================================================================
+
+include(InstallRequiredSystemLibraries)
+
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Libint for Polyquant")
+set(CPACK_PACKAGE_VERSION_MAJOR "2")
+set(CPACK_PACKAGE_VERSION_MINOR "7")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+set(CPACK_SOURCE_STRIP_FILES "")
+set(CPACK_BINARY_DEB "ON")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shiv Upadhyay")
+include(CPack)
+
+
+
 # Options ==============================================================================================================
 
 redefaultable_option(REQUIRE_CXX_API "C++11 Libint interface" ON)
