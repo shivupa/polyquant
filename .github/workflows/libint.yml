@@ -51,21 +51,16 @@ jobs:
             -DLIBINT2_REALTYPE=double \
             -DLIBINT2_BUILD_TESTS=OFF \
             -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/installdir \
             -G "${{ matrix.config.generators }}" \
             $GITHUB_WORKSPACE
       - name: Build
         shell: bash
         working-directory: builddir
         run: cmake --build . --config ${{ matrix.config.build_type }}
-      - name: Install
-        shell: bash
-        working-directory: builddir
-        run: cmake --install .
       - name: Create tar
         shell: bash
         run: |
-          tar -czf polyquant-libint.tar.gz installdir
+          tar -czf polyquant-libint.tar.gz builddir
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
