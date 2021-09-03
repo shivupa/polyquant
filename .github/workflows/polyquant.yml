@@ -61,9 +61,14 @@ jobs:
           cmake --version
           gcc --version
           tar -xzf polyquant-libint.tar.gz
+          cd builddir
+          ninja install
+          cd ..
+          rm -rf builddir
           mkdir builddir
           echo $MKLROOT
           ls
+          ls /opt
           mv installdir libint2
           ls libint2
       - name: Configure
