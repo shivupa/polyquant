@@ -60,7 +60,7 @@ jobs:
       - name: Build deb
         shell: bash
         working-directory: builddir
-        run: cmake --build . --target package
+        run: cpack -G DEB
       - name: Rename deb
         shell: bash
         run: |
