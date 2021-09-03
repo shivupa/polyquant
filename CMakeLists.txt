@@ -29,6 +29,7 @@ include(AddCustomTargetSubproject)
 # Packaging ==============================================================================================================
 
 include(InstallRequiredSystemLibraries)
+include(CPack)
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Libint for Polyquant")
 set(CPACK_PACKAGE_VERSION_MAJOR "2")
@@ -38,7 +39,6 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSIO
 set(CPACK_SOURCE_STRIP_FILES "")
 set(CPACK_BINARY_DEB "ON")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shiv Upadhyay")
-include(CPack)
 
 
 
