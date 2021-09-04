@@ -29,18 +29,18 @@ include(AddCustomTargetSubproject)
 # Packaging ==============================================================================================================
 
 include(InstallRequiredSystemLibraries)
-include(CPack)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Libint for Polyquant")
 set(CPACK_PACKAGE_VERSION_MAJOR "2")
 set(CPACK_PACKAGE_VERSION_MINOR "7")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-set(CPACK_SOURCE_STRIP_FILES "")
-set(CPACK_BINARY_DEB "ON")
+set(CPACK_SOURCE_STRIP_FILES TRUE)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shiv Upadhyay")
-message(FATAL_ERROR "CPACK_DEBIAN_PACKAGE_MAINTAINER ${CPACK_DEBIAN_PACKAGE_MAINTAINER}")
-
+set(CPACK_BINARY_DEB ON CACHE BOOL ON)
+include(CPack)
 
 
 # Options ==============================================================================================================
