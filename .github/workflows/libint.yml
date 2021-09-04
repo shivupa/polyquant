@@ -15,7 +15,7 @@ jobs:
           - {
             name: "Ubuntu_Latest_GCC",
             os: ubuntu-latest,
-            artifact: "polyquant-libint.tar.gz",
+            artifact: "polyquant-libint.deb",
             build_type: "Release",
             cc: "gcc",
             cxx: "g++",
