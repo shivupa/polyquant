@@ -285,7 +285,7 @@ if (LIBINT_HAS_CXX_API)
   get_filename_component(DATADIR_ABSOLUTE "${CMAKE_INSTALL_PREFIX}/${LIBINT2_INSTALL_DATADIR}" ABSOLUTE)
   target_compile_definitions(libint2_cxx INTERFACE
           $<BUILD_INTERFACE:SRCDATADIR="${PROJECT_SOURCE_DIR}/lib/basis">
-          $<INSTALL_INTERFACE:DATADIR="${DATADIR_ABSOLUTE}">)
+          $<INSTALL_INTERFACE:DATADIR="${CMAKE_INSTALL_PREFIX}/${LIBINT2_INSTALL_DATADIR}">)
   # Add library to the list of installed components
   install(TARGETS libint2_cxx EXPORT libint2
           COMPONENT cxx
