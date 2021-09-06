@@ -64,6 +64,7 @@ jobs:
           mkdir builddir
           echo $MKLROOT
           ls /opt
+          ls /usr/local
       - name: Configure
         shell: bash
         working-directory: builddir
