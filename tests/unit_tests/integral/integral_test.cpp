@@ -55,7 +55,7 @@ TEST_SUITE("INTEGRAL") {
       for (auto j = 0; j < test_bas.num_basis[0]; j++)
         for (auto k = 0; k < test_bas.num_basis[0]; k++)
           for (auto l = 0; l < test_bas.num_basis[0]; l++)
-            CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+            CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("INTEGRAL: mixed basis electron repulsion AO basis") {
     POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumHfile/h2o.json");
@@ -69,10 +69,10 @@ TEST_SUITE("INTEGRAL") {
       for (auto j = 0; j < test_bas.num_basis[0]; j++)
         for (auto k = 0; k < test_bas.num_basis[0]; k++)
           for (auto l = 0; l < test_bas.num_basis[0]; l++){
-            CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
-            CHECK(test_int.get2e_elem(0, 1, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
-            CHECK(test_int.get2e_elem(1, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
-            CHECK(test_int.get2e_elem(1, 1, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+            CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+            CHECK(test_int.get2e_elem(0, 1, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+            CHECK(test_int.get2e_elem(1, 0, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+            CHECK(test_int.get2e_elem(1, 1, i, j, k, l)  ==     doctest::Approx(twoelec[test_int.idx8(i,j,k,l)]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
           }
   }
   TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis") {

@@ -1,0 +1,116 @@
+name: Polyquant CMake Build
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    tags:
+      - 'v*'
+
+jobs:
+  cmake-build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu_Latest_GCC10_Release_Ninja",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc-10",
+            cxx: "g++-10",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_GCC10_Debug_Ninja",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            cc: "gcc-10",
+            cxx: "g++-10",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_GCC11_Release_Ninja",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc-11",
+            cxx: "g++-11",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_GCC11_Debug_Ninja",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            cc: "gcc-11",
+            cxx: "g++-11",
+            generators: "Ninja"
+          }
+
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Print env
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: libint.yml
+          workflow_conclusion: success
+          name: polyquant-libint.deb
+      - name: Install dependencies on Ubuntu
+        if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
+        run: |
+          sudo apt-get update
+          sudo apt-get install \
+            ninja-build \
+            cmake \
+            libeigen3-dev \
+            libboost-all-dev \
+            intel-mkl \
+            libhdf5-dev \
+            ${{ matrix.config.cc }} \
+            ${{ matrix.config.cxx }}
+          ninja --version
+          cmake --version
+          gcc --version
+          sudo dpkg -i polyquant-libint.deb
+          mkdir builddir
+          echo $MKLROOT
+          ls /opt
+          ls /usr/local
+      - name: Create a directory that the libint imported target requires. DO NOT DELETE THIS STEP.
+        shell: bash
+        run: |
+          mkdir $GITHUB_WORKSPACE/libint2
+      - name: Configure
+        shell: bash
+        working-directory: builddir
+        env:
+          CC: matrix.config.cc
+          CXX: matrix.config.cxx
+          MKLROOT: /usr/include/mkl
+        run: |
+          cmake \
+            -DPOLYQUANT_DOC=0 \
+            -DPOLYQUANT_TEST=1 \
+            -DPOLYQUANT_CODE_COVERAGE=0 \
+            -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+            -G "${{ matrix.config.generators }}" \
+            ..
+      - name: Build
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --config ${{ matrix.config.build_type }}
+      - name: Test
+        shell: bash
+        working-directory: builddir
+        run: ctest --output-on-failure

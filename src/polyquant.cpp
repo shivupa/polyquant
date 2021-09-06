@@ -1,6 +1,17 @@
 // LCOV_EXCL_START
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
-#define EIGEN_USE_MKL_ALL
+
+// LAPACKE + BOOST conflict copied from https://github.com/xianyi/OpenBLAS/issues/1992 and https://github.com/ValeevGroup/BTAS/commit/f8d095eada6f694408201d7f66a52b9740cdf24e
+#include <complex>
+#ifndef lapack_complex_float
+# define lapack_complex_float std::complex<float>
+#endif
+#ifndef lapack_complex_double
+# define lapack_complex_double std::complex<double>
+#endif
+
+#define EIGEN_USE_BLAS
+#define EIGEN_USE_LAPACKE
 #include <Eigen/Core>
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>
