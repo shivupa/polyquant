@@ -1,7 +1,9 @@
 name: Polyquant CMake Build
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   release:
     tags:
       - 'v*'
@@ -42,8 +44,8 @@ jobs:
             name: "Ubuntu_Latest_GCC11_Debug_Ninja",
             os: ubuntu-latest,
             build_type: "Debug",
-            cc: "gcc",
-            cxx: "g++",
+            cc: "gcc-11",
+            cxx: "g++-11",
             generators: "Ninja"
           }
 
