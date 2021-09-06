@@ -90,8 +90,8 @@ jobs:
       - name: Configure
         shell: bash
         working-directory: builddir
-        cc: matrix.config.cc
-        cxx: matrix.config.cxx
+        CC: matrix.config.cc
+        CXX: matrix.config.cxx
         run: |
           cmake \
             -DPOLYQUANT_DOC=0 \
