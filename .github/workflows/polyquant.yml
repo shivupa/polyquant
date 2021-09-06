@@ -90,6 +90,10 @@ jobs:
       - name: Configure
         shell: bash
         working-directory: builddir
+        env:
+          CC: matrix.config.cc
+          CXX: matrix.config.cxx
+          MKLROOT: /usr/include/mkl
         run: |
           cmake \
             -DPOLYQUANT_DOC=0 \
