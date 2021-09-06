@@ -74,7 +74,7 @@ jobs:
             intel-mkl \
             libhdf5-dev \
             ${{ matrix.config.cc }} \
-            ${{ matrix.config.cxx }} 
+            ${{ matrix.config.cxx }}
           ninja --version
           cmake --version
           gcc --version
@@ -90,8 +90,9 @@ jobs:
       - name: Configure
         shell: bash
         working-directory: builddir
-        CC: matrix.config.cc
-        CXX: matrix.config.cxx
+        env:
+          CC: matrix.config.cc
+          CXX: matrix.config.cxx
         run: |
           cmake \
             -DPOLYQUANT_DOC=0 \
