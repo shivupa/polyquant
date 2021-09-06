@@ -15,15 +15,31 @@ jobs:
       matrix:
         config:
           - {
-            name: "Ubuntu_Latest_GCC_Release_Ninja",
+            name: "Ubuntu_Latest_GCC10_Release_Ninja",
             os: ubuntu-latest,
             build_type: "Release",
-            cc: "gcc",
-            cxx: "g++",
+            cc: "gcc-10",
+            cxx: "g++-10",
             generators: "Ninja"
           }
           - {
-            name: "Ubuntu_Latest_GCC_Debug_Ninja",
+            name: "Ubuntu_Latest_GCC10_Debug_Ninja",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            cc: "gcc-10",
+            cxx: "g++-10",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_GCC11_Release_Ninja",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc-11",
+            cxx: "g++-11",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_GCC11_Debug_Ninja",
             os: ubuntu-latest,
             build_type: "Debug",
             cc: "gcc",
@@ -56,7 +72,9 @@ jobs:
             libeigen3-dev \
             libboost-all-dev \
             intel-mkl \
-            libhdf5-dev
+            libhdf5-dev \
+            ${{ matrix.config.cc }} \
+            ${{ matrix.config.cxx }} 
           ninja --version
           cmake --version
           gcc --version
@@ -65,13 +83,15 @@ jobs:
           echo $MKLROOT
           ls /opt
           ls /usr/local
-      - name: Configure
+      - name: Create a directory that the libint imported target requires. DO NOT DELETE THIS STEP.
         shell: bash
         run: |
           mkdir $GITHUB_WORKSPACE/libint2
       - name: Configure
         shell: bash
         working-directory: builddir
+        cc: matrix.config.cc
+        cxx: matrix.config.cxx
         run: |
           cmake \
             -DPOLYQUANT_DOC=0 \
