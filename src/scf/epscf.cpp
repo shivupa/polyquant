@@ -682,15 +682,16 @@ void POLYQUANT_EPSCF::dump_molden() {
 
     std::vector<std::string> symmetry_labels;
     symmetry_labels.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), "A");
-    std::vector<int> occupations;
-    occupations.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), 0);
-    std::fill(occupations.begin(), occupations.begin() + quantum_part.num_parts_alpha, 1);
-    std::fill(occupations.begin() + MO_a_coeff.cols(), occupations.begin() + MO_a_coeff.cols() + quantum_part.num_parts_alpha, 1);
+    Eigen::Matrix<double, Eigen::Dynamic, 1> occupations;
+    occupations.setConstant(MO_a_coeff.cols() + MO_b_coeff.cols(), 0.0);
+    occupations.head(quantum_part.num_parts_alpha).setConstant(1.0);
+    occupations.segment(MO_a_coeff.cols(),quantum_part.num_parts_beta).setConstant(1.0);
     std::vector<bool> spincases;
     spincases.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), false);
     std::fill(spincases.begin(), spincases.begin() + MO_a_coeff.cols(), true);
-    libint2::molden::Export<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>, Eigen::Matrix<int, Eigen::Dynamic, 1>, Eigen::Matrix<double, Eigen::Dynamic, 1>> molden_dumper(
-        this->input_molecule.to_libint_atom(), this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
+    std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
+    libint2::molden::Export molden_dumper(
+        atoms, this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
         libint2::constants::codata_2018::bohr_to_angstrom, 0.0);
     std::string filename = quantum_part_key + "_polyquant.molden";
     molden_dumper.write(filename);
