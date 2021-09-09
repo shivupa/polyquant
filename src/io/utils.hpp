@@ -68,7 +68,18 @@ template <typename T> void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dyna
   for (size_t i = 0; i < vec.rows(); i++) {
     std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec(i, 0) << std::endl;
   }
-}
+};
+
+/**
+ * @brief A helper function to dump a string to file.
+ *
+ * @param str the string to write
+ **/
+inline void Polyquant_dump_str_to_file(const std::string& str, const std::string &filename) {
+  std::ofstream strfile;
+  strfile.open(filename);
+  strfile << str << std::endl;
+};
 
 /**
  * @brief A helper function to dump a dense vector object to file.
@@ -81,7 +92,7 @@ template <typename T> void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eig
   for (Eigen::Index i = 0; i < vec.rows(); i++) {
     vecfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec(i, 0) << std::endl;
   }
-}
+};
 
 /**
  * @brief A helper function to dump a dense matrix object to std::out.
@@ -98,8 +109,7 @@ template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dyna
     }
     std::cout << std::endl;
   }
-}
-
+};
 /**
  * @brief A helper function to dump a dense matrix object to file.
  *
@@ -114,7 +124,7 @@ template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eig
     }
     matfile << std::endl;
   }
-}
+};
 /**
  * @brief A helper function to dump a string to file.
  *
