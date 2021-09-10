@@ -306,6 +306,9 @@ void POLYQUANT_MOLECULE::setup_molecule(const POLYQUANT_INPUT &input) {
     this->calculate_E_nuc();
     Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));
     print_molecule();
+    std::string filename = "polyquant_used_geometry.xyz";
+    std::string contents = this->dump_xyz();
+    Polyquant_dump_str_to_file(contents, filename);
   } else {
     APP_ABORT("Cannot set up molecule. Input json missing 'molecule' section.");
   }

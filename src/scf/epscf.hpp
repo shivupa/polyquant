@@ -5,6 +5,7 @@
 #include <h5cpp/hdf5.hpp>
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <libint2/diis.h>
+#include <libint2/lcao/molden.h>
 
 namespace polyquant {
 
@@ -62,6 +63,8 @@ public:
   void from_file(std::string &filename);
 
   void print_params();
+
+  void dump_molden();
   /**
    * @brief H_core matrix
    *

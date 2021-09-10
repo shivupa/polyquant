@@ -664,6 +664,46 @@ void POLYQUANT_EPSCF::print_params() {
   Polyquant_cout(buffer.str());
 }
 
+void POLYQUANT_EPSCF::dump_molden() {
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    auto &MO_a_coeff = this->C[quantum_part_idx][0];
+    auto &MO_b_coeff = this->C[quantum_part_idx][0];
+    auto &MO_a_energy = this->E_orbitals[quantum_part_idx][0];
+    auto &MO_b_energy = this->E_orbitals[quantum_part_idx][0];
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      MO_b_coeff = this->C[quantum_part_idx][1];
+      MO_b_energy = this->E_orbitals[quantum_part_idx][1];
+    }
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_AandB_coeff(MO_a_coeff.rows(), MO_a_coeff.cols() + MO_b_coeff.cols());
+    MO_AandB_coeff << MO_a_coeff, MO_b_coeff;
+    Eigen::Matrix<double, Eigen::Dynamic, 1> MO_AandB_energy(MO_a_energy.rows() + MO_b_energy.rows());
+    MO_AandB_energy << MO_a_energy, MO_b_energy;
+
+    std::vector<std::string> symmetry_labels;
+    symmetry_labels.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), "A");
+    Eigen::Matrix<double, Eigen::Dynamic, 1> occupations;
+    occupations.setConstant(MO_a_coeff.cols() + MO_b_coeff.cols(), 0.0);
+    occupations.head(quantum_part.num_parts_alpha).setConstant(1.0);
+    occupations.segment(MO_a_coeff.cols(),quantum_part.num_parts_beta).setConstant(1.0);
+    std::vector<bool> spincases;
+    spincases.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), false);
+    std::fill(spincases.begin(), spincases.begin() + MO_a_coeff.cols(), true);
+    std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
+    try {
+    libint2::molden::Export molden_dumper(
+        atoms, this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
+        libint2::constants::codata_2018::bohr_to_angstrom, 0.0);
+    std::string filename = quantum_part_key + "_polyquant.molden";
+    molden_dumper.write(filename);
+    } catch(std::logic_error e){
+        Polyquant_cout("Not dumping molden for " + quantum_part_key + " because : " + e.what());
+    }
+
+    quantum_part_idx++;
+  }
+}
+
 void POLYQUANT_EPSCF::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -690,6 +730,7 @@ void POLYQUANT_EPSCF::run() {
   this->calculate_E_total();
   if (this->stop && this->converged) {
     this->print_success();
+    this->dump_molden();
   } else if (this->stop && this->exceeded_iterations) {
     this->print_exceeded_iterations();
   } else {

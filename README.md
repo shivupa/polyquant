@@ -1,11 +1,13 @@
 # polyquant
 
+[![Polyquant CMake Build](https://github.com/shivupa/polyquant/actions/workflows/polyquant.yml/badge.svg?branch=main)](https://github.com/shivupa/polyquant/actions/workflows/polyquant.yml)
+
 Polyquant uses C++20. This is required because the CI operations use https://en.cppreference.com/w/cpp/header/bit.
 
 ## Dependencies 
 
 ### Dependencies that must be installed by the user
-- [libeigen/eigen] (https://gitlab.com/libeigen/eigen)
+- [libeigen/eigen](https://gitlab.com/libeigen/eigen)
   Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.
 
 - [boostorg/boost](https://github.com/boostorg/boost)
@@ -26,18 +28,18 @@ Polyquant uses C++20. This is required because the CI operations use https://en.
    `Polyquant` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
    To convert for qmcpack you need to configure with [-with-cartgauss-ordering=gamess](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
 
+   The `libint` branch has a configured library compatible with polyquant. It is recommended to build the libint branch, install, and then build the main branch.
+
 - [ess-dmsc/h5cpp](https://github.com/ess-dmsc/h5cpp)
    C++ wrapper for the HDF5 C-library 
 
    `Polyquant` uses `ess-dmsc/h5cpp` to dump HDF5 files for use with QMCPACK.
 
 ### For a debug build
-
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)
    `include_what_you_use` lets you check that the headers aren't including too much unnecessary stuff.
 
 ### For documentation:
-
 `Polyquant` uses a combination of libraries to generate documentations from comments included in the source:
 - [doxygen](http://www.doxygen.nl/)
 - [breathe](https://github.com/michaeljones/breathe)
@@ -46,7 +48,6 @@ Polyquant uses C++20. This is required because the CI operations use https://en.
 - [m2r](https://github.com/miyakogi/m2r)
 
 ### For formatting the source
-
 - [clang-format](https://clang.llvm.org/)
    
    `Polyquant` uses `clang-format` to format all of the `hpp` and `cpp` files
