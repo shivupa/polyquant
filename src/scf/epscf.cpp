@@ -690,11 +690,16 @@ void POLYQUANT_EPSCF::dump_molden() {
     spincases.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), false);
     std::fill(spincases.begin(), spincases.begin() + MO_a_coeff.cols(), true);
     std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
+    try {
     libint2::molden::Export molden_dumper(
         atoms, this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
         libint2::constants::codata_2018::bohr_to_angstrom, 0.0);
     std::string filename = quantum_part_key + "_polyquant.molden";
     molden_dumper.write(filename);
+    } catch(std::logic_error e){
+        Polyquant_cout("Not dumping molden for " + quantum_part_key + " because : " + e.what());
+    }
+
     quantum_part_idx++;
   }
 }
