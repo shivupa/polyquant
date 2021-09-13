@@ -1,0 +1,59 @@
+{
+  "molecule": {
+    "geometry": [
+     0.0000000,    0.0000000,     0.0000000,
+     0.0000000,    0.0000000,     1.0640000,
+     0.0000000,    0.0000000,    -1.1560000
+    ],
+    "symbols": ["C", "H", "N"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "scf",
+    "basis": 
+        {"electron" :
+        {
+            "H" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}],
+            "C" : [{ "library" :  {"type" : "aug-cc-pvdz"}}],
+            "N" : [{ "library" :  {"type" : "aug-cc-pvdz"}}]
+        },
+        "positron" :
+        {
+            "H" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
+        }
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "dump_for_qmcpack" : false,
+    "hdf5_filename_qmcpack" : "HCN.h5",
+    "quantum_particles" : [ 
+        { "name" : "positron",
+          "spin" : 0.5,
+          "mass" : 1,
+          "charge" : 1,
+          "num_particles_alpha" : 1,
+          "num_particles_beta" : 0,
+          "particle_multiplicity" : 2,
+          "exchange" : true,
+          "electron_exchange" : false,
+          "restricted" : false
+        }
+    ],
+    "mf_keywords" :{
+        "convergence_E" : 1e-3,
+        "convergence_DM" : 1e-4,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true,
+        "diis_extrapolation" : true,
+        "diis_size" : 15,
+        "diis_damping" : 0.00,
+        "diis_mixing_fraction" : 0.5,
+        "Cauchy_Schwarz_screening" : true,
+        "incremental_fock" : true
+    },
+   "pure" : false
+      }
+}
