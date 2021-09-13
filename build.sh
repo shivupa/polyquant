@@ -3,15 +3,13 @@
 rm -rf build
 mkdir -p build
 cd build
-export MKL_INCLUDE_DIR=/opt/intel/mkl
-export MKL_ROOT=/opt/intel/mkl
 cmake \
     -DPOLYQUANT_DOC=0 \
     -DPOLYQUANT_TEST=1 \
     -DPOLYQUANT_CODE_COVERAGE=0 \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
-    -DCMAKE_BUILD_TYPE="Debug" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -G Ninja \
     ..
 #ninja Sphinx
