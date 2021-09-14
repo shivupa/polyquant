@@ -1,9 +1,5 @@
 {
-  "schema_name": "qc_schema_input", 
-  "schema_version": 1,
   "molecule": {
-    "schema_name": "qcschema_molecule",
-    "schema_version": 2,
     "geometry": [
         0.0000000, 0.0000000,  0.0000000
     ],
@@ -15,9 +11,14 @@
   "model": {
     "method": "scf",
     "basis": 
+        {"electron" :
+        {"Li" : [{ "custom" :
+            {"type" : "file",
+             "filename" : "Li_basis.g94"}}]},
+        "positron" :
         {"Li" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "Li_basis.g94"}}]}
+             "filename" : "Li_basis.g94"}}]}}
              
   },
   "keywords": {
@@ -42,6 +43,6 @@
         "convergence_DM" : 1e-6,
         "iteration_max" : 200
     },
-   "pure" : true
+   "pure" : false
       }
 }

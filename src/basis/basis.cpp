@@ -49,12 +49,10 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
       auto temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
       // std::move(atom_basis.begin(), atom_basis.end(),
       // std::back_inserter(this->basis));
-      // this->basis.back().move({{atoms[a].x, atoms[a].y,
-      // atoms[a].z}});
+      // this->basis.back().move({{atoms[a].x, atoms[a].y, atoms[a].z}});
       qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
       qp_basis.set_pure(pure);
-      // std::move(atom_basis.begin(), atom_basis.end(),
-      //           std::back_inserter(this->basis));
+      // std::move(atom_basis.begin(), atom_basis.end(), std::back_inserter(this->basis));
     } else {
       auto libint_atoms = molecule.to_libint_atom(classical_part_key);
       for (auto &libint_atom : libint_atoms) {
