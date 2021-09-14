@@ -155,36 +155,36 @@ void POLYQUANT_EPSCF::form_fock() {
         auto shell2bf_b = this->input_basis.basis[quantum_part_b_idx].shell2bf();
         for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < quantum_part_b_spin_lim; quantum_part_b_spin_idx++) {
           // loop over shells
-          int nthreads = omp_get_max_threads();
+          // int nthreads = omp_get_max_threads();
+          // std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FA;
+          // std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FB;
+          // FA.resize(nthreads);
+          // FB.resize(nthreads);
+          // for (int i = 0; i < nthreads; i++) {
+          //  FA[i].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
+          //  FB[i].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
+          //  FA[i].setZero();
+          //  FB[i].setZero();
+          //}
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FA;
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FB;
-          FA.resize(nthreads);
-          FB.resize(nthreads);
-          for (int i = 0; i < nthreads; i++) {
-            FA[i].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
-            FB[i].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
-            FA[i].setZero();
-            FB[i].setZero();
-          }
 #pragma omp parallel
           {
-            // int nthreads = omp_get_num_threads();
+            int nthreads = omp_get_num_threads();
             int thread_id = omp_get_thread_num();
-            // std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FA;
-            // std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FB;
-            // if (thread_id == 0){
-            //     FA.resize(nthreads);
-            //     FB.resize(nthreads);
-            //     for (int i = 0; i < nthreads; i ++){
-            //     FA[i].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
-            //     FB[i].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
-            //     FA[i].setZero();
-            //     FB[i].setZero();
-            //     }
-            // }
+            if (thread_id == 0) {
+              FA.resize(nthreads);
+              FB.resize(nthreads);
+              for (int i = 0; i < nthreads; i++) {
+                FA[i].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
+                FB[i].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
+                FA[i].setZero();
+                FB[i].setZero();
+              }
+            }
             // std::cout << "OK0 " << thread_id << std::endl;
-            // FA[thread_id].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
-            // FB[thread_id].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
+            FA[thread_id].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
+            FB[thread_id].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
             int shellcounter = 0;
             for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
               // std::cout << "OK1 " << thread_id << std::endl;
