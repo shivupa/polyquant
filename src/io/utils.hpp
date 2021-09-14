@@ -75,7 +75,7 @@ template <typename T> void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dyna
  *
  * @param str the string to write
  **/
-inline void Polyquant_dump_str_to_file(const std::string& str, const std::string &filename) {
+inline void Polyquant_dump_str_to_file(const std::string &str, const std::string &filename) {
   std::ofstream strfile;
   strfile.open(filename);
   strfile << str << std::endl;
