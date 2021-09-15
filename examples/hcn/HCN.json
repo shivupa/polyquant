@@ -15,13 +15,13 @@
     "basis": 
         {"electron" :
         {
-            "H" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}],
-            "C" : [{ "library" :  {"type" : "aug-cc-pvdz"}}],
-            "N" : [{ "library" :  {"type" : "aug-cc-pvdz"}}]
+            "H" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}],
+            "C" : [{ "library" :  {"type" : "sto-3g"}}],
+            "N" : [{ "library" :  {"type" : "sto-3g"}}]
         },
         "positron" :
         {
-            "H" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
+            "H" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
         }
         }
   },
