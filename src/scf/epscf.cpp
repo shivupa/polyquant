@@ -735,26 +735,44 @@ void POLYQUANT_EPSCF::dump_molden() {
       MO_b_coeff = this->C[quantum_part_idx][1];
       MO_b_energy = this->E_orbitals[quantum_part_idx][1];
     }
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_AandB_coeff(MO_a_coeff.rows(), MO_a_coeff.cols() + MO_b_coeff.cols());
-    MO_AandB_coeff << MO_a_coeff, MO_b_coeff;
-    Eigen::Matrix<double, Eigen::Dynamic, 1> MO_AandB_energy(MO_a_energy.rows() + MO_b_energy.rows());
-    MO_AandB_energy << MO_a_energy, MO_b_energy;
+    // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_AandB_coeff(MO_a_coeff.rows(), MO_a_coeff.cols() + MO_b_coeff.cols());
+    // MO_AandB_coeff << MO_a_coeff, MO_b_coeff;
+    // std::cout << "SHIV 0" <<std::endl;
+    // for (int i =0; i < MO_a_coeff.rows();i++){
+    //    std::cout << "SHIV " << MO_AandB_coeff(i, 0) << std::endl;
+    //}
+    // std::cout << "SHIV 1" <<std::endl;
+    // for (int i =0; i < MO_a_coeff.rows();i++){
+    //    std::cout << "SHIV " << MO_AandB_coeff(i, MO_a_coeff.cols() + 1) << std::endl;
+    //}
+    // Eigen::Matrix<double, Eigen::Dynamic, 1> MO_AandB_energy(MO_a_energy.rows() + MO_b_energy.rows());
+    // MO_AandB_energy << MO_a_energy, MO_b_energy;
 
-    std::vector<std::string> symmetry_labels;
-    symmetry_labels.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), "A");
-    Eigen::Matrix<double, Eigen::Dynamic, 1> occupations;
-    occupations.setConstant(MO_a_coeff.cols() + MO_b_coeff.cols(), 0.0);
-    occupations.head(quantum_part.num_parts_alpha).setConstant(1.0);
-    occupations.segment(MO_a_coeff.cols(), quantum_part.num_parts_beta).setConstant(1.0);
-    std::vector<bool> spincases;
-    spincases.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), false);
-    std::fill(spincases.begin(), spincases.begin() + MO_a_coeff.cols(), true);
+    std::vector<std::string> MO_a_symmetry_labels;
+    MO_a_symmetry_labels.resize(MO_a_coeff.cols(), "A");
+    std::vector<std::string> MO_b_symmetry_labels;
+    MO_b_symmetry_labels.resize(MO_b_coeff.cols(), "A");
+    std::vector<double> MO_a_occupation;
+    MO_a_occupation.resize(MO_a_coeff.cols(), 0.0);
+    std::fill(MO_a_occupation.begin(), MO_a_occupation.begin() + quantum_part.num_parts_alpha, 1.0);
+    std::vector<double> MO_b_occupation;
+    MO_b_occupation.resize(MO_b_coeff.cols(), 0.0);
+    std::fill(MO_b_occupation.begin(), MO_b_occupation.begin() + quantum_part.num_parts_beta, 1.0);
+    // Eigen::Matrix<double, Eigen::Dynamic, 1> occupations;
+    // occupations.setConstant(MO_a_coeff.cols() + MO_b_coeff.cols(), 0.0);
+    // occupations.head(quantum_part.num_parts_alpha).setConstant(1.0);
+    // occupations.segment(MO_a_coeff.cols(), quantum_part.num_parts_beta).setConstant(1.0);
+    // std::vector<bool> spincases;
+    // spincases.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), false);
+    // std::fill(spincases.begin(), spincases.begin() + MO_a_coeff.cols(), true);
     std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
     try {
-      libint2::molden::Export molden_dumper(atoms, this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
-                                            libint2::constants::codata_2018::bohr_to_angstrom, 0.0);
       std::string filename = quantum_part_key + "_polyquant.molden";
-      molden_dumper.write(filename);
+      POLYQUANT_MOLDEN molden_dumper(filename);
+      molden_dumper.dump(atoms, this->input_basis.basis[quantum_part_idx], MO_a_coeff, MO_a_energy, MO_a_symmetry_labels, MO_a_occupation, MO_b_coeff, MO_b_energy, MO_b_symmetry_labels, MO_b_occupation);
+      // libint2::molden::Export molden_dumper(atoms, this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
+      //                                      libint2::constants::codata_2018::bohr_to_angstrom, 0.0);
+      // molden_dumper.write(filename);
     } catch (std::logic_error e) {
       Polyquant_cout("Not dumping molden for " + quantum_part_key + " because : " + e.what());
     }

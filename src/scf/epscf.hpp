@@ -1,5 +1,6 @@
 #ifndef POLYQUANT_EPSCF_H
 #define POLYQUANT_EPSCF_H
+#include "io/molden_utilities.hpp"
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <h5cpp/hdf5.hpp>
