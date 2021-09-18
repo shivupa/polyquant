@@ -15,13 +15,13 @@
     "basis": 
         {"electron" :
         {
-            "H" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}],
+            "H" : [{ "library" :  {"type" : "sto-3g"}}],
             "C" : [{ "library" :  {"type" : "sto-3g"}}],
-            "N" : [{ "library" :  {"type" : "sto-3g"}}]
+            "N" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
         },
         "positron" :
         {
-            "H" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
+            "N" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
         }
         }
   },
@@ -44,7 +44,7 @@
     ],
     "mf_keywords" :{
         "convergence_E" : 1e-3,
-        "convergence_DM" : 1e-4,
+        "convergence_DM" : 1e-3,
         "iteration_max" : 200,
         "dump_for_qmcpack" : true,
         "diis_extrapolation" : true,

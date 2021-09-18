@@ -192,7 +192,7 @@ mol colupdate 0 top 0
 mol scaleminmax top 0 0.000000 0.000000
 mol smoothrep top 0 0
 mol drawframes top 0 {now}
-mol representation Isosurface 0.000001000 0 0 0 1 1
+mol representation Isosurface 0.009930994386531 0 0 0 1 1
 mol color ColorID 0
 mol selection {all}
 mol material Transparent
@@ -204,7 +204,7 @@ mol smoothrep top 1 0
 mol drawframes top 1 {now}
 mol rename top "electron alpha"
 mol new electrondens_beta.cube type cube first 0 last -1 step 1 fidbonds 1 autobonds 1 waitfor all
-mol representation Isosurface 0.000001000 0 0 0 1 1
+mol representation Isosurface 0.019942913429057 0 0 0 1 1
 mol color ColorID 1
 mol selection {all}
 mol material Transparent
@@ -215,8 +215,8 @@ mol scaleminmax top 2 0.000000 0.000000
 mol smoothrep top 2 0
 mol drawframes top 2 {now}
 mol rename top "electron beta"
-mol new positrondens_beta.cube type cube first 0 last -1 step 1 fidbonds 1 autobonds 1 waitfor all
-mol representation Isosurface 0.000001000 0 0 0 1 1
+mol new positrondens_alpha.cube type cube first 0 last -1 step 1 fidbonds 1 autobonds 1 waitfor all
+mol representation Isosurface 0.000000459614089 0 0 0 1 1
 mol color ColorID 7
 mol selection {all}
 mol material Transparent
@@ -238,7 +238,7 @@ mol rename top "positron alpha"
 
 display projection Orthographic
 axes Location Off
-scale by 0.15
+scale by 0.20
 draw color black
 # draw line "-26.4589 -26.4589 -26.4589" "-26.4589 -26.4589 26.4589"
 # draw line "-26.4589 -26.4589 -26.4589" "-26.4589 26.4589 -26.4589"
@@ -252,7 +252,7 @@ draw color black
 # draw line "26.4589 26.4589 26.4589" "-26.4589 26.4589 26.4589"
 # draw line "26.4589 26.4589 26.4589" "26.4589 -26.4589 26.4589"
 # draw line "26.4589 26.4589 26.4589" "26.4589 26.4589 -26.4589"
-#rotate y by 90
+rotate y by 90
 render Tachyon vmdscene "/usr/lib64/vmd/tachyon_LINUXAMD64 -aasamples 12 %s -format TARGA -res 2048 2048 -o %s.tga"
 #molinfo top set drawn 0
-#quit
+quit
