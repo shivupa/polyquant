@@ -1,0 +1,71 @@
+{
+  "molecule": {
+    "geometry": [
+                    0.0000000000,          0.0000000000,          0.0000000000,
+                    1.1313061930,          0.0000000000,          0.0000000000,
+                   -1.1313061930,          0.0000000000,          0.0000000000,
+                    0.0000000000,          1.3482382199,          0.0000000000,
+                    0.0000000000,         -1.3482382199,          0.0000000000
+    ],
+    "symbols": ["X", "Li", "Li", "F", "F"],
+    "molecular_charge": 1,
+    "molecular_multiplicity": 2
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CI",
+    "basis": 
+        {"electron" :
+        {
+            "X" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}],
+            "Li" : [{ "library" :  {"type" : "cc-pvdz"}}],
+            "F" : [{ "library" :  {"type" : "cc-pvdz"}}]
+        },
+        "positron" :
+        {
+            "X" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
+        }
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "dump_for_qmcpack" : false,
+    "hdf5_filename_qmcpack" : "LiFdimer.h5",
+    "quantum_particles" : [ 
+        { "name" : "positron",
+          "spin" : 0.5,
+          "mass" : 1,
+          "charge" : 1,
+          "num_particles_alpha" : 1,
+          "num_particles_beta" : 0,
+          "particle_multiplicity" : 2,
+          "exchange" : true,
+          "electron_exchange" : false,
+          "restricted" : false
+        }
+    ],
+    "mf_keywords" :{
+        "convergence_E" : 1e-3,
+        "convergence_DM" : 1e-3,
+        "iteration_max" : 200,
+        "dump_for_qmcpack" : true,
+        "diis_extrapolation" : true,
+        "diis_size" : 15,
+        "diis_damping" : 0.00,
+        "diis_mixing_fraction" : 0.5,
+        "Cauchy_Schwarz_screening" : true,
+        "incremental_fock" : true
+    },
+   "ci_keywords" : {
+       "convergence_E" : 1e-8,
+       "num_states" : 5,
+       "num_subspace_vec" : 20,
+       "excitation_level" : [
+           [1,1,1],
+           [1,0,1]
+           ],
+           "cache_size" : 10
+   },
+   "pure" : false
+      }
+}
