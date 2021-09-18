@@ -348,8 +348,29 @@ std::string POLYQUANT_MOLECULE::dump_xyz(std::string classical_part_key) const {
 }
 
 std::vector<libint2::Atom> POLYQUANT_MOLECULE::to_libint_atom(std::string classical_part_key) const {
-  std::istringstream temp_xyz_stream(this->dump_xyz(classical_part_key));
-  return libint2::read_dotxyz(temp_xyz_stream);
+  std::vector<libint2::Atom> atoms;
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      if (classical_part_key != "all") {
+        if (classical_part_key == "no_ghost") {
+          if (classical_part.second.mass < 1) {
+            continue;
+          }
+        } else if (classical_part.first != classical_part_key) {
+          continue;
+        }
+      }
+      std::cout << "SHIV" << classical_part.first << std::endl;
+      libint2::Atom temp_atom;
+      temp_atom.atomic_number = classical_part.second.charge;
+      auto center_idx = classical_part.second.center_idx[i];
+      temp_atom.x = centers[center_idx][0];
+      temp_atom.y = centers[center_idx][1];
+      temp_atom.z = centers[center_idx][2];
+      atoms.push_back(temp_atom);
+    }
+  }
+  return atoms;
 }
 
 void POLYQUANT_MOLECULE::calculate_E_nuc() {
