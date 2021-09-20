@@ -112,4 +112,6 @@ jobs:
       - name: Test
         shell: bash
         working-directory: builddir
+        env:
+          DATADIR: /usr/share/libint/2.7.0/basis/
         run: ctest --output-on-failure
