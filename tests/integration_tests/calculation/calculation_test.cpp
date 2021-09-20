@@ -43,26 +43,26 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_total ==doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
-  TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF library basis.") {
-    POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumHlibrary/h2o.json");
-    test_calc.run();
-    CHECK(test_calc.scf_calc.converged == true);
-    CHECK(test_calc.scf_calc.independent_converged == true);
-    CHECK(test_calc.scf_calc.exceeded_iterations == false);
-    CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(3.0365625787).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-6.7850710986).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.0108559101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-54.215088101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0001178508).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(63.0329825588).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0016888836).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.275190008).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0005147619).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-  }
+  // TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF library basis.") {
+  //   POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumHlibrary/h2o.json");
+  //   test_calc.run();
+  //   CHECK(test_calc.scf_calc.converged == true);
+  //   CHECK(test_calc.scf_calc.independent_converged == true);
+  //   CHECK(test_calc.scf_calc.exceeded_iterations == false);
+  //   CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(3.0365625787).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-6.7850710986).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.0108559101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-54.215088101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0001178508).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(63.0329825588).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0016888836).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.275190008).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0005147619).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  //   CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  // }
 
   TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF file basis.") {
     POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumHfile/h2o.json");
