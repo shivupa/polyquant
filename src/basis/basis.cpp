@@ -83,7 +83,6 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
     auto temp_atom_basis = libint2::BasisSet::read_g94_basis_library(filename);
     for (auto &libint_atom : libint_atoms) {
       // check all elements
-      std::cout << libint_atom.atomic_number << std::endl;
       for (auto s : temp_atom_basis.at(libint_atom.atomic_number)) {
         Polyquant_cout("Adding basis");
         qp_basis.push_back(std::move(s));

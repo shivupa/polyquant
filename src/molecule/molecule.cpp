@@ -360,7 +360,6 @@ std::vector<libint2::Atom> POLYQUANT_MOLECULE::to_libint_atom(std::string classi
           continue;
         }
       }
-      std::cout << "SHIV" << classical_part.first << std::endl;
       libint2::Atom temp_atom;
       temp_atom.atomic_number = classical_part.second.charge;
       auto center_idx = classical_part.second.center_idx[i];
