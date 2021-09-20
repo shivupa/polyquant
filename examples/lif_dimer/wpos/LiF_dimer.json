@@ -17,7 +17,6 @@
     "basis": 
         {"electron" :
         {
-            "X" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}],
             "Li" : [{ "library" :  {"type" : "cc-pvdz"}}],
             "F" : [{ "library" :  {"type" : "cc-pvdz"}}]
         },
