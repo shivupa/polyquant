@@ -58,7 +58,7 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0016888836).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.2751959414).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.275190008).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0005147619).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -79,7 +79,7 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0016888836).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.2751959414).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.2751900085).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0005147619).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
