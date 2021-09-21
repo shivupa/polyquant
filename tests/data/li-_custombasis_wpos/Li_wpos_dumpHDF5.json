@@ -36,8 +36,8 @@
         }
     ],
     "mf_keywords" :{
-        "convergence_E" : 1e-8,
-        "convergence_DM" : 1e-6,
+        "convergence_E" : 1e-9,
+        "convergence_DM" : 1e-7,
         "iteration_max" : 200
     },
    "pure" : true

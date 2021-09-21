@@ -90,9 +90,10 @@ public:
 
   /**
    * @brief bohr to angstroms conversion todo remove
+   *        the 2018 CODATA reference set, available at https://physics.nist.gov/cuu/pdf/wall_2018.pdf
    *
    */
-  double bohr_to_angstrom = 0.52917721092;
+  double bohr_to_angstrom = 0.529177210903;
   /**
    * @brief angstroms to bohr conversion todo remove
    *

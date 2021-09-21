@@ -17,8 +17,8 @@ TEST_SUITE("MOLECULE") {
     CHECK(test_mol.E_nuc == doctest::Approx(9.194863688325974).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
 
     std::string xyz_ref =
-        "3\nPOLYQUANT Dumped XYZ centers = all\nH    0.756969  "
-        "  0.000000    -0.585875\nH    -0.756969    0.000000   "
+        "3\nPOLYQUANT Dumped XYZ centers = all\nH    0.756968  "
+        "  0.000000    -0.585875\nH    -0.756968    0.000000   "
         " -0.585875\nO    0.000000    0.000000    0.000000";
     std::string xyz_test = test_mol.dump_xyz();
     CHECK(xyz_test == xyz_ref);

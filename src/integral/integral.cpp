@@ -287,13 +287,14 @@ double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx, const si
   std::pair<std::vector<size_t>, std::vector<size_t>> eri_idx = make_sorted_ijkl_idx(quantum_part_a_idx, quantum_part_b_idx, i, j, k, l);
   // finish by calculating entire shell if not present and storing entire
   // shell..
+    omp_set_lock(&writelock);
   auto part_one = std::get<0>(eri_idx);
   auto part_two = std::get<1>(eri_idx);
   auto cached_eri_elem = this->ericache.get(eri_idx);
   if (cached_eri_elem.has_value()) {
+    omp_unset_lock(&writelock);
     return cached_eri_elem.value();
   } else {
-    omp_set_lock(&writelock);
     libint2::initialize();
     auto shells_a = this->input_basis.basis[part_one[0]];
     auto shells_b = this->input_basis.basis[part_two[0]];

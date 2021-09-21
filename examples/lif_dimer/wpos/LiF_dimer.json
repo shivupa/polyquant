@@ -1,34 +1,35 @@
 {
   "molecule": {
     "geometry": [
-     0.0000000,    0.0000000,     0.0000000,
-     0.0000000,    0.0000000,     1.0640000,
-     0.0000000,    0.0000000,    -1.1560000
+                    0.0000000000,          0.0000000000,          0.0000000000,
+                    1.1313061930,          0.0000000000,          0.0000000000,
+                   -1.1313061930,          0.0000000000,          0.0000000000,
+                    0.0000000000,          1.3482382199,          0.0000000000,
+                    0.0000000000,         -1.3482382199,          0.0000000000
     ],
-    "symbols": ["C", "H", "N"],
-    "molecular_charge": 0,
-    "molecular_multiplicity": 1
+    "symbols": ["X", "Li", "Li", "F", "F"],
+    "molecular_charge": 1,
+    "molecular_multiplicity": 2
   },
   "driver": "energy",
   "model": {
-    "method": "scf",
+    "method": "CI",
     "basis": 
         {"electron" :
         {
-            "H" : [{ "library" :  {"type" : "sto-3g"}}],
-            "C" : [{ "library" :  {"type" : "sto-3g"}}],
-            "N" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
+            "Li" : [{ "library" :  {"type" : "cc-pvdz"}}],
+            "F" : [{ "library" :  {"type" : "cc-pvdz"}}]
         },
         "positron" :
         {
-            "N" : [{ "library" :  {"type" : "sto-3g"}}, {"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
+            "X" : [{"custom" : {"type" : "file", "filename" : "diffuse_functions.g94" }}]
         }
         }
   },
   "keywords": {
     "restricted" : true,
     "dump_for_qmcpack" : false,
-    "hdf5_filename_qmcpack" : "HCN.h5",
+    "hdf5_filename_qmcpack" : "LiFdimer.h5",
     "quantum_particles" : [ 
         { "name" : "positron",
           "spin" : 0.5,
@@ -54,6 +55,16 @@
         "Cauchy_Schwarz_screening" : true,
         "incremental_fock" : true
     },
+   "ci_keywords" : {
+       "convergence_E" : 1e-8,
+       "num_states" : 5,
+       "num_subspace_vec" : 20,
+       "excitation_level" : [
+           [1,1,1],
+           [1,0,1]
+           ],
+           "cache_size" : 10
+   },
    "pure" : false
       }
 }

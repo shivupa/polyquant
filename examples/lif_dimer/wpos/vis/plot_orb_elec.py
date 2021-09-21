@@ -26,9 +26,9 @@ with open(".pyscf_conf.py", "w+") as f:
 
 #########################################
 
-data = iodata.load_one(original_filename)
-iodata.dump_one(data, filename)
-#filename=original_filename
+#data = iodata.load_one(original_filename)
+#iodata.dump_one(data, filename)
+filename=original_filename
 
 #########################################
 
