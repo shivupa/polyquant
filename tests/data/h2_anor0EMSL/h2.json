@@ -1,0 +1,27 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.3707000,
+        0.0000000, 0.0000000, -0.3707000
+    ],
+    "symbols": ["H", "H"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "scf",
+    "basis": 
+    { "electron" :{"H" : [{ "library" : {"type" : "ano-r0"} }]}}
+  },
+  "keywords": {
+    "restricted" : false,
+    "mf_keywords" :{
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
+        "iteration_max" : 200
+    },
+   "pure" : true
+  }
+}
+
