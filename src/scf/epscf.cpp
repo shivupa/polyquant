@@ -25,7 +25,7 @@ double POLYQUANT_EPSCF::directscf_get_shell_density_norm_exchange(const QUANTUM_
   if (!this->Cauchy_Schwarz_screening) {
     return norm;
   }
-  if (this->incremental_fock && incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] && !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+  if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
     norm = (this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx])
                .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                .lpNorm<Eigen::Infinity>();
@@ -42,7 +42,7 @@ double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(const QUANTUM_P
     return norm;
   }
   if (quantum_part.num_parts == 1) {
-    if (this->incremental_fock && incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] && !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
       norm = (this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx])
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                  .lpNorm<Eigen::Infinity>();
@@ -50,7 +50,7 @@ double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(const QUANTUM_P
       norm = this->D[quantum_part_idx][quantum_part_spin_idx].block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size).lpNorm<Eigen::Infinity>();
     }
   } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-    if (this->incremental_fock && incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] && !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
       norm = (2.0 * (this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx]))
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                  .lpNorm<Eigen::Infinity>();
@@ -58,7 +58,7 @@ double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(const QUANTUM_P
       norm = (2.0 * this->D[quantum_part_idx][quantum_part_spin_idx]).block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size).lpNorm<Eigen::Infinity>();
     }
   } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-    if (this->incremental_fock && incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] && !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
       norm = ((this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx]) +
               (this->D[quantum_part_idx][1 - quantum_part_spin_idx] - this->D_last[quantum_part_idx][1 - quantum_part_spin_idx]))
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
@@ -74,7 +74,7 @@ double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(const QUANTUM_P
 
 double POLYQUANT_EPSCF::directscf_get_density_coulomb(const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b) {
   double D_val = 0.0;
-  if (this->incremental_fock && incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] && !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+  if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
     D_val = (this->D[quantum_part_idx][quantum_part_spin_idx](a, b) - this->D_last[quantum_part_idx][quantum_part_spin_idx](a, b));
     if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
       D_val += D_val;
@@ -95,7 +95,7 @@ double POLYQUANT_EPSCF::directscf_get_density_coulomb(const QUANTUM_PARTICLE_SET
 double POLYQUANT_EPSCF::directscf_get_density_exchange(const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &a,
                                                        const size_t &b) {
   double D_val = 0.0;
-  if (this->incremental_fock && incremental_fock_start[quantum_part_idx][quantum_part_spin_idx] && !incremental_fock_reset[quantum_part_idx][quantum_part_spin_idx]) {
+  if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
     D_val = (this->D[quantum_part_idx][quantum_part_spin_idx](a, b) - this->D_last[quantum_part_idx][quantum_part_spin_idx](a, b));
   } else {
     D_val = this->D[quantum_part_idx][quantum_part_spin_idx](a, b);
@@ -108,26 +108,20 @@ void POLYQUANT_EPSCF::form_fock() {
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_a_idx];
-    if (!this->incremental_fock || !incremental_fock_start[quantum_part_a_idx][0] || incremental_fock_reset[quantum_part_a_idx][0]) {
+    if (!this->incremental_fock || !incremental_fock_doing_incremental[quantum_part_a_idx][0]) {
       std::stringstream ss;
       ss << "Resetting Incremental Fock build for Particle " << quantum_part_a_idx << " spin " << 0 << std::endl;
       Polyquant_cout(ss.str());
       this->F[quantum_part_a_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_a_idx][0] += this->H_core[quantum_part_a_idx];
-    } else if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][0] && !incremental_fock_reset[quantum_part_a_idx][0]) {
-      this->incremental_fock_reset_threshold[quantum_part_a_idx][0] = this->iteration_rms_error[quantum_part_a_idx][0] / 10.0;
-      this->incremental_fock_reset_iteration[quantum_part_a_idx][0] = this->iteration_num;
     }
     if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
-      if (!this->incremental_fock || !incremental_fock_start[quantum_part_a_idx][1] || incremental_fock_reset[quantum_part_a_idx][1]) {
+      if (!this->incremental_fock || !incremental_fock_doing_incremental[quantum_part_a_idx][1]) {
         std::stringstream ss;
         ss << "Resetting Incremental Fock build for Particle " << quantum_part_a_idx << " spin " << 1 << std::endl;
         Polyquant_cout(ss.str());
         this->F[quantum_part_a_idx][1].setZero(num_basis, num_basis);
         this->F[quantum_part_a_idx][1] += this->H_core[quantum_part_a_idx];
-      } else if (this->incremental_fock && incremental_fock_start[quantum_part_a_idx][1] && incremental_fock_reset[quantum_part_a_idx][1]) {
-        this->incremental_fock_reset_threshold[quantum_part_a_idx][1] = this->iteration_rms_error[quantum_part_a_idx][1] / 10.0;
-        this->incremental_fock_reset_iteration[quantum_part_a_idx][1] = this->iteration_num;
       }
     }
     quantum_part_a_idx++;
@@ -143,6 +137,7 @@ void POLYQUANT_EPSCF::form_fock() {
     auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
     auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
     for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < quantum_part_a_spin_lim; quantum_part_a_spin_idx++) {
+      this->Cauchy_Schwarz_threshold = std::max(this->iteration_rms_error[quantum_part_a_idx][quantum_part_a_spin_idx] / 1e4, std::numeric_limits<double>::epsilon());
       for (auto quantum_part_b_idx = quantum_part_a_idx; quantum_part_b_idx < this->input_molecule.quantum_particles.size(); quantum_part_b_idx++) {
         if (!independent_converged && quantum_part_a_idx != quantum_part_b_idx)
           continue;
@@ -343,22 +338,24 @@ void POLYQUANT_EPSCF::diag_fock() {
                                                                           this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][0] * this->F[quantum_part_idx][0];
     this->iteration_rms_error[quantum_part_idx][0] = FD_commutator.norm() / (num_basis * num_basis);
     if (this->incremental_fock) {
-      if (this->iteration_rms_error[quantum_part_idx][0] < this->incremental_fock_reset_threshold[quantum_part_idx][0] ||
-          this->iteration_num - this->incremental_fock_reset_iteration[quantum_part_idx][0] > this->incremental_fock_reset_freq) {
-        this->incremental_fock_reset[quantum_part_idx][0] = true;
+      if (this->incremental_fock_doing_incremental[quantum_part_idx][0]) {
+        if (this->iteration_rms_error[quantum_part_idx][0] < this->incremental_fock_reset_threshold[quantum_part_idx][0] ||
+            this->iteration_num - this->incremental_fock_reset_iteration[quantum_part_idx][0] > this->incremental_fock_reset_freq) {
+          this->incremental_fock_doing_incremental[quantum_part_idx][0] = false;
+          this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->iteration_rms_error[quantum_part_idx][0] / 10;
+        }
       } else {
-        if (independent_converged_iteration_num < 0 && iteration_num > independent_converged_iteration_num + incremental_fock_delay_after_independent_converged) {
-          this->incremental_fock_reset[quantum_part_idx][0] = false;
-          this->incremental_fock_start[quantum_part_idx][0] = true;
+        if (this->iteration_rms_error[quantum_part_idx][0]<incremental_fock_initial_onset_thresh &&this->iteration_num> 1) {
+          this->incremental_fock_doing_incremental[quantum_part_idx][0] = true;
+          this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->iteration_rms_error[quantum_part_idx][0] / 10;
           std::stringstream buffer;
-          buffer << "Starting incremental fock build for " << quantum_part_key << " spin " << 0 << std::endl;
+          buffer << "Next iteration doing an incremental fock build for " << quantum_part_key << " spin " << 0 << this->iteration_num << std::endl;
           Polyquant_cout(buffer.str());
         }
       }
     }
     if (this->diis_extrapolation) {
       this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
-      this->F[quantum_part_idx][0] = F_diis;
     }
     F_prime = this->input_integral.orth_X[quantum_part_idx] * F_diis * this->input_integral.orth_X[quantum_part_idx];
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(F_prime);
@@ -371,22 +368,24 @@ void POLYQUANT_EPSCF::diag_fock() {
                                                                             this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][1] * this->F[quantum_part_idx][1];
       this->iteration_rms_error[quantum_part_idx][1] = FD_commutator.norm() / (num_basis * num_basis);
       if (this->incremental_fock) {
-        if (this->iteration_rms_error[quantum_part_idx][1] < this->incremental_fock_reset_threshold[quantum_part_idx][1] ||
-            this->iteration_num - this->incremental_fock_reset_iteration[quantum_part_idx][1] > this->incremental_fock_reset_freq) {
-          this->incremental_fock_reset[quantum_part_idx][1] = true;
+        if (this->incremental_fock_doing_incremental[quantum_part_idx][1]) {
+          if (this->iteration_rms_error[quantum_part_idx][1] < this->incremental_fock_reset_threshold[quantum_part_idx][1] ||
+              this->iteration_num - this->incremental_fock_reset_iteration[quantum_part_idx][1] > this->incremental_fock_reset_freq) {
+            this->incremental_fock_doing_incremental[quantum_part_idx][1] = false;
+            this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->iteration_rms_error[quantum_part_idx][1] / 10;
+          }
         } else {
-          if (independent_converged_iteration_num < 0 && iteration_num > independent_converged_iteration_num + incremental_fock_delay_after_independent_converged) {
-            this->incremental_fock_reset[quantum_part_idx][1] = false;
-            this->incremental_fock_start[quantum_part_idx][1] = true;
+          if (this->iteration_rms_error[quantum_part_idx][1]<incremental_fock_initial_onset_thresh &&this->iteration_num> 1) {
+            this->incremental_fock_doing_incremental[quantum_part_idx][1] = true;
+            this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->iteration_rms_error[quantum_part_idx][1] / 10;
             std::stringstream buffer;
-            buffer << "Starting incremental fock build for " << quantum_part_key << " spin " << 1 << std::endl;
+            buffer << "Next iteration doing an incremental fock build for " << quantum_part_key << " spin " << 1 << std::endl;
             Polyquant_cout(buffer.str());
           }
         }
       }
       if (this->diis_extrapolation) {
         this->diis[quantum_part_idx][1].extrapolate(F_diis, FD_commutator);
-        this->F[quantum_part_idx][1] = F_diis;
       }
       F_prime = this->input_integral.orth_X[quantum_part_idx] * F_diis * this->input_integral.orth_X[quantum_part_idx];
       Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver_beta(F_prime);
@@ -460,7 +459,6 @@ void POLYQUANT_EPSCF::calculate_E_elec() {
 }
 
 void POLYQUANT_EPSCF::calculate_E_total() {
-  // Polyquant_cout(this->input_molecule.E_nuc);
   this->E_total = 0.0;
   for (auto &E_part : E_particles) {
     this->E_total += E_part;
@@ -476,9 +474,9 @@ void POLYQUANT_EPSCF::check_stop() {
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     std::stringstream buffer;
     buffer << std::setprecision(20) << "Convergence status for " << quantum_part_key << std::endl;
-    auto E_diff = this->E_particles[quantum_part_idx] - this->E_particles_last[quantum_part_idx];
+    auto E_diff = (this->E_particles[quantum_part_idx] - this->E_particles_last[quantum_part_idx]) / this->E_particles[quantum_part_idx];
     this->iteration_E_diff[quantum_part_idx] = std::abs(E_diff);
-    buffer << "delta E = " << E_diff << " converged = " << std::boolalpha << (this->iteration_E_diff[quantum_part_idx] < this->convergence_E) << std::endl;
+    buffer << "delta E / E = " << E_diff << " converged = " << std::boolalpha << (this->iteration_E_diff[quantum_part_idx] < this->convergence_E) << std::endl;
 
     if (this->iteration_E_diff[quantum_part_idx] >= this->convergence_E || this->iteration_num < 2) {
       this->converged = false;
@@ -558,47 +556,38 @@ void POLYQUANT_EPSCF::reset_diis() {
 
 void POLYQUANT_EPSCF::reset_incfock() {
   if (this->incremental_fock) {
-    incremental_fock_reset.clear();
     incremental_fock_reset_threshold.clear();
     incremental_fock_reset_iteration.clear();
-    incremental_fock_start.clear();
-    incremental_fock_reset.resize(this->input_molecule.quantum_particles.size());
+    incremental_fock_doing_incremental.clear();
     incremental_fock_reset_threshold.resize(this->input_molecule.quantum_particles.size());
     incremental_fock_reset_iteration.resize(this->input_molecule.quantum_particles.size());
-    incremental_fock_start.resize(this->input_molecule.quantum_particles.size());
+    incremental_fock_doing_incremental.resize(this->input_molecule.quantum_particles.size());
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       if (quantum_part.num_parts == 1) {
-        this->incremental_fock_reset[quantum_part_idx].resize(1);
-        this->incremental_fock_reset[quantum_part_idx][0] = true;
         this->incremental_fock_reset_threshold[quantum_part_idx].resize(1);
-        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh / 10.0;
         this->incremental_fock_reset_iteration[quantum_part_idx].resize(1);
         this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
-        this->incremental_fock_start[quantum_part_idx].resize(1);
-        this->incremental_fock_start[quantum_part_idx][0] = false;
+        this->incremental_fock_doing_incremental[quantum_part_idx].resize(1);
+        this->incremental_fock_doing_incremental[quantum_part_idx][0] = false;
       } else if (quantum_part.restricted == false) {
-        this->incremental_fock_reset[quantum_part_idx].resize(2);
-        this->incremental_fock_reset[quantum_part_idx][0] = true;
-        this->incremental_fock_reset[quantum_part_idx][1] = true;
         this->incremental_fock_reset_threshold[quantum_part_idx].resize(2);
-        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh;
-        this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh / 10.0;
+        this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->incremental_fock_initial_onset_thresh / 10.0;
         this->incremental_fock_reset_iteration[quantum_part_idx].resize(2);
         this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
         this->incremental_fock_reset_iteration[quantum_part_idx][2] = this->iteration_num;
-        this->incremental_fock_start[quantum_part_idx].resize(2);
-        this->incremental_fock_start[quantum_part_idx][0] = false;
-        this->incremental_fock_start[quantum_part_idx][1] = false;
+        this->incremental_fock_doing_incremental[quantum_part_idx].resize(2);
+        this->incremental_fock_doing_incremental[quantum_part_idx][0] = false;
+        this->incremental_fock_doing_incremental[quantum_part_idx][1] = false;
       } else {
-        this->incremental_fock_reset[quantum_part_idx].resize(1);
-        this->incremental_fock_reset[quantum_part_idx][0] = true;
         this->incremental_fock_reset_threshold[quantum_part_idx].resize(1);
-        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh;
+        this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->incremental_fock_initial_onset_thresh / 10.0;
         this->incremental_fock_reset_iteration[quantum_part_idx].resize(1);
         this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
-        this->incremental_fock_start[quantum_part_idx].resize(1);
-        this->incremental_fock_start[quantum_part_idx][0] = false;
+        this->incremental_fock_doing_incremental[quantum_part_idx].resize(1);
+        this->incremental_fock_doing_incremental[quantum_part_idx][0] = false;
       }
       quantum_part_idx++;
     }
@@ -610,7 +599,6 @@ void POLYQUANT_EPSCF::run_iteration() {
   this->form_fock();
   this->diag_fock();
   this->form_DM();
-  // this->calculate_E_elec();
 }
 
 void POLYQUANT_EPSCF::guess_DM() {
@@ -626,6 +614,9 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->reset_diis();
   this->reset_incfock();
 
+  if (this->input_molecule.quantum_particles.size() == 1) {
+    this->independent_converged = true;
+  }
   auto quantum_part_idx = 0ul;
   this->E_particles.resize(this->input_molecule.quantum_particles.size());
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
@@ -674,23 +665,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   }
 }
 
-void POLYQUANT_EPSCF::print_start_iterations() {
-  Polyquant_cout("Starting Iterations");
-  std::stringstream buffer;
-  buffer << "Parameters" << std::endl;
-  buffer << "    diis_extrapolation" << this->diis_extrapolation << std::endl;
-  buffer << "    diis_start" << this->diis_start << std::endl;
-  buffer << "    diis_damping" << this->diis_damping << std::endl;
-  buffer << "    diis_mixing_fraction" << this->diis_mixing_fraction << std::endl;
-  buffer << "    diis_size" << this->diis_size << std::endl;
-  buffer << "    incremental_fock" << this->incremental_fock << std::endl;
-  buffer << "    incremental_fock_reset_freq" << this->incremental_fock_reset_freq << std::endl;
-  buffer << "    incremental_fock_delay_after_independent_converged" << this->incremental_fock_delay_after_independent_converged << std::endl;
-  buffer << "    incremental_fock_initial_onset_thresh" << this->incremental_fock_initial_onset_thresh << std::endl;
-  buffer << "    Cauchy_Schwarz_screening" << this->Cauchy_Schwarz_screening << std::endl;
-  buffer << "    Cauchy_Schwarz_threshold" << this->Cauchy_Schwarz_threshold << std::endl;
-  Polyquant_cout(buffer.str());
-}
+void POLYQUANT_EPSCF::print_start_iterations() { Polyquant_cout("Excess particle SCF Program"); }
 
 void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
@@ -713,9 +688,20 @@ void POLYQUANT_EPSCF::print_error() { APP_ABORT("Something wrong!"); }
 void POLYQUANT_EPSCF::print_params() {
   Polyquant_cout("Running SCF");
   std::stringstream buffer;
-  buffer << "Maximum iterations = " << iteration_max << std::endl;
-  buffer << "convergence_E = " << std::scientific << this->convergence_E << std::endl;
-  buffer << "convergence_DM = " << std::scientific << this->convergence_DM << std::endl;
+  buffer << "Parameters" << std::endl;
+  buffer << "    Maximum iterations = " << iteration_max << std::endl;
+  buffer << "    convergence_E = " << std::scientific << this->convergence_E << std::endl;
+  buffer << "    convergence_DM = " << std::scientific << this->convergence_DM << std::endl;
+  buffer << "    diis_extrapolation = " << this->diis_extrapolation << std::endl;
+  buffer << "    diis_start = " << this->diis_start << std::endl;
+  buffer << "    diis_damping = " << this->diis_damping << std::endl;
+  buffer << "    diis_mixing_fraction = " << this->diis_mixing_fraction << std::endl;
+  buffer << "    diis_size = " << this->diis_size << std::endl;
+  buffer << "    incremental_fock = " << this->incremental_fock << std::endl;
+  buffer << "    incremental_fock_reset_freq = " << this->incremental_fock_reset_freq << std::endl;
+  buffer << "    incremental_fock_initial_onset_thresh = " << this->incremental_fock_initial_onset_thresh << std::endl;
+  buffer << "    Cauchy_Schwarz_screening = " << this->Cauchy_Schwarz_screening << std::endl;
+  buffer << "    Cauchy_Schwarz_threshold = " << this->Cauchy_Schwarz_threshold << std::endl;
   Polyquant_cout(buffer.str());
 }
 
@@ -745,7 +731,8 @@ void POLYQUANT_EPSCF::dump_molden() {
     try {
       std::string filename = quantum_part_key + "_polyquant.molden";
       POLYQUANT_MOLDEN molden_dumper(filename);
-      molden_dumper.dump(atoms, this->input_basis.basis[quantum_part_idx], MO_a_coeff, MO_a_energy, MO_a_symmetry_labels, MO_a_occupation, MO_b_coeff, MO_b_energy, MO_b_symmetry_labels, MO_b_occupation);
+      molden_dumper.dump(atoms, this->input_basis.basis[quantum_part_idx], MO_a_coeff, MO_a_energy, MO_a_symmetry_labels, MO_a_occupation, MO_b_coeff, MO_b_energy, MO_b_symmetry_labels,
+                         MO_b_occupation);
     } catch (std::logic_error e) {
       Polyquant_cout("Not dumping molden for " + quantum_part_key + " because : " + e.what());
     }
@@ -757,6 +744,7 @@ void POLYQUANT_EPSCF::dump_molden() {
 void POLYQUANT_EPSCF::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  this->print_start_iterations();
   this->print_params();
   // calculate integrals we need
   this->input_integral.calculate_overlap();
@@ -771,7 +759,6 @@ void POLYQUANT_EPSCF::run() {
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
-  this->print_start_iterations();
   while (!this->stop) {
     this->run_iteration();
     this->print_iteration();

@@ -10,7 +10,7 @@ using namespace polyquant;
 TEST_SUITE("CALCULATION") {
   TEST_CASE("CALCULATION: H2/ano-R0(EMSL basis) SCF.") {
     POLYQUANT_CALCULATION test_calc;
-    test_calc.setup_calculation("../../tests/data/h2_anor0EMSL//h2.json");
+    test_calc.setup_calculation("../../tests/data/h2_anor0EMSL/h2.json");
     test_calc.run();
     CHECK(test_calc.scf_calc.converged == true);
     CHECK(test_calc.scf_calc.independent_converged == true);
