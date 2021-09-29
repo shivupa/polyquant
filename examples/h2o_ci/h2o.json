@@ -13,8 +13,16 @@
   "model": {
     "method": "CI",
     "basis": 
-    {"H" : [{ "library" : {"type" : "sto-3g"} }],
-        "O" : [{ "library" : {"type" : "sto-3g"} }]}
+        { "electron" :
+          {
+            "H" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}],
+            "O" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}]
+          }
+        }
   },
   "keywords": {
     "restricted" : false,
