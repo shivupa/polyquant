@@ -49,7 +49,6 @@ public:
   //  void calculate_two_electron();
   std::pair<std::vector<size_t>, std::vector<size_t>> make_sorted_ijkl_idx(const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx, const size_t &i, const size_t &j, const size_t &k,
                                                                            const size_t &l);
-  double get2e_elem(const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx, const size_t &i, const size_t &j, const size_t &k, const size_t &l);
 
   /**
    * @brief Create the matricies and vector to hold the integrals and call to

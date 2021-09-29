@@ -159,6 +159,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                                                                                                         int num_part_beta) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  libint2::initialize();
   auto num_basis_a = this->input_basis.num_basis[quantum_part_a_idx];
   auto num_basis_b = this->input_basis.num_basis[quantum_part_b_idx];
 
@@ -172,25 +173,75 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   eri.setZero();
   temp1.setZero();
   temp2.setZero();
-  double elem = 0.0;
+
   // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
   // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
-  for (auto i = 0; i < num_basis_a; i++) {
-    for (auto q = 0; q < num_basis_a; q++) {
-      for (auto r = 0; r < num_basis_b; r++) {
-        for (auto s = 0; s < num_basis_b; s++) {
-          elem = 0.0;
-#pragma omp parallel for reduction(+ : elem)
-          for (auto p = 0; p < num_basis_a; p++) {
-            elem += mo_coeffs_a(p, i) * this->get2e_elem(quantum_part_a_idx, quantum_part_b_idx, p, q, r, s);
+  auto nthreads = omp_get_max_threads();
+  auto shells_a = this->input_basis.basis[quantum_part_a_idx];
+  auto shells_b = this->input_basis.basis[quantum_part_b_idx];
+  auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
+  auto num_shell_b = this->input_basis.basis[quantum_part_b_idx].size();
+  auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
+  auto shell2bf_b = this->input_basis.basis[quantum_part_b_idx].shell2bf();
+
+  auto max_nprim = shells_a.max_nprim() > shells_b.max_nprim() ? shells_a.max_nprim() : shells_b.max_nprim();
+  auto max_l = shells_a.max_l() > shells_b.max_l() ? shells_a.max_l() : shells_b.max_l();
+
+  std::vector<libint2::Engine> engines;
+  engines.resize(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
+  engines[0].set_precision(this->tolerance_2e);
+  for (int i = 0; i < nthreads; i++) {
+    engines[i] = engines[0];
+  }
+
+  #pragma omp parallel for
+  for (size_t i = 0; i < num_shell_a; i++) {
+    auto thread_id = omp_get_thread_num();
+    auto shell_i_bf_start = shell2bf_a[i];
+    auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][i].size();
+    for (size_t q = 0; q < num_shell_a; q++) {
+      auto shell_q_bf_start = shell2bf_a[q];
+      auto shell_q_bf_size = this->input_basis.basis[quantum_part_a_idx][q].size();
+      for (size_t r = 0; r < num_shell_b; r++) {
+        auto shell_r_bf_start = shell2bf_b[r];
+        auto shell_r_bf_size = this->input_basis.basis[quantum_part_b_idx][r].size();
+        for (size_t s = 0; s < num_shell_b; s++) {
+          auto shell_s_bf_start = shell2bf_b[s];
+          auto shell_s_bf_size = this->input_basis.basis[quantum_part_b_idx][s].size();
+          for (size_t p = 0; p < num_shell_a; p++) {
+            auto shell_p_bf_start = shell2bf_a[p];
+            auto shell_p_bf_size = this->input_basis.basis[quantum_part_a_idx][p].size();
+            const auto &buf = engines[thread_id].results();
+            engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
+             const auto *buf_1234 = buf[0];
+              auto shell_pqrs_bf = 0;
+              for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
+              for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
+                for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
+                  for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
+                    if (buf_1234 != nullptr) {
+                      auto eri_pqrs = buf_1234[shell_pqrs_bf];
+                      shell_pqrs_bf++;
+                      if (eri_pqrs != 0){
+                    for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+                      temp1(shell_i_bf, shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
+                    }
+                  }
+                }
+              }
+            }
           }
-          temp1(i, q, r, s) += elem;
         }
       }
     }
   }
+}
+}
+
+double elem = 0.0;
   for (auto i = 0; i < num_basis_a; i++) {
     for (auto j = 0; j < num_basis_a; j++) {
       for (auto r = 0; r < num_basis_b; r++) {
@@ -238,6 +289,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
       }
     }
   }
+  libint2::finalize();
   return eri;
 }
 
@@ -283,88 +335,6 @@ std::pair<std::vector<size_t>, std::vector<size_t>> POLYQUANT_INTEGRAL::make_sor
   return return_pair;
 }
 
-double POLYQUANT_INTEGRAL::get2e_elem(const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx, const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
-  std::pair<std::vector<size_t>, std::vector<size_t>> eri_idx = make_sorted_ijkl_idx(quantum_part_a_idx, quantum_part_b_idx, i, j, k, l);
-  // finish by calculating entire shell if not present and storing entire
-  // shell..
-    omp_set_lock(&writelock);
-  auto part_one = std::get<0>(eri_idx);
-  auto part_two = std::get<1>(eri_idx);
-  auto cached_eri_elem = this->ericache.get(eri_idx);
-  if (cached_eri_elem.has_value()) {
-    omp_unset_lock(&writelock);
-    return cached_eri_elem.value();
-  } else {
-    libint2::initialize();
-    auto shells_a = this->input_basis.basis[part_one[0]];
-    auto shells_b = this->input_basis.basis[part_two[0]];
-    auto max_nprim = shells_a.max_nprim() > shells_b.max_nprim() ? shells_a.max_nprim() : shells_b.max_nprim();
-    auto max_l = shells_a.max_l() > shells_b.max_l() ? shells_a.max_l() : shells_b.max_l();
-    libint2::Engine engine = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
-    engine.set_precision(this->tolerance_2e);
-
-    auto shell2bf_a = shells_a.shell2bf();
-    auto shell2bf_b = shells_b.shell2bf();
-    size_t s1 = 0;
-    size_t s2 = 0;
-    size_t s3 = 0;
-    size_t s4 = 0;
-    for (auto shell_start_a : shell2bf_a) {
-      if (part_one[1] > shell_start_a) {
-        s1++;
-      }
-      if (part_one[2] > shell_start_a) {
-        s2++;
-      }
-      if (part_one[1] <= shell_start_a && part_one[2] <= shell_start_a) {
-        break;
-      }
-    }
-    for (auto shell_start_b : shell2bf_b) {
-      if (part_two[1] > shell_start_b) {
-        s3++;
-      }
-      if (part_two[2] > shell_start_b) {
-        s4++;
-      }
-      if (part_two[1] <= shell_start_b && part_two[2] <= shell_start_b) {
-        break;
-      }
-    }
-
-    const auto &buf = engine.results();
-    // loop over unique shell pairs, {s1,s2} such that s1 >= s2
-    // this is due to the permutational symmetry of the real integrals over
-    // Hermitian operators: (1|2) = (2|1)
-    auto n1 = shells_a[s1].size();
-    auto n2 = shells_a[s2].size();
-    auto n3 = shells_b[s3].size();
-    auto n4 = shells_b[s4].size();
-    engine.compute(shells_a[s1], shells_a[s2], shells_b[s3], shells_b[s4]);
-    const auto *buf_1234 = buf[0];
-    double return_element = 0.0;
-    for (size_t f1 = shell2bf_a[s1], f1234 = 0; f1 < shell2bf_a[s1] + n1; ++f1) {
-      for (size_t f2 = shell2bf_a[s2]; f2 < shell2bf_a[s2] + n2; ++f2) {
-        std::vector<size_t> temp_part_one = {quantum_part_a_idx, f1, f2};
-        for (size_t f3 = shell2bf_b[s3]; f3 < shell2bf_b[s3] + n3; ++f3) {
-          for (size_t f4 = shell2bf_b[s4]; f4 < shell2bf_b[s4] + n4; ++f4, ++f1234) {
-            std::vector<size_t> temp_part_two = {quantum_part_b_idx, f3, f4};
-            std::pair<std::vector<size_t>, std::vector<size_t>> temp_eri_idx = make_sorted_ijkl_idx(quantum_part_a_idx, quantum_part_b_idx, f1, f2, f3, f4);
-            if (buf_1234 == nullptr) {
-              this->ericache.set(temp_eri_idx, 0.0);
-            } else {
-              this->ericache.set(temp_eri_idx, buf_1234[f1234]);
-            }
-          }
-        }
-      }
-    }
-    libint2::finalize();
-    omp_unset_lock(&writelock);
-    auto cached_eri_elem = this->ericache.get(eri_idx);
-    return cached_eri_elem.value();
-  }
-}
 void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells_a, const libint2::BasisSet &shells_b,
                                               libint2::Operator obtype) {
   // Following the HF test in the Libint2 repo

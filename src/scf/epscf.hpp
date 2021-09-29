@@ -7,6 +7,7 @@
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <libint2/diis.h>
 #include <libint2/lcao/molden.h>
+#include <libint2.hpp> // IWYU pragma: keep
 
 namespace polyquant {
 

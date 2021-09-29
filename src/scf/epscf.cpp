@@ -132,8 +132,8 @@ void POLYQUANT_EPSCF::form_fock() {
     }
     quantum_part_a_idx++;
   }
+  libint2::initialize();
   Polyquant_cout("forming fock");
-#pragma omp parallel for schedule(runtime)
   for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule.quantum_particles.size(); quantum_part_a_idx++) {
     auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
     std::advance(quantum_part_a_it, quantum_part_a_idx);
@@ -166,38 +166,40 @@ void POLYQUANT_EPSCF::form_fock() {
           //  FA[i].setZero();
           //  FB[i].setZero();
           //}
+          auto nthreads = omp_get_max_threads();
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FA;
           std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FB;
-#pragma omp parallel
-          {
-            int nthreads = omp_get_num_threads();
-            int thread_id = omp_get_thread_num();
-            if (thread_id == 0) {
-              FA.resize(nthreads);
-              FB.resize(nthreads);
-              for (int i = 0; i < nthreads; i++) {
-                FA[i].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
-                FB[i].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
-                FA[i].setZero();
-                FB[i].setZero();
-              }
-            }
-            // std::cout << "OK0 " << thread_id << std::endl;
-            FA[thread_id].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
-            FB[thread_id].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
-            int shellcounter = 0;
+          auto shells_a = this->input_basis.basis[quantum_part_a_idx];
+          auto shells_b = this->input_basis.basis[quantum_part_b_idx];
+          auto max_nprim = shells_a.max_nprim() > shells_b.max_nprim() ? shells_a.max_nprim() : shells_b.max_nprim();
+          auto max_l = shells_a.max_l() > shells_b.max_l() ? shells_a.max_l() : shells_b.max_l();
+          std::vector<libint2::Engine> engines;
+          engines.resize(nthreads);
+          FA.resize(nthreads);
+          FB.resize(nthreads);
+          engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
+          engines[0].set_precision(this->input_integral.tolerance_2e);
+          // engines[0].set_precision(0.0);
+          for (int i = 0; i < nthreads; i++) {
+            engines[i] = engines[0];
+            FA[i].resizeLike(this->F[quantum_part_a_idx][quantum_part_a_spin_idx]);
+            FB[i].resizeLike(this->F[quantum_part_b_idx][quantum_part_b_spin_idx]);
+            FA[i].setZero();
+            FB[i].setZero();
+          }
+            #pragma omp parallel
+            {
+              int shellcounter = 0;
             for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
-              // std::cout << "OK1 " << thread_id << std::endl;
+              auto thread_id = omp_get_thread_num();
               auto shell_i_bf_start = shell2bf_a[shell_i];
               auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][shell_i].size();
               auto shellpairdata_ij_iter = std::get<1>(this->input_integral.unique_shell_pairs[quantum_part_a_idx]).at(shell_i).begin();
               for (auto &shell_j : std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
-                // std::cout << "OK2 " << thread_id << std::endl;
                 auto shell_j_bf_start = shell2bf_a[shell_j];
                 auto shell_j_bf_size = this->input_basis.basis[quantum_part_a_idx][shell_j].size();
                 const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
                 shellpairdata_ij_iter++;
-                // std::cout << "OK3 " << thread_id << std::endl;
                 auto D_shell_ij_norm =
                     directscf_get_shell_density_norm_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
                 for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
@@ -205,42 +207,34 @@ void POLYQUANT_EPSCF::form_fock() {
                   auto shell_k_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_k].size();
                   auto D_shell_ik_norm = 0.0;
                   auto D_shell_jk_norm = 0.0;
-                  // std::cout << "OK4 " << thread_id << std::endl;
                   if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
                     D_shell_ik_norm =
                         directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
                     D_shell_jk_norm =
                         directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
-                    // std::cout << "OK5 " << thread_id << std::endl;
                   }
                   auto shellpairdata_kl_iter = std::get<1>(this->input_integral.unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
-                  // std::cout << "OK5.5 " << thread_id << std::endl;
                   for (auto &shell_l : std::get<0>(this->input_integral.unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
                     shellcounter++;
-                    if (shellcounter % nthreads != thread_id)
+                    if (shellcounter % nthreads != thread_id){
                       continue;
-
-                    // std::cout << "OK6 " << thread_id << std::endl;
+                    }
                     auto shell_l_bf_start = shell2bf_b[shell_l];
                     auto shell_l_bf_size = this->input_basis.basis[quantum_part_b_idx][shell_l].size();
                     const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
                     shellpairdata_kl_iter++;
-                    // std::cout << "OK7 " << thread_id << std::endl;
                     auto D_shell_kl_norm =
                         directscf_get_shell_density_norm_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
                     // for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space
                     // but this is unsupported for now
                     auto D_shell_il_norm = 0.0;
-                    // std::cout << "OK8 " << thread_id << std::endl;
                     auto D_shell_jl_norm = 0.0;
                     if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
                       auto D_shell_il_norm =
                           directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
-                      // std::cout << "OK9 " << thread_id << std::endl;
                       auto D_shell_jl_norm =
                           directscf_get_shell_density_norm_exchange(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
                     }
-                    // std::cout << "OK10 " << thread_id << std::endl;
                     if (this->Cauchy_Schwarz_screening) {
                       if (std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm}) *
                               this->input_integral.Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral.Schwarz[quantum_part_b_idx](shell_k, shell_l) <
@@ -248,7 +242,6 @@ void POLYQUANT_EPSCF::form_fock() {
                         continue;
                       }
                     }
-                    // std::cout << "OK11 " << thread_id << std::endl;
                     // compute the permutational degeneracy for the given shell
                     // set this may look like the libint example but we are
                     // breaking bra-ket symmetry so we are 4 fold symmetric
@@ -256,24 +249,27 @@ void POLYQUANT_EPSCF::form_fock() {
                     const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
                     const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
                     auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
-                    // std::cout << "OK12 " << thread_id << std::endl;
+                    const auto &buf = engines[thread_id].results();
+                    engines[thread_id].compute(shells_a[shell_i],
+                                   shells_a[shell_j],
+                                   shells_b[shell_k],
+                                   shells_b[shell_l]);
+                     const auto *buf_1234 = buf[0];
+                    auto shell_ijkl_bf = 0;
                     for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                       for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
                         for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
                           for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
-                            // std::cout << "OK12 " << thread_id << std::endl;
-                            auto eri_ijkl = this->input_integral.get2e_elem(quantum_part_a_idx, quantum_part_b_idx, shell_i_bf, shell_j_bf, shell_k_bf, shell_l_bf);
+                            if (buf_1234 != nullptr) {
+                            auto eri_ijkl = buf_1234[shell_ijkl_bf];
                             auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
                             auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
-                            // std::cout << "OK13 " << thread_id << std::endl;
                             const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a.restricted == false && quantum_part_a.num_parts > 1) ? 0.5 : 1.0;
                             const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.25 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
-                            // std::cout << "OK14 " << thread_id << std::endl;
                             FA[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                             FA[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                             FB[thread_id](shell_k_bf, shell_l_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
                             FB[thread_id](shell_l_bf, shell_k_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
-                            // std::cout << "OK15 " << thread_id << std::endl;
                             // exchange terms
                             if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
                               auto D_ik = this->directscf_get_density_exchange(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_k_bf);
@@ -284,13 +280,14 @@ void POLYQUANT_EPSCF::form_fock() {
                               FA[thread_id](shell_i_bf, shell_k_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
                               FA[thread_id](shell_k_bf, shell_i_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
                               FA[thread_id](shell_j_bf, shell_l_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                              // std::cout << "OK16 " << thread_id << std::endl;
                               FA[thread_id](shell_l_bf, shell_j_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
                               FA[thread_id](shell_i_bf, shell_l_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
                               FA[thread_id](shell_l_bf, shell_i_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
                               FA[thread_id](shell_j_bf, shell_k_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                               FA[thread_id](shell_k_bf, shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                             }
+                          }
+                            shell_ijkl_bf++;
                           }
                         }
                       }
@@ -299,17 +296,19 @@ void POLYQUANT_EPSCF::form_fock() {
                 }
               }
             }
-            if (thread_id == 0) {
-              for (auto ti = 0; ti < nthreads; ti++) {
-                this->F[quantum_part_a_idx][quantum_part_a_spin_idx] += FA[ti];
-                this->F[quantum_part_b_idx][quantum_part_b_spin_idx] += FB[ti];
-              }
+          }
+
+            for (auto ti = 0; ti < nthreads; ti++) {
+              this->F[quantum_part_a_idx][quantum_part_a_spin_idx] += FA[ti];
+              this->F[quantum_part_b_idx][quantum_part_b_spin_idx] += FB[ti];
             }
           }
-        }
+
+
       }
     }
   }
+  libint2::finalize();
   // compute energy with non-extrapolated Fock matrix
   this->calculate_E_elec();
   //
@@ -691,10 +690,6 @@ void POLYQUANT_EPSCF::print_start_iterations() {
   buffer << "    Cauchy_Schwarz_screening" << this->Cauchy_Schwarz_screening << std::endl;
   buffer << "    Cauchy_Schwarz_threshold" << this->Cauchy_Schwarz_threshold << std::endl;
   Polyquant_cout(buffer.str());
-  // if (this->Cauchy_Schwarz_screening) {
-  //  APP_ABORT("Cauchy_Schwarz_screening is broken right now. Please turn "
-  //            "it off.");
-  //}
 }
 
 void POLYQUANT_EPSCF::print_iteration() {
@@ -735,18 +730,6 @@ void POLYQUANT_EPSCF::dump_molden() {
       MO_b_coeff = this->C[quantum_part_idx][1];
       MO_b_energy = this->E_orbitals[quantum_part_idx][1];
     }
-    // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_AandB_coeff(MO_a_coeff.rows(), MO_a_coeff.cols() + MO_b_coeff.cols());
-    // MO_AandB_coeff << MO_a_coeff, MO_b_coeff;
-    // std::cout << "SHIV 0" <<std::endl;
-    // for (int i =0; i < MO_a_coeff.rows();i++){
-    //    std::cout << "SHIV " << MO_AandB_coeff(i, 0) << std::endl;
-    //}
-    // std::cout << "SHIV 1" <<std::endl;
-    // for (int i =0; i < MO_a_coeff.rows();i++){
-    //    std::cout << "SHIV " << MO_AandB_coeff(i, MO_a_coeff.cols() + 1) << std::endl;
-    //}
-    // Eigen::Matrix<double, Eigen::Dynamic, 1> MO_AandB_energy(MO_a_energy.rows() + MO_b_energy.rows());
-    // MO_AandB_energy << MO_a_energy, MO_b_energy;
 
     std::vector<std::string> MO_a_symmetry_labels;
     MO_a_symmetry_labels.resize(MO_a_coeff.cols(), "A");
@@ -758,21 +741,11 @@ void POLYQUANT_EPSCF::dump_molden() {
     std::vector<double> MO_b_occupation;
     MO_b_occupation.resize(MO_b_coeff.cols(), 0.0);
     std::fill(MO_b_occupation.begin(), MO_b_occupation.begin() + quantum_part.num_parts_beta, 1.0);
-    // Eigen::Matrix<double, Eigen::Dynamic, 1> occupations;
-    // occupations.setConstant(MO_a_coeff.cols() + MO_b_coeff.cols(), 0.0);
-    // occupations.head(quantum_part.num_parts_alpha).setConstant(1.0);
-    // occupations.segment(MO_a_coeff.cols(), quantum_part.num_parts_beta).setConstant(1.0);
-    // std::vector<bool> spincases;
-    // spincases.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), false);
-    // std::fill(spincases.begin(), spincases.begin() + MO_a_coeff.cols(), true);
     std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
     try {
       std::string filename = quantum_part_key + "_polyquant.molden";
       POLYQUANT_MOLDEN molden_dumper(filename);
       molden_dumper.dump(atoms, this->input_basis.basis[quantum_part_idx], MO_a_coeff, MO_a_energy, MO_a_symmetry_labels, MO_a_occupation, MO_b_coeff, MO_b_energy, MO_b_symmetry_labels, MO_b_occupation);
-      // libint2::molden::Export molden_dumper(atoms, this->input_basis.basis[quantum_part_idx], MO_AandB_coeff, occupations, MO_AandB_energy, symmetry_labels, spincases,
-      //                                      libint2::constants::codata_2018::bohr_to_angstrom, 0.0);
-      // molden_dumper.write(filename);
     } catch (std::logic_error e) {
       Polyquant_cout("Not dumping molden for " + quantum_part_key + " because : " + e.what());
     }
