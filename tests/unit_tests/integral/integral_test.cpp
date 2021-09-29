@@ -43,23 +43,6 @@ TEST_SUITE("INTEGRAL") {
     CHECK(test_int.nuclear[0](0, 0) ==doctest::Approx(-73.3460596066).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     CHECK(test_int.nuclear[0](3, 5) ==doctest::Approx(1.621655966).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
-  TEST_CASE("INTEGRAL: electron repulsion AO basis") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
-    POLYQUANT_MOLECULE test_mol(test_inp);
-    POLYQUANT_BASIS test_bas(test_inp, test_mol);
-    POLYQUANT_INTEGRAL test_int(test_inp, test_bas, test_mol);
-    std::ifstream is("../../tests/unit_tests/integral/twoelec.txt");
-    std::istream_iterator<double> start(is), end;
-    std::vector<double> twoelec(start, end);
-    auto ijkl = 0;
-    for (auto i = 0; i < test_bas.num_basis[0]; i++)
-      for (auto j = 0; j < test_bas.num_basis[0]; j++)
-        for (auto k = 0; k < test_bas.num_basis[0]; k++)
-          for (auto l = 0; l < test_bas.num_basis[0]; l++){
-            CHECK(test_int.get2e_elem(0, 0, i, j, k, l)  ==     doctest::Approx(twoelec[ijkl]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-            ijkl++;
-          }
-  }
   TEST_CASE("INTEGRAL: mixed basis electron repulsion AO basis") {
     POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumHfile/h2o.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
