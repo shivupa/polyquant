@@ -38,9 +38,10 @@ void POLYQUANT_MOLDEN::dump_atoms(std::vector<libint2::Atom> &atoms) {
   for (const auto &atom : atoms) {
     auto Z = atom.atomic_number;
     if (Z == 0) {
-        this->molden_file << std::setw(4) << "X" << std::setw(6) << (atom_count + 1) << std::setw(6) << Z << std::setw(14) << atom.x << std::setw(14)                       << atom.y << std::setw(14) << atom.z << std::endl;
+      this->molden_file << std::setw(4) << "X" << std::setw(6) << (atom_count + 1) << std::setw(6) << Z << std::setw(14) << atom.x << std::setw(14) << atom.y << std::setw(14) << atom.z << std::endl;
     } else {
-        this->molden_file << std::setw(4) << libint2::chemistry::get_element_info().at(Z - 1).symbol << std::setw(6) << (atom_count + 1) << std::setw(6) << Z << std::setw(14) << atom.x << std::setw(14)                       << atom.y << std::setw(14) << atom.z << std::endl;
+      this->molden_file << std::setw(4) << libint2::chemistry::get_element_info().at(Z - 1).symbol << std::setw(6) << (atom_count + 1) << std::setw(6) << Z << std::setw(14) << atom.x << std::setw(14)
+                        << atom.y << std::setw(14) << atom.z << std::endl;
     }
     atom_count++;
   }
