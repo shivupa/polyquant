@@ -34,7 +34,7 @@
         }
     ],
     "mf_keywords" :{
-        "convergence_E" : 1e-9,
+        "convergence_E" : 1e-7,
         "convergence_DM" : 1e-7,
         "iteration_max" : 200,
         "dump_for_qmcpack" : true,
