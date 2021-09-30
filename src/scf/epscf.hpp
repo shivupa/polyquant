@@ -4,10 +4,10 @@
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <h5cpp/hdf5.hpp>
+#include <libint2.hpp> // IWYU pragma: keep
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <libint2/diis.h>
 #include <libint2/lcao/molden.h>
-#include <libint2.hpp> // IWYU pragma: keep
 
 namespace polyquant {
 
@@ -152,13 +152,11 @@ public:
   double diis_mixing_fraction = 0.0;
   int diis_size = 5;
   bool incremental_fock = true;
-  std::vector<std::vector<bool>> incremental_fock_reset;
   std::vector<std::vector<double>> incremental_fock_reset_threshold;
   std::vector<std::vector<int>> incremental_fock_reset_iteration;
-  std::vector<std::vector<int>> incremental_fock_start;
+  std::vector<std::vector<int>> incremental_fock_doing_incremental;
   int incremental_fock_reset_freq = 8;
-  int incremental_fock_delay_after_independent_converged = 10;
-  double incremental_fock_initial_onset_thresh = 1e-4;
+  double incremental_fock_initial_onset_thresh = 1e-5;
   bool Cauchy_Schwarz_screening = false;
   double Cauchy_Schwarz_threshold = 1e-12;
 

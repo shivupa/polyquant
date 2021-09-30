@@ -27,10 +27,10 @@ namespace polyquant {
 class POLYQUANT_MOLDEN {
 public:
   POLYQUANT_MOLDEN() = default;
-  ~POLYQUANT_MOLDEN(){
-      if(this->molden_file.is_open()){
-          this->molden_file.close();
-      }
+  ~POLYQUANT_MOLDEN() {
+    if (this->molden_file.is_open()) {
+      this->molden_file.close();
+    }
   }
   /**
    * @brief Construct a MOLDEN object using the create_file function.
