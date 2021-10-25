@@ -144,7 +144,7 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
   }
 }
 // TODO
-void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
+void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
   // lambda for removing normalization
   auto gaussianint_lambda = [](auto n, auto alpha) {
     auto n1 = (n + 1) * 0.5;
@@ -161,7 +161,7 @@ void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vect
   auto NbElements_dataset = basis_group.create_dataset("NbElements", int_type, simple_space);
   NbElements_dataset.write(unique_shells.size(), int_type, simple_space);
   // dump basis name
-  std::string basis_name = "LCAOBSet";
+  std::string basis_name = fmt::format("LCAOBSet_{}", quantum_part_name);
   auto str_type = hdf5::datatype::String::fixed(basis_name.size());
   str_type.padding(hdf5::datatype::StringPad::NULLPAD);
   str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
@@ -336,7 +336,7 @@ void POLYQUANT_HDF5::dump_mf_to_hdf5_for_QMCPACK(bool pbc, bool complex_vals, bo
   this->dump_generalparameters(complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity);
   this->dump_MOs(quantum_part_name, num_ao, num_mo, E_orb, mo_coeff);
   this->dump_atoms(num_atom, num_species, atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names, atomic_centers);
-  this->dump_basis(atomic_names, unique_shells);
+  this->dump_basis(quantum_part_name, atomic_names, unique_shells);
 }
 // TODO
 void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
