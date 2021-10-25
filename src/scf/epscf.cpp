@@ -35,36 +35,37 @@ double POLYQUANT_EPSCF::directscf_get_shell_density_norm_exchange(const QUANTUM_
   return norm;
 }
 
-double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx,
+double POLYQUANT_EPSCF::directscf_get_shell_density_norm_coulomb(const QUANTUM_PARTICLE_SET &quantum_part_a, const size_t &quantum_part_a_idx, const size_t &quantum_part_a_spin_idx,
+                                                                 const QUANTUM_PARTICLE_SET &quantum_part_b, const size_t &quantum_part_b_idx, const size_t &quantum_part_b_spin_idx,
                                                                  const size_t &shell_a_bf_start, const size_t &shell_a_bf_size, const size_t &shell_b_bf_start, const size_t &shell_b_bf_size) {
   double norm = 0.0;
   if (!this->Cauchy_Schwarz_screening) {
     return norm;
   }
-  if (quantum_part.num_parts == 1) {
-    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
-      norm = (this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx])
+  if (quantum_part_b.num_parts == 1) {
+    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_a_idx][quantum_part_a_spin_idx]) {
+      norm = (this->D[quantum_part_b_idx][quantum_part_b_spin_idx] - this->D_last[quantum_part_b_idx][quantum_part_b_spin_idx])
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                  .lpNorm<Eigen::Infinity>();
     } else {
-      norm = this->D[quantum_part_idx][quantum_part_spin_idx].block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size).lpNorm<Eigen::Infinity>();
+      norm = this->D[quantum_part_b_idx][quantum_part_b_spin_idx].block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size).lpNorm<Eigen::Infinity>();
     }
-  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
-    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
-      norm = (2.0 * (this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx]))
+  } else if (quantum_part_b.num_parts > 1 && quantum_part_b.restricted == true) {
+    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_a_idx][quantum_part_a_spin_idx]) {
+      norm = (2.0 * (this->D[quantum_part_b_idx][quantum_part_b_spin_idx] - this->D_last[quantum_part_b_idx][quantum_part_b_spin_idx]))
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                  .lpNorm<Eigen::Infinity>();
     } else {
-      norm = (2.0 * this->D[quantum_part_idx][quantum_part_spin_idx]).block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size).lpNorm<Eigen::Infinity>();
+      norm = (2.0 * this->D[quantum_part_b_idx][quantum_part_b_spin_idx]).block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size).lpNorm<Eigen::Infinity>();
     }
-  } else if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_idx][quantum_part_spin_idx]) {
-      norm = ((this->D[quantum_part_idx][quantum_part_spin_idx] - this->D_last[quantum_part_idx][quantum_part_spin_idx]) +
-              (this->D[quantum_part_idx][1 - quantum_part_spin_idx] - this->D_last[quantum_part_idx][1 - quantum_part_spin_idx]))
+  } else if (quantum_part_b.num_parts > 1 && quantum_part_b.restricted == false) {
+    if (this->incremental_fock && incremental_fock_doing_incremental[quantum_part_a_idx][quantum_part_a_spin_idx]) {
+      norm = ((this->D[quantum_part_b_idx][quantum_part_b_spin_idx] - this->D_last[quantum_part_b_idx][quantum_part_b_spin_idx]) +
+              (this->D[quantum_part_b_idx][1 - quantum_part_b_spin_idx] - this->D_last[quantum_part_b_idx][1 - quantum_part_b_spin_idx]))
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                  .lpNorm<Eigen::Infinity>();
     } else {
-      norm = (this->D[quantum_part_idx][quantum_part_spin_idx] + this->D[quantum_part_idx][1 - quantum_part_spin_idx])
+      norm = (this->D[quantum_part_b_idx][quantum_part_b_spin_idx] + this->D[quantum_part_b_idx][1 - quantum_part_b_spin_idx])
                  .block(shell_a_bf_start, shell_b_bf_start, shell_a_bf_size, shell_b_bf_size)
                  .lpNorm<Eigen::Infinity>();
     }
@@ -254,10 +255,10 @@ void POLYQUANT_EPSCF::form_fock() {
                           for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
                             if (buf_1234 != nullptr) {
                               auto eri_ijkl = buf_1234[shell_ijkl_bf];
-                              auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
-                              auto D_kl = this->directscf_get_density_coulomb(quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
+                              auto D_ij = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx,quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
+                              auto D_kl = this->directscf_get_density_coulomb(quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx,quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
                               const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a.restricted == false && quantum_part_a.num_parts > 1) ? 0.5 : 1.0;
-                              const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.25 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
+                              const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.5 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
                               FA[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                               FA[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                               //FB[thread_id](shell_k_bf, shell_l_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
