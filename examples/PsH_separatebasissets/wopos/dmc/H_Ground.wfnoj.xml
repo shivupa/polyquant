@@ -1,15 +1,26 @@
 <?xml version="1.0"?>
 <qmcsystem>
   <wavefunction name="psi0" target="e">
-      <determinantset type="MolecularOrbital" name="LCAOBSet" source="ion0" transform="yes" cuspCorrection="yes" href="H_wpos.h5">
-	    <sposet basisset="LCAOBSet" name="eigenset_0" size="5" cuspInfo="spo-e.cuspInfo.xml">
-        <occupation mode="ground"/>
-        <coefficient size="5" spindataset="0"/>
-      </sposet>
-      <multideterminant fast="no" optimize="no" ngroups="2" spo_0="eigenset_0" spo_1="eigenset_0" >
-        <detlist size="25" type="DETS" nstates="5" cutoff="1e-20"  href="H_wpos.h5" algorithm="table_method" />
-        <detlist size="25" type="DETS" nstates="5" cutoff="1e-20"  href="H_wpos.h5" algorithm="table_method" />
-      </multideterminant>
-    </determinantset>
+      <sposet_collection  type="MolecularOrbital" source="ion0" cuspCorrection="yes" href="H_wpos.h5">
+            <basisset name="LCAOBSet" transform="yes"> </basisset>
+            <sposet name="spo0" basisset="LCAOBSet" size="1" >
+              <occupation mode="ground" />
+              <coefficient size="1" id="updetC" spindataset="0">
+                1.00000000000000e+00
+              </coefficient>
+            </sposet>
+            <sposet name="spo1" basisset="LCAOBSet" size="1" >
+              <occupation mode="ground" />
+              <coefficient size="1" id="downdetC" spindataset="0" >
+                1.00000000000000e+00
+              </coefficient>
+            </sposet>
+      </sposet_collection> 
+      <determinantset>
+        <slaterdeterminant delay_rank="1">
+          <determinant id="updet" sposet="spo0"/>
+          <determinant id="ddet"  sposet="spo1" />
+        </slaterdeterminant>
+      </determinantset>
   </wavefunction>
 </qmcsystem>

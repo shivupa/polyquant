@@ -146,14 +146,14 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
 // TODO
 void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
   // lambda for removing normalization
-  // auto gaussianint_lambda = [](auto n, auto alpha) {
-  //   auto n1 = (n + 1) * 0.5;
-  //   return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
-  // };
-  // auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
-  //   auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
-  //   return 1.0 / std::sqrt(gint_val);
-  // };
+  auto gaussianint_lambda = [](auto n, auto alpha) {
+    auto n1 = (n + 1) * 0.5;
+    return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
+  };
+  auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
+    auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
+    return 1.0 / std::sqrt(gint_val);
+  };
   Polyquant_cout("dumping basis parameters");
   auto basis_group = root_group.create_group("basisset");
 
@@ -294,8 +294,9 @@ void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vect
         // //
         // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
         // const auto sqrt_Pi_cubed =
-        // double{5.56832799683170784528481798212}; const auto two_alpha
-        // = 2.0 * exponent; const auto two_alpha_to_am32 =
+        // double{5.56832799683170784528481798212}; 
+        // const auto two_alpha      = 2.0 * exponent; 
+        // const auto two_alpha_to_am32 =
         //     std::pow(two_alpha, (shell.contr[0].l + 1)) *
         //     std::sqrt(two_alpha);
         // const auto normalization_factor =
@@ -305,15 +306,15 @@ void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vect
         //                libint2::math::df_Kminus1[2 * shell.contr[0].l]));
         // contraction /= normalization_factor;
         // Remove pyscf norm
-        // aply pyscf _nomalize_contracted_ao
-        // std::cout << "before unnormalizing at output " << exponent << " "
-        //          << contraction << std::endl;
-        // contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
-        // std::cout << "after unnormalizing at output " << exponent << " "
-        //           << contraction << std::endl;
-        // std::stringstream buffer;
-        // auto a = gtonorm_lambda(shell.contr[0].l, exponent);
-        // std::cout << a << std::endl;
+        // apply pyscf _nomalize_contracted_ao
+        std::cout << "before unnormalizing at output " << exponent << " "
+                 << contraction << std::endl;
+        contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
+        std::cout << "after unnormalizing at output " << exponent << " "
+                  << contraction << std::endl;
+        std::stringstream buffer;
+        auto a = gtonorm_lambda(shell.contr[0].l, exponent);
+        std::cout << a << std::endl;
         auto contraction_dataset = curr_func_group.create_dataset("contraction", double_type, simple_space);
         contraction_dataset.write(contraction, double_type, simple_space);
       }
