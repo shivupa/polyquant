@@ -7,7 +7,7 @@
     <pairpot name="ElecElec" type="coulomb" source="e" target="e" physical="true"/>
     <pairpot name="IonIon" type="coulomb" source="ion0" target="ion0"/>
     <pairpot name="IonElec" type="coulomb" source="ion0" target="e"/>
-    <estimator type="gofr" name="gofr" num_bin="200" rmax="5.0" />
+    <estimator type="gofr" name="gofr" num_bin="50" rmax="5.0" />
   </hamiltonian>
   <!--
  
@@ -17,41 +17,20 @@ Example initial VMC to measure initial energy and variance
   <qmc method="vmc" move="pbyp" checkpoint="-1">
     <estimator name="LocalEnergy" hdf5="no"/>
     <parameter name="warmupSteps">100</parameter>
-    <parameter name="blocks">15000</parameter>
-    <parameter name="steps">50</parameter>
+    <parameter name="blocks">10</parameter>
+    <parameter name="steps">100</parameter>
     <parameter name="substeps">8</parameter>
     <parameter name="timestep">0.5</parameter>
     <parameter name="usedrift">no</parameter>
   </qmc>
-  <!--
- 
-Example initial VMC optimization 
- 
-Number of steps required will be computed from total requested sample 
-count and total number of walkers 
-
-  <loop max="5">
-    <qmc method="linear" move="pbyp" checkpoint="-1">
+<qmc method="dmc" move="pbyp" checkpoint="20">
       <estimator name="LocalEnergy" hdf5="no"/>
-      <parameter name="warmupSteps">100</parameter>
-      <parameter name="blocks">200</parameter>
-      <parameter name="timestep">0.5</parameter>
-      <parameter name="walkers">1</parameter>
-      <parameter name="samples">64000</parameter>
-      <parameter name="substeps">4</parameter>
-      <parameter name="usedrift">no</parameter>
-      <parameter name="MinMethod">OneShiftOnly</parameter>
-      <parameter name="minwalkers">0.3</parameter>
-    </qmc>
-  </loop>
-  <qmc method="vmc" move="pbyp" checkpoint="-1">
-    <estimator name="LocalEnergy" hdf5="no"/>
-    <parameter name="warmupSteps">100</parameter>
-    <parameter name="blocks">400</parameter>
-    <parameter name="steps">50</parameter>
-    <parameter name="substeps">8</parameter>
-    <parameter name="timestep">0.5</parameter>
-    <parameter name="usedrift">no</parameter>
+      <parameter name="warmupSteps"         >    20             </parameter>
+      <parameter name="blocks"              >    200             </parameter>
+      <parameter name="steps"               >    30              </parameter>
+      <parameter name="timestep"            >    0.005           </parameter>
+      <parameter name="reconfiguration"     >    no              </parameter>
+      <parameter name="minimumtargetwalkers">    128             </parameter>
+      <parameter name="targetwalkers">  1000 </parameter>
   </qmc>
--->
 </simulation>

@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 
-f = h5py.File('PsH.s001.stat.h5', 'r')
+f = h5py.File('PsH.s000.stat.h5', 'r')
 
 gofr_eup_p = np.mean(f["gofr_e_0_2"].get("value"), axis=0)
 gofr_edn_p = np.mean(f["gofr_e_1_2"].get("value"), axis=0)
