@@ -12,8 +12,9 @@
     "method": "SCF",
     "basis": 
         { "electron" :
-          {"H" : [{ "library" : 
-              {"type" : "cc-pvdz"}}]}
+          {"H" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}]}
         }
   },
   "keywords": {
@@ -24,8 +25,8 @@
         "convergence_E" : 1e-12,
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
-        "Cauchy_Schwarz_screening" : false,
-        "incremental_fock" : false
+        "Cauchy_Schwarz_screening" : true,
+        "incremental_fock" : true
     },
    "pure" : true
       }
