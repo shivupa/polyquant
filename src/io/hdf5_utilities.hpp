@@ -9,6 +9,7 @@
 #include <cctype>
 #include <chrono>
 #include <filesystem>
+#include <fmt/core.h>
 #include <fstream>
 #include <h5cpp/hdf5.hpp>
 #include <iomanip>
@@ -17,7 +18,6 @@
 #include <nlohmann/json.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
-#include <fmt/core.h>
 
 namespace polyquant {
 

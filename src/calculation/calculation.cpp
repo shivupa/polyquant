@@ -274,7 +274,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
     int multiplicity = quantum_part.multiplicity;
-    libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
+    libint2::BasisSet basis = this->input_basis.unnormalized_basis_for_output[quantum_part_idx];
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {

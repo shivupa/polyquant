@@ -147,39 +147,47 @@ void POLYQUANT_BASIS::apply_pyscf_normalization() {
   //_nomalize_contracted_ao in pyscf/gto/mole.py
   // lambda for normalization
   auto gaussianint_lambda = [](auto n, auto alpha) {
-    auto n1 = (n + 1) * 0.5;
+    auto n1 = (n + 1.0) * 0.5;
     return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
   };
   auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
-    auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
+    auto gint_val = gaussianint_lambda((l * 2.0) + 2.0, 2.0 * exponent);
     return 1.0 / std::sqrt(gint_val);
   };
+  auto libint_norm = [](auto l, auto alpha) {
+    // used in libint -> const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
+    const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
+    // const auto sqrt_Pi_cubed = std::pow(std::numbers::pi_v<double>, 1.5);
+    const auto two_alpha = 2.0 * alpha;
+    const auto two_alpha_to_am32 = std::pow(two_alpha, (l + 1)) * std::sqrt(two_alpha);
+    const auto normalization_factor = std::sqrt(std::pow(2.0, l) * two_alpha_to_am32 / (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * l]));
+    return normalization_factor;
+  };
+  this->unnormalized_basis_for_output = this->basis;
+  for (auto &quantum_particle_basis : this->unnormalized_basis_for_output) {
+    for (auto &shell : quantum_particle_basis) {
+      // REMOVE NORMALIZATION FACTOR FROM LIBINT
+      // SEE SHELL.H
+      // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
+      auto l = shell.contr[0].l;
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        shell.contr[0].coeff.at(p) /= libint_norm(l, shell.alpha[p]);
+      }
+    }
+  }
   for (auto &quantum_particle_basis : this->basis) {
     for (auto &shell : quantum_particle_basis) {
       // REMOVE NORMALIZATION FACTOR FROM LIBINT
       // SEE SHELL.H
       // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
-      // used in libint -> const auto sqrt_Pi_cubed =
-      // double{5.56832799683170784528481798212};
-      const auto sqrt_Pi_cubed = std::pow(std::numbers::pi_v<double>, 1.5);
+      auto l = shell.contr[0].l;
       for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        auto exponent = shell.alpha[p];
-        const auto two_alpha = 2.0 * exponent;
-        const auto two_alpha_to_am32 = std::pow(two_alpha, (shell.contr[0].l + 1)) * std::sqrt(two_alpha);
-        const auto normalization_factor = std::sqrt(std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32 / (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * shell.contr[0].l]));
-        shell.contr[0].coeff.at(p) /= normalization_factor;
+        shell.contr[0].coeff.at(p) /= libint_norm(l, shell.alpha[p]);
       }
 
-      auto l = shell.contr[0].l;
       // apply pyscf gtonorm
       for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        // std::cout << "before gto pyscf norm "<< shell.alpha[p] << " " <<
-        // shell.contr[0].coeff.at(p)
-        // << std::endl;
         shell.contr[0].coeff.at(p) *= gtonorm_lambda(l, shell.alpha[p]);
-        // std::cout << "after gto pyscf norm "<< shell.alpha[p] << " " <<
-        // shell.contr[0].coeff.at(p)
-        //           << std::endl;
       }
 
       // apply pyscf _nomalize_contracted_ao
@@ -200,16 +208,10 @@ void POLYQUANT_BASIS::apply_pyscf_normalization() {
       }
       s1 = 1.0 / std::sqrt(s1);
       for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        // std::cout << "before _nomalize_contracted_ao "<< shell.alpha[p] << "
-        // "
-        // << shell.contr[0].coeff.at(p)
-        // << std::endl;
         shell.contr[0].coeff.at(p) *= s1;
-        // std::cout << "after _nomalize_contracted_ao " << shell.alpha[p] << "
-        // "
-        //           << shell.contr[0].coeff.at(p) << std::endl;
       }
     }
+    // TODO proper shell dumping for output file...
     for (auto shell : quantum_particle_basis) {
       std::cout << shell << std::endl;
     }

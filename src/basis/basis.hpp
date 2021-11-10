@@ -56,6 +56,7 @@ public:
    *
    */
   std::vector<libint2::BasisSet> basis;
+  std::vector<libint2::BasisSet> unnormalized_basis_for_output;
   /**
    * @brief Number of basis functions
    *
