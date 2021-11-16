@@ -349,5 +349,6 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   std::string particle_filename = "Multidet_" + filename;
   Polyquant_cout("Dumping post MF HDF5 to filename: " + particle_filename);
   POLYQUANT_HDF5 hdf5_f(particle_filename);
-  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states, this->ci_calc.detset.max_orb);
+  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states,
+                                          *std::max_element(this->ci_calc.detset.max_orb.begin(), this->ci_calc.detset.max_orb.end()));
 }

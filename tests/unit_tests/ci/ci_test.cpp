@@ -37,7 +37,7 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
-    CHECK(test_ci.detset.max_orb == 7);
+    CHECK(test_ci.detset.max_orb[0] == 7);
     CHECK(test_ci.detset.N_dets == 21);
     CHECK(test_ci.detset.dets[0].size() == 21);
     std::bitset<8> hf_det("0011111");
@@ -111,7 +111,7 @@ TEST_SUITE("CI") {
   }
   TEST_CASE("CI: get occ virt ") {
     POLYQUANT_DETSET<uint64_t> detset;
-    detset.max_orb = 7;
+    detset.max_orb[0] = 7;
     std::bitset<8> hf_det("0011111");
     std::vector<uint64_t> hf_det_vec = {hf_det.to_ulong()};
     std::vector<int> occ, virt;

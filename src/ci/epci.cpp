@@ -13,8 +13,8 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   std::vector<int> num_basis;
   for (auto i : this->input_basis.num_basis) {
     num_basis.push_back(i);
+    this->detset.max_orb.push_back(i);
   }
-  this->detset.max_orb = *std::max_element(num_basis.begin(), num_basis.end());
   this->detset.set_integral(this->input_integral);
   this->detset.construct_cache(this->cache_size);
   this->setup_determinants();

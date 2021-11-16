@@ -49,7 +49,7 @@ public:
    *
    */
   std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
-  int max_orb;
+  std::vector<int> max_orb;
   POLYQUANT_INTEGRAL input_integral;
 
   void set_integral(POLYQUANT_INTEGRAL &integral) { this->input_integral = integral; };
@@ -125,8 +125,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(std::vector<std::vect
   dets.resize(occ.size());
   for (auto i_part = 0; i_part < occ.size(); i_part++) {
     std::string alpha_bit_string, beta_bit_string;
-    alpha_bit_string.resize(max_orb, '0');
-    beta_bit_string.resize(max_orb, '0');
+    alpha_bit_string.resize(max_orb[i_part], '0');
+    beta_bit_string.resize(max_orb[i_part], '0');
     for (auto i_occ : occ[i_part][0]) {
       alpha_bit_string[i_occ] = '1';
     }
@@ -260,7 +260,7 @@ template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::
   for (auto i = 0; i < D.size(); i++) {
     std::bitset<64> D_bitset(D[i]);
     for (auto j = 0; j < D_bitset.size(); j++) {
-      if ((i * 64) + j >= this->max_orb) {
+      if ((i * 64) + j >= this->max_orb[idx_part]) {
         break;
       }
       if (D_bitset[j] == 1) {
