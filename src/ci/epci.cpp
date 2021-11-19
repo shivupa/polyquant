@@ -7,19 +7,35 @@ void POLYQUANT_EPCI::setup(const POLYQUANT_EPSCF &input_scf) {
   this->input_params = this->input_epscf.input_params;
   this->input_molecule = this->input_epscf.input_molecule;
   this->input_basis = this->input_epscf.input_basis;
+  this->frozen_core.resize(this->input_molecule.quantum_particles.size());
+  this->deleted_virtual.resize(this->input_molecule.quantum_particles.size());
   this->input_integral = this->input_epscf.input_integral;
-  this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C);
-  this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
+  // this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C);
+  // this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C);
+  // std::vector<int> num_basis;
+  // for (auto i : this->input_basis.num_basis) {
+  //   num_basis.push_back(i);
+  //   this->detset.max_orb.push_back(i);
+  // }
+  // this->detset.set_integral(this->input_integral);
+  // this->detset.construct_cache(this->cache_size);
+  // this->setup_determinants();
+  // Polyquant_cout("Created " + std::to_string(this->detset.N_dets) + " determinants");
+  // this->detset.print_determinants();
+}
+
+void POLYQUANT_EPCI::calculate_integrals() {
+
+  this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C, this->frozen_core, this->deleted_virtual);
+  this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C, this->frozen_core, this->deleted_virtual);
+
   std::vector<int> num_basis;
-  for (auto i : this->input_basis.num_basis) {
-    num_basis.push_back(i);
-    this->detset.max_orb.push_back(i);
+  for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++){
+    num_basis.push_back(this->input_basis.num_basis[i] - this->frozen_core[i] - this->deleted_virtual[i]);
+    this->detset.max_orb.push_back(this->input_basis.num_basis[i] - this->frozen_core[i] - this->deleted_virtual[i]);
   }
   this->detset.set_integral(this->input_integral);
   this->detset.construct_cache(this->cache_size);
-  this->setup_determinants();
-  Polyquant_cout("Created " + std::to_string(this->detset.N_dets) + " determinants");
-  this->detset.print_determinants();
 }
 
 void POLYQUANT_EPCI::setup_determinants() {
@@ -77,6 +93,8 @@ void POLYQUANT_EPCI::setup_determinants() {
     this->detset.N_dets *= this->detset.dets[quantum_part_idx].size();
     quantum_part_idx++;
   }
+  Polyquant_cout("Created " + std::to_string(this->detset.N_dets) + " determinants");
+  this->detset.print_determinants();
 }
 
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
@@ -89,6 +107,7 @@ void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+    this->setup_determinants();
   this->print_start_iterations();
   // spectra generated function
   // this->detset.create_ham();

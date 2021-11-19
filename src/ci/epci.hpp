@@ -21,7 +21,7 @@ namespace polyquant {
 class POLYQUANT_EPCI {
 public:
   POLYQUANT_EPCI() = default;
-  POLYQUANT_EPCI(const POLYQUANT_EPSCF &input_scf) { this->setup(input_scf); }
+  POLYQUANT_EPCI(const POLYQUANT_EPSCF &input_scf){this->setup(input_scf);};
   void setup(const POLYQUANT_EPSCF &input_scf);
   void setup_determinants();
   void run();
@@ -74,6 +74,8 @@ public:
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;
 
   std::vector<std::tuple<int, int, int>> excitation_level;
+  std::vector<int> frozen_core;
+  std::vector<int> deleted_virtual;
   /**
    * @brief Energy convergence
    *
