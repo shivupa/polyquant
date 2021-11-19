@@ -31,7 +31,6 @@ public:
   void print_exceeded_iterations();
   void print_error();
   void print_params();
-  void dump_ham();
 
   int iteration_num = 0;
   /**

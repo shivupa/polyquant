@@ -14,6 +14,7 @@ void POLYQUANT_INTEGRAL::construct_ijcache(size_t size_in_gb) {
   polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> constructed_ijcache(this->ijcache_size);
   this->ijcache = constructed_ijcache;
 }
+
 void POLYQUANT_INTEGRAL::construct_ericache(size_t size_in_gb) {
   std::vector<size_t> temp_vec = {0, 0, 0};
   std::pair<std::vector<size_t>, std::vector<size_t>> temp(temp_vec, temp_vec);
@@ -70,6 +71,7 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
   }
   libint2::finalize();
 }
+
 void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
   if (threshold == -1) {
     threshold = this->tolerance_2e;
@@ -87,6 +89,7 @@ void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
   }
   libint2::finalize();
 }
+
 void POLYQUANT_INTEGRAL::calculate_kinetic() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -133,7 +136,7 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
   libint2::finalize();
 }
 
-void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs) {
+void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core, std::vector<int> deleted_virtual) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   mo_one_body_ints.resize(mo_coeffs.size());
@@ -144,10 +147,10 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto charge = quantum_part.charge;
     // this next loop will be parallel if eigen is linked to parallel blas/lapack
-    for (auto j = 0; j < mo_one_body_ints[quantum_part_idx].size(); j++) {
-      mo_one_body_ints[quantum_part_idx][j].resize(mo_coeffs[quantum_part_idx][j].cols(), mo_coeffs[quantum_part_idx][j].cols());
-      mo_one_body_ints[quantum_part_idx][j].setZero();
-      mo_one_body_ints[quantum_part_idx][j] = mo_coeffs[quantum_part_idx][j].transpose() * (kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_coeffs[quantum_part_idx][j];
+    for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < mo_one_body_ints[quantum_part_idx].size(); quantum_part_spin_idx++) {
+      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].resize(mo_coeffs[quantum_part_idx][quantum_part_spin_idx].cols(), mo_coeffs[quantum_part_idx][quantum_part_spin_idx].cols());
+      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].setZero();
+      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_coeffs[quantum_part_idx][quantum_part_spin_idx].transpose() * (kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
     }
     quantum_part_idx++;
   }
@@ -293,7 +296,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   return eri;
 }
 
-void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs) {
+void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core, std::vector<int> deleted_virtual) {
   mo_two_body_ints.resize(mo_coeffs.size());
   auto num_basis = this->input_basis.num_basis;
   auto quantum_part_a_idx = 0ul;
@@ -381,6 +384,7 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
     }
   }
 }
+
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) {
   omp_init_lock(&writelock);
   auto function = __PRETTY_FUNCTION__;

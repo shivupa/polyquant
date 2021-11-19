@@ -98,10 +98,15 @@ void POLYQUANT_EPCI::setup_determinants() {
 }
 
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
+
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
+
 void POLYQUANT_EPCI::print_success() { Polyquant_cout("SCF SUCCESS"); }
+
 void POLYQUANT_EPCI::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
+
 void POLYQUANT_EPCI::print_error() { APP_ABORT("Something wrong!"); }
+
 void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 
 void POLYQUANT_EPCI::run() {
@@ -154,7 +159,3 @@ void POLYQUANT_EPCI::run() {
     APP_ABORT("CI Calculation did not converge!");
   }
 }
-// void POLYQUANT_EPCI::dump_ham() {
-//    this->detset.dump_ham();
-//
-//}

@@ -7,6 +7,7 @@ POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
   POLYQUANT_TIMER timer(function);
   this->setup_calculation(filename);
 }
+
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
   Polyquant_cout("SETTING UP INPUT FILE");
@@ -162,6 +163,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     dump_mf_for_qmcpack(hdf5_filename);
   }
 }
+
 void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_type) {
   if (!this->post_mean_field_methods.contains(post_mean_field_type) && post_mean_field_type != "FILE") {
     APP_ABORT("POLYQUANT post mean field parsing error. I can't understand the input provided. Could you double-check it?");
@@ -352,6 +354,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     quantum_part_idx++;
   }
 }
+
 void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
   dets.resize(this->input_molecule.quantum_particles.size());
