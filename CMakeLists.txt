@@ -7,7 +7,7 @@ include(FetchContent)
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
 set(POLYQUANT_VERSION_MINOR 3)
-set(POLYQUANT_VERSION_PATCH 5)
+set(POLYQUANT_VERSION_PATCH 6)
 set(POLYQUANT_VERSION "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
@@ -144,7 +144,7 @@ find_package(LinAlg REQUIRED)
 FetchContent_Declare(
   spectra
   GIT_REPOSITORY https://github.com/shivupa/spectra.git
-  GIT_TAG origin/Davidsonspacesize)
+  GIT_TAG origin/logging )
 FetchContent_MakeAvailable(spectra)
 ########################################
 # libint for gaussian AO integrals
