@@ -3,6 +3,7 @@
 #include "basis/basis.hpp"
 #include "ci/determinant_set.hpp"
 #include "integral/integral.hpp"
+#include "io/davidson_logging.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
@@ -10,6 +11,7 @@
 #include "scf/epscf.hpp"
 #include <Eigen/Core>
 #include <Spectra/DavidsonSymEigsSolver.h>
+#include <Spectra/LoggerBase.h>
 #include <Spectra/MatOp/SparseSymMatProd.h>
 #include <Spectra/SymEigsSolver.h>
 #include <combinations.hpp>
@@ -21,8 +23,10 @@ namespace polyquant {
 class POLYQUANT_EPCI {
 public:
   POLYQUANT_EPCI() = default;
-  POLYQUANT_EPCI(const POLYQUANT_EPSCF &input_scf){this->setup(input_scf);};
+  POLYQUANT_EPCI(const POLYQUANT_EPSCF &input_scf) { this->setup(input_scf); };
   void setup(const POLYQUANT_EPSCF &input_scf);
+  void calculate_integrals();
+  void calculate_fc_energy();
   void setup_determinants();
   void run();
   void print_start_iterations();
@@ -33,11 +37,7 @@ public:
   void print_params();
 
   int iteration_num = 0;
-  /**
-   * @brief Iteration energy difference
-   *
-   */
-  std::vector<double> iteration_E_diff;
+  std::vector<double> frozen_core_energy;
 
   /**
    * @brief the input parameters

@@ -214,25 +214,23 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
             ci_calc.excitation_level = ex_lvl_obj;
           }
         }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")){
-            auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
-            if (FC.type() == json::value_t::array) {
-                ci_calc.frozen_core = FC;
-            } else if (FC.type() == json::value_t::boolean) {
-                APP_ABORT("TODO Set FC based on chemical system");
-            } else {
-                APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
-            }
-
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
+          auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
+          if (FC.type() == json::value_t::array) {
+            ci_calc.frozen_core = FC.get<std::vector<int>>();
+          } else if (FC.type() == json::value_t::boolean) {
+            APP_ABORT("TODO Set FC based on chemical system");
+          } else {
+            APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
+          }
         }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")){
-            auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
-            if (DV.type() == json::value_t::array) {
-                ci_calc.deleted_virtual = DV;
-            } else {
-                APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
-            }
-
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")) {
+          auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
+          if (DV.type() == json::value_t::array) {
+            ci_calc.deleted_virtual = DV.get<std::vector<int>>();
+          } else {
+            APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
+          }
         }
       }
     }

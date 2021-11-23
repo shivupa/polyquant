@@ -7,7 +7,6 @@
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>
-#include <unsupported/Eigen/CXX11/Tensor>
 #include <vector>
 
 namespace polyquant {
@@ -195,7 +194,8 @@ public:
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> transform_mo_2_body_integrals(const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx,
                                                                                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
-                                                                                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta);
+                                                                                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta,
+                                                                                      std::vector<int> frozen_core, std::vector<int> deleted_virtual);
   void calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core, std::vector<int> deleted_virtual);
 
   size_t ijcache_size;

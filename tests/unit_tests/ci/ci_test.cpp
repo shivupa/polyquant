@@ -13,7 +13,9 @@ TEST_SUITE("CI") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
     test_calc.run();
-    test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C);
+    std::vector frozen_core = {0};
+    std::vector deleted_virtual = {0};
+    test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
     CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0)) ==doctest::Approx(32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 1)) ==doctest::Approx(0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -23,7 +25,9 @@ TEST_SUITE("CI") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
     test_calc.run();
-    test_calc.scf_calc.input_integral.calculate_mo_2_body_integrals(test_calc.scf_calc.C);
+    std::vector frozen_core = {0};
+    std::vector deleted_virtual = {0};
+    test_calc.scf_calc.input_integral.calculate_mo_2_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
     CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 0)) ==doctest::Approx(4.74449478).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 1)) ==doctest::Approx(0.4166223).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -37,6 +41,8 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
     CHECK(test_ci.detset.max_orb[0] == 7);
     CHECK(test_ci.detset.N_dets == 21);
     CHECK(test_ci.detset.dets[0].size() == 21);
@@ -111,7 +117,7 @@ TEST_SUITE("CI") {
   }
   TEST_CASE("CI: get occ virt ") {
     POLYQUANT_DETSET<uint64_t> detset;
-    detset.max_orb[0] = 7;
+    detset.max_orb = {7};
     std::bitset<8> hf_det("0011111");
     std::vector<uint64_t> hf_det_vec = {hf_det.to_ulong()};
     std::vector<int> occ, virt;
@@ -133,6 +139,8 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
 
     std::bitset<8> hf_det("0011111");
     std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = {
@@ -155,6 +163,8 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
 
     std::bitset<8> hf_det("0011111");
     std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = {{hf_det.to_ulong()}, {hf_det.to_ulong()}};
@@ -188,6 +198,8 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {2, 2, 2};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
 
     std::bitset<8> hf_det("0011111");
     std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = { {hf_det.to_ulong()}, {hf_det.to_ulong()}};
@@ -222,6 +234,8 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
 
     std::cout << test_ci.detset.N_dets << std::endl;
     for (auto i = 0; i < test_ci.detset.N_dets; i++) {
@@ -240,6 +254,8 @@ TEST_SUITE("CI") {
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
     // get elec det distance
     std::bitset<18> hf_det("0000000000000011");
     std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = {{hf_det.to_ulong()}, {hf_det.to_ulong()}};
@@ -267,6 +283,8 @@ TEST_SUITE("CI") {
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
     // get elec det distance
     std::bitset<18> hf_det("0000000000000011");
     std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = {{hf_det.to_ulong()}, {hf_det.to_ulong()}};
