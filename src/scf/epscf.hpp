@@ -38,6 +38,12 @@ public:
 
   void form_DM() override;
 
+  void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm_last,
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff,
+    int num_basis,
+    int num_part);
+
   void calculate_E_elec() override;
 
   void calculate_E_total() override;

@@ -39,6 +39,48 @@ void POLYQUANT_EPCI::calculate_integrals() {
 }
 
 void POLYQUANT_EPCI::calculate_fc_energy() {
+  // caculate dm for frozen core block
+    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
+    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> H_frozen_core;
+    fc_dm.resize(this->input_molecule.quantum_particles.size());
+    H_frozen_core.resize(this->input_molecule.quantum_particles.size());
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        fc_dm[quantum_part_idx].resize(2);
+      } else {
+        fc_dm[quantum_part_idx].resize(1);
+      }
+    }
+
+    quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+      auto num_parts_alpha = this->frozen_core[i];
+      auto num_parts_beta = this->frozen_core[i];
+      this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], num_basis, num_parts_alpha);
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], num_basis, num_parts_beta);
+      }
+      quantum_part_idx++;
+    }
+
+  // calculate frozen core  "operator"
+  // quantum_part_idx = 0ul;
+  // for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  //   auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+  //   auto num_parts_alpha = this->frozen_core[i];
+  //   auto num_parts_beta = this->frozen_core[i];
+  //   this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], num_basis, num_parts_alpha);
+  //   if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+  //     this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], num_basis, num_parts_beta);
+  //   }
+  //   quantum_part_idx++;
+  // }
+
+
+  // caculate energy for frozen core block
+
   temp_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis, this->input_molecule);
   // calculate integral for FC block
   std::vector<int> fake_fc;

@@ -401,29 +401,11 @@ void POLYQUANT_EPSCF::form_DM() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    this->D_last[quantum_part_idx][0] = this->D[quantum_part_idx][0];
-    this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
     auto num_parts_alpha = quantum_part.num_parts_alpha;
     auto num_parts_beta = quantum_part.num_parts_beta;
-#pragma omp parallel for
-    for (size_t i = 0; i < num_basis; i++) {
-      for (size_t j = 0; j < num_basis; j++) {
-        for (int k = 0; k < num_parts_alpha; k++) {
-          this->D[quantum_part_idx][0](i, j) += this->C[quantum_part_idx][0](i, k) * this->C[quantum_part_idx][0](j, k);
-        }
-      }
-    }
+    form_DM_helper(this->D[quantum_part_idx][0], this->D_last[quantum_part_idx][0], this->C[quantum_part_idx][0], num_basis, num_parts_alpha);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      this->D_last[quantum_part_idx][1] = this->D[quantum_part_idx][1];
-      this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
-#pragma omp parallel for
-      for (size_t i = 0; i < num_basis; i++) {
-        for (size_t j = 0; j < num_basis; j++) {
-          for (int k = 0; k < num_parts_beta; k++) {
-            this->D[quantum_part_idx][1](i, j) += this->C[quantum_part_idx][1](i, k) * this->C[quantum_part_idx][1](j, k);
-          }
-        }
-      }
+      form_DM_helper(this->D[quantum_part_idx][1], this->D_last[quantum_part_idx][1], this->C[quantum_part_idx][1], num_basis, num_parts_beta);
     }
     quantum_part_idx++;
   }
@@ -438,6 +420,23 @@ void POLYQUANT_EPSCF::form_DM() {
       quantum_part_a_idx++;
     }
   }
+}
+
+void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm,
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm_last,
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff,
+  int num_basis,
+  int num_part){
+    dm_last = dm;
+    dm.setZero(num_basis, num_basis);
+#pragma omp parallel for
+    for (size_t i = 0; i < num_basis; i++) {
+      for (size_t j = 0; j < num_basis; j++) {
+        for (int k = 0; k < num_part; k++) {
+          dm(i, j) += coeff(i, k) * coeff(j, k);
+        }
+      }
+    }
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
