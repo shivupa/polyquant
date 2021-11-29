@@ -41,17 +41,30 @@ void POLYQUANT_EPCI::calculate_integrals() {
 void POLYQUANT_EPCI::calculate_fc_energy() {
   // caculate dm for frozen core block
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm_last;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> H_frozen_core;
   fc_dm.resize(this->input_molecule.quantum_particles.size());
   H_frozen_core.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       fc_dm[quantum_part_idx].resize(2);
+      fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
+      fc_dm[quantum_part_idx][1].setZero(num_basis, num_basis);
+      fc_dm_last[quantum_part_idx].resize(2);
+      fc_dm_last[quantum_part_idx][0].setZero(num_basis, num_basis);
+      fc_dm_last[quantum_part_idx][1].setZero(num_basis, num_basis);
       H_frozen_core[quantum_part_idx].resize(2);
+      H_frozen_core[quantum_part_idx][0].setZero(num_basis, num_basis);
+      H_frozen_core[quantum_part_idx][1].setZero(num_basis, num_basis);
     } else {
       fc_dm[quantum_part_idx].resize(1);
+      fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
+      fc_dm_last[quantum_part_idx].resize(1);
+      fc_dm_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       H_frozen_core[quantum_part_idx].resize(1);
+      H_frozen_core[quantum_part_idx][0].setZero(num_basis, num_basis);
     }
   }
 
@@ -68,6 +81,30 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   }
 
   // calculate frozen core  "operator"
+  libint2::initialize();
+  for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule.quantum_particles.size(); quantum_part_a_idx++) {
+    auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
+    std::advance(quantum_part_a_it, quantum_part_a_idx);
+    auto quantum_part_a = quantum_part_a_it->second;
+    auto quantum_part_a_spin_lim = quantum_part_a.restricted ? 1 : 2;
+    quantum_part_a_spin_lim = (quantum_part_a.num_parts == 1) ? 1 : quantum_part_a_spin_lim;
+    for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < quantum_part_a_spin_lim; quantum_part_a_spin_idx++) {
+      for (auto quantum_part_b_idx = 0; quantum_part_b_idx < this->input_molecule.quantum_particles.size(); quantum_part_b_idx++) {
+        auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
+        std::advance(quantum_part_b_it, quantum_part_b_idx);
+        auto quantum_part_b = quantum_part_b_it->second;
+        auto quantum_part_b_spin_lim = quantum_part_b.restricted ? 1 : 2;
+        quantum_part_b_spin_lim = (quantum_part_b.num_parts == 1) ? 1 : quantum_part_b_spin_lim;
+
+        for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < quantum_part_b_spin_lim; quantum_part_b_spin_idx++) {
+          form_fock_helper_single_fock_matrix(H_frozen_core[quantum_part_a_idx][quantum_part_a_spin_idx], fc_dm, fc_dm_last, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b_idx,
+                                              quantum_part_b_spin_idx);
+        }
+      }
+    }
+  }
+  libint2::finalize();
+
   // quantum_part_idx = 0ul;
   // for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
   //   auto num_basis = this->input_basis.num_basis[quantum_part_idx];
@@ -81,27 +118,19 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   // }
 
   // caculate energy for frozen core block
-
-  temp_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis, this->input_molecule);
-  // calculate integral for FC block
-  std::vector<int> fake_fc;
-  std::vector<int> fake_dv;
-  fake_fc.resize(this->input_molecule.quantum_particles.size());
-  fake_dv.resize(this->input_molecule.quantum_particles.size());
-  for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-    fake_fc[i] = 0;
-    fake_dv[i] = this->input_basis.num_basis[i] - this->frozen_core[i];
-  }
-  temp_integral.calculate_mo_1_body_integrals(this->input_epscf.C, fake_fc, fake_dv);
-  temp_integral.calculate_mo_2_body_integrals(this->input_epscf.C, fake_fc, fake_dv);
-
-  frozen_core_energy.resize(this->input_molecule.quantum_particles.size());
-  for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-    if (this->frozen_core[i] == 0) {
-      frozen_core_energy[i] = 0.0;
+  quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    if (quantum_part.num_parts == 1) {
+      this->frozen_core_energy[quantum_part_idx] = 0.5 * (fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + H_frozen_core[quantum_part_idx][0]).array()).sum();
+    } else if (quantum_part.restricted == false) {
+      this->frozen_core_energy[quantum_part_idx] =
+          0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +
+                 ((fc_dm[quantum_part_idx][0]).array() * (H_frozen_core[quantum_part_idx][0]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (H_frozen_core[quantum_part_idx][1]).array()))
+                    .sum();
     } else {
-      // todo evaluate energy here
+      this->frozen_core_energy[quantum_part_idx] = (fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + H_frozen_core[quantum_part_idx][0]).array()).sum();
     }
+    quantum_part_idx++;
   }
 }
 
