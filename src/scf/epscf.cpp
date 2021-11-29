@@ -114,8 +114,9 @@ double POLYQUANT_EPSCF::directscf_get_density_exchange(const std::vector<std::ve
 
 void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock,
                                                           const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                                          const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const int quantum_part_a_idx,
-                                                          const int quantum_part_a_spin_idx, const int quantum_part_b_idx, const int quantum_part_b_spin_idx) {
+                                                          const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
+                                                          const int quantum_part_a_idx, const int quantum_part_a_spin_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const int quantum_part_b_idx,
+                                                          const int quantum_part_b_spin_idx) {
   auto shells_a = this->input_basis.basis[quantum_part_a_idx];
   auto num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
   auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
@@ -274,8 +275,8 @@ void POLYQUANT_EPSCF::form_fock_helper() {
         quantum_part_b_spin_lim = (quantum_part_b.num_parts == 1) ? 1 : quantum_part_b_spin_lim;
 
         for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < quantum_part_b_spin_lim; quantum_part_b_spin_idx++) {
-          form_fock_helper_single_fock_matrix(this->F[quantum_part_a_idx][quantum_part_a_spin_idx], this->D, this->D_last, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b_idx,
-                                              quantum_part_b_spin_idx);
+          form_fock_helper_single_fock_matrix(this->F[quantum_part_a_idx][quantum_part_a_spin_idx], this->D, this->D_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b,
+                                              quantum_part_b_idx, quantum_part_b_spin_idx);
         }
       }
     }
@@ -426,8 +427,8 @@ void POLYQUANT_EPSCF::form_DM() {
   }
 }
 
-void POLYQUANT_EPSCF::form_DM_helper(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                                     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part) {
+void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
+                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part) {
   dm_last = dm;
   dm.setZero(num_basis, num_basis);
 #pragma omp parallel for

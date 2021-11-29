@@ -41,8 +41,9 @@ public:
                                         const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b);
 
   void form_fock_helper_single_fock_matrix(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock, const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                           const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const int quantum_part_a_idx,
-                                           const int quantum_part_a_spin_idx, const int quantum_part_b_idx, const int quantum_part_b_spin_idx);
+                                           const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
+                                           const int quantum_part_a_idx, const int quantum_part_a_spin_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const int quantum_part_b_idx,
+                                           const int quantum_part_b_spin_idx);
 
   void form_fock_helper();
 
@@ -52,8 +53,8 @@ public:
 
   void form_DM() override;
 
-  void form_DM_helper(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part);
+  void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
+                      const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part);
 
   void calculate_E_elec() override;
 

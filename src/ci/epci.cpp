@@ -71,8 +71,8 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    auto num_parts_alpha = this->frozen_core[i];
-    auto num_parts_beta = this->frozen_core[i];
+    auto num_parts_alpha = this->frozen_core[quantum_part_idx];
+    auto num_parts_beta = this->frozen_core[quantum_part_idx];
     this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], num_basis, num_parts_alpha);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], num_basis, num_parts_beta);
@@ -97,8 +97,8 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
         quantum_part_b_spin_lim = (quantum_part_b.num_parts == 1) ? 1 : quantum_part_b_spin_lim;
 
         for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < quantum_part_b_spin_lim; quantum_part_b_spin_idx++) {
-          form_fock_helper_single_fock_matrix(H_frozen_core[quantum_part_a_idx][quantum_part_a_spin_idx], fc_dm, fc_dm_last, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b_idx,
-                                              quantum_part_b_spin_idx);
+          this->input_epscf.form_fock_helper_single_fock_matrix(H_frozen_core[quantum_part_a_idx][quantum_part_a_spin_idx], fc_dm, fc_dm_last, quantum_part_a, quantum_part_a_idx,
+                                                                quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx, quantum_part_b_spin_idx);
         }
       }
     }
