@@ -40,30 +40,32 @@ void POLYQUANT_EPCI::calculate_integrals() {
 
 void POLYQUANT_EPCI::calculate_fc_energy() {
   // caculate dm for frozen core block
-    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
-    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> H_frozen_core;
-    fc_dm.resize(this->input_molecule.quantum_particles.size());
-    H_frozen_core.resize(this->input_molecule.quantum_particles.size());
-    auto quantum_part_idx = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        fc_dm[quantum_part_idx].resize(2);
-      } else {
-        fc_dm[quantum_part_idx].resize(1);
-      }
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> H_frozen_core;
+  fc_dm.resize(this->input_molecule.quantum_particles.size());
+  H_frozen_core.resize(this->input_molecule.quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      fc_dm[quantum_part_idx].resize(2);
+      H_frozen_core[quantum_part_idx].resize(2);
+    } else {
+      fc_dm[quantum_part_idx].resize(1);
+      H_frozen_core[quantum_part_idx].resize(1);
     }
+  }
 
-    quantum_part_idx = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      auto num_parts_alpha = this->frozen_core[i];
-      auto num_parts_beta = this->frozen_core[i];
-      this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], num_basis, num_parts_alpha);
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], num_basis, num_parts_beta);
-      }
-      quantum_part_idx++;
+  quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_parts_alpha = this->frozen_core[i];
+    auto num_parts_beta = this->frozen_core[i];
+    this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], num_basis, num_parts_alpha);
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], num_basis, num_parts_beta);
     }
+    quantum_part_idx++;
+  }
 
   // calculate frozen core  "operator"
   // quantum_part_idx = 0ul;
@@ -77,7 +79,6 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   //   }
   //   quantum_part_idx++;
   // }
-
 
   // caculate energy for frozen core block
 
@@ -96,12 +97,11 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
 
   frozen_core_energy.resize(this->input_molecule.quantum_particles.size());
   for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-    if (this->frozen_core[i] == 0 ){
+    if (this->frozen_core[i] == 0) {
       frozen_core_energy[i] = 0.0;
     } else {
-      //todo evaluate energy here
+      // todo evaluate energy here
     }
-
   }
 }
 
@@ -217,7 +217,7 @@ void POLYQUANT_EPCI::run() {
   using Vector_of_Scalar = Eigen::Matrix<double, Eigen::Dynamic, 1>;
   // DavidsonDerivedLogger<Scalar, Vector_of_Scalar> log;
   // Spectra::LoggerBase<Scalar, Vector_of_Scalar>* logger = &log;
-  DavidsonDerivedLogger<Scalar, Vector_of_Scalar>* logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>();
+  DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>();
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger); // Create Solver
   Eigen::Index maxit = this->iteration_max;
   int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);

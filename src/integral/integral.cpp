@@ -214,7 +214,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   // std::cout << " " << num_mo_a<< " " << num_mo_b << " " << num_shell_a<< " " << num_shell_b << std::endl;
   temp1.resize(num_mo_a * num_ao_a * num_ao_b * num_ao_b);
   temp1.setZero();
-  #pragma omp parallel for
+#pragma omp parallel for
   for (size_t i = 0; i < num_shell_a; i++) {
     auto thread_id = omp_get_thread_num();
     auto shell_i_bf_start = shell2bf_a[i + frozen_core[quantum_part_a_idx]];
@@ -244,14 +244,14 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                       shell_pqrs_bf++;
                       if (eri_pqrs != 0) {
                         for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-                          if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf <= (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])){
+                          if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf <= (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
                             // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
-                              // num_mo_a * num_shell_a * num_shell_b * num_shell_b
-                              auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
-                              idx1 += (shell_q_bf) * num_ao_b * num_ao_b;
-                              idx1 += (shell_r_bf) * num_ao_b;
-                              idx1 += shell_s_bf;
-                              temp1(idx1) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
+                            // num_mo_a * num_shell_a * num_shell_b * num_shell_b
+                            auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
+                            idx1 += (shell_q_bf)*num_ao_b * num_ao_b;
+                            idx1 += (shell_r_bf)*num_ao_b;
+                            idx1 += shell_s_bf;
+                            temp1(idx1) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
                           }
                         }
                       }
@@ -281,7 +281,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             idx1 += q * num_ao_b * num_ao_b;
             idx1 += r * num_ao_b;
             idx1 += s;
-            //elem += mo_coeffs_a(q, j) * temp1(i, q, r, s)
+            // elem += mo_coeffs_a(q, j) * temp1(i, q, r, s)
             elem += mo_coeffs_a(q, j + frozen_core[quantum_part_a_idx]) * temp1(idx1);
           }
           auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
@@ -340,7 +340,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             idx3 += j * num_mo_b * num_ao_b;
             idx3 += k * num_ao_b;
             idx3 += s;
-            //elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
+            // elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
             elem += mo_coeffs_b(s, l + frozen_core[quantum_part_b_idx]) * temp3(idx3);
           }
           // temp2(i, j, k, l) += elem;

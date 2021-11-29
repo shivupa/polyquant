@@ -422,21 +422,18 @@ void POLYQUANT_EPSCF::form_DM() {
   }
 }
 
-void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm,
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm_last,
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff,
-  int num_basis,
-  int num_part){
-    dm_last = dm;
-    dm.setZero(num_basis, num_basis);
+void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
+                                     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part) {
+  dm_last = dm;
+  dm.setZero(num_basis, num_basis);
 #pragma omp parallel for
-    for (size_t i = 0; i < num_basis; i++) {
-      for (size_t j = 0; j < num_basis; j++) {
-        for (int k = 0; k < num_part; k++) {
-          dm(i, j) += coeff(i, k) * coeff(j, k);
-        }
+  for (size_t i = 0; i < num_basis; i++) {
+    for (size_t j = 0; j < num_basis; j++) {
+      for (int k = 0; k < num_part; k++) {
+        dm(i, j) += coeff(i, k) * coeff(j, k);
       }
     }
+  }
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
