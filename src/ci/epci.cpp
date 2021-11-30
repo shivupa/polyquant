@@ -216,7 +216,7 @@ void POLYQUANT_EPCI::run() {
   this->print_start_iterations();
 
   Eigen::Index initialsubspacevec = this->num_subspace_vec;
-  Eigen::Index maxsubspacevec = 10 * this->num_states;
+  Eigen::Index maxsubspacevec = std::max(2 * this->num_subspace_vec, 10 * this->num_states);
   Polyquant_cout("Initial subspace");
   Polyquant_cout(initialsubspacevec);
   using Scalar = double;
