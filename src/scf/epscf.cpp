@@ -680,7 +680,36 @@ void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("E(particles) : " + std::to_string(E_parts));
 }
 
-void POLYQUANT_EPSCF::print_success() { Polyquant_cout("SCF SUCCESS"); }
+void POLYQUANT_EPSCF::print_success() {
+  Polyquant_cout("SCF SUCCESS");
+  Polyquant_cout(this->E_total);
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
+  occ.resize(this->input_molecule.quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    auto num_mo = C[quantum_part_idx][0].size();
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      occ[quantum_part_idx].resize(2);
+      occ[quantum_part_idx][0].setZero(num_mo);
+      occ[quantum_part_idx][1].setZero(num_mo);
+      for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
+        occ[quantum_part_idx][0](i) = 1.0;
+      }
+      for (auto i = 0; i < quantum_part.num_parts_beta; i++) {
+        occ[quantum_part_idx][1](i) = 1.0;
+      }
+    } else {
+      occ[quantum_part_idx].resize(1);
+      occ[quantum_part_idx][0].setZero(num_mo);
+      auto occval = (quantum_part.num_parts == 1) ? 1.0 : 2.0;
+      for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
+        occ[quantum_part_idx][0](i) = occval;
+      }
+    }
+    quantum_part_idx++;
+  }
+  dump_orbitals(this->C, this->E_orbitals, occ);
+}
 
 void POLYQUANT_EPSCF::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
 
@@ -774,7 +803,6 @@ void POLYQUANT_EPSCF::run() {
   } else {
     this->print_error();
   }
-  Polyquant_cout(this->E_total);
 }
 
 void POLYQUANT_EPSCF::from_file(std::string &filename) {

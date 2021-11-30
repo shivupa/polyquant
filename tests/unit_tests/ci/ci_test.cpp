@@ -42,7 +42,9 @@ TEST_SUITE("CI") {
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
+    test_ci.calculate_fc_energy();
     test_ci.setup_determinants();
+    CHECK(test_ci.frozen_core_energy[0] == 0.0);
     CHECK(test_ci.detset.max_orb[0] == 7);
     CHECK(test_ci.detset.N_dets == 21);
     CHECK(test_ci.detset.dets[0].size() == 21);
@@ -54,6 +56,20 @@ TEST_SUITE("CI") {
     CHECK(test_ci.detset.dets[0].count(single_ext_vec_alpha) == 1);
     std::pair<std::vector<uint64_t>, std::vector<uint64_t>> single_ext_vec_beta = {{single_ext.to_ulong()}, {hf_det.to_ulong()}};
     CHECK(test_ci.detset.dets[0].count(single_ext_vec_beta) == 1);
+  }
+  TEST_CASE("CI: frozen core energy ") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+    test_calc.run();
+    POLYQUANT_EPCI test_ci;
+    std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+    test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.frozen_core.push_back(2);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.calculate_fc_energy();
+    CHECK(test_ci.frozen_core_energy[0] == doctest::Approx(-31.0000097518).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: get holes ") {
     POLYQUANT_DETSET<uint64_t> detset;

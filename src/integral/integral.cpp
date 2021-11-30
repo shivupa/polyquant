@@ -155,7 +155,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mo_subset;
       if (frozen_core[quantum_part_idx] != 0 || deleted_virtual[quantum_part_idx] != 0) {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](
-            Eigen::all, Eigen::seq(frozen_core[quantum_part_idx], mo_coeffs[quantum_part_idx][quantum_part_spin_idx].cols() - deleted_virtual[quantum_part_idx]));
+            Eigen::all, Eigen::seq(frozen_core[quantum_part_idx], mo_coeffs[quantum_part_idx][quantum_part_spin_idx].cols() - deleted_virtual[quantum_part_idx] - 1));
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
@@ -211,14 +211,13 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   }
 
   // temp1 = Eigen::Tensor<double, 4>(num_mo_a, num_shell_a, num_shell_b, num_shell_b);
-  // std::cout << " " << num_mo_a<< " " << num_mo_b << " " << num_shell_a<< " " << num_shell_b << std::endl;
   temp1.resize(num_mo_a * num_ao_a * num_ao_b * num_ao_b);
   temp1.setZero();
 #pragma omp parallel for
   for (size_t i = 0; i < num_shell_a; i++) {
     auto thread_id = omp_get_thread_num();
-    auto shell_i_bf_start = shell2bf_a[i + frozen_core[quantum_part_a_idx]];
-    auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][i + frozen_core[quantum_part_a_idx]].size();
+    auto shell_i_bf_start = shell2bf_a[i];
+    auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][i].size();
     for (size_t q = 0; q < num_shell_a; q++) {
       auto shell_q_bf_start = shell2bf_a[q];
       auto shell_q_bf_size = this->input_basis.basis[quantum_part_a_idx][q].size();
@@ -244,12 +243,12 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                       shell_pqrs_bf++;
                       if (eri_pqrs != 0) {
                         for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-                          if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf <= (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
+                          if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
                             // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
                             // num_mo_a * num_shell_a * num_shell_b * num_shell_b
                             auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
-                            idx1 += (shell_q_bf)*num_ao_b * num_ao_b;
-                            idx1 += (shell_r_bf)*num_ao_b;
+                            idx1 += shell_q_bf * num_ao_b * num_ao_b;
+                            idx1 += shell_r_bf * num_ao_b;
                             idx1 += shell_s_bf;
                             temp1(idx1) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
                           }

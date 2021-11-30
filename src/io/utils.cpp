@@ -32,6 +32,76 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
   }
   outfile.close();
 }
+
+void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
+                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ) {
+  auto stride = 5;
+  Polyquant_cout("MOLECULAR ORBITALS");
+  for (auto i = 0; i < E_orbitals.size(); i++) {
+    for (auto j = 0; j < E_orbitals[i].size(); j++) {
+      std::string line = "";
+      line += "\n";
+      line += fmt::format("Particle {} Spin {}", i, j);
+      line += "\n";
+      Polyquant_cout(line);
+      auto num_mo = E_orbitals[i][j].size();
+      auto max_cols = (num_mo + stride - 1) / stride;
+      std::cout << max_cols << std::endl;
+
+      for (auto mo_idx = 0; mo_idx < max_cols; mo_idx++) {
+        line = "\n";
+        line += fmt::format("{:10}", "MO num");
+        for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
+          if ((mo_idx * stride) + mo_offset == num_mo) {
+            break;
+          }
+          line += fmt::format("{:^20}", fmt::format("{:> 3d}", (mo_idx * stride) + mo_offset + 1));
+        }
+        line += fmt::format("{:10}", "");
+        Polyquant_cout(line);
+
+        line = "";
+        line += fmt::format("{:10}", "MO ene");
+        for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
+          if ((mo_idx * stride) + mo_offset == num_mo) {
+            break;
+          }
+          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", E_orbitals[i][j]((mo_idx * stride) + mo_offset)));
+        }
+        line += fmt::format("{:10}", "");
+        Polyquant_cout(line);
+
+        line = "";
+        line += fmt::format("{:10}", "MO occ");
+        for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
+          if ((mo_idx * stride) + mo_offset == num_mo) {
+            break;
+          }
+          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j]((mo_idx * stride) + mo_offset)));
+        }
+        line += fmt::format("{:10}", "");
+        Polyquant_cout(line);
+
+        Polyquant_cout("");
+
+        for (auto ao_idx = 0; ao_idx < C[i][j].rows(); ao_idx++) {
+          line = "";
+          line += fmt::format("{:^10}", ao_idx + 1);
+          for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
+            if ((mo_idx * stride) + mo_offset == num_mo) {
+              break;
+            }
+            line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", C[i][j](ao_idx, (mo_idx * stride) + mo_offset)));
+          }
+          line += fmt::format("{:10}", "");
+          Polyquant_cout(line);
+        }
+
+        Polyquant_cout("");
+      }
+    }
+  }
+}
 // LCOV_EXCL_STOP
 
 std::map<std::string, int> _atm_symb_to_num = {
