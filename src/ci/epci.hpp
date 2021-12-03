@@ -37,7 +37,6 @@ public:
   void print_params();
 
   int iteration_num = 0;
-  std::vector<double> frozen_core_energy;
 
   /**
    * @brief the input parameters

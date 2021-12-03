@@ -41,6 +41,7 @@ public:
 
   void calculate_overlap();
   void calculate_Schwarz();
+  void calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core);
   void calculate_unique_shell_pairs(double threshold = -1.0);
   void calculate_kinetic();
   void calculate_nuclear();
@@ -115,6 +116,8 @@ public:
   void compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells_a, const libint2::BasisSet &shells_b, libint2::Operator obtype);
   std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>> compute_shellpairs(const libint2::BasisSet &bs1, const double threshold);
 
+  void compute_frozen_core_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &fc_dm,
+                                const size_t quantum_part_a_idx, const size_t quantum_part_b_idx, libint2::Operator obtype);
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
   //     const double &cont_coeff1, const double &exp1, const xt::xarray<int>
@@ -174,6 +177,11 @@ public:
    *
    */
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> Schwarz;
+  /**
+   * @brief Frozen core effective one body integrals
+   *
+   */
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> frozen_core_ints;
   /**
    * @brief The orthogonalization matrix
    *

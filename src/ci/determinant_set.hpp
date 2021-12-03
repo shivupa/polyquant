@@ -50,6 +50,7 @@ public:
    */
   std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
   std::vector<int> max_orb;
+  std::vector<double> frozen_core_energy;
   POLYQUANT_INTEGRAL input_integral;
 
   void set_integral(POLYQUANT_INTEGRAL &integral) { this->input_integral = integral; };
@@ -867,11 +868,15 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
+  auto frozen_core_shift = 0.0;
+  for (auto fc_energy : this->frozen_core_energy) {
+    frozen_core_shift += fc_energy;
+  }
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto matrix_elem = 0.0;
 #pragma omp parallel for reduction(+ : matrix_elem)
     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
-      auto sc_elem = this->Slater_Condon(j_det, i_det);
+      auto sc_elem = this->Slater_Condon(j_det, i_det) + frozen_core_shift;
       if (x_in[j_det] != 0 && sc_elem != 0) {
         matrix_elem += x_in[j_det] * sc_elem;
       }

@@ -35,7 +35,6 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
       this->overlap[quantum_part_idx].resize(num_basis, num_basis);
       this->overlap[quantum_part_idx].fill(0);
       this->compute_1body_ints(this->overlap[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::overlap);
-      // TODO figure out how to write to file
       std::stringstream filename;
       filename << "overlap";
       filename << quantum_part_idx;
@@ -60,7 +59,6 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
       this->Schwarz[quantum_part_idx].resize(num_basis_a, num_basis_b);
       this->Schwarz[quantum_part_idx].fill(0);
       this->compute_Schwarz_ints(this->Schwarz[quantum_part_idx], this->input_basis.basis[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::coulomb);
-      // TODO figure out how to write to file
       std::stringstream filename;
       filename << "Schwarz";
       filename << quantum_part_idx;
@@ -68,6 +66,35 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
       Polyquant_dump_mat_to_file(this->Schwarz[quantum_part_idx], filename.str());
     }
     quantum_part_idx++;
+  }
+  libint2::finalize();
+}
+
+void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+
+  libint2::initialize();
+  auto quantum_part_a_idx = 0ul;
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+    auto num_basis_a = this->input_basis.num_basis[quantum_part_a_idx];
+    if (this->frozen_core_ints[quantum_part_a_idx].cols() == 0 && this->frozen_core_ints[quantum_part_a_idx].rows() == 0) {
+      this->frozen_core_ints[quantum_part_a_idx].resize(num_basis_a, num_basis_a);
+      this->frozen_core_ints[quantum_part_a_idx].fill(0);
+    }
+    auto quantum_part_b_idx = 0ul;
+    if (frozen_core[quantum_part_a_idx] != 0) {
+      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+        this->compute_frozen_core_ints(this->frozen_core_ints[quantum_part_a_idx], fc_dm[quantum_part_b_idx],                     quantum_part_a_idx, quantum_part_b_idx,                                       libint2::Operator::coulomb);
+        quantum_part_b_idx++;
+      }
+      std::stringstream filename;
+      filename << "Frozen_core_";
+      filename << quantum_part_a_idx;
+      filename << ".txt";
+      Polyquant_dump_mat_to_file(this->frozen_core_ints[quantum_part_a_idx], filename.str());
+    }
+    quantum_part_a_idx++;
   }
   libint2::finalize();
 }
@@ -159,7 +186,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
-      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_subset;
+      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (kinetic[quantum_part_idx] + frozen_core_ints[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_subset;
     }
     quantum_part_idx++;
   }
@@ -442,6 +469,135 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
   }
 }
 
+void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &fc_dm,
+                                const size_t quantum_part_a_idx, const size_t quantum_part_b_idx, libint2::Operator obtype){
+  auto nthreads = omp_get_max_threads();
+    auto shells_a = this->input_basis.basis[quantum_part_a_idx];
+    auto shells_b = this->input_basis.basis[quantum_part_b_idx];
+    auto num_shell_a = shells_a.size();
+    auto shell2bf_a = shells_a.shell2bf();
+    auto num_shell_b = shells_b.size();
+    auto shell2bf_b = shells_b.shell2bf();
+  std::vector<libint2::Engine> engines;
+  std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
+  Polyquant_cout(message);
+  engines.resize(nthreads);
+  engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
+  engines[0].set_precision(this->tolerance_2e);
+  if (nthreads > 1) {
+    Polyquant_cout("Making more engines for each thread");
+    for (auto i = 1ul; i < nthreads; i++) {
+      engines[i] = engines[0];
+    }
+  }
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> outmat;
+  outmat.resize(nthreads);
+  for (int i = 0; i < nthreads; i++) {
+    outmat[i].resizeLike(output_matrix);
+    outmat[i].setZero();
+  }
+  auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
+    std::advance(quantum_part_a_it, quantum_part_a_idx);
+    auto quantum_part_a = quantum_part_a_it->second;
+    auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
+    std::advance(quantum_part_b_it, quantum_part_b_idx);
+    auto quantum_part_b = quantum_part_b_it->second;
+    bool exchange = quantum_part_a_idx == quantum_part_b_idx;
+    bool restricted = quantum_part_b.restricted;
+    int charge_prod = quantum_part_a.charge * quantum_part_b.charge;
+#pragma omp parallel
+  {
+    int shellcounter = 0;
+    auto thread_id = omp_get_thread_num();
+    for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
+      auto shell_i_bf_start = shell2bf_a[shell_i];
+      auto shell_i_bf_size = shells_a[shell_i].size();
+      auto shellpairdata_ij_iter = std::get<1>(this->unique_shell_pairs[quantum_part_a_idx]).at(shell_i).begin();
+      for (auto &shell_j : std::get<0>(this->unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
+        auto shell_j_bf_start = shell2bf_a[shell_j];
+        auto shell_j_bf_size = shells_a[shell_j].size();
+        const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
+        shellpairdata_ij_iter++;
+        for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
+          auto shell_k_bf_start = shell2bf_b[shell_k];
+          auto shell_k_bf_size = shells_b[shell_k].size();
+          auto shellpairdata_kl_iter = std::get<1>(this->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
+          for (auto &shell_l : std::get<0>(this->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
+            shellcounter++;
+            if (shellcounter % nthreads != thread_id) {
+              continue;
+            }
+            auto shell_l_bf_start = shell2bf_b[shell_l];
+            auto shell_l_bf_size = shells_b[shell_l].size();
+            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+            shellpairdata_kl_iter++;
+
+            const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
+            const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
+            auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
+            const auto &buf = engines[thread_id].results();
+            engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
+            const auto *buf_1234 = buf[0];
+            auto shell_ijkl_bf = 0;
+            for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+              for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
+                for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
+                  for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
+                    if (buf_1234 != nullptr) {
+                      auto eri_ijkl = buf_1234[shell_ijkl_bf];
+                      const auto spinscale = (exchange && restricted == false) ? 0.5 : 1.0;
+                      const auto scaleall = (exchange) ? 0.5 * spinscale : 0.5 * charge_prod * spinscale;
+                      auto D_kl = 0.0;
+                      if (restricted) {
+                        D_kl = 2.0 * fc_dm[0](shell_k_bf, shell_l_bf);
+                      } else {
+                        D_kl = fc_dm[0](shell_k_bf, shell_l_bf) + fc_dm[1](shell_k_bf, shell_l_bf);
+                      }
+                      outmat[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+                      outmat[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+                      // exchange terms
+                      if (exchange) {
+                        auto D_ik = 0.0;
+                        auto D_jl = 0.0;
+                        auto D_il = 0.0;
+                        auto D_jk = 0.0;
+                        if (restricted) {
+                          D_ik = 2.0 * fc_dm[0](shell_i_bf, shell_k_bf);
+                          D_jl = 2.0 * fc_dm[0](shell_j_bf, shell_l_bf);
+                          D_il = 2.0 * fc_dm[0](shell_i_bf, shell_l_bf);
+                          D_jk = 2.0 * fc_dm[0](shell_j_bf, shell_k_bf);
+                        } else {
+                          D_ik = fc_dm[0](shell_i_bf, shell_k_bf) + fc_dm[1](shell_i_bf, shell_k_bf);
+                          D_jl = fc_dm[0](shell_j_bf, shell_l_bf) + fc_dm[1](shell_j_bf, shell_l_bf);
+                          D_il = fc_dm[0](shell_i_bf, shell_l_bf) + fc_dm[1](shell_i_bf, shell_l_bf);
+                          D_jk = fc_dm[0](shell_j_bf, shell_k_bf) + fc_dm[1](shell_j_bf, shell_k_bf);
+                        }
+                        const auto scale = 0.125;
+                        outmat[thread_id](shell_i_bf, shell_k_bf) -= scale * shell_ijkl_perdeg * D_jl * eri_ijkl;
+                        outmat[thread_id](shell_k_bf, shell_i_bf) -= scale * shell_ijkl_perdeg * D_jl * eri_ijkl;
+                        outmat[thread_id](shell_j_bf, shell_l_bf) -= scale * shell_ijkl_perdeg * D_ik * eri_ijkl;
+                        outmat[thread_id](shell_l_bf, shell_j_bf) -= scale * shell_ijkl_perdeg * D_ik * eri_ijkl;
+                        outmat[thread_id](shell_i_bf, shell_l_bf) -= scale * shell_ijkl_perdeg * D_jk * eri_ijkl;
+                        outmat[thread_id](shell_l_bf, shell_i_bf) -= scale * shell_ijkl_perdeg * D_jk * eri_ijkl;
+                        outmat[thread_id](shell_j_bf, shell_k_bf) -= scale * shell_ijkl_perdeg * D_il * eri_ijkl;
+                        outmat[thread_id](shell_k_bf, shell_j_bf) -= scale * shell_ijkl_perdeg * D_il * eri_ijkl;
+                      }
+                    }
+                    shell_ijkl_bf++;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  for (auto ti = 0; ti < nthreads; ti++) {
+    output_matrix += outmat[ti];
+  }
+}
+
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) {
   omp_init_lock(&writelock);
   auto function = __PRETTY_FUNCTION__;
@@ -456,6 +612,7 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLY
   this->nuclear.resize(molecule.quantum_particles.size());
   this->orth_X.resize(molecule.quantum_particles.size());
   this->Schwarz.resize(molecule.quantum_particles.size());
+  this->frozen_core_ints.resize(molecule.quantum_particles.size());
   this->unique_shell_pairs.resize(molecule.quantum_particles.size());
 }
 

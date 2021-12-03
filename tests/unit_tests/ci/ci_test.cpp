@@ -44,7 +44,7 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.calculate_fc_energy();
     test_ci.setup_determinants();
-    CHECK(test_ci.frozen_core_energy[0] == 0.0);
+    CHECK(test_ci.detset.frozen_core_energy[0] == 0.0);
     CHECK(test_ci.detset.max_orb[0] == 7);
     CHECK(test_ci.detset.N_dets == 21);
     CHECK(test_ci.detset.dets[0].size() == 21);
@@ -69,7 +69,7 @@ TEST_SUITE("CI") {
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.calculate_fc_energy();
-    CHECK(test_ci.frozen_core_energy[0] == doctest::Approx(-31.0000097518).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_ci.detset.frozen_core_energy[0] == doctest::Approx(-31.0000097518).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: get holes ") {
     POLYQUANT_DETSET<uint64_t> detset;
