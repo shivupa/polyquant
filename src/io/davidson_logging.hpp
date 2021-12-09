@@ -17,17 +17,35 @@ template <typename Scalar, typename Vector> class DavidsonDerivedLogger : public
 public:
   DavidsonDerivedLogger(){};
   inline void iteration_log(const Spectra::IterationData<Scalar, Vector> &data) override final {
-    std::cout << "                                                                                            " << std::endl;
-    std::cout << "    Iteration                       :   " << data.iteration << std::endl;
-    std::cout << "    Number of converged eigenvalues :   " << data.number_of_converged << std::endl;
-    std::cout << "    Size of subspace                :   " << data.subspace_size << std::endl;
-    std::cout << "    ------------------------------------------------------------------------              " << std::endl;
-    std::cout << "       " << std::setw(20) << "Current Eigenvalue" << std::setw(20) << "Converged?" << std::setw(20) << "Residue" << std::endl;
-    std::cout << "    ------------------------------------------------------------------------              " << std::endl;
+    std::string pad(7 ,' ');
+    std::string divider(95, '-');
+    std::string middivider(81, '-');
+    middivider =  fmt::format("{:^95}", middivider);
+    Polyquant_cout(divider);
+    std::string line;
+    line = pad;
+    line += fmt::format("{:<33}:{:>33d}", "Iteration", data.iteration);
+    Polyquant_cout(line);
+    line = pad;
+    line += fmt::format("{:<33}:{:>33d}", "Number of converged eigenvalues", data.number_of_converged);
+    Polyquant_cout(line);
+    line = pad;
+    line += fmt::format("{:<33}:{:>33d}", "Size of subspace", data.subspace_size);
+    Polyquant_cout(line);
+    Polyquant_cout(middivider);
+    line = pad;
+    line += fmt::format("{:^27}{:^27}{:^27}", "Current Eigenvalue", "Converged?", "Residue");
+    Polyquant_cout(line);
+    Polyquant_cout(middivider);
     for (int i = 0; i < data.current_eigenvalues.size(); i++) {
-      std::cout << "       " << std::setw(20) << data.current_eigenvalues[i] << std::setw(20) << data.current_eig_converged[i] << std::setw(20) << data.residues[i] << std::endl;
+        line = pad;
+        auto curr_eig = fmt::format("{:>20.10f}", data.current_eigenvalues[i]);
+        auto curr_eig_conv = fmt::format("{:^20}", data.current_eig_converged[i]);
+        auto res = fmt::format("{:>20.10f}", data.residues[i]);
+        line += fmt::format("{:<27}{:<27}{:<27}", curr_eig, curr_eig_conv, res);
+        Polyquant_cout(line);
     }
-    std::cout << "                                                                                            " << std::endl;
+    Polyquant_cout(divider);
   };
 };
 } // namespace polyquant
