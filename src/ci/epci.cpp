@@ -46,9 +46,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   POLYQUANT_TIMER timer(function);
   // caculate dm for frozen core block
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm_last;
   fc_dm.resize(this->input_molecule.quantum_particles.size());
-  fc_dm_last.resize(this->input_molecule.quantum_particles.size());
   this->detset.frozen_core_energy.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
@@ -57,14 +55,9 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       fc_dm[quantum_part_idx].resize(2);
       fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
       fc_dm[quantum_part_idx][1].setZero(num_basis, num_basis);
-      fc_dm_last[quantum_part_idx].resize(2);
-      fc_dm_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      fc_dm_last[quantum_part_idx][1].setZero(num_basis, num_basis);
     } else {
       fc_dm[quantum_part_idx].resize(1);
       fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
-      fc_dm_last[quantum_part_idx].resize(1);
-      fc_dm_last[quantum_part_idx][0].setZero(num_basis, num_basis);
     }
   }
 
