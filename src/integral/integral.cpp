@@ -83,17 +83,17 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
       this->frozen_core_ints[quantum_part_a_idx].fill(0);
     }
     auto quantum_part_b_idx = 0ul;
-    if (frozen_core[quantum_part_a_idx] != 0) {
-      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+    for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+    if (frozen_core[quantum_part_b_idx] != 0) {
         this->compute_frozen_core_ints(this->frozen_core_ints[quantum_part_a_idx], fc_dm[quantum_part_b_idx],                     quantum_part_a_idx, quantum_part_b_idx,                                       libint2::Operator::coulomb);
-        quantum_part_b_idx++;
       }
-      std::stringstream filename;
-      filename << "Frozen_core_";
-      filename << quantum_part_a_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->frozen_core_ints[quantum_part_a_idx], filename.str());
+        quantum_part_b_idx++;
     }
+    std::stringstream filename;
+    filename << "Frozen_core_";
+    filename << quantum_part_a_idx;
+    filename << ".txt";
+    Polyquant_dump_mat_to_file(this->frozen_core_ints[quantum_part_a_idx], filename.str());
     quantum_part_a_idx++;
   }
   libint2::finalize();
@@ -549,9 +549,9 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
                       const auto scaleall = (exchange) ? 0.5 * spinscale : 0.5 * charge_prod * spinscale;
                       auto D_kl = 0.0;
                       if (restricted) {
-                        D_kl = 2.0 * fc_dm[0](shell_k_bf, shell_l_bf);
+                        D_kl = 1.0 * fc_dm[0](shell_k_bf, shell_l_bf);
                       } else {
-                        D_kl = fc_dm[0](shell_k_bf, shell_l_bf) + fc_dm[1](shell_k_bf, shell_l_bf);
+                        D_kl = 0.5 * (fc_dm[0](shell_k_bf, shell_l_bf) + fc_dm[1](shell_k_bf, shell_l_bf));
                       }
                       outmat[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                       outmat[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
@@ -562,15 +562,15 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
                         auto D_il = 0.0;
                         auto D_jk = 0.0;
                         if (restricted) {
-                          D_ik = 2.0 * fc_dm[0](shell_i_bf, shell_k_bf);
-                          D_jl = 2.0 * fc_dm[0](shell_j_bf, shell_l_bf);
-                          D_il = 2.0 * fc_dm[0](shell_i_bf, shell_l_bf);
-                          D_jk = 2.0 * fc_dm[0](shell_j_bf, shell_k_bf);
+                          D_ik = 1.0 * fc_dm[0](shell_i_bf, shell_k_bf);
+                          D_jl = 1.0 * fc_dm[0](shell_j_bf, shell_l_bf);
+                          D_il = 1.0 * fc_dm[0](shell_i_bf, shell_l_bf);
+                          D_jk = 1.0 * fc_dm[0](shell_j_bf, shell_k_bf);
                         } else {
-                          D_ik = fc_dm[0](shell_i_bf, shell_k_bf) + fc_dm[1](shell_i_bf, shell_k_bf);
-                          D_jl = fc_dm[0](shell_j_bf, shell_l_bf) + fc_dm[1](shell_j_bf, shell_l_bf);
-                          D_il = fc_dm[0](shell_i_bf, shell_l_bf) + fc_dm[1](shell_i_bf, shell_l_bf);
-                          D_jk = fc_dm[0](shell_j_bf, shell_k_bf) + fc_dm[1](shell_j_bf, shell_k_bf);
+                          D_ik = 0.5 * (fc_dm[0](shell_i_bf, shell_k_bf) + fc_dm[1](shell_i_bf, shell_k_bf));
+                          D_jl = 0.5 * (fc_dm[0](shell_j_bf, shell_l_bf) + fc_dm[1](shell_j_bf, shell_l_bf));
+                          D_il = 0.5 * (fc_dm[0](shell_i_bf, shell_l_bf) + fc_dm[1](shell_i_bf, shell_l_bf));
+                          D_jk = 0.5 * (fc_dm[0](shell_j_bf, shell_k_bf) + fc_dm[1](shell_j_bf, shell_k_bf));
                         }
                         const auto scale = 0.125;
                         outmat[thread_id](shell_i_bf, shell_k_bf) -= scale * shell_ijkl_perdeg * D_jl * eri_ijkl;
@@ -851,6 +851,11 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       s = s.array().rsqrt();
       this->orth_X[quantum_part_idx] = s.asDiagonal();
       this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
+      std::stringstream filename;
+      filename << "Orthogonalization_mat_";
+      filename << quantum_part_idx;
+      filename << ".txt";
+      Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
     }
     quantum_part_idx++;
   }
