@@ -33,7 +33,7 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
       Polyquant_cout("Calculating One Body Overlap Integrals...");
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->overlap[quantum_part_idx].resize(num_basis, num_basis);
-      this->overlap[quantum_part_idx].fill(0);
+      this->overlap[quantum_part_idx].setZero();
       this->compute_1body_ints(this->overlap[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::overlap);
       std::stringstream filename;
       filename << "overlap";
@@ -57,7 +57,7 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
       auto num_basis_a = this->input_basis.basis[quantum_part_idx].size();
       auto num_basis_b = this->input_basis.basis[quantum_part_idx].size();
       this->Schwarz[quantum_part_idx].resize(num_basis_a, num_basis_b);
-      this->Schwarz[quantum_part_idx].fill(0);
+      this->Schwarz[quantum_part_idx].setZero();
       this->compute_Schwarz_ints(this->Schwarz[quantum_part_idx], this->input_basis.basis[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::coulomb);
       std::stringstream filename;
       filename << "Schwarz";
@@ -80,7 +80,7 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
     auto num_basis_a = this->input_basis.num_basis[quantum_part_a_idx];
     if (this->frozen_core_ints[quantum_part_a_idx].cols() == 0 && this->frozen_core_ints[quantum_part_a_idx].rows() == 0) {
       this->frozen_core_ints[quantum_part_a_idx].resize(num_basis_a, num_basis_a);
-      this->frozen_core_ints[quantum_part_a_idx].fill(0);
+      this->frozen_core_ints[quantum_part_a_idx].setZero();
     }
     auto quantum_part_b_idx = 0ul;
     for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
@@ -127,7 +127,7 @@ void POLYQUANT_INTEGRAL::calculate_kinetic() {
       Polyquant_cout("Calculating One Body Kinetic Integrals...");
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->kinetic[quantum_part_idx].resize(num_basis, num_basis);
-      this->kinetic[quantum_part_idx].fill(0);
+      this->kinetic[quantum_part_idx].setZero();
       this->compute_1body_ints(this->kinetic[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::kinetic);
       std::stringstream filename;
       filename << "kinetic";
@@ -150,7 +150,7 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
       Polyquant_cout("Calculating One Body Nuclear Integrals...");
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->nuclear[quantum_part_idx].resize(num_basis, num_basis);
-      this->nuclear[quantum_part_idx].fill(0);
+      this->nuclear[quantum_part_idx].setZero();
       this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_libint_atom("no_ghost"));
       std::stringstream filename;
       filename << "nuclear";
