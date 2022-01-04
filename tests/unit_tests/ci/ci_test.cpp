@@ -15,6 +15,14 @@ TEST_SUITE("CI") {
     test_calc.run();
     std::vector frozen_core = {0};
     std::vector deleted_virtual = {0};
+    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
+    fc_dm.resize(1); //1 particle
+    auto num_basis = test_calc.scf_calc.input_basis.num_basis[0];
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dm;
+    dm.resize(num_basis, num_basis);
+    dm.setZero();
+    fc_dm[0].push_back(dm);
+    test_calc.scf_calc.input_integral.calculate_frozen_core_ints(fc_dm, frozen_core);
     test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
     CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0)) ==doctest::Approx(32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -69,7 +77,8 @@ TEST_SUITE("CI") {
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.calculate_fc_energy();
-    CHECK(test_ci.detset.frozen_core_energy[0] == doctest::Approx(-31.0000097518).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    // Unverified number
+    CHECK(test_ci.detset.frozen_core_energy[0] == doctest::Approx(-76.9636027398).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: get holes ") {
     POLYQUANT_DETSET<uint64_t> detset;
