@@ -69,8 +69,10 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       auto num_parts_alpha = this->frozen_core[quantum_part_idx];
       auto num_parts_beta = this->frozen_core[quantum_part_idx];
       this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], num_basis, num_parts_alpha);
+      Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][0], "FC_DM_" + quantum_part_key + "_alpha.txt");
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], num_basis, num_parts_beta);
+        Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][1], "FC_DM_" + quantum_part_key + "_beta.txt");
       }
     }
     quantum_part_idx++;
@@ -78,16 +80,22 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
 
   // calculate frozen core  "operator"
   this->input_integral.calculate_frozen_core_ints(fc_dm, this->frozen_core);
+
+  quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    this->input_integral.frozen_core_ints[quantum_part_idx] += this->input_epscf.H_core[quantum_part_idx];
+    Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx], "FCop_" + quantum_part_key + ".txt");
+  }
+
   // calculate energy for frozen core block
   quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     this->detset.frozen_core_energy[quantum_part_idx] = 0.0;
     if (this->frozen_core[quantum_part_idx] != 0) {
       if (quantum_part.restricted == false) {
-        this->detset.frozen_core_energy[quantum_part_idx] = 0.5 * ((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * ((2.0 *  this->input_epscf.H_core[quantum_part_idx]) + this->input_integral.frozen_core_ints[quantum_part_idx]).array()).sum();
+        this->detset.frozen_core_energy[quantum_part_idx] =   0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +                  ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()))                    .sum();
       } else {
-        this->detset.frozen_core_energy[quantum_part_idx] = 
-            ((fc_dm[quantum_part_idx][0]).array() * ((2.0 * this->input_epscf.H_core[quantum_part_idx]) + this->input_integral.frozen_core_ints[quantum_part_idx]).array()).sum();
+        this->detset.frozen_core_energy[quantum_part_idx] = (fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx]).array()).sum();
       }
     }
     quantum_part_idx++;
@@ -157,7 +165,7 @@ void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iter
 
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
 
-void POLYQUANT_EPCI::print_success() { Polyquant_cout("SCF SUCCESS"); }
+void POLYQUANT_EPCI::print_success() { Polyquant_cout("CI SUCCESS"); }
 
 void POLYQUANT_EPCI::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
 
@@ -190,15 +198,16 @@ void POLYQUANT_EPCI::run() {
 
   // Retrieve results
   if (solver.info() == Spectra::CompInfo::Successful) {
+    this->print_success();
     this->energies = solver.eigenvalues();
     this->C_ci = solver.eigenvectors();
     std::cout << nconv << " Eigenvalues found:\n" << std::endl;
-    // auto frozen_core_shift = 0.0;
-    // for (auto fc_energy : this->detset.frozen_core_energy) {
-    //   frozen_core_shift += fc_energy;
-    // }
+    //auto frozen_core_shift = 0.0;
+    //for (auto fc_energy : this->detset.frozen_core_energy) {
+    //  frozen_core_shift += fc_energy;
+    //}
     for (auto e = 0; e < this->energies.size(); e++) {
-      Polyquant_cout(this->energies[e] + this->input_molecule.E_nuc); // + frozen_core_shift);
+      Polyquant_cout(this->energies[e] + this->input_molecule.E_nuc);// + frozen_core_shift);
     }
   } else {
     APP_ABORT("CI Calculation did not converge!");

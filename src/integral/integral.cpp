@@ -83,17 +83,12 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
       this->frozen_core_ints[quantum_part_a_idx].setZero();
     }
     auto quantum_part_b_idx = 0ul;
-    for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
-    if (frozen_core[quantum_part_b_idx] != 0) {
+      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+        if (frozen_core[quantum_part_b_idx] != 0) {
         this->compute_frozen_core_ints(this->frozen_core_ints[quantum_part_a_idx], fc_dm[quantum_part_b_idx],                     quantum_part_a_idx, quantum_part_b_idx,                                       libint2::Operator::coulomb);
-      }
+        }
         quantum_part_b_idx++;
-    }
-    std::stringstream filename;
-    filename << "Frozen_core_";
-    filename << quantum_part_a_idx;
-    filename << ".txt";
-    Polyquant_dump_mat_to_file(this->frozen_core_ints[quantum_part_a_idx], filename.str());
+      }
     quantum_part_a_idx++;
   }
   libint2::finalize();
@@ -186,7 +181,14 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
-      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (kinetic[quantum_part_idx] + frozen_core_ints[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_subset;
+      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (frozen_core_ints[quantum_part_idx]) * mo_subset;
+      std::stringstream filename;
+      filename << "MO_1body_";
+      filename << quantum_part_idx;
+      filename << "_";
+      filename << quantum_part_spin_idx;
+      filename << ".txt";
+      Polyquant_dump_mat_to_file(mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx], filename.str());
     }
     quantum_part_idx++;
   }
@@ -502,7 +504,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
     auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
     std::advance(quantum_part_b_it, quantum_part_b_idx);
     auto quantum_part_b = quantum_part_b_it->second;
-    bool exchange = quantum_part_a_idx == quantum_part_b_idx;
+    //bool exchange = quantum_part_a_idx == quantum_part_b_idx;
+    bool exchange = false;
     bool restricted = quantum_part_b.restricted;
     int charge_prod = quantum_part_a.charge * quantum_part_b.charge;
 #pragma omp parallel
@@ -594,7 +597,7 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
     }
   }
   for (auto ti = 0; ti < nthreads; ti++) {
-    output_matrix += outmat[ti];
+    output_matrix +=  outmat[ti];
   }
 }
 
@@ -852,7 +855,7 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       this->orth_X[quantum_part_idx] = s.asDiagonal();
       this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
       std::stringstream filename;
-      filename << "Orthogonalization_mat_";
+      filename << "orthogonalizer_";
       filename << quantum_part_idx;
       filename << ".txt";
       Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
