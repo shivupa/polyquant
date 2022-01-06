@@ -15,17 +15,15 @@
     "basis": 
         { "electron" :
           {
-            "H" : [{ "custom" : 
-              {"type" : "file",
-               "filename" : "electron_basis.g94"}}],
-            "O" : [{ "custom" : 
-              {"type" : "file",
-               "filename" : "electron_basis.g94"}}]
+            "H" : [{ "library" : 
+              {"type" : "3-21g"}}],
+            "O" : [{ "library" : 
+              {"type" : "3-21g"}}]
           }
         }
   },
   "keywords": {
-    "restricted" : false,
+    "restricted" : true,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
@@ -37,10 +35,11 @@
        "convergence_E" : 1e-6,
        "num_states" : 2,
        "num_subspace_vec" : 10,
-       "frozen_core" : [1],
        "excitation_level" : [ 
            [1,1,1]
-       ]
+       ],
+       "frozen_core" : [1],
+       "deleted_virtual" : [0]
    }
   }
 }
