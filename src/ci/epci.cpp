@@ -83,7 +83,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
 
   quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    this->input_integral.frozen_core_ints[quantum_part_idx] += this->input_epscf.H_core[quantum_part_idx];
+    //this->input_integral.frozen_core_ints[quantum_part_idx] += this->input_epscf.H_core[quantum_part_idx];
     Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx], "FCop_" + quantum_part_key + ".txt");
   }
 
@@ -93,9 +93,9 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
     this->detset.frozen_core_energy[quantum_part_idx] = 0.0;
     if (this->frozen_core[quantum_part_idx] != 0) {
       if (quantum_part.restricted == false) {
-        this->detset.frozen_core_energy[quantum_part_idx] =   0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +                  ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()))                    .sum();
+        this->detset.frozen_core_energy[quantum_part_idx] =  0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +                  ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()))                    .sum();
       } else {
-        this->detset.frozen_core_energy[quantum_part_idx] = (fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx]).array()).sum();
+        this->detset.frozen_core_energy[quantum_part_idx] = ( fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx]).array()).sum();
       }
     }
     quantum_part_idx++;
@@ -186,7 +186,28 @@ void POLYQUANT_EPCI::run() {
   Polyquant_cout(initialsubspacevec);
   using Scalar = double;
   using Vector_of_Scalar = Eigen::Matrix<double, Eigen::Dynamic, 1>;
-  std::cout << "SHIV " <<this->detset.Slater_Condon(0,0) << std::endl;
+  {
+    std::bitset<13> hf_det("0000000011111");
+    std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = { {hf_det.to_ulong()}, {hf_det.to_ulong()}};
+    auto det_pos = this->detset.dets[0].find(hf_det_obj);
+    auto distance = std::distance(this->detset.dets[0].begin(), det_pos);
+    std::cout << "SHIV detsize" << this->detset.dets[0].size() << " " << distance << std::endl;
+    std::cout << "SHIV " <<this->detset.Slater_Condon(distance,distance) << std::endl;
+  }
+{
+    std::bitset<12> hf_det("00000001111");
+    std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = { {hf_det.to_ulong()}, {hf_det.to_ulong()}};
+    auto det_pos = this->detset.dets[0].find(hf_det_obj);
+    auto distance = std::distance(this->detset.dets[0].begin(), det_pos);
+    std::cout << "SHIV detsize" << this->detset.dets[0].size() << " " << distance << std::endl;
+    std::cout << "SHIV " <<this->detset.Slater_Condon(distance,distance) << std::endl;
+  }
+std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (0,0,0,0)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(0, 0), this->detset.input_integral.idx2(0, 0)) << std::endl;
+std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (1,1,1,1)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(1, 1), this->detset.input_integral.idx2(1, 1)) << std::endl;
+std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (2,2,2,2)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(2, 2), this->detset.input_integral.idx2(2, 2)) << std::endl;
+auto temp_shit = 2.0 * this->detset.input_integral.mo_one_body_ints[0][0](0,0) + this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(0, 0), this->detset.input_integral.idx2(0, 0));
+std::cout << "SHIV tempshit " << temp_shit << std::endl;
+this->detset.create_ham();
   for (auto fc_energy : this->detset.frozen_core_energy) {
     std::cout << "SHIV " <<    fc_energy << std::endl;
   }

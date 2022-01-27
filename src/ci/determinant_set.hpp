@@ -812,7 +812,13 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
         auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
         auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
         excitation_level += this->num_excitation(det_i, det_j);
-
+        if (excitation_level < 3) {
+            auto frozen_core_shift = 0.0;
+            for (auto fc_energy : this->frozen_core_energy) {
+              frozen_core_shift += fc_energy;
+            }
+            matrix_elem += frozen_core_shift;
+        }
         if (excitation_level == 0) {
           // do 1+2 body
           matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);
@@ -868,15 +874,11 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
-  auto frozen_core_shift = 0.0;
-  for (auto fc_energy : this->frozen_core_energy) {
-    frozen_core_shift += fc_energy;
-  }
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto matrix_elem = 0.0;
 #pragma omp parallel for reduction(+ : matrix_elem)
     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
-      auto sc_elem = this->Slater_Condon(j_det, i_det) + frozen_core_shift;
+      auto sc_elem = this->Slater_Condon(j_det, i_det);
       if (x_in[j_det] != 0 && sc_elem != 0) {
         matrix_elem += x_in[j_det] * sc_elem;
       }
@@ -897,6 +899,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
       ham(i_det, j_det) = matrix_element;
     }
   }
+  Polyquant_dump_mat_to_file(ham, "ci_ham.txt");
 }
 } // namespace polyquant
 #endif

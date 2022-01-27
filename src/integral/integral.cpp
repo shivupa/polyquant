@@ -89,6 +89,7 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
         }
         quantum_part_b_idx++;
       }
+      this->frozen_core_ints[quantum_part_a_idx] += this->kinetic[quantum_part_a_idx] + (-quantum_part_a.charge * nuclear[quantum_part_a_idx]);
     quantum_part_a_idx++;
   }
   libint2::finalize();
@@ -176,8 +177,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].setZero();
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mo_subset;
       if (frozen_core[quantum_part_idx] != 0 || deleted_virtual[quantum_part_idx] != 0) {
-        mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](
-            Eigen::all, Eigen::seq(frozen_core[quantum_part_idx], mo_coeffs[quantum_part_idx][quantum_part_spin_idx].cols() - deleted_virtual[quantum_part_idx] - 1));
+        mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](Eigen::all, Eigen::seqN(frozen_core[quantum_part_idx], nmo));
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
