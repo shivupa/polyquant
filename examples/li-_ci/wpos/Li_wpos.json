@@ -11,10 +11,15 @@
   "model": {
     "method": "CI",
     "basis": 
-        {"Li" : [{ "custom" : 
-            {"type" : "file",
-             "filename" : "Li_basis.g94"}}]}
-             
+        { "electron" :
+          {"Li" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "Li_basis.g94"}}]},
+          "positron" :
+          {"Li" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "Li_basis.g94"}}]}
+        }
   },
   "keywords": {
     "restricted" : true,
@@ -51,7 +56,8 @@
        "excitation_level" : [
            [1,1,1],
            [1,0,1]
-           ]
+           ],
+       "frozen_core" : [0,0]
    },
    "pure" : true
       }
