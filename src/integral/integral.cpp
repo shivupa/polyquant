@@ -164,8 +164,10 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   mo_one_body_ints.resize(mo_coeffs.size());
+  //mo_ovlp_ints.resize(mo_coeffs.size());
   for (auto i = 0; i < mo_one_body_ints.size(); i++) {
     mo_one_body_ints[i].resize(mo_coeffs[i].size());
+    //mo_ovlp_ints[i].resize(mo_coeffs[i].size());
   }
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
@@ -175,6 +177,8 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       auto nmo = mo_coeffs[quantum_part_idx][quantum_part_spin_idx].cols() - frozen_core[quantum_part_idx] - deleted_virtual[quantum_part_idx];
       mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].resize(nmo, nmo);
       mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].setZero();
+      //mo_ovlp_ints[quantum_part_idx][quantum_part_spin_idx].resize(nmo, nmo);
+      //mo_ovlp_ints[quantum_part_idx][quantum_part_spin_idx].Identity();
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mo_subset;
       if (frozen_core[quantum_part_idx] != 0 || deleted_virtual[quantum_part_idx] != 0) {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](Eigen::all, Eigen::seqN(frozen_core[quantum_part_idx], nmo));
@@ -182,6 +186,11 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
       mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (frozen_core_ints[quantum_part_idx]) * mo_subset;
+      //if (frozen_core[quantum_part_idx] != 0 || deleted_virtual[quantum_part_idx] != 0) {
+      //    mo_ovlp_ints[quantum_part_idx][quantum_part_spin_idx].setZero();
+      //    mo_ovlp_ints = mo_subset.transpose() * (this->overlap[quantum_part_idx]) * mo_subset;
+
+      //}
       std::stringstream filename;
       filename << "MO_1body_";
       filename << quantum_part_idx;
@@ -504,8 +513,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
     auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
     std::advance(quantum_part_b_it, quantum_part_b_idx);
     auto quantum_part_b = quantum_part_b_it->second;
-    //bool exchange = quantum_part_a_idx == quantum_part_b_idx;
-    bool exchange = false;
+    bool exchange = quantum_part_a_idx == quantum_part_b_idx;
+    //bool exchange = false;
     bool restricted = quantum_part_b.restricted;
     int charge_prod = quantum_part_a.charge * quantum_part_b.charge;
 #pragma omp parallel
@@ -552,9 +561,9 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
                       const auto scaleall = (exchange) ? 0.5 * spinscale : 0.5 * charge_prod * spinscale;
                       auto D_kl = 0.0;
                       if (restricted) {
-                        D_kl = 1.0 * fc_dm[0](shell_k_bf, shell_l_bf);
+                        D_kl = 2.0 * fc_dm[0](shell_k_bf, shell_l_bf);
                       } else {
-                        D_kl = 0.5 * (fc_dm[0](shell_k_bf, shell_l_bf) + fc_dm[1](shell_k_bf, shell_l_bf));
+                        D_kl = 1.0 * (fc_dm[0](shell_k_bf, shell_l_bf) + fc_dm[1](shell_k_bf, shell_l_bf));
                       }
                       outmat[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                       outmat[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;

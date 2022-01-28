@@ -32,6 +32,7 @@ public:
 
   void get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes) const;
   void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const;
+  void get_num_parts(std::vector<T> &Di, int &num_parts) const;
   double get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const;
   void get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const;
   double same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
@@ -228,6 +229,12 @@ template <typename T> void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, st
       parts.push_back((64 * i) + position);
       P &= ~(1UL << position);
     }
+  }
+}
+template <typename T> void POLYQUANT_DETSET<T>::get_num_parts(std::vector<T> &Di, int &num_parts) const {
+    num_parts = 0;
+  for (auto i = 0; i < Di.size(); i++) {
+      num_parts += std::popcount(Di[i]);
   }
 }
 template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const {
@@ -798,6 +805,29 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
     double matrix_elem = 0.0;
     auto i_unfold = det_idx_unfold(i_det);
     auto j_unfold = det_idx_unfold(j_det);
+    auto frozen_core_shift = 0.0;
+    for (auto fc_energy : this->frozen_core_energy) {
+      frozen_core_shift += fc_energy;
+    }
+    auto fc_scale_factor = 1.0;
+    //if (frozen_core_shift != 0.0){
+    //for (auto idx_part = 0; idx_part < dets.size(); idx_part++) {
+    //  if (i_unfold[idx_part] != j_unfold[idx_part]){
+    //    auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
+    //    auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
+    //    auto det_i_a = det_i.first;
+    //    auto det_i_b = det_i.second;
+    //    auto excitation_level = 0;
+    //    excitation_level = this->num_excitation(det_i, det_j);
+    //    int num_part = 0;
+    //    get_num_parts(det_i_a, num_part);
+    //    get_num_parts(det_i_b, num_part);
+    //    fc_scale_factor *= (1.0*num_part - 1.0*excitation_level)/ (1.0*num_part);
+    //  }
+    //}
+    std::cout << fc_scale_factor <<  frozen_core_shift << std::endl;
+    //matrix_elem += fc_scale_factor * frozen_core_shift;
+    //}
     std::vector<bool> iequalj;
     // todo condense this
     for (auto idx_part = 0; idx_part < dets.size(); idx_part++) {
@@ -812,13 +842,7 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
         auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
         auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
         excitation_level += this->num_excitation(det_i, det_j);
-        if (excitation_level < 3) {
-            auto frozen_core_shift = 0.0;
-            for (auto fc_energy : this->frozen_core_energy) {
-              frozen_core_shift += fc_energy;
-            }
-            matrix_elem += frozen_core_shift;
-        }
+        
         if (excitation_level == 0) {
           // do 1+2 body
           matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);

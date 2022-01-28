@@ -206,11 +206,13 @@ std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (0,0,0,0)" << this-
 std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (1,1,1,1)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(1, 1), this->detset.input_integral.idx2(1, 1)) << std::endl;
 std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (2,2,2,2)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(2, 2), this->detset.input_integral.idx2(2, 2)) << std::endl;
 auto temp_shit = 2.0 * this->detset.input_integral.mo_one_body_ints[0][0](0,0) + this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(0, 0), this->detset.input_integral.idx2(0, 0));
-std::cout << "SHIV tempshit " << temp_shit << std::endl;
-this->detset.create_ham();
+std::cout << "SHIV tempstuff " << temp_shit << std::endl;
+auto frozen_core_shift = 0.0;
   for (auto fc_energy : this->detset.frozen_core_energy) {
+      frozen_core_shift += fc_energy;
     std::cout << "SHIV " <<    fc_energy << std::endl;
   }
+this->detset.create_ham();
 
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>();
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger); // Create Solver
@@ -223,12 +225,8 @@ this->detset.create_ham();
     this->energies = solver.eigenvalues();
     this->C_ci = solver.eigenvectors();
     std::cout << nconv << " Eigenvalues found:\n" << std::endl;
-    //auto frozen_core_shift = 0.0;
-    //for (auto fc_energy : this->detset.frozen_core_energy) {
-    //  frozen_core_shift += fc_energy;
-    //}
     for (auto e = 0; e < this->energies.size(); e++) {
-      Polyquant_cout(this->energies[e] + this->input_molecule.E_nuc);// + frozen_core_shift);
+      Polyquant_cout(this->energies[e] + this->input_molecule.E_nuc + frozen_core_shift);
     }
   } else {
     APP_ABORT("CI Calculation did not converge!");
