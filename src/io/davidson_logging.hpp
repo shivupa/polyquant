@@ -15,7 +15,10 @@ namespace polyquant {
 template <typename Scalar, typename Vector> class DavidsonDerivedLogger : public Spectra::LoggerBase<Scalar, Vector> {
   // This derived logging class could have some reference to an ostream or call to another class that wraps ostreams etc.
 public:
+  Scalar constant_shift = 0.0;
   DavidsonDerivedLogger(){};
+  DavidsonDerivedLogger(Scalar constant_shift){this->set_constant_shift(constant_shift);};
+  void set_constant_shift(Scalar constant_shift){this->constant_shift = constant_shift;};
   inline void iteration_log(const Spectra::IterationData<Scalar, Vector> &data) override final {
     std::string pad(7 ,' ');
     std::string divider(95, '-');
@@ -39,7 +42,7 @@ public:
     Polyquant_cout(middivider);
     for (int i = 0; i < data.current_eigenvalues.size(); i++) {
         line = pad;
-        auto curr_eig = fmt::format("{:>20.10f}", data.current_eigenvalues[i]);
+        auto curr_eig = fmt::format("{:>20.10f}", data.current_eigenvalues[i] + constant_shift);
         auto curr_eig_conv = fmt::format("{:^20}", data.current_eig_converged[i]);
         auto res = fmt::format("{:>20.10f}", data.residues[i]);
         line += fmt::format("{:<27}{:<27}{:<27}", curr_eig, curr_eig_conv, res);

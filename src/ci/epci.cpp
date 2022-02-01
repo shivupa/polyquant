@@ -83,8 +83,11 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
 
   quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    //this->input_integral.frozen_core_ints[quantum_part_idx] += this->input_epscf.H_core[quantum_part_idx];
-    Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx], "FCop_" + quantum_part_key + ".txt");
+    Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][0], "FC_DM_" + quantum_part_key + "_alpha.txt");
+    Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx][0], "FCop_" + quantum_part_key + "_0.txt");
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+    Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx][1], "FCop_" + quantum_part_key + "_1.txt");
+      }
   }
 
   // calculate energy for frozen core block
@@ -93,9 +96,9 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
     this->detset.frozen_core_energy[quantum_part_idx] = 0.0;
     if (this->frozen_core[quantum_part_idx] != 0) {
       if (quantum_part.restricted == false) {
-        this->detset.frozen_core_energy[quantum_part_idx] =  0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +                  ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx]).array()))                    .sum();
+        this->detset.frozen_core_energy[quantum_part_idx] =  0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +                  ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx][0]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx][1]).array()))                    .sum();
       } else {
-        this->detset.frozen_core_energy[quantum_part_idx] = ( fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx]).array()).sum();
+        this->detset.frozen_core_energy[quantum_part_idx] = ( fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx][0]).array()).sum();
       }
     }
     quantum_part_idx++;
@@ -186,39 +189,15 @@ void POLYQUANT_EPCI::run() {
   Polyquant_cout(initialsubspacevec);
   using Scalar = double;
   using Vector_of_Scalar = Eigen::Matrix<double, Eigen::Dynamic, 1>;
-  {
-    std::bitset<13> hf_det("0000000011111");
-    std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = { {hf_det.to_ulong()}, {hf_det.to_ulong()}};
-    auto det_pos = this->detset.dets[0].find(hf_det_obj);
-    auto distance = std::distance(this->detset.dets[0].begin(), det_pos);
-    std::cout << "SHIV detsize" << this->detset.dets[0].size() << " " << distance << std::endl;
-    std::cout << "SHIV " <<this->detset.Slater_Condon(distance,distance) << std::endl;
-  }
-{
-    std::bitset<12> hf_det("00000001111");
-    std::pair<std::vector<uint64_t>, std::vector<uint64_t>> hf_det_obj = { {hf_det.to_ulong()}, {hf_det.to_ulong()}};
-    auto det_pos = this->detset.dets[0].find(hf_det_obj);
-    auto distance = std::distance(this->detset.dets[0].begin(), det_pos);
-    std::cout << "SHIV detsize" << this->detset.dets[0].size() << " " << distance << std::endl;
-    std::cout << "SHIV " <<this->detset.Slater_Condon(distance,distance) << std::endl;
-  }
-std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (0,0,0,0)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(0, 0), this->detset.input_integral.idx2(0, 0)) << std::endl;
-std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (1,1,1,1)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(1, 1), this->detset.input_integral.idx2(1, 1)) << std::endl;
-std::cout << "SHIV mo_2body (part 0, spin 0, part 0, spin 0) (2,2,2,2)" << this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(2, 2), this->detset.input_integral.idx2(2, 2)) << std::endl;
-auto temp_shit = 2.0 * this->detset.input_integral.mo_one_body_ints[0][0](0,0) + this->detset.input_integral.mo_two_body_ints[0][0][0][0](this->detset.input_integral.idx2(0, 0), this->detset.input_integral.idx2(0, 0));
-std::cout << "SHIV tempstuff " << temp_shit << std::endl;
-auto frozen_core_shift = 0.0;
+  auto frozen_core_shift = 0.0;
   for (auto fc_energy : this->detset.frozen_core_energy) {
       frozen_core_shift += fc_energy;
-    std::cout << "SHIV " <<    fc_energy << std::endl;
   }
-this->detset.create_ham();
-
-  DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>();
+  Scalar constant_shift = this->input_molecule.E_nuc + frozen_core_shift;
+  DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);
   Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger); // Create Solver
   Eigen::Index maxit = this->iteration_max;
   int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
-
   // Retrieve results
   if (solver.info() == Spectra::CompInfo::Successful) {
     this->print_success();
@@ -226,7 +205,7 @@ this->detset.create_ham();
     this->C_ci = solver.eigenvectors();
     std::cout << nconv << " Eigenvalues found:\n" << std::endl;
     for (auto e = 0; e < this->energies.size(); e++) {
-      Polyquant_cout(this->energies[e] + this->input_molecule.E_nuc + frozen_core_shift);
+      Polyquant_cout(this->energies[e] + constant_shift);
     }
   } else {
     APP_ABORT("CI Calculation did not converge!");

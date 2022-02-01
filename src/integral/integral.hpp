@@ -117,7 +117,7 @@ public:
   std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>> compute_shellpairs(const libint2::BasisSet &bs1, const double threshold);
 
   void compute_frozen_core_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &fc_dm,
-                                const size_t quantum_part_a_idx, const size_t quantum_part_b_idx, libint2::Operator obtype);
+                                const size_t quantum_part_a_idx, const size_t quantum_part_a_spin_idx, const size_t quantum_part_b_idx, const size_t quantum_part_b_spin_idx, libint2::Operator obtype);
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
   //     const double &cont_coeff1, const double &exp1, const xt::xarray<int>
@@ -181,14 +181,13 @@ public:
    * @brief Frozen core effective one body integrals
    *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> frozen_core_ints;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> frozen_core_ints;
   /**
    * @brief The orthogonalization matrix
    *
    */
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> orth_X;
 
-  //std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_ovlp_ints;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
   /**
    * @brief The two electron MO integrals stored as
