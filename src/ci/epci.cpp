@@ -85,9 +85,9 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][0], "FC_DM_" + quantum_part_key + "_alpha.txt");
     Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx][0], "FCop_" + quantum_part_key + "_0.txt");
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-    Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx][1], "FCop_" + quantum_part_key + "_1.txt");
-      }
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      Polyquant_dump_mat_to_file(this->input_integral.frozen_core_ints[quantum_part_idx][1], "FCop_" + quantum_part_key + "_1.txt");
+    }
   }
 
   // calculate energy for frozen core block
@@ -96,9 +96,13 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
     this->detset.frozen_core_energy[quantum_part_idx] = 0.0;
     if (this->frozen_core[quantum_part_idx] != 0) {
       if (quantum_part.restricted == false) {
-        this->detset.frozen_core_energy[quantum_part_idx] =  0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +                  ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx][0]).array()) + ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx][1]).array()))                    .sum();
+        this->detset.frozen_core_energy[quantum_part_idx] = 0.5 * (((fc_dm[quantum_part_idx][0] + fc_dm[quantum_part_idx][1]).array() * (this->input_epscf.H_core[quantum_part_idx]).array()) +
+                                                                   ((fc_dm[quantum_part_idx][0]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx][0]).array()) +
+                                                                   ((fc_dm[quantum_part_idx][1]).array() * (this->input_integral.frozen_core_ints[quantum_part_idx][1]).array()))
+                                                                      .sum();
       } else {
-        this->detset.frozen_core_energy[quantum_part_idx] = ( fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx][0]).array()).sum();
+        this->detset.frozen_core_energy[quantum_part_idx] =
+            (fc_dm[quantum_part_idx][0].array() * (this->input_epscf.H_core[quantum_part_idx] + this->input_integral.frozen_core_ints[quantum_part_idx][0]).array()).sum();
       }
     }
     quantum_part_idx++;
@@ -191,7 +195,7 @@ void POLYQUANT_EPCI::run() {
   using Vector_of_Scalar = Eigen::Matrix<double, Eigen::Dynamic, 1>;
   auto frozen_core_shift = 0.0;
   for (auto fc_energy : this->detset.frozen_core_energy) {
-      frozen_core_shift += fc_energy;
+    frozen_core_shift += fc_energy;
   }
   Scalar constant_shift = this->input_molecule.E_nuc + frozen_core_shift;
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);

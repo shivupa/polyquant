@@ -812,7 +812,7 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
         auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
         auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
         excitation_level += this->num_excitation(det_i, det_j);
-        
+
         if (excitation_level == 0) {
           // do 1+2 body
           matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);

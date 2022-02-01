@@ -81,21 +81,22 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
     auto num_basis_a = this->input_basis.num_basis[quantum_part_a_idx];
-    for (auto quantum_part_a_spin_idx =0; quantum_part_a_spin_idx < fc_dm[quantum_part_a_idx].size(); quantum_part_a_spin_idx++){
+    for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < fc_dm[quantum_part_a_idx].size(); quantum_part_a_spin_idx++) {
       if (this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].cols() == 0 && this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].rows() == 0) {
         this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].resize(num_basis_a, num_basis_a);
         this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].setZero();
       }
       auto quantum_part_b_idx = 0ul;
       for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
-        for (auto quantum_part_b_spin_idx =0; quantum_part_b_spin_idx < fc_dm[quantum_part_b_idx].size(); quantum_part_b_spin_idx++){
+        for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < fc_dm[quantum_part_b_idx].size(); quantum_part_b_spin_idx++) {
           if (frozen_core[quantum_part_b_idx] != 0) {
-          this->compute_frozen_core_ints(this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx], fc_dm[quantum_part_b_idx],quantum_part_a_idx,quantum_part_a_spin_idx, quantum_part_b_idx,quantum_part_b_spin_idx,libint2::Operator::coulomb);
+            this->compute_frozen_core_ints(this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx], fc_dm[quantum_part_b_idx], quantum_part_a_idx, quantum_part_a_spin_idx,
+                                           quantum_part_b_idx, quantum_part_b_spin_idx, libint2::Operator::coulomb);
           }
         }
-          quantum_part_b_idx++;
-        }
-        this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx] += this->kinetic[quantum_part_a_idx] + (-quantum_part_a.charge * nuclear[quantum_part_a_idx]);
+        quantum_part_b_idx++;
+      }
+      this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx] += this->kinetic[quantum_part_a_idx] + (-quantum_part_a.charge * nuclear[quantum_part_a_idx]);
     }
     quantum_part_a_idx++;
   }
@@ -479,14 +480,15 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
 }
 
 void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &fc_dm,
-                                const size_t quantum_part_a_idx,const size_t quantum_part_a_spin_idx, const size_t quantum_part_b_idx,const size_t quantum_part_b_spin_idx, libint2::Operator obtype){
+                                                  const size_t quantum_part_a_idx, const size_t quantum_part_a_spin_idx, const size_t quantum_part_b_idx, const size_t quantum_part_b_spin_idx,
+                                                  libint2::Operator obtype) {
   auto nthreads = omp_get_max_threads();
-    auto shells_a = this->input_basis.basis[quantum_part_a_idx];
-    auto shells_b = this->input_basis.basis[quantum_part_b_idx];
-    auto num_shell_a = shells_a.size();
-    auto shell2bf_a = shells_a.shell2bf();
-    auto num_shell_b = shells_b.size();
-    auto shell2bf_b = shells_b.shell2bf();
+  auto shells_a = this->input_basis.basis[quantum_part_a_idx];
+  auto shells_b = this->input_basis.basis[quantum_part_b_idx];
+  auto num_shell_a = shells_a.size();
+  auto shell2bf_a = shells_a.shell2bf();
+  auto num_shell_b = shells_b.size();
+  auto shell2bf_b = shells_b.shell2bf();
   std::vector<libint2::Engine> engines;
   std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
   Polyquant_cout(message);
@@ -506,15 +508,15 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
     outmat[i].setZero();
   }
   auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
-    std::advance(quantum_part_a_it, quantum_part_a_idx);
-    auto quantum_part_a = quantum_part_a_it->second;
-    auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
-    std::advance(quantum_part_b_it, quantum_part_b_idx);
-    auto quantum_part_b = quantum_part_b_it->second;
-    bool same_particle = quantum_part_a_idx == quantum_part_b_idx;
-    bool exchange = same_particle && (quantum_part_a_spin_idx == quantum_part_b_spin_idx);
-    bool restricted = quantum_part_b.restricted;
-    int charge_prod = quantum_part_a.charge * quantum_part_b.charge;
+  std::advance(quantum_part_a_it, quantum_part_a_idx);
+  auto quantum_part_a = quantum_part_a_it->second;
+  auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
+  std::advance(quantum_part_b_it, quantum_part_b_idx);
+  auto quantum_part_b = quantum_part_b_it->second;
+  bool same_particle = quantum_part_a_idx == quantum_part_b_idx;
+  bool exchange = same_particle && (quantum_part_a_spin_idx == quantum_part_b_spin_idx);
+  bool restricted = quantum_part_b.restricted;
+  int charge_prod = quantum_part_a.charge * quantum_part_b.charge;
 #pragma omp parallel
   {
     int shellcounter = 0;
@@ -604,7 +606,7 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
     }
   }
   for (auto ti = 0; ti < nthreads; ti++) {
-    output_matrix +=  outmat[ti];
+    output_matrix += outmat[ti];
   }
 }
 
