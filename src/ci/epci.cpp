@@ -64,7 +64,6 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    std::cout << this->frozen_core[quantum_part_idx] << std::endl;
     if (this->frozen_core[quantum_part_idx] != 0) {
       auto num_parts_alpha = this->frozen_core[quantum_part_idx];
       auto num_parts_beta = this->frozen_core[quantum_part_idx];
@@ -207,9 +206,8 @@ void POLYQUANT_EPCI::run() {
     this->print_success();
     this->energies = solver.eigenvalues();
     this->C_ci = solver.eigenvectors();
-    std::cout << nconv << " Eigenvalues found:\n" << std::endl;
     for (auto e = 0; e < this->energies.size(); e++) {
-      Polyquant_cout(this->energies[e] + constant_shift);
+      this->energies[e] += constant_shift;
     }
   } else {
     APP_ABORT("CI Calculation did not converge!");

@@ -78,7 +78,7 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.calculate_fc_energy();
     // Unverified number
-    CHECK(test_ci.detset.frozen_core_energy[0] == doctest::Approx(-76.9636027398).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_ci.detset.frozen_core_energy[0] == doctest::Approx(-71.3745646924).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: get holes ") {
     POLYQUANT_DETSET<uint64_t> detset;
@@ -278,6 +278,10 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.frozen_core.push_back(0);
+    test_ci.frozen_core.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
@@ -307,6 +311,10 @@ TEST_SUITE("CI") {
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
     test_ci.excitation_level.push_back(ex_lvl);
     test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.frozen_core.push_back(0);
+    test_ci.frozen_core.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.setup_determinants();

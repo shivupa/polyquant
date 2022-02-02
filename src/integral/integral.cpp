@@ -73,19 +73,19 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
 void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  frozen_core_ints.resize(fc_dm.size());
+  this->frozen_core_ints.resize(fc_dm.size());
   for (auto i = 0; i < frozen_core_ints.size(); i++) {
-    frozen_core_ints[i].resize(fc_dm[i].size());
+    this->frozen_core_ints[i].resize(fc_dm[i].size());
+    auto num_basis_i = this->input_basis.num_basis[i];
+    for ( auto j = 0; j < fc_dm[i].size(); j++){
+   this->frozen_core_ints[i][j].resize(num_basis_i, num_basis_i);
+   this->frozen_core_ints[i][j].setZero();
+    }
   }
   libint2::initialize();
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
-    auto num_basis_a = this->input_basis.num_basis[quantum_part_a_idx];
     for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < fc_dm[quantum_part_a_idx].size(); quantum_part_a_spin_idx++) {
-      if (this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].cols() == 0 && this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].rows() == 0) {
-        this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].resize(num_basis_a, num_basis_a);
-        this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx].setZero();
-      }
       auto quantum_part_b_idx = 0ul;
       for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
         for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < fc_dm[quantum_part_b_idx].size(); quantum_part_b_spin_idx++) {
@@ -189,7 +189,11 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
-      mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (frozen_core_ints[quantum_part_idx][quantum_part_spin_idx]) * mo_subset;
+      if (frozen_core_ints[quantum_part_idx].size() != 0){
+        mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (frozen_core_ints[quantum_part_idx][quantum_part_spin_idx]) * mo_subset;
+      } else {
+        mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (this->kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_subset;
+      }
       std::stringstream filename;
       filename << "MO_1body_";
       filename << quantum_part_idx;
@@ -643,7 +647,6 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
   int nthreads = omp_get_max_threads();
   std::vector<libint2::Engine> engines;
   engines.reserve(nthreads);
-  // std::cout << nthreads << std::endl;
   engines.emplace_back(libint2::Operator::overlap, std::max(bs1.max_nprim(), bs2.max_nprim()), std::max(bs1.max_l(), bs2.max_l()), 0);
   for (size_t i = 1; i != nthreads; ++i) {
     engines.push_back(engines[0]);
