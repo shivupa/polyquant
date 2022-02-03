@@ -77,9 +77,9 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
   for (auto i = 0; i < frozen_core_ints.size(); i++) {
     this->frozen_core_ints[i].resize(fc_dm[i].size());
     auto num_basis_i = this->input_basis.num_basis[i];
-    for ( auto j = 0; j < fc_dm[i].size(); j++){
-   this->frozen_core_ints[i][j].resize(num_basis_i, num_basis_i);
-   this->frozen_core_ints[i][j].setZero();
+    for (auto j = 0; j < fc_dm[i].size(); j++) {
+      this->frozen_core_ints[i][j].resize(num_basis_i, num_basis_i);
+      this->frozen_core_ints[i][j].setZero();
     }
   }
   libint2::initialize();
@@ -189,7 +189,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
-      if (frozen_core_ints[quantum_part_idx].size() != 0){
+      if (frozen_core_ints[quantum_part_idx].size() != 0) {
         mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (frozen_core_ints[quantum_part_idx][quantum_part_spin_idx]) * mo_subset;
       } else {
         mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (this->kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_subset;

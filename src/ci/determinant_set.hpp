@@ -94,6 +94,8 @@ public:
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
+    auto function = __PRETTY_FUNCTION__;
+    POLYQUANT_TIMER timer(function);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
     output.resize(this->rows(), mat_in.cols());
     output.setZero();
@@ -868,6 +870,8 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto matrix_elem = 0.0;
 #pragma omp parallel for reduction(+ : matrix_elem)
