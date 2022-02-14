@@ -2,7 +2,7 @@
 #define POLYQUANT_DETSET_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
-#include "io/lfu_cache.hpp"
+// #include "io/lfu_cache.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
@@ -23,8 +23,8 @@ namespace polyquant {
 
 template <typename T> class POLYQUANT_DETSET {
 public:
-  POLYQUANT_DETSET() { this->construct_cache(); }
-  POLYQUANT_DETSET(size_t size_in_gb) { this->construct_cache(size_in_gb); }
+  POLYQUANT_DETSET() { } //this->construct_cache(); }
+  //POLYQUANT_DETSET(size_t size_in_gb) { this->construct_cache(size_in_gb); }
 
   int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void create_det(std::vector<std::vector<std::vector<int>>> &occ);
@@ -34,6 +34,7 @@ public:
   void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const;
   double get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const;
   void get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const;
+
   double same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
   double same_part_ham_single(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
   double same_part_ham_double(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
@@ -43,37 +44,55 @@ public:
 
   std::pair<std::vector<T>, std::vector<T>> get_det(int idx_part, int i) const;
   void print_determinants();
+  // /**
+  //  * @brief determinant set (number of quantum particles, alpha/beta, det num
+  //  * bitstrings)
+  //  *
+  //  */
+  // std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
   /**
-   * @brief determinant set (number of quantum particles, alpha/beta, det num
-   * bitstrings)
+   * @brief unique dets (number of quantum particles, alpha/beta, list of unique dets)
    *
    */
-  std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
+  std::vector< std::vector< std::vector<T> > > unique_dets;
+  /**
+   * @brief map of det index vector - vector of size (num quantum particle types * 2 spins)
+   * index 0, 1 correspond to particle 0 spin 0, particle 0 spin 1 etc.
+   * The det index vector contains indicies to the unique_dets lists and the second int is the overall index
+   * For example for a system with alpha and beta electrons, index <0,0> maps to 0, index<0,1> maps to 1, etc
+   * If <0,1> wasn't in the variational space it wouldn't be added to the map
+   *
+   */
+  std::unordered_map< std::vector< int > , int , VectorHash<int> > dets;
+
   std::vector<int> max_orb;
   std::vector<double> frozen_core_energy;
+
   POLYQUANT_INTEGRAL input_integral;
 
   void set_integral(POLYQUANT_INTEGRAL &integral) { this->input_integral = integral; };
 
-  void construct_cache(size_t size_in_gb = 10000) {
-    // This is actually super complicated. Some assumptions are made here that
-    // doesn't quite transfer to ACTUAL size used
-    // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
-    // It is assumed that map size() * sizeof(hashed object)
-    std::string message = "Setting CI determinant elements max cache size: ";
-    message += std::to_string(size_in_gb);
-    message += " GB";
-    std::pair<int, int> temp(0, 0);
-    this->cache_size = (size_in_gb * 1e9) / sizeof(temp);
-    message += " or ";
-    message += std::to_string(this->cache_size);
-    message += " objects";
-    Polyquant_cout(message);
-    polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> constructed_cache(this->cache_size);
-    this->cache = constructed_cache;
-  }
-  size_t cache_size;
-  mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
+  // void construct_cache(size_t size_in_gb = 10000) {
+  //   // This is actually super complicated. Some assumptions are made here that
+  //   // doesn't quite transfer to ACTUAL size used
+  //   // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
+  //   // It is assumed that map size() * sizeof(hashed object)
+  //   std::string message = "Setting CI determinant elements max cache size: ";
+  //   message += std::to_string(size_in_gb);
+  //   message += " GB";
+  //   std::pair<int, int> temp(0, 0);
+  //   this->cache_size = (size_in_gb * 1e9) / sizeof(temp);
+  //   message += " or ";
+  //   message += std::to_string(this->cache_size);
+  //   message += " objects";
+  //   Polyquant_cout(message);
+  //   polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> constructed_cache(this->cache_size);
+  //   this->cache = constructed_cache;
+  // }
+
+  // size_t cache_size;
+
+  // mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
 
   double Slater_Condon(int i_det, int j_det) const;
   // for diagonalization stuff
@@ -89,10 +108,12 @@ public:
   int N_dets;
   // y_out = M * x_in
   // Eigen::SparseMatrix<double> ham;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ham;
+  // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ham;
   void perform_op(const double *x_in, double *y_out) const;
+
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
+
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
     auto function = __PRETTY_FUNCTION__;
     POLYQUANT_TIMER timer(function);
@@ -112,7 +133,7 @@ public:
     }
     return output;
   }
-  void create_ham();
+  // void create_ham();
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 };
 
@@ -885,19 +906,19 @@ template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, d
   }
 }
 
-template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
-  // this->ham.conservativeResize(this->N_dets, this->N_dets);
-  this->ham.resize(this->N_dets, this->N_dets);
-  // std::vector<Eigen::Triplet<double>> tripletList;
-  std::cout << "Diagonal Ham" << std::endl;
-  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
-    std::cout << i_det << " " << this->Slater_Condon(i_det, i_det) << std::endl;
-    for (auto j_det = 0; j_det < this->N_dets; j_det++) {
-      auto matrix_element = this->Slater_Condon(i_det, j_det);
-      ham(i_det, j_det) = matrix_element;
-    }
-  }
-  Polyquant_dump_mat_to_file(ham, "ci_ham.txt");
-}
+// template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
+//   // this->ham.conservativeResize(this->N_dets, this->N_dets);
+//   this->ham.resize(this->N_dets, this->N_dets);
+//   // std::vector<Eigen::Triplet<double>> tripletList;
+//   std::cout << "Diagonal Ham" << std::endl;
+//   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
+//     std::cout << i_det << " " << this->Slater_Condon(i_det, i_det) << std::endl;
+//     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
+//       auto matrix_element = this->Slater_Condon(i_det, j_det);
+//       ham(i_det, j_det) = matrix_element;
+//     }
+//   }
+//   Polyquant_dump_mat_to_file(ham, "ci_ham.txt");
+// }
 } // namespace polyquant
 #endif

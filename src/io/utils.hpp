@@ -155,6 +155,16 @@ template <typename T> struct PairVectorHash {
     return seed;
   }
 };
+template <typename T> struct VectorHash {
+  size_t operator()(const std::vector<T> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    for (T i : v) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
 template <typename T> struct PairHash {
   size_t operator()(const std::pair<T, T> &v) const {
     std::hash<T> hasher;
