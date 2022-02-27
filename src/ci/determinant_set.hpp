@@ -2,7 +2,6 @@
 #define POLYQUANT_DETSET_H
 #include "basis/basis.hpp"
 #include "integral/integral.hpp"
-// #include "io/lfu_cache.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
@@ -23,12 +22,13 @@ namespace polyquant {
 
 template <typename T> class POLYQUANT_DETSET {
 public:
-  POLYQUANT_DETSET() { } //this->construct_cache(); }
-  //POLYQUANT_DETSET(size_t size_in_gb) { this->construct_cache(size_in_gb); }
+  POLYQUANT_DETSET() {} 
 
   int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
-  void create_det(std::vector<std::vector<std::vector<int>>> &occ);
-  std::vector<std::pair<std::vector<T>, std::vector<T>>> create_excitation(int idx_part, std::pair<std::vector<T>, std::vector<T>> det, std::tuple<int, int, int> excitation_level);
+  void resize(std::size_t size) ;
+  void create_det(int idx_part, std::vector<std::vector<int>> &occ);
+  void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
+  void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level);
 
   void get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes) const;
   void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const;
@@ -51,10 +51,10 @@ public:
   //  */
   // std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
   /**
-   * @brief unique dets (number of quantum particles, alpha/beta, list of unique dets)
+   * @brief unique dets (number of quantum particles, alpha/beta, list of unique dets which are vector of ints) 
    *
    */
-  std::vector< std::vector< std::vector<T> > > unique_dets;
+  std::vector<std::vector<std::vector<std::vector<T>>>> unique_dets;
   /**
    * @brief map of det index vector - vector of size (num quantum particle types * 2 spins)
    * index 0, 1 correspond to particle 0 spin 0, particle 0 spin 1 etc.
@@ -63,7 +63,7 @@ public:
    * If <0,1> wasn't in the variational space it wouldn't be added to the map
    *
    */
-  std::unordered_map< std::vector< int > , int , VectorHash<int> > dets;
+  std::unordered_map<std::vector<int>, int, VectorHash<int>> dets;
 
   std::vector<int> max_orb;
   std::vector<double> frozen_core_energy;
@@ -114,25 +114,8 @@ public:
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
 
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
-    auto function = __PRETTY_FUNCTION__;
-    POLYQUANT_TIMER timer(function);
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
-    output.resize(this->rows(), mat_in.cols());
-    output.setZero();
-    // Cij = Aik Bkj
-    for (auto i = 0; i < this->N_dets; i++) {
-      for (auto j = 0; j < mat_in.cols(); j++) {
-        auto reduced_val = 0.0;
-#pragma omp parallel for reduction(+ : reduced_val)
-        for (auto k = 0; k < this->N_dets; k++) {
-          reduced_val += this->Slater_Condon(i, k) * mat_in(k, j);
-        }
-        output(i, j) = reduced_val;
-      }
-    }
-    return output;
-  }
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
+
   // void create_ham();
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 };
@@ -145,92 +128,97 @@ template <typename T> int POLYQUANT_DETSET<T>::num_excitation(std::pair<std::vec
   }
   return excitation_degree / 2;
 }
-template <typename T> void POLYQUANT_DETSET<T>::create_det(std::vector<std::vector<std::vector<int>>> &occ) {
-  dets.resize(occ.size());
-  for (auto i_part = 0; i_part < occ.size(); i_part++) {
-    std::string alpha_bit_string, beta_bit_string;
-    alpha_bit_string.resize(max_orb[i_part], '0');
-    beta_bit_string.resize(max_orb[i_part], '0');
-    for (auto i_occ : occ[i_part][0]) {
-      alpha_bit_string[i_occ] = '1';
-    }
-    for (auto i_occ : occ[i_part][1]) {
-      beta_bit_string[i_occ] = '1';
-    }
-    Polyquant_cout("Creating det " + alpha_bit_string + " " + beta_bit_string);
-    std::reverse(alpha_bit_string.begin(), alpha_bit_string.end());
-    std::reverse(beta_bit_string.begin(), beta_bit_string.end());
-    std::vector<T> alpha_det;
-    std::vector<T> beta_det;
-    for (auto i = 0ul; i < alpha_bit_string.length(); i += 64) {
-      alpha_det.push_back(std::stoull(alpha_bit_string.substr(i, 64), 0, 2));
-      beta_det.push_back(std::stoull(beta_bit_string.substr(i, 64), 0, 2));
-    }
-    std::pair<std::vector<T>, std::vector<T>> det = {alpha_det, beta_det};
-    dets[i_part].insert(det);
+
+template <typename T> void POLYQUANT_DETSET<T>::resize(std::size_t size) {
+  unique_dets.resize(size);
+  for (auto i = 0; i < size; i++) {
+    unique_dets[i].resize(2);
   }
 }
-template <typename T>
-std::vector<std::pair<std::vector<T>, std::vector<T>>> POLYQUANT_DETSET<T>::create_excitation(int idx_part, std::pair<std::vector<T>, std::vector<T>> det, std::tuple<int, int, int> excitation_level) {
-  std::vector<std::pair<std::vector<T>, std::vector<T>>> created_dets;
-  std::vector<std::vector<T>> created_dets_alpha, created_dets_beta;
-  created_dets.push_back(det);
-  created_dets_alpha.push_back(std::get<0>(det));
-  created_dets_beta.push_back(std::get<1>(det));
-  std::vector<int> occ, virt;
-  auto alpha_ex_lvl = std::get<0>(excitation_level);
-  auto beta_ex_lvl = std::get<1>(excitation_level);
-  auto total_ex_lvl = std::get<2>(excitation_level);
-  if (alpha_ex_lvl + beta_ex_lvl > total_ex_lvl) {
-    return created_dets;
+template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::vector<std::vector<int>> &occ) {
+  std::string alpha_bit_string, beta_bit_string;
+  alpha_bit_string.resize(max_orb[idx_part], '0');
+  beta_bit_string.resize(max_orb[idx_part], '0');
+  for (auto i_occ : occ[0]) {
+    alpha_bit_string[i_occ] = '1';
   }
-  // alpha
-  occ.clear();
-  virt.clear();
-  this->get_occ_virt(idx_part, det.first, occ, virt);
-  if (alpha_ex_lvl > virt.size()) {
-    APP_ABORT("Alpha Excitation level exceeds virtual size!");
+  for (auto i_occ : occ[1]) {
+    beta_bit_string[i_occ] = '1';
   }
-  for (auto &&iocc : iter::combinations(occ, alpha_ex_lvl)) {
-    for (auto &&ivirt : iter::combinations(virt, alpha_ex_lvl)) {
-      std::vector<T> temp_det(std::get<0>(det));
-      // https://stackoverflow.com/a/47990
-      for (auto &occbit : iocc) {
-        temp_det[occbit / 64ul] &= ~(1UL << (occbit % 64ul));
+  Polyquant_cout("Creating det " + alpha_bit_string + " " + beta_bit_string + " for particle " + std::to_string(idx_part));
+  std::reverse(alpha_bit_string.begin(), alpha_bit_string.end());
+  std::reverse(beta_bit_string.begin(), beta_bit_string.end());
+  std::vector<T> alpha_det;
+  std::vector<T> beta_det;
+  for (auto i = 0ul; i < alpha_bit_string.length(); i += 64) {
+    alpha_det.push_back(std::stoull(alpha_bit_string.substr(i, 64), 0, 2));
+    beta_det.push_back(std::stoull(beta_bit_string.substr(i, 64), 0, 2));
+  }
+  unique_dets[idx_part][0].push_back(alpha_det);
+  unique_dets[idx_part][1].push_back(beta_det);
+}
+
+template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation(int idx_part, int idx_spin, int excitation_level) {
+std::vector<int> occ, virt;
+occ.clear();
+virt.clear();
+auto det = this->unique_dets[idx_part][idx_spin][0];
+this->get_occ_virt(idx_part, det, occ, virt);
+if (excitation_level > virt.size()) {
+  APP_ABORT("Alpha Excitation level exceeds virtual size!");
+}
+for (auto &&iocc : iter::combinations(occ, excitation_level)) {
+  for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
+    std::vector<T> temp_det(det);
+    // https://stackoverflow.com/a/47990
+    for (auto &occbit : iocc) {
+      temp_det[occbit / 64ul] &= ~(1UL << (occbit % 64ul));
+    }
+    for (auto &virtbit : ivirt) {
+      temp_det[virtbit / 64ul] |= 1UL << (virtbit % 64ul);
+    }
+    this->unique_dets[idx_part][idx_spin].push_back(temp_det);
+  }
+}
+}
+template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<std::tuple<int, int, int>> excitation_level) {
+  if (excitation_level.size() > 2) {
+    APP_ABORT("The CI code can currently handle up to a maximum of 2 unique quantum particle types.");
+  }
+  // TODO generalize this
+  this->N_dets = 0;
+  std::pair<std::vector<T>, std::vector<T>> hf_det_pair_0 = std::make_pair(this->unique_dets[0][0][0], this->unique_dets[0][1][0]);
+  std::pair<std::vector<T>, std::vector<T>> hf_det_pair_1;
+  if (excitation_level.size() == 2){
+hf_det_pair_1 = std::make_pair(this->unique_dets[1][0][0], this->unique_dets[1][1][0]);
+  }
+  for (auto i = 0; i < this->unique_dets[0][0].size(); i++) {
+    for (auto j = 0; j < this->unique_dets[0][1].size(); j++) {
+      std::pair<std::vector<T>, std::vector<T>> det_pair_0 = std::make_pair(this->unique_dets[0][0][i], this->unique_dets[0][1][j]);
+      auto excitation_degree_0 = 0;
+      excitation_degree_0 = this->num_excitation(hf_det_pair_0, det_pair_0);
+      if (excitation_degree_0 <= std::get<2>(excitation_level[0])) {
+        if (excitation_level.size() == 2){
+        for (auto k = 0; k < this->unique_dets[1][0].size(); k++) {
+          for (auto l = 0; l < this->unique_dets[1][1].size(); l++) {
+            std::pair<std::vector<T>, std::vector<T>> det_pair_1 = std::make_pair(this->unique_dets[1][0][k], this->unique_dets[1][1][l]);
+            auto excitation_degree_1 = 0;
+            excitation_degree_1 = this->num_excitation(hf_det_pair_1, det_pair_1);
+            if (excitation_degree_1 <= std::get<2>(excitation_level[1])) {
+              std::vector<int> det_idx = {i, j, k, l};
+              this->dets[det_idx] = this->N_dets;
+              this->N_dets++;
+            }
+          }
+        }
+        } else {
+              std::vector<int> det_idx = {i, j};
+              this->dets[det_idx] = this->N_dets;
+              this->N_dets++;
+        }
       }
-      for (auto &virtbit : ivirt) {
-        temp_det[virtbit / 64ul] |= 1UL << (virtbit % 64ul);
-      }
-      created_dets_alpha.push_back(temp_det);
     }
   }
-  // beta
-  occ.clear();
-  virt.clear();
-  this->get_occ_virt(idx_part, det.second, occ, virt);
-  if (beta_ex_lvl > virt.size()) {
-    APP_ABORT("Beta excitation level exceeds virtual size!");
-  }
-  for (auto &&iocc : iter::combinations(occ, beta_ex_lvl)) {
-    for (auto &&ivirt : iter::combinations(virt, beta_ex_lvl)) {
-      std::vector<T> temp_det(std::get<1>(det));
-      // https://stackoverflow.com/a/47990
-      for (auto &occbit : iocc) {
-        temp_det[occbit / 64ul] &= ~(1UL << (occbit % 64ul));
-      }
-      for (auto &virtbit : ivirt) {
-        temp_det[virtbit / 64ul] |= 1UL << (virtbit % 64ul);
-      }
-      created_dets_beta.push_back(temp_det);
-    }
-  }
-  for (auto i : created_dets_alpha) {
-    for (auto j : created_dets_beta) {
-      std::pair<std::vector<T>, std::vector<T>> temp_det(i, j);
-      created_dets.push_back(temp_det);
-    }
-  }
-  return created_dets;
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes) const {
@@ -295,35 +283,31 @@ template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::
     }
   }
 }
+
 template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
   Polyquant_cout("Printing Determinants");
-  for (auto i_part = 0; i_part < dets.size(); i_part++) {
-    Polyquant_cout("Particle " + std::to_string(i_part));
+  Polyquant_cout("Total number of unique determinants: " + std::to_string(this->N_dets));
+  //TODO this is specific to only 2 particles
+  for (auto i_part = 0; i_part < unique_dets.size(); i_part++) {
+    for (auto i_spin = 0; i_spin < unique_dets[i_part].size(); i_spin++) {
+    Polyquant_cout("Particle " + std::to_string(i_part) + " spin " + std::to_string(i_spin));
     auto idet_idx = 0;
-    for (auto i_det : dets[i_part]) {
+    for (auto i_det : unique_dets[i_part][i_spin]) {
       std::stringstream ss;
       ss << std::setw(10) << idet_idx;
       ss << "    ";
       std::string det;
-      for (auto i_detframe : i_det.first) {
+      for (auto i_detframe : i_det) {
         det += std::bitset<64>(i_detframe).to_string();
         det += " ";
       }
       std::reverse(det.begin(), det.end());
       ss << det;
-      ss << "    ";
-      det = "";
-      for (auto i_detframe : i_det.second) {
-        det += std::bitset<64>(i_detframe).to_string();
-        det += " ";
-      }
-      std::reverse(det.begin(), det.end());
-      ss << det;
-      ss << "    ";
       Polyquant_cout(ss.str());
       idet_idx++;
     }
   }
+}
 }
 
 // Polyquant_cout("Det num to idx");
@@ -340,21 +324,21 @@ template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
 //}
 
 template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::size_t det_idx) const {
-  std::vector<int> unfolded_idx;
-  auto running_size = 1ul;
-  for (auto i_part = dets.size(); i_part > 0; i_part--) {
-    running_size *= dets[i_part - 1].size();
-    unfolded_idx.push_back(det_idx % running_size);
-    det_idx /= running_size;
-  }
-  std::reverse(unfolded_idx.begin(), unfolded_idx.end());
-  return unfolded_idx;
+  // std::vector<int> unfolded_idx;
+  // auto running_size = 1ul;
+  // for (auto i_part = dets.size(); i_part > 0; i_part--) {
+  //   running_size *= dets[i_part - 1].size();
+  //   unfolded_idx.push_back(det_idx % running_size);
+  //   det_idx /= running_size;
+  // }
+  // std::reverse(unfolded_idx.begin(), unfolded_idx.end());
+  // return unfolded_idx;
 }
 
 template <typename T> std::pair<std::vector<T>, std::vector<T>> POLYQUANT_DETSET<T>::get_det(int idx_part, int i) const {
-  auto it = this->dets[idx_part].begin();
-  std::advance(it, i);
-  return *it;
+  //auto it = this->dets[idx_part].begin();
+  //std::advance(it, i);
+  //return *it;
 }
 
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
@@ -905,6 +889,26 @@ template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, d
     y_out[i_det] = matrix_elem;
   }
 }
+
+template <typename T> Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
+    auto function = __PRETTY_FUNCTION__;
+    POLYQUANT_TIMER timer(function);
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
+    output.resize(this->rows(), mat_in.cols());
+    output.setZero();
+    // Cij = Aik Bkj
+    for (auto i = 0; i < this->N_dets; i++) {
+      for (auto j = 0; j < mat_in.cols(); j++) {
+        auto reduced_val = 0.0;
+#pragma omp parallel for reduction(+ : reduced_val)
+        for (auto k = 0; k < this->N_dets; k++) {
+          reduced_val += this->Slater_Condon(i, k) * mat_in(k, j);
+        }
+        output(i, j) = reduced_val;
+      }
+    }
+    return output;
+  }
 
 // template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
 //   // this->ham.conservativeResize(this->N_dets, this->N_dets);
