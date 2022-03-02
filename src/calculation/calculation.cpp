@@ -362,9 +362,10 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   for (auto i = 0; i < this->ci_calc.detset.N_dets; i++) {
     for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
       auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
-      auto curr_det = this->ci_calc.detset.get_det(idx_part, i_unfold[idx_part]);
-      dets[idx_part][0].push_back(curr_det.first);
-      dets[idx_part][1].push_back(curr_det.second);
+      auto curr_det_a = this->ci_calc.detset.get_det(idx_part, 0, i_unfold[2 * idx_part + 0]);
+      auto curr_det_b = this->ci_calc.detset.get_det(idx_part, 1, i_unfold[2 * idx_part + 1]);
+      dets[idx_part][0].push_back(curr_det_a);
+      dets[idx_part][1].push_back(curr_det_b);
     }
   }
   std::string particle_filename = "Multidet_" + filename;

@@ -23,6 +23,15 @@ namespace polyquant {
 template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() {}
+  ~POLYQUANT_DETSET() {
+    std::stringstream ss;
+    ss << "SLATER CONDON CALLS : " << Slater_Condon_calls << std::endl;
+    ss << "SLATER CONDON DIAGONAL (i==j) CALLS : " << Slater_Condon_diagonal_calls << std::endl;
+    double percentage_of_all_calls = ((double)Slater_Condon_diagonal_calls) / ((double)Slater_Condon_calls);
+    percentage_of_all_calls *= 100.0;
+    ss << "percent SLATER CONDON DIAGONAL (i==j) CALLS : " << percentage_of_all_calls << "%" << std::endl;
+    Polyquant_cout(ss.str());
+  }
 
   int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void resize(std::size_t size);
@@ -42,7 +51,7 @@ public:
   double mixed_part_ham_single(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
   double mixed_part_ham_double(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
 
-  std::pair<std::vector<T>, std::vector<T>> get_det(int idx_part, int i) const;
+  std::vector<T> get_det(int idx_part, int idx_spin, int i) const;
   void print_determinants();
   // /**
   //  * @brief determinant set (number of quantum particles, alpha/beta, det num
@@ -51,7 +60,7 @@ public:
   //  */
   // std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
   /**
-   * @brief unique dets (number of quantum particles, alpha/beta, list of unique dets which are vector of ints)
+   * @brief unique dets (number of quantum particles, alpha/beta, list of unique dets which are vector of templated type)
    *
    */
   std::vector<std::vector<std::vector<std::vector<T>>>> unique_dets;
@@ -95,6 +104,9 @@ public:
   // mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
 
   double Slater_Condon(int i_det, int j_det) const;
+
+  mutable int Slater_Condon_calls;
+  mutable int Slater_Condon_diagonal_calls;
   // for diagonalization stuff
   using Scalar = double; // A typedef named "Scalar" is required
   int rows() const {
@@ -109,7 +121,7 @@ public:
   // y_out = M * x_in
   // Eigen::SparseMatrix<double> ham;
   // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ham;
-  void perform_op(const double *x_in, double *y_out) const;
+  // void perform_op(const double *x_in, double *y_out) const;
 
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
@@ -324,30 +336,24 @@ template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
 //}
 
 template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::size_t det_idx) const {
-  // std::vector<int> unfolded_idx;
-  // auto running_size = 1ul;
-  // for (auto i_part = dets.size(); i_part > 0; i_part--) {
-  //   running_size *= dets[i_part - 1].size();
-  //   unfolded_idx.push_back(det_idx % running_size);
-  //   det_idx /= running_size;
-  // }
-  // std::reverse(unfolded_idx.begin(), unfolded_idx.end());
-  // return unfolded_idx;
+  if (det_idx > this->N_dets) {
+    APP_ABORT("det_idx_unfold called with value greater than the number of determinants");
+  }
+
+  auto it = std::find_if(std::begin(dets), std::end(dets), [&det_idx](auto &&pair) { return pair.second == det_idx; });
+  if (it == std::end(dets)) {
+    APP_ABORT("det_idx_unfold could not find determinant which should exist (idx < N_dets).");
+  }
+  return it->first;
 }
 
-template <typename T> std::pair<std::vector<T>, std::vector<T>> POLYQUANT_DETSET<T>::get_det(int idx_part, int i) const {
-  // auto it = this->dets[idx_part].begin();
-  // std::advance(it, i);
-  // return *it;
-}
+template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
 
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
-  auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  auto det_i_a = det_i.first;
-  auto det_i_b = det_i.second;
-  auto det_j_a = det_j.first;
-  auto det_j_b = det_j.second;
+  auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+  auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+  auto det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+  auto det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
 
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->input_integral.mo_one_body_ints[idx_part].size();
@@ -387,12 +393,10 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_par
 
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_single(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
-  auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  auto det_i_a = det_i.first;
-  auto det_i_b = det_i.second;
-  auto det_j_a = det_j.first;
-  auto det_j_b = det_j.second;
+  auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+  auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+  auto det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+  auto det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->input_integral.mo_one_body_ints[idx_part].size();
 
@@ -442,12 +446,10 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_single(int idx_p
 
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
-  auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  auto det_i_a = det_i.first;
-  auto det_i_b = det_i.second;
-  auto det_j_a = det_j.first;
-  auto det_j_b = det_j.second;
+  auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+  auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+  auto det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+  auto det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->input_integral.mo_one_body_ints[idx_part].size();
 
@@ -487,18 +489,14 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_p
 }
 template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_diag(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
-  auto idx_part_det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  auto idx_part_det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  auto idx_part_det_i_a = idx_part_det_i.first;
-  auto idx_part_det_i_b = idx_part_det_i.second;
-  auto idx_part_det_j_a = idx_part_det_j.first;
-  auto idx_part_det_j_b = idx_part_det_j.second;
-  auto other_idx_part_det_i = this->get_det(other_idx_part, i_unfold[other_idx_part]);
-  auto other_idx_part_det_j = this->get_det(other_idx_part, j_unfold[other_idx_part]);
-  auto other_idx_part_det_i_a = other_idx_part_det_i.first;
-  auto other_idx_part_det_i_b = other_idx_part_det_i.second;
-  auto other_idx_part_det_j_a = other_idx_part_det_j.first;
-  auto other_idx_part_det_j_b = other_idx_part_det_j.second;
+  auto idx_part_det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+  auto idx_part_det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+  auto idx_part_det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+  auto idx_part_det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
+  auto other_idx_part_det_i_a = this->get_det(other_idx_part, 0, i_unfold[other_idx_part * 2 + 0]);
+  auto other_idx_part_det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
+  auto other_idx_part_det_j_a = this->get_det(other_idx_part, 0, j_unfold[other_idx_part * 2 + 0]);
+  auto other_idx_part_det_j_b = this->get_det(other_idx_part, 1, j_unfold[other_idx_part * 2 + 1]);
   auto idx_part_alpha_spin_idx = 0;
   auto idx_part_beta_spin_idx = 1 % this->input_integral.mo_one_body_ints[idx_part].size();
   auto other_idx_part_alpha_spin_idx = 0;
@@ -558,18 +556,14 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_diag(int idx_pa
 
 template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_single(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
-  auto idx_part_det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  auto idx_part_det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  auto idx_part_det_i_a = idx_part_det_i.first;
-  auto idx_part_det_i_b = idx_part_det_i.second;
-  auto idx_part_det_j_a = idx_part_det_j.first;
-  auto idx_part_det_j_b = idx_part_det_j.second;
-  auto other_idx_part_det_i = this->get_det(other_idx_part, i_unfold[other_idx_part]);
-  auto other_idx_part_det_j = this->get_det(other_idx_part, j_unfold[other_idx_part]);
-  auto other_idx_part_det_i_a = other_idx_part_det_i.first;
-  auto other_idx_part_det_i_b = other_idx_part_det_i.second;
-  auto other_idx_part_det_j_a = other_idx_part_det_j.first;
-  auto other_idx_part_det_j_b = other_idx_part_det_j.second;
+  auto idx_part_det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+  auto idx_part_det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+  auto idx_part_det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+  auto idx_part_det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
+  auto other_idx_part_det_i_a = this->get_det(other_idx_part, 0, i_unfold[other_idx_part * 2 + 0]);
+  auto other_idx_part_det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
+  auto other_idx_part_det_j_a = this->get_det(other_idx_part, 0, j_unfold[other_idx_part * 2 + 0]);
+  auto other_idx_part_det_j_b = this->get_det(other_idx_part, 1, j_unfold[other_idx_part * 2 + 1]);
   auto idx_part_alpha_spin_idx = 0;
   auto idx_part_beta_spin_idx = 1 % this->input_integral.mo_one_body_ints[idx_part].size();
   auto other_idx_part_alpha_spin_idx = 0;
@@ -686,18 +680,14 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_single(int idx_
 
 template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
-  auto idx_part_det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  auto idx_part_det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  auto idx_part_det_i_a = idx_part_det_i.first;
-  auto idx_part_det_i_b = idx_part_det_i.second;
-  auto idx_part_det_j_a = idx_part_det_j.first;
-  auto idx_part_det_j_b = idx_part_det_j.second;
-  auto other_idx_part_det_i = this->get_det(other_idx_part, i_unfold[other_idx_part]);
-  auto other_idx_part_det_j = this->get_det(other_idx_part, j_unfold[other_idx_part]);
-  auto other_idx_part_det_i_a = other_idx_part_det_i.first;
-  auto other_idx_part_det_i_b = other_idx_part_det_i.second;
-  auto other_idx_part_det_j_a = other_idx_part_det_j.first;
-  auto other_idx_part_det_j_b = other_idx_part_det_j.second;
+  auto idx_part_det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+  auto idx_part_det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+  auto idx_part_det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+  auto idx_part_det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
+  auto other_idx_part_det_i_a = this->get_det(other_idx_part, 0, i_unfold[other_idx_part * 2 + 0]);
+  auto other_idx_part_det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
+  auto other_idx_part_det_j_a = this->get_det(other_idx_part, 0, j_unfold[other_idx_part * 2 + 0]);
+  auto other_idx_part_det_j_b = this->get_det(other_idx_part, 1, j_unfold[other_idx_part * 2 + 1]);
   auto idx_part_alpha_spin_idx = 0;
   auto idx_part_beta_spin_idx = 1 % this->input_integral.mo_one_body_ints[idx_part].size();
   auto other_idx_part_alpha_spin_idx = 0;
@@ -792,6 +782,10 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_
   return elem;
 }
 template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
+
+  Slater_Condon_calls++;
+  if (i_det == j_det)
+    Slater_Condon_diagonal_calls++;
   // std::pair<int, int> mat_idx;
   // if (j_det < i_det) {
   //   mat_idx = std::make_pair(j_det, i_det);
@@ -802,93 +796,105 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
   // if (cached_matrix_elem.has_value()) {
   //   return cached_matrix_elem.value();
   // } else {
-  //   double matrix_elem = 0.0;
-  //   auto i_unfold = det_idx_unfold(i_det);
-  //   auto j_unfold = det_idx_unfold(j_det);
-  //   std::vector<bool> iequalj;
+  double matrix_elem = 0.0;
+  auto i_unfold = det_idx_unfold(i_det);
+  auto j_unfold = det_idx_unfold(j_det);
+  std::vector<bool> iequalj;
   //   // todo condense this
-  //   for (auto idx_part = 0; idx_part < dets.size(); idx_part++) {
-  //     iequalj.push_back(i_unfold[idx_part] == j_unfold[idx_part]);
-  //   }
-  //   auto idx_part = 0ul;
-  //   for (auto const &[quantum_part_key, quantum_part] : this->input_integral.input_molecule.quantum_particles) {
-  //     std::vector<bool> iequalj_otherparts(iequalj.begin(), iequalj.end());
-  //     iequalj_otherparts.erase(iequalj_otherparts.begin() + idx_part);
-  //     if (std::find(iequalj_otherparts.begin(), iequalj_otherparts.end(), false) == iequalj_otherparts.end()) {
-  //       auto excitation_level = 0;
-  //       auto det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  //       auto det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  //       excitation_level += this->num_excitation(det_i, det_j);
+  for (auto idx_part = 0; idx_part < unique_dets.size(); idx_part++) {
+    iequalj.push_back(i_unfold[idx_part * 2 + 0] == j_unfold[idx_part * 2 + 0] && i_unfold[idx_part * 2 + 1] == j_unfold[idx_part * 2 + 1]);
+  }
+  auto idx_part = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_integral.input_molecule.quantum_particles) {
+    std::vector<bool> iequalj_otherparts(iequalj.begin(), iequalj.end());
+    iequalj_otherparts.erase(iequalj_otherparts.begin() + idx_part);
+    if (std::find(iequalj_otherparts.begin(), iequalj_otherparts.end(), false) == iequalj_otherparts.end()) {
+      auto excitation_level = 0;
+      auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+      auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+      auto det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+      auto det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
+      auto det_i = std::make_pair(det_i_a, det_i_b);
+      auto det_j = std::make_pair(det_j_a, det_j_b);
+      excitation_level += this->num_excitation(det_i, det_j);
 
-  //       if (excitation_level == 0) {
-  //         // do 1+2 body
-  //         matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);
-  //       } else if (excitation_level == 1) {
-  //         // do 1+2 body
-  //         matrix_elem += this->same_part_ham_single(idx_part, i_unfold, j_unfold);
-  //       } else if (excitation_level == 2) {
-  //         // do 2 body
-  //         matrix_elem += this->same_part_ham_double(idx_part, i_unfold, j_unfold);
-  //       }
-  //     }
-  //     auto other_idx_part = 0ul;
-  //     for (auto const &[other_quantum_part_key, other_quantum_part] : this->input_integral.input_molecule.quantum_particles) {
-  //       if (idx_part == other_idx_part) {
-  //         continue;
-  //       }
-  //       // loop over other particles
-  //       // if all other particle dets j,k,l etc are equal then add the particle
-  //       // i j interaction
-  //       std::vector<bool> iequalj_otherparts(iequalj.begin(), iequalj.end());
-  //       iequalj_otherparts.erase(iequalj_otherparts.begin() + idx_part);
-  //       iequalj_otherparts.erase(iequalj_otherparts.begin() + other_idx_part);
-  //       if (std::find(iequalj_otherparts.begin(), iequalj_otherparts.end(), false) == iequalj_otherparts.end()) {
-  //         auto excitation_level = 0;
-  //         auto excitation_level_part_i = 0;
-  //         auto excitation_level_part_j = 0;
-  //         auto part_i_det_i = this->get_det(idx_part, i_unfold[idx_part]);
-  //         auto part_i_det_j = this->get_det(idx_part, j_unfold[idx_part]);
-  //         auto part_j_det_i = this->get_det(other_idx_part, i_unfold[other_idx_part]);
-  //         auto part_j_det_j = this->get_det(other_idx_part, j_unfold[other_idx_part]);
-  //         excitation_level_part_i = this->num_excitation(part_i_det_i, part_i_det_j);
-  //         excitation_level_part_j = this->num_excitation(part_j_det_i, part_j_det_j);
-  //         excitation_level = excitation_level_part_i + excitation_level_part_j;
-  //         auto charge_factor = quantum_part.charge * other_quantum_part.charge;
-  //         // std::cout << "Charge factor " << charge_factor << std::endl;
-  //         if (excitation_level < 3) {
-  //           if (excitation_level_part_i == 0 && excitation_level_part_j == 0) {
-  //             matrix_elem += charge_factor * this->mixed_part_ham_diag(idx_part, other_idx_part, i_unfold, j_unfold);
-  //           } else if (excitation_level_part_i == 1 && excitation_level_part_j == 1) {
-  //             matrix_elem += charge_factor * this->mixed_part_ham_double(idx_part, other_idx_part, i_unfold, j_unfold);
-  //           } else if (excitation_level_part_i == 1 || excitation_level_part_j == 1) {
-  //             matrix_elem += charge_factor * this->mixed_part_ham_single(idx_part, other_idx_part, i_unfold, j_unfold);
-  //           }
-  //         }
-  //       }
-  //       other_idx_part++;
-  //     }
-  //     idx_part++;
-  //   }
-  //   this->cache.set(mat_idx, matrix_elem);
-  //   return matrix_elem;
-  // }
-}
-
-template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
-    auto matrix_elem = 0.0;
-#pragma omp parallel for reduction(+ : matrix_elem)
-    for (auto j_det = 0; j_det < this->N_dets; j_det++) {
-      auto sc_elem = this->Slater_Condon(j_det, i_det);
-      if (x_in[j_det] != 0 && sc_elem != 0) {
-        matrix_elem += x_in[j_det] * sc_elem;
+      if (excitation_level == 0) {
+        // do 1+2 body
+        matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);
+      } else if (excitation_level == 1) {
+        // do 1+2 body
+        matrix_elem += this->same_part_ham_single(idx_part, i_unfold, j_unfold);
+      } else if (excitation_level == 2) {
+        // do 2 body
+        matrix_elem += this->same_part_ham_double(idx_part, i_unfold, j_unfold);
       }
     }
-    y_out[i_det] = matrix_elem;
+    auto other_idx_part = 0ul;
+    for (auto const &[other_quantum_part_key, other_quantum_part] : this->input_integral.input_molecule.quantum_particles) {
+      if (idx_part == other_idx_part) {
+        continue;
+      }
+      // loop over other particles
+      // if all other particle dets j,k,l etc are equal then add the particle
+      // i j interaction
+      std::vector<bool> iequalj_otherparts(iequalj.begin(), iequalj.end());
+      iequalj_otherparts.erase(iequalj_otherparts.begin() + idx_part);
+      iequalj_otherparts.erase(iequalj_otherparts.begin() + other_idx_part);
+      if (std::find(iequalj_otherparts.begin(), iequalj_otherparts.end(), false) == iequalj_otherparts.end()) {
+        auto excitation_level = 0;
+        auto excitation_level_part_i = 0;
+        auto excitation_level_part_j = 0;
+        auto part_i_det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+        auto part_i_det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+        auto part_i_det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
+        auto part_i_det_j_b = this->get_det(idx_part, 1, j_unfold[idx_part * 2 + 1]);
+        auto part_i_det_i = std::make_pair(part_i_det_i_a, part_i_det_i_b);
+        auto part_i_det_j = std::make_pair(part_i_det_j_a, part_i_det_j_b);
+        auto part_j_det_i_a = this->get_det(other_idx_part, 0, i_unfold[other_idx_part * 2 + 0]);
+        auto part_j_det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
+        auto part_j_det_j_a = this->get_det(other_idx_part, 0, j_unfold[other_idx_part * 2 + 0]);
+        auto part_j_det_j_b = this->get_det(other_idx_part, 1, j_unfold[other_idx_part * 2 + 1]);
+        auto part_j_det_i = std::make_pair(part_j_det_i_a, part_j_det_i_b);
+        auto part_j_det_j = std::make_pair(part_j_det_j_a, part_j_det_j_b);
+
+        excitation_level_part_i = this->num_excitation(part_i_det_i, part_i_det_j);
+        excitation_level_part_j = this->num_excitation(part_j_det_i, part_j_det_j);
+        excitation_level = excitation_level_part_i + excitation_level_part_j;
+        auto charge_factor = quantum_part.charge * other_quantum_part.charge;
+        //         // std::cout << "Charge factor " << charge_factor << std::endl;
+        if (excitation_level < 3) {
+          if (excitation_level_part_i == 0 && excitation_level_part_j == 0) {
+            matrix_elem += charge_factor * this->mixed_part_ham_diag(idx_part, other_idx_part, i_unfold, j_unfold);
+          } else if (excitation_level_part_i == 1 && excitation_level_part_j == 1) {
+            matrix_elem += charge_factor * this->mixed_part_ham_double(idx_part, other_idx_part, i_unfold, j_unfold);
+          } else if (excitation_level_part_i == 1 || excitation_level_part_j == 1) {
+            matrix_elem += charge_factor * this->mixed_part_ham_single(idx_part, other_idx_part, i_unfold, j_unfold);
+          }
+        }
+      }
+      other_idx_part++;
+    }
+    idx_part++;
   }
+  //   this->cache.set(mat_idx, matrix_elem);
+  return matrix_elem;
 }
+
+// template <typename T> void POLYQUANT_DETSET<T>::perform_op(const double *x_in, double *y_out) const {
+//   auto function = __PRETTY_FUNCTION__;
+//   POLYQUANT_TIMER timer(function);
+//   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
+//     auto matrix_elem = 0.0;
+// #pragma omp parallel for reduction(+ : matrix_elem)
+//     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
+//       auto sc_elem = this->Slater_Condon(j_det, i_det);
+//       if (x_in[j_det] != 0 && sc_elem != 0) {
+//         matrix_elem += x_in[j_det] * sc_elem;
+//       }
+//     }
+//     y_out[i_det] = matrix_elem;
+//   }
+// }
 
 template <typename T>
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
