@@ -161,6 +161,7 @@ void POLYQUANT_EPCI::run() {
   POLYQUANT_TIMER timer(function);
   this->calculate_integrals();
   this->setup_determinants();
+  this->detset.precompute_diagonal_Slater_Condon();
   this->print_start_iterations();
 
   Eigen::Index initialsubspacevec = this->num_subspace_vec;

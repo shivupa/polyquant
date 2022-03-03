@@ -103,10 +103,12 @@ public:
 
   // mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
 
+  mutable std::vector<double> diagonal_Hii;
+  void precompute_diagonal_Slater_Condon() const;
   double Slater_Condon(int i_det, int j_det) const;
 
-  mutable int Slater_Condon_calls;
-  mutable int Slater_Condon_diagonal_calls;
+  mutable int Slater_Condon_calls = 0;
+  mutable int Slater_Condon_diagonal_calls = 0;
   // for diagonalization stuff
   using Scalar = double; // A typedef named "Scalar" is required
   int rows() const {
@@ -350,6 +352,7 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
 
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
+  Slater_Condon_diagonal_calls++;
   auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
   auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
   auto det_j_a = this->get_det(idx_part, 0, j_unfold[idx_part * 2 + 0]);
@@ -781,11 +784,29 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_
   }
   return elem;
 }
-template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
 
+template <typename T> void POLYQUANT_DETSET<T>::precompute_diagonal_Slater_Condon() const {
+  diagonal_Hii.resize(N_dets, 0.0);
+  for (auto i = 0; i < N_dets; i++) {
+    auto i_unfold = det_idx_unfold(i);
+    double matrix_elem = 0.0;
+    auto idx_part = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_integral.input_molecule.quantum_particles) {
+      auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+      auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+      auto det_i = std::make_pair(det_i_a, det_i_b);
+      matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, i_unfold);
+      idx_part++;
+    }
+    diagonal_Hii[i] = matrix_elem;
+  }
+}
+
+template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
+  if (i_det == j_det) {
+    return diagonal_Hii[i_det];
+  }
   Slater_Condon_calls++;
-  if (i_det == j_det)
-    Slater_Condon_diagonal_calls++;
   // std::pair<int, int> mat_idx;
   // if (j_det < i_det) {
   //   mat_idx = std::make_pair(j_det, i_det);
