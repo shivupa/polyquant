@@ -33,6 +33,7 @@ public:
     Polyquant_cout(ss.str());
   }
 
+  int single_spin_num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const;
   int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void resize(std::size_t size);
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
@@ -128,14 +129,33 @@ public:
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
 
-  void sigma_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
-  void sigma_class_two_contribution(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> &F, int idx_part, int idx_spin, int idx_I_det);
+  void sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
+  void sigma_two_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
+
+  void sigma_one_species_class_two_contribution(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_two_species_class_two_contribution(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+
+  void sigma_one_species(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_two_species(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+
+  void create_sigma(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void create_sigma_slow(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
 
   // void create_ham();
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 };
+
+template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const {
+  int excitation_degree = 0;
+  for (auto i = 0; i < Di.size(); i++) {
+    excitation_degree += std::popcount(Di[i] ^ Dj[i]);
+  }
+  return excitation_degree / 2;
+}
+
 
 template <typename T> int POLYQUANT_DETSET<T>::num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const {
   int excitation_degree = 0;
@@ -304,7 +324,6 @@ template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::
 template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
   Polyquant_cout("Printing Determinants");
   Polyquant_cout("Total number of unique determinants: " + std::to_string(this->N_dets));
-  // TODO this is specific to only 2 particles
   for (auto i_part = 0; i_part < unique_dets.size(); i_part++) {
     for (auto i_spin = 0; i_spin < unique_dets[i_part].size(); i_spin++) {
       Polyquant_cout("Particle " + std::to_string(i_part) + " spin " + std::to_string(i_spin));
@@ -923,8 +942,96 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 
 template <typename T>
 void POLYQUANT_DETSET<T>::
+
 template <typename T>
-void POLYQUANT_DETSET<T>::
+void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> &F, int idx_part, int idx_spin, int idx_I_det) {
+    for (auto idx_J_det = idx_I_det + 1; idx_J_det < this->unique_dets[idx_part][idx_spin].size(), idx_J_det++){
+        auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][idx_spin][idx_I_det],this->unique_dets[idx_part][idx_spin][idx_J_det]);
+        if (num_exec == 1) {
+        } else if(num_exec ==2) {
+        }
+    }
+}
+
+template <typename T>
+void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
+    for (auto idx_I_det = 0; idx_I_det < this->unique_dets[idx_part][idx_spin].size(), idx_I_det++){
+        Eigen::Matrix<double, Eigen::Dynamic, 1> F;
+        F.resize(this->unique_dets[idx_part][idx_spin].size());
+        sigma_class_one_contribution_helper(F, idx_part, idx_spin, idx_I_det);
+        for (auto idx_I_chi_gammaprime_det = 0; idx_I_det < this->unique_dets[idx_part][1-idx_spin].size(), idx_I_chi_gammaprime_det++){
+            std::vector<int> det_idx(2);
+            det_idx[idx_spin] = idx_I_det;
+            det_idx[1-idx_spin] = idx_I_chi_gammaprime_det;
+            if (this->dets.find(det_idx) != this->dets.end()){
+                for (auto state_idx = 0; state_idx < C.cols; state_idx++){
+                    for (auto idx_J_det = idx_I_det + 1; idx_J_det < this->unique_dets[idx_part][idx_spin].size(), idx_J_det++){
+                        std::vector<int> jdet_idx(2);
+                        jdet_idx[idx_spin] = idx_J_det;
+                        jdet_idx[1-idx_spin] = idx_I_chi_gammaprime_det;
+                        if (this->dets.find(det_idx) != this->dets.end()){
+                            auto unfolded_det_idx = this->dets[det_idx];
+                            sigma[unfolded_det_idx, state_idx] += F[idx_J_det] * C(unfolded_det_idx,state_idx);
+                            unfolded_det_idx = this->dets[jdet_idx];
+                            sigma[unfolded_det_idx, state_idx] += F[idx_I_det] * C(unfolded_det_idx,state_idx);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+template <typename T>
+void POLYQUANT_DETSET<T>::sigma_one_species(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+    // TODO handle idx_J_det == idx_I_det
+    // 3 unique terms
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_contribution;
+    sigma_contribution.resize(this->rows(), sigma.cols());
+    sigma_contribution.setZero();
+    // Aa Aa
+    sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 0);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+    // Ab Ab
+    sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 1);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+    // Aa Ab
+    //sigma_one_species_class_two_contribution(sigma_contribution, C, 0, 0);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+}
+
+template <typename T>
+void POLYQUANT_DETSET<T>::create_sigma(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+    auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
+    if (num_parts == 1){
+        sigma_one_species(sigma, C);
+    } else if (num_parts == 2){
+        //sigma_two_species(sigma, C);
+    } else {
+    std::stringstream ss;
+    ss << "Sigma vector building not supported for " << num_part << " unique quantum particles."  << std::endl;
+    APP_ABORT(ss.str());
+    }
+}
+
+template <typename T>
+void POLYQUANT_DETSET<T>::create_sigma_slow(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+// Cij = Aik Bkj
+  for (auto i = 0; i < this->N_dets; i++) {
+    for (auto j = 0; j < C.cols(); j++) {
+      auto reduced_val = 0.0;
+#pragma omp parallel for reduction(+ : reduced_val)
+      for (auto k = 0; k < this->N_dets; k++) {
+        reduced_val += this->Slater_Condon(i, k) * C(k, j);
+      }
+      sigma(i, j) = reduced_val;
+    }
+  }
+}
+
 
 template <typename T>
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
@@ -933,19 +1040,32 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::opera
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
   output.resize(this->rows(), mat_in.cols());
   output.setZero();
-  // Cij = Aik Bkj
-  for (auto i = 0; i < this->N_dets; i++) {
-    for (auto j = 0; j < mat_in.cols(); j++) {
-      auto reduced_val = 0.0;
-#pragma omp parallel for reduction(+ : reduced_val)
-      for (auto k = 0; k < this->N_dets; k++) {
-        reduced_val += this->Slater_Condon(i, k) * mat_in(k, j);
-      }
-      output(i, j) = reduced_val;
-    }
-  }
+  //create_sigma_slow(output, mat_in);
+  create_sigma(output, mat_in);
   return output;
 }
+
+
+//template <typename T>
+//Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
+//  auto function = __PRETTY_FUNCTION__;
+//  POLYQUANT_TIMER timer(function);
+//  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
+//  output.resize(this->rows(), mat_in.cols());
+//  output.setZero();
+//  // Cij = Aik Bkj
+//  for (auto i = 0; i < this->N_dets; i++) {
+//    for (auto j = 0; j < mat_in.cols(); j++) {
+//      auto reduced_val = 0.0;
+//#pragma omp parallel for reduction(+ : reduced_val)
+//      for (auto k = 0; k < this->N_dets; k++) {
+//        reduced_val += this->Slater_Condon(i, k) * mat_in(k, j);
+//      }
+//      output(i, j) = reduced_val;
+//    }
+//  }
+//  return output;
+//}
 
 // template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
 //   // this->ham.conservativeResize(this->N_dets, this->N_dets);
