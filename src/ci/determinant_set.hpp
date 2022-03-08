@@ -128,6 +128,9 @@ public:
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
 
+  void sigma_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_class_two_contribution(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
 
   // void create_ham();
@@ -916,6 +919,12 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 //     y_out[i_det] = matrix_elem;
 //   }
 // }
+
+
+template <typename T>
+void POLYQUANT_DETSET<T>::
+template <typename T>
+void POLYQUANT_DETSET<T>::
 
 template <typename T>
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
