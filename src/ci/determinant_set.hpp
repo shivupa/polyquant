@@ -32,18 +32,20 @@ public:
     ss << "percent SLATER CONDON DIAGONAL (i==j) CALLS : " << percentage_of_all_calls << "%" << std::endl;
     Polyquant_cout(ss.str());
   }
-
-  int single_spin_num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const;
-  int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void resize(std::size_t size);
+
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
   void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
   void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level);
 
+  int single_spin_num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const;
+  int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes) const;
   void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const;
   double get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const;
   void get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const;
+
+  double single_spin_ham_contribution_diagonal(int idx_part, int idx_spin, std::vector<T> &Di);
 
   double same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
   double same_part_ham_single(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
@@ -156,14 +158,11 @@ template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(std::v
   return excitation_degree / 2;
 }
 
-
 template <typename T> int POLYQUANT_DETSET<T>::num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const {
   int excitation_degree = 0;
-  for (auto i = 0; i < Di.first.size(); i++) {
-    excitation_degree += std::popcount(Di.first[i] ^ Dj.first[i]);
-    excitation_degree += std::popcount(Di.second[i] ^ Dj.second[i]);
-  }
-  return excitation_degree / 2;
+  excitation_degree += single_spin_num_excitation(Di.first, Dj.first);
+  excitation_degree += single_spin_num_excitation(Di.second, Dj.second);
+  return excitation_degree;
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::resize(std::size_t size) {
@@ -373,6 +372,9 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
 
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
 
+double single_spin_ham_contribution_diagonal(int idx_part, int idx_spin, std::vector<T> &Di){
+
+}
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   Slater_Condon_diagonal_calls++;
   auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
@@ -404,13 +406,16 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_par
           0.5 * (this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx](this->input_integral.idx2(orb_a_i, orb_a_j), this->input_integral.idx2(orb_a_j, orb_a_i)));
     }
     for (auto orb_b_j : bocc) {
-      elem += this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx](this->input_integral.idx2(orb_a_i, orb_a_i), this->input_integral.idx2(orb_b_j, orb_b_j));
+      elem += 0.5 * this->input_integral.mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx](this->input_integral.idx2(orb_a_i, orb_a_i), this->input_integral.idx2(orb_b_j, orb_b_j));
     }
   }
   for (auto orb_b_i : bocc) {
     for (auto orb_b_j : bocc) {
       elem += 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx](this->input_integral.idx2(orb_b_i, orb_b_i), this->input_integral.idx2(orb_b_j, orb_b_j)));
       elem -= 0.5 * (this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx](this->input_integral.idx2(orb_b_i, orb_b_j), this->input_integral.idx2(orb_b_j, orb_b_i)));
+    }
+    for (auto orb_a_j : aocc) {
+      elem += 0.5 * this->input_integral.mo_two_body_ints[idx_part][beta_spin_idx][idx_part][alpha_spin_idx](this->input_integral.idx2(orb_b_i, orb_b_i), this->input_integral.idx2(orb_a_j, orb_a_j));
     }
   }
   return elem;
