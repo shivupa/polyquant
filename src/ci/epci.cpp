@@ -133,8 +133,12 @@ void POLYQUANT_EPCI::setup_determinants() {
     auto ex_lvl = this->excitation_level[quantum_part_idx];
     auto max_alpha_ex_lvl = std::get<0>(ex_lvl);
     auto max_beta_ex_lvl = std::get<1>(ex_lvl);
-    this->detset.create_unique_excitation(quantum_part_idx, 0, max_alpha_ex_lvl);
-    this->detset.create_unique_excitation(quantum_part_idx, 1, max_beta_ex_lvl);
+    for (auto i = 1; i <= max_alpha_ex_lvl; i++){
+        this->detset.create_unique_excitation(quantum_part_idx, 0, i);
+    }
+    for (auto i = 1; i <= max_beta_ex; i++){
+        this->detset.create_unique_excitation(quantum_part_idx, 1, i);
+    }
     quantum_part_idx++;
   }
 
