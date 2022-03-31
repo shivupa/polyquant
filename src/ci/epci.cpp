@@ -136,7 +136,7 @@ void POLYQUANT_EPCI::setup_determinants() {
     for (auto i = 1; i <= max_alpha_ex_lvl; i++){
         this->detset.create_unique_excitation(quantum_part_idx, 0, i);
     }
-    for (auto i = 1; i <= max_beta_ex; i++){
+    for (auto i = 1; i <= max_beta_ex_lvl; i++){
         this->detset.create_unique_excitation(quantum_part_idx, 1, i);
     }
     quantum_part_idx++;
