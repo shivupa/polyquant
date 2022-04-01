@@ -129,18 +129,18 @@ public:
   // needed for custom operator in Davidson
   double operator()(int i, int j) const { return this->Slater_Condon(i, j); }
 
-  void sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> &F, int idx_part, int idx_spin, int idx_I_det);
-  void sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
-  //void sigma_two_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
+  void sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> F, int idx_part, int idx_spin, int idx_I_det) const;
+  void sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
+  //void sigma_two_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
 
-  void sigma_one_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
-  //void sigma_two_species_class_two_contribution(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_one_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
+  //void sigma_two_species_class_two_contribution(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
-  void sigma_one_species(Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
-  void sigma_two_species(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void sigma_two_species(const Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
-  void create_sigma(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
-  void create_sigma_slow(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+  void create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
 
@@ -158,7 +158,8 @@ template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(std::v
 
 template <typename T> int POLYQUANT_DETSET<T>::num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const {
   int excitation_degree = 0;
-  excitation_degree += single_spin_num_excitation(Di.first, Dj.first);
+  int temp = single_spin_num_excitation(Di.first, Dj.first);
+  excitation_degree += temp;
   excitation_degree += single_spin_num_excitation(Di.second, Dj.second);
   return excitation_degree;
 }
@@ -942,7 +943,7 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 
 
 template <typename T>
-void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> &F, int idx_part, int idx_spin, int idx_I_det) {
+void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> F, int idx_part, int idx_spin, int idx_I_det) {
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
         // diagonal contribution
@@ -1000,7 +1001,7 @@ void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
+void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
 
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
@@ -1032,7 +1033,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
+void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
     
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
@@ -1100,7 +1101,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
     // TODO handle idx_J_det == idx_I_det
     // 3 unique terms
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_contribution;
@@ -1121,7 +1122,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<const Eigen::Matrix<doubl
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::create_sigma(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+void POLYQUANT_DETSET<T>::create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
     auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
     if (num_parts == 1){
         sigma_one_species(sigma, C);
@@ -1135,7 +1136,7 @@ void POLYQUANT_DETSET<T>::create_sigma(const Eigen::Ref<const Eigen::Matrix<doub
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::create_sigma_slow(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
 // Cij = Aik Bkj
   for (auto i = 0; i < this->N_dets; i++) {
     for (auto j = 0; j < C.cols(); j++) {
