@@ -38,8 +38,8 @@ public:
   void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
   void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level);
 
-  int single_spin_num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const;
-  int num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const;
+  int single_spin_num_excitation(const std::vector<T> &Di, const std::vector<T> &Dj) const;
+  int num_excitation(const std::pair<std::vector<T>, std::vector<T>> &Di, const std::pair<std::vector<T>, std::vector<T>> &Dj) const;
   void get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes) const;
   void get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const;
   double get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const;
@@ -148,7 +148,7 @@ public:
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 };
 
-template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(std::vector<T> &Di, std::vector<T> &Dj) const {
+template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(const std::vector<T> &Di, const std::vector<T> &Dj) const {
   int excitation_degree = 0;
   for (auto i = 0; i < Di.size(); i++) {
     excitation_degree += std::popcount(Di[i] ^ Dj[i]);
@@ -156,12 +156,9 @@ template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(std::v
   return excitation_degree / 2;
 }
 
-template <typename T> int POLYQUANT_DETSET<T>::num_excitation(std::pair<std::vector<T>, std::vector<T>> &Di, std::pair<std::vector<T>, std::vector<T>> &Dj) const {
+template <typename T> int POLYQUANT_DETSET<T>::num_excitation(const std::pair<std::vector<T>, std::vector<T>> &Di, const std::pair<std::vector<T>, std::vector<T>> &Dj) const {
   int excitation_degree = 0;
-  int temp = single_spin_num_excitation(Di.first, Dj.first);
-  excitation_degree += temp;
-  excitation_degree += single_spin_num_excitation(Di.second, Dj.second);
-  return excitation_degree;
+  return single_spin_num_excitation(Di.first, Dj.first) + single_spin_num_excitation(Di.second, Dj.second);
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::resize(std::size_t size) {
@@ -943,7 +940,7 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 
 
 template <typename T>
-void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> F, int idx_part, int idx_spin, int idx_I_det) {
+void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> F, int idx_part, int idx_spin, int idx_I_det) const{
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
         // diagonal contribution
@@ -1158,8 +1155,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::opera
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
   output.resize(this->rows(), mat_in.cols());
   output.setZero();
-  //create_sigma_slow(output, mat_in);
-  create_sigma(output, mat_in);
+  create_sigma_slow(output, mat_in);
+  //create_sigma(output, mat_in);
   return output;
 }
 
