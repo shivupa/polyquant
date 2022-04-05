@@ -993,6 +993,7 @@ void POLYQUANT_DETSET<T>::sigma_class_one_contribution_helper(Eigen::Ref<Eigen::
             phase = get_phase(det_i_a, det_j_a, holes, parts);
             auto elem = 0.0;
             elem = -2*phase* (this->input_integral.mo_two_body_ints[idx_part][first_spin_idx][idx_part][first_spin_idx](this->input_integral.idx2(parts[0], holes[0]), this->input_integral.idx2(parts[1], holes[1])) - this->input_integral.mo_two_body_ints[idx_part][first_spin_idx][idx_part][first_spin_idx](this->input_integral.idx2(parts[0], holes[1]), this->input_integral.idx2(parts[1], holes[0])));
+            F(idx_J_det) = phase * elem;
         }
     }
 }
@@ -1002,6 +1003,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
 
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
+    #pragma omp parallel for 
     for (auto idx_I_det = 0; idx_I_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_det++){
         Eigen::Matrix<double, Eigen::Dynamic, 1> F;
         F.resize(this->unique_dets[idx_part][first_spin_idx].size());
@@ -1012,7 +1014,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
             det_idx[second_spin_idx] = idx_I_chi_gammaprime_det;
             if (this->dets.find(det_idx) != this->dets.end()){
                 for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                    for (auto idx_J_det = idx_I_det + 1; idx_J_det < this->unique_dets[idx_part][idx_spin].size(); idx_J_det++){
+                    for (auto idx_J_det = idx_I_det ; idx_J_det < this->unique_dets[idx_part][idx_spin].size(); idx_J_det++){
                         std::vector<int> jdet_idx(2);
                         jdet_idx[first_spin_idx] = idx_J_det;
                         jdet_idx[second_spin_idx] = idx_I_chi_gammaprime_det;
@@ -1035,6 +1037,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
 
+    #pragma omp parallel for
     for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++){
         for (auto idx_J_A_det = 0; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++){
             auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det],this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
@@ -1155,8 +1158,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::opera
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
   output.resize(this->rows(), mat_in.cols());
   output.setZero();
-  create_sigma_slow(output, mat_in);
-  //create_sigma(output, mat_in);
+  //create_sigma_slow(output, mat_in);
+  create_sigma(output, mat_in);
   return output;
 }
 
