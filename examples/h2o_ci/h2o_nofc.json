@@ -16,9 +16,9 @@
         { "electron" :
           {
             "H" : [{ "library" : 
-              {"type" : "3-21g"}}],
+              {"type" : "sto-3g"}}],
             "O" : [{ "library" : 
-              {"type" : "3-21g"}}]
+              {"type" : "sto-3g"}}]
           }
         }
   },
@@ -35,8 +35,9 @@
        "convergence_E" : 1e-6,
        "num_states" : 2,
        "num_subspace_vec" : 10,
+       "slow_diag" : true,
        "excitation_level" : [ 
-           [1,1,1]
+           [2,2,2]
        ],
        "frozen_core" : [0],
        "deleted_virtual" : [0]
