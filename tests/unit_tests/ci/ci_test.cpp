@@ -378,32 +378,42 @@ TEST_SUITE("CI") {
     
     std::vector<int> i_unfold = {0,0,0,0};
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
-    for (auto alpha_excitation = 0; alpha_excitation < test_ci.detset.unique_dets[0][0].size(); alpha_excitation++) {
-        std::vector<int> j_unfold = {alpha_excitation,0,0,0};
-        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][alpha_excitation]);
-        if (ex == 1) {
-            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        }
+
+    std::vector<int> j_unfold = {3,0,3,0};
+    auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+    auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+    CHECK(double_ham_elem == doctest::Approx(-0.0001280909).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+  }
+
+  TEST_CASE("CI: sigma slow v fast") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+    test_calc.run();
+    POLYQUANT_EPCI test_ci;
+    std::tuple<int, int, int> ex_lvl = {2, 2, 2};
+    test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
+    test_ci.detset.precompute_diagonal_Slater_Condon();
+    
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
+    sigma.resize(test_ci.detset.N_dets, 1);
+    sigma.setZero();
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
+    sigma_fast.resize(test_ci.detset.N_dets, 1);
+    sigma_fast.setZero();
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
+    C.resize(test_ci.detset.N_dets, 1);
+    C.setZero();
+    C(0,0) = 1.0;
+
+    test_ci.detset.create_sigma_slow(sigma, C);
+    test_ci.detset.create_sigma(sigma_fast, C);
+
+    for (auto i =0; i< test_ci.detset.N_dets; i++){
+        std::cout << "SHIV" << sigma(i,0) << "  " << sigma_fast(i,0) << std::endl;
     }
-    for (auto beta_excitation = 0; beta_excitation < test_ci.detset.unique_dets[0][1].size(); beta_excitation++) {
-        std::vector<int> j_unfold = {0,beta_excitation,0,0};
-        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][1][0], test_ci.detset.unique_dets[0][1][beta_excitation]);
-        if (ex == 1) {
-            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        }
-    }
-    for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
-        std::vector<int> j_unfold = {0,0,pos_excitation,0};
-        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
-        if (ex == 1) {
-            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        }
-    }
+
   }
 }
