@@ -278,26 +278,8 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
     
-    auto count = 0;
-    // for (auto i = 0; i < 11;i++){
-    //   auto unfolded_idx = test_ci.detset.det_idx_unfold(count);
-    //   std::cout << count << " " << i / 11 << " " << i % 11 << std::endl;
-    //   CHECK(unfolded_idx.size() == 2);
-    //   CHECK(unfolded_idx[0] == 0);
-    //   CHECK(unfolded_idx[1] == i % 11);
-    //   count++;
-    // }
-    // for (auto i = 0; i < 11;i++){
-    //   auto unfolded_idx = test_ci.detset.det_idx_unfold(count);
-    //   std::cout << count << " " << i / 11 << " " << i % 11 << std::endl;
-    //   CHECK(unfolded_idx.size() == 2);
-    //   CHECK(unfolded_idx[1] == 0);
-    //   CHECK(unfolded_idx[0] == i % 11);
-    //   count++;
-    // }
     for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << i << " " << unfolded_idx[0] << " " << unfolded_idx[1] << std::endl; 
       CHECK(unfolded_idx.size() == 2);
       if (i < 11){
         CHECK(unfolded_idx[0] == 0);
@@ -332,6 +314,53 @@ TEST_SUITE("CI") {
     CHECK(diag_ham_elem == doctest::Approx(-7.5257234633357024123).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: mixed part ham single ") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+    test_calc.run();
+    POLYQUANT_EPCI test_ci;
+    std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+    test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.frozen_core.push_back(0);
+    test_ci.frozen_core.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
+    
+    std::vector<int> i_unfold = {0,0,0,0};
+    auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
+    for (auto alpha_excitation = 0; alpha_excitation < test_ci.detset.unique_dets[0][0].size(); alpha_excitation++) {
+        std::vector<int> j_unfold = {alpha_excitation,0,0,0};
+        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][alpha_excitation]);
+        if (ex == 1) {
+            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        }
+    }
+    for (auto beta_excitation = 0; beta_excitation < test_ci.detset.unique_dets[0][1].size(); beta_excitation++) {
+        std::vector<int> j_unfold = {0,beta_excitation,0,0};
+        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][1][0], test_ci.detset.unique_dets[0][1][beta_excitation]);
+        if (ex == 1) {
+            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        }
+    }
+    for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
+        std::vector<int> j_unfold = {0,0,pos_excitation,0};
+        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
+        if (ex == 1) {
+            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        }
+    }
+  }
+
+  TEST_CASE("CI: mixed part ham double ") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
     test_calc.run();

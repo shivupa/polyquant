@@ -146,6 +146,8 @@ public:
 
   // void create_ham();
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
+
+  bool slow_diag = false;
 };
 
 template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(const std::vector<T> &Di, const std::vector<T> &Dj) const {
@@ -816,6 +818,18 @@ template <typename T> void POLYQUANT_DETSET<T>::precompute_diagonal_Slater_Condo
       auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
       auto det_i = std::make_pair(det_i_a, det_i_b);
       matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, i_unfold);
+      auto other_idx_part = 0ul;
+      for (auto const &[other_quantum_part_key, other_quantum_part] : this->input_integral.input_molecule.quantum_particles) {
+        if (idx_part == other_idx_part) {
+          continue;
+        }
+        auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+        auto det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
+        auto det_i = std::make_pair(det_i_a, det_i_b);
+        auto charge_factor = quantum_part.charge * other_quantum_part.charge;
+        matrix_elem += charge_factor * this->mixed_part_ham_diag(idx_part,other_idx_part, i_unfold, i_unfold);
+        other_idx_part++;
+      }
       idx_part++;
     }
     diagonal_Hii[i] = matrix_elem;
@@ -1004,25 +1018,25 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
     #pragma omp parallel for 
-    for (auto idx_I_det = 0; idx_I_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_det++){
-        Eigen::Matrix<double, Eigen::Dynamic, 1> F;
-        F.resize(this->unique_dets[idx_part][first_spin_idx].size());
-        sigma_class_one_contribution_helper(F, idx_part, first_spin_idx, idx_I_det);
-        for (auto idx_I_chi_gammaprime_det = 0; idx_I_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_chi_gammaprime_det++){
+    for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++){
+        for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++){
             std::vector<int> det_idx(2);
-            det_idx[first_spin_idx] = idx_I_det;
-            det_idx[second_spin_idx] = idx_I_chi_gammaprime_det;
+            det_idx[first_spin_idx] = idx_I_A_det;
+            det_idx[second_spin_idx] = idx_I_B_det;
             if (this->dets.find(det_idx) != this->dets.end()){
                 for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                    for (auto idx_J_det = idx_I_det ; idx_J_det < this->unique_dets[idx_part][idx_spin].size(); idx_J_det++){
+                    for (auto idx_J_A_det = idx_I_A_det ; idx_J_A_det < this->unique_dets[idx_part][idx_spin].size(); idx_J_A_det++){
                         std::vector<int> jdet_idx(2);
-                        jdet_idx[first_spin_idx] = idx_J_det;
-                        jdet_idx[second_spin_idx] = idx_I_chi_gammaprime_det;
+                        jdet_idx[first_spin_idx] = idx_J_A_det;
+                        jdet_idx[second_spin_idx] = idx_I_B_det;
                         if (this->dets.find(det_idx) != this->dets.end()){
-                            auto unfolded_det_idx = this->dets.find(det_idx)->second;
-                            sigma(unfolded_det_idx, state_idx) += F[idx_J_det] * C(unfolded_det_idx,state_idx);
-                            unfolded_det_idx = this->dets.find(jdet_idx)->second;
-                            sigma(unfolded_det_idx, state_idx) += F[idx_I_det] * C(unfolded_det_idx,state_idx);
+                            auto folded_idet_idx = this->dets.find(det_idx)->second;
+                            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+                            auto integral = Slater_Condon(folded_idet_idx,folded_jdet_idx);
+                            sigma(folded_idet_idx, state_idx) += integral * C(folded_idet_idx,state_idx);
+                            if (folded_idet_idx != folded_jdet_idx){
+                                sigma(folded_jdet_idx, state_idx) += integral * C(folded_jdet_idx,state_idx);
+                            }
                         }
                     }
                 }
@@ -1044,26 +1058,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
             if (num_exec != 1) {
                 continue;
             }
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F;
-            F.resize(this->unique_dets[idx_part][second_spin_idx].size(), C.cols());
-            for (auto idx_J_B_det = 0; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++){
-                std::vector<int> det_idx(2);
-                det_idx[first_spin_idx] = idx_J_A_det;
-                det_idx[second_spin_idx] = idx_J_B_det;
-                if (this->dets.find(det_idx) != this->dets.end()){
-                    double phase = 1.0;
-                    std::vector<int> holes, parts;
-                    auto det_i_a = this->get_det(idx_part, first_spin_idx, idx_I_A_det);
-                    auto det_j_a = this->get_det(idx_part, first_spin_idx, idx_J_A_det);
-                    get_holes(det_i_a, det_j_a, holes);
-                    get_parts(det_i_a, det_j_a, parts);
-                    phase = get_phase(det_i_a, det_j_a, holes, parts);
-                    auto unfolded_det_idx = this->dets.find(det_idx)->second;
-                    for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                        F(idx_J_B_det,state_idx) = phase * C(unfolded_det_idx, state_idx);
-                    }
-                }
-            }
             for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++){
                 for (auto idx_J_B_det = 0; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++){
                     auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][second_spin_idx][idx_I_B_det], this->unique_dets[idx_part][second_spin_idx][idx_J_B_det]);
@@ -1071,28 +1065,16 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
                         continue;
                     }
                     for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                        if (F(idx_J_B_det, state_idx) != 0.0){
                             std::vector<int> det_idx(2);
                             det_idx[first_spin_idx] = idx_I_A_det;
                             det_idx[second_spin_idx] = idx_I_B_det;
-                            auto unfolded_det_idx = this->dets.find(det_idx)->second;
-
-                            std::vector<int> aholes, aparts;
-                            std::vector<int> bholes, bparts;
-                            double phase = 1.0;
-                            auto det_i_a = this->get_det(idx_part, first_spin_idx, idx_I_A_det);
-                            auto det_j_a = this->get_det(idx_part, first_spin_idx, idx_J_A_det);
-                            auto det_i_b = this->get_det(idx_part, second_spin_idx, idx_I_B_det);
-                            auto det_j_b = this->get_det(idx_part, second_spin_idx, idx_J_B_det);
-                            get_holes(det_i_a, det_j_a, aholes);
-                            get_parts(det_i_a, det_j_a, aparts);
-                            get_holes(det_i_b, det_j_b, bholes);
-                            get_parts(det_i_b, det_j_b, bparts);
-                            // phase between first spin already accounted for.
-                            phase = get_phase(det_i_b, det_j_b, bholes, bparts);
-                            auto two_e_int = this->input_integral.mo_two_body_ints[idx_part][first_spin_idx][idx_part][second_spin_idx](this->input_integral.idx2(aparts[0], aholes[0]), this->input_integral.idx2(bparts[0], bholes[0]));
-                            sigma(unfolded_det_idx, state_idx) += 2.0 * phase * F(idx_J_B_det, state_idx) * two_e_int;
-                        }
+                            std::vector<int> jdet_idx(2);
+                            jdet_idx[first_spin_idx] = idx_J_A_det;
+                            jdet_idx[second_spin_idx] = idx_J_B_det;
+                            auto folded_det_idx = this->dets.find(det_idx)->second;
+                            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+                            auto integral = Slater_Condon(folded_det_idx,folded_jdet_idx);
+                            sigma(folded_det_idx, state_idx) += integral * C(folded_jdet_idx,state_idx);
                     }
                 }
             }
@@ -1158,8 +1140,12 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::opera
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
   output.resize(this->rows(), mat_in.cols());
   output.setZero();
-  //create_sigma_slow(output, mat_in);
+  if ( slow_diag == true){
+      Polyquant_cout("Using slow sigma");
+  create_sigma_slow(output, mat_in);
+  } else {
   create_sigma(output, mat_in);
+  }
   return output;
 }
 
