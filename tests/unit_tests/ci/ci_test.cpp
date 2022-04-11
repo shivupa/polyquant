@@ -360,7 +360,7 @@ TEST_SUITE("CI") {
     }
   }
 
-  TEST_CASE("CI: mixed part ham double ") {
+  TEST_CASE("CI: mixed part ham double") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
     test_calc.run();
@@ -380,9 +380,28 @@ TEST_SUITE("CI") {
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
 
     std::vector<int> j_unfold = {3,0,3,0};
+    std::bitset<16> single_exc_det_elec("0000000000010010");
+    auto det_found = false;
+    auto const detvec_elec = test_ci.detset.unique_dets[0][0][3];
+    std::cout << detvec_elec[0] << " " << single_exc_det_elec.to_ulong() << std::endl;
+    auto it_elec = std::find(std::begin(detvec_elec), std::end(detvec_elec), single_exc_det_elec.to_ulong());
+    if (it_elec != std::end(detvec_elec)){
+        det_found = true;
+    }
+    CHECK( det_found == true);
+
+    std::bitset<16> single_exc_det_pos("0000000000001000");
+    det_found = false;
+    auto const detvec_pos = test_ci.detset.unique_dets[1][0][3];
+    auto it_pos = std::find(std::begin(detvec_pos), std::end(detvec_pos), single_exc_det_pos.to_ulong());
+    if (it_pos != std::end(detvec_pos)){
+        det_found = true;
+    }
+    CHECK( det_found == true);
+
     auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
     auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-    CHECK(double_ham_elem == doctest::Approx(-0.0001280909).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(double_ham_elem == doctest::Approx(-0.0000004373).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
   TEST_CASE("CI: sigma slow v fast") {
@@ -412,7 +431,8 @@ TEST_SUITE("CI") {
     test_ci.detset.create_sigma(sigma_fast, C);
 
     for (auto i =0; i< test_ci.detset.N_dets; i++){
-        std::cout << "SHIV" << sigma(i,0) << "  " << sigma_fast(i,0) << std::endl;
+      auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << std::endl;
     }
 
   }

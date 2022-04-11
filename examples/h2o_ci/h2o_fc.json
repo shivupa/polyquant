@@ -37,7 +37,7 @@
        "num_subspace_vec" : 10,
        "slow_diag" : true,
        "excitation_level" : [ 
-           [1,1,1]
+           [2,2,2]
        ],
        "frozen_core" : [1],
        "deleted_virtual" : [0]

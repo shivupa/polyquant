@@ -49,6 +49,7 @@
    "ci_keywords" : {
        "convergence_E" : 1e-8,
        "num_states" : 5,
+       "slow_diag" : true,
        "num_subspace_vec" : 20,
        "excitation_level" : [
            [1,1,2],
