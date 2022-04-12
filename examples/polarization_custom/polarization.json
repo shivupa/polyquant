@@ -5,7 +5,10 @@
     ],
     "symbols": ["H"],
     "molecular_charge": 1,
-    "molecular_multiplicity": 1
+    "molecular_multiplicity": 1,
+    "scale_nuclei" : {
+        "H" : 0.2
+    }
   },
   "driver": "energy",
   "model": {
@@ -18,10 +21,6 @@
         }
   },
   "keywords": {
-    "atom_types" : ["H"],
-    "polarization_types" : { "electron" : {"H" :"none"},
-                             "positron" : {"H": "custom"}
-    },
     "restricted" : true,
     "dump_for_qmcpack" : true,
     "hdf5_filename_qmcpack" : "H_wpos.h5",

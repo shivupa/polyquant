@@ -56,7 +56,18 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   for (auto label : input.input_data["molecule"]["symbols"]) {
     center_labels.push_back(label);
     quantum_nuclei.push_back(0);
+    scale_nuclei[label] = 1.0;
   }
+  // Store center charge scaling
+  if (input.input_data["molecule"].contains("scale_nuclei")){
+  for (auto label : center_labels){
+      if (input.input_data["molecule"]["scale_nuclei"].contains(label)){
+          scale_nuclei[label] = input.input_data["molecule"]["scale_nuclei"][label];
+      }
+  }
+  }
+
+
   if (input.input_data.contains("keywords")) {
     // if (input.input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
@@ -370,6 +381,31 @@ std::vector<libint2::Atom> POLYQUANT_MOLECULE::to_libint_atom(std::string classi
     }
   }
   return atoms;
+}
+
+std::vector<std::pair<double, std::array<double, 3>>>  POLYQUANT_MOLECULE::to_libint_charges(std::string classical_part_key) const {
+   std::vector<std::pair<double, std::array<double, 3>>> q;
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      if (classical_part_key != "all") {
+        if (classical_part_key == "no_ghost") {
+          if (classical_part.second.mass < 1) {
+            continue;
+          }
+        } else if (classical_part.first != classical_part_key) {
+          continue;
+        }
+      }
+      auto scale_factor = this->scale_nuclei.find(classical_part.first)->second;
+      double at_num = classical_part.second.charge * scale_factor;
+      auto center_idx = classical_part.second.center_idx[i];
+      std::array<double, 3> pos = {{centers[center_idx][0], centers[center_idx][1],centers[center_idx][2]}};
+
+      std::pair<double, std::array<double, 3>> temp_q = std::make_pair(at_num, pos);
+      q.push_back(temp_q);
+    }
+  }
+  return q;
 }
 
 void POLYQUANT_MOLECULE::calculate_E_nuc() {

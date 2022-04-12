@@ -155,7 +155,7 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->nuclear[quantum_part_idx].resize(num_basis, num_basis);
       this->nuclear[quantum_part_idx].setZero();
-      this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_libint_atom("no_ghost"));
+      this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_libint_charges("no_ghost"));
       std::stringstream filename;
       filename << "nuclear";
       filename << quantum_part_idx;
@@ -702,7 +702,7 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
  * integrals.
  */
 void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells, libint2::Operator obtype,
-                                            const std::vector<libint2::Atom> &atoms) {
+                                            const std::vector<std::pair<double, std::array<double, 3>>>  &atoms) {
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -719,7 +719,7 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
     // the nuclei are charges in this case; in QM/MM there will also be
     // classical charges
     if (obtype == libint2::Operator::nuclear) {
-      engines[0].set_params(libint2::make_point_charges(atoms));
+      engines[0].set_params(atoms);
     }
     if (nthreads > 1) {
       if (thread_id == 0) {
@@ -848,14 +848,13 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
 
 void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
   libint2::initialize();
-  auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-  if (this->polarization_potential[quantum_part_idx].cols() == 0 && this->polarization_potential[quantum_part_idx].rows() == 0){
     Polyquant_cout("Calculating One Body Polarization Potential Integrals...");
     std::vector<std::string> atom_types = {};
     std::vector<std::vector<std::string>> polarization_types = {};
     polarization_types.resize(this->input_molecule.quantum_particles.size());
     Polyquant_cout("Parsing the necessary keywords atom_types and polarization_types...");
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     if (this->input_params.input_data.contains("keywords")) {
       if (this->input_params.input_data["keywords"].contains("atom_types")) {
         for (auto i : this->input_params.input_data["keywords"]["atom_types"])
@@ -877,18 +876,23 @@ void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
       APP_ABORT("Polyquant needs keywords atom_types and polarization_types to do"
                 "a polarization potential calculation.");
     }
+    quantum_part_idx++;
+  }
 
+  quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    this->polarization_potential[quantum_part_idx] = Eigen::Matrix<double, Eigen::Dynamic,Eigen::Dynamic>({num_basis, num_basis});
-    this->polarization_potential[quantum_part_idx].fill(0);
-
+    if (this->polarization_potential[quantum_part_idx].cols() == 0 && this->polarization_potential[quantum_part_idx].rows() == 0){
+        this->polarization_potential[quantum_part_idx] = Eigen::Matrix<double, Eigen::Dynamic,Eigen::Dynamic>({num_basis, num_basis});
+        this->polarization_potential[quantum_part_idx].fill(0);
+    }
     auto classical_part_idx = 0ul;
     for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
         for (auto j = 0; j < classical_part.num_parts; j++){
         auto center_idx = classical_part.center_idx[j];
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> atom_polarization_potential({num_basis, num_basis});
         atom_polarization_potential.fill(0);
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator_coeff;
+        Eigen::Matrix<double, Eigen::Dynamic, 1> operator_coeff;
         Eigen::Matrix<double, Eigen::Dynamic,1> operator_origin({3,1});
         operator_origin(0) =  this->input_molecule.centers[center_idx][0];
         operator_origin(1) =  this->input_molecule.centers[center_idx][1];
@@ -933,7 +937,12 @@ void POLYQUANT_INTEGRAL::calculate_polarization_potential() {
             if (this->input_params.input_data.contains("keywords")) {
                 if (this->input_params.input_data["keywords"].contains("operator_coeff")) {
                     if (this->input_params.input_data["keywords"]["operator_coeff"].contains(atom_types[classical_part_idx])) {
-                        operator_coeff = this->input_params.input_data["keywords"]["operator_coeff"][atom_types[classical_part_idx]];
+                        operator_coeff.resize(26);
+                        auto count = 0;
+                        for (auto coeff_val : this->input_params.input_data["keywords"]["operator_coeff"][atom_types[classical_part_idx]]){
+                            operator_coeff[count] = coeff_val;
+                            count++;
+                        }
                     } else {
                         APP_ABORT("Polarization type 'custom' requires keywords->operator_coeff to have atom_type");
                     }
@@ -970,7 +979,7 @@ double POLYQUANT_INTEGRAL::primitive_integral_operator_expanded_in_gaussians(
     Eigen::Dynamic> &origin2, const double &cont_coeff2, const double &exp2,
     const Eigen::Matrix<int,Eigen::Dynamic,1> &angular_momentum_2, const Eigen::Matrix<double,
     Eigen::Dynamic, 1> &operator_origin, const
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &operator_coeff,
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &operator_coeff,
     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
     &operator_exps) {
   double integral_value = 0.0;
@@ -1059,7 +1068,7 @@ void POLYQUANT_INTEGRAL::compute_1body_ints_operator_expanded_in_gaussians(
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix,
     const libint2::BasisSet &shells, const Eigen::Matrix<double,
     Eigen::Dynamic, 1> &operator_origin, const
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &operator_coeff,
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &operator_coeff,
     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
     &operator_exps) {
 

@@ -54,6 +54,7 @@ public:
    * @return std::vector<libint2,,Atom> the vector of atoms
    */
   std::vector<libint2::Atom> to_libint_atom(std::string classical_part_key = "all") const;
+  std::vector<std::pair<double, std::array<double, 3>>>  to_libint_charges(std::string classical_part_key = "all") const;
 
   /**
    * @brief Create an xyz representation of the molecule.
@@ -64,6 +65,7 @@ public:
 
   std::vector<std::vector<double>> centers;
 
+  std::map<std::string, double> scale_nuclei;
   std::map<std::string, CLASSICAL_PARTICLE_SET> classical_particles;
 
   std::map<std::string, QUANTUM_PARTICLE_SET> quantum_particles;
@@ -99,6 +101,7 @@ public:
    *
    */
   double angstrom_to_bohr = 1 / bohr_to_angstrom;
+
 };
 } // namespace polyquant
 #endif
