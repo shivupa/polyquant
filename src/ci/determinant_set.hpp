@@ -1026,8 +1026,8 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
             if (this->dets.find(det_idx) != this->dets.end()){
                 auto folded_idet_idx = this->dets.find(det_idx)->second;
                 auto folded_idet_idx2 = this->dets.at(det_idx);
+                auto integral = Slater_Condon(folded_idet_idx,folded_idet_idx);
                 for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                     auto integral = Slater_Condon(folded_idet_idx,folded_idet_idx);
                      //std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << folded_idet_idx << " " << folded_idet_idx2 << " " << integral << std::endl;
                      sigma(folded_idet_idx, state_idx) += integral * C(folded_idet_idx,state_idx);
                     }
@@ -1050,8 +1050,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
             det_idx[first_spin_idx] = idx_I_A_det;
             det_idx[second_spin_idx] = idx_I_B_det;
             if (this->dets.find(det_idx) != this->dets.end()){
-                for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                    auto folded_idet_idx = this->dets.find(det_idx)->second;
+                auto folded_idet_idx = this->dets.find(det_idx)->second;
                     for (auto idx_J_A_det = idx_I_A_det ; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++){
                         if (idx_J_A_det == idx_I_A_det){
                             continue;
@@ -1060,13 +1059,14 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
                         jdet_idx[first_spin_idx] = idx_J_A_det;
                         jdet_idx[second_spin_idx] = idx_I_B_det;
                         if (this->dets.find(jdet_idx) != this->dets.end()){
+                            for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
                             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
                             auto integral = Slater_Condon(folded_idet_idx,folded_jdet_idx);
-                            std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << folded_idet_idx << " " << folded_jdet_idx << " " << integral << std::endl;
-                            sigma(folded_idet_idx, state_idx) += integral * C(folded_idet_idx,state_idx);
+                            //std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << folded_idet_idx << " " << folded_jdet_idx << " " << integral << std::endl;
+                            sigma(folded_idet_idx, state_idx) += integral * C(folded_jdet_idx,state_idx);
                             //if (folded_idet_idx != folded_jdet_idx)
                             //{
-                            sigma(folded_jdet_idx, state_idx) += integral * C(folded_jdet_idx,state_idx);
+                            sigma(folded_jdet_idx, state_idx) += integral * C(folded_idet_idx,state_idx);
                             //}
                         }
                     }
@@ -1107,8 +1107,8 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
                     jdet_idx[second_spin_idx] = idx_J_B_det;
                     if (this->dets.find(jdet_idx) != this->dets.end()){
                     auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+                    auto integral = Slater_Condon(folded_det_idx,folded_jdet_idx);
                     for (auto state_idx = 0; state_idx < C.cols(); state_idx++){
-                            auto integral = Slater_Condon(folded_det_idx,folded_jdet_idx);
                             sigma(folded_det_idx, state_idx) += integral * C(folded_jdet_idx,state_idx);
                             sigma(folded_jdet_idx, state_idx) += integral * C(folded_det_idx,state_idx);
                     }
@@ -1129,7 +1129,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eig
     sigma_contribution.setZero();
     // Diagonal Contribution
     sigma_one_species_diagonal_contribution(sigma_contribution, C, 0, 0);
-    //sigma += sigma_contribution;
+    sigma += sigma_contribution;
     sigma_contribution.setZero();
     // Aa Aa
     sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 0);
@@ -1141,7 +1141,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eig
     sigma_contribution.setZero();
     // Aa Ab
     sigma_one_species_class_two_contribution(sigma_contribution, C, 0, 0);
-    //sigma += sigma_contribution;
+    sigma += sigma_contribution;
     sigma_contribution.setZero();
 }
 

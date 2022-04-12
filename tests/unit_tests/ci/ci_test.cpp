@@ -432,7 +432,8 @@ TEST_SUITE("CI") {
 
     for (auto i =0; i< test_ci.detset.N_dets; i++){
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << std::endl;
+        //std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     }
 
   }
