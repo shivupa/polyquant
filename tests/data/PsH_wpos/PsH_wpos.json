@@ -9,9 +9,17 @@
   },
   "driver": "energy",
   "model": {
-    "method": "CI",
+    "method": "SCF",
     "basis": 
-        {"H" : [{ "library" : {"type" : "aug-cc-pVDZ"} }]}
+        { "electron" :
+          {"H" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "../../tests/data/PsH_wpos/electron_basis.g94"}}]},
+          "positron" :
+          {"H" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "../../tests/data/PsH_wpos/positron_basis.g94"}}]}
+        }
   },
   "keywords": {
     "restricted" : true,
@@ -32,18 +40,9 @@
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
         "iteration_max" : 200,
-        "dump_for_qmcpack" : true,
-        "hdf5_filename_qmcpack" : "H_wpos.h5"
+        "incremental_fock" : true,
+        "Cauchy_Schwarz_screening" : true
     },
-   "ci_keywords" : {
-       "convergence_E" : 1e-6,
-       "num_states" : 2,
-       "num_subspace_vec" : 14,
-       "excitation_level" : [
-           [2,2,4],
-           [1,0,1]
-           ]
-   },
    "pure" : true
       }
 }
