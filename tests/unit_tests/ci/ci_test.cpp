@@ -404,7 +404,8 @@ TEST_SUITE("CI") {
     CHECK(double_ham_elem == doctest::Approx(-0.0000004373).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
-  TEST_CASE("CI: sigma slow v fast") {
+
+   TEST_CASE("CI: single species sigma slow v fast") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
     test_calc.run();
@@ -436,5 +437,43 @@ TEST_SUITE("CI") {
       CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     }
 
+  }
+
+  TEST_CASE("CI: multispecies sigma slow v fast") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
+    test_calc.run();
+    POLYQUANT_EPCI test_ci;
+    std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+    test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.excitation_level.push_back(ex_lvl);
+    test_ci.frozen_core.push_back(0);
+    test_ci.frozen_core.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.deleted_virtual.push_back(0);
+    test_ci.setup(test_calc.scf_calc);
+    test_ci.calculate_integrals();
+    test_ci.setup_determinants();
+    test_ci.detset.precompute_diagonal_Slater_Condon();
+    
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
+    sigma.resize(test_ci.detset.N_dets, 1);
+    sigma.setZero();
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
+    sigma_fast.resize(test_ci.detset.N_dets, 1);
+    sigma_fast.setZero();
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
+    C.resize(test_ci.detset.N_dets, 1);
+    C.setZero();
+    C(0,0) = 1.0;
+
+    test_ci.detset.create_sigma_slow(sigma, C);
+    test_ci.detset.create_sigma(sigma_fast, C);
+
+    for (auto i =0; i< test_ci.detset.N_dets; i++){
+      auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    }
   }
 }
