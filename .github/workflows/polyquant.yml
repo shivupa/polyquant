@@ -64,21 +64,6 @@ jobs:
           workflow: libint.yml
           workflow_conclusion: success
           name: polyquant-libint.deb
-      - name: add custom deb repository jammy main
-        uses: myci-actions/add-deb-repo@10
-        with:
-          repo: deb-src http://za.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse
-          repo-name: jammy
-      - name: add custom deb repository jammy updates
-        uses: myci-actions/add-deb-repo@10
-        with:
-          repo: deb-src http://za.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse
-          repo-name: jammy-updates
-      - name: add custom deb repository jammy security
-        uses: myci-actions/add-deb-repo@10
-        with:
-          repo: deb-src http://za.archive.ubuntu.com/ubuntu jammy-security main restricted universe multiverse
-          repo-name: jammy-security
       - name: Install dependencies on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
         run: |
@@ -91,9 +76,6 @@ jobs:
             libhdf5-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
-          sudo apt-get update
-          sudo apt-get build-dep libeigen3-dev
-          sudo apt-get -b source -t jammy libeigen3-dev
           ninja --version
           cmake --version
           gcc --version

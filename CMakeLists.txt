@@ -130,7 +130,15 @@ set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(CPR)
 ########################################
 # Eigen for matrix math
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 NO_MODULE)
+if (NOT TARGET Eigen3::Eigen)
+    FetchContent_Declare(
+            eigen
+            GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+            GIT_TAG        3.4.0
+    )
+    FetchContent_MakeAvailable(eigen)
+endif (NOT TARGET Eigen3::Eigen)
 ########################################
 # OpenMP for parallelization
 find_package(OpenMP REQUIRED)
