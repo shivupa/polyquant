@@ -76,9 +76,9 @@ jobs:
             libhdf5-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
-          deb-src http://za.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse
-          deb-src http://za.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse
-          deb-src http://za.archive.ubuntu.com/ubuntu jammy-security main restricted universe multiverse
+          echo "deb-src http://za.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse" >> /etc/apt/sources.list.d
+          echo "deb-src http://za.archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list.d
+          echo "deb-src http://za.archive.ubuntu.com/ubuntu jammy-security main restricted universe multiverse" >> /etc/apt/sources.list.d
           sudo apt-get update
           sudo apt-get build-dep libeigen3-dev
           sudo apt-get -b source -t jammy libeigen3-dev
