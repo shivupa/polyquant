@@ -185,7 +185,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].setZero();
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mo_subset;
       if (frozen_core[quantum_part_idx] != 0 || deleted_virtual[quantum_part_idx] != 0) {
-        mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](Eigen::all, Eigen::seqN(frozen_core[quantum_part_idx], nmo));
+        mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](Eigen::placeholders::all, Eigen::seqN(frozen_core[quantum_part_idx], nmo));
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }

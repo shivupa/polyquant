@@ -133,11 +133,19 @@ FetchContent_MakeAvailable(CPR)
 find_package(Eigen3 3.3 NO_MODULE)
 if (NOT TARGET Eigen3::Eigen)
     FetchContent_Declare(
-            eigen
-            GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-            GIT_TAG        3.4.0
-    )
-    FetchContent_MakeAvailable(eigen)
+      Eigen
+      GIT_REPOSITORY https://gitlab.com/shivupa/eigen.git
+      GIT_TAG master
+      GIT_SHALLOW TRUE
+      GIT_PROGRESS TRUE)
+    set(EIGEN_BUILD_DOC OFF)
+    # note: To disable eigen tests,
+    # you should put this code in a add_subdirectory to avoid to change
+    # BUILD_TESTING for your own project too since variables are directory
+    # scoped
+    set(BUILD_TESTING OFF)
+    set(EIGEN_BUILD_PKGCONFIG OFF)
+    FetchContent_MakeAvailable(Eigen)
 endif (NOT TARGET Eigen3::Eigen)
 ########################################
 # OpenMP for parallelization

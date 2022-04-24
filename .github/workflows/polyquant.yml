@@ -71,6 +71,7 @@ jobs:
           sudo apt-get install \
             ninja-build \
             cmake \
+            libeigen3-dev \
             libboost-all-dev \
             intel-mkl \
             libhdf5-dev \
