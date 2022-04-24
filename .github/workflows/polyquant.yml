@@ -71,12 +71,13 @@ jobs:
           sudo apt-get install \
             ninja-build \
             cmake \
-            libeigen3-dev \
             libboost-all-dev \
             intel-mkl \
             libhdf5-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
+          sudo apt-get build-dep libeigen3-dev
+          sudo apt-get -b source -t jammy libeigen3-dev
           ninja --version
           cmake --version
           gcc --version
