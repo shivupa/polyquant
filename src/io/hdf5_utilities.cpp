@@ -144,16 +144,8 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
   }
 }
 // TODO
-void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
+void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
   // lambda for removing normalization
-  // auto gaussianint_lambda = [](auto n, auto alpha) {
-  //   auto n1 = (n + 1) * 0.5;
-  //   return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
-  // };
-  // auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
-  //   auto gint_val = gaussianint_lambda((l * 2) + 2, 2.0 * exponent);
-  //   return 1.0 / std::sqrt(gint_val);
-  // };
   Polyquant_cout("dumping basis parameters");
   auto basis_group = root_group.create_group("basisset");
 
@@ -161,7 +153,7 @@ void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vect
   auto NbElements_dataset = basis_group.create_dataset("NbElements", int_type, simple_space);
   NbElements_dataset.write(unique_shells.size(), int_type, simple_space);
   // dump basis name
-  std::string basis_name = "LCAOBSet";
+  std::string basis_name = fmt::format("LCAOBSet_{}", quantum_part_name);
   auto str_type = hdf5::datatype::String::fixed(basis_name.size());
   str_type.padding(hdf5::datatype::StringPad::NULLPAD);
   str_type.encoding(hdf5::datatype::CharacterEncoding::ASCII);
@@ -289,31 +281,6 @@ void POLYQUANT_HDF5::dump_basis(std::vector<std::string> atomic_names, std::vect
         auto exponent_dataset = curr_func_group.create_dataset("exponent", double_type, simple_space);
         exponent_dataset.write(exponent, double_type, simple_space);
         double contraction = shell.contr[0].coeff.at(i);
-        // // REMOVE NORMALIZATION FACTOR FROM LIBINT
-        // // SEE SHELL.H
-        // //
-        // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
-        // const auto sqrt_Pi_cubed =
-        // double{5.56832799683170784528481798212}; const auto two_alpha
-        // = 2.0 * exponent; const auto two_alpha_to_am32 =
-        //     std::pow(two_alpha, (shell.contr[0].l + 1)) *
-        //     std::sqrt(two_alpha);
-        // const auto normalization_factor =
-        //     std::sqrt(std::pow(2.0, shell.contr[0].l) * two_alpha_to_am32
-        //     /
-        //               (sqrt_Pi_cubed *
-        //                libint2::math::df_Kminus1[2 * shell.contr[0].l]));
-        // contraction /= normalization_factor;
-        // Remove pyscf norm
-        // aply pyscf _nomalize_contracted_ao
-        // std::cout << "before unnormalizing at output " << exponent << " "
-        //          << contraction << std::endl;
-        // contraction /= gtonorm_lambda(shell.contr[0].l, exponent);
-        // std::cout << "after unnormalizing at output " << exponent << " "
-        //           << contraction << std::endl;
-        // std::stringstream buffer;
-        // auto a = gtonorm_lambda(shell.contr[0].l, exponent);
-        // std::cout << a << std::endl;
         auto contraction_dataset = curr_func_group.create_dataset("contraction", double_type, simple_space);
         contraction_dataset.write(contraction, double_type, simple_space);
       }
@@ -335,7 +302,7 @@ void POLYQUANT_HDF5::dump_mf_to_hdf5_for_QMCPACK(bool pbc, bool complex_vals, bo
   this->dump_generalparameters(complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity);
   this->dump_MOs(quantum_part_name, num_ao, num_mo, E_orb, mo_coeff);
   this->dump_atoms(num_atom, num_species, atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names, atomic_centers);
-  this->dump_basis(atomic_names, unique_shells);
+  this->dump_basis(quantum_part_name, atomic_names, unique_shells);
 }
 // TODO
 void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets,
@@ -349,7 +316,11 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
       std::vector<uint64_t> flattened_dets;
       for (int i = 0; i < N_dets; i++) {
         for (int j = 0; j < N_int_per_det; j++) {
-          flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
+          if (j < dets[part_idx][spin_idx][i].size()) {
+            flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
+          } else {
+            flattened_dets.push_back(0);
+          }
         }
       }
       auto det_dataset =

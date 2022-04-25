@@ -15,17 +15,15 @@
     "basis": 
         { "electron" :
           {
-            "H" : [{ "custom" : 
-              {"type" : "file",
-               "filename" : "electron_basis.g94"}}],
-            "O" : [{ "custom" : 
-              {"type" : "file",
-               "filename" : "electron_basis.g94"}}]
+            "H" : [{ "library" : 
+              {"type" : "sto-3g"}}],
+            "O" : [{ "library" : 
+              {"type" : "sto-3g"}}]
           }
         }
   },
   "keywords": {
-    "restricted" : false,
+    "restricted" : true,
     "mf_keywords" :{
         "convergence_E" : 1e-8,
         "convergence_DM" : 1e-6,
@@ -37,9 +35,12 @@
        "convergence_E" : 1e-6,
        "num_states" : 2,
        "num_subspace_vec" : 10,
+       "slow_diag" : true,
        "excitation_level" : [ 
            [2,2,2]
-       ]
+       ],
+       "frozen_core" : [1],
+       "deleted_virtual" : [0]
    }
   }
 }

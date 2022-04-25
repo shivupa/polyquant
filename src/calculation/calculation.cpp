@@ -7,6 +7,7 @@ POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
   POLYQUANT_TIMER timer(function);
   this->setup_calculation(filename);
 }
+
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
   Polyquant_cout("SETTING UP INPUT FILE");
@@ -162,6 +163,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     dump_mf_for_qmcpack(hdf5_filename);
   }
 }
+
 void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_type) {
   if (!this->post_mean_field_methods.contains(post_mean_field_type) && post_mean_field_type != "FILE") {
     APP_ABORT("POLYQUANT post mean field parsing error. I can't understand the input provided. Could you double-check it?");
@@ -194,6 +196,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("cache_size")) {
           ci_calc.cache_size = this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
         }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
+          ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
+        }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
           auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
           if (ex_lvl.type() == json::value_t::array) {
@@ -210,6 +215,24 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
               ex_lvl_obj.push_back(ex_lvl_tup);
             }
             ci_calc.excitation_level = ex_lvl_obj;
+          }
+        }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
+          auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
+          if (FC.type() == json::value_t::array) {
+            ci_calc.frozen_core = FC.get<std::vector<int>>();
+          } else if (FC.type() == json::value_t::boolean) {
+            APP_ABORT("TODO Set FC based on chemical system");
+          } else {
+            APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
+          }
+        }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")) {
+          auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
+          if (DV.type() == json::value_t::array) {
+            ci_calc.deleted_virtual = DV.get<std::vector<int>>();
+          } else {
+            APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
           }
         }
       }
@@ -274,7 +297,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
     int multiplicity = quantum_part.multiplicity;
-    libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
+    libint2::BasisSet basis = this->input_basis.unnormalized_basis_for_output[quantum_part_idx];
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {
@@ -332,6 +355,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     quantum_part_idx++;
   }
 }
+
 void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
   dets.resize(this->input_molecule.quantum_particles.size());
@@ -341,13 +365,15 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   for (auto i = 0; i < this->ci_calc.detset.N_dets; i++) {
     for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
       auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
-      auto curr_det = this->ci_calc.detset.get_det(idx_part, i_unfold[idx_part]);
-      dets[idx_part][0].push_back(curr_det.first);
-      dets[idx_part][1].push_back(curr_det.second);
+      auto curr_det_a = this->ci_calc.detset.get_det(idx_part, 0, i_unfold[2 * idx_part + 0]);
+      auto curr_det_b = this->ci_calc.detset.get_det(idx_part, 1, i_unfold[2 * idx_part + 1]);
+      dets[idx_part][0].push_back(curr_det_a);
+      dets[idx_part][1].push_back(curr_det_b);
     }
   }
   std::string particle_filename = "Multidet_" + filename;
   Polyquant_cout("Dumping post MF HDF5 to filename: " + particle_filename);
   POLYQUANT_HDF5 hdf5_f(particle_filename);
-  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states, this->ci_calc.detset.max_orb);
+  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states,
+                                          *std::max_element(this->ci_calc.detset.max_orb.begin(), this->ci_calc.detset.max_orb.end()));
 }

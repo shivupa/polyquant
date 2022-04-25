@@ -7,7 +7,6 @@
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numeric>
-#include <unsupported/Eigen/CXX11/Tensor>
 #include <vector>
 
 namespace polyquant {
@@ -42,6 +41,7 @@ public:
 
   void calculate_overlap();
   void calculate_Schwarz();
+  void calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core);
   void calculate_unique_shell_pairs(double threshold = -1.0);
   void calculate_kinetic();
   void calculate_nuclear();
@@ -116,6 +116,8 @@ public:
   void compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells_a, const libint2::BasisSet &shells_b, libint2::Operator obtype);
   std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>> compute_shellpairs(const libint2::BasisSet &bs1, const double threshold);
 
+  void compute_frozen_core_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &fc_dm,
+                                const size_t quantum_part_a_idx, const size_t quantum_part_a_spin_idx, const size_t quantum_part_b_idx, const size_t quantum_part_b_spin_idx, libint2::Operator obtype);
   // double primitive_integral_operator_expanded_in_gaussians(
   //     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &origin1,
   //     const double &cont_coeff1, const double &exp1, const xt::xarray<int>
@@ -176,6 +178,11 @@ public:
    */
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> Schwarz;
   /**
+   * @brief Frozen core effective one body integrals
+   *
+   */
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> frozen_core_ints;
+  /**
    * @brief The orthogonalization matrix
    *
    */
@@ -191,12 +198,13 @@ public:
 
   std::vector<std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>>> unique_shell_pairs;
 
-  void calculate_mo_1_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeff);
+  void calculate_mo_1_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeff, std::vector<int> frozen_core, std::vector<int> deleted_virtual);
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> transform_mo_2_body_integrals(const size_t &quantum_part_a_idx, const size_t &quantum_part_b_idx,
                                                                                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_a,
-                                                                                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta);
-  void calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs);
+                                                                                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta,
+                                                                                      std::vector<int> frozen_core, std::vector<int> deleted_virtual);
+  void calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core, std::vector<int> deleted_virtual);
 
   size_t ijcache_size;
   size_t ericache_size;

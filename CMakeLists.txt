@@ -6,7 +6,7 @@ include(FetchContent)
 # Set up the project and version info
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
-set(POLYQUANT_VERSION_MINOR 3)
+set(POLYQUANT_VERSION_MINOR 5)
 set(POLYQUANT_VERSION_PATCH 0)
 set(POLYQUANT_VERSION "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
 # these files can reside in the bin so we know exactly what was built we could
@@ -130,7 +130,23 @@ set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(CPR)
 ########################################
 # Eigen for matrix math
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 NO_MODULE)
+if (NOT TARGET Eigen3::Eigen)
+    FetchContent_Declare(
+      Eigen
+      GIT_REPOSITORY https://gitlab.com/shivupa/eigen.git
+      GIT_TAG master
+      GIT_SHALLOW TRUE
+      GIT_PROGRESS TRUE)
+    set(EIGEN_BUILD_DOC OFF)
+    # note: To disable eigen tests,
+    # you should put this code in a add_subdirectory to avoid to change
+    # BUILD_TESTING for your own project too since variables are directory
+    # scoped
+    set(BUILD_TESTING OFF)
+    set(EIGEN_BUILD_PKGCONFIG OFF)
+    FetchContent_MakeAvailable(Eigen)
+endif (NOT TARGET Eigen3::Eigen)
 ########################################
 # OpenMP for parallelization
 find_package(OpenMP REQUIRED)
@@ -144,7 +160,7 @@ find_package(LinAlg REQUIRED)
 FetchContent_Declare(
   spectra
   GIT_REPOSITORY https://github.com/shivupa/spectra.git
-  GIT_TAG origin/Davidsonspacesize)
+  GIT_TAG origin/logging )
 FetchContent_MakeAvailable(spectra)
 ########################################
 # libint for gaussian AO integrals
@@ -193,6 +209,14 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/shivupa/h5cpp
   GIT_TAG origin/optional_docs)
 FetchContent_MakeAvailable(h5cpp)
+########################################
+# Text Formatting
+# TODO replace with std::format once compilers support it
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(fmt)
 ########################################
 # testing
 FetchContent_Declare(

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <fmt/core.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -19,6 +20,7 @@ namespace polyquant {
 
 #define POLYQUANT_TEST_EPSILON_LOOSE 0.000001
 #define POLYQUANT_TEST_EPSILON_TIGHT 0.00000001
+#define POLYQUANT_TEST_EPSILON_MACHINEPREC 1e-16
 
 // /**
 //  * @brief Abort the code and print a reason for aborting.
@@ -132,6 +134,9 @@ template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eig
  **/
 void Polyquant_dump_basis_to_file(const std::string &contents, const std::string &filename);
 
+void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
+                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ);
+
 /**
  * @brief A hasher for a pair of vectors
  * for more info see https://stackoverflow.com/a/29855973
@@ -146,6 +151,16 @@ template <typename T> struct PairVectorHash {
       seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     for (T i : v.second) {
+      seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+template <typename T> struct VectorHash {
+  size_t operator()(const std::vector<T> &v) const {
+    std::hash<T> hasher;
+    size_t seed = 0;
+    for (T i : v) {
       seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     return seed;

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <qmcsystem>
-  <wavefunction name="psi0" target="e">
+    <wavefunction name="psi0" target="e">
       <sposet_collection name="PositronOrbital" type="MolecularOrbital" source="ion0" cuspCorrection="yes" href="positron_H_wpos.h5">
-            <basisset name="LCAOBSet_positron" transform="yes"> </basisset>
-            <sposet name="spo2" basisset="LCAOBSet_positron" size="1">
-              <occupation mode="ground"/>
+            <basisset name="LCAOBSet_positron" transform="yes" > </basisset>
+            <sposet name="spo2" basisset="LCAOBSet_positron" size="1" >
+              <occupation mode="ground" />
               <coefficient size="1" id="updetC" spindataset="0">
                 1.00000000000000e+00
               </coefficient>
@@ -12,15 +12,15 @@
       </sposet_collection> 
       <sposet_collection name="ElectronOrbital" type="MolecularOrbital" source="ion0" cuspCorrection="yes" href="electron_H_wpos.h5">
             <basisset name="LCAOBSet_electron" transform="yes"> </basisset>
-            <sposet name="spo0" basisset="LCAOBSet_electron" size="1">
-              <occupation mode="ground"/>
+            <sposet name="spo0" basisset="LCAOBSet_electron" size="1" >
+              <occupation mode="ground" />
               <coefficient size="1" id="updetC" spindataset="0">
                 1.00000000000000e+00
               </coefficient>
             </sposet>
-            <sposet name="spo1" basisset="LCAOBSet_electron" size="1">
-              <occupation mode="ground"/>
-              <coefficient size="1" id="downdetC" spindataset="0">
+            <sposet name="spo1" basisset="LCAOBSet_electron" size="1" >
+              <occupation mode="ground" />
+              <coefficient size="1" id="downdetC" spindataset="0" >
                 1.00000000000000e+00
               </coefficient>
             </sposet>
@@ -28,32 +28,38 @@
       <determinantset>
         <slaterdeterminant delay_rank="1">
           <determinant id="updet" sposet="spo0"/>
-          <determinant id="ddet" sposet="spo1"/>
-          <determinant id="pdet" sposet="spo2"/>
+          <determinant id="ddet"  sposet="spo1" />
+          <determinant id="pdet"  sposet="spo2" />
         </slaterdeterminant>
       </determinantset>
       <jastrow name="J2" type="Two-Body" function="pade" print="yes">
           <correlation speciesA="ue" speciesB="de"> 
-              <var id="jud_b" name="B">2.4043170030e-01</var> 
+              <var id="jud_b" name="B">3.7813696418e-01</var> 
           </correlation>
           <correlation speciesA="ue" speciesB="up"> 
-              <var id="jup_b" name="B">1.3064801899e-01</var> 
+              <var id="jup_b" name="B">2.2403851660e-01</var> 
           </correlation>
           <correlation speciesA="de" speciesB="up"> 
-              <var id="jdp_b" name="B">1.1748074221e-01</var> 
+              <var id="jdp_b" name="B">2.2387309878e-01</var> 
           </correlation>
       </jastrow>
       <jastrow name="J1" type="One-Body" function="Bspline" source="ion0" spin="yes">
         <correlation speciesA="H" speciesB="ue" size="7" rcut="6">
-          <coefficients id="jH_ue" type="Array"> -0.2235921226 -0.1538563314 -0.09693497439 -0.08003407588 -0.02261468255 0.01462791832 0.02500673056</coefficients>
+          <coefficients id="jH_ue"  type="Array">
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          </coefficients>
         </correlation>
         <correlation speciesA="H" speciesB="de" size="7" rcut="6">
-          <coefficients id="jH_de" type="Array"> -0.1769654363 -0.1074800691 -0.05478796567 -0.04422449984 0.001293020181 0.02719446796 0.03492923136</coefficients>
+          <coefficients id="jH_de"  type="Array">
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          </coefficients>
         </correlation>
         <correlation speciesA="H" speciesB="up" size="7" rcut="6">
-          <coefficients id="jH_up" type="Array"> 0.9820771161 0.5873662137 0.2929865784 0.1253834432 0.01542029845 -0.0356239261 -0.06259337572</coefficients>
+          <coefficients id="jH_up"  type="Array">
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          </coefficients>
         </correlation>
-      </jastrow>
+    </jastrow>
   <!--
   <jastrow name="J1" type="One-Body" function="pade" source="ion0" Spin="yes" print="yes">
       <correlation speciesA="H" speciesB="ue"> 
