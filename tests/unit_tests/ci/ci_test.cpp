@@ -360,7 +360,7 @@ TEST_SUITE("CI") {
     }
   }
 
-  TEST_CASE("CI: mixed part ham double") {
+  TEST_CASE("CI: mixed part ham double ") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
     test_calc.run();
@@ -379,29 +379,29 @@ TEST_SUITE("CI") {
     std::vector<int> i_unfold = {0,0,0,0};
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
 
-    std::vector<int> j_unfold = {3,0,3,0};
-    std::bitset<16> single_exc_det_elec("0000000000010010");
-    auto det_found = false;
-    auto const detvec_elec = test_ci.detset.unique_dets[0][0][3];
-    std::cout << detvec_elec[0] << " " << single_exc_det_elec.to_ulong() << std::endl;
-    auto it_elec = std::find(std::begin(detvec_elec), std::end(detvec_elec), single_exc_det_elec.to_ulong());
-    if (it_elec != std::end(detvec_elec)){
-        det_found = true;
-    }
-    CHECK( det_found == true);
-
-    std::bitset<16> single_exc_det_pos("0000000000001000");
-    det_found = false;
-    auto const detvec_pos = test_ci.detset.unique_dets[1][0][3];
-    auto it_pos = std::find(std::begin(detvec_pos), std::end(detvec_pos), single_exc_det_pos.to_ulong());
-    if (it_pos != std::end(detvec_pos)){
-        det_found = true;
-    }
-    CHECK( det_found == true);
-
+    std::vector<int> j_unfold = {25,0,11,0};
     auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
     auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-    CHECK(double_ham_elem == doctest::Approx(-0.0000004373).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(double_ham_elem == doctest::Approx(0.01679484011798332288).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    // auto max_val = 0.0;
+     // for (auto elec_excitation = 0; elec_excitation < test_ci.detset.unique_dets[0][0].size(); elec_excitation++) {
+     // for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
+     //     std::vector<int> j_unfold = {elec_excitation,0,pos_excitation,0};
+     //     auto ex = 0.0; 
+     //     ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][elec_excitation]);
+     //     ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
+     //     if (ex == 2) {
+     //         auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+     //         auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+     //         if (std::abs(double_ham_elem) > max_val)
+     //         {
+     //             std::cout << " " << elec_excitation << " " << pos_excitation << " " << double_ham_elem  << std::endl;
+     //             max_val = double_ham_elem;
+     //         }
+     //         //CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+     //     }
+     // }
+     // }
   }
 
 
