@@ -379,29 +379,29 @@ TEST_SUITE("CI") {
     std::vector<int> i_unfold = {0,0,0,0};
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
 
-    std::vector<int> j_unfold = {25,0,11,0};
-    auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-    auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-    CHECK(double_ham_elem == doctest::Approx(0.01679484011798332288).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // auto max_val = 0.0;
-     // for (auto elec_excitation = 0; elec_excitation < test_ci.detset.unique_dets[0][0].size(); elec_excitation++) {
-     // for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
-     //     std::vector<int> j_unfold = {elec_excitation,0,pos_excitation,0};
-     //     auto ex = 0.0; 
-     //     ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][elec_excitation]);
-     //     ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
-     //     if (ex == 2) {
-     //         auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-     //         auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-     //         if (std::abs(double_ham_elem) > max_val)
-     //         {
-     //             std::cout << " " << elec_excitation << " " << pos_excitation << " " << double_ham_elem  << std::endl;
-     //             max_val = double_ham_elem;
-     //         }
-     //         //CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-     //     }
-     // }
-     // }
+    // std::vector<int> j_unfold = {25,0,11,0};
+    // auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+    // auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+    // CHECK(double_ham_elem == doctest::Approx(0.01679484011798332288).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+     auto max_val = 0.0;
+     for (auto elec_excitation = 0; elec_excitation < test_ci.detset.unique_dets[0][0].size(); elec_excitation++) {
+     for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
+         std::vector<int> j_unfold = {elec_excitation,0,pos_excitation,0};
+         auto ex = 0.0; 
+         ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][elec_excitation]);
+         ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
+         if (ex == 2) {
+             auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+             auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+             if (std::abs(double_ham_elem) > max_val)
+             {
+                 std::cout << " " << elec_excitation << " " << pos_excitation << " " << double_ham_elem  << std::endl;
+                 max_val = double_ham_elem;
+             }
+             //CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+         }
+     }
+     }
   }
 
 
