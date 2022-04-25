@@ -383,6 +383,7 @@ TEST_SUITE("CI") {
     // auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
     // auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
     // CHECK(double_ham_elem == doctest::Approx(0.01679484011798332288).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(0 == 1);
      auto max_val = 0.0;
      for (auto elec_excitation = 0; elec_excitation < test_ci.detset.unique_dets[0][0].size(); elec_excitation++) {
      for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
