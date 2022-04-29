@@ -309,13 +309,17 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   temp2.setZero();
   // temp2 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_shell_b, num_shell_b);
   // temp2.setZero();
-  double elem = 0.0;
+#pragma omp parallel
+  {
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
   for (auto i = 0; i < num_mo_a; i++) {
     for (auto j = 0; j < num_mo_a; j++) {
       for (auto r = 0; r < num_ao_b; r++) {
         for (auto s = 0; s < num_ao_b; s++) {
-          elem = 0.0;
-#pragma omp parallel for reduction(+ : elem)
+          double elem = 0.0;
+          if ((i+j+r+s) % nthreads != thread_id)
+              continue;
           for (auto q = 0; q < num_ao_a; q++) {
             auto idx1 = i * num_ao_a * num_ao_b * num_ao_b;
             idx1 += q * num_ao_b * num_ao_b;
@@ -333,6 +337,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
       }
     }
   }
+  }
   temp1.resize(0);
   temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
   temp3.setZero();
@@ -340,12 +345,17 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   // temp1 = Eigen::Tensor<double, 1>(0);
   // temp3 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_mo_b, num_shell_b);
   // temp3.setZero();
+#pragma omp parallel
+  {
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
   for (auto i = 0; i < num_mo_a; i++) {
     for (auto j = 0; j < num_mo_a; j++) {
       for (auto k = 0; k < num_mo_b; k++) {
         for (auto s = 0; s < num_ao_b; s++) {
-          elem = 0.0;
-#pragma omp parallel for reduction(+ : elem)
+          double elem = 0.0;
+          if ((i+j+k+s) % nthreads != thread_id)
+              continue;
           for (auto r = 0; r < num_ao_b; r++) {
             auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
             idx2 += j * num_ao_b * num_ao_b;
@@ -364,17 +374,23 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
       }
     }
   }
+  }
   temp2.resize(0);
   // temp2.setZero();
   // temp2 = Eigen::Tensor<double, 1>(0);
   // delete temp2;
   eri.resize(eri_size_a, eri_size_b);
+#pragma omp parallel
+  {
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
   for (auto i = 0; i < num_mo_a; i++) {
     for (auto j = 0; j < num_mo_a; j++) {
       for (auto k = 0; k < num_mo_b; k++) {
         for (auto l = 0; l < num_mo_b; l++) {
-          elem = 0.0;
-#pragma omp parallel for reduction(+ : elem)
+          double elem = 0.0;
+          if ((i+j+k+l) % nthreads != thread_id)
+              continue;
           for (auto s = 0; s < num_ao_b; s++) {
             auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
             idx3 += j * num_mo_b * num_ao_b;
@@ -388,6 +404,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
         }
       }
     }
+  }
   }
   libint2::finalize();
   return eri;
