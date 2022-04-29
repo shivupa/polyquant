@@ -313,30 +313,30 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
-  for (auto i = 0; i < num_mo_a; i++) {
-    for (auto j = 0; j < num_mo_a; j++) {
-      for (auto r = 0; r < num_ao_b; r++) {
-        for (auto s = 0; s < num_ao_b; s++) {
-          double elem = 0.0;
-          if ((i+j+r+s) % nthreads != thread_id)
+    for (auto i = 0; i < num_mo_a; i++) {
+      for (auto j = 0; j < num_mo_a; j++) {
+        for (auto r = 0; r < num_ao_b; r++) {
+          for (auto s = 0; s < num_ao_b; s++) {
+            double elem = 0.0;
+            if ((i + j + r + s) % nthreads != thread_id)
               continue;
-          for (auto q = 0; q < num_ao_a; q++) {
-            auto idx1 = i * num_ao_a * num_ao_b * num_ao_b;
-            idx1 += q * num_ao_b * num_ao_b;
-            idx1 += r * num_ao_b;
-            idx1 += s;
-            // elem += mo_coeffs_a(q, j) * temp1(i, q, r, s)
-            elem += mo_coeffs_a(q, j + frozen_core[quantum_part_a_idx]) * temp1(idx1);
+            for (auto q = 0; q < num_ao_a; q++) {
+              auto idx1 = i * num_ao_a * num_ao_b * num_ao_b;
+              idx1 += q * num_ao_b * num_ao_b;
+              idx1 += r * num_ao_b;
+              idx1 += s;
+              // elem += mo_coeffs_a(q, j) * temp1(i, q, r, s)
+              elem += mo_coeffs_a(q, j + frozen_core[quantum_part_a_idx]) * temp1(idx1);
+            }
+            auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
+            idx2 += j * num_ao_b * num_ao_b;
+            idx2 += r * num_ao_b;
+            idx2 += s;
+            temp2(idx2) += elem;
           }
-          auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
-          idx2 += j * num_ao_b * num_ao_b;
-          idx2 += r * num_ao_b;
-          idx2 += s;
-          temp2(idx2) += elem;
         }
       }
     }
-  }
   }
   temp1.resize(0);
   temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
@@ -349,31 +349,31 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
-  for (auto i = 0; i < num_mo_a; i++) {
-    for (auto j = 0; j < num_mo_a; j++) {
-      for (auto k = 0; k < num_mo_b; k++) {
-        for (auto s = 0; s < num_ao_b; s++) {
-          double elem = 0.0;
-          if ((i+j+k+s) % nthreads != thread_id)
+    for (auto i = 0; i < num_mo_a; i++) {
+      for (auto j = 0; j < num_mo_a; j++) {
+        for (auto k = 0; k < num_mo_b; k++) {
+          for (auto s = 0; s < num_ao_b; s++) {
+            double elem = 0.0;
+            if ((i + j + k + s) % nthreads != thread_id)
               continue;
-          for (auto r = 0; r < num_ao_b; r++) {
-            auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
-            idx2 += j * num_ao_b * num_ao_b;
-            idx2 += r * num_ao_b;
-            idx2 += s;
-            // elem += mo_coeffs_b(r, k) * temp2(i, j, r, s);
-            elem += mo_coeffs_b(r, k + frozen_core[quantum_part_b_idx]) * temp2(idx2);
+            for (auto r = 0; r < num_ao_b; r++) {
+              auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
+              idx2 += j * num_ao_b * num_ao_b;
+              idx2 += r * num_ao_b;
+              idx2 += s;
+              // elem += mo_coeffs_b(r, k) * temp2(i, j, r, s);
+              elem += mo_coeffs_b(r, k + frozen_core[quantum_part_b_idx]) * temp2(idx2);
+            }
+            auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
+            idx3 += j * num_mo_b * num_ao_b;
+            idx3 += k * num_ao_b;
+            idx3 += s;
+            // temp3(i, j, k, s) += elem;
+            temp3(idx3) += elem;
           }
-          auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
-          idx3 += j * num_mo_b * num_ao_b;
-          idx3 += k * num_ao_b;
-          idx3 += s;
-          // temp3(i, j, k, s) += elem;
-          temp3(idx3) += elem;
         }
       }
     }
-  }
   }
   temp2.resize(0);
   // temp2.setZero();
@@ -384,27 +384,27 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
-  for (auto i = 0; i < num_mo_a; i++) {
-    for (auto j = 0; j < num_mo_a; j++) {
-      for (auto k = 0; k < num_mo_b; k++) {
-        for (auto l = 0; l < num_mo_b; l++) {
-          double elem = 0.0;
-          if ((i+j+k+l) % nthreads != thread_id)
+    for (auto i = 0; i < num_mo_a; i++) {
+      for (auto j = 0; j < num_mo_a; j++) {
+        for (auto k = 0; k < num_mo_b; k++) {
+          for (auto l = 0; l < num_mo_b; l++) {
+            double elem = 0.0;
+            if ((i + j + k + l) % nthreads != thread_id)
               continue;
-          for (auto s = 0; s < num_ao_b; s++) {
-            auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
-            idx3 += j * num_mo_b * num_ao_b;
-            idx3 += k * num_ao_b;
-            idx3 += s;
-            // elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
-            elem += mo_coeffs_b(s, l + frozen_core[quantum_part_b_idx]) * temp3(idx3);
+            for (auto s = 0; s < num_ao_b; s++) {
+              auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
+              idx3 += j * num_mo_b * num_ao_b;
+              idx3 += k * num_ao_b;
+              idx3 += s;
+              // elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
+              elem += mo_coeffs_b(s, l + frozen_core[quantum_part_b_idx]) * temp3(idx3);
+            }
+            // temp2(i, j, k, l) += elem;
+            eri(this->idx2(i, j), this->idx2(k, l)) = elem;
           }
-          // temp2(i, j, k, l) += elem;
-          eri(this->idx2(i, j), this->idx2(k, l)) = elem;
         }
       }
     }
-  }
   }
   libint2::finalize();
   return eri;
