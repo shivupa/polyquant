@@ -240,5 +240,6 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
   } else {
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
   }
-  this->apply_pyscf_normalization();
+  this->unnormalized_basis_for_output = this->basis;
+  // this->apply_pyscf_normalization();
 }

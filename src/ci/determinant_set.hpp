@@ -287,6 +287,20 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
   std::vector<T> mask;
   mask.resize(Di.size());
   std::fill(mask.begin(), mask.end(), 0);
+  // for testing
+  if (!std::is_sorted(holes.begin(), holes.end())) {
+    APP_ABORT("For phase computation, holes are not sorted!");
+  }
+  if (!std::is_sorted(parts.begin(), parts.end())) {
+    APP_ABORT("For phase computation, parts are not sorted!");
+  }
+  if (holes.size() != parts.size()) {
+    APP_ABORT("For phase computation, num holes != num parts");
+  }
+  if (holes.size() > 2 and holes.size() > 0) {
+    APP_ABORT("For phase computation, num holes/parts > 2");
+  }
+
   for (auto i = 0; i < holes.size(); i++) {
     T high = std::max(parts[i], holes[i]);
     T low = std::min(parts[i], holes[i]);
