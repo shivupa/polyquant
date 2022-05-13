@@ -83,6 +83,35 @@ inline void Polyquant_dump_str_to_file(const std::string &str, const std::string
   strfile << str << std::endl;
 };
 
+template <typename t> void Polyquant_read_vec_from_file(std::vector<t> &vec, const std::string &filename) {
+  std::ifstream vecfile(filename);
+  vec.clear();
+
+  std::string line;
+  while (std::getline(vecfile, line)) {
+    std::istringstream linestream(line);
+    double value; // could have multiple values per line here
+    linestream >> value;
+    vec.push_back(value);
+  }
+};
+
+template <typename t> void Polyquant_read_vecofvec_from_file(std::vector<std::vector<t>> &vec, const std::string &filename) {
+  std::ifstream vecfile(filename);
+  vec.clear();
+
+  std::string line;
+  while (std::getline(vecfile, line)) {
+    std::istringstream linestream(line);
+    double value; // could have multiple values per line here
+    std::vector<t> tempvec;
+    tempvec.clear();
+    while (linestream >> value)
+      tempvec.push_back(value);
+    vec.push_back(tempvec);
+  }
+};
+
 /**
  * @brief A helper function to dump a dense vector object to file.
  *
