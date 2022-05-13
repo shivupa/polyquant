@@ -175,7 +175,7 @@ TEST_SUITE("CI") {
     detset.get_holes(hf_det_vec, double_ext_vec, holes);
     detset.get_parts(hf_det_vec, double_ext_vec, parts);
     phase = detset.get_phase(hf_det_vec, double_ext_vec, holes, parts);
-    CHECK(phase == -1.0);
+    CHECK(phase == 1.0);
   }
   TEST_CASE("CI: get occ virt ") {
     POLYQUANT_DETSET<uint64_t> detset;
@@ -420,23 +420,58 @@ TEST_SUITE("CI") {
     
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
     sigma.resize(test_ci.detset.N_dets, 1);
-    sigma.setZero();
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
     sigma_fast.resize(test_ci.detset.N_dets, 1);
-    sigma_fast.setZero();
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
     C.resize(test_ci.detset.N_dets, 1);
+    /////////////////////////////////////////////////////////////////////
     C.setZero();
+    sigma.setZero();
+    sigma_fast.setZero();
     C(0,0) = 1.0;
+
+    test_ci.detset.create_sigma_slow(sigma, C);
+    test_ci.detset.create_sigma(sigma_fast, C);
+    std::cout << "\n" << "C[0] = 1; C[i > 0]  = 0" << "\n" << std::endl;
+    for (auto i =0; i< test_ci.detset.N_dets; i++){
+      auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    }
+    /////////////////////////////////////////////////////////////////////
+    C.setZero();
+    sigma.setZero();
+    sigma_fast.setZero();
+    C(5,0) = 1.0;
+
+    test_ci.detset.create_sigma_slow(sigma, C);
+    test_ci.detset.create_sigma(sigma_fast, C);
+    std::cout << "\n" << "C[5] = 1; C[i != 5]  = 0" << "\n" << std::endl;
+    for (auto i =0; i< test_ci.detset.N_dets; i++){
+      auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+        CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    std::cout << "\n" << "C[:] = One over N_dets" << "\n" << std::endl;
+    C.setZero();
+    sigma.setZero();
+    sigma_fast.setZero();
+    for(auto i = 0; i < test_ci.detset.N_dets; i++){
+        C(i,0) = 1.0 / test_ci.detset.N_dets;
+    }
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
 
     for (auto i =0; i< test_ci.detset.N_dets; i++){
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        //std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
       CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     }
+    
+
 
   }
 
@@ -465,8 +500,43 @@ TEST_SUITE("CI") {
     sigma_fast.setZero();
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
     C.resize(test_ci.detset.N_dets, 1);
+    /////////////////////////////////////////////////////////////////////
     C.setZero();
+    sigma.setZero();
+    sigma_fast.setZero();
     C(0,0) = 1.0;
+
+    test_ci.detset.create_sigma_slow(sigma, C);
+    test_ci.detset.create_sigma(sigma_fast, C);
+    std::cout << "\n" << "C[0] = 1; C[i > 0]  = 0" << "\n" << std::endl;
+    for (auto i =0; i< test_ci.detset.N_dets; i++){
+      auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    }
+    /////////////////////////////////////////////////////////////////////
+    C.setZero();
+    sigma.setZero();
+    sigma_fast.setZero();
+    C(5,0) = 1.0;
+
+    test_ci.detset.create_sigma_slow(sigma, C);
+    test_ci.detset.create_sigma(sigma_fast, C);
+    std::cout << "\n" << "C[5] = 1; C[i != 5]  = 0" << "\n" << std::endl;
+    for (auto i =0; i< test_ci.detset.N_dets; i++){
+      auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
+        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
+        CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    std::cout << "\n" << "C[:] = One over N_dets" << "\n" << std::endl;
+    C.setZero();
+    sigma.setZero();
+    sigma_fast.setZero();
+    for(auto i = 0; i < test_ci.detset.N_dets; i++){
+        C(i,0) = 1.0 / test_ci.detset.N_dets;
+    }
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
@@ -476,5 +546,7 @@ TEST_SUITE("CI") {
         std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
       CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     }
+    
+
   }
 }
