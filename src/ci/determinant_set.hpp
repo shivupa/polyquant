@@ -309,12 +309,13 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
     T j = low / 64;
     T n = low % 64;
     for (auto l = j; l < k; l++) {
-      mask[l] = ~(0ul);
+      mask[l] = ~(0);
     }
-    mask[k] = (1UL << m) - 1;
-    mask[j] = mask[j] & (~(1ul << ((n + 1) + 1)));
-    for (auto l = j; j < k; l++) {
-      nperm = nperm + std::popcount(Di[j] & mask[l]);
+    mask[k] = (1 << m) - 1;
+    // mask[j] = mask[j] & (~(1ul << ((n + 1) + 1)));
+    mask[j] = mask[j] & (~(1 << (n + 1)) + 1);
+    for (auto l = j; l <= k; l++) {
+      nperm += std::popcount(Di[j] & mask[l]);
     }
   }
   if ((holes.size() == 2) && (holes[1] < parts[0] || holes[0] > parts[1])) {
