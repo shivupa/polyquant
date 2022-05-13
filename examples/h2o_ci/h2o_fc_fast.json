@@ -25,21 +25,21 @@
   "keywords": {
     "restricted" : true,
     "mf_keywords" :{
-        "convergence_E" : 1e-8,
-        "convergence_DM" : 1e-6,
+        "convergence_E" : 1e-9,
+        "convergence_DM" : 1e-8,
         "iteration_max" : 200,
         "dump_for_qmcpack" : true
     },
    "pure" : true,
    "ci_keywords" : {
-       "convergence_E" : 1e-6,
+       "convergence_E" : 1e-8,
        "num_states" : 2,
-       "num_subspace_vec" : 10,
+       "num_subspace_vec" : 20,
        "slow_diag" : false,
        "excitation_level" : [ 
            [2,2,2]
        ],
-       "frozen_core" : [1],
+       "frozen_core" : [0],
        "deleted_virtual" : [0]
    }
   }
