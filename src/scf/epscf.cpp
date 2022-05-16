@@ -367,6 +367,13 @@ void POLYQUANT_EPSCF::diag_fock() {
     this->E_orbitals[quantum_part_idx][0] = eigensolver.eigenvalues();
     C_prime = eigensolver.eigenvectors();
     this->C[quantum_part_idx][0] = this->input_integral.orth_X[quantum_part_idx] * C_prime;
+    // for (auto i = 0; i < this->C[quantum_part_idx][0].cols(); i++) {
+    //   auto max_val = this->C[quantum_part_idx][0](Eigen::placeholders::all, i).maxCoeff();
+    //   auto min_val = this->C[quantum_part_idx][0](Eigen::placeholders::all, i).minCoeff();
+    //   if (std::abs(min_val) > std::abs(max_val) && min_val < 0) {
+    //     this->C[quantum_part_idx][0](Eigen::placeholders::all, i) *= -1;
+    //   }
+    // }
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][1];
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator = this->F[quantum_part_idx][1] * this->D[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
@@ -397,6 +404,13 @@ void POLYQUANT_EPSCF::diag_fock() {
       this->E_orbitals[quantum_part_idx][1] = eigensolver_beta.eigenvalues();
       C_prime = eigensolver_beta.eigenvectors();
       this->C[quantum_part_idx][1] = this->input_integral.orth_X[quantum_part_idx] * C_prime;
+      // for (auto i = 0; i < this->C[quantum_part_idx][1].cols(); i++) {
+      //   auto max_val = this->C[quantum_part_idx][1](Eigen::placeholders::all, i).maxCoeff();
+      //   auto min_val = this->C[quantum_part_idx][1](Eigen::placeholders::all, i).minCoeff();
+      //   if (max_val < 0 || (std::abs(min_val) > std::abs(max_val) && min_val < 0)) {
+      //     this->C[quantum_part_idx][1](Eigen::placeholders::all, i) *= -1;
+      //   }
+      // }
     }
     quantum_part_idx++;
   }

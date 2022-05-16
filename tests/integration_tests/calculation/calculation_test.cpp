@@ -143,4 +143,120 @@ TEST_SUITE("CALCULATION") {
     CHECK(root_group2.exists("atoms") == true);
     CHECK(root_group2.exists("basisset") == true);
   }
+
+  TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary_cisd/h2o.json");
+    test_calc.run();
+    CHECK(test_calc.scf_calc.converged == true);
+
+    CHECK(test_calc.ci_calc.energies[0] == doctest::Approx(-75.01170307729812).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.ci_calc.energies[1] == doctest::Approx(-74.59209776692875).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+
+    std::vector<std::vector<double>> reference_values;
+    std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/cisd_ham_elements.txt";
+    Polyquant_read_vecofvec_from_file(reference_values,reference_values_file);
+    std::cout << test_calc.ci_calc.detset.N_dets << std::endl;
+    auto count = 0;
+    for (auto i = 0; i < test_calc.ci_calc.detset.N_dets; i++) {
+        for (auto j = 0; j < test_calc.ci_calc.detset.N_dets; j++) {
+            auto idx_i_unfold = test_calc.ci_calc.detset.det_idx_unfold(i);
+            auto idx_j_unfold = test_calc.ci_calc.detset.det_idx_unfold(j);
+            auto ex = test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][0][idx_i_unfold[0]], test_calc.ci_calc.detset.unique_dets[0][0][idx_j_unfold[0]]);
+            ex += test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc.detset.unique_dets[0][1][idx_j_unfold[1]]);
+            auto elem_thru_SC =test_calc.ci_calc.detset.Slater_Condon(i , j);
+            auto diff = elem_thru_SC - reference_values[count][0];
+            CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+            auto idx_part = 0;
+            auto det_i_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
+            auto det_i_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
+            auto det_j_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_j_unfold[idx_part * 2 + 0]);
+            auto det_j_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_j_unfold[idx_part * 2 + 1]);
+            auto phase = 1.0;
+            std::vector<int> holes, parts;
+            holes.clear();
+            parts.clear();
+            test_calc.ci_calc.detset.get_holes(det_i_a, det_j_a, holes);
+            test_calc.ci_calc.detset.get_parts(det_i_a, det_j_a, parts);
+            if (holes.size() > 0){
+            phase *= test_calc.ci_calc.detset.get_phase(det_i_a, det_j_a, holes, parts);
+            }
+            holes.clear();
+            parts.clear();
+            test_calc.ci_calc.detset.get_holes(det_i_b, det_j_b, holes);
+            test_calc.ci_calc.detset.get_parts(det_i_b, det_j_b, parts);
+            if (holes.size() > 0){
+            phase *= test_calc.ci_calc.detset.get_phase(det_i_b, det_j_b, holes, parts);
+            }
+            if (diff > POLYQUANT_TEST_EPSILON_LOOSE){
+                    std::cout << ex << "           " << 
+                        idx_i_unfold[0] << " " << idx_i_unfold[1] << " " <<
+                        idx_j_unfold[0] << " " << idx_j_unfold[1] << "          " <<
+                        phase << " " << reference_values[count][1] << "           "<<
+                        elem_thru_SC << " " << reference_values[count][0] << " = " << diff << std::endl;
+            }
+            count++;
+
+        }
+    }
+  }
+
+  TEST_CASE("CALCULATION: H2O/sto-3g(library) CI slow.") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary_cisd/h2o_slow.json");
+    test_calc.run();
+    CHECK(test_calc.scf_calc.converged == true);
+
+    CHECK(test_calc.ci_calc.energies[0] == doctest::Approx(-75.01170307729812).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.ci_calc.energies[1] == doctest::Approx(-74.59209776692875).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+
+    std::vector<std::vector<double>> reference_values;
+    std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/cisd_ham_elements.txt";
+    Polyquant_read_vecofvec_from_file(reference_values,reference_values_file);
+    std::cout << test_calc.ci_calc.detset.N_dets << std::endl;
+    auto count = 0;
+    for (auto i = 0; i < test_calc.ci_calc.detset.N_dets; i++) {
+        for (auto j = 0; j < test_calc.ci_calc.detset.N_dets; j++) {
+            auto idx_i_unfold = test_calc.ci_calc.detset.det_idx_unfold(i);
+            auto idx_j_unfold = test_calc.ci_calc.detset.det_idx_unfold(j);
+            auto ex = test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][0][idx_i_unfold[0]], test_calc.ci_calc.detset.unique_dets[0][0][idx_j_unfold[0]]);
+            ex += test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc.detset.unique_dets[0][1][idx_j_unfold[1]]);
+            auto elem_thru_SC =test_calc.ci_calc.detset.Slater_Condon(i , j);
+            auto diff = elem_thru_SC - reference_values[count][0];
+            CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+            auto idx_part = 0;
+            auto det_i_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
+            auto det_i_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
+            auto det_j_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_j_unfold[idx_part * 2 + 0]);
+            auto det_j_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_j_unfold[idx_part * 2 + 1]);
+            auto phase = 1.0;
+            std::vector<int> holes, parts;
+            holes.clear();
+            parts.clear();
+            test_calc.ci_calc.detset.get_holes(det_i_a, det_j_a, holes);
+            test_calc.ci_calc.detset.get_parts(det_i_a, det_j_a, parts);
+            if (holes.size() > 0){
+            phase *= test_calc.ci_calc.detset.get_phase(det_i_a, det_j_a, holes, parts);
+            }
+            holes.clear();
+            parts.clear();
+            test_calc.ci_calc.detset.get_holes(det_i_b, det_j_b, holes);
+            test_calc.ci_calc.detset.get_parts(det_i_b, det_j_b, parts);
+            if (holes.size() > 0){
+            phase *= test_calc.ci_calc.detset.get_phase(det_i_b, det_j_b, holes, parts);
+            }
+            if (diff > 1e-9){
+                    std::cout << ex << "           " << 
+                        idx_i_unfold[0] << " " << idx_i_unfold[1] << " " <<
+                        idx_j_unfold[0] << " " << idx_j_unfold[1] << "          " <<
+                        phase << " " << reference_values[count][1] << "           "<<
+                        elem_thru_SC << " " << reference_values[count][0] << " = " << diff << std::endl;
+            }
+            count++;
+
+        }
+    }
+  }
+
+
 }

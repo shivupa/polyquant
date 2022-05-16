@@ -26,11 +26,13 @@
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
         "Cauchy_Schwarz_screening" : true,
-        "incremental_fock" : true
+        "incremental_fock" : true,
+        "Cauchy_Schwarz_screening" : true
     },
    "ci_keywords" : {
        "convergence_E" : 1e-8,
        "num_states" : 5,
+       "slow_diag" : false,
        "num_subspace_vec" : 20,
        "excitation_level" : [
            [1,1,2],

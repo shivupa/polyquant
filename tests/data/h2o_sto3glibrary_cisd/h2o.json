@@ -1,11 +1,11 @@
 {
   "molecule": {
     "geometry": [
+        0.0000000, 0.0000000,  0.0000000,
         0.7569685, 0.0000000, -0.5858752,
-       -0.7569685, 0.0000000, -0.5858752,
-        0.0000000, 0.0000000,  0.0000000
+       -0.7569685, 0.0000000, -0.5858752
     ],
-    "symbols": ["H", "H", "O"],
+    "symbols": ["O", "H", "H"],
     "molecular_charge": 0,
     "molecular_multiplicity": 1
   },
@@ -13,26 +13,19 @@
   "model": {
     "method": "CI",
     "basis": 
-        { "electron" :
-          {
-            "H" : [{ "library" : 
-              {"type" : "sto-3g"}}],
-            "O" : [{ "library" : 
-              {"type" : "sto-3g"}}]
-          }
-        }
+    { "electron" :{"H" : [{ "library" : {"type" : "sto-3g"} }],
+                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}}
   },
   "keywords": {
     "restricted" : true,
-    "dump_for_qmcpack" : true,
     "mf_keywords" :{
-        "convergence_E" : 1e-9,
-        "convergence_DM" : 1e-8,
+        "convergence_E" : 1e-8,
+        "convergence_DM" : 1e-6,
         "iteration_max" : 200
     },
    "pure" : true,
    "ci_keywords" : {
-       "convergence_E" : 1e-8,
+       "convergence_E" : 1e-9,
        "num_states" : 2,
        "num_subspace_vec" : 20,
        "slow_diag" : false,

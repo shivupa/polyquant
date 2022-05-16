@@ -738,7 +738,35 @@ def cisd(mol, printroots=4, visualize=False, preservedict=True):
     print(targetdetset)
     # create a set from the union of the target and core determinants
     targetdetset |= coreset
-    print(targetdetset)
+    alpha_list = [
+            frozenset({0,1,2,3,4}),
+            frozenset({1,2,3,4,5}),
+            frozenset({1,2,3,4,6}),
+            frozenset({0,2,3,4,5}),
+            frozenset({0,2,3,4,6}),
+            frozenset({0,1,3,4,5}),
+            frozenset({0,1,3,4,6}),
+            frozenset({0,1,2,4,5}),
+            frozenset({0,1,2,4,6}),
+            frozenset({0,1,2,3,5}),
+            frozenset({0,1,2,3,6}),
+            frozenset({2,3,4,5,6}),
+            frozenset({1,3,4,5,6}),
+            frozenset({1,2,4,5,6}),
+            frozenset({1,2,3,5,6}),
+            frozenset({0,3,4,5,6}),
+            frozenset({0,2,4,5,6}),
+            frozenset({0,2,3,5,6}),
+            frozenset({0,1,4,5,6}),
+            frozenset({0,1,3,5,6}),
+            frozenset({0,1,2,5,6})
+        ]
+    targetdetset = []
+    for i in alpha_list:
+        for j in alpha_list:
+            nexc = n_excit_sets((alpha_list[0], alpha_list[0]), (i,j))
+            if nexc < 3:
+                targetdetset.append((i,j))
     for i,j in enumerate(targetdetset):
         print(i,j)
     print(len(targetdetset))
@@ -747,6 +775,19 @@ def cisd(mol, printroots=4, visualize=False, preservedict=True):
     hamdict.update(populatehamdict(targetdetset, targetdetset, hamdict, h1e, eri))
     # construct the hamiltonian in the target space
     targetham = getsmallham(list(targetdetset), hamdict)
+    print(type(targetham))
+    for i in range(len(targetdetset)):
+        for j in range(len(targetdetset)):
+            idet = targetdetset[i]
+            jdet = targetdetset[j]
+            nexc = n_excit_sets(idet ,jdet)
+            if nexc < 3:
+                sign = 1
+                if nexc == 1:
+                    hole, part, sign, spin, aocc, bocc = hole_part_sign_spin_occ_single_sets(idet, jdet)
+                elif nexc == 2:
+                    h1, h2, p1, p2, sign, samespin = hole_part_sign_spin_double_sets(idet, jdet)
+            print("{: 18.12f}           {:18.12f}".format(targetham[i,j], sign))
     print(targetham)
     # diagonalize the hamiltonian yielding the eigenvalues and
     # eigenvectors
