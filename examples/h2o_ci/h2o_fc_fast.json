@@ -24,11 +24,11 @@
   },
   "keywords": {
     "restricted" : true,
+    "dump_for_qmcpack" : true,
     "mf_keywords" :{
         "convergence_E" : 1e-9,
         "convergence_DM" : 1e-8,
-        "iteration_max" : 200,
-        "dump_for_qmcpack" : true
+        "iteration_max" : 200
     },
    "pure" : true,
    "ci_keywords" : {
