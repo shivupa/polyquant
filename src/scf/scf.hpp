@@ -34,6 +34,8 @@ public:
   virtual void guess_DM() = 0;
   virtual void run() = 0;
 
+  bool verbose = false;
+
   /**
    * @brief the input parameters
    *

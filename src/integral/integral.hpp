@@ -205,7 +205,7 @@ public:
                                                                                       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_coeffs_b, int num_part_alpha, int num_part_beta,
                                                                                       std::vector<int> frozen_core, std::vector<int> deleted_virtual);
   void calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core, std::vector<int> deleted_virtual);
-
+  bool verbose = false;
   size_t ijcache_size;
   size_t ericache_size;
   mutable polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> ijcache;
