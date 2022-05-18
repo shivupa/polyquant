@@ -15,6 +15,7 @@
 #include <Eigen/Core>
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>
+#include <io/utils.hpp>
 #include <string>
 
 using namespace polyquant;
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
     std::cout << options.help() << std::endl;
   } else if (input_parameters.count("input")) {
     POLYQUANT_TIMER timer("TOTAL RUNTIME");
+    Polyquant_dump_program_header();
     if (input_parameters.count("input") == 1) {
       std::string filename = input_parameters["input"].as<std::string>();
       // set up calculation object
