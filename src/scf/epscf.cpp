@@ -16,8 +16,8 @@ void POLYQUANT_EPSCF::form_H_core() {
       filename << quantum_part_key;
       filename << ".txt";
       Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx], filename.str());
-      quantum_part_idx++;
     }
+    quantum_part_idx++;
   }
 }
 
