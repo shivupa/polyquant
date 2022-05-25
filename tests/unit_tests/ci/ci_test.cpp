@@ -379,10 +379,10 @@ TEST_SUITE("CI") {
     std::vector<int> i_unfold = {0,0,0,0};
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
 
-    std::vector<int> j_unfold = {22,0,7,0};
+    std::vector<int> j_unfold = {25,0,12,0};
     auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
     auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-    CHECK(std::abs(double_ham_elem) == doctest::Approx(0.017292652397971213646).epsilon(1e-3));
+    CHECK(std::abs(double_ham_elem) == doctest::Approx(0.016794909884226914137).epsilon(1e-3));
     // CHECK(0 == 1);
     //  auto max_val = 0.0;
     //  for (auto elec_excitation = 0; elec_excitation < test_ci.detset.unique_dets[0][0].size(); elec_excitation++) {
