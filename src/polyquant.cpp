@@ -15,20 +15,22 @@
 #include <Eigen/Core>
 #include <calculation/calculation.hpp>
 #include <cxxopts.hpp>
+#include <io/utils.hpp>
 #include <string>
 
 using namespace polyquant;
 
 int main(int argc, char **argv) {
-  POLYQUANT_TIMER timer("TOTAL RUNTIME");
   Eigen::initParallel();
-  cxxopts::Options options("polyquant", "Multiple quantum particles.");
+  cxxopts::Options options("polyquant", "Software package for nonrelativistically treating multiple interacting quantum particle species.");
   options.add_options()("i,input", "input filename", cxxopts::value<std::string>())("h,help", "Print usage");
   auto input_parameters = options.parse(argc, argv);
 
   if (input_parameters.count("help")) {
     std::cout << options.help() << std::endl;
   } else if (input_parameters.count("input")) {
+    POLYQUANT_TIMER timer("TOTAL RUNTIME");
+    Polyquant_dump_program_header();
     if (input_parameters.count("input") == 1) {
       std::string filename = input_parameters["input"].as<std::string>();
       // set up calculation object

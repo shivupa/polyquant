@@ -13,6 +13,38 @@ void APP_ABORT(const std::string &reason) {
   }
   exit(1);
 }
+void Polyquant_dump_program_header() {
+  // clang-format off
+    std::string program_title_text = R"POLYQUANT(
+
+
+                         ..                           MM                           
+                       pd'  `7MM"""Mq.   .g8""8q.     MM                           
+                      6P      MM   `MM..dP'    `YM.   MM                           
+                     6M'      MM   ,M9 dM'      `MM   MM                           
+                     MN       MMmmdM9  MM        MM   MM                           
+                     MN       MM       MM.      ,MP   MM                           
+                     YM.      MM       `Mb.    ,dP'   MM                           
+                      Mb    .JMML.       `"bmmd"'     MM                           
+                       Yq.                   MMb      MM                           
+                         ``                   `bood'  MM                           
+
+                    ,,                                                          
+`7MM"""Mq.        `7MM                                                     mm   
+  MM   `MM.         MM                                                     MM   
+  MM   ,M9 ,pW"Wq.  MM `7M'   `MF',dW"Yvd `7MM  `7MM   ,6"Yb.  `7MMpMMMb.mmMMmm 
+  MMmmdM9 6W'   `Wb MM   VA   ,V ,W'   MM   MM    MM  8)   MM    MM    MM  MM   
+  MM      8M     M8 MM    VA ,V  8M    MM   MM    MM   ,pm9MM    MM    MM  MM   
+  MM      YA.   ,A9 MM     VVV   YA.   MM   MM    MM  8M   MM    MM    MM  MM   
+.JMML.     `Ybmd9'.JMML.   ,V     `MbmdMM   `Mbod"YML.`Moo9^Yo..JMML  JMML.`Mbmo
+                          ,V           MM                                       
+                       OOb"          .JMML.                                     
+
+
+)POLYQUANT";
+  // clang-format on
+  std::cout << program_title_text << std::endl;
+}
 
 void Polyquant_dump_json(const json &json_obj) { std::cout << json_obj.dump(4) << std::endl; }
 

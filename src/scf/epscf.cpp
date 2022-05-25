@@ -10,11 +10,13 @@ void POLYQUANT_EPSCF::form_H_core() {
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
     this->H_core[quantum_part_idx] += (1.0 / quantum_part.mass) * this->input_integral.kinetic[quantum_part_idx];
     this->H_core[quantum_part_idx] += (-quantum_part.charge) * this->input_integral.nuclear[quantum_part_idx];
-    std::stringstream filename;
-    filename << "H_core_";
-    filename << quantum_part_key;
-    filename << ".txt";
-    Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx], filename.str());
+    if (verbose == true) {
+      std::stringstream filename;
+      filename << "H_core_";
+      filename << quantum_part_key;
+      filename << ".txt";
+      Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx], filename.str());
+    }
     quantum_part_idx++;
   }
 }
@@ -312,7 +314,7 @@ void POLYQUANT_EPSCF::form_fock() {
   // compute energy with non-extrapolated Fock matrix
   this->calculate_E_elec();
   //
-  if (this->iteration_num == 1) {
+  if (this->iteration_num == 1 && verbose == true) {
     quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
       Polyquant_cout("Dumping Fock Matrix");
@@ -428,7 +430,7 @@ void POLYQUANT_EPSCF::form_DM() {
     }
     quantum_part_idx++;
   }
-  if (this->iteration_num >= 1) {
+  if (this->iteration_num >= 1 && verbose == true) {
     auto quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
       Polyquant_cout("Dumping 1pDM Matrix");

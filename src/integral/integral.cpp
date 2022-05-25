@@ -35,11 +35,13 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
       this->overlap[quantum_part_idx].resize(num_basis, num_basis);
       this->overlap[quantum_part_idx].setZero();
       this->compute_1body_ints(this->overlap[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::overlap);
-      std::stringstream filename;
-      filename << "overlap";
-      filename << quantum_part_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->overlap[quantum_part_idx], filename.str());
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "overlap";
+        filename << quantum_part_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(this->overlap[quantum_part_idx], filename.str());
+      }
     }
     quantum_part_idx++;
   }
@@ -59,11 +61,13 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
       this->Schwarz[quantum_part_idx].resize(num_basis_a, num_basis_b);
       this->Schwarz[quantum_part_idx].setZero();
       this->compute_Schwarz_ints(this->Schwarz[quantum_part_idx], this->input_basis.basis[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::coulomb);
-      std::stringstream filename;
-      filename << "Schwarz";
-      filename << quantum_part_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->Schwarz[quantum_part_idx], filename.str());
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "Schwarz";
+        filename << quantum_part_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(this->Schwarz[quantum_part_idx], filename.str());
+      }
     }
     quantum_part_idx++;
   }
@@ -133,11 +137,13 @@ void POLYQUANT_INTEGRAL::calculate_kinetic() {
       this->kinetic[quantum_part_idx].resize(num_basis, num_basis);
       this->kinetic[quantum_part_idx].setZero();
       this->compute_1body_ints(this->kinetic[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::kinetic);
-      std::stringstream filename;
-      filename << "kinetic";
-      filename << quantum_part_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->kinetic[quantum_part_idx], filename.str());
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "kinetic";
+        filename << quantum_part_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(this->kinetic[quantum_part_idx], filename.str());
+      }
     }
     quantum_part_idx++;
   }
@@ -156,11 +162,13 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
       this->nuclear[quantum_part_idx].resize(num_basis, num_basis);
       this->nuclear[quantum_part_idx].setZero();
       this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_libint_atom("no_ghost"));
-      std::stringstream filename;
-      filename << "nuclear";
-      filename << quantum_part_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->nuclear[quantum_part_idx], filename.str());
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "nuclear";
+        filename << quantum_part_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(this->nuclear[quantum_part_idx], filename.str());
+      }
     }
     quantum_part_idx++;
   }
@@ -194,13 +202,15 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       } else {
         mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx] = mo_subset.transpose() * (this->kinetic[quantum_part_idx] + (-charge * nuclear[quantum_part_idx])) * mo_subset;
       }
-      std::stringstream filename;
-      filename << "MO_1body_";
-      filename << quantum_part_idx;
-      filename << "_";
-      filename << quantum_part_spin_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx], filename.str());
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "MO_1body_";
+        filename << quantum_part_idx;
+        filename << "_";
+        filename << quantum_part_spin_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx], filename.str());
+      }
     }
     quantum_part_idx++;
   }
@@ -883,11 +893,13 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       s = s.array().rsqrt();
       this->orth_X[quantum_part_idx] = s.asDiagonal();
       this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
-      std::stringstream filename;
-      filename << "orthogonalizer_";
-      filename << quantum_part_idx;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "orthogonalizer_";
+        filename << quantum_part_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+      }
     }
     quantum_part_idx++;
   }

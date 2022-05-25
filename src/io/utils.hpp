@@ -52,6 +52,12 @@ double quantum_symb_to_mass(std::string key);
 int quantum_symb_to_charge(std::string key);
 
 /**
+ * @brief A helper function to dump the program header.
+ *
+ */
+void Polyquant_dump_program_header();
+
+/**
  * @brief A helper function to dump a json object to std::out.
  *
  * @param json_obj The json object to print.

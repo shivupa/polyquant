@@ -27,6 +27,9 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
       this->input_integral.tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
     }
   }
+  if (this->input_params.input_data.contains("verbose")) {
+    this->input_integral.verbose = this->input_params.input_data["verbose"];
+  }
 }
 
 void POLYQUANT_CALCULATION::run() {
@@ -91,6 +94,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   scf_calc.setup_calculation(this->input_params, this->input_molecule, this->input_basis, this->input_integral);
   bool dump_for_qmcpack = false;
   std::string hdf5_filename = "Default.h5";
+
+  if (this->input_params.input_data.contains("verbose")) {
+    scf_calc.verbose = this->input_params.input_data["verbose"];
+  }
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("mf_keywords")) {
       if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
@@ -176,6 +183,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   bool dump_for_qmcpack = false;
   std::string hdf5_filename = "Default.h5";
   if (post_mean_field_type == "CI") {
+    if (this->input_params.input_data.contains("verbose")) {
+      ci_calc.verbose = this->input_params.input_data["verbose"];
+    }
     if (this->input_params.input_data.contains("keywords")) {
       if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
         if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
