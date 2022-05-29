@@ -153,7 +153,7 @@ find_package(OpenMP REQUIRED)
 ########################################
 # LinAlg
 # set this list to prioritize a BLAS type
-# set( LinAlg_BLAS_PREFERENCE_LIST "IntelMKL" "IBMESSL" "BLIS" "OpenBLAS" "ReferenceBLAS" )
+set( LinAlg_BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
 find_package(LinAlg REQUIRED)
 ########################################
 # Spectra for sparse math
