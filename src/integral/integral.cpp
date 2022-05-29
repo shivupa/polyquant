@@ -6,22 +6,7 @@ POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQ
   this->setup_integral(input, basis, molecule);
 }
 
-POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() { omp_destroy_lock(&writelock); }
-
-void POLYQUANT_INTEGRAL::construct_ijcache(size_t size_in_gb) {
-  std::pair<int, int> temp(0, 0);
-  this->ijcache_size = (size_in_gb * 1e9) / sizeof(temp);
-  polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> constructed_ijcache(this->ijcache_size);
-  this->ijcache = constructed_ijcache;
-}
-
-void POLYQUANT_INTEGRAL::construct_ericache(size_t size_in_gb) {
-  std::vector<size_t> temp_vec = {0, 0, 0};
-  std::pair<std::vector<size_t>, std::vector<size_t>> temp(temp_vec, temp_vec);
-  this->ericache_size = (size_in_gb * 1e9) / sizeof(temp);
-  polyquant_lfu_cache<std::pair<std::vector<size_t>, std::vector<size_t>>, double, PairVectorHash<size_t>> constructed_ericache(this->ericache_size);
-  this->ericache = constructed_ericache;
-}
+POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() {}
 
 void POLYQUANT_INTEGRAL::calculate_overlap() {
   auto function = __PRETTY_FUNCTION__;
@@ -642,14 +627,11 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
 }
 
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) {
-  omp_init_lock(&writelock);
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
-  this->construct_ijcache();
-  this->construct_ericache();
   this->overlap.resize(molecule.quantum_particles.size());
   this->kinetic.resize(molecule.quantum_particles.size());
   this->nuclear.resize(molecule.quantum_particles.size());
@@ -670,58 +652,81 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
   const auto nsh1 = bs1.size();
   const auto nsh2 = bs2.size();
   const auto bs1_equiv_bs2 = (&bs1 == &bs2);
-  std::unordered_map<size_t, std::vector<size_t>> splist;
+  std::unordered_map<size_t, std::vector<size_t>> return_splist;
+  std::vector<std::unordered_map<size_t, std::vector<size_t>>> splists;
   int nthreads = omp_get_max_threads();
+  splists.resize(nthreads);
   std::vector<libint2::Engine> engines;
   engines.reserve(nthreads);
   engines.emplace_back(libint2::Operator::overlap, std::max(bs1.max_nprim(), bs2.max_nprim()), std::max(bs1.max_l(), bs2.max_l()), 0);
   for (size_t i = 1; i != nthreads; ++i) {
     engines.push_back(engines[0]);
   }
-  // loop over permutationally-unique set of shells
-  for (auto s1 = 0l; s1 != nsh1; ++s1) {
-    if (splist.find(s1) == splist.end()) {
-      splist.insert(std::make_pair(s1, std::vector<size_t>()));
-    }
-    auto n1 = bs1[s1].size(); // number of basis functions in this shell
-    auto s2_max = bs1_equiv_bs2 ? s1 : nsh2 - 1;
-#pragma omp parallel for
-    for (auto s2 = 0l; s2 <= s2_max; ++s2) {
-      auto thread_id = omp_get_thread_num();
-      auto &engine = engines[thread_id];
-      const auto &buf = engine.results();
-      auto on_same_center = (bs1[s1].O == bs2[s2].O);
-      bool significant = on_same_center;
-      if (not on_same_center) {
-        auto n2 = bs2[s2].size();
-        engines[thread_id].compute(bs1[s1], bs2[s2]);
-        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n1, n2);
-        auto norm = buf_mat.norm();
-        significant = (norm >= threshold);
+// loop over permutationally-unique set of shells
+#pragma omp parallel
+  {
+    int shellcounter = 0;
+    auto thread_id = omp_get_thread_num();
+    for (auto s1 = 0l; s1 != nsh1; ++s1) {
+      if (splists[thread_id].find(s1) == splists[thread_id].end()) {
+        splists[thread_id].insert(std::make_pair(s1, std::vector<size_t>()));
       }
-      if (significant) {
-        omp_set_lock(&writelock);
-        splist[s1].emplace_back(s2);
-        omp_unset_lock(&writelock);
+      auto n1 = bs1[s1].size(); // number of basis functions in this shell
+      auto s2_max = bs1_equiv_bs2 ? s1 : nsh2 - 1;
+      for (auto s2 = 0l; s2 <= s2_max; ++s2) {
+        shellcounter++;
+        if (shellcounter % nthreads != thread_id) {
+          continue;
+        }
+        auto &engine = engines[thread_id];
+        const auto &buf = engine.results();
+        auto on_same_center = (bs1[s1].O == bs2[s2].O);
+        bool significant = on_same_center;
+        if (not on_same_center) {
+          auto n2 = bs2[s2].size();
+          engines[thread_id].compute(bs1[s1], bs2[s2]);
+          Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n1, n2);
+          auto norm = buf_mat.norm();
+          significant = (norm >= threshold);
+        }
+        if (significant) {
+          splists[thread_id][s1].emplace_back(s2);
+        }
+      }
+    }
+  }
+
+  // merge maps
+  for (auto i = 0; i < nthreads; i++) {
+    auto unordered_map_main_first = return_splist.begin();
+    auto unordered_map_main_last = return_splist.end();
+    auto unordered_map_merging_first = splists[i].begin();
+    auto unordered_map_merging_last = splists[i].end();
+    for (; unordered_map_merging_first != unordered_map_merging_last; ++unordered_map_merging_first) {
+      std::pair<std::unordered_map<size_t, std::vector<size_t>>::iterator, bool> ins = return_splist.insert(*unordered_map_merging_first);
+      if (!ins.second) { // if insertion into map2 was not successful
+        std::vector<size_t> *vec1 = &(unordered_map_merging_first->second);
+        std::vector<size_t> *vec2 = &(ins.first->second);
+        vec2->insert(vec2->end(), vec1->begin(), vec1->end());
       }
     }
   }
 
 #pragma omp parallel for
   for (auto s1 = 0l; s1 != nsh1; ++s1) {
-    auto &list = splist[s1];
+    auto &list = return_splist[s1];
     std::sort(list.begin(), list.end());
   }
   /// to use precomputed shell pair data must decide on max precision a priori
   const auto max_engine_precision = tolerance_2e / 1e10;
   const auto ln_max_engine_precision = std::log(max_engine_precision);
-  std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata(splist.size());
+  std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata(return_splist.size());
   for (auto s1 = 0l; s1 != nsh1; ++s1) {
-    for (const auto &s2 : splist[s1]) {
+    for (const auto &s2 : return_splist[s1]) {
       spdata[s1].emplace_back(std::make_shared<libint2::ShellPair>(bs1[s1], bs2[s2], ln_max_engine_precision));
     }
   }
-  return std::make_tuple(splist, spdata);
+  return std::make_tuple(return_splist, spdata);
 }
 /**
  * @details This follows the HF test in the Libint2 repo. It constructs the

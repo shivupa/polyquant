@@ -1,6 +1,5 @@
 #ifndef POLYQUANT_INPUT_HDF5_H
 #define POLYQUANT_INPUT_HDF5_H
-#include "io/lfu_cache.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include <Eigen/Dense>
