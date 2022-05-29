@@ -20,7 +20,7 @@ namespace polyquant {
 
 #define POLYQUANT_TEST_EPSILON_LOOSE 0.000001
 #define POLYQUANT_TEST_EPSILON_TIGHT 0.00000001
-#define POLYQUANT_TEST_EPSILON_MACHINEPREC 1e-16
+#define POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT 1e-14
 
 // /**
 //  * @brief Abort the code and print a reason for aborting.

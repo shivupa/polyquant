@@ -34,8 +34,8 @@
         }
     ],
     "mf_keywords" :{
-        "convergence_E" : 1e-15,
-        "convergence_DM" : 1e-15,
+        "convergence_E" : 1e-13,
+        "convergence_DM" : 1e-13,
         "iteration_max" : 200,
         "dump_for_qmcpack" : true,
         "hdf5_filename_qmcpack" : "Li_wpos.h5"
