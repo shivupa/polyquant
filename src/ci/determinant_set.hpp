@@ -35,6 +35,7 @@ public:
   void resize(std::size_t size);
 
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
+  void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets);
   void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
   void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level);
 
@@ -199,14 +200,14 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   unique_dets[idx_part][1].push_back(beta_det);
 }
 
-template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation(int idx_part, int idx_spin, int excitation_level) {
+template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) {
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
-  auto det = this->unique_dets[idx_part][idx_spin][0];
+  auto det = this->unique_dets[idx_part][idx_spin][idx_det];
   this->get_occ_virt(idx_part, det, occ, virt);
   if (excitation_level > virt.size()) {
-    APP_ABORT("Alpha Excitation level exceeds virtual size!");
+    APP_ABORT("Excitation level exceeds virtual size!");
   }
   for (auto &&iocc : iter::combinations(occ, excitation_level)) {
     for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
@@ -218,8 +219,17 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation(int idx
       for (auto &virtbit : ivirt) {
         temp_det[virtbit / 64ul] |= 1UL << (virtbit % 64ul);
       }
-      this->unique_dets[idx_part][idx_spin].push_back(temp_det);
+      return_dets.push_back(temp_det);
     }
+  }
+}
+
+template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation(int idx_part, int idx_spin, int excitation_level) {
+  std::vector<std::vector<T>> excitation_dets;
+  auto idx_det = 0;
+  this->get_unique_excitation_list(idx_part, idx_spin, idx_det, excitation_level, excitation_dets);
+  for (auto det : excitation_dets) {
+    this->unique_dets[idx_part][idx_spin].push_back(det);
   }
 }
 template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<std::tuple<int, int, int>> excitation_level) {
