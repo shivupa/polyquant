@@ -27,6 +27,7 @@ namespace polyquant {
 class POLYQUANT_HDF5 {
 public:
   POLYQUANT_HDF5() = default;
+  ~POLYQUANT_HDF5() { hdf5_file.close(); }
   /**
    * @brief Construct a HDF5 object using the create_file function.
    *
