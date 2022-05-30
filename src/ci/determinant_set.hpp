@@ -35,7 +35,8 @@ public:
   void resize(std::size_t size);
 
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
-  void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets);
+  void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const;
+  void get_unique_excitation_list_of_indices(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<int> &return_idx_list) const;
   void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
   void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level);
 
@@ -200,7 +201,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   unique_dets[idx_part][1].push_back(beta_det);
 }
 
-template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) {
+template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const {
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
@@ -222,6 +223,27 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
       return_dets.push_back(temp_det);
     }
   }
+}
+
+template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list_of_indices(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<int> &return_idx_list) const {
+    std::vector<std::vector<T>> excited_dets;
+    this->get_unique_excitation_list(idx_part, idx_spin, idx_det, excitation_level, excited_dets);
+    //std::reverse(excited_dets.begin(), excited_dets.end());
+    auto curr_idx = 0;
+    while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()){
+        auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+        auto is_det = [&curr_det](std::vector<T> i){ return i == curr_det; };
+        auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+        if ( det_in_excited_dets_list != excited_dets.end()){
+            return_idx_list.push_back(curr_idx);
+            excited_dets.erase(det_in_excited_dets_list);
+        }
+        //if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
+        //    return_idx_list.push_back(curr_idx);
+        //    excited_dets.pop_back();
+        //} 
+        curr_idx++;
+    }
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation(int idx_part, int idx_spin, int excitation_level) {
