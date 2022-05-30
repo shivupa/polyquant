@@ -226,24 +226,24 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list_of_indices(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<int> &return_idx_list) const {
-    std::vector<std::vector<T>> excited_dets;
-    this->get_unique_excitation_list(idx_part, idx_spin, idx_det, excitation_level, excited_dets);
-    //std::reverse(excited_dets.begin(), excited_dets.end());
-    auto curr_idx = 0;
-    while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()){
-        auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-        auto is_det = [&curr_det](std::vector<T> i){ return i == curr_det; };
-        auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-        if ( det_in_excited_dets_list != excited_dets.end()){
-            return_idx_list.push_back(curr_idx);
-            excited_dets.erase(det_in_excited_dets_list);
-        }
-        //if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
-        //    return_idx_list.push_back(curr_idx);
-        //    excited_dets.pop_back();
-        //} 
-        curr_idx++;
+  std::vector<std::vector<T>> excited_dets;
+  this->get_unique_excitation_list(idx_part, idx_spin, idx_det, excitation_level, excited_dets);
+  // std::reverse(excited_dets.begin(), excited_dets.end());
+  auto curr_idx = 0;
+  while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
+    auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+    auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+    auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+    if (det_in_excited_dets_list != excited_dets.end()) {
+      return_idx_list.push_back(curr_idx);
+      excited_dets.erase(det_in_excited_dets_list);
     }
+    // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
+    //     return_idx_list.push_back(curr_idx);
+    //     excited_dets.pop_back();
+    // }
+    curr_idx++;
+  }
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation(int idx_part, int idx_spin, int excitation_level) {
@@ -1037,7 +1037,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
           // TODO pick one of these and stick to that form
           // auto folded_idet_idx = this->dets.find(det_idx)->second;
           auto folded_idet_idx = this->dets.at(det_idx);
-          //auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
+          // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
           auto integral = diagonal_Hii[folded_idet_idx];
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             // std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << folded_idet_idx  << " " << integral << std::endl;
@@ -1075,8 +1075,8 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
     auto thread_id = omp_get_thread_num();
     for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++) {
       for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++) {
-            if ((idx_I_A_det + idx_I_B_det ) % nthreads != thread_id)
-              continue;
+        if ((idx_I_A_det + idx_I_B_det) % nthreads != thread_id)
+          continue;
         std::vector<int> det_idx(2);
         det_idx[first_spin_idx] = idx_I_A_det;
         det_idx[second_spin_idx] = idx_I_B_det;
@@ -1087,14 +1087,14 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
           this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, excitation_list);
           this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 2, excitation_list);
           std::sort(excitation_list.begin(), excitation_list.end());
-          excitation_list.erase(std::remove_if(excitation_list.begin(), excitation_list.end(), [&idx_I_A_det](int x){return x < idx_I_A_det;}), excitation_list.end());
+          excitation_list.erase(std::remove_if(excitation_list.begin(), excitation_list.end(), [&idx_I_A_det](int x) { return x < idx_I_A_det; }), excitation_list.end());
 
-          //for (auto idx_J_A_det = idx_I_A_det; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++) {
+          // for (auto idx_J_A_det = idx_I_A_det; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++) {
           auto excitation_list_count = 0;
           for (auto idx_J_A_det : excitation_list) {
             excitation_list_count++;
-            //if ((idx_I_A_det + idx_I_B_det + excitation_list_count) % nthreads != thread_id)
-            //  continue;
+            // if ((idx_I_A_det + idx_I_B_det + excitation_list_count) % nthreads != thread_id)
+            //   continue;
             if (idx_J_A_det == idx_I_A_det) {
               continue;
             }
@@ -1106,21 +1106,21 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
               auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
               auto integral = 0.0;
               if (num_exec == 1) {
-                  integral = same_part_ham_single(idx_part, det_idx, jdet_idx);
+                integral = same_part_ham_single(idx_part, det_idx, jdet_idx);
               } else {
-                  integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
+                integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
               }
-              if(integral != 0.0){
-              auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-              for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                //auto integral = Slater_Condon(folded_idet_idx, folded_jdet_idx);
-                // std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << folded_idet_idx << " " << folded_jdet_idx << " " << integral << std::endl;
-                threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                // if (folded_idet_idx != folded_jdet_idx)
-                //{
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
-                //}
-              }
+              if (integral != 0.0) {
+                auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+                for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
+                  // auto integral = Slater_Condon(folded_idet_idx, folded_jdet_idx);
+                  //  std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << folded_idet_idx << " " << folded_jdet_idx << " " << integral << std::endl;
+                  threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                  // if (folded_idet_idx != folded_jdet_idx)
+                  //{
+                  threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
+                  //}
+                }
               }
             }
           }
@@ -1158,44 +1158,43 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
     threads_sigma_contributions[i].resize(this->rows(), C.cols());
     threads_sigma_contributions[i].setZero();
   }
-  std::cout << "NTHREADS = " << nthreads << std::endl;
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++) {
-      std::vector<int> a_excitation_list;
-      this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, a_excitation_list);
-      std::sort(a_excitation_list.begin(), a_excitation_list.end());
-      a_excitation_list.erase(std::remove_if(a_excitation_list.begin(), a_excitation_list.end(), [&idx_I_A_det](int x){return x < idx_I_A_det;}), a_excitation_list.end());
-      auto a_excitation_list_count = 0;
-      for (auto idx_J_A_det : a_excitation_list) {
-        a_excitation_list_count++;
-      // replace this with for (idx_J_A_det in single_excitation(idx_I_A_det))
-      //for (auto idx_J_A_det = idx_I_A_det; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++) {
-        // auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
-        // if (num_exec != 1) {
-        //   continue;
-        // }
-        for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++) {
-          std::vector<int> det_idx(2);
-          det_idx[first_spin_idx] = idx_I_A_det;
-          det_idx[second_spin_idx] = idx_I_B_det;
-          if (this->dets.find(det_idx) != this->dets.end()) {
+      for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++) {
+        if ((idx_I_A_det + idx_I_B_det) % nthreads != thread_id)
+          continue;
+        std::vector<int> det_idx(2);
+        det_idx[first_spin_idx] = idx_I_A_det;
+        det_idx[second_spin_idx] = idx_I_B_det;
+        if (this->dets.find(det_idx) != this->dets.end()) {
+          std::vector<int> a_excitation_list;
+          this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, a_excitation_list);
+          std::sort(a_excitation_list.begin(), a_excitation_list.end());
+          a_excitation_list.erase(std::remove_if(a_excitation_list.begin(), a_excitation_list.end(), [&idx_I_A_det](int x) { return x < idx_I_A_det; }), a_excitation_list.end());
+          auto a_excitation_list_count = 0;
+          for (auto idx_J_A_det : a_excitation_list) {
+            a_excitation_list_count++;
+            // replace this with for (idx_J_A_det in single_excitation(idx_I_A_det))
+            // for (auto idx_J_A_det = idx_I_A_det; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++) {
+            // auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
+            // if (num_exec != 1) {
+            //   continue;
+            // }
             auto folded_det_idx = this->dets.find(det_idx)->second;
             // replace this with for (idx_J_B_det in single_excitation(idx_I_B_det))
             // for (auto idx_J_B_det = idx_I_B_det; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
-            //for (auto idx_J_B_det = 0; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
+            // for (auto idx_J_B_det = 0; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
             std::vector<int> b_excitation_list;
             this->get_unique_excitation_list_of_indices(idx_part, second_spin_idx, idx_I_B_det, 1, b_excitation_list);
             std::sort(b_excitation_list.begin(), b_excitation_list.end());
-            //b_excitation_list.erase(std::remove_if(b_excitation_list.begin(), b_excitation_list.end(), [&idx_I_B_det](int x){return x < idx_I_B_det;}), b_excitation_list.end());
+            // b_excitation_list.erase(std::remove_if(b_excitation_list.begin(), b_excitation_list.end(), [&idx_I_B_det](int x){return x < idx_I_B_det;}), b_excitation_list.end());
             auto b_excitation_list_count = 0;
             for (auto idx_J_B_det : b_excitation_list) {
               b_excitation_list_count++;
 
-              if ((idx_I_A_det + idx_I_B_det + a_excitation_list_count + b_excitation_list_count) % nthreads != thread_id)
-                continue;
               // auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][second_spin_idx][idx_I_B_det], this->unique_dets[idx_part][second_spin_idx][idx_J_B_det]);
               // if (num_exec != 1) {
               //   continue;
@@ -1206,16 +1205,16 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
               jdet_idx[second_spin_idx] = idx_J_B_det;
               if (this->dets.find(jdet_idx) != this->dets.end()) {
                 auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-                //auto integral = Slater_Condon(folded_det_idx, folded_jdet_idx);
+                // auto integral = Slater_Condon(folded_det_idx, folded_jdet_idx);
                 auto integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
-                if (integral != 0.0){
-                for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                  // std::cout << folded_det_idx << "         " << folded_jdet_idx << "           "  <<  idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << idx_J_B_det << " " <<
-                  // integral
-                  // << " " << C(folded_jdet_idx, state_idx)<< std::endl;
-                  threads_sigma_contributions[thread_id](folded_det_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                  threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_det_idx, state_idx);
-                }
+                if (integral != 0.0) {
+                  for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
+                    // std::cout << folded_det_idx << "         " << folded_jdet_idx << "           "  <<  idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << idx_J_B_det << " " <<
+                    // integral
+                    // << " " << C(folded_jdet_idx, state_idx)<< std::endl;
+                    threads_sigma_contributions[thread_id](folded_det_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                    threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_det_idx, state_idx);
+                  }
                 }
               }
               // instead of JB starting at 0 we could do swaps IAJB JAIB
@@ -1322,7 +1321,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
             det_idx[2 * other_idx_part + second_spin_idx] = idx_I_D_det;
             if (this->dets.find(det_idx) != this->dets.end()) {
               auto folded_idet_idx = this->dets.find(det_idx)->second;
-              //auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
+              // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
               auto integral = diagonal_Hii[folded_idet_idx];
               for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
                 // std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_I_C_det << " " << idx_I_D_det << " "<< folded_idet_idx << " " << integral << std::endl;
