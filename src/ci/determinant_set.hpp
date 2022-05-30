@@ -1009,6 +1009,9 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 template <typename T>
 void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                                                   const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
+
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = 1 - idx_spin;
 
@@ -1051,6 +1054,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
 template <typename T>
 void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                                                    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const {
+
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   auto first_spin_idx = idx_spin;
   // auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
   auto second_spin_idx = 1 - idx_spin;
@@ -1109,6 +1115,9 @@ template <typename T>
 void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                                                    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin, int other_idx_part,
                                                                    int other_idx_spin) const {
+
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
 
   if (idx_part != other_idx_part && idx_part != 0) {
     APP_ABORT("sigma_one_species_class_two_contribution called with mismatching particle types and/or not particle 0.");
