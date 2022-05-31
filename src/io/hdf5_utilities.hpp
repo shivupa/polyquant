@@ -1,6 +1,5 @@
 #ifndef POLYQUANT_INPUT_HDF5_H
 #define POLYQUANT_INPUT_HDF5_H
-#include "io/lfu_cache.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include <Eigen/Dense>
@@ -28,6 +27,7 @@ namespace polyquant {
 class POLYQUANT_HDF5 {
 public:
   POLYQUANT_HDF5() = default;
+  ~POLYQUANT_HDF5() { hdf5_file.close(); }
   /**
    * @brief Construct a HDF5 object using the create_file function.
    *

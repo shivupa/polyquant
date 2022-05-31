@@ -1,7 +1,6 @@
 #ifndef POLYQUANT_INTEGRAL_H
 #define POLYQUANT_INTEGRAL_H
 #include "basis/basis.hpp"
-#include "io/lfu_cache.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
@@ -36,8 +35,6 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule);
   ~POLYQUANT_INTEGRAL();
-  void construct_ijcache(size_t size_in_gb = 10000);
-  void construct_ericache(size_t size_in_gb = 10000);
 
   void calculate_overlap();
   void calculate_Schwarz();
@@ -71,14 +68,8 @@ public:
   template <typename T> const T idx2(const T &i, const T &j) const {
     std::pair<T, T> ij_idx;
     ij_idx = std::make_pair(i, j);
-    auto cached_ij_elem = this->ijcache.get(ij_idx);
-    if (cached_ij_elem.has_value()) {
-      return cached_ij_elem.value();
-    } else {
-      auto ij_elem = symmetric_matrix_triangular_idx(i, j);
-      this->ijcache.set(ij_idx, ij_elem);
-      return ij_elem;
-    }
+    auto ij_elem = symmetric_matrix_triangular_idx(i, j);
+    return ij_elem;
   }
   /**
    * @brief Calculate the combined index for the vector containing the unique
@@ -206,10 +197,6 @@ public:
                                                                                       std::vector<int> frozen_core, std::vector<int> deleted_virtual);
   void calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core, std::vector<int> deleted_virtual);
   bool verbose = false;
-  size_t ijcache_size;
-  size_t ericache_size;
-  mutable polyquant_lfu_cache<std::pair<int, int>, int, PairHash<int>> ijcache;
-  mutable polyquant_lfu_cache<std::pair<std::vector<size_t>, std::vector<size_t>>, double, PairVectorHash<size_t>> ericache;
   /**
    * @brief the input parameters
    *
@@ -1038,7 +1025,6 @@ public:
       0.512, 1.0,   2.0,   3.0,   4.0,   5.0,   6.0,   7.0,   8.0,
       9.0,   10.0,  20.0,  30.0,  40.0,  50.0,  100.0, 250.0};
   */
-  mutable omp_lock_t writelock;
 };
 } // namespace polyquant
 #endif

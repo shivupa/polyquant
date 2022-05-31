@@ -1,4 +1,4 @@
-name: Polyquant CMake Build
+name: Polyquant clang-format check
 on:
   push:
     branches: [main]

@@ -7,9 +7,10 @@ cmake \
     -DPOLYQUANT_DOC=0 \
     -DPOLYQUANT_TEST=1 \
     -DPOLYQUANT_CODE_COVERAGE=0 \
-    -DCMAKE_C_COMPILER=gcc \
-    -DCMAKE_CXX_COMPILER=g++ \
-    -DCMAKE_BUILD_TYPE="Debug" \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_BUILD_TYPE="Release" \
+    -DBLIS_INCLUDE_DIR=/opt/aocl-aocc \
     -G Ninja \
     ..
 #ninja Sphinx

@@ -7,7 +7,7 @@ include(FetchContent)
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
 set(POLYQUANT_VERSION_MINOR 5)
-set(POLYQUANT_VERSION_PATCH 1)
+set(POLYQUANT_VERSION_PATCH 2)
 set(POLYQUANT_VERSION "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
@@ -153,7 +153,7 @@ find_package(OpenMP REQUIRED)
 ########################################
 # LinAlg
 # set this list to prioritize a BLAS type
-# set( LinAlg_BLAS_PREFERENCE_LIST "IntelMKL" "IBMESSL" "BLIS" "OpenBLAS" "ReferenceBLAS" )
+set( LinAlg_BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
 find_package(LinAlg REQUIRED)
 ########################################
 # Spectra for sparse math
