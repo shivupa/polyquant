@@ -452,28 +452,23 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
                                               libint2::Operator obtype) {
   // Following the HF test in the Libint2 repo
   // construct the overlap integrals engine
+  auto nthreads = omp_get_max_threads();
+  std::vector<libint2::Engine> engines;
+  std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
+  Polyquant_cout(message);
+  engines.resize(nthreads);
+  engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
+  engines[0].set_precision(0.0);
+  if (nthreads > 1) {
+    Polyquant_cout("Making more engines for each thread");
+  }
+  for (auto i = 1ul; i < nthreads; i++) {
+    engines[i] = engines[0];
+  }
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
-
-    std::vector<libint2::Engine> engines;
-    if (thread_id == 0) {
-      std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
-      Polyquant_cout(message);
-    }
-    engines.resize(nthreads);
-    engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
-    engines[0].set_precision(0.0);
-    if (nthreads > 1) {
-      if (thread_id == 0) {
-        Polyquant_cout("Making more engines for each thread");
-      }
-      for (auto i = 1ul; i < nthreads; i++) {
-        engines[i] = engines[0];
-      }
-    }
-
     const auto &buf = engines[thread_id].results();
     for (auto s1 = 0l, s12 = 0l; s1 != shells_a.size(); ++s1) {
       auto n1 = shells_a[s1].size();
