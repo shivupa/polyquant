@@ -173,6 +173,34 @@ void POLYQUANT_BASIS::apply_pyscf_normalization() {
       for (auto p = 0ul; p < shell.alpha.size(); ++p) {
         shell.contr[0].coeff.at(p) /= libint_norm(l, shell.alpha[p]);
       }
+      // apply pyscf gtonorm
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        shell.contr[0].coeff.at(p) *= gtonorm_lambda(l, shell.alpha[p]);
+      }
+      // apply pyscf _nomalize_contracted_ao
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ee;
+      ee.setZero(shell.alpha.size(), shell.alpha.size());
+      for (auto i = 0ul; i < shell.alpha.size(); ++i) {
+        for (auto j = 0ul; j < shell.alpha.size(); ++j) {
+          auto n1 = l * 2 + 2;
+          auto alpha = shell.alpha[i] + shell.alpha[j];
+          ee(i, j) = gaussianint_lambda(l * 2 + 2, alpha);
+        }
+      }
+      double s1 = 0.0;
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        for (auto q = 0ul; q < shell.alpha.size(); ++q) {
+          s1 += shell.contr[0].coeff.at(p) * ee(p, q) * shell.contr[0].coeff.at(q);
+        }
+      }
+      s1 = 1.0 / std::sqrt(s1);
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        shell.contr[0].coeff.at(p) *= s1;
+      }
+      // remove pyscf gtonorm
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        shell.contr[0].coeff.at(p) /= gtonorm_lambda(l, shell.alpha[p]);
+      }
     }
   }
   for (auto &quantum_particle_basis : this->basis) {
