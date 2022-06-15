@@ -1,0 +1,4 @@
+                            LocalEnergy               Variance           ratio 
+PsH  series 0  -0.666092 +/- 0.001578   0.249314 +/- 0.018325   0.3743 
+SCF SUCCESS
+-0.66604241245981032904

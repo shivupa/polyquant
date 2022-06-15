@@ -17,11 +17,11 @@ r = np.linspace(min_r, max_r, len(gofr_e_p))
 fig, ax = plt.subplots(1,3)
 fig.set_size_inches(9,3)
 ax[0].plot(r, gofr_eup_p)
-ax[0].set_title = r"$g(r)_{e\uparrow p}$"
+ax[0].set_title(r"$g(r)_{e\uparrow p}$")
 ax[1].plot(r, gofr_edn_p)
-ax[1].set_title = r"$g(r)_{e\downarrow p}$"
+ax[1].set_title(r"$g(r)_{e\downarrow p}$")
 ax[2].plot(r, gofr_e_p)
-ax[2].set_title = r"$g(r)_{e\uparrow\downarrow p}$"
+ax[2].set_title(r"$g(r)_{e\updownarrows p}$")
 print(gofr_e_p[0])
 fig.set_tight_layout(True)
 plt.savefig("gofr.eps")

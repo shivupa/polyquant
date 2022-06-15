@@ -1,36 +1,26 @@
 <?xml version="1.0"?>
 <qmcsystem>
-  <wavefunction name="psi0" target="e">
-      <sposet_collection name="PositronOrbital" type="MolecularOrbital" source="ion0" cuspCorrection="yes" href="positron_H_wpos.h5">
+    <wavefunction name="psi0" target="e">
+        <sposet_collection name="PositronOrbital" type="MolecularOrbital" source="ion0" cuspCorrection="no" href="../positron_H_wpos.h5">
             <basisset name="LCAOBSet_positron" transform="yes" > </basisset>
-            <sposet name="spo2" basisset="LCAOBSet_positron" size="1" >
+            <sposet name="spo2" basisset="LCAOBSet_positron" size="5" >
               <occupation mode="ground" />
-              <coefficient size="1" id="updetC" spindataset="0">
-                1.00000000000000e+00
-              </coefficient>
+              <coefficient size="5" spindataset="0" />
             </sposet>
       </sposet_collection> 
-      <sposet_collection name="ElectronOrbital" type="MolecularOrbital" source="ion0" cuspCorrection="yes" href="electron_H_wpos.h5">
+      <sposet_collection name="ElectronOrbital" type="MolecularOrbital" source="ion0" cuspCorrection="no" href="../electron_H_wpos.h5">
             <basisset name="LCAOBSet_electron" transform="yes"> </basisset>
-            <sposet name="spo0" basisset="LCAOBSet_electron" size="1" >
+            <sposet name="spo0" basisset="LCAOBSet_electron" size="5" >
               <occupation mode="ground" />
-              <coefficient size="1" id="updetC" spindataset="0">
-                1.00000000000000e+00
-              </coefficient>
-            </sposet>
-            <sposet name="spo1" basisset="LCAOBSet_electron" size="1" >
-              <occupation mode="ground" />
-              <coefficient size="1" id="downdetC" spindataset="0" >
-                1.00000000000000e+00
-              </coefficient>
+              <coefficient size="5" spindataset="0" />
             </sposet>
       </sposet_collection> 
       <determinantset>
-        <multideterminant optimize="no" spo_0="spo0" spo_1="spo1" spo_2="spo2"> 
-          <detlist size="125" type="DETS" cutoff="1e-20" href="Multidet_H_wpos.h5"/> 
+        <multideterminant optimize="no" spo_0="spo0" spo_1="spo0" spo_2="spo2" > 
+            <detlist size="125" type="DETS" cutoff="1e-20" href="../Multidet_H_wpos.h5"/> 
         </multideterminant> 
       </determinantset>
-  <!--
+<!--
   <jastrow name="J1" type="One-Body" function="pade" source="ion0" Spin="yes" print="yes">
       <correlation speciesA="H" speciesB="ue"> 
           <var id="jH_ue" name="B">3.7813696418e-01</var> 
