@@ -158,7 +158,36 @@ void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iter
 
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
 
-void POLYQUANT_EPCI::print_success() { Polyquant_cout("CI SUCCESS"); }
+void POLYQUANT_EPCI::print_success() { 
+    Polyquant_cout("CI SUCCESS"); 
+    std::stringstream divider;
+    for (auto a =0; a < 80; a++)
+        divider << "*";
+    divider << std::endl;
+
+    for (auto state_idx = 0; state_idx < this->num_states; state_idx++){
+      Polyquant_cout(divider.str());
+      std::string line;
+      line += fmt::format("State {} Energy {}\n", state_idx, this->energies[state_idx]);
+      Polyquant_cout(line);
+      line = "";
+      line += fmt::format("{: ^10}{:^30}{: ^10}{:^20}{: ^10}\n","","Det idx","","C","");
+      line += fmt::format("{: ^10}{:-^30}{: ^10}{:-^20}{: ^10}","","","","","");
+      Polyquant_cout(line);
+      for (auto i = 0; i < this->detset.N_dets; i++){
+          line = "";
+          std::stringstream unfold_string;
+          auto i_unfold = this->detset.det_idx_unfold(i);
+          for (auto unfold_idx : i_unfold){
+            unfold_string << unfold_idx;
+            unfold_string << " ";
+          }
+          line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}","",unfold_string.str(),"",this->C_ci(i, state_idx),"");
+          Polyquant_cout(line);
+      }
+    }
+    Polyquant_cout("");
+}
 
 void POLYQUANT_EPCI::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
 
@@ -190,12 +219,12 @@ void POLYQUANT_EPCI::run() {
   Eigen::Index maxit = this->iteration_max;
   int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
   if (solver.info() == Spectra::CompInfo::Successful) {
-    this->print_success();
     this->energies = solver.eigenvalues();
     this->C_ci = solver.eigenvectors();
     for (auto e = 0; e < this->energies.size(); e++) {
       this->energies[e] += constant_shift;
     }
+    this->print_success();
   } else {
     APP_ABORT("CI Calculation did not converge!");
   }
