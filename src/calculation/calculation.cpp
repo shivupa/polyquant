@@ -93,6 +93,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
 
   scf_calc.setup_calculation(this->input_params, this->input_molecule, this->input_basis, this->input_integral);
   bool dump_for_qmcpack = false;
+  bool skip_scf = false;
   std::string hdf5_filename = "Default.h5";
 
   if (this->input_params.input_data.contains("verbose")) {
@@ -145,10 +146,16 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
         scf_calc.Cauchy_Schwarz_threshold = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_threshold"];
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("force_independent_converged")) {
+        scf_calc.independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["force_independent_converged"];
+      }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]) {
           dump_for_qmcpack = true;
           mean_field_type = "FILE";
+          if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file_skipiterations")) {
+            skip_scf = this->input_params.input_data["keywords"]["mf_keywords"]["from_file_skipiterations"];
+          }
         } else {
           dump_for_qmcpack = true;
           mean_field_type = "SCF";
@@ -162,9 +169,13 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     }
   }
   if (mean_field_type == "SCF") {
+    scf_calc.setup_standard();
     scf_calc.run();
   } else if (mean_field_type == "FILE") {
-    scf_calc.from_file(hdf5_filename);
+    scf_calc.setup_from_file(hdf5_filename);
+    if (!skip_scf) {
+      scf_calc.run();
+    }
   }
   if (dump_for_qmcpack) {
     dump_mf_for_qmcpack(hdf5_filename);

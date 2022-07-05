@@ -3,6 +3,7 @@
 #include "io/molden_utilities.hpp"
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
+#include <filesystem>
 #include <h5cpp/hdf5.hpp>
 #include <libint2.hpp> // IWYU pragma: keep
 #include <libint2/chemistry/sto3g_atomic_density.h>
@@ -56,6 +57,8 @@ public:
   void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
                       const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part);
 
+  void form_scf_occ(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ);
+
   void calculate_E_elec() override;
 
   void calculate_E_total() override;
@@ -70,6 +73,10 @@ public:
 
   void guess_DM() override;
 
+  void setup_standard();
+
+  void calculate_integrals();
+
   void run() override;
 
   void print_start_iterations();
@@ -82,7 +89,7 @@ public:
 
   void print_error();
 
-  void from_file(std::string &filename);
+  void setup_from_file(std::string &filename);
 
   void print_params();
 

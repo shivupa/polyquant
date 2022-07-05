@@ -314,7 +314,7 @@ void POLYQUANT_EPSCF::form_fock() {
   // compute energy with non-extrapolated Fock matrix
   this->calculate_E_elec();
   //
-  if (this->iteration_num == 1 && verbose == true) {
+  if (verbose == true) {
     quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
       Polyquant_cout("Dumping Fock Matrix");
@@ -430,7 +430,7 @@ void POLYQUANT_EPSCF::form_DM() {
     }
     quantum_part_idx++;
   }
-  if (this->iteration_num >= 1 && verbose == true) {
+  if (verbose == true) {
     auto quantum_part_a_idx = 0;
     for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
       Polyquant_cout("Dumping 1pDM Matrix");
@@ -696,10 +696,7 @@ void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("E(particles) : " + std::to_string(E_parts));
 }
 
-void POLYQUANT_EPSCF::print_success() {
-  Polyquant_cout("SCF SUCCESS");
-  Polyquant_cout(this->E_total);
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
+void POLYQUANT_EPSCF::form_scf_occ(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ) {
   occ.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
@@ -724,6 +721,13 @@ void POLYQUANT_EPSCF::print_success() {
     }
     quantum_part_idx++;
   }
+}
+
+void POLYQUANT_EPSCF::print_success() {
+  Polyquant_cout("SCF SUCCESS");
+  Polyquant_cout(this->E_total);
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
+  form_scf_occ(occ);
   dump_orbitals(this->C, this->E_orbitals, occ);
 }
 
@@ -787,11 +791,9 @@ void POLYQUANT_EPSCF::dump_molden() {
   }
 }
 
-void POLYQUANT_EPSCF::run() {
+void POLYQUANT_EPSCF::calculate_integrals() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  this->print_start_iterations();
-  this->print_params();
   // calculate integrals we need
   this->input_integral.calculate_overlap();
   this->input_integral.symmetric_orthogonalization();
@@ -802,9 +804,20 @@ void POLYQUANT_EPSCF::run() {
   if (this->Cauchy_Schwarz_screening) {
     this->input_integral.calculate_Schwarz();
   }
+}
+void POLYQUANT_EPSCF::setup_standard() {
+  this->print_start_iterations();
+  this->print_params();
+  this->calculate_integrals();
+
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
+}
+
+void POLYQUANT_EPSCF::run() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   while (!this->stop) {
     this->run_iteration();
     this->print_iteration();
@@ -821,30 +834,32 @@ void POLYQUANT_EPSCF::run() {
   }
 }
 
-void POLYQUANT_EPSCF::from_file(std::string &filename) {
+void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  this->print_start_iterations();
   this->print_params();
-  // calculate integrals we need
-  this->input_integral.calculate_overlap();
-  this->input_integral.symmetric_orthogonalization();
-  this->input_integral.calculate_kinetic();
-  this->input_integral.calculate_nuclear();
-  // this->input_integral.calculate_two_electron();
+  this->calculate_integrals();
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
-  hdf5::file::File hdf5_file = hdf5::file::open(filename, hdf5::file::AccessFlags::READONLY);
-  auto root_group = hdf5_file.root();
-  Polyquant_cout("Reading coefficients from file : " + filename);
-  if (!root_group.exists("Super_Twist")) {
-    APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
-  }
-  auto Super_Twist_group = root_group.get_group("Super_Twist");
-
-  auto idx = 0;
+  // write over the current dm
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    auto idx = 0;
+    std::filesystem::path path(filename);
+    std::string dir = path.parent_path().string();
+    std::string file = path.filename().string();
+    std::string file_to_load = dir + quantum_part_key + "_" + file;
+
+    hdf5::file::File hdf5_file = hdf5::file::open(file_to_load, hdf5::file::AccessFlags::READONLY);
+    auto root_group = hdf5_file.root();
+    Polyquant_cout("Reading coefficients from file : " + file_to_load);
+    if (!root_group.exists("Super_Twist")) {
+      APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
+    }
+    auto Super_Twist_group = root_group.get_group("Super_Twist");
+
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     auto Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
     hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
@@ -879,6 +894,11 @@ void POLYQUANT_EPSCF::from_file(std::string &filename) {
   this->form_DM();
   Polyquant_cout("Running a single SCF iteration");
   this->run_iteration();
+  this->print_iteration();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
+  Polyquant_cout("Orbitals from file");
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
+  form_scf_occ(occ);
+  dump_orbitals(this->C, this->E_orbitals, occ);
 }
