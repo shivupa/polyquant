@@ -12,19 +12,21 @@ TEST_SUITE("CALCULATION") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/h2_anor0EMSL/h2.json");
     test_calc.run();
+    // Verified using pyscf
+    // Tue Jul  5 11:02:08 AM EDT 2022
     CHECK(test_calc.scf_calc.converged == true);
     CHECK(test_calc.scf_calc.independent_converged == true);
     CHECK(test_calc.scf_calc.exceeded_iterations == false);
     CHECK(test_calc.scf_calc.E_particles[0] ==doctest::Approx(-1.5791914276).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-0.5870915714).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][1](0) ==doctest::Approx(-0.5870915714).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.1461257697).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][1](0, 0)) ==doctest::Approx(0.1461257697).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-6.757001547).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][1](0, 0) ==doctest::Approx(-6.757001547).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0213527406).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][1](0, 0) ==doctest::Approx(0.0213527406).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-12.1271698441).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][0](0, 0) ==doctest::Approx(0.51800237).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][1](0, 0) ==doctest::Approx(0.51800237).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-0.5377051).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][1](0, 0) ==doctest::Approx(-0.5377051).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.26832645).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][1](0, 0) ==doctest::Approx(0.26832645).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-0.96504951).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total ==doctest::Approx(-0.8654374339).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
@@ -32,34 +34,38 @@ TEST_SUITE("CALCULATION") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary/h2o.json");
     test_calc.run();
+    // Verified using pyscf
+    // Tue Jul  5 11:16:05 AM EDT 2022
     CHECK(test_calc.scf_calc.converged == true);
     CHECK(test_calc.scf_calc.independent_converged == true);
     CHECK(test_calc.scf_calc.exceeded_iterations == false);
     CHECK(test_calc.scf_calc.E_particles[0] ==doctest::Approx(-84.1577900311).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-20.2417374167).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][1](0) ==doctest::Approx(-20.2417374167).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.0016846621).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][1](0, 0)) ==doctest::Approx(0.0016846621).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-7.2719670401).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][1](0, 0) ==doctest::Approx(-7.2719620734).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0239084665).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][1](0, 0) ==doctest::Approx(0.0239084665).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-63.7952159349).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][0](0, 0) ==doctest::Approx(-5.97197546e-03).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][1](0, 0) ==doctest::Approx(-5.97197546e-03).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][1](0, 0) ==doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][1](0, 0) ==doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-5.07666209).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total ==doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
-  TEST_CASE("CALCULATION: H2O/sto-3g(file) SCF.") {
+  TEST_CASE("CALCULATION: H2O/sto-3g(basis from file) SCF.") {
     POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3gfile/h2o.json");
     test_calc.run();
+    // Verified using pyscf
+    // Tue Jul  5 11:16:25 AM EDT 2022
     CHECK(test_calc.scf_calc.converged == true);
     CHECK(test_calc.scf_calc.independent_converged == true);
     CHECK(test_calc.scf_calc.exceeded_iterations == false);
     CHECK(test_calc.scf_calc.E_particles[0] ==doctest::Approx(-84.1577900311).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-20.2417374167).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.0016846621).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-7.2719620734).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0239084665).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-63.7952013522).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][0](0, 0) ==doctest::Approx(-5.97197546e-03).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-5.07666209).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total ==doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
@@ -71,20 +77,20 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.exceeded_iterations == false);
     CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(3.0365625787).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-6.7850710986).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.0108559101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-54.215088101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0001178508).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(63.0329825588).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][0](0, 0) ==doctest::Approx(-0.0384832).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-4.3143).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.00148096).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(5.01601).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0016888836).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.275190008).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0005147619).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[1][0](0, 0) ==doctest::Approx(-0.00598694).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(0.181054).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.00646869).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-3.50184).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
-  TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF file basis.") {
+  TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF (basis from file).") {
     POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumHfile/h2o.json");
     test_calc.run();
     CHECK(test_calc.scf_calc.converged == true);
@@ -92,16 +98,16 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.exceeded_iterations == false);
     CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(3.0365625787).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-6.7850710986).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.0108559101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-54.215088101).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0001178508).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(63.0329825588).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][0](0, 0) ==doctest::Approx(-0.0384832).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-4.3143).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.00148096).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(5.01601).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0016888836).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(2.2751900085).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0005147619).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-44.0054532844).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[1][0](0, 0) ==doctest::Approx(-0.00598694).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(0.181054).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.00646869).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(-3.50184).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
@@ -113,16 +119,16 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.exceeded_iterations == false);
     CHECK(test_calc.scf_calc.E_particles[0] ==doctest::Approx(-7.7455067859).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[0][0](0) ==doctest::Approx(-2.417238715).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[0][0](0, 0)) ==doctest::Approx(0.1966873521).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-26.7731982011).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.0393589).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-55.4965821304).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[0][0](0, 0) ==doctest::Approx(0.697239).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) ==doctest::Approx(-2.1305440797).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D[0][0](0, 0) ==doctest::Approx(0.494599).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[0](0, 0) ==doctest::Approx(-4.41628).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_particles[1] ==doctest::Approx(0.2197833078).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals[1][0](0) ==doctest::Approx(-0.1098592288).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.C[1][0](0, 0)) ==doctest::Approx(0.0001239862).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(144.5306083531).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.C[1][0](0, 0) ==doctest::Approx(0.000439523).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) ==doctest::Approx(11.5013794256).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.D[1][0](0, 0) ==doctest::Approx(0.0000000154).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(196.0729238353).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.H_core[1](0, 0) ==doctest::Approx(15.603).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total ==doctest::Approx(-7.5257234633).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {

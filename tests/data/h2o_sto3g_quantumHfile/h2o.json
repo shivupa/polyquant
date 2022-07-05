@@ -1,11 +1,15 @@
 {
+  "schema_name": "qc_schema_input", 
+  "schema_version": 1,
   "molecule": {
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
     "geometry": [
+        0.0000000, 0.0000000,  0.0000000,
         0.7569685, 0.0000000, -0.5858752,
-       -0.7569685, 0.0000000, -0.5858752,
-        0.0000000, 0.0000000,  0.0000000
+       -0.7569685, 0.0000000, -0.5858752
     ],
-    "symbols": ["H", "H", "O"],
+    "symbols": ["O", "H", "H"],
     "molecular_charge": 0,
     "molecular_multiplicity": 1
   },
@@ -13,16 +17,26 @@
   "model": {
     "method": "scf",
     "basis": 
-    { "electron" :{"H" : [{ "library" : {"type" : "sto-3g"} }],
-                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]},
-    "H" :{"H" : [{ "library" : {"type" : "sto-3g"} }],
-                   "O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }]}
+    { "electron" :
+        {"H" : [{ "custom" : 
+                {"type" : "file",
+                 "filename" : "../../tests/data/h2o_sto3gfile/H_basis.g94"}}],
+        "O" : [{ "custom" : 
+                {"type" : "file",
+                 "filename" : "../../tests/data/h2o_sto3gfile/O_basis.g94"}}]},
+        "H" :
+        {"H" : [{ "custom" : 
+                {"type" : "file",
+                 "filename" : "../../tests/data/h2o_sto3gfile/H_basis.g94"}}],
+        "O" : [{ "custom" : 
+                {"type" : "file",
+                 "filename" : "../../tests/data/h2o_sto3gfile/O_basis.g94"}}]}
+
     }
   },
   "keywords": {
     "restricted" : false,
-    "quantum_nuclei" : [1,1,0],
-    "pure" : true
+    "quantum_nuclei" : [0,1,1,0]
   }
 }
 
