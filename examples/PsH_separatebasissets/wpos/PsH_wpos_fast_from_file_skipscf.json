@@ -43,7 +43,7 @@
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
         "from_file" : true,
-        "from_file_skipiterations" : false,
+        "from_file_skipiterations" : true,
         "force_independent_converged" : true,
         "incremental_fock" : true,
         "Cauchy_Schwarz_screening" : true

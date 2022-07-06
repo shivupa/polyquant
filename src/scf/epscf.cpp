@@ -526,20 +526,22 @@ void POLYQUANT_EPSCF::check_stop() {
     Polyquant_cout(buffer.str());
   }
   if (!this->independent_converged && this->converged && this->stop) {
-    Polyquant_cout("Independent densities converged. Turning on interactions.");
+    Polyquant_cout("Independent densities converged.");
     if (this->stop_after_independent_converged) {
+      Polyquant_cout("Stopping since 'stop_after_independent_converged' was requested.");
       this->stop = true;
     } else {
+      Polyquant_cout("Turning on interactions.");
       this->converged = false;
       this->stop = false;
+      // reset DIIS since we now have interactions so extrapolating with
+      // noninteracting
+      Polyquant_cout("Resetting DIIS and incremental fock building.");
+      this->reset_diis();
+      this->reset_incfock();
     }
     this->independent_converged = true;
     this->independent_converged_iteration_num = this->iteration_num;
-    // reset DIIS since we now have interactions so extrapolating with
-    // noninteracting
-    Polyquant_cout("Resetting DIIS and incremental fock building.");
-    this->reset_diis();
-    this->reset_incfock();
   }
   if (this->iteration_num == this->iteration_max) {
     this->exceeded_iterations = true;
