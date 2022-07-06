@@ -50,6 +50,9 @@ public:
 
   void form_fock() override;
 
+  void diag_fock_helper(int quantum_part_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &F_prime, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_C,
+                        Eigen::Matrix<double, Eigen::Dynamic, 1> &mo_e);
+
   void diag_fock() override;
 
   void form_DM() override;
@@ -171,6 +174,7 @@ public:
    */
   bool converged = false;
   bool independent_converged = false;
+  bool stop_after_independent_converged = false;
   int independent_converged_iteration_num = -1;
 
   bool diis_extrapolation = true;

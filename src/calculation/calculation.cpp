@@ -149,6 +149,9 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("force_independent_converged")) {
         scf_calc.independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["force_independent_converged"];
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("stop_after_independent_converged")) {
+        scf_calc.stop_after_independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["stop_after_independent_converged"];
+      }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]) {
           dump_for_qmcpack = true;
