@@ -690,7 +690,7 @@ void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("E(particles) : " + std::to_string(E_parts));
 }
 
-void POLYQUANT_EPSCF::form_scf_occ(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ) {
+void POLYQUANT_EPSCF::form_scf_occ() {
   occ.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
@@ -700,17 +700,17 @@ void POLYQUANT_EPSCF::form_scf_occ(std::vector<std::vector<Eigen::Matrix<double,
       occ[quantum_part_idx][0].setZero(num_mo);
       occ[quantum_part_idx][1].setZero(num_mo);
       for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
-        occ[quantum_part_idx][0](i) = 1.0;
+        occ[quantum_part_idx][0].diagonal()(i) = 1.0;
       }
       for (auto i = 0; i < quantum_part.num_parts_beta; i++) {
-        occ[quantum_part_idx][1](i) = 1.0;
+        occ[quantum_part_idx][1].diagonal()(i) = 1.0;
       }
     } else {
       occ[quantum_part_idx].resize(1);
       occ[quantum_part_idx][0].setZero(num_mo);
       auto occval = (quantum_part.num_parts == 1) ? 1.0 : 2.0;
       for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
-        occ[quantum_part_idx][0](i) = occval;
+        occ[quantum_part_idx][0].diagonal()(i) = occval;
       }
     }
     quantum_part_idx++;
@@ -720,9 +720,8 @@ void POLYQUANT_EPSCF::form_scf_occ(std::vector<std::vector<Eigen::Matrix<double,
 void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
-  form_scf_occ(occ);
-  dump_orbitals(this->C, this->E_orbitals, occ);
+  form_scf_occ();
+  dump_orbitals(this->C, this->E_orbitals, this->occ);
 }
 
 void POLYQUANT_EPSCF::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
@@ -752,25 +751,18 @@ void POLYQUANT_EPSCF::print_params() {
 void POLYQUANT_EPSCF::dump_molden() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
     auto &MO_a_coeff = this->C[quantum_part_idx][0];
-    auto &MO_b_coeff = this->C[quantum_part_idx][0];
     auto &MO_a_energy = this->E_orbitals[quantum_part_idx][0];
-    auto &MO_b_energy = this->E_orbitals[quantum_part_idx][0];
-    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      MO_b_coeff = this->C[quantum_part_idx][1];
-      MO_b_energy = this->E_orbitals[quantum_part_idx][1];
-    }
+    auto &MO_a_occupation = this->occ[quantum_part_idx][0];
+    auto &MO_b_coeff = unique_beta ? this->C[quantum_part_idx][1] : this->C[quantum_part_idx][0];
+    auto &MO_b_energy = unique_beta ? this->E_orbitals[quantum_part_idx][1] : this->E_orbitals[quantum_part_idx][0];
+    auto &MO_b_occupation = unique_beta ? this->occ[quantum_part_idx][1] : this->occ[quantum_part_idx][0];
 
     std::vector<std::string> MO_a_symmetry_labels;
     MO_a_symmetry_labels.resize(MO_a_coeff.cols(), "A");
     std::vector<std::string> MO_b_symmetry_labels;
     MO_b_symmetry_labels.resize(MO_b_coeff.cols(), "A");
-    std::vector<double> MO_a_occupation;
-    MO_a_occupation.resize(MO_a_coeff.cols(), 0.0);
-    std::fill(MO_a_occupation.begin(), MO_a_occupation.begin() + quantum_part.num_parts_alpha, 1.0);
-    std::vector<double> MO_b_occupation;
-    MO_b_occupation.resize(MO_b_coeff.cols(), 0.0);
-    std::fill(MO_b_occupation.begin(), MO_b_occupation.begin() + quantum_part.num_parts_beta, 1.0);
     std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
     try {
       std::string filename = quantum_part_key + "_polyquant.molden";
@@ -892,7 +884,6 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
   Polyquant_cout("Orbitals from file");
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
-  form_scf_occ(occ);
-  dump_orbitals(this->C, this->E_orbitals, occ);
+  form_scf_occ();
+  dump_orbitals(this->C, this->E_orbitals, this->occ);
 }

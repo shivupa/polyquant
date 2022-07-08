@@ -60,7 +60,7 @@ public:
   void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
                       const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part);
 
-  void form_scf_occ(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ);
+  void form_scf_occ();
 
   void calculate_E_elec() override;
 
@@ -125,6 +125,8 @@ public:
    *
    */
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
+
+  std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> occ;
 
   /**
    * @brief MO energy vector

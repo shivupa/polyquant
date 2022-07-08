@@ -170,7 +170,7 @@ template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eig
 void Polyquant_dump_basis_to_file(const std::string &contents, const std::string &filename);
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ);
+                   std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> &occ);
 
 /**
  * @brief A hasher for a pair of vectors

@@ -50,16 +50,16 @@ public:
   std::ofstream molden_file;
   std::string filename;
   void dump(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy,
-            std::vector<std::string> &MO_a_symmetry_labels, std::vector<double> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff,
-            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels, std::vector<double> &MO_b_occupation);
+            std::vector<std::string> &MO_a_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff,
+            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_b_occupation);
 
 private:
   void dump_header();
   void dump_atoms(std::vector<libint2::Atom> &atoms);
   void dump_basis(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis);
   void dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels,
-                     std::vector<double> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy,
-                     std::vector<std::string> &MO_b_symmetry_labels, std::vector<double> &MO_b_occupation);
+                     Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff,
+                     Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_b_occupation);
   std::vector<long> ao_map;
   // void dump_generalparameters(bool complex_vals, bool ecp, bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha, int num_part_beta, int num_part_total, int multiplicity);
   // void dump_MOs(std::string quantum_part_name, int num_ao, int num_mo, std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> E_orb,
