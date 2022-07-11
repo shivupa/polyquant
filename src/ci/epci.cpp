@@ -55,7 +55,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       auto num_parts_alpha = this->frozen_core[quantum_part_idx];
       auto num_parts_beta = this->frozen_core[quantum_part_idx];
       Eigen::DiagonalMatrix<double, Eigen::Dynamic> occ;
-      occ.resize(num_parts_alpha);
+      occ.setZero(num_basis);
       this->input_epscf.form_occ_helper_aufbau(occ, num_parts_alpha, 1.0);
       this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], occ, num_basis, num_parts_alpha);
       if (verbose == true) {
@@ -63,7 +63,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       }
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         Eigen::DiagonalMatrix<double, Eigen::Dynamic> occ;
-        occ.resize(num_parts_beta);
+        occ.setZero(num_basis);
         this->input_epscf.form_occ_helper_aufbau(occ, num_parts_beta, 1.0);
         this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], occ, num_basis, num_parts_beta);
         if (verbose == true) {

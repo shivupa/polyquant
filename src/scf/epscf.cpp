@@ -441,7 +441,8 @@ void POLYQUANT_EPSCF::form_DM() {
 }
 
 void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &occ, int num_basis, int num_part) {
+                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &occ, const int num_basis,
+                                     const int num_part) {
   dm_last = dm;
   dm.setZero(num_basis, num_basis);
   dm.noalias() = coeff * occ * coeff.transpose();
