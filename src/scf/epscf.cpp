@@ -356,8 +356,9 @@ void POLYQUANT_EPSCF::diag_fock() {
 
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_basis, num_basis);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][0];
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator = this->F[quantum_part_idx][0] * this->D[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
-                                                                          this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][0] * this->F[quantum_part_idx][0];
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
+    FD_commutator.noalias() = this->F[quantum_part_idx][0] * this->D[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
+                              this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][0] * this->F[quantum_part_idx][0];
     this->iteration_rms_error[quantum_part_idx][0] = FD_commutator.norm() / (num_basis * num_basis);
     if (this->incremental_fock) {
       if (this->incremental_fock_doing_incremental[quantum_part_idx][0]) {
@@ -383,8 +384,9 @@ void POLYQUANT_EPSCF::diag_fock() {
     diag_fock_helper(quantum_part_idx, F_prime, this->C[quantum_part_idx][0], this->E_orbitals[quantum_part_idx][0]);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][1];
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator = this->F[quantum_part_idx][1] * this->D[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
-                                                                            this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][1] * this->F[quantum_part_idx][1];
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
+      FD_commutator.noalias() = this->F[quantum_part_idx][1] * this->D[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
+                                this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][1] * this->F[quantum_part_idx][1];
       this->iteration_rms_error[quantum_part_idx][1] = FD_commutator.norm() / (num_basis * num_basis);
       if (this->incremental_fock) {
         if (this->incremental_fock_doing_incremental[quantum_part_idx][1]) {
