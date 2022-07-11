@@ -419,9 +419,9 @@ void POLYQUANT_EPSCF::form_DM() {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     auto num_parts_alpha = quantum_part.num_parts_alpha;
     auto num_parts_beta = quantum_part.num_parts_beta;
-    form_DM_helper(this->D[quantum_part_idx][0], this->D_last[quantum_part_idx][0], this->C[quantum_part_idx][0], num_basis, num_parts_alpha);
+    form_DM_helper(this->D[quantum_part_idx][0], this->D_last[quantum_part_idx][0], this->C[quantum_part_idx][0], this->occ[quantum_part_idx][0], num_basis, num_parts_alpha);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      form_DM_helper(this->D[quantum_part_idx][1], this->D_last[quantum_part_idx][1], this->C[quantum_part_idx][1], num_basis, num_parts_beta);
+      form_DM_helper(this->D[quantum_part_idx][1], this->D_last[quantum_part_idx][1], this->C[quantum_part_idx][1], this->occ[quantum_part_idx][1], num_basis, num_parts_beta);
     }
     quantum_part_idx++;
   }
@@ -439,10 +439,10 @@ void POLYQUANT_EPSCF::form_DM() {
 }
 
 void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part) {
+                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &occ, int num_basis, int num_part) {
   dm_last = dm;
   dm.setZero(num_basis, num_basis);
-  dm = coeff(Eigen::placeholders::all, Eigen::seq(0, num_part - 1)) * coeff(Eigen::placeholders::all, Eigen::seq(0, num_part - 1)).transpose();
+  dm.noalias() = coeff * occ * coeff.transpose();
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
@@ -609,6 +609,7 @@ void POLYQUANT_EPSCF::run_iteration() {
   this->iteration_num += 1;
   this->form_fock();
   this->diag_fock();
+  this->form_occ();
   this->form_DM();
 }
 
@@ -620,6 +621,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->D_last.resize(this->input_molecule.quantum_particles.size());
   this->C.resize(this->input_molecule.quantum_particles.size());
   this->F.resize(this->input_molecule.quantum_particles.size());
+  this->occ.resize(this->input_molecule.quantum_particles.size());
   this->iteration_rms_error.resize(this->input_molecule.quantum_particles.size());
 
   this->reset_diis();
@@ -638,10 +640,12 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
       this->F[quantum_part_idx].resize(1);
+      this->occ[quantum_part_idx].resize(1);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_basis);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
     } else if (quantum_part.restricted == false) {
@@ -649,8 +653,11 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->D_last[quantum_part_idx].resize(2);
       this->C[quantum_part_idx].resize(2);
       this->F[quantum_part_idx].resize(2);
+      this->occ[quantum_part_idx].resize(2);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_basis);
+      this->occ[quantum_part_idx][1].setZero(num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
@@ -665,7 +672,9 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
       this->F[quantum_part_idx].resize(1);
+      this->occ[quantum_part_idx].resize(1);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_basis);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
@@ -690,27 +699,48 @@ void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("E(particles) : " + std::to_string(E_parts));
 }
 
-void POLYQUANT_EPSCF::form_scf_occ() {
-  occ.resize(this->input_molecule.quantum_particles.size());
+void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int num_parts, const double occval) {
+  for (auto i = 0; i < num_parts; i++) {
+    part_occ.diagonal()(i) = occval;
+  }
+}
+
+void POLYQUANT_EPSCF::form_occ() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    auto num_mo = C[quantum_part_idx][0].size();
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      occ[quantum_part_idx].resize(2);
-      occ[quantum_part_idx][0].setZero(num_mo);
-      occ[quantum_part_idx][1].setZero(num_mo);
-      for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
-        occ[quantum_part_idx][0].diagonal()(i) = 1.0;
+      if (occupation_mode == "aufbau") {
+        this->form_occ_helper_aufbau(occ[quantum_part_idx][0], quantum_part.num_parts_alpha, 1.0);
+        this->form_occ_helper_aufbau(occ[quantum_part_idx][1], quantum_part.num_parts_beta, 1.0);
+      } else {
+        APP_ABORT("Invalid SCF occupation_mode");
       }
-      for (auto i = 0; i < quantum_part.num_parts_beta; i++) {
-        occ[quantum_part_idx][1].diagonal()(i) = 1.0;
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "occ_alpha_";
+        filename << quantum_part_key;
+        filename << ".txt";
+        Polyquant_dump_diagmat_to_file(this->occ[quantum_part_idx][0], filename.str());
+        filename.str(std::string());
+        filename << "occ_beta_";
+        filename << quantum_part_key;
+        filename << ".txt";
+        Polyquant_dump_diagmat_to_file(this->occ[quantum_part_idx][1], filename.str());
       }
     } else {
-      occ[quantum_part_idx].resize(1);
-      occ[quantum_part_idx][0].setZero(num_mo);
-      auto occval = (quantum_part.num_parts == 1) ? 1.0 : 2.0;
-      for (auto i = 0; i < quantum_part.num_parts_alpha; i++) {
-        occ[quantum_part_idx][0].diagonal()(i) = occval;
+      if (occupation_mode == "aufbau") {
+        // auto occval = (quantum_part.num_parts == 1) ? 1.0 : 2.0;
+        auto occval = 1.0;
+        this->form_occ_helper_aufbau(occ[quantum_part_idx][0], quantum_part.num_parts_alpha, occval);
+      } else {
+        APP_ABORT("Invalid SCF occupation_mode");
+      }
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "occ_alpha_";
+        filename << quantum_part_key;
+        filename << ".txt";
+        Polyquant_dump_diagmat_to_file(this->occ[quantum_part_idx][0], filename.str());
       }
     }
     quantum_part_idx++;
@@ -720,7 +750,6 @@ void POLYQUANT_EPSCF::form_scf_occ() {
 void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
-  form_scf_occ();
   dump_orbitals(this->C, this->E_orbitals, this->occ);
 }
 
@@ -877,6 +906,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     idx += 2;
     quantum_part_idx++;
   }
+  form_occ();
   this->form_DM();
   Polyquant_cout("Running a single SCF iteration");
   this->run_iteration();
@@ -884,6 +914,5 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
   Polyquant_cout("Orbitals from file");
-  form_scf_occ();
   dump_orbitals(this->C, this->E_orbitals, this->occ);
 }
