@@ -132,6 +132,20 @@ template <typename T> void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eig
 };
 
 /**
+ * @brief A helper function to dump a dense diagonal matrix object to std::out.
+ *
+ * @param mat The dense matrix to print
+ **/
+template <typename T> void Polyquant_dump_diagmat(const Eigen::DiagonalMatrix<T, Eigen::Dynamic> &mat, const std::string &title) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  for (size_t i = 0; i < mat.rows(); i++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat.diagonal()(i) << "  ";
+    std::cout << std::endl;
+  }
+};
+/**
  * @brief A helper function to dump a dense matrix object to std::out.
  *
  * @param mat The dense matrix to print
@@ -145,6 +159,19 @@ template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dyna
       std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat(i, j) << "  ";
     }
     std::cout << std::endl;
+  }
+};
+/**
+ * @brief A helper function to dump a dense diagonalmatrix object to file.
+ *
+ * @param mat The dense matrix to write.
+ **/
+template <typename T> void Polyquant_dump_diagmat_to_file(const Eigen::DiagonalMatrix<T, Eigen::Dynamic> &mat, const std::string &filename) {
+  std::ofstream matfile;
+  matfile.open(filename);
+  for (Eigen::Index i = 0; i < mat.rows(); i++) {
+    matfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat.diagonal()(i) << "  ";
+    matfile << std::endl;
   }
 };
 /**
