@@ -94,6 +94,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   scf_calc.setup_calculation(this->input_params, this->input_molecule, this->input_basis, this->input_integral);
   bool dump_for_qmcpack = false;
   bool skip_scf = false;
+  std::deque<bool> freeze_density_from_input;
   std::string hdf5_filename = "Default.h5";
 
   if (this->input_params.input_data.contains("verbose")) {
@@ -152,6 +153,16 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("stop_after_independent_converged")) {
         scf_calc.stop_after_independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["stop_after_independent_converged"];
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("freeze_density")) {
+        auto freeze_dens_inp = this->input_params.input_data["keywords"]["mf_keywords"]["freeze_density"];
+        freeze_density_from_input.resize(0);
+        if (freeze_dens_inp.type() == json::value_t::array) {
+          for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+            freeze_density_from_input.push_back(freeze_dens_inp[i]);
+            std::cout << std::boolalpha << freeze_density_from_input[i] << std::endl;
+          }
+        }
+      }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]) {
           dump_for_qmcpack = true;
@@ -173,9 +184,19 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   }
   if (mean_field_type == "SCF") {
     scf_calc.setup_standard();
+    if (freeze_density_from_input.size() == this->input_molecule.quantum_particles.size()) {
+      for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+        this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
+      }
+    }
     scf_calc.run();
   } else if (mean_field_type == "FILE") {
     scf_calc.setup_from_file(hdf5_filename);
+    if (freeze_density_from_input.size() == this->input_molecule.quantum_particles.size()) {
+      for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+        this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
+      }
+    }
     if (!skip_scf) {
       scf_calc.run();
     }

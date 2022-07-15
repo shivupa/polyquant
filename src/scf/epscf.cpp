@@ -260,6 +260,10 @@ void POLYQUANT_EPSCF::form_fock_helper() {
   libint2::initialize();
   Polyquant_cout("forming fock");
   for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule.quantum_particles.size(); quantum_part_a_idx++) {
+    if ((this->iteration_num > 1) && this->freeze_density[quantum_part_a_idx] == true) {
+      quantum_part_a_idx++;
+      continue;
+    }
     auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
     std::advance(quantum_part_a_it, quantum_part_a_idx);
     auto quantum_part_a = quantum_part_a_it->second;
@@ -290,6 +294,10 @@ void POLYQUANT_EPSCF::form_fock() {
   // set data structures
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+    if ((this->iteration_num > 1) && this->freeze_density[quantum_part_a_idx] == true) {
+      quantum_part_a_idx++;
+      continue;
+    }
     auto num_basis = this->input_basis.num_basis[quantum_part_a_idx];
     if (!this->incremental_fock || !incremental_fock_doing_incremental[quantum_part_a_idx][0]) {
       std::stringstream ss;
@@ -347,6 +355,11 @@ void POLYQUANT_EPSCF::diag_fock() {
   auto quantum_part_idx = 0ul;
   this->E_orbitals.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+
+    if ((this->iteration_num > 1) && this->freeze_density[quantum_part_idx] == true) {
+      quantum_part_idx++;
+      continue;
+    }
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->E_orbitals[quantum_part_idx].resize(2);
@@ -418,6 +431,10 @@ void POLYQUANT_EPSCF::diag_fock() {
 void POLYQUANT_EPSCF::form_DM() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    if ((this->iteration_num > 1) && this->freeze_density[quantum_part_idx] == true) {
+      quantum_part_idx++;
+      continue;
+    }
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     auto num_parts_alpha = quantum_part.num_parts_alpha;
     auto num_parts_beta = quantum_part.num_parts_beta;
@@ -449,9 +466,16 @@ void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
+
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     this->E_particles_last[quantum_part_idx] = this->E_particles[quantum_part_idx];
+    if ((this->iteration_num > 1) && this->freeze_density[quantum_part_idx] == true) {
+      quantum_part_idx++;
+      continue;
+    }
     if (quantum_part.num_parts == 1) {
       this->E_particles[quantum_part_idx] = 0.5 * (this->D[quantum_part_idx][0].array() * (this->H_core[quantum_part_idx] + this->F[quantum_part_idx][0]).array()).sum();
     } else if (quantum_part.restricted == false) {
@@ -480,6 +504,10 @@ void POLYQUANT_EPSCF::check_stop() {
   this->iteration_E_diff.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    if (this->iteration_num > 1 && this->freeze_density[quantum_part_idx] == true) {
+      quantum_part_idx++;
+      continue;
+    }
     std::stringstream buffer;
     buffer << std::setprecision(20) << "Convergence status for " << quantum_part_key << std::endl;
     auto E_diff = (this->E_particles[quantum_part_idx] - this->E_particles_last[quantum_part_idx]) / this->E_particles[quantum_part_idx];
@@ -618,8 +646,8 @@ void POLYQUANT_EPSCF::run_iteration() {
 
 void POLYQUANT_EPSCF::guess_DM() {
   // TODO SAD or
-  // TODO SAP
   // TODO move into separate functions
+  freeze_density.resize(this->input_molecule.quantum_particles.size(), false);
   this->D.resize(this->input_molecule.quantum_particles.size());
   this->D_last.resize(this->input_molecule.quantum_particles.size());
   this->C.resize(this->input_molecule.quantum_particles.size());
@@ -777,6 +805,13 @@ void POLYQUANT_EPSCF::print_params() {
   buffer << "    incremental_fock_initial_onset_thresh = " << this->incremental_fock_initial_onset_thresh << std::endl;
   buffer << "    Cauchy_Schwarz_screening = " << this->Cauchy_Schwarz_screening << std::endl;
   buffer << "    Cauchy_Schwarz_threshold = " << this->Cauchy_Schwarz_threshold << std::endl;
+  buffer << "    Independent converged = " << std::boolalpha << this->independent_converged << std::endl;
+  buffer << "    Freeze density   " << std::endl;
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    buffer << "        Particle type " << quantum_part_idx << "  :  " << std::boolalpha << this->freeze_density[quantum_part_idx] << std::endl;
+    quantum_part_idx++;
+  }
   Polyquant_cout(buffer.str());
 }
 
@@ -824,10 +859,7 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   }
 }
 void POLYQUANT_EPSCF::setup_standard() {
-  this->print_start_iterations();
-  this->print_params();
   this->calculate_integrals();
-
   // start the SCF process
   this->form_H_core();
   this->guess_DM();
@@ -836,6 +868,8 @@ void POLYQUANT_EPSCF::setup_standard() {
 void POLYQUANT_EPSCF::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  this->print_start_iterations();
+  this->print_params();
   while (!this->stop) {
     this->run_iteration();
     this->print_iteration();
@@ -855,8 +889,6 @@ void POLYQUANT_EPSCF::run() {
 void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  this->print_start_iterations();
-  this->print_params();
   this->calculate_integrals();
   // start the SCF process
   this->form_H_core();
@@ -912,7 +944,8 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   form_occ();
   this->form_DM();
   Polyquant_cout("Running a single SCF iteration");
-  this->run_iteration();
+  // this->run_iteration();
+  this->form_fock();
   this->print_iteration();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
