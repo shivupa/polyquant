@@ -67,9 +67,11 @@ public:
   void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
                       const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &occ, const int num_basis, const int num_part);
 
-  void form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int num_parts, const double occval);
+  void form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
 
   void form_occ();
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& S,  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff1, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff2);
 
   void calculate_E_elec() override;
 
@@ -134,6 +136,7 @@ public:
    *
    */
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_ref_mom;
 
   std::string occupation_mode = "aufbau";
   std::deque<bool> freeze_density;
