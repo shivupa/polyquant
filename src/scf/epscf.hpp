@@ -69,9 +69,16 @@ public:
 
   void form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
 
+  void form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
+
   void form_occ();
 
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& S,  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff1, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff2);
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
+                                                                    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff2);
+
+  std::vector<std::vector<std::vector<int>>> permute_orbitals_vector;
+  bool permute_orbtials_start = false;
+  void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, std::vector<int> &permutation);
 
   void calculate_E_elec() override;
 

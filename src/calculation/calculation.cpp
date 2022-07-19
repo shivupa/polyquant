@@ -96,6 +96,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   bool skip_scf = false;
   std::deque<bool> freeze_density_from_input;
   std::string hdf5_filename = "Default.h5";
+  std::vector<std::vector<std::vector<int>>> permute_orbitals_vector;
 
   if (this->input_params.input_data.contains("verbose")) {
     scf_calc.verbose = this->input_params.input_data["verbose"];
@@ -150,6 +151,9 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("force_independent_converged")) {
         scf_calc.independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["force_independent_converged"];
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("occupation_mode")) {
+        scf_calc.occupation_mode = this->input_params.input_data["keywords"]["mf_keywords"]["occupation_mode"];
+      }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("stop_after_independent_converged")) {
         scf_calc.stop_after_independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["stop_after_independent_converged"];
       }
@@ -180,6 +184,22 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         // TODO if there is ever more than one mean field type then this will
         // have to change.
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("permute_orbs")) {
+        permute_orbitals_vector.resize(this->input_params.input_data["keywords"]["mf_keywords"]["permute_orbs"].size());
+        auto part_idx = 0;
+        for (auto &particle_MO_order : this->input_params.input_data["keywords"]["mf_keywords"]["permute_orbs"]) {
+          auto spin_idx = 0;
+          permute_orbitals_vector[part_idx].resize(particle_MO_order.size());
+          for (auto &spin_MO_order : particle_MO_order) {
+            for (auto &MO_idx : spin_MO_order) {
+                permute_orbitals_vector[part_idx][spin_idx].push_back(MO_idx);
+            }
+            //permute_orbitals_vector[part_idx][spin_idx].push_back(spin_MO_order);
+            spin_idx++;
+          }
+          part_idx++;
+        }
+      }
     }
   }
   if (mean_field_type == "SCF") {
@@ -189,6 +209,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
       }
     }
+    if (permute_orbitals_vector.size() != 0) {
+        this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
+        this->scf_calc.permute_orbitals_start = true;
+    }
     scf_calc.run();
   } else if (mean_field_type == "FILE") {
     scf_calc.setup_from_file(hdf5_filename);
@@ -196,6 +220,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
         this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
       }
+    }
+    if (permute_orbitals_vector.size() != 0) {
+        this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
+        this->scf_calc.permute_orbitals_start = true;
     }
     if (!skip_scf) {
       scf_calc.run();

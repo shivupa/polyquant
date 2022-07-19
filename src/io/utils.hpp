@@ -199,6 +199,7 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
                    std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> &occ);
 
+// TODO move these functions to some sort of algorithms folder or something
 /**
  * @brief A hasher for a pair of vectors
  * for more info see https://stackoverflow.com/a/29855973
@@ -237,5 +238,43 @@ template <typename T> struct PairHash {
     return seed;
   }
 };
+
+/**
+ * Argsort for std vector
+ * @param vector input
+ * @return sorted indicies std vector
+ */
+template <typename T> std::vector<int> argsort(const std::vector<T> &in_vec, bool ascending = true) {
+  std::vector<int> indices(in_vec.size());
+  std::iota(indices.begin(), indices.end(), 0);
+  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
+    // sort indices according to corresponding array element
+    if (ascending) {
+      return in_vec[left] < in_vec[right];
+    } else {
+      return in_vec[left] > in_vec[right];
+    }
+  });
+  return indices;
+};
+/**
+ * Argsort for Eigen vector
+ * @param vector input
+ * @return sorted indicies std vector
+ */
+template <typename T> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, bool ascending = true) {
+  std::vector<int> indices(in_vec.size());
+  std::iota(indices.begin(), indices.end(), 0);
+  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
+    // sort indices according to corresponding array element
+    if (ascending) {
+      return in_vec(left) < in_vec(right);
+    } else {
+      return in_vec(left) > in_vec(right);
+    }
+  });
+  return indices;
+};
+;
 } // namespace polyquant
 #endif

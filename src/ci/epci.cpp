@@ -56,7 +56,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       auto num_parts_beta = this->frozen_core[quantum_part_idx];
       Eigen::DiagonalMatrix<double, Eigen::Dynamic> occ;
       occ.setZero(num_basis);
-      this->input_epscf.form_occ_helper_aufbau(occ, num_parts_alpha, 1.0);
+      this->input_epscf.form_occ_helper_aufbau(occ, quantum_part_idx, 0, num_parts_alpha, 1.0);
       this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], occ, num_basis, num_parts_alpha);
       if (verbose == true) {
         Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][0], "FC_DM_" + quantum_part_key + "_alpha.txt");
@@ -64,7 +64,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         Eigen::DiagonalMatrix<double, Eigen::Dynamic> occ;
         occ.setZero(num_basis);
-        this->input_epscf.form_occ_helper_aufbau(occ, num_parts_beta, 1.0);
+        this->input_epscf.form_occ_helper_aufbau(occ, quantum_part_idx, 1, num_parts_beta, 1.0);
         this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], occ, num_basis, num_parts_beta);
         if (verbose == true) {
           Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][1], "FC_DM_" + quantum_part_key + "_beta.txt");

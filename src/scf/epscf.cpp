@@ -730,49 +730,59 @@ void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("E(particles) : " + std::to_string(E_parts));
 }
 
-void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval) {
+void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
+                                             const double occval) {
   for (auto i = 0; i < num_parts; i++) {
     part_occ.diagonal()(i) = occval;
   }
 }
-void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval) {
-    if ((this->iteration_num == 1)){
-        form_occ_helper_aufbau(part_occ, num_parts, occval);
-    } else {
-        // create overlap between reference orbitals and current orbitals
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
-        // Paper doi: 10.1021/jp801738f
-        // eq. 2.7
-        orbital_overlap = det_overlap(this->input_integral.overlap[quantum_part_idx], this->C_ref_mom[quantum_part_idx][quantum_part_spin_idx](Eigen::placeholders::all, Eigen::seqN(0, num_parts)), this->C)
-        // orbital_overlap = C_ref.T @ S @ C
-        // M x N           = M x a @ a x a @ a x N
-        // M - num occ
-        // N - num MOs
-        // a - num AOs
+void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
+                                          const double occval) {
+  if (this->iteration_num == 1) {
+    form_occ_helper_aufbau(part_occ, quantum_part_idx, quantum_part_spin_idx, num_parts, occval);
+  } else {
+    // create overlap between reference orbitals and current orbitals
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
+    // Paper doi: 10.1021/jp801738f
+    // eq. 2.7
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset = this->C_ref_mom[quantum_part_idx][quantum_part_spin_idx](Eigen::placeholders::all, Eigen::seqN(0, num_parts));
+    orbital_overlap = det_overlap(this->input_integral.overlap[quantum_part_idx], orb_subset, this->C[quantum_part_idx][quantum_part_spin_idx]);
+    // orbital_overlap = C_ref.T @ S @ C
+    // M x N           = M x a @ a x a @ a x N
+    // M - num occ
+    // N - num MOs
+    // a - num AOs
 
-        // eq. 2.8
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> total_ovlp_with_prev_occ = orbital_overlap.rowwise().sum();
-        // argsort based on overlap with occupied orbitals
-        
-        //
-    }
-    // rewrite reference orbitals?
-    if ((this->iteration_num == 1) || occupation_mode == "MOM"){
-        this->C_ref_mom = this->C;
-    }
+    // eq. 2.8
+    Eigen::Matrix<double, Eigen::Dynamic, 1> total_ovlp_with_prev_occ = orbital_overlap.rowwise().sum();
+    // descending argsort based on overlap with occupied orbitals
+    std::vector<int> argsort_indices;
+    bool ascending = false;
+    argsort_indices = argsort(total_ovlp_with_prev_occ, ascending);
+
+    // reorder orbitals with respect to overlap
+    // i.e. permute the columns
+    this->permute_MOs(quantum_part_idx, quantum_part_spin_idx, argsort_indices);
+  }
+  // rewrite reference orbitals?
+  if ((this->iteration_num == 1) || occupation_mode == "MOM") {
+    this->C_ref_mom = this->C;
+  }
   for (auto i = 0; i < num_parts; i++) {
     part_occ.diagonal()(i) = occval;
   }
 }
-
 
 void POLYQUANT_EPSCF::form_occ() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       if (occupation_mode == "aufbau") {
-        this->form_occ_helper_aufbau(occ[quantum_part_idx][0], quantum_part.num_parts_alpha, 1.0);
-        this->form_occ_helper_aufbau(occ[quantum_part_idx][1], quantum_part.num_parts_beta, 1.0);
+        this->form_occ_helper_aufbau(occ[quantum_part_idx][0], quantum_part_idx, 0, quantum_part.num_parts_alpha, 1.0);
+        this->form_occ_helper_aufbau(occ[quantum_part_idx][1], quantum_part_idx, 1, quantum_part.num_parts_beta, 1.0);
+      } else if (occupation_mode == "MOM" || occupation_mode == "iMOM") {
+        this->form_occ_helper_MOM(occ[quantum_part_idx][0], quantum_part_idx, 0, quantum_part.num_parts_alpha, 1.0);
+        this->form_occ_helper_MOM(occ[quantum_part_idx][1], quantum_part_idx, 1, quantum_part.num_parts_beta, 1.0);
       } else {
         APP_ABORT("Invalid SCF occupation_mode");
       }
@@ -792,7 +802,10 @@ void POLYQUANT_EPSCF::form_occ() {
       if (occupation_mode == "aufbau") {
         // auto occval = (quantum_part.num_parts == 1) ? 1.0 : 2.0;
         auto occval = 1.0;
-        this->form_occ_helper_aufbau(occ[quantum_part_idx][0], quantum_part.num_parts_alpha, occval);
+        this->form_occ_helper_aufbau(occ[quantum_part_idx][0], quantum_part_idx, 0, quantum_part.num_parts_alpha, occval);
+      } else if (occupation_mode == "MOM" || occupation_mode == "iMOM") {
+        auto occval = 1.0;
+        this->form_occ_helper_MOM(occ[quantum_part_idx][0], quantum_part_idx, 0, quantum_part.num_parts_alpha, occval);
       } else {
         APP_ABORT("Invalid SCF occupation_mode");
       }
@@ -808,10 +821,19 @@ void POLYQUANT_EPSCF::form_occ() {
   }
 }
 
-Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_EPSCF::det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& S,  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff1, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& coeff2){
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_ovlp;
-    det_ovlp.noalias() = coeff1.transpose() * S * coeff2;
-    return det_ovlp;
+Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_EPSCF::det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S,
+                                                                                   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
+                                                                                   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff2) {
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_ovlp;
+  det_ovlp.noalias() = coeff1.transpose() * S * coeff2;
+  return det_ovlp;
+}
+
+void POLYQUANT_EPSCF::permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, std::vector<int> &permutation) {
+  Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> swapper_mat(this->C[quantum_part_idx][quantum_part_spin_idx].cols());
+  swapper_mat.indices() = Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>, Eigen::Unaligned>(permutation.data(), permutation.size());
+  // multiply from right : permute cols, multiply from left, permute rows
+  this->C[quantum_part_idx][quantum_part_spin_idx] = this->C[quantum_part_idx][quantum_part_spin_idx] * swapper_mat;
 }
 
 void POLYQUANT_EPSCF::print_success() {
@@ -977,9 +999,12 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     idx += 2;
     quantum_part_idx++;
   }
+  if (permute_orbtials_start) {
+    permute_initial_MOs();
+  }
   form_occ();
   this->form_DM();
-  Polyquant_cout("Running a single SCF iteration");
+  // Polyquant_cout("Running a single SCF iteration");
   // this->run_iteration();
   this->form_fock();
   this->print_iteration();
