@@ -64,6 +64,15 @@ void Polyquant_dump_program_header();
  */
 void Polyquant_dump_json(const json &json_obj);
 
+template <typename T> void Polyquant_dump_stdvec(const std::vector<T> &vec, const std::string &title) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  for (size_t i = 0; i < vec.size(); i++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec[i] << std::endl;
+  }
+};
+
 /**
  * @brief A helper function to dump a dense vector object to std::out.
  *
