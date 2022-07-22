@@ -192,9 +192,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
           permute_orbitals_vector[part_idx].resize(particle_MO_order.size());
           for (auto &spin_MO_order : particle_MO_order) {
             for (auto &MO_idx : spin_MO_order) {
-                permute_orbitals_vector[part_idx][spin_idx].push_back(MO_idx);
+              permute_orbitals_vector[part_idx][spin_idx].push_back(MO_idx);
             }
-            //permute_orbitals_vector[part_idx][spin_idx].push_back(spin_MO_order);
             spin_idx++;
           }
           part_idx++;
@@ -210,20 +209,20 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       }
     }
     if (permute_orbitals_vector.size() != 0) {
-        this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
-        this->scf_calc.permute_orbitals_start = true;
+      this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
+      this->scf_calc.permute_orbitals_start = true;
     }
     scf_calc.run();
   } else if (mean_field_type == "FILE") {
+    if (permute_orbitals_vector.size() != 0) {
+      this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
+      this->scf_calc.permute_orbitals_start = true;
+    }
     scf_calc.setup_from_file(hdf5_filename);
     if (freeze_density_from_input.size() == this->input_molecule.quantum_particles.size()) {
       for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
         this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
       }
-    }
-    if (permute_orbitals_vector.size() != 0) {
-        this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
-        this->scf_calc.permute_orbitals_start = true;
     }
     if (!skip_scf) {
       scf_calc.run();

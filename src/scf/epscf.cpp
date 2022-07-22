@@ -426,6 +426,9 @@ void POLYQUANT_EPSCF::diag_fock() {
     }
     quantum_part_idx++;
   }
+  if (permute_orbitals_start) {
+    permute_initial_MOs();
+  }
 }
 
 void POLYQUANT_EPSCF::form_DM() {
@@ -738,7 +741,9 @@ void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen
 }
 void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
                                           const double occval) {
-  if (this->iteration_num == 1) {
+  if (C_ref_mom.empty()) {
+    Polyquant_cout("Setting MOM reference orbitals");
+    this->C_ref_mom = this->C;
     form_occ_helper_aufbau(part_occ, quantum_part_idx, quantum_part_spin_idx, num_parts, occval);
   } else {
     // create overlap between reference orbitals and current orbitals
@@ -754,18 +759,22 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::D
     // a - num AOs
 
     // eq. 2.8
-    Eigen::Matrix<double, Eigen::Dynamic, 1> total_ovlp_with_prev_occ = orbital_overlap.rowwise().sum();
+    Eigen::Matrix<double, Eigen::Dynamic, 1> total_ovlp_with_prev_occ;
+    if (orbital_overlap.rows() == 1) {
+      total_ovlp_with_prev_occ = orbital_overlap.transpose();
+    } else {
+      total_ovlp_with_prev_occ = orbital_overlap.colwise().sum();
+    }
     // descending argsort based on overlap with occupied orbitals
     std::vector<int> argsort_indices;
     bool ascending = false;
     argsort_indices = argsort(total_ovlp_with_prev_occ, ascending);
-
     // reorder orbitals with respect to overlap
     // i.e. permute the columns
     this->permute_MOs(quantum_part_idx, quantum_part_spin_idx, argsort_indices);
   }
   // rewrite reference orbitals?
-  if ((this->iteration_num == 1) || occupation_mode == "MOM") {
+  if (occupation_mode == "MOM") {
     this->C_ref_mom = this->C;
   }
   for (auto i = 0; i < num_parts; i++) {
@@ -836,6 +845,20 @@ void POLYQUANT_EPSCF::permute_MOs(const int quantum_part_idx, const int quantum_
   this->C[quantum_part_idx][quantum_part_spin_idx] = this->C[quantum_part_idx][quantum_part_spin_idx] * swapper_mat;
 }
 
+void POLYQUANT_EPSCF::permute_initial_MOs() {
+  Polyquant_cout("Permuting Initial Orbtials");
+  permute_orbitals_start = false;
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      permute_MOs(quantum_part_idx, 0, this->permute_orbitals_vector[quantum_part_idx][0]);
+      permute_MOs(quantum_part_idx, 1, this->permute_orbitals_vector[quantum_part_idx][1]);
+    } else {
+      permute_MOs(quantum_part_idx, 0, this->permute_orbitals_vector[quantum_part_idx][0]);
+    }
+    quantum_part_idx++;
+  }
+}
 void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
@@ -999,10 +1022,10 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     idx += 2;
     quantum_part_idx++;
   }
-  if (permute_orbtials_start) {
+  if (permute_orbitals_start) {
     permute_initial_MOs();
   }
-  form_occ();
+  this->form_occ();
   this->form_DM();
   // Polyquant_cout("Running a single SCF iteration");
   // this->run_iteration();

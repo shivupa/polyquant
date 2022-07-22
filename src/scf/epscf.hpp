@@ -77,7 +77,11 @@ public:
                                                                     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff2);
 
   std::vector<std::vector<std::vector<int>>> permute_orbitals_vector;
-  bool permute_orbtials_start = false;
+
+  bool permute_orbitals_start = false;
+
+  void permute_initial_MOs();
+
   void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, std::vector<int> &permutation);
 
   void calculate_E_elec() override;
