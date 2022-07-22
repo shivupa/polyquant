@@ -1,0 +1,33 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "scf",
+    "basis": 
+        { "electron" :
+          {"H" : [{ "library" : 
+            {"type" : "aug-cc-pv5z"}}]
+          }
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "H_wpos.h5",
+    "pure" : true,
+    "mf_keywords" :{
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-10,
+        "iteration_max" : 200,
+        "from_file" : false
+    }
+  }
+}
+
