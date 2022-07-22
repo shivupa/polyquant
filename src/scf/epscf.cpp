@@ -213,11 +213,9 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
                   for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
                     if (buf_1234 != nullptr) {
                       auto eri_ijkl = buf_1234[shell_ijkl_bf];
-                      auto D_ij = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_a, quantum_part_a_idx,
-                                                                      quantum_part_a_spin_idx, shell_i_bf, shell_j_bf);
                       auto D_kl = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
                                                                       quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
-                      const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a.restricted == false && quantum_part_a.num_parts > 1) ? 0.5 : 1.0;
+                      const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
                       const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.5 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
                       FA[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
                       FA[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
@@ -580,19 +578,15 @@ void POLYQUANT_EPSCF::reset_diis() {
   if (this->diis_extrapolation) {
     this->diis.clear();
     this->diis.resize(this->input_molecule.quantum_particles.size());
-    libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> tempdiis(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       if (quantum_part.num_parts == 1) {
-        this->diis[quantum_part_idx].resize(1);
-        this->diis[quantum_part_idx].push_back(tempdiis);
+        this->diis[quantum_part_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
       } else if (quantum_part.restricted == false) {
-        this->diis[quantum_part_idx].resize(2);
-        this->diis[quantum_part_idx].push_back(tempdiis);
-        this->diis[quantum_part_idx].push_back(tempdiis);
+        this->diis[quantum_part_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
+        this->diis[quantum_part_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
       } else {
-        this->diis[quantum_part_idx].resize(1);
-        this->diis[quantum_part_idx].push_back(tempdiis);
+        this->diis[quantum_part_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
       }
       quantum_part_idx++;
     }
@@ -940,6 +934,8 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   }
 }
 void POLYQUANT_EPSCF::setup_standard() {
+  this->print_start_iterations();
+  this->print_params();
   this->calculate_integrals();
   // start the SCF process
   this->form_H_core();
@@ -949,8 +945,6 @@ void POLYQUANT_EPSCF::setup_standard() {
 void POLYQUANT_EPSCF::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  this->print_start_iterations();
-  this->print_params();
   while (!this->stop) {
     this->run_iteration();
     this->print_iteration();
@@ -970,6 +964,8 @@ void POLYQUANT_EPSCF::run() {
 void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  this->print_start_iterations();
+  this->print_params();
   this->calculate_integrals();
   // start the SCF process
   this->form_H_core();

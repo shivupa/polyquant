@@ -206,7 +206,7 @@ public:
   int independent_converged_iteration_num = -1;
 
   bool diis_extrapolation = true;
-  int diis_start = 1;
+  int diis_start = 5;
   double diis_damping = 0.0;
   double diis_mixing_fraction = 0.0;
   int diis_size = 5;
