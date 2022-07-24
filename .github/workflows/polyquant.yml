@@ -82,7 +82,7 @@ jobs:
           sudo dpkg -i polyquant-libint.deb
           mkdir builddir
           echo $MKLROOT
-          ls /usr/share/libint/2.7.0/basis/
+          ls /usr/share/libint/*/basis/
       - name: Create a directory that the libint imported target requires. DO NOT DELETE THIS STEP.
         shell: bash
         run: |
