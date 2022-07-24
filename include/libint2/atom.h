@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2020 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
  *  This file is part of Libint.
  *
@@ -145,7 +145,7 @@ __libint2_read_dotxyz(std::istream &is, const double bohr_to_angstrom,
       if (strcaseequal("CC", element_symbol))
         axis = 2;
       if (axis != -1) {
-        if (found_abc[axis] == true)
+        if (found_abc[axis])
           throw std::logic_error(
               caller + ": unit cell parameter along Cartesian axis " +
               std::to_string(axis) + " appears more than once");
@@ -180,7 +180,7 @@ __libint2_read_dotxyz(std::istream &is, const double bohr_to_angstrom,
   // make sure all 3 axes were specified
   if (pbc) {
     for(auto xyz=0; xyz!=3; ++xyz)
-      if (found_abc[xyz] == false) {
+      if (!found_abc[xyz]) {
         throw std::logic_error(caller +
                                ": unit cell parameter along Cartesian axis " +
                                std::to_string(xyz) + " not given");
@@ -194,12 +194,11 @@ __libint2_read_dotxyz(std::istream &is, const double bohr_to_angstrom,
 
 namespace libint2 {
 
+// clang-format off
 /// reads the list of atoms from a file in the standard XYZ format supported
-/// by most chemistry software (see <a
-/// href="https://en.wikipedia.org/wiki/XYZ_file_format">the Wikipedia
-/// page</a>)
-/// \param is[in] the std::istream object from which the data will be read
-/// \param bohr_to_angstrom[in] the conversion factor from Bohr (atomic unit
+/// by most chemistry software (see <a href="https://en.wikipedia.org/wiki/XYZ_file_format">the Wikipedia page</a>)
+/// \param[in] is the std::istream object from which the data will be read
+/// \param[in] bohr_to_angstrom the conversion factor from Bohr (atomic unit
 /// of length; Libint uses atomic units throughout) to angstrom (in which
 /// the Cartesian coordinates are given in the XYZ file). The default is
 /// the 2018 CODATA value given by the
@@ -207,6 +206,7 @@ namespace libint2 {
 /// constant.
 /// \return a std::vector of Atom objects
 /// \throw std::logic_error if cannot parse the contents of \c is
+// clang-format off
 inline std::vector<Atom> read_dotxyz(
     std::istream &is,
     const double bohr_to_angstrom = constants::codata_2018::bohr_to_angstrom) {
@@ -221,8 +221,8 @@ inline std::vector<Atom> read_dotxyz(
 ///       element symbols "AA", "BB", and "CC" (N.B. the element symbols are not
 ///       case-sensitive).
 /// Omitting all three unit cell vectors is equivalent to an infinite unit cell (no periodicity in any direction).
-/// \param is[in] the std::istream object from which the data will be read
-/// \param bohr_to_angstrom[in] the conversion factor from Bohr (atomic unit
+/// \param[in] is the std::istream object from which the data will be read
+/// \param[in] bohr_to_angstrom the conversion factor from Bohr (atomic unit
 /// of length; Libint uses atomic units throughout) to angstrom (in which
 /// the Cartesian coordinates are given in the XYZ file). The default is
 /// the 2018 CODATA value given by the
@@ -241,7 +241,8 @@ inline auto read_dotxyz_pbc(
 /// converts a vector of <code>Atom</code>s to a vector of point charges
 std::vector<std::pair<double, std::array<double, 3>>> inline make_point_charges(
     const std::vector<libint2::Atom> &atoms) {
-  std::vector<std::pair<double, std::array<double, 3>>> q(atoms.size());
+  std::vector<std::pair<double, std::array<double, 3>>> q;
+  q.reserve(atoms.size());
   for (const auto &atom : atoms) {
     q.emplace_back(static_cast<double>(atom.atomic_number),
                    std::array<double, 3>{{atom.x, atom.y, atom.z}});

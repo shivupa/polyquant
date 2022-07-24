@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2020 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
  *  This file is part of Libint.
  *
@@ -120,8 +120,6 @@ namespace libint2 {
       std::vector<Real> bc_;
   };
 
-#define _local_min_macro(a,b) ((a) > (b) ? (a) : (b))
-
   /** Computes the Boys function, \f$ F_m (T) = \int_0^1 u^{2m} \exp(-T u^2) \, {\rm d}u \f$,
     * using single algorithm (asymptotic expansion). Slow for the sake of precision control.
     * Useful in two cases:
@@ -154,7 +152,7 @@ namespace libint2 {
       /// computes a single value of \f$ F_m(T) \f$ using MacLaurin series to full precision of @c Real
       static Real eval(Real T, size_t m) {
         assert(m < 100);
-        static const Real T_crit = std::numeric_limits<Real>::is_bounded == true ? -log( std::numeric_limits<Real>::min() * 100.5 / 2. ) : Real(0) ;
+        static const Real T_crit = std::numeric_limits<Real>::is_bounded ? -log( std::numeric_limits<Real>::min() * 100.5 / 2. ) : Real(0) ;
         if (std::numeric_limits<Real>::is_bounded && T > T_crit)
           throw std::overflow_error("FmEval_Reference<Real>::eval: Real lacks precision for the given value of argument T");
         static const Real half = Real(1)/2;
@@ -250,10 +248,10 @@ namespace libint2 {
 
       static_assert(std::is_same<Real,double>::value, "FmEval_Chebyshev7 only supports double as the real type");
 
-      static constexpr const int ORDER = interpolation_order;   //!, interpolation order
-      static constexpr const int ORDERp1 = ORDER+1;   //!< ORDER + 1
+      static constexpr int ORDER = interpolation_order;   //!, interpolation order
+      static constexpr int ORDERp1 = ORDER+1;   //!< ORDER + 1
 
-      static constexpr const Real T_crit = cheb_table_tmax;          //!< critical value of T above which safe to use upward recusion
+      static constexpr Real T_crit = cheb_table_tmax;          //!< critical value of T above which safe to use upward recusion
       static constexpr Real delta = cheb_table_delta;           //!< interval size
       static constexpr Real one_over_delta = 1/delta;  //! 1/delta
 
@@ -489,7 +487,7 @@ namespace libint2 {
       /// Constructs the object to be able to compute Boys funcion for m in [0,mmax], with relative \c precision
       FmEval_Taylor(unsigned int mmax, Real precision = std::numeric_limits<Real>::epsilon()) :
           soft_zero_(1e-6), cutoff_(precision), numbers_(
-              INTERPOLATION_ORDER + 1, 2 * (mmax + INTERPOLATION_ORDER - 1)) {
+              INTERPOLATION_ORDER + 1, 2 * (mmax + INTERPOLATION_ORDER)) {
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 # if !defined(__AVX__) && defined(NDEBUG)
@@ -518,7 +516,7 @@ namespace libint2 {
             * std::pow(cutoff_ * numbers_.fac[INTERPOLATION_ORDER + 1],
                        1.0 / INTERPOLATION_ORDER);
         oodelT_ = 1.0 / delT_;
-        max_m_ = mmax + INTERPOLATION_ORDER - 1;
+        max_m_ = mmax + INTERPOLATION_ORDER;
 
         T_crit_ = new Real[max_m_ + 1]; /*--- m=0 is included! ---*/
         max_T_ = 0;
@@ -840,11 +838,11 @@ namespace libint2 {
       static_assert(std::is_same<Real,double>::value, "TennoGmEval only supports double as the real type");
 
       static const int mmin_ = -1;
-      static constexpr const Real Tmax = (1 << cheb_table_tmaxlog2); //!< critical value of T above which use upward recursion
-      static constexpr const Real Umax = detail::pow10(cheb_table_umaxlog10); //!< max value of U for which to interpolate
-      static constexpr const Real Umin = detail::pow10(cheb_table_uminlog10); //!< min value of U for which to interpolate
-      static constexpr const std::size_t ORDERp1 = interpolation_order + 1;
-      static constexpr const Real maxabsprecision = 1.4e-14;  //!< guaranteed abs precision of the interpolation table for m>0
+      static constexpr Real Tmax = (1 << cheb_table_tmaxlog2); //!< critical value of T above which use upward recursion
+      static constexpr Real Umax = detail::pow10(cheb_table_umaxlog10); //!< max value of U for which to interpolate
+      static constexpr Real Umin = detail::pow10(cheb_table_uminlog10); //!< min value of U for which to interpolate
+      static constexpr std::size_t ORDERp1 = interpolation_order + 1;
+      static constexpr Real maxabsprecision = 1.4e-14;  //!< guaranteed abs precision of the interpolation table for m>0
 
   public:
       /// \param m_max maximum value of the Gm function index
@@ -925,16 +923,16 @@ namespace libint2 {
         const auto U = 0.25 * zeta * zeta * one_over_rho;
         assert(U >= 0);
         if (T > Tmax || U < Umin) {
-          eval_Gm_urr(Gm, T, U, mmax, 0); // no need for G_-1
+          eval_urr<false>(Gm, T, U, /* zeta_over_two_rho = */ 0, mmax);
         } else {
-          interpolate_Gm<false>(Gm, T, U, 0, mmax);
+          interpolate_Gm<false>(Gm, T, U, /* zeta_over_two_rho = */ 0, mmax);
         }
       }
       /// @param[in] Gm pointer to array of @c mmax+1 @c Real elements, on
       ///               return this contains the core integral for Slater-type
       ///               geminal, \f$ \exp(-zeta r_{12}) \f$ ,
-      ///               namely \f$ \sqrt{U} (G_{m-1}(T,U) - G_m(T,U)), m \in [0,m_\mathrm{max}] \f$ where\
-      //                \f$ G_{m}(T,U) = \int_0^1 t^{2m} \exp(U(1-t^{-2}) - Tt^2) dt \f$, where
+      ///               namely \f$ (G_{m-1}(T,U) - G_m(T,U)) \zeta / (2 \rho), m \in [0,m_\mathrm{max}] \f$ where
+      ///               \f$ G_{m}(T,U) = \int_0^1 t^{2m} \exp(U(1-t^{-2}) - Tt^2) dt \f$, where
       ///               \f$ T = \rho |\vec{P} - \vec{Q}|^2 \f$ and
       ///               \f$ U = \zeta^2 / (4 \rho) \f$
       /// @param[in] one_over_rho \f$ 1/\rho \f$
@@ -948,7 +946,7 @@ namespace libint2 {
         assert(U > 0);  // integral factorizes into 2 overlaps for U = 0
         const auto zeta_over_two_rho = 0.5 * zeta * one_over_rho;
         if (T > Tmax) {
-          eval_Gm_urr(Gm, T, U, mmax, -1);
+          eval_urr<true>(Gm, T, U, zeta_over_two_rho, mmax);
         } else {
           interpolate_Gm<true>(Gm, T, U, zeta_over_two_rho, mmax);
         }
@@ -970,7 +968,7 @@ namespace libint2 {
         Real G_m1 = 0;
         Real G_0 = 0;
         if (U == 0) {  // \sqrt{U} G_{-1} is finite, need to handle that case separately
-          assert(compute_Gm1 == false);
+          assert(!compute_Gm1);
           if (T < std::numeric_limits<Real>::epsilon()) {
             G_0 = 1;
           }
@@ -1012,13 +1010,16 @@ namespace libint2 {
 
       /// Computes core integrals by upward recursion from \f$ G_{-1} (T,U) \f$ and \f$ G_0 (T,U) \f$
       /// this is unstable for small T, so use when interpolation does not apply.
-      /// @param[out] Gm \f$ G_m(T,U), m=mmin..mmax \f$ , i.e. @c Gm[m] \f$ = G_{\mathrm{mmin} + m}(T,U) \f$
+      /// @tparam[in] Exp if true, will compute core integrals of the exponential operator, otherwise will compute Yukawa
+      /// @param[out] Gm_vec pointer to an array with at least @c mmax+1 elements, on output contains:
+      ///    - if `Exp==false`, `Gm_vec[m]` contains \f$ G_m(T,U), m=0..mmax\f$ ;
+      ///    - if `Exp==true`, `Gm_vec[m]` contains \f$ \frac{\zeta}{2 \rho} \left( G_{m-1}(T,U) - G_m(T,U) \right), m=0..mmax \f$;
       /// @param[in] T the value of \f$ T \f$
       /// @param[in] U the value of \f$ U \f$
+      /// @param[in] zeta_over_two_rho the value of \f$ \frac{\zeta}{2 \rho} \f$, only used if @c Exp==true
       /// @param[in] mmax the maximum value of \f$ m \f$
-      /// @param[in] mmin the minimum value of \f$ m \f$ ; the only valid values are 0 and -1
-      static void eval_Gm_urr(Real* Gm, Real T, Real U, size_t mmax, long mmin) {
-        assert(mmin == 0 || mmin == -1);
+      template <bool Exp>
+      static void eval_urr(Real* Gm_vec, Real T, Real U, Real zeta_over_two_rho, size_t mmax) {
         assert(T > 0);
         assert(U > 0);
 
@@ -1033,11 +1034,21 @@ namespace libint2 {
         const Real erfc_k = exp(kappa*kappa - T) * erfc(kappa);
         const Real erfc_l = exp(lambda*lambda - T) * erfc(lambda);
 
-        Real G_m1_value;
-        Real& G_m1 = (mmin == -1) ? Gm[0] : G_m1_value;
-        G_m1 = pfac * (erfc_k + erfc_l) * oo_sqrt_U;
-        Real& G_0 = (mmin == -1) ? Gm[1] : Gm[0];
-        G_0 = pfac * (erfc_k - erfc_l) * oo_sqrt_T;
+        Real Gmm1; // will contain G[m-1]
+        Real Gm; // will contain G[m]
+        Real Gmp1; // will contain G[m+1]
+        Gmm1 = pfac * (erfc_k + erfc_l) * oo_sqrt_U;  // G_{-1}
+        Gm = pfac * (erfc_k - erfc_l) * oo_sqrt_T;   // G_{0}
+        if
+#if __cplusplus >= 201703L
+            constexpr
+#endif
+            (!Exp) {
+          Gm_vec[0] = Gm;
+        }
+        else {
+          Gm_vec[0] = (Gmm1 - Gm) * zeta_over_two_rho;
+        }
 
         if (mmax > 0) {
 
@@ -1046,13 +1057,19 @@ namespace libint2 {
           const Real two_U = 2.0 * U;
           const Real exp_mT = exp(-T);
 
-          Real* Gmm1 = &G_m1;
-          Real* Gm0 = &G_0;
-          Real* Gmp1 = Gm0 + 1;
-          for(unsigned int m=1, two_m_minus_1=1; m<=mmax; ++m, two_m_minus_1+=2, ++Gmp1) {
-            *Gmp1 = oo_two_T * ( two_m_minus_1 * *Gm0 + two_U * *Gmm1 - exp_mT);
-            Gmm1 = Gm0;
-            Gm0 = Gmp1;
+          for(unsigned int m=0, two_m_minus_1=1; m<mmax; ++m, two_m_minus_1+=2) {
+            Gmp1 = oo_two_T * (two_m_minus_1 * Gm + two_U * Gmm1 - exp_mT);
+            if
+#if __cplusplus >= 201703L
+                constexpr
+#endif
+                (!Exp) {
+              Gm_vec[m + 1] = Gmp1;
+            } else {
+              Gm_vec[m + 1] = (Gm - Gmp1) * zeta_over_two_rho;
+            }
+            Gmm1 = Gm;
+            Gm = Gmp1;
           }
         }
 
@@ -1060,13 +1077,13 @@ namespace libint2 {
       }
 
       /// compute core integrals by Chebyshev interpolation
-      /// @tparam[in] exp if true, will compute core integrals of the exponential operator, otherwise will compute Yukawa
-      /// @param[out] Gm_vec if @c exp==false Gm_vec[m]=\f$ G_m(T,U), m=0..mmax \f$, otherwise Gm_vec[m]=\f$ \frac{\zeta}{2 \rho} \left( G_{m-1}(T,U) - G_m(T,U) \right), m=0..mmax \f$ ; must be at least @c mmax+1 elements long
+      /// @tparam[in] Exp if true, will compute core integrals of the exponential operator, otherwise will compute Yukawa
+      /// @param[out] Gm_vec if @c Exp==false Gm_vec[m]=\f$ G_m(T,U), m=0..mmax \f$, otherwise Gm_vec[m]=\f$ \frac{\zeta}{2 \rho} \left( G_{m-1}(T,U) - G_m(T,U) \right), m=0..mmax \f$ ; must be at least @c mmax+1 elements long
       /// @param[in] T the value of \f$ T \f$
       /// @param[in] U the value of \f$ U \f$
-      /// @param[in] zeta_over_two_rho the value of \f$ \frac{\zeta}{2 \rho} \f$, only used if @c exp==true
+      /// @param[in] zeta_over_two_rho the value of \f$ \frac{\zeta}{2 \rho} \f$, only used if @c Exp==true
       /// @param[in] mmax the maximum value of \f$ m \f$
-      template <bool exp>
+      template <bool Exp>
       void interpolate_Gm(Real* Gm_vec, Real T, Real U, Real zeta_over_two_rho, long mmax) const {
         assert(T >= 0);
         assert(U >= Umin && U <= Umax);
@@ -1088,11 +1105,11 @@ namespace libint2 {
         // which interval does this T fall into?
         const int Tint = T < 2 ? 0 : int(std::floor(std::log2(T)));  assert(Tint >= 0 && Tint < 10);
         // precomputed 1 / 2^K
-        const constexpr Real one_over_2K[] = {1, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125, 0.00390625, .001953125};
+        constexpr Real one_over_2K[] = {1, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125, 0.00390625, .001953125};
         // which interval does this U fall into?
         const int Uint = int(std::floor(std::log10(U / Umin))); assert(Uint >= 0 && Uint < 10);
         // precomputed 1 / 10^(cheb_table_uminlog10 + K)
-        const constexpr Real one_over_10K[] = {1. / detail::pow10(cheb_table_uminlog10),
+        constexpr Real one_over_10K[] = {1. / detail::pow10(cheb_table_uminlog10),
                                                1. / detail::pow10(cheb_table_uminlog10+1),
                                                1. / detail::pow10(cheb_table_uminlog10+2),
                                                1. / detail::pow10(cheb_table_uminlog10+3),
@@ -1143,22 +1160,26 @@ namespace libint2 {
         libint2::simd::VectorAVXDouble u3vec(u12, u13, u14, u15);
 #endif // AVX
 
-        Real Gmm1 = 0.0; // will track the previous value, only used for exp==false
+        Real Gmm1 = 0.0; // will track the previous value, only used for Exp==false
 
-        constexpr const bool compute_Gmm10 = true;
+        constexpr bool compute_Gmm10 = true;
         long mmin_interp;
         if (compute_Gmm10) {
           // precision of interpolation for m=-1,0 can be insufficient, just evaluate explicitly
           Real G0;
-          std::tie(exp ? G0 : Gm_vec[0], Gmm1) = eval_G0_and_maybe_Gm1<exp>(T, U);
-          if (exp) {
+          std::tie(Exp ? G0 : Gm_vec[0], Gmm1) = eval_G0_and_maybe_Gm1<Exp>(T, U);
+          if
+#if __cplusplus >= 201703L
+              constexpr
+#endif
+              (Exp) {
             Gm_vec[0] = (Gmm1 - G0) * zeta_over_two_rho;
             Gmm1 = G0;
           }
           mmin_interp = 1;
         }
         else
-          mmin_interp = (exp == true) ? -1 : 0;
+          mmin_interp = Exp ? -1 : 0;
 
         // now compute the rest
         for(long m=mmin_interp; m<=mmax; ++m){
@@ -1264,7 +1285,11 @@ namespace libint2 {
             }
 #endif // AVX
 
-            if (exp == false) {
+            if
+#if __cplusplus >= 201703L
+                constexpr
+#endif
+                (!Exp) {
               Gm_vec[m] = Gm;
             }
             else {

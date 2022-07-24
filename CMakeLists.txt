@@ -5,8 +5,8 @@ project(Libint LANGUAGES CXX C)
 # Set Libint version ===================================================================================================
 set(LIBINT_MAJOR_VERSION 2)
 set(LIBINT_MINOR_VERSION 7)
-set(LIBINT_MICRO_VERSION 0)
-set(LIBINT_BUILDID "beta.6")
+set(LIBINT_MICRO_VERSION 2)
+set(LIBINT_BUILDID "")
 set(LIBINT_VERSION "${LIBINT_MAJOR_VERSION}.${LIBINT_MINOR_VERSION}.${LIBINT_MICRO_VERSION}")
 if (LIBINT_BUILDID)
     set(LIBINT_EXT_VERSION "${LIBINT_MAJOR_VERSION}.${LIBINT_MINOR_VERSION}.${LIBINT_MICRO_VERSION}-${LIBINT_BUILDID}")
@@ -42,13 +42,13 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shiv Upadhyay")
 set(CPACK_BINARY_DEB ON CACHE BOOL ON)
 include(CPack)
 
-
 # Options ==============================================================================================================
 
 redefaultable_option(REQUIRE_CXX_API "C++11 Libint interface" ON)
 redefaultable_option(ENABLE_FORTRAN "Fortran03+ Libint interface" OFF)
 redefaultable_option(ENABLE_MPFR "Use GNU MPFR library for high-precision testing (EXPERTS ONLY)" OFF)
 redefaultable_option(LIBINT2_BUILD_SHARED_AND_STATIC_LIBS "Build in one shot static and shared library variants. Uses -fPIC." OFF)
+redefaultable_option(LIBINT2_PYTHON "Python bindings" OFF)
 if (NOT LIBINT2_REALTYPE)
     set(LIBINT2_REALTYPE double)
 endif()
@@ -204,7 +204,7 @@ if (NOT CMAKE_CXX_EXTENSIONS)
   set_target_properties(libint2_obj PROPERTIES CXX_EXTENSIONS OFF)
 endif(NOT CMAKE_CXX_EXTENSIONS)
 
-if(BUILD_SHARED_LIBS OR LIBINT2_BUILD_SHARED_AND_STATIC_LIBS)
+if(BUILD_SHARED_LIBS OR LIBINT2_BUILD_SHARED_AND_STATIC_LIBS OR LIBINT2_PYTHON)
   set_target_properties(libint2_obj PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -285,7 +285,7 @@ if (LIBINT_HAS_CXX_API)
   get_filename_component(DATADIR_ABSOLUTE "${CMAKE_INSTALL_PREFIX}/${LIBINT2_INSTALL_DATADIR}" ABSOLUTE)
   target_compile_definitions(libint2_cxx INTERFACE
           $<BUILD_INTERFACE:SRCDATADIR="${PROJECT_SOURCE_DIR}/lib/basis">
-          $<INSTALL_INTERFACE:DATADIR="${CMAKE_INSTALL_PREFIX}/${LIBINT2_INSTALL_DATADIR}">)
+          $<INSTALL_INTERFACE:DATADIR="${DATADIR_ABSOLUTE}">)
   # Add library to the list of installed components
   install(TARGETS libint2_cxx EXPORT libint2
           COMPONENT cxx
@@ -301,7 +301,7 @@ endif(LIBINT_HAS_CXX_API)
 # Tests ================================================================================================================
 
 redefaultable_option(LIBINT2_BUILD_TESTS "Build tests." ON)
-if(LIBINT2_BUILD_TESTS)
+if (LIBINT2_BUILD_TESTS)
   enable_testing(true)
   add_custom_target_subproject(libint2 check USES_TERMINAL COMMAND ${CMAKE_CTEST_COMMAND} -V -R "libint2/")
   
@@ -323,6 +323,14 @@ if(LIBINT2_BUILD_TESTS)
           COMMAND $<TARGET_FILE:eritest-libint2> 2 1)
   set_tests_properties(libint2/eritest/run2
           PROPERTIES FIXTURES_REQUIRED LIBINT2_ERITEST_EXEC)
+  add_test(NAME libint2/eritest/run3
+          COMMAND $<TARGET_FILE:eritest-libint2> 3 1)
+  set_tests_properties(libint2/eritest/run3
+          PROPERTIES FIXTURES_REQUIRED LIBINT2_ERITEST_EXEC)
+  add_test(NAME libint2/eritest/run4
+          COMMAND $<TARGET_FILE:eritest-libint2> 4 1)
+  set_tests_properties(libint2/eritest/run4
+          PROPERTIES FIXTURES_REQUIRED LIBINT2_ERITEST_EXEC)
   
   if (LIBINT_HAS_CXX_API)
       set(utests_src
@@ -332,14 +340,17 @@ if(LIBINT2_BUILD_TESTS)
               tests/unit/fixture.h
               tests/unit/test-1body.cc
               tests/unit/test-2body.cc
-              tests/unit/test-core-ints.cc
+              tests/unit/test-basis.cc
               tests/unit/test-c-api.cc
               tests/unit/test-core.cc
+              tests/unit/test-core-ints.cc
               tests/unit/test-permute.cc
+              tests/unit/test-precision.cc
               tests/unit/test-shell-order.cc
               tests/unit/test-util.cc
               )
       add_executable(unit_tests-libint2 EXCLUDE_FROM_ALL tests/unit/test.cc ${utests_src})
+      target_compile_definitions(unit_tests-libint2 PRIVATE -DNO_LIBINT_COMPILER_CODE)
       target_link_libraries(unit_tests-libint2 libint2_cxx)
       add_test(libint2/unit/build "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target unit_tests-libint2)
       set_tests_properties(libint2/unit/build PROPERTIES FIXTURES_SETUP LIBINT2_UNIT_TESTS_EXEC)
@@ -532,3 +543,19 @@ feature_summary(WHAT ALL
 # appendix: misc details
 ###############################################################################
 SET(CMAKE_COLOR_MAKEFILE ON)
+
+if (LIBINT2_PYTHON)
+  add_subdirectory(python EXCLUDE_FROM_ALL)
+  target_compile_definitions(
+    libint2-python
+    PRIVATE
+    __COMPILING_LIBINT2
+    )
+  target_include_directories(
+    libint2-python
+    PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_BINARY_DIR}/include
+    ${EIGEN3_INCLUDE_DIR}
+    )
+endif()
