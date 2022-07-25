@@ -66,7 +66,7 @@ jobs:
       - name: Rename deb
         shell: bash
         run: |
-          mv builddir/Libint-2.7.0-Linux.deb ${{ matrix.config.artifact }}
+          mv builddir/Libint-2.7.2-Linux.deb ${{ matrix.config.artifact }}
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
