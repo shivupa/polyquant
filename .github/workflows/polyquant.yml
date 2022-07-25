@@ -72,9 +72,9 @@ jobs:
             ninja-build \
             cmake \
             libboost-all-dev \
-            intel-mkl \
+            libblas-dev \
+            liblapack-dev \
             libhdf5-dev \
-            libfmt-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
           ninja --version
