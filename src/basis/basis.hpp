@@ -45,7 +45,7 @@ public:
                                                const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
   void set_pure_from_input(const POLYQUANT_INPUT &input);
   void set_libint_shell_norm();
-  void apply_pyscf_normalization();
+  void print_basis();
   /**
    * @brief The name of the basis to load
    *
@@ -56,7 +56,6 @@ public:
    *
    */
   std::vector<libint2::BasisSet> basis;
-  std::vector<libint2::BasisSet> unnormalized_basis_for_output;
   /**
    * @brief Number of basis functions
    *
