@@ -48,8 +48,8 @@ void POLYQUANT_MOLDEN::dump_atoms(std::vector<libint2::Atom> &atoms) {
 }
 
 void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis) {
-  const auto shell2ao = libint2::BasisSet::compute_shell2bf(basis);
-  const auto atom2shell = libint2::BasisSet::atom2shell(atoms, basis);
+  const auto shell2ao = basis.shell2bf();
+  const auto atom2shell = basis.atom2shell(atoms);
   this->molden_file << "[GTO]" << std::endl;
 
   // ao map change from the libint ordering to the molden ordering
@@ -68,7 +68,7 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
           using namespace libint2;
           int m;
           FOR_SOLIDHARM_MOLDEN(l, m)
-          const auto ao_in_shell = INT_SOLIDHARMINDEX(l, m);
+          const auto ao_in_shell = libint2::INT_SOLIDHARMINDEX(l, m);
           ao_map[ao_molden] = ao + ao_in_shell;
           ++ao_molden;
           END_FOR_SOLIDHARM_MOLDEN
@@ -77,11 +77,11 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
           using namespace libint2;
           int i, j, k;
           FOR_CART_MOLDEN(i, j, k, l)
-          const auto ao_in_shell = INT_CARTINDEX(l, i, j);
+          const auto ao_in_shell = libint2::INT_CARTINDEX(l, i, j);
           ao_map[ao_molden] = ao + ao_in_shell;
           ++ao_molden;
           END_FOR_CART_MOLDEN
-          ao += INT_NCART(l);
+          ao += libint2::INT_NCART(l);
         }
       }
     }

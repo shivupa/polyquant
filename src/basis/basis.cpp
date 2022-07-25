@@ -47,19 +47,21 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
         libint_atom.atomic_number = atom_symb_to_num(center_basis["library"]["atom"]);
       }
       auto temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
-      // std::move(atom_basis.begin(), atom_basis.end(),
-      // std::back_inserter(this->basis));
-      // this->basis.back().move({{atoms[a].x, atoms[a].y, atoms[a].z}});
-      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      std::vector<libint2::Shell> combined_functions;
+      combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
+      combined_functions.insert(combined_functions.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      qp_basis = libint2::BasisSet(combined_functions);
       qp_basis.set_pure(pure);
-      // std::move(atom_basis.begin(), atom_basis.end(), std::back_inserter(this->basis));
     } else {
       auto libint_atoms = molecule.to_libint_atom(classical_part_key);
       for (auto &libint_atom : libint_atoms) {
         libint_atom.atomic_number = atom_symb_to_num(classical_part_key);
       }
       libint2::BasisSet temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
-      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      std::vector<libint2::Shell> combined_functions;
+      combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
+      combined_functions.insert(combined_functions.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      qp_basis = libint2::BasisSet(combined_functions);
       qp_basis.set_pure(pure);
     }
   } catch (...) {
@@ -81,14 +83,17 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
     filename += ".g94";
     Polyquant_dump_basis_to_file(r.text, filename);
     auto temp_atom_basis = libint2::BasisSet::read_g94_basis_library(filename);
+    std::vector<libint2::Shell> combined_functions;
+    combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
     for (auto &libint_atom : libint_atoms) {
       // check all elements
       for (auto s : temp_atom_basis.at(libint_atom.atomic_number)) {
         Polyquant_cout("Adding basis");
-        qp_basis.push_back(std::move(s));
-        qp_basis.back().move({{libint_atom.x, libint_atom.y, libint_atom.z}});
+        combined_functions.push_back(std::move(s));
+        combined_functions.back().move({{libint_atom.x, libint_atom.y, libint_atom.z}});
       }
     }
+    qp_basis = libint2::BasisSet(combined_functions);
     qp_basis.set_pure(pure);
   }
 }
@@ -110,15 +115,18 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_custom(const POLYQUANT_IN
       //           std::back_inserter(this->basis));
       // auto const classical_part =
       // molecule.classical_particles[classical_part_key];
+      std::vector<libint2::Shell> combined_functions;
+      combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
       for (auto center_idx : classical_part.center_idx) {
         // check all elements
         for (auto Z = 1; Z < 100; Z++) {
           for (auto s : atom_basis.at(Z)) {
-            qp_basis.push_back(std::move(s));
-            qp_basis.back().move({{molecule.centers[center_idx][0], molecule.centers[center_idx][1], molecule.centers[center_idx][2]}});
+            combined_functions.push_back(std::move(s));
+            combined_functions.back().move({{molecule.centers[center_idx][0], molecule.centers[center_idx][1], molecule.centers[center_idx][2]}});
           }
         }
       }
+      qp_basis = libint2::BasisSet(combined_functions);
       qp_basis.set_pure(this->pure);
     }
   } else {
@@ -267,7 +275,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
         load_quantum_particle_basis(input, molecule, quantum_part_key, qp_basis);
         this->basis.emplace_back(qp_basis);
         Polyquant_cout("Added basis for " + quantum_part_key);
-        size_t nb = libint2::nbf(qp_basis);
+        size_t nb = qp_basis.nbf();
         Polyquant_cout("Number of basis functions: " + std::to_string(nb));
         this->num_basis.emplace_back(nb);
       }
