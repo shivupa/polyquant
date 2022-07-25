@@ -72,7 +72,7 @@ jobs:
             ninja-build \
             cmake \
             libboost-all-dev \
-            libblas-dev \
+            intel-mkl \
             liblapack-dev \
             libhdf5-dev \
             ${{ matrix.config.cc }} \
