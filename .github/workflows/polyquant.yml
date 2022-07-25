@@ -74,6 +74,7 @@ jobs:
             libboost-all-dev \
             intel-mkl \
             libhdf5-dev \
+            libfmt-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
           ninja --version
