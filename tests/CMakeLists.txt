@@ -9,23 +9,11 @@ add_executable(
   unit_tests/ci/ci_test.cpp
   integration_tests/calculation/calculation_test.cpp)
 # find the required testing library and link the other required libraries
-target_link_libraries(main_test Libint2::cxx)
-if(Eigen3_FOUND)
-  include_directories(${Eigen3_INC})
-  target_link_libraries(main_test Eigen3::Eigen)
-endif(Eigen3_FOUND)
-
 target_link_libraries(
   main_test
   doctest::doctest
-  io
-  molecule
-  basis
-  integral
-  calculation
-  scf
-  ci)
+  polyquant_lib)
 
-target_include_directories(main_test PUBLIC include)
+target_include_directories(main_test PRIVATE include)
 doctest_discover_tests(main_test ADD_LABELS 1)
 # add_test(main_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/main_test)
