@@ -15,9 +15,9 @@ void POLYQUANT_MOLDEN::create_file(const std::string &fname) {
 }
 
 void POLYQUANT_MOLDEN::dump(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff,
-                            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels, std::vector<double> &MO_a_occupation,
+                            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_a_occupation,
                             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels,
-                            std::vector<double> &MO_b_occupation) {
+                            Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_b_occupation) {
   this->dump_header();
   this->dump_atoms(atoms);
   this->dump_basis(atoms, basis);
@@ -48,8 +48,8 @@ void POLYQUANT_MOLDEN::dump_atoms(std::vector<libint2::Atom> &atoms) {
 }
 
 void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis) {
-  const auto shell2ao = libint2::BasisSet::compute_shell2bf(basis);
-  const auto atom2shell = libint2::BasisSet::atom2shell(atoms, basis);
+  const auto shell2ao = basis.shell2bf();
+  const auto atom2shell = basis.atom2shell(atoms);
   this->molden_file << "[GTO]" << std::endl;
 
   // ao map change from the libint ordering to the molden ordering
@@ -68,7 +68,7 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
           using namespace libint2;
           int m;
           FOR_SOLIDHARM_MOLDEN(l, m)
-          const auto ao_in_shell = INT_SOLIDHARMINDEX(l, m);
+          const auto ao_in_shell = libint2::INT_SOLIDHARMINDEX(l, m);
           ao_map[ao_molden] = ao + ao_in_shell;
           ++ao_molden;
           END_FOR_SOLIDHARM_MOLDEN
@@ -77,11 +77,11 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
           using namespace libint2;
           int i, j, k;
           FOR_CART_MOLDEN(i, j, k, l)
-          const auto ao_in_shell = INT_CARTINDEX(l, i, j);
+          const auto ao_in_shell = libint2::INT_CARTINDEX(l, i, j);
           ao_map[ao_molden] = ao + ao_in_shell;
           ++ao_molden;
           END_FOR_CART_MOLDEN
-          ao += INT_NCART(l);
+          ao += libint2::INT_NCART(l);
         }
       }
     }
@@ -116,8 +116,9 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
 }
 
 void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy,
-                                     std::vector<std::string> &MO_a_symmetry_labels, std::vector<double> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff,
-                                     Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels, std::vector<double> &MO_b_occupation) {
+                                     std::vector<std::string> &MO_a_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_a_occupation,
+                                     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy,
+                                     std::vector<std::string> &MO_b_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_b_occupation) {
   this->molden_file << "[MO]" << std::endl;
 
   auto nmo_a = MO_a_coeff.cols();
@@ -125,7 +126,7 @@ void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen
     this->molden_file << "  Sym= " << std::uppercase << MO_a_symmetry_labels[mo_idx] << std::endl;
     this->molden_file << "  Ene= " << std::setprecision(10) << std::setw(20) << MO_a_energy[mo_idx] << std::endl;
     this->molden_file << "  Spin= Alpha" << std::endl;
-    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_a_occupation[mo_idx] << std::endl;
+    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_a_occupation.diagonal()(mo_idx) << std::endl;
     for (auto ao_idx = 0; ao_idx < MO_a_coeff.rows(); ao_idx++) {
       this->molden_file << "    " << std::setw(10) << ao_idx + 1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_a_coeff(ao_map[ao_idx], mo_idx) << std::endl;
       // this->molden_file << "    " << std::setw(10) << ao_idx+1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_a_coeff(ao_idx, mo_idx) << std::endl;
@@ -136,7 +137,7 @@ void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen
     this->molden_file << "  Sym= " << std::uppercase << MO_b_symmetry_labels[mo_idx] << std::endl;
     this->molden_file << "  Ene= " << std::setprecision(10) << std::setw(20) << MO_b_energy[mo_idx] << std::endl;
     this->molden_file << "  Spin= Beta" << std::endl;
-    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_b_occupation[mo_idx] << std::endl;
+    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_b_occupation.diagonal()(mo_idx) << std::endl;
     for (auto ao_idx = 0; ao_idx < MO_b_coeff.rows(); ao_idx++) {
       this->molden_file << "    " << std::setw(10) << ao_idx + 1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_b_coeff(ao_map[ao_idx], mo_idx) << std::endl;
       // this->molden_file << "    " << std::setw(10) << ao_idx+1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_b_coeff(ao_idx, mo_idx) << std::endl;

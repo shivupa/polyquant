@@ -20,7 +20,9 @@ TEST_SUITE("INTEGRAL") {
     POLYQUANT_INTEGRAL test_int;
     test_int.setup_integral(test_inp, test_bas, test_mol);
     test_int.calculate_overlap();
-    CHECK(test_int.overlap[0](0, 0) ==doctest::Approx(12.5663706144).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    // Verified using pyscf
+    // Tue Jul  5 12:27:07 PM EDT 2022
+    CHECK(test_int.overlap[0](0, 0) ==doctest::Approx(1.0).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     CHECK(test_int.overlap[0](3, 5) ==doctest::Approx(0.0).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
 
@@ -30,7 +32,9 @@ TEST_SUITE("INTEGRAL") {
     POLYQUANT_BASIS test_bas(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int(test_inp, test_bas, test_mol);
     test_int.calculate_kinetic();
-    CHECK(test_int.kinetic[0](0, 0) ==doctest::Approx(9.5508423276).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    // Verified using pyscf
+    // Tue Jul  5 12:27:19 PM EDT 2022
+    CHECK(test_int.kinetic[0](0, 0) ==doctest::Approx(0.7600318835666091).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     CHECK(test_int.kinetic[0](3, 5) ==doctest::Approx(0.0).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
 
@@ -40,8 +44,10 @@ TEST_SUITE("INTEGRAL") {
     POLYQUANT_BASIS test_bas(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int(test_inp, test_bas, test_mol);
     test_int.calculate_nuclear();
-    CHECK(test_int.nuclear[0](0, 0) ==doctest::Approx(-73.3460596066).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
-    CHECK(test_int.nuclear[0](3, 5) ==doctest::Approx(1.621655966).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    // Verified using pyscf
+    // Tue Jul  5 12:33:46 PM EDT 2022
+    CHECK(test_int.nuclear[0](0, 0) ==doctest::Approx(-5.836693971481976).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    CHECK(test_int.nuclear[0](3, 5) ==doctest::Approx(0.22351644812734084).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
   TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis") {
     POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
@@ -51,7 +57,7 @@ TEST_SUITE("INTEGRAL") {
     test_int.setup_integral(test_inp, test_bas, test_mol);
     test_int.calculate_overlap();
     test_int.symmetric_orthogonalization();
-    CHECK(test_int.orth_X[0](0, 0) ==doctest::Approx(0.3360854745).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
-    CHECK(test_int.orth_X[0](3, 5) ==doctest::Approx(-0.0444794772).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    CHECK(test_int.orth_X[0](0, 0) ==doctest::Approx(1.2111064830).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    CHECK(test_int.orth_X[0](3, 5) ==doctest::Approx(-0.1122800384).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
 }

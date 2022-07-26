@@ -73,6 +73,7 @@ jobs:
             cmake \
             libboost-all-dev \
             intel-mkl \
+            liblapack-dev \
             libhdf5-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
@@ -82,7 +83,7 @@ jobs:
           sudo dpkg -i polyquant-libint.deb
           mkdir builddir
           echo $MKLROOT
-          ls /usr/share/libint/2.7.0/basis/
+          ls /usr/share/libint/*/basis/
       - name: Create a directory that the libint imported target requires. DO NOT DELETE THIS STEP.
         shell: bash
         run: |
@@ -112,5 +113,5 @@ jobs:
         shell: bash
         working-directory: builddir
         env:
-          LIBINT_DATA_PATH: /usr/share/libint/2.7.0/basis/
+          LIBINT_DATA_PATH: /usr/share/libint/2.7.2/basis/
         run: ctest --output-on-failure

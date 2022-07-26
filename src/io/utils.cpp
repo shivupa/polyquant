@@ -66,7 +66,7 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
 }
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ) {
+                   std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> &occ) {
   auto stride = 5;
   Polyquant_cout("MOLECULAR ORBITALS");
   for (auto i = 0; i < E_orbitals.size(); i++) {
@@ -109,7 +109,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
           }
-          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j]((mo_idx * stride) + mo_offset)));
+          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j].diagonal()((mo_idx * stride) + mo_offset)));
         }
         line += fmt::format("{:10}", "");
         Polyquant_cout(line);

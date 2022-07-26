@@ -93,7 +93,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
 
   scf_calc.setup_calculation(this->input_params, this->input_molecule, this->input_basis, this->input_integral);
   bool dump_for_qmcpack = false;
+  bool skip_scf = false;
+  std::deque<bool> freeze_density_from_input;
   std::string hdf5_filename = "Default.h5";
+  std::vector<std::vector<std::vector<int>>> permute_orbitals_vector;
 
   if (this->input_params.input_data.contains("verbose")) {
     scf_calc.verbose = this->input_params.input_data["verbose"];
@@ -145,10 +148,32 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
         scf_calc.Cauchy_Schwarz_threshold = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_threshold"];
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("force_independent_converged")) {
+        scf_calc.independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["force_independent_converged"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("occupation_mode")) {
+        scf_calc.occupation_mode = this->input_params.input_data["keywords"]["mf_keywords"]["occupation_mode"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("stop_after_independent_converged")) {
+        scf_calc.stop_after_independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["stop_after_independent_converged"];
+      }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("freeze_density")) {
+        auto freeze_dens_inp = this->input_params.input_data["keywords"]["mf_keywords"]["freeze_density"];
+        freeze_density_from_input.resize(0);
+        if (freeze_dens_inp.type() == json::value_t::array) {
+          for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+            freeze_density_from_input.push_back(freeze_dens_inp[i]);
+            std::cout << std::boolalpha << freeze_density_from_input[i] << std::endl;
+          }
+        }
+      }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (this->input_params.input_data["keywords"]["mf_keywords"]["from_file"]) {
           dump_for_qmcpack = true;
           mean_field_type = "FILE";
+          if (this->input_params.input_data["keywords"]["mf_keywords"].contains("from_file_skipiterations")) {
+            skip_scf = this->input_params.input_data["keywords"]["mf_keywords"]["from_file_skipiterations"];
+          }
         } else {
           dump_for_qmcpack = true;
           mean_field_type = "SCF";
@@ -159,12 +184,49 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         // TODO if there is ever more than one mean field type then this will
         // have to change.
       }
+      if (this->input_params.input_data["keywords"]["mf_keywords"].contains("permute_orbs")) {
+        permute_orbitals_vector.resize(this->input_params.input_data["keywords"]["mf_keywords"]["permute_orbs"].size());
+        auto part_idx = 0;
+        for (auto &particle_MO_order : this->input_params.input_data["keywords"]["mf_keywords"]["permute_orbs"]) {
+          auto spin_idx = 0;
+          permute_orbitals_vector[part_idx].resize(particle_MO_order.size());
+          for (auto &spin_MO_order : particle_MO_order) {
+            for (auto &MO_idx : spin_MO_order) {
+              permute_orbitals_vector[part_idx][spin_idx].push_back(MO_idx);
+            }
+            spin_idx++;
+          }
+          part_idx++;
+        }
+      }
     }
   }
   if (mean_field_type == "SCF") {
+    scf_calc.setup_standard();
+    if (freeze_density_from_input.size() == this->input_molecule.quantum_particles.size()) {
+      for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+        this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
+      }
+    }
+    if (permute_orbitals_vector.size() != 0) {
+      this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
+      this->scf_calc.permute_orbitals_start = true;
+    }
     scf_calc.run();
   } else if (mean_field_type == "FILE") {
-    scf_calc.from_file(hdf5_filename);
+    if (permute_orbitals_vector.size() != 0) {
+      this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
+      this->scf_calc.permute_orbitals_start = true;
+    }
+    scf_calc.setup_from_file(hdf5_filename);
+    if (freeze_density_from_input.size() == this->input_molecule.quantum_particles.size()) {
+      for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+        this->scf_calc.freeze_density[i] = freeze_density_from_input[i];
+      }
+    }
+    if (!skip_scf) {
+      scf_calc.run();
+    }
   }
   if (dump_for_qmcpack) {
     dump_mf_for_qmcpack(hdf5_filename);
@@ -307,7 +369,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
     int multiplicity = quantum_part.multiplicity;
-    libint2::BasisSet basis = this->input_basis.unnormalized_basis_for_output[quantum_part_idx];
+    libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {

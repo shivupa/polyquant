@@ -145,6 +145,27 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
 }
 // TODO
 void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::string> atomic_names, std::vector<std::vector<libint2::Shell>> unique_shells) {
+  // apply the shell normalization used in
+  // https://github.com/pyscf/pyscf/blob/53e2069b4a3a2e0616bdf4d8c2e3f898c10a8330/pyscf/gto/mole.py#L827
+  //_nomalize_contracted_ao in pyscf/gto/mole.py
+  // lambda for normalization
+  auto gaussianint_lambda = [](auto n, auto alpha) {
+    auto n1 = (n + 1.0) * 0.5;
+    return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
+  };
+  auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
+    auto gint_val = gaussianint_lambda((l * 2.0) + 2.0, 2.0 * exponent);
+    return 1.0 / std::sqrt(gint_val);
+  };
+  auto libint_norm = [](auto l, auto alpha) {
+    // used in libint -> const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
+    const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
+    // const auto sqrt_Pi_cubed = std::pow(std::numbers::pi_v<double>, 1.5);
+    const auto two_alpha = 2.0 * alpha;
+    const auto two_alpha_to_am32 = std::pow(two_alpha, (l + 1)) * std::sqrt(two_alpha);
+    const auto normalization_factor = std::sqrt(std::pow(2.0, l) * two_alpha_to_am32 / (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * l]));
+    return normalization_factor;
+  };
   // lambda for removing normalization
   Polyquant_cout("dumping basis parameters");
   auto basis_group = root_group.create_group("basisset");
@@ -274,13 +295,50 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       auto basis_position_dataset = shell_group.create_dataset("Shell_coord", hdf5::datatype::create<std::vector<double>>(), hdf5::dataspace::create(origin));
       basis_position_dataset.write(origin);
       auto rad_func_group = shell_group.create_group("radfunctions");
+      std::vector<double> renormed_coefficients;
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        renormed_coefficients.push_back(shell.contr[0].coeff[p]);
+      }
+      auto l = shell.contr[0].l;
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        renormed_coefficients[p] /= libint_norm(l, shell.alpha[p]);
+      }
+      // apply pyscf gtonorm
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        renormed_coefficients[p] *= gtonorm_lambda(l, shell.alpha[p]);
+      }
+      // apply pyscf _nomalize_contracted_ao
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ee;
+      ee.setZero(shell.alpha.size(), shell.alpha.size());
+      for (auto i = 0ul; i < shell.alpha.size(); ++i) {
+        for (auto j = 0ul; j < shell.alpha.size(); ++j) {
+          auto n1 = l * 2 + 2;
+          auto alpha = shell.alpha[i] + shell.alpha[j];
+          ee(i, j) = gaussianint_lambda(l * 2 + 2, alpha);
+        }
+      }
+      double s1 = 0.0;
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        for (auto q = 0ul; q < shell.alpha.size(); ++q) {
+          s1 += renormed_coefficients[p] * ee(p, q) * renormed_coefficients[q];
+        }
+      }
+      s1 = 1.0 / std::sqrt(s1);
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        renormed_coefficients[p] *= s1;
+      }
+      // remove pyscf gtonorm
+      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
+        renormed_coefficients[p] /= gtonorm_lambda(l, shell.alpha[p]);
+      }
+
       for (auto i = 0ul; i < shell.alpha.size(); ++i) {
         auto curr_func_group = rad_func_group.create_group("DataRad" + std::to_string(i));
         // dump exponent and contraction coefficient
         double exponent = shell.alpha[i];
         auto exponent_dataset = curr_func_group.create_dataset("exponent", double_type, simple_space);
         exponent_dataset.write(exponent, double_type, simple_space);
-        double contraction = shell.contr[0].coeff.at(i);
+        double contraction = renormed_coefficients[i];
         auto contraction_dataset = curr_func_group.create_dataset("contraction", double_type, simple_space);
         contraction_dataset.write(contraction, double_type, simple_space);
       }

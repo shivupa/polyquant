@@ -3,6 +3,7 @@
 #include "io/molden_utilities.hpp"
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
+#include <filesystem>
 #include <h5cpp/hdf5.hpp>
 #include <libint2.hpp> // IWYU pragma: keep
 #include <libint2/chemistry/sto3g_atomic_density.h>
@@ -16,7 +17,14 @@ public:
   POLYQUANT_EPSCF() = default;
 
   POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral)
-      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
+      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral) {
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+
+      std::cout << "        Particle type " << quantum_part_idx << "  :  " << std::boolalpha << this->freeze_density[quantum_part_idx] << std::endl;
+      quantum_part_idx++;
+    }
+  };
 
   void form_H_core() override;
 
@@ -49,12 +57,32 @@ public:
 
   void form_fock() override;
 
+  void diag_fock_helper(int quantum_part_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &F_prime, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_C,
+                        Eigen::Matrix<double, Eigen::Dynamic, 1> &mo_e);
+
   void diag_fock() override;
 
   void form_DM() override;
 
   void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                      const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, int num_basis, int num_part);
+                      const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &occ, const int num_basis, const int num_part);
+
+  void form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
+
+  void form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
+
+  void form_occ();
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
+                                                                    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff2);
+
+  std::vector<std::vector<std::vector<int>>> permute_orbitals_vector;
+
+  bool permute_orbitals_start = false;
+
+  void permute_initial_MOs();
+
+  void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, std::vector<int> &permutation);
 
   void calculate_E_elec() override;
 
@@ -70,6 +98,10 @@ public:
 
   void guess_DM() override;
 
+  void setup_standard();
+
+  void calculate_integrals();
+
   void run() override;
 
   void print_start_iterations();
@@ -82,7 +114,7 @@ public:
 
   void print_error();
 
-  void from_file(std::string &filename);
+  void setup_from_file(std::string &filename);
 
   void print_params();
 
@@ -115,6 +147,12 @@ public:
    *
    */
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_ref_mom;
+
+  std::string occupation_mode = "aufbau";
+  std::deque<bool> freeze_density;
+
+  std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> occ;
 
   /**
    * @brief MO energy vector
@@ -164,10 +202,11 @@ public:
    */
   bool converged = false;
   bool independent_converged = false;
+  bool stop_after_independent_converged = false;
   int independent_converged_iteration_num = -1;
 
   bool diis_extrapolation = true;
-  int diis_start = 1;
+  int diis_start = 5;
   double diis_damping = 0.0;
   double diis_mixing_fraction = 0.0;
   int diis_size = 5;

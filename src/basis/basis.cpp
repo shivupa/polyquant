@@ -47,19 +47,21 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
         libint_atom.atomic_number = atom_symb_to_num(center_basis["library"]["atom"]);
       }
       auto temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
-      // std::move(atom_basis.begin(), atom_basis.end(),
-      // std::back_inserter(this->basis));
-      // this->basis.back().move({{atoms[a].x, atoms[a].y, atoms[a].z}});
-      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      std::vector<libint2::Shell> combined_functions;
+      combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
+      combined_functions.insert(combined_functions.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      qp_basis = libint2::BasisSet(combined_functions);
       qp_basis.set_pure(pure);
-      // std::move(atom_basis.begin(), atom_basis.end(), std::back_inserter(this->basis));
     } else {
       auto libint_atoms = molecule.to_libint_atom(classical_part_key);
       for (auto &libint_atom : libint_atoms) {
         libint_atom.atomic_number = atom_symb_to_num(classical_part_key);
       }
       libint2::BasisSet temp_atom_basis = libint2::BasisSet(center_basis["library"]["type"], libint_atoms, true);
-      qp_basis.insert(qp_basis.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      std::vector<libint2::Shell> combined_functions;
+      combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
+      combined_functions.insert(combined_functions.end(), temp_atom_basis.begin(), temp_atom_basis.end());
+      qp_basis = libint2::BasisSet(combined_functions);
       qp_basis.set_pure(pure);
     }
   } catch (...) {
@@ -81,14 +83,17 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const POLYQUANT_I
     filename += ".g94";
     Polyquant_dump_basis_to_file(r.text, filename);
     auto temp_atom_basis = libint2::BasisSet::read_g94_basis_library(filename);
+    std::vector<libint2::Shell> combined_functions;
+    combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
     for (auto &libint_atom : libint_atoms) {
       // check all elements
       for (auto s : temp_atom_basis.at(libint_atom.atomic_number)) {
         Polyquant_cout("Adding basis");
-        qp_basis.push_back(std::move(s));
-        qp_basis.back().move({{libint_atom.x, libint_atom.y, libint_atom.z}});
+        combined_functions.push_back(std::move(s));
+        combined_functions.back().move({{libint_atom.x, libint_atom.y, libint_atom.z}});
       }
     }
+    qp_basis = libint2::BasisSet(combined_functions);
     qp_basis.set_pure(pure);
   }
 }
@@ -110,15 +115,18 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_custom(const POLYQUANT_IN
       //           std::back_inserter(this->basis));
       // auto const classical_part =
       // molecule.classical_particles[classical_part_key];
+      std::vector<libint2::Shell> combined_functions;
+      combined_functions.insert(combined_functions.end(), qp_basis.begin(), qp_basis.end());
       for (auto center_idx : classical_part.center_idx) {
         // check all elements
         for (auto Z = 1; Z < 100; Z++) {
           for (auto s : atom_basis.at(Z)) {
-            qp_basis.push_back(std::move(s));
-            qp_basis.back().move({{molecule.centers[center_idx][0], molecule.centers[center_idx][1], molecule.centers[center_idx][2]}});
+            combined_functions.push_back(std::move(s));
+            combined_functions.back().move({{molecule.centers[center_idx][0], molecule.centers[center_idx][1], molecule.centers[center_idx][2]}});
           }
         }
       }
+      qp_basis = libint2::BasisSet(combined_functions);
       qp_basis.set_pure(this->pure);
     }
   } else {
@@ -135,110 +143,14 @@ void POLYQUANT_BASIS::set_pure_from_input(const POLYQUANT_INPUT &input) {
 }
 
 void POLYQUANT_BASIS::set_libint_shell_norm() {
-  libint2::Shell::do_enforce_unit_normalization(false);
+  libint2::Shell::do_enforce_unit_normalization(true);
   std::stringstream buffer;
   buffer << "(Of developer interest only) Enforcing unit normalization in Libint: " << std::boolalpha << libint2::Shell::do_enforce_unit_normalization() << std::endl;
   Polyquant_cout(buffer.str());
 }
 
-void POLYQUANT_BASIS::apply_pyscf_normalization() {
-  // apply the shell normalization used in
-  // https://github.com/pyscf/pyscf/blob/53e2069b4a3a2e0616bdf4d8c2e3f898c10a8330/pyscf/gto/mole.py#L827
-  //_nomalize_contracted_ao in pyscf/gto/mole.py
-  // lambda for normalization
-  auto gaussianint_lambda = [](auto n, auto alpha) {
-    auto n1 = (n + 1.0) * 0.5;
-    return std::tgamma(n1) / (2.0 * std::pow(alpha, n1));
-  };
-  auto gtonorm_lambda = [&gaussianint_lambda](auto l, auto exponent) {
-    auto gint_val = gaussianint_lambda((l * 2.0) + 2.0, 2.0 * exponent);
-    return 1.0 / std::sqrt(gint_val);
-  };
-  auto libint_norm = [](auto l, auto alpha) {
-    // used in libint -> const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
-    const auto sqrt_Pi_cubed = double{5.56832799683170784528481798212};
-    // const auto sqrt_Pi_cubed = std::pow(std::numbers::pi_v<double>, 1.5);
-    const auto two_alpha = 2.0 * alpha;
-    const auto two_alpha_to_am32 = std::pow(two_alpha, (l + 1)) * std::sqrt(two_alpha);
-    const auto normalization_factor = std::sqrt(std::pow(2.0, l) * two_alpha_to_am32 / (sqrt_Pi_cubed * libint2::math::df_Kminus1[2 * l]));
-    return normalization_factor;
-  };
-  this->unnormalized_basis_for_output = this->basis;
-  for (auto &quantum_particle_basis : this->unnormalized_basis_for_output) {
-    for (auto &shell : quantum_particle_basis) {
-      // REMOVE NORMALIZATION FACTOR FROM LIBINT
-      // SEE SHELL.H
-      // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
-      auto l = shell.contr[0].l;
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) /= libint_norm(l, shell.alpha[p]);
-      }
-      // apply pyscf gtonorm
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) *= gtonorm_lambda(l, shell.alpha[p]);
-      }
-      // apply pyscf _nomalize_contracted_ao
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ee;
-      ee.setZero(shell.alpha.size(), shell.alpha.size());
-      for (auto i = 0ul; i < shell.alpha.size(); ++i) {
-        for (auto j = 0ul; j < shell.alpha.size(); ++j) {
-          auto n1 = l * 2 + 2;
-          auto alpha = shell.alpha[i] + shell.alpha[j];
-          ee(i, j) = gaussianint_lambda(l * 2 + 2, alpha);
-        }
-      }
-      double s1 = 0.0;
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        for (auto q = 0ul; q < shell.alpha.size(); ++q) {
-          s1 += shell.contr[0].coeff.at(p) * ee(p, q) * shell.contr[0].coeff.at(q);
-        }
-      }
-      s1 = 1.0 / std::sqrt(s1);
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) *= s1;
-      }
-      // remove pyscf gtonorm
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) /= gtonorm_lambda(l, shell.alpha[p]);
-      }
-    }
-  }
+void POLYQUANT_BASIS::print_basis() {
   for (auto &quantum_particle_basis : this->basis) {
-    for (auto &shell : quantum_particle_basis) {
-      // REMOVE NORMALIZATION FACTOR FROM LIBINT
-      // SEE SHELL.H
-      // https://github.com/evaleev/libint/blob/3bf3a07b58650fe2ed4cd3dc6517d741562e1249/include/libint2/shell.h#L263
-      auto l = shell.contr[0].l;
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) /= libint_norm(l, shell.alpha[p]);
-      }
-
-      // apply pyscf gtonorm
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) *= gtonorm_lambda(l, shell.alpha[p]);
-      }
-
-      // apply pyscf _nomalize_contracted_ao
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ee;
-      ee.setZero(shell.alpha.size(), shell.alpha.size());
-      for (auto i = 0ul; i < shell.alpha.size(); ++i) {
-        for (auto j = 0ul; j < shell.alpha.size(); ++j) {
-          auto n1 = l * 2 + 2;
-          auto alpha = shell.alpha[i] + shell.alpha[j];
-          ee(i, j) = gaussianint_lambda(l * 2 + 2, alpha);
-        }
-      }
-      double s1 = 0.0;
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        for (auto q = 0ul; q < shell.alpha.size(); ++q) {
-          s1 += shell.contr[0].coeff.at(p) * ee(p, q) * shell.contr[0].coeff.at(q);
-        }
-      }
-      s1 = 1.0 / std::sqrt(s1);
-      for (auto p = 0ul; p < shell.alpha.size(); ++p) {
-        shell.contr[0].coeff.at(p) *= s1;
-      }
-    }
     // TODO proper shell dumping for output file...
     for (auto shell : quantum_particle_basis) {
       std::cout << shell << std::endl;
@@ -258,7 +170,7 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
         load_quantum_particle_basis(input, molecule, quantum_part_key, qp_basis);
         this->basis.emplace_back(qp_basis);
         Polyquant_cout("Added basis for " + quantum_part_key);
-        size_t nb = libint2::nbf(qp_basis);
+        size_t nb = qp_basis.nbf();
         Polyquant_cout("Number of basis functions: " + std::to_string(nb));
         this->num_basis.emplace_back(nb);
       }
@@ -268,6 +180,5 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
   } else {
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
   }
-  // this->unnormalized_basis_for_output = this->basis;
-  this->apply_pyscf_normalization();
+  this->print_basis();
 }

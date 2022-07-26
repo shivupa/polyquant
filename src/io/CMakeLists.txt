@@ -1,16 +1,3 @@
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.[hc]pp")
-
-add_library(io ${_HDRS} ${_SRCS})
-
-if(Eigen3_FOUND)
-  target_link_libraries(io Eigen3::Eigen)
-endif(Eigen3_FOUND)
-target_link_libraries(io nlohmann_json::nlohmann_json)
-target_link_libraries(io Libint2::cxx)
-target_link_libraries(io h5cpp)
-target_link_libraries(io fmt::fmt)
-target_link_libraries(io Spectra)
-if(POLYQUANT_CODE_COVERAGE)
-  target_link_libraries(io coverage_config)
-endif(POLYQUANT_CODE_COVERAGE)
+target_sources(polyquant_lib PRIVATE ${_HDRS} ${_SRCS})

@@ -64,6 +64,15 @@ void Polyquant_dump_program_header();
  */
 void Polyquant_dump_json(const json &json_obj);
 
+template <typename T> void Polyquant_dump_stdvec(const std::vector<T> &vec, const std::string &title) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  for (size_t i = 0; i < vec.size(); i++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec[i] << std::endl;
+  }
+};
+
 /**
  * @brief A helper function to dump a dense vector object to std::out.
  *
@@ -132,6 +141,20 @@ template <typename T> void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eig
 };
 
 /**
+ * @brief A helper function to dump a dense diagonal matrix object to std::out.
+ *
+ * @param mat The dense matrix to print
+ **/
+template <typename T> void Polyquant_dump_diagmat(const Eigen::DiagonalMatrix<T, Eigen::Dynamic> &mat, const std::string &title) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  for (size_t i = 0; i < mat.rows(); i++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat.diagonal()(i) << "  ";
+    std::cout << std::endl;
+  }
+};
+/**
  * @brief A helper function to dump a dense matrix object to std::out.
  *
  * @param mat The dense matrix to print
@@ -145,6 +168,19 @@ template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dyna
       std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat(i, j) << "  ";
     }
     std::cout << std::endl;
+  }
+};
+/**
+ * @brief A helper function to dump a dense diagonalmatrix object to file.
+ *
+ * @param mat The dense matrix to write.
+ **/
+template <typename T> void Polyquant_dump_diagmat_to_file(const Eigen::DiagonalMatrix<T, Eigen::Dynamic> &mat, const std::string &filename) {
+  std::ofstream matfile;
+  matfile.open(filename);
+  for (Eigen::Index i = 0; i < mat.rows(); i++) {
+    matfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat.diagonal()(i) << "  ";
+    matfile << std::endl;
   }
 };
 /**
@@ -170,8 +206,9 @@ template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eig
 void Polyquant_dump_basis_to_file(const std::string &contents, const std::string &filename);
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ);
+                   std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> &occ);
 
+// TODO move these functions to some sort of algorithms folder or something
 /**
  * @brief A hasher for a pair of vectors
  * for more info see https://stackoverflow.com/a/29855973
@@ -210,5 +247,43 @@ template <typename T> struct PairHash {
     return seed;
   }
 };
+
+/**
+ * Argsort for std vector
+ * @param vector input
+ * @return sorted indicies std vector
+ */
+template <typename T> std::vector<int> argsort(const std::vector<T> &in_vec, bool ascending = true) {
+  std::vector<int> indices(in_vec.size());
+  std::iota(indices.begin(), indices.end(), 0);
+  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
+    // sort indices according to corresponding array element
+    if (ascending) {
+      return in_vec[left] < in_vec[right];
+    } else {
+      return in_vec[left] > in_vec[right];
+    }
+  });
+  return indices;
+};
+/**
+ * Argsort for Eigen vector
+ * @param vector input
+ * @return sorted indicies std vector
+ */
+template <typename T> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, bool ascending = true) {
+  std::vector<int> indices(in_vec.size());
+  std::iota(indices.begin(), indices.end(), 0);
+  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
+    // sort indices according to corresponding array element
+    if (ascending) {
+      return in_vec(left) < in_vec(right);
+    } else {
+      return in_vec(left) > in_vec(right);
+    }
+  });
+  return indices;
+};
+;
 } // namespace polyquant
 #endif

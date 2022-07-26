@@ -10,10 +10,11 @@
   "driver": "energy",
   "model": {
     "method": "CI",
-    "basis": 
+    "basis": {"electron" :
         {"Li" : [{ "custom" : 
             {"type" : "file",
              "filename" : "Li_basis.g94"}}]}
+    }
              
   },
   "keywords": {
