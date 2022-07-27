@@ -240,86 +240,91 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   Polyquant_cout("Will run a post mean field calculation of type: ");
   Polyquant_cout(post_mean_field_type);
   std::string mean_field_type = "FILE";
+  std::string fcidump_filename;
   this->run_mean_field(mean_field_type);
 
   bool dump_for_qmcpack = false;
   std::string hdf5_filename = "Default.h5";
-  if (post_mean_field_type == "CI") {
-    if (this->input_params.input_data.contains("verbose")) {
-      ci_calc.verbose = this->input_params.input_data["verbose"];
-    }
-    if (this->input_params.input_data.contains("keywords")) {
-      if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
-        if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
-          dump_for_qmcpack = this->input_params.input_data["keywords"]["dump_for_qmcpack"];
-        }
-        if (this->input_params.input_data["keywords"].contains("hdf5_filename_qmcpack")) {
-          hdf5_filename = this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("convergence_E")) {
-          ci_calc.convergence_E = this->input_params.input_data["keywords"]["ci_keywords"]["convergence_E"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_states")) {
-          ci_calc.num_states = this->input_params.input_data["keywords"]["ci_keywords"]["num_states"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
-          ci_calc.num_subspace_vec = this->input_params.input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("cache_size")) {
-          ci_calc.cache_size = this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
-          ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
-          auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
-          if (ex_lvl.type() == json::value_t::array) {
-            std::vector<std::tuple<int, int, int>> ex_lvl_obj;
-            for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-              std::tuple<int, int, int> ex_lvl_tup = {ex_lvl[i][0], ex_lvl[i][1], ex_lvl[i][2]};
-              ex_lvl_obj.push_back(ex_lvl_tup);
-            }
-            ci_calc.excitation_level = ex_lvl_obj;
-          } else {
-            std::vector<std::tuple<int, int, int>> ex_lvl_obj;
-            std::tuple<int, int, int> ex_lvl_tup = {ex_lvl, ex_lvl, ex_lvl};
-            for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-              ex_lvl_obj.push_back(ex_lvl_tup);
-            }
-            ci_calc.excitation_level = ex_lvl_obj;
+  if (this->input_params.input_data.contains("verbose")) {
+    ci_calc.verbose = this->input_params.input_data["verbose"];
+  }
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
+      if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
+        dump_for_qmcpack = this->input_params.input_data["keywords"]["dump_for_qmcpack"];
+      }
+      if (this->input_params.input_data["keywords"].contains("hdf5_filename_qmcpack")) {
+        hdf5_filename = this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("convergence_E")) {
+        ci_calc.convergence_E = this->input_params.input_data["keywords"]["ci_keywords"]["convergence_E"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_states")) {
+        ci_calc.num_states = this->input_params.input_data["keywords"]["ci_keywords"]["num_states"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
+        ci_calc.num_subspace_vec = this->input_params.input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("cache_size")) {
+        ci_calc.cache_size = this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
+        ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
+        auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
+        if (ex_lvl.type() == json::value_t::array) {
+          std::vector<std::tuple<int, int, int>> ex_lvl_obj;
+          for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+            std::tuple<int, int, int> ex_lvl_tup = {ex_lvl[i][0], ex_lvl[i][1], ex_lvl[i][2]};
+            ex_lvl_obj.push_back(ex_lvl_tup);
           }
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
-          auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
-          if (FC.type() == json::value_t::array) {
-            ci_calc.frozen_core = FC.get<std::vector<int>>();
-          } else if (FC.type() == json::value_t::boolean) {
-            APP_ABORT("TODO Set FC based on chemical system");
-          } else {
-            APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
+          ci_calc.excitation_level = ex_lvl_obj;
+        } else {
+          std::vector<std::tuple<int, int, int>> ex_lvl_obj;
+          std::tuple<int, int, int> ex_lvl_tup = {ex_lvl, ex_lvl, ex_lvl};
+          for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+            ex_lvl_obj.push_back(ex_lvl_tup);
           }
+          ci_calc.excitation_level = ex_lvl_obj;
         }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")) {
-          auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
-          if (DV.type() == json::value_t::array) {
-            ci_calc.deleted_virtual = DV.get<std::vector<int>>();
-          } else {
-            APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
-          }
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("fcidump_filename")) {
+        fcidump_filename = this->input_params.input_data["keywords"]["ci_keywords"]["fcidump_filename"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
+        auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
+        if (FC.type() == json::value_t::array) {
+          ci_calc.frozen_core = FC.get<std::vector<int>>();
+        } else if (FC.type() == json::value_t::boolean) {
+          APP_ABORT("TODO Set FC based on chemical system");
+        } else {
+          APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
+        }
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")) {
+        auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
+        if (DV.type() == json::value_t::array) {
+          ci_calc.deleted_virtual = DV.get<std::vector<int>>();
+        } else {
+          APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
         }
       }
     }
-    if (post_mean_field_type == "CI") {
-      this->ci_calc.setup(this->scf_calc);
-      this->ci_calc.run();
-    } else if (post_mean_field_type == "FILE") {
-      this->ci_calc.setup(this->scf_calc);
-      // ci_calc.from_file(hdf5_filename);
-      APP_ABORT("FROM_FILE for ci not implemented.");
-    }
-    if (dump_for_qmcpack) {
-      dump_post_mf_for_qmcpack(hdf5_filename);
-    }
+  }
+  if (post_mean_field_type == "FCIDUMP") {
+    this->ci_calc.setup(this->scf_calc);
+    this->ci_calc.fcidump(fcidump_file);
+  } else if (post_mean_field_type == "CI") {
+    this->ci_calc.setup(this->scf_calc);
+    this->ci_calc.run();
+  } else if (post_mean_field_type == "FILE") {
+    this->ci_calc.setup(this->scf_calc);
+    // ci_calc.from_file(hdf5_filename);
+    APP_ABORT("FROM_FILE for ci not implemented.");
+  }
+  if (dump_for_qmcpack) {
+    dump_post_mf_for_qmcpack(hdf5_filename);
   }
 }
 

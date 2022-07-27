@@ -201,6 +201,10 @@ void POLYQUANT_EPCI::print_error() { APP_ABORT("Something wrong!"); }
 
 void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 
+void POLYQUANT_EPCI::fcidump(std::string &filename) {
+  // Assemble data
+  // call function in IO
+}
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);

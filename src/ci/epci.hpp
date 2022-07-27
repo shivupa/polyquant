@@ -35,7 +35,7 @@ public:
   void print_exceeded_iterations();
   void print_error();
   void print_params();
-
+  void fcidump(std::string &filename);
   int iteration_num = 0;
 
   /**
