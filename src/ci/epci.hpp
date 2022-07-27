@@ -38,6 +38,7 @@ public:
   void print_error();
   void print_params();
   void dump_molden();
+  void fcidump(std::string &filename);
 
   int iteration_num = 0;
 

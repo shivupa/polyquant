@@ -240,87 +240,92 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   Polyquant_cout("Will run a post mean field calculation of type: ");
   Polyquant_cout(post_mean_field_type);
   std::string mean_field_type = "FILE";
+  std::string fcidump_filename;
   this->run_mean_field(mean_field_type);
 
   bool dump_for_qmcpack = false;
   std::string hdf5_filename = "Default.h5";
-  if (post_mean_field_type == "CI") {
-    if (this->input_params.input_data.contains("verbose")) {
-      ci_calc.verbose = this->input_params.input_data["verbose"];
-    }
-    if (this->input_params.input_data.contains("keywords")) {
-      if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
-        if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
-          dump_for_qmcpack = this->input_params.input_data["keywords"]["dump_for_qmcpack"];
-        }
-        if (this->input_params.input_data["keywords"].contains("hdf5_filename_qmcpack")) {
-          hdf5_filename = this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("convergence_E")) {
-          ci_calc.convergence_E = this->input_params.input_data["keywords"]["ci_keywords"]["convergence_E"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_states")) {
-          ci_calc.num_states = this->input_params.input_data["keywords"]["ci_keywords"]["num_states"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
-          ci_calc.num_subspace_vec = this->input_params.input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("cache_size")) {
-          ci_calc.cache_size = this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
-          ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("NO_states")) {
-          auto NO_states = this->input_params.input_data["keywords"]["ci_keywords"]["NO_states"];
-          ci_calc.NO_states.clear();
-          if (NO_states.type() == json::value_t::array) {
-            for (auto i = 0; i < NO_states.size(); i++) {
-              ci_calc.NO_states.push_back(NO_states[i]);
-            }
+  if (this->input_params.input_data.contains("verbose")) {
+    ci_calc.verbose = this->input_params.input_data["verbose"];
+  }
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("ci_keywords")) {
+      if (this->input_params.input_data["keywords"].contains("dump_for_qmcpack")) {
+        dump_for_qmcpack = this->input_params.input_data["keywords"]["dump_for_qmcpack"];
+      }
+      if (this->input_params.input_data["keywords"].contains("hdf5_filename_qmcpack")) {
+        hdf5_filename = this->input_params.input_data["keywords"]["hdf5_filename_qmcpack"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("convergence_E")) {
+        ci_calc.convergence_E = this->input_params.input_data["keywords"]["ci_keywords"]["convergence_E"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_states")) {
+        ci_calc.num_states = this->input_params.input_data["keywords"]["ci_keywords"]["num_states"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
+        ci_calc.num_subspace_vec = this->input_params.input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("cache_size")) {
+        ci_calc.cache_size = this->input_params.input_data["keywords"]["ci_keywords"]["cache_size"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
+        ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("NO_states")) {
+        auto NO_states = this->input_params.input_data["keywords"]["ci_keywords"]["NO_states"];
+        ci_calc.NO_states.clear();
+        if (NO_states.type() == json::value_t::array) {
+          for (auto i = 0; i < NO_states.size(); i++) {
+            ci_calc.NO_states.push_back(NO_states[i]);
           }
+        }
+      } else {
+        ci_calc.NO_states.push_back(0);
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
+        auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
+        if (ex_lvl.type() == json::value_t::array) {
+          std::vector<std::tuple<int, int, int>> ex_lvl_obj;
+          for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+            std::tuple<int, int, int> ex_lvl_tup = {ex_lvl[i][0], ex_lvl[i][1], ex_lvl[i][2]};
+            ex_lvl_obj.push_back(ex_lvl_tup);
+          }
+          ci_calc.excitation_level = ex_lvl_obj;
         } else {
-          ci_calc.NO_states.push_back(0);
-        }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
-          auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
-          if (ex_lvl.type() == json::value_t::array) {
-            std::vector<std::tuple<int, int, int>> ex_lvl_obj;
-            for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-              std::tuple<int, int, int> ex_lvl_tup = {ex_lvl[i][0], ex_lvl[i][1], ex_lvl[i][2]};
-              ex_lvl_obj.push_back(ex_lvl_tup);
-            }
-            ci_calc.excitation_level = ex_lvl_obj;
-          } else {
-            std::vector<std::tuple<int, int, int>> ex_lvl_obj;
-            std::tuple<int, int, int> ex_lvl_tup = {ex_lvl, ex_lvl, ex_lvl};
-            for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-              ex_lvl_obj.push_back(ex_lvl_tup);
-            }
-            ci_calc.excitation_level = ex_lvl_obj;
+          std::vector<std::tuple<int, int, int>> ex_lvl_obj;
+          std::tuple<int, int, int> ex_lvl_tup = {ex_lvl, ex_lvl, ex_lvl};
+          for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
+            ex_lvl_obj.push_back(ex_lvl_tup);
           }
+          ci_calc.excitation_level = ex_lvl_obj;
         }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
-          auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
-          if (FC.type() == json::value_t::array) {
-            ci_calc.frozen_core = FC.get<std::vector<int>>();
-          } else if (FC.type() == json::value_t::boolean) {
-            APP_ABORT("TODO Set FC based on chemical system");
-          } else {
-            APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
-          }
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("fcidump_filename")) {
+        fcidump_filename = this->input_params.input_data["keywords"]["ci_keywords"]["fcidump_filename"];
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
+        auto FC = this->input_params.input_data["keywords"]["ci_keywords"]["frozen_core"];
+        if (FC.type() == json::value_t::array) {
+          ci_calc.frozen_core = FC.get<std::vector<int>>();
+        } else if (FC.type() == json::value_t::boolean) {
+          APP_ABORT("TODO Set FC based on chemical system");
+        } else {
+          APP_ABORT("keywords->ci_keywords->frozen_core of an invalid type. Must be boolean or list of numbers.");
         }
-        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")) {
-          auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
-          if (DV.type() == json::value_t::array) {
-            ci_calc.deleted_virtual = DV.get<std::vector<int>>();
-          } else {
-            APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
-          }
+      }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("deleted_virtual")) {
+        auto DV = this->input_params.input_data["keywords"]["ci_keywords"]["deleted_virtual"];
+        if (DV.type() == json::value_t::array) {
+          ci_calc.deleted_virtual = DV.get<std::vector<int>>();
+        } else {
+          APP_ABORT("keywords->ci_keywords->deleted_virtual of an invalid type. Must be boolean or list of numbers.");
         }
       }
     }
-    if (post_mean_field_type == "CI") {
+    if (post_mean_field_type == "FCIDUMP") {
+      this->ci_calc.setup(this->scf_calc);
+      this->ci_calc.fcidump(fcidump_file);
+    } else if (post_mean_field_type == "CI") {
       this->ci_calc.setup(this->scf_calc);
       this->ci_calc.run();
     } else if (post_mean_field_type == "FILE") {
@@ -332,242 +337,244 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       dump_post_mf_for_qmcpack(hdf5_filename);
       dump_post_mf_NOs_for_qmcpack(hdf5_filename);
     }
+    if (dump_for_qmcpack) {
+      dump_post_mf_for_qmcpack(hdf5_filename);
+    }
   }
-}
 
-void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
-  bool pbc = false;
-  bool ecp = false;
-  bool complex_vals = false;
-  bool bohr_unit = true;
-  int num_atom = this->input_molecule.centers.size();
-  int num_species = this->input_molecule.classical_particles.size();
-  // This is dumb why not get it from the basis...
-  bool pure = true;
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("pure")) {
-      pure = this->input_params.input_data["keywords"]["pure"];
-    }
-  }
-  std::string pure_or_cart = "spherical";
-  if (!pure) {
-    std::string pure_or_cart = "cartesian";
-  }
-  std::vector<int> atomic_species_ids;
-  std::vector<int> atomic_number;
-  std::vector<int> atomic_charge;
-  std::vector<int> core_elec;
-  std::vector<std::string> atomic_names;
-  std::vector<std::vector<double>> atomic_centers = this->input_molecule.centers;
-  atomic_species_ids.resize(this->input_molecule.centers.size());
-  std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
-  for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
-    for (auto idx : classical_part.center_idx) {
-      atomic_species_ids[idx] = classical_part_idx;
-    }
-    atomic_number.push_back((int)classical_part.charge);
-    atomic_charge.push_back((int)classical_part.charge);
-    core_elec.push_back(0);
-    atomic_names.push_back(classical_part_key);
-    classical_part_idx++;
-  }
-  auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    std::string quantum_part_name = quantum_part_key;
-    bool restricted = quantum_part.restricted;
-    int num_ao = this->input_basis.num_basis[quantum_part_idx];
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
-    int num_part_alpha = quantum_part.num_parts_alpha;
-    int num_part_beta = quantum_part.num_parts_beta;
-    int num_part_total = quantum_part.num_parts;
-    int multiplicity = quantum_part.multiplicity;
-    libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
-    //  "cartesian"
-    // auto i = 0ul;
-    // for (auto shell : basis) {
-    //   std::cout << shell << std::endl;
-    //   i++;
-    // }
-    // auto idx =
-    //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
-    // if (idx != basis_shell2atom.end()) {
-    //   Polyquant_cout("Basis shell doesn't correspond to a classical "
-    //                  "center! This shouldn't happen. Basis shell:");
-    //   std::string idx_string(1, *idx);
-    //   Polyquant_cout("Shell:" + idx_string);
-    //   Polyquant_cout(basis[*idx]);
-    //   // APP_ABORT("Shell doesn't correspond to center");
-    // }
-    std::vector<std::vector<libint2::Shell>> unique_shells;
-    unique_shells.resize(this->input_molecule.classical_particles.size());
-    classical_part_idx = 0;
-    double EPSILON = 1e-6;
-    for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
-      // Polyquant_cout(classical_part_key);
-      for (auto shell : basis) {
-        // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-        // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
-        // + " " + std::to_string(shell.O[0]
-        // -this->input_molecule.centers[classical_part.center_idx[0]][0])
-        // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-        // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
-        // + " " + std::to_string(shell.O[1]
-        // -this->input_molecule.centers[classical_part.center_idx[0]][1])
-        // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-        //  std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
-        // + " " + std::to_string(shell.O[2]
-        // -this->input_molecule.centers[classical_part.center_idx[0]][2])
-        // );
-        if (std::abs(shell.O[0] - this->input_molecule.centers[classical_part.center_idx[0]][0]) < EPSILON &&
-            std::abs(shell.O[1] - this->input_molecule.centers[classical_part.center_idx[0]][1]) < EPSILON &&
-            std::abs(shell.O[2] - this->input_molecule.centers[classical_part.center_idx[0]][2]) < EPSILON) {
-          // Polyquant_cout("Unique shell on center: " +
-          //                std::to_string(classical_part.center_idx[0]) +
-          //                " named: " + classical_part_key);
-          // Polyquant_cout(shell);
-          unique_shells[classical_part_idx].push_back(shell);
-        }
+  void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string & filename) {
+    bool pbc = false;
+    bool ecp = false;
+    bool complex_vals = false;
+    bool bohr_unit = true;
+    int num_atom = this->input_molecule.centers.size();
+    int num_species = this->input_molecule.classical_particles.size();
+    // This is dumb why not get it from the basis...
+    bool pure = true;
+    if (this->input_params.input_data.contains("keywords")) {
+      if (this->input_params.input_data["keywords"].contains("pure")) {
+        pure = this->input_params.input_data["keywords"]["pure"];
       }
+    }
+    std::string pure_or_cart = "spherical";
+    if (!pure) {
+      std::string pure_or_cart = "cartesian";
+    }
+    std::vector<int> atomic_species_ids;
+    std::vector<int> atomic_number;
+    std::vector<int> atomic_charge;
+    std::vector<int> core_elec;
+    std::vector<std::string> atomic_names;
+    std::vector<std::vector<double>> atomic_centers = this->input_molecule.centers;
+    atomic_species_ids.resize(this->input_molecule.centers.size());
+    std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
+    for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
+      for (auto idx : classical_part.center_idx) {
+        atomic_species_ids[idx] = classical_part_idx;
+      }
+      atomic_number.push_back((int)classical_part.charge);
+      atomic_charge.push_back((int)classical_part.charge);
+      core_elec.push_back(0);
+      atomic_names.push_back(classical_part_key);
       classical_part_idx++;
     }
-    std::string particle_filename = quantum_part_key + "_" + filename;
-    Polyquant_cout("Dumping HDF5 to filename: " + particle_filename);
-    POLYQUANT_HDF5 hdf5_f(particle_filename);
-    hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
-                                       quantum_part_name, scf_calc.E_orbitals[quantum_part_idx], scf_calc.C[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge, core_elec,
-                                       atomic_names, atomic_centers, unique_shells);
-    quantum_part_idx++;
-  }
-}
-
-void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) {
-  bool pbc = false;
-  bool ecp = false;
-  bool complex_vals = false;
-  bool bohr_unit = true;
-  int num_atom = this->input_molecule.centers.size();
-  int num_species = this->input_molecule.classical_particles.size();
-  // This is dumb why not get it from the basis...
-  bool pure = true;
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("pure")) {
-      pure = this->input_params.input_data["keywords"]["pure"];
-    }
-  }
-  std::string pure_or_cart = "spherical";
-  if (!pure) {
-    std::string pure_or_cart = "cartesian";
-  }
-  std::vector<int> atomic_species_ids;
-  std::vector<int> atomic_number;
-  std::vector<int> atomic_charge;
-  std::vector<int> core_elec;
-  std::vector<std::string> atomic_names;
-  std::vector<std::vector<double>> atomic_centers = this->input_molecule.centers;
-  atomic_species_ids.resize(this->input_molecule.centers.size());
-  std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
-  for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
-    for (auto idx : classical_part.center_idx) {
-      atomic_species_ids[idx] = classical_part_idx;
-    }
-    atomic_number.push_back((int)classical_part.charge);
-    atomic_charge.push_back((int)classical_part.charge);
-    core_elec.push_back(0);
-    atomic_names.push_back(classical_part_key);
-    classical_part_idx++;
-  }
-  auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    std::string quantum_part_name = quantum_part_key;
-    bool restricted = quantum_part.restricted;
-    int num_ao = this->input_basis.num_basis[quantum_part_idx];
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
-    int num_part_alpha = quantum_part.num_parts_alpha;
-    int num_part_beta = quantum_part.num_parts_beta;
-    int num_part_total = quantum_part.num_parts;
-    int multiplicity = quantum_part.multiplicity;
-    libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
-    //  "cartesian"
-    // auto i = 0ul;
-    // for (auto shell : basis) {
-    //   std::cout << shell << std::endl;
-    //   i++;
-    // }
-    // auto idx =
-    //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
-    // if (idx != basis_shell2atom.end()) {
-    //   Polyquant_cout("Basis shell doesn't correspond to a classical "
-    //                  "center! This shouldn't happen. Basis shell:");
-    //   std::string idx_string(1, *idx);
-    //   Polyquant_cout("Shell:" + idx_string);
-    //   Polyquant_cout(basis[*idx]);
-    //   // APP_ABORT("Shell doesn't correspond to center");
-    // }
-    std::vector<std::vector<libint2::Shell>> unique_shells;
-    unique_shells.resize(this->input_molecule.classical_particles.size());
-    classical_part_idx = 0;
-    double EPSILON = 1e-6;
-    for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
-      // Polyquant_cout(classical_part_key);
-      for (auto shell : basis) {
-        // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-        // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
-        // + " " + std::to_string(shell.O[0]
-        // -this->input_molecule.centers[classical_part.center_idx[0]][0])
-        // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-        // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
-        // + " " + std::to_string(shell.O[1]
-        // -this->input_molecule.centers[classical_part.center_idx[0]][1])
-        // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-        //  std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
-        // + " " + std::to_string(shell.O[2]
-        // -this->input_molecule.centers[classical_part.center_idx[0]][2])
-        // );
-        if (std::abs(shell.O[0] - this->input_molecule.centers[classical_part.center_idx[0]][0]) < EPSILON &&
-            std::abs(shell.O[1] - this->input_molecule.centers[classical_part.center_idx[0]][1]) < EPSILON &&
-            std::abs(shell.O[2] - this->input_molecule.centers[classical_part.center_idx[0]][2]) < EPSILON) {
-          // Polyquant_cout("Unique shell on center: " +
-          //                std::to_string(classical_part.center_idx[0]) +
-          //                " named: " + classical_part_key);
-          // Polyquant_cout(shell);
-          unique_shells[classical_part_idx].push_back(shell);
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      std::string quantum_part_name = quantum_part_key;
+      bool restricted = quantum_part.restricted;
+      int num_ao = this->input_basis.num_basis[quantum_part_idx];
+      int num_mo = this->input_basis.num_basis[quantum_part_idx];
+      int num_part_alpha = quantum_part.num_parts_alpha;
+      int num_part_beta = quantum_part.num_parts_beta;
+      int num_part_total = quantum_part.num_parts;
+      int multiplicity = quantum_part.multiplicity;
+      libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
+      //  "cartesian"
+      // auto i = 0ul;
+      // for (auto shell : basis) {
+      //   std::cout << shell << std::endl;
+      //   i++;
+      // }
+      // auto idx =
+      //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
+      // if (idx != basis_shell2atom.end()) {
+      //   Polyquant_cout("Basis shell doesn't correspond to a classical "
+      //                  "center! This shouldn't happen. Basis shell:");
+      //   std::string idx_string(1, *idx);
+      //   Polyquant_cout("Shell:" + idx_string);
+      //   Polyquant_cout(basis[*idx]);
+      //   // APP_ABORT("Shell doesn't correspond to center");
+      // }
+      std::vector<std::vector<libint2::Shell>> unique_shells;
+      unique_shells.resize(this->input_molecule.classical_particles.size());
+      classical_part_idx = 0;
+      double EPSILON = 1e-6;
+      for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
+        // Polyquant_cout(classical_part_key);
+        for (auto shell : basis) {
+          // Polyquant_cout( std::to_string(shell.O[0]) + " " +
+          // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+          // + " " + std::to_string(shell.O[0]
+          // -this->input_molecule.centers[classical_part.center_idx[0]][0])
+          // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
+          // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+          // + " " + std::to_string(shell.O[1]
+          // -this->input_molecule.centers[classical_part.center_idx[0]][1])
+          // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
+          //  std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+          // + " " + std::to_string(shell.O[2]
+          // -this->input_molecule.centers[classical_part.center_idx[0]][2])
+          // );
+          if (std::abs(shell.O[0] - this->input_molecule.centers[classical_part.center_idx[0]][0]) < EPSILON &&
+              std::abs(shell.O[1] - this->input_molecule.centers[classical_part.center_idx[0]][1]) < EPSILON &&
+              std::abs(shell.O[2] - this->input_molecule.centers[classical_part.center_idx[0]][2]) < EPSILON) {
+            // Polyquant_cout("Unique shell on center: " +
+            //                std::to_string(classical_part.center_idx[0]) +
+            //                " named: " + classical_part_key);
+            // Polyquant_cout(shell);
+            unique_shells[classical_part_idx].push_back(shell);
+          }
         }
+        classical_part_idx++;
       }
-      classical_part_idx++;
-    }
-
-    for (int state_vec_idx = 0; state_vec_idx < ci_calc.NO_states.size(); state_vec_idx++) {
-      auto state_idx = ci_calc.NO_states[state_vec_idx];
-      std::stringstream particle_filename;
-      particle_filename << "NSO_State_" << state_idx << "_part_" << quantum_part_key << "_" << filename;
-      Polyquant_cout("Dumping HDF5 to filename: " + particle_filename.str());
-      POLYQUANT_HDF5 hdf5_f(particle_filename.str());
+      std::string particle_filename = quantum_part_key + "_" + filename;
+      Polyquant_cout("Dumping HDF5 to filename: " + particle_filename);
+      POLYQUANT_HDF5 hdf5_f(particle_filename);
       hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
-                                         quantum_part_name, ci_calc.occ_nso[state_vec_idx][quantum_part_idx], ci_calc.C_nso[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
-                                         atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
+                                         quantum_part_name, scf_calc.E_orbitals[quantum_part_idx], scf_calc.C[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge, core_elec,
+                                         atomic_names, atomic_centers, unique_shells);
       quantum_part_idx++;
     }
   }
-}
 
-void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
-  std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
-  dets.resize(this->input_molecule.quantum_particles.size());
-  for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
-    dets[idx_part].resize(2);
-  }
-  for (auto i = 0; i < this->ci_calc.detset.N_dets; i++) {
-    auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
-    for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
-      auto curr_det_a = this->ci_calc.detset.get_det(idx_part, 0, i_unfold[2 * idx_part + 0]);
-      auto curr_det_b = this->ci_calc.detset.get_det(idx_part, 1, i_unfold[2 * idx_part + 1]);
-      dets[idx_part][0].push_back(curr_det_a);
-      dets[idx_part][1].push_back(curr_det_b);
+  void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string & filename) {
+    bool pbc = false;
+    bool ecp = false;
+    bool complex_vals = false;
+    bool bohr_unit = true;
+    int num_atom = this->input_molecule.centers.size();
+    int num_species = this->input_molecule.classical_particles.size();
+    // This is dumb why not get it from the basis...
+    bool pure = true;
+    if (this->input_params.input_data.contains("keywords")) {
+      if (this->input_params.input_data["keywords"].contains("pure")) {
+        pure = this->input_params.input_data["keywords"]["pure"];
+      }
+    }
+    std::string pure_or_cart = "spherical";
+    if (!pure) {
+      std::string pure_or_cart = "cartesian";
+    }
+    std::vector<int> atomic_species_ids;
+    std::vector<int> atomic_number;
+    std::vector<int> atomic_charge;
+    std::vector<int> core_elec;
+    std::vector<std::string> atomic_names;
+    std::vector<std::vector<double>> atomic_centers = this->input_molecule.centers;
+    atomic_species_ids.resize(this->input_molecule.centers.size());
+    std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
+    for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
+      for (auto idx : classical_part.center_idx) {
+        atomic_species_ids[idx] = classical_part_idx;
+      }
+      atomic_number.push_back((int)classical_part.charge);
+      atomic_charge.push_back((int)classical_part.charge);
+      core_elec.push_back(0);
+      atomic_names.push_back(classical_part_key);
+      classical_part_idx++;
+    }
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      std::string quantum_part_name = quantum_part_key;
+      bool restricted = quantum_part.restricted;
+      int num_ao = this->input_basis.num_basis[quantum_part_idx];
+      int num_mo = this->input_basis.num_basis[quantum_part_idx];
+      int num_part_alpha = quantum_part.num_parts_alpha;
+      int num_part_beta = quantum_part.num_parts_beta;
+      int num_part_total = quantum_part.num_parts;
+      int multiplicity = quantum_part.multiplicity;
+      libint2::BasisSet basis = this->input_basis.basis[quantum_part_idx];
+      //  "cartesian"
+      // auto i = 0ul;
+      // for (auto shell : basis) {
+      //   std::cout << shell << std::endl;
+      //   i++;
+      // }
+      // auto idx =
+      //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
+      // if (idx != basis_shell2atom.end()) {
+      //   Polyquant_cout("Basis shell doesn't correspond to a classical "
+      //                  "center! This shouldn't happen. Basis shell:");
+      //   std::string idx_string(1, *idx);
+      //   Polyquant_cout("Shell:" + idx_string);
+      //   Polyquant_cout(basis[*idx]);
+      //   // APP_ABORT("Shell doesn't correspond to center");
+      // }
+      std::vector<std::vector<libint2::Shell>> unique_shells;
+      unique_shells.resize(this->input_molecule.classical_particles.size());
+      classical_part_idx = 0;
+      double EPSILON = 1e-6;
+      for (auto const &[classical_part_key, classical_part] : this->input_molecule.classical_particles) {
+        // Polyquant_cout(classical_part_key);
+        for (auto shell : basis) {
+          // Polyquant_cout( std::to_string(shell.O[0]) + " " +
+          // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][0])
+          // + " " + std::to_string(shell.O[0]
+          // -this->input_molecule.centers[classical_part.center_idx[0]][0])
+          // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
+          // std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][1])
+          // + " " + std::to_string(shell.O[1]
+          // -this->input_molecule.centers[classical_part.center_idx[0]][1])
+          // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
+          //  std::to_string(this->input_molecule.centers[classical_part.center_idx[0]][2])
+          // + " " + std::to_string(shell.O[2]
+          // -this->input_molecule.centers[classical_part.center_idx[0]][2])
+          // );
+          if (std::abs(shell.O[0] - this->input_molecule.centers[classical_part.center_idx[0]][0]) < EPSILON &&
+              std::abs(shell.O[1] - this->input_molecule.centers[classical_part.center_idx[0]][1]) < EPSILON &&
+              std::abs(shell.O[2] - this->input_molecule.centers[classical_part.center_idx[0]][2]) < EPSILON) {
+            // Polyquant_cout("Unique shell on center: " +
+            //                std::to_string(classical_part.center_idx[0]) +
+            //                " named: " + classical_part_key);
+            // Polyquant_cout(shell);
+            unique_shells[classical_part_idx].push_back(shell);
+          }
+        }
+        classical_part_idx++;
+      }
+
+      for (int state_vec_idx = 0; state_vec_idx < ci_calc.NO_states.size(); state_vec_idx++) {
+        auto state_idx = ci_calc.NO_states[state_vec_idx];
+        std::stringstream particle_filename;
+        particle_filename << "NSO_State_" << state_idx << "_part_" << quantum_part_key << "_" << filename;
+        Polyquant_cout("Dumping HDF5 to filename: " + particle_filename.str());
+        POLYQUANT_HDF5 hdf5_f(particle_filename.str());
+        hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
+                                           quantum_part_name, ci_calc.occ_nso[state_vec_idx][quantum_part_idx], ci_calc.C_nso[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
+                                           atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
+        quantum_part_idx++;
+      }
     }
   }
-  std::string particle_filename = "Multidet_" + filename;
-  Polyquant_cout("Dumping post MF HDF5 to filename: " + particle_filename);
-  POLYQUANT_HDF5 hdf5_f(particle_filename);
-  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states,
-                                          *std::max_element(this->ci_calc.detset.max_orb.begin(), this->ci_calc.detset.max_orb.end()));
-}
+
+  void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string & filename) {
+    std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
+    dets.resize(this->input_molecule.quantum_particles.size());
+    for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
+      dets[idx_part].resize(2);
+    }
+    for (auto i = 0; i < this->ci_calc.detset.N_dets; i++) {
+      auto i_unfold = this->ci_calc.detset.det_idx_unfold(i);
+      for (int idx_part = 0; idx_part < this->input_molecule.quantum_particles.size(); idx_part++) {
+        auto curr_det_a = this->ci_calc.detset.get_det(idx_part, 0, i_unfold[2 * idx_part + 0]);
+        auto curr_det_b = this->ci_calc.detset.get_det(idx_part, 1, i_unfold[2 * idx_part + 1]);
+        dets[idx_part][0].push_back(curr_det_a);
+        dets[idx_part][1].push_back(curr_det_b);
+      }
+    }
+    std::string particle_filename = "Multidet_" + filename;
+    Polyquant_cout("Dumping post MF HDF5 to filename: " + particle_filename);
+    POLYQUANT_HDF5 hdf5_f(particle_filename);
+    hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc.C_ci, this->ci_calc.detset.N_dets, this->ci_calc.num_states,
+                                            *std::max_element(this->ci_calc.detset.max_orb.begin(), this->ci_calc.detset.max_orb.end()));
+  }
