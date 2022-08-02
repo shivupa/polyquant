@@ -210,15 +210,32 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
   if (excitation_level > virt.size()) {
     APP_ABORT("Excitation level exceeds virtual size!");
   }
+    
+  // std::cout << "OCC ";
+  // for (auto &o : occ){
+  //   std::cout << " " << o;
+  // }
+  // std::cout << std::endl;
+
+  // std::cout << "VIRT ";
+  // for (auto &v : virt){
+  //   std::cout << " " << v;
+  // }
+  // std::cout << std::endl;
+
   for (auto &&iocc : iter::combinations(occ, excitation_level)) {
     for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
       std::vector<T> temp_det(det);
       // https://stackoverflow.com/a/47990
       for (auto &occbit : iocc) {
-        temp_det[occbit / 64ul] &= ~(1UL << (occbit % 64ul));
+        auto int_idx = (temp_det.size() - 1) -  (occbit / 64ul);
+        //  std::cout << "Occ annihilating " << int_idx << "  " << occbit % 64ul << std::endl;
+        temp_det[int_idx] &= ~(1UL << (occbit % 64ul));
       }
       for (auto &virtbit : ivirt) {
-        temp_det[virtbit / 64ul] |= 1UL << (virtbit % 64ul);
+        auto int_idx = (temp_det.size() - 1) -  (virtbit / 64ul);
+        //  std::cout << "Virt creating " << int_idx << "  " << virtbit % 64ul << std::endl;
+        temp_det[int_idx] |= 1UL << (virtbit % 64ul);
       }
       return_dets.push_back(temp_det);
     }
@@ -357,19 +374,23 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const {
-  for (auto i = 0; i < D.size(); i++) {
+  for (auto i = 0; i < D.size(); i++){
     std::bitset<64> D_bitset(D[i]);
     for (auto j = 0; j < D_bitset.size(); j++) {
-      if ((i * 64) + j >= this->max_orb[idx_part]) {
+      auto orb_idx = ((D.size() - i -1) * 64) + j;
+      if (orb_idx >= this->max_orb[idx_part]) {
         break;
       }
       if (D_bitset[j] == 1) {
-        occ.push_back(j);
+        occ.push_back(orb_idx);
       } else {
-        virt.push_back(j);
+        virt.push_back(orb_idx);
       }
     }
   }
+
+  std::sort(occ.begin(), occ.end());
+  std::sort(virt.begin(), virt.end());
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
