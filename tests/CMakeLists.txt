@@ -9,10 +9,7 @@ add_executable(
   unit_tests/ci/ci_test.cpp
   integration_tests/calculation/calculation_test.cpp)
 # find the required testing library and link the other required libraries
-target_link_libraries(
-  main_test
-  doctest::doctest
-  polyquant_lib)
+target_link_libraries(main_test doctest::doctest polyquant_lib)
 
 target_include_directories(main_test PRIVATE include)
 doctest_discover_tests(main_test ADD_LABELS 1)
