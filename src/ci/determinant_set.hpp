@@ -59,6 +59,7 @@ public:
   // /**
   //  * @brief determinant set (number of quantum particles, alpha/beta, det num
   //  * bitstrings)
+  //  * the bitstrings are stored from highest orbital to lowest orbital
   //  *
   //  */
   // std::vector<std::unordered_set<std::pair<std::vector<T>, std::vector<T>>, PairVectorHash<T>>> dets;
@@ -207,18 +208,22 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
   virt.clear();
   auto det = this->unique_dets[idx_part][idx_spin][idx_det];
   this->get_occ_virt(idx_part, det, occ, virt);
+
   if (excitation_level > virt.size()) {
     APP_ABORT("Excitation level exceeds virtual size!");
   }
+
   for (auto &&iocc : iter::combinations(occ, excitation_level)) {
     for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
       std::vector<T> temp_det(det);
       // https://stackoverflow.com/a/47990
       for (auto &occbit : iocc) {
-        temp_det[occbit / 64ul] &= ~(1UL << (occbit % 64ul));
+        auto int_idx = (temp_det.size() - 1) - (occbit / 64ul);
+        temp_det[int_idx] &= ~(1UL << (occbit % 64ul));
       }
       for (auto &virtbit : ivirt) {
-        temp_det[virtbit / 64ul] |= 1UL << (virtbit % 64ul);
+        auto int_idx = (temp_det.size() - 1) - (virtbit / 64ul);
+        temp_det[int_idx] |= 1UL << (virtbit % 64ul);
       }
       return_dets.push_back(temp_det);
     }
@@ -299,20 +304,24 @@ template <typename T> void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, st
     auto H = (Di[i] ^ Dj[i]) & Di[i];
     while (H != 0) {
       auto position = std::countr_zero(H);
-      holes.push_back((64 * i) + position);
+      auto orb_idx = ((Di.size() - i - 1) * 64) + position;
+      holes.push_back(orb_idx);
       H &= ~(1UL << position);
     }
   }
+  std::sort(holes.begin(), holes.end());
 }
 template <typename T> void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const {
   for (auto i = 0; i < Di.size(); i++) {
     auto P = (Di[i] ^ Dj[i]) & Dj[i];
     while (P != 0) {
       auto position = std::countr_zero(P);
-      parts.push_back((64 * i) + position);
+      auto orb_idx = ((Di.size() - i - 1) * 64) + position;
+      parts.push_back(orb_idx);
       P &= ~(1UL << position);
     }
   }
+  std::sort(parts.begin(), parts.end());
 }
 template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const {
   T nperm = 0;
@@ -360,16 +369,21 @@ template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::
   for (auto i = 0; i < D.size(); i++) {
     std::bitset<64> D_bitset(D[i]);
     for (auto j = 0; j < D_bitset.size(); j++) {
-      if ((i * 64) + j >= this->max_orb[idx_part]) {
+      auto orb_idx = ((D.size() - i - 1) * 64) + j;
+      // max_orb - 1 because we are dealing with the index
+      if (orb_idx >= this->max_orb[idx_part]) {
         break;
       }
       if (D_bitset[j] == 1) {
-        occ.push_back(j);
+        occ.push_back(orb_idx);
       } else {
-        virt.push_back(j);
+        virt.push_back(orb_idx);
       }
     }
   }
+
+  std::sort(occ.begin(), occ.end());
+  std::sort(virt.begin(), virt.end());
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
@@ -971,7 +985,6 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
         excitation_level_part_j = this->num_excitation(part_j_det_i, part_j_det_j);
         excitation_level = excitation_level_part_i + excitation_level_part_j;
         auto charge_factor = quantum_part.charge * other_quantum_part.charge;
-        //         // std::cout << "Charge factor " << charge_factor << std::endl;
         if (excitation_level < 3) {
           if (excitation_level_part_i == 0 && excitation_level_part_j == 0) {
             matrix_elem += charge_factor * this->mixed_part_ham_diag(idx_part, other_idx_part, i_unfold, j_unfold);
@@ -1040,7 +1053,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
           // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
           auto integral = diagonal_Hii[folded_idet_idx];
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-            // std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << folded_idet_idx  << " " << integral << std::endl;
             threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
           }
         }
@@ -1115,7 +1127,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
                 auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
                 for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
                   // auto integral = Slater_Condon(folded_idet_idx, folded_jdet_idx);
-                  //  std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << folded_idet_idx << " " << folded_jdet_idx << " " << integral << std::endl;
                   threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
                   // if (folded_idet_idx != folded_jdet_idx)
                   //{
@@ -1210,9 +1221,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
                 auto integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
                 if (integral != 0.0) {
                   for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                    // std::cout << folded_det_idx << "         " << folded_jdet_idx << "           "  <<  idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << idx_J_B_det << " " <<
-                    // integral
-                    // << " " << C(folded_jdet_idx, state_idx)<< std::endl;
                     threads_sigma_contributions[thread_id](folded_det_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
                     threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_det_idx, state_idx);
                   }
@@ -1240,47 +1248,19 @@ void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eig
   sigma_contribution.setZero();
   // Diagonal Contribution
   sigma_one_species_diagonal_contribution(sigma_contribution, C, 0, 0);
-  // std::cout << "Diag" << std::endl;
-  //  for (auto i = 0; i < this->rows(); i++){
-  //    for (auto j = 0; j < C.cols(); j++){
-  //        std::cout << sigma_contribution(i,j) << "  ";
-  //    }
-  //    std::cout << std::endl;
-  //  }
   sigma += sigma_contribution;
   sigma_contribution.setZero();
   // Aa Aa
   sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 0);
   sigma += sigma_contribution;
-  // std::cout << "AA" << std::endl;
-  // for (auto i = 0; i < this->rows(); i++){
-  //   for (auto j = 0; j < C.cols(); j++){
-  //       std::cout << sigma_contribution(i,j) << "  ";
-  //   }
-  //   std::cout << std::endl;
-  // }
   sigma_contribution.setZero();
   // Ab Ab
   sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 1);
   sigma += sigma_contribution;
-  //  std::cout << "BB" << std::endl;
-  // for (auto i = 0; i < this->rows(); i++){
-  //   for (auto j = 0; j < C.cols(); j++){
-  //       std::cout << sigma_contribution(i,j) << "  ";
-  //   }
-  //   std::cout << std::endl;
-  // }
   sigma_contribution.setZero();
   // Aa Ab
   sigma_one_species_class_two_contribution(sigma_contribution, C, 0, 0, 0, 1);
   sigma += sigma_contribution;
-  //  std::cout << "AB" << std::endl;
-  // for (auto i = 0; i < this->rows(); i++){
-  //   for (auto j = 0; j < C.cols(); j++){
-  //       std::cout << sigma_contribution(i,j) << "  ";
-  //   }
-  //   std::cout << std::endl;
-  // }
   sigma_contribution.setZero();
 }
 
@@ -1328,7 +1308,6 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
               // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
               auto integral = diagonal_Hii[folded_idet_idx];
               for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                // std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_I_C_det << " " << idx_I_D_det << " "<< folded_idet_idx << " " << integral << std::endl;
                 threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
               }
             }
@@ -1408,7 +1387,6 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
                   // }
                   if (integral != 0.0) {
                     for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                      // std::cout << " " << idx_I_A_det << " " << idx_I_B_det << " " << idx_J_A_det << " " << folded_idet_idx << " " << folded_jdet_idx << " " << integral << std::endl;
                       threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
                       // if (folded_idet_idx != folded_jdet_idx)
                       //{

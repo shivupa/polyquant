@@ -16,7 +16,7 @@ TEST_SUITE("CI") {
     std::vector frozen_core = {0};
     std::vector deleted_virtual = {0};
     std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
-    fc_dm.resize(1); //1 particle
+    fc_dm.resize(1); // 1 particle
     auto num_basis = test_calc.scf_calc.input_basis.num_basis[0];
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dm;
     dm.resize(num_basis, num_basis);
@@ -25,8 +25,8 @@ TEST_SUITE("CI") {
     test_calc.scf_calc.input_integral.calculate_frozen_core_ints(fc_dm, frozen_core);
     test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0)) ==doctest::Approx(32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 1)) ==doctest::Approx(0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0)) == doctest::Approx(32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 1)) == doctest::Approx(0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
   TEST_CASE("CI: two body MO basis") {
@@ -37,9 +37,9 @@ TEST_SUITE("CI") {
     std::vector deleted_virtual = {0};
     test_calc.scf_calc.input_integral.calculate_mo_2_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 0)) ==doctest::Approx(4.74449478).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 1)) ==doctest::Approx(0.4166223).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 2)) ==doctest::Approx(1.00454538).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 0)) == doctest::Approx(4.74449478).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 1)) == doctest::Approx(0.4166223).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 2)) == doctest::Approx(1.00454538).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: setup/detset construction ") {
     POLYQUANT_CALCULATION test_calc;
@@ -60,47 +60,45 @@ TEST_SUITE("CI") {
 
     bool det_found = false;
     for (auto const &detvec : test_ci.detset.unique_dets[0][0]) {
-    auto it = std::find(std::begin(detvec), std::end(detvec), hf_det.to_ulong());
-    if (it != std::end(detvec)){
+      auto it = std::find(std::begin(detvec), std::end(detvec), hf_det.to_ulong());
+      if (it != std::end(detvec)) {
         det_found = true;
-         break;
+        break;
+      }
     }
-    }
-    CHECK( det_found == true);
+    CHECK(det_found == true);
 
     det_found = false;
     for (auto const &detvec : test_ci.detset.unique_dets[0][1]) {
-    auto it = std::find(std::begin(detvec), std::end(detvec), hf_det.to_ulong());
-    if (it != std::end(detvec)) {
+      auto it = std::find(std::begin(detvec), std::end(detvec), hf_det.to_ulong());
+      if (it != std::end(detvec)) {
         det_found = true;
-         break;
+        break;
+      }
     }
-    }
-    CHECK( det_found == true);
-
-
+    CHECK(det_found == true);
 
     std::bitset<8> single_exc_det("0011111");
 
     det_found = false;
     for (auto const &detvec : test_ci.detset.unique_dets[0][0]) {
-    auto it = std::find(std::begin(detvec), std::end(detvec), single_exc_det.to_ulong());
-    if (it != std::end(detvec)){
+      auto it = std::find(std::begin(detvec), std::end(detvec), single_exc_det.to_ulong());
+      if (it != std::end(detvec)) {
         det_found = true;
-         break;
+        break;
+      }
     }
-    }
-    CHECK( det_found == true);
+    CHECK(det_found == true);
 
     det_found = false;
     for (auto const &detvec : test_ci.detset.unique_dets[0][1]) {
-    auto it = std::find(std::begin(detvec), std::end(detvec), single_exc_det.to_ulong());
-    if (it != std::end(detvec)){
+      auto it = std::find(std::begin(detvec), std::end(detvec), single_exc_det.to_ulong());
+      if (it != std::end(detvec)) {
         det_found = true;
-         break;
+        break;
+      }
     }
-    }
-    CHECK( det_found == true);
+    CHECK(det_found == true);
   }
   TEST_CASE("CI: frozen core energy ") {
     POLYQUANT_CALCULATION test_calc;
@@ -205,13 +203,13 @@ TEST_SUITE("CI") {
     test_ci.setup_determinants();
     test_ci.detset.precompute_diagonal_Slater_Condon();
 
-    std::vector<int> i_unfold = {0,0};
-    std::vector<int> j_unfold = {0,0};
+    std::vector<int> i_unfold = {0, 0};
+    std::vector<int> j_unfold = {0, 0};
     auto diag_ham_elem = test_ci.detset.same_part_ham_diag(0, i_unfold, j_unfold);
     CHECK(diag_ham_elem == doctest::Approx(-84.1577927627923).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
 
     auto folded_idet_idx = test_ci.detset.dets.find(i_unfold)->second;
-    auto diag_ham_single_elem_thru_SC =test_ci.detset.Slater_Condon(folded_idet_idx, folded_idet_idx);
+    auto diag_ham_single_elem_thru_SC = test_ci.detset.Slater_Condon(folded_idet_idx, folded_idet_idx);
   }
   TEST_CASE("CI: same part ham single ") {
     POLYQUANT_CALCULATION test_calc;
@@ -224,20 +222,19 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
 
-    std::vector<int> i_unfold = {0,0};
-    std::vector<int> j_unfold = {0,1};
+    std::vector<int> i_unfold = {0, 0};
+    std::vector<int> j_unfold = {0, 1};
     auto off_diag_ham_single_elem = test_ci.detset.same_part_ham_single(0, i_unfold, j_unfold);
-    CHECK(off_diag_ham_single_elem ==doctest::Approx(3.042582036923841e-08).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(off_diag_ham_single_elem == doctest::Approx(3.042582036923841e-08).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     off_diag_ham_single_elem = test_ci.detset.same_part_ham_single(0, j_unfold, i_unfold);
-    CHECK(off_diag_ham_single_elem ==doctest::Approx(3.042582036923841e-08).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-
+    CHECK(off_diag_ham_single_elem == doctest::Approx(3.042582036923841e-08).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
 
     auto folded_idet_idx = test_ci.detset.dets.find(i_unfold)->second;
     auto folded_jdet_idx = test_ci.detset.dets.find(j_unfold)->second;
-    auto off_diag_ham_single_elem_thru_SC =test_ci.detset.Slater_Condon(folded_idet_idx, folded_jdet_idx);
-    CHECK(off_diag_ham_single_elem ==doctest::Approx(off_diag_ham_single_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    off_diag_ham_single_elem_thru_SC =test_ci.detset.Slater_Condon(folded_jdet_idx, folded_idet_idx);
-    CHECK(off_diag_ham_single_elem ==doctest::Approx(off_diag_ham_single_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    auto off_diag_ham_single_elem_thru_SC = test_ci.detset.Slater_Condon(folded_idet_idx, folded_jdet_idx);
+    CHECK(off_diag_ham_single_elem == doctest::Approx(off_diag_ham_single_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    off_diag_ham_single_elem_thru_SC = test_ci.detset.Slater_Condon(folded_jdet_idx, folded_idet_idx);
+    CHECK(off_diag_ham_single_elem == doctest::Approx(off_diag_ham_single_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
   TEST_CASE("CI: same part ham double ") {
     POLYQUANT_CALCULATION test_calc;
@@ -250,21 +247,20 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
 
-    std::vector<int> i_unfold = {0,0};
-    std::vector<int> j_unfold = {0,12};
+    std::vector<int> i_unfold = {0, 0};
+    std::vector<int> j_unfold = {0, 12};
     auto off_diag_ham_double_elem = test_ci.detset.same_part_ham_double(0, i_unfold, j_unfold);
     auto ref_value = 0.010855436090541142;
-    CHECK(off_diag_ham_double_elem ==doctest::Approx(ref_value).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(off_diag_ham_double_elem == doctest::Approx(ref_value).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     off_diag_ham_double_elem = test_ci.detset.same_part_ham_double(0, j_unfold, i_unfold);
-    CHECK(off_diag_ham_double_elem ==doctest::Approx(ref_value).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-
+    CHECK(off_diag_ham_double_elem == doctest::Approx(ref_value).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
 
     auto folded_idet_idx = test_ci.detset.dets.find(i_unfold)->second;
     auto folded_jdet_idx = test_ci.detset.dets.find(j_unfold)->second;
-    auto off_diag_ham_double_elem_thru_SC =test_ci.detset.Slater_Condon(folded_idet_idx, folded_jdet_idx);
-    CHECK(off_diag_ham_double_elem ==doctest::Approx(off_diag_ham_double_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    off_diag_ham_double_elem_thru_SC =test_ci.detset.Slater_Condon(folded_jdet_idx, folded_idet_idx);
-    CHECK(off_diag_ham_double_elem ==doctest::Approx(off_diag_ham_double_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    auto off_diag_ham_double_elem_thru_SC = test_ci.detset.Slater_Condon(folded_idet_idx, folded_jdet_idx);
+    CHECK(off_diag_ham_double_elem == doctest::Approx(off_diag_ham_double_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    off_diag_ham_double_elem_thru_SC = test_ci.detset.Slater_Condon(folded_jdet_idx, folded_idet_idx);
+    CHECK(off_diag_ham_double_elem == doctest::Approx(off_diag_ham_double_elem_thru_SC).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 
   TEST_CASE("CI: det_idx_unfold") {
@@ -277,13 +273,13 @@ TEST_SUITE("CI") {
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
-    
+
     for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
       CHECK(unfolded_idx.size() == 2);
-      if (i < 11){
+      if (i < 11) {
         CHECK(unfolded_idx[0] == 0);
-        CHECK(unfolded_idx[1] == i );
+        CHECK(unfolded_idx[1] == i);
       } else {
         CHECK(unfolded_idx[1] == 0);
         CHECK(unfolded_idx[0] == i - 10);
@@ -292,8 +288,7 @@ TEST_SUITE("CI") {
   }
   TEST_CASE("CI: mixed part ham diag ") {
     POLYQUANT_CALCULATION test_calc;
-    test_calc.setup_calculation(
-        "../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+    test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
     test_calc.run();
     POLYQUANT_EPCI test_ci;
     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -307,8 +302,8 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
     test_ci.detset.precompute_diagonal_Slater_Condon();
-    
-    std::vector<int> i_unfold = {0,0,0,0};
+
+    std::vector<int> i_unfold = {0, 0, 0, 0};
     auto folded_idx = test_ci.detset.dets.find(i_unfold)->second;
     auto diag_ham_elem = test_ci.detset.Slater_Condon(folded_idx, folded_idx);
     CHECK(diag_ham_elem == doctest::Approx(-7.5257234633357024123).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
@@ -328,35 +323,35 @@ TEST_SUITE("CI") {
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
-    
-    std::vector<int> i_unfold = {0,0,0,0};
+
+    std::vector<int> i_unfold = {0, 0, 0, 0};
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
     for (auto alpha_excitation = 0; alpha_excitation < test_ci.detset.unique_dets[0][0].size(); alpha_excitation++) {
-        std::vector<int> j_unfold = {alpha_excitation,0,0,0};
-        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][alpha_excitation]);
-        if (ex == 1) {
-            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        }
+      std::vector<int> j_unfold = {alpha_excitation, 0, 0, 0};
+      auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][alpha_excitation]);
+      if (ex == 1) {
+        auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+        auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+        CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+      }
     }
     for (auto beta_excitation = 0; beta_excitation < test_ci.detset.unique_dets[0][1].size(); beta_excitation++) {
-        std::vector<int> j_unfold = {0,beta_excitation,0,0};
-        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][1][0], test_ci.detset.unique_dets[0][1][beta_excitation]);
-        if (ex == 1) {
-            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        }
+      std::vector<int> j_unfold = {0, beta_excitation, 0, 0};
+      auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][1][0], test_ci.detset.unique_dets[0][1][beta_excitation]);
+      if (ex == 1) {
+        auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+        auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+        CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+      }
     }
     for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
-        std::vector<int> j_unfold = {0,0,pos_excitation,0};
-        auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
-        if (ex == 1) {
-            auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
-            auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
-            CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        }
+      std::vector<int> j_unfold = {0, 0, pos_excitation, 0};
+      auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
+      if (ex == 1) {
+        auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
+        auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
+        CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+      }
     }
   }
 
@@ -375,11 +370,11 @@ TEST_SUITE("CI") {
     test_ci.setup(test_calc.scf_calc);
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
-    
-    std::vector<int> i_unfold = {0,0,0,0};
+
+    std::vector<int> i_unfold = {0, 0, 0, 0};
     auto folded_i_idx = test_ci.detset.dets.find(i_unfold)->second;
 
-    std::vector<int> j_unfold = {1,0,2,0};
+    std::vector<int> j_unfold = {1, 0, 2, 0};
     auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
     auto double_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
     CHECK(std::abs(double_ham_elem) == doctest::Approx(0.0).epsilon(1e-3));
@@ -388,7 +383,7 @@ TEST_SUITE("CI") {
     // for (auto elec_excitation = 0; elec_excitation < test_ci.detset.unique_dets[0][0].size(); elec_excitation++) {
     // for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
     //     std::vector<int> j_unfold = {elec_excitation,0,pos_excitation,0};
-    //     auto ex = 0.0; 
+    //     auto ex = 0.0;
     //     ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[0][0][0], test_ci.detset.unique_dets[0][0][elec_excitation]);
     //     ex += test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
     //     if (ex == 2) {
@@ -405,8 +400,7 @@ TEST_SUITE("CI") {
     // }
   }
 
-
-   TEST_CASE("CI: single species sigma slow v fast") {
+  TEST_CASE("CI: single species sigma slow v fast") {
     POLYQUANT_CALCULATION test_calc;
     test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
     test_calc.run();
@@ -417,7 +411,7 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
     test_ci.detset.precompute_diagonal_Slater_Condon();
-    
+
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
     sigma.resize(test_ci.detset.N_dets, 1);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
@@ -428,51 +422,60 @@ TEST_SUITE("CI") {
     C.setZero();
     sigma.setZero();
     sigma_fast.setZero();
-    C(0,0) = 1.0;
+    C(0, 0) = 1.0;
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
-    std::cout << "\n" << "C[0] = 1; C[i > 0]  = 0" << "\n" << std::endl;
-    for (auto i =0; i< test_ci.detset.N_dets; i++){
+    std::cout << "\n"
+              << "C[0] = 1; C[i > 0]  = 0"
+              << "\n"
+              << std::endl;
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
-      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+      std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " << sigma(i, 0) << "  " << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0)
+                << std::endl;
+      CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
     /////////////////////////////////////////////////////////////////////
     C.setZero();
     sigma.setZero();
     sigma_fast.setZero();
-    C(5,0) = 1.0;
+    C(5, 0) = 1.0;
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
-    std::cout << "\n" << "C[5] = 1; C[i != 5]  = 0" << "\n" << std::endl;
-    for (auto i =0; i< test_ci.detset.N_dets; i++){
+    std::cout << "\n"
+              << "C[5] = 1; C[i != 5]  = 0"
+              << "\n"
+              << std::endl;
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
-        CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+      std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " << sigma(i, 0) << "  " << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0)
+                << std::endl;
+      CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
 
     /////////////////////////////////////////////////////////////////////
-    std::cout << "\n" << "C[:] = One over N_dets" << "\n" << std::endl;
+    std::cout << "\n"
+              << "C[:] = One over N_dets"
+              << "\n"
+              << std::endl;
     C.setZero();
     sigma.setZero();
     sigma_fast.setZero();
-    for(auto i = 0; i < test_ci.detset.N_dets; i++){
-        C(i,0) = 1.0 / test_ci.detset.N_dets;
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
+      C(i, 0) = 1.0 / test_ci.detset.N_dets;
     }
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
 
-    for (auto i =0; i< test_ci.detset.N_dets; i++){
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
-      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+      std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "        " << sigma(i, 0) << "  " << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0)
+                << std::endl;
+      CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
-    
-
-
   }
 
   TEST_CASE("CI: multispecies sigma slow v fast") {
@@ -491,7 +494,7 @@ TEST_SUITE("CI") {
     test_ci.calculate_integrals();
     test_ci.setup_determinants();
     test_ci.detset.precompute_diagonal_Slater_Condon();
-    
+
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
     sigma.resize(test_ci.detset.N_dets, 1);
     sigma.setZero();
@@ -504,49 +507,59 @@ TEST_SUITE("CI") {
     C.setZero();
     sigma.setZero();
     sigma_fast.setZero();
-    C(0,0) = 1.0;
+    C(0, 0) = 1.0;
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
-    std::cout << "\n" << "C[0] = 1; C[i > 0]  = 0" << "\n" << std::endl;
-    for (auto i =0; i< test_ci.detset.N_dets; i++){
+    std::cout << "\n"
+              << "C[0] = 1; C[i > 0]  = 0"
+              << "\n"
+              << std::endl;
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
-      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+      std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " << sigma(i, 0) << "  "
+                << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0) << std::endl;
+      CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
     /////////////////////////////////////////////////////////////////////
     C.setZero();
     sigma.setZero();
     sigma_fast.setZero();
-    C(5,0) = 1.0;
+    C(5, 0) = 1.0;
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
-    std::cout << "\n" << "C[5] = 1; C[i != 5]  = 0" << "\n" << std::endl;
-    for (auto i =0; i< test_ci.detset.N_dets; i++){
+    std::cout << "\n"
+              << "C[5] = 1; C[i != 5]  = 0"
+              << "\n"
+              << std::endl;
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
-        CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+      std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " << sigma(i, 0) << "  "
+                << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0) << std::endl;
+      CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
 
     /////////////////////////////////////////////////////////////////////
-    std::cout << "\n" << "C[:] = One over N_dets" << "\n" << std::endl;
+    std::cout << "\n"
+              << "C[:] = One over N_dets"
+              << "\n"
+              << std::endl;
     C.setZero();
     sigma.setZero();
     sigma_fast.setZero();
-    for(auto i = 0; i < test_ci.detset.N_dets; i++){
-        C(i,0) = 1.0 / test_ci.detset.N_dets;
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
+      C(i, 0) = 1.0 / test_ci.detset.N_dets;
     }
 
     test_ci.detset.create_sigma_slow(sigma, C);
     test_ci.detset.create_sigma(sigma_fast, C);
 
-    for (auto i =0; i< test_ci.detset.N_dets; i++){
+    for (auto i = 0; i < test_ci.detset.N_dets; i++) {
       auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
-        std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " <<sigma(i,0) << "  " << sigma_fast(i,0) << "     " << sigma(i,0) - sigma_fast(i,0) << std::endl;
-      CHECK(sigma(i,0) == doctest::Approx(sigma_fast(i,0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+      std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " << sigma(i, 0) << "  "
+                << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0) << std::endl;
+      CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
-    
-
   }
 }
