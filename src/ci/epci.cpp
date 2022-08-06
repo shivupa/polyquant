@@ -32,7 +32,6 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   // caculate dm for frozen core block
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
   fc_dm.resize(this->input_molecule.quantum_particles.size());
   this->detset.frozen_core_energy.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
@@ -107,6 +106,28 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   }
 }
 
+void POLYQUANT_EPCI::calculate_NOs(){
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  // caculate dm for frozen core block
+  dm1.resize(this->input_molecule.quantum_particles.size());
+  this->detset.frozen_core_energy.resize(this->input_molecule.quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      dm1[quantum_part_idx].resize(2);
+      dm1[quantum_part_idx][0].setZero(num_basis, num_basis);
+      dm1[quantum_part_idx][1].setZero(num_basis, num_basis);
+    } else {
+      dm1[quantum_part_idx].resize(1);
+      dm1[quantum_part_idx][0].setZero(num_basis, num_basis);
+    }
+  }
+  
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  }
+}
 void POLYQUANT_EPCI::setup_determinants() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);

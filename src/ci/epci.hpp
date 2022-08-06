@@ -27,6 +27,7 @@ public:
   void setup(const POLYQUANT_EPSCF &input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
+  void calculate_NOs();
   void setup_determinants();
   void run();
   void print_start_iterations();
@@ -70,6 +71,9 @@ public:
   POLYQUANT_DETSET<uint64_t> detset;
   Eigen::Matrix<double, Eigen::Dynamic, 1> energies;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;
+
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> dm1;
 
   std::vector<std::tuple<int, int, int>> excitation_level;
   std::vector<int> frozen_core;
