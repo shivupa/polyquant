@@ -383,29 +383,39 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
   // PNTGRP=C2V,
   // &END
 
-  auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    std::string quantum_part_name = quantum_part_key;
-
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
-    int num_part_total = quantum_part.num_parts;
-    int ms2 = quantum_part.multiplicity - 1; // we store mult they want spin
-    bool restricted = quantum_part.restricted;
-    bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
-    auto &MO_a_coeff = this->C[quantum_part_idx][0];
-    auto &MO_b_coeff = unique_beta ? this->C[quantum_part_idx][1] : this->C[quantum_part_idx][0];
+  auto quantum_part_a_idx = 0ul;
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+    int num_mo = this->input_basis.num_basis[quantum_part_a_idx];
+    int num_part_total = quantum_part_a.num_parts;
+    int ms2 = quantum_part_a.multiplicity - 1; // we store mult they want spin
+    bool restricted = quantum_part_a.restricted;
+    bool unique_beta = (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false);
+    auto &MO_a_coeff = this->C[quantum_part_a_idx][0];
+    auto &MO_b_coeff = unique_beta ? this->C[quantum_part_a_idx][1] : this->C[quantum_part_a_idx][0];
     std::vector<int> MO_symmetry_labels;
     MO_symmetry_labels.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), 1);
     int isym = 1;
     std::string point_group = "C1";
-    // need integrals
-    // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
-    // std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> mo_two_body_ints;
-    // call function in IO
-    std::string particle_filename = quantum_part_key + "_" + quantum_part_name;
+    std::string particle_filename = quantum_part_a_key + "_" + quantum_part_a_name;
     POLYQUANT_FCIDUMP fcidump_f(particle_filename);
-    fcidump_f.dump(num_mo, num_part_total, ms2, restricted, MO_symmetry_labels, isym, pntgrp, this->input_integral.mo_one_body_ints, this->input_integral.mo_two_body_ints);
-    quantum_part_idx++;
+    fcidump_f.dump(num_mo, num_part_total, ms2, restricted, MO_symmetry_labels, isym, pntgrp, this->input_integral.mo_one_body_ints, this->input_integral.mo_two_body_ints, quantum_part_a_idx,
+                   quantum_part_a_idx);
+    auto quantum_part_b_idx = 0ul;
+    for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+      if (quantum_part_a_idx == quantum_part_b_idx || quantum_part_b_idx < quantum_part_a_idx) {
+        continue;
+      }
+      std::string particle_filename = quantum_part_a_key + "_" + quantum_part_b_key + "_" + quantum_part_a_name;
+      POLYQUANT_FCIDUMP fcidump_f(particle_filename);
+      fcidump_f.dump(num_mo, num_part_total, ms2, restricted, MO_symmetry_labels, isym, pntgrp, this->input_integral.mo_one_body_ints, this->input_integral.mo_two_body_ints, quantum_part_a_idx,
+                     quantum_part_b_idx);
+      // need integrals
+      // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
+      // std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> mo_two_body_ints;
+      // call function in IO
+      quantum_part_b_idx++;
+    }
+    quantum_part_a_idx++;
   }
 }
 void POLYQUANT_EPCI::run() {
