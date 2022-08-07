@@ -124,9 +124,19 @@ void POLYQUANT_EPCI::calculate_NOs(){
       dm1[quantum_part_idx][0].setZero(num_basis, num_basis);
     }
   }
-  
+  // calculate DM in MO basis
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+       f
   }
+  // transform to AO
+  // add FC contribution
+    // if verbose dump
+    // diag for NOs and occ
+    // print + hdf5
+  // for spin combined dm 
+    // if verbose dump
+    // diag for NOs and occ
+    // print + hdf5
 }
 void POLYQUANT_EPCI::setup_determinants() {
   auto function = __PRETTY_FUNCTION__;
