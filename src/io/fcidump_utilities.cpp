@@ -15,6 +15,8 @@ void POLYQUANT_FCIDUMP::create_file(const std::string &fname) {
 }
 
 void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL& input_ints, int quantum_part_a_idx,int quantum_part_b_idx ){
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
     quantum_part_a_index = quantum_part_a_idx;
     quantum_part_b_index = quantum_part_b_idx;
     // if this is an FCIDUMP for the same types, dump header info
@@ -22,7 +24,7 @@ void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restri
       this->dump_header(num_mo, num_part_total, ms2,restricted, MO_symmetry_labels, isym, point_group);
     }
     // do we need to consider alpha/beta species of each particles orbitals?
-    if (restricted != false){
+    if (restricted == false){
         spin_types = 2;
     }
     this->dump_one_body_ints(input_ints);
@@ -75,8 +77,8 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
 	   //if restricted loop over alpha and beta
     for (int spin_a=0; spin_a< spin_types ; spin_a ++) {
       for (int spin_b=0; spin_b< spin_types ; spin_b ++) {
-    int nmo_a = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].rows();
-    int nmo_b = input_ints.mo_one_body_ints[quantum_part_b_index][spin_b].rows();
+    int nmo_a = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].cols();
+    int nmo_b = input_ints.mo_one_body_ints[quantum_part_b_index][spin_b].cols();
         for (int i=0; i< nmo_a ; i ++) {
           for (int j=0; j< nmo_a ; j ++) {
            for (int a=0; a< nmo_b ; a ++) {

@@ -314,6 +314,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   }
   if (post_mean_field_type == "FCIDUMP") {
     this->ci_calc.setup(this->scf_calc);
+  this->ci_calc.calculate_integrals();
     this->ci_calc.fcidump(fcidump_filename);
   } else if (post_mean_field_type == "CI") {
     this->ci_calc.setup(this->scf_calc);
@@ -323,7 +324,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
     // ci_calc.from_file(hdf5_filename);
     APP_ABORT("FROM_FILE for ci not implemented.");
   }
-  if (dump_for_qmcpack) {
+  if (dump_for_qmcpack and post_mean_field_type != "FCIDUMP") {
     dump_post_mf_for_qmcpack(hdf5_filename);
   }
 }
