@@ -47,7 +47,7 @@ public:
   std::ofstream fcidump_file;
   std::string filename;
   
-  void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group, std::vector<std::vector<Eigen::Matrix<double,Eigen::dynamic, Eigen::Dynamic>>> mo_one_body_ints, std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double,Eigen::Dynamic, Eigen::Dynamic>>>>>mo_two_body_ints, int quantum_part_a_idx,int quantum_part_b_idx );
+  void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL& input_ints, int quantum_part_a_idx,int quantum_part_b_idx );
   /**
    * @brief main funtion to handle FCIDUMP file generation
    *
@@ -67,9 +67,7 @@ public:
    *
    * @param point_group string label of current symmetry group of molecule
    *
-   * @param mo_one_body_ints one-body integrals as stored in source code
-   *
-   * @param mo_two_body_ints two-body integrals as stored in source code
+   * @param input_ints an integral object storing the system integrals, 1 body and 2 body are needed here.
    *
    * @param quantum_part_*_idx index of particles to parse
    * 
