@@ -2,6 +2,7 @@
 #define POLYQUANT_INPUT_FCIDUMP_H
 #include "io/timer.hpp"
 #include "io/utils.hpp"
+#include "integral/integral.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
@@ -40,12 +41,6 @@ public:
    * @param filename the file to write to.
    */
   void create_file(const std::string &fname);
-  /**
-   * @brief the fcidump file object
-   *
-   */
-  std::ofstream fcidump_file;
-  std::string filename;
 
   /**
    * @brief main funtion to handle FCIDUMP file generation
@@ -82,8 +77,8 @@ public:
   int spin_types = 1;
 private:
   void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group);
-  void dump_one_body_ints(std::vector<std::vector<double,Eigen::Dynamic,Eigen::Dynamic>>mo_one_body_ints);
-  void dump_two_body_ints(std::vector<std::vector,std::vector<std::vector<double,Eigen::Dynamic,Eigen::Dynamic>>>> mo_two_body_ints);
+  void dump_one_body_ints(POLYQUANT_INTEGRAL& input_ints);
+  void dump_two_body_ints(POLYQUANT_INTEGRAL& input_ints);
   void dump_other_vals();
 };
 } // namespace polyquant
