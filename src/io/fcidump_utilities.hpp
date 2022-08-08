@@ -47,7 +47,7 @@ public:
   std::ofstream fcidump_file;
   std::string filename;
   
-  void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group, std::vector<std::vector<Eigen::Matrix<double,Eigen::dynamic, Eigen::Dynamic>>> mo_one_body_ints, std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double,Eigen::Dynamic, Eigen::Dynamic>>>>>mo_two_body_ints, int quantum_part_a_idx,int quantum_part_b_idx );
+  void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group, std::vector<std::vector<Eigen::Matrix<double,Eigen::dynamic, Eigen::Dynamic>>> mo_one_body_ints, std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double,Eigen::Dynamic, Eigen::Dynamic>>>>>mo_two_body_ints, int quantum_part_a_idx,int quantum_part_b_idx );
   /**
    * @brief main funtion to handle FCIDUMP file generation
    *
@@ -61,7 +61,7 @@ public:
    *
    * @param quantum_part_*_idx index of particles to parse
    *
-   * @param MO_symmetry_labels symmetry labels for MOs, currently all in C1 group
+   * @param mo_symmetry_labels symmetry labels for MOs, currently all in C1 group
    *
    * @param isym currently unused, but included by some for interfacing with NECI FCIDUMP
    *
@@ -80,8 +80,9 @@ public:
   std::string filename;
   int quantum_part_a_index;
   int quantum_part_b_index;
+  int spin_types = 1;
 private:
-  void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group);
+  void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group);
   void dump_one_body_ints(std::vector<std::vector<double,Eigen::Dynamic,Eigen::Dynamic>>mo_one_body_ints);
   void dump_two_body_ints(std::vector<std::vector,std::vector<std::vector<double,Eigen::Dynamic,Eigen::Dynamic>>>> mo_two_body_ints);
   void dump_other_vals();
