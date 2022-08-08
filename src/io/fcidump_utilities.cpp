@@ -25,8 +25,8 @@ void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<i
     if (restricted != false){
         spin_types = 2;
     }
-    this->dump_one_body_ints(input_ints.mo_one_body_ints);
-    this->dump_two_body_ints(input_ints.mo_two_body_ints);
+    this->dump_one_body_ints(input_ints);
+    this->dump_two_body_ints(input_ints);
     this->dump_other_vals();
 }
 
@@ -40,7 +40,7 @@ void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::ve
   IUHF=1,
   */
   this->fcidump_file << std::setw(10) << "&FCI  NORB= " << std::setw(5) << num_mo << std::setw(9) <<", NELEC= " << std::setw(4) << num_part_tot << std::setw(5) << "M2S= " << std::setw(4) <<ms2 << std::endl;
-  this->fcidump_file << std::setw(10) << "ORBSYM= "  
+  this->fcidump_file << std::setw(10) << "ORBSYM= ";
    for (int i=0;i, mo_symmetry_labels.siz()){
     this->fcidump_file  << std::setw(3)<< mo_symmetry_labels.at(i);
    }
@@ -51,16 +51,15 @@ void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::ve
     this->fcidump_file << std::setw(3) << "*/"  << mo_symmetry_labels<< std::endl;
 }
 
-  void dump_one_body_ints(std::vector<std::vector<Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>> mo_one_body_ints){
+  void dump_one_body_ints(POLYQUANT_INTEGRAL& input_ints) {
 	   //if restricted loop over alpha and beta
-    int rows = mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b].rows()
-    int cols = mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b].cols()
     for (int spin_a=0; spin_a< spin_types ; spin_a ++) {
       for (int spin_b=0; spin_b< spin_types ; spin_b ++) {
+    int rows = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b].rows();
+    int cols = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b].cols();
         for (int i=0; i < rows ; i ++) {
           for (int a=0; a < cols ; a ++){
-              ints = mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b]
-              this->fcidump_file << std::setw(10) << mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b](i,a) << std::setw(3) << i+1 << std::setw(3)<< a+1 << std::endl;
+              this->fcidump_file << std::setw(10) << input_ints.mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b](i,a) << std::setw(3) << i+1 << std::setw(3)<< a+1 << std::endl;
             }
   }
   }
@@ -68,21 +67,19 @@ void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::ve
   }
 
 
-  void dump_two_body_ints(std::vector<std::vector,std::vector<std::vector<Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>>>> mo_two_body_ints, int num_mo,num_part_tot){
+  void dump_two_body_ints(POLYQUANT_INTEGRAL& input_ints){
 	   //if restricted loop over alpha and beta
-     int spin_types=1;
-     if !restricted{
-      spin_types = 2;
-     }
     for (int spin_a=0; spin_a< spin_types ; spin_a ++) {
       for (int spin_b=0; spin_b< spin_types ; spin_b ++) {
+    int rows = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b].rows();
+    int cols = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b].cols();
         for (int i=0; i< rows ; i ++) {
           for (int j=0; j< rows ; j ++) {
            for (int a=0; a< cols ; a ++) {
             for (int b=0; b< cols ; b ++){
               ints = mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b]
               // TODO idx8 call will probably have to change
-              this->fcidump_file << std::setw(10) << mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b](POLYQUAUNT_INTEGRAL::idx8(i,j,a,b))<< std::setw(3)<< i+1 <<std::setw(3)<< j+1 <<std::setw(3)<< a+1 <<std::setw(3)<< b+1 << std::endl;
+              this->fcidump_file << std::setw(10) << input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_idx][spin_b](input_ints.idx2(i,j), input_ints.idx2(a,b))<< std::setw(3)<< i+1 <<std::setw(3)<< j+1 <<std::setw(3)<< a+1 <<std::setw(3)<< b+1 << std::endl;
             }
            }
   }
