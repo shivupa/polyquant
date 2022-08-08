@@ -44,7 +44,17 @@ void POLYQUANT_FCIDUMP::create_file(const std::string &fname) {
   ISYM=1,
   IUHF=1,
   */
-  }
+  this->fcidump_file << std::setw(10) << "&FCI  NORB= " << std::setw(5) << num_mo << std::setw(9) <<", NELEC= " << std::setw(4) << num_part_tot << std::setw(5) << "M2S= " << std::setw(4) <<ms2 << std::endl;
+  this->fcidump_file << std::setw(10) << "ORBSYM= "  
+   for (int i=0;i, MO_symmetry_labels.siz()){
+    this->fcidump_file  << std::setw(3)<< MO_symmetry_labels.at(i);
+   }
+    this->fcidump_file << ',' <<std::endl;
+  this->fcidump_file << std::setw(10) << "ISYM= "  << MO_symmetry_labels<< std::endl;
+  this->fcidump_file << std::setw(10) << "IUHF= "  << !restricted << std::endl;
+  this->fcidump_file << std::setw(10) << "PNT_GRP= "  << MO_symmetry_labels<< std::endl;
+    this->fcidump_file << std::setw(3) << "*/"  << MO_symmetry_labels<< std::endl;}
+
   
   void dump_one_body_ints(std::vector<std::vector<double,Eigen::Dynamic,Eigen::Dynamic>>mo_one_body_ints){
 	   std::string placeholder

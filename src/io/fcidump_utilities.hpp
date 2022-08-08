@@ -57,7 +57,7 @@ public:
    *
    * @param ms2 spin polarization
    *
-   * @param restricted, a boolean indicated whether there is one (restricted,0) or multiple sets (unrestricted,1) of orbitals to consider
+   * @param restricted, a boolean indicated whether there is one (restricted,1) or multiple sets (unrestricted,0) of orbitals to consider
    *
    * @param quantum_part_*_idx index of particles to parse
    *
