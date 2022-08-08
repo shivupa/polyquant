@@ -102,7 +102,7 @@ public:
    * @brief Post mean-field types that polyquant knows about
    *
    */
-  const std::unordered_set<std::string> post_mean_field_methods = {"CI"};
+  const std::unordered_set<std::string> post_mean_field_methods = {"CI", "FCIDUMP"};
 };
 } // namespace polyquant
 #endif
