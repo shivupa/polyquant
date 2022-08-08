@@ -382,7 +382,6 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
   // ISYM=1,
   // PNTGRP=C2V,
   // &END
-
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
     int num_mo = this->input_basis.num_basis[quantum_part_a_idx];
