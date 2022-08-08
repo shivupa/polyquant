@@ -314,7 +314,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   }
   if (post_mean_field_type == "FCIDUMP") {
     this->ci_calc.setup(this->scf_calc);
-    this->ci_calc.fcidump(fcidump_file);
+    this->ci_calc.fcidump(fcidump_filename);
   } else if (post_mean_field_type == "CI") {
     this->ci_calc.setup(this->scf_calc);
     this->ci_calc.run();
