@@ -27,6 +27,7 @@ public:
   void setup(const POLYQUANT_EPSCF &input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
+  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& orbs, Eigen::Matrix<double, Eigen::Dynamic, 1>& occs);
   void calculate_NOs();
   void setup_determinants();
   void run();
@@ -74,6 +75,10 @@ public:
 
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> dm1;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_nso;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_no;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ_nso;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ_no;
 
   std::vector<std::tuple<int, int, int>> excitation_level;
   std::vector<int> frozen_core;
