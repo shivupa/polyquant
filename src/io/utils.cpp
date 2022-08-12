@@ -109,7 +109,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
           }
-          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j].diagonal()((mo_idx * stride) + mo_offset)));
+          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j][(mo_idx * stride) + mo_offset]));
         }
         line += fmt::format("{:10}", "");
         Polyquant_cout(line);

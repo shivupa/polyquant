@@ -121,48 +121,67 @@ void POLYQUANT_EPCI::calculate_NOs() {
   this->C_nso.resize(this->NO_states.size());
   this->C_no.resize(this->NO_states.size());
   this->occ_nso.resize(this->NO_states.size());
-  this->occ_no.resize(this->NO_statees.size());
+  this->occ_no.resize(this->NO_states.size());
 
-  for (int state_idx : this->NO_states) {
-    this->dm1[state_idx].resize(this->input_molecule.quantum_particles.size());
-    this->C_nso[state_idx].resize(this->input_molecule.quantum_particles.size());
-    this->C_no[state_idx].resize(this->input_molecule.quantum_particles.size());
-    this->occ_nso[state_idx].resize(this->input_molecule.quantum_particles.size());
-    this->occ_no[state_idx].resize(this->input_molecule.quantum_particles.size());
+  for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
+    auto state_idx = this->NO_states[state_vec_idx];
+    std::cout << "SHIV   " << state_vec_idx << "   " << state_idx << std::endl;
+    this->dm1[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
+    this->C_nso[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
+    this->C_no[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
+    this->occ_nso[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
+    this->occ_no[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        dm1[state_idx][quantum_part_idx].resize(2);
-        this->C_nso[state_idx][quantum_part_idx].resize(2);
-        this->C_no[state_idx][quantum_part_idx].resize(1);
-        dm1[state_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
-        dm1[[state_idx] quantum_part_idx][1].setZero(num_basis, num_basis);
+        dm1[state_vec_idx][quantum_part_idx].resize(2);
+        this->C_nso[state_vec_idx][quantum_part_idx].resize(2);
+        this->C_no[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_nso[state_vec_idx][quantum_part_idx].resize(2);
+        this->occ_no[state_vec_idx][quantum_part_idx].resize(1);
+        dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
+        dm1[state_vec_idx][quantum_part_idx][1].setZero(num_basis, num_basis);
       } else {
-        this->C_nso[state_idx][quantum_part_idx].resize(1);
-        this->C_no[state_idx][quantum_part_idx].resize(1);
-        dm1[state_idx][quantum_part_idx].resize(1);
-        dm1[state_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
+        this->C_nso[state_vec_idx][quantum_part_idx].resize(1);
+        this->C_no[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_nso[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_no[state_vec_idx][quantum_part_idx].resize(1);
+        dm1[state_vec_idx][quantum_part_idx].resize(1);
+        dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
       }
     }
     // calculate DM in MO basis
     // transform to AO
     // add FC contribution
-    quantum_part_idx = 0 for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    quantum_part_idx = 0;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
+      auto num_mo = 0;
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C);
-        this->dm1[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0];
-        this->dm1[state_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
+        num_mo = this->input_epscf.C[quantum_part_idx][0].cols();
+        MO_rdm1.setZero(num_mo, num_mo);
+        this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
+        Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
+        // MO_rdm nmo x nmo
+        // C nao x nmo
+        // C @ MO_rdm @ C.T
+        this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
+        this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
 
-        MO_rdm1.clear();
-        this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C);
-        this->dm1[state_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1];
-        this->dm1[state_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
+        num_mo = this->input_epscf.C[quantum_part_idx][1].cols();
+        MO_rdm1.setZero(num_mo, num_mo);
+        this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
+        Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
+        this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
+        this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
       } else {
-        this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C);
-        this->dm1[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0];
-        this->dm1[state_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
+        num_mo = this->input_epscf.C[quantum_part_idx][0].cols();
+        MO_rdm1.setZero(num_mo, num_mo);
+        this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
+        Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
+        this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
+        this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
       }
       quantum_part_idx++;
     }
@@ -170,9 +189,21 @@ void POLYQUANT_EPCI::calculate_NOs() {
     if (verbose == true) {
       quantum_part_idx = 0ul;
       for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-        Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][0], "CI_State_" + state_idx + "_DM_" + quantum_part_key + "_alpha.txt");
+        std::stringstream dump_file;
+        dump_file << "CI_state_";
+        dump_file << state_idx;
+        dump_file << "_DM_";
+        dump_file << quantum_part_key;
+        dump_file << "_alpha.txt";
+        Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][0], dump_file.str());
         if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-          Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][1], "CI_State_" + state_idx + "_DM_" + quantum_part_key + "_beta.txt");
+          std::stringstream dump_file;
+          dump_file << "CI_state_";
+          dump_file << state_idx;
+          dump_file << "_DM_";
+          dump_file << quantum_part_key;
+          dump_file << "_beta.txt";
+          Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][1], dump_file.str());
         }
         quantum_part_idx++;
       }
@@ -180,7 +211,8 @@ void POLYQUANT_EPCI::calculate_NOs() {
 
     // diag for NSOs and occ
     // print
-    quantum_part_idx = 0 for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    quantum_part_idx = 0;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], this->C_nso[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][1], this->C_nso[state_idx][quantum_part_idx][1], this->occ_nso[state_idx][quantum_part_idx][1]);
@@ -189,30 +221,24 @@ void POLYQUANT_EPCI::calculate_NOs() {
       }
       quantum_part_idx++;
     }
-
-    std::stringstream title;
-    title << "NATURAL SPIN ORBITALS  state " << state_idx;
-    dump_orbitals(this->C_nso[state_idx], this->occ_nso[state_idx], this->occ_nso[state_idx], title.str());
-
     // diag for NOs and occ
     // print
-    quantum_part_idx = 0 for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    quantum_part_idx = 0;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][1], this->C_no[state_idx][quantum_part_idx][0],
-                       this->occ_nso[state_idx][quantum_part_idx][0]);
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dm1_spin_combined = this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][1];
+        diag_dm_helper(dm1_spin_combined, this->C_no[state_idx][quantum_part_idx][0], this->occ_no[state_idx][quantum_part_idx][0]);
       } else {
         if (quantum_part.num_parts > 1) {
-          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][0], this->C_no[state_idx][quantum_part_idx][0],
-                         this->occ_nso[state_idx][quantum_part_idx][0]);
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dm1_spin_combined = this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][0];
+          diag_dm_helper(dm1_spin_combined, this->C_no[state_idx][quantum_part_idx][0], this->occ_no[state_idx][quantum_part_idx][0]);
         } else {
-          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], this->C_no[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dm1_spin_combined = this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][1];
+          diag_dm_helper(dm1_spin_combined, this->C_no[state_idx][quantum_part_idx][0], this->occ_no[state_idx][quantum_part_idx][0]);
         }
       }
       quantum_part_idx++;
     }
-    title.str(std::string());
-    title << "NATURAL ORBITALS  state " << state_idx;
-    dump_orbitals(this->C_no[state_idx], this->occ_no[state_idx], this->occ_no[state_idx], title.str());
   }
 }
 void POLYQUANT_EPCI::setup_determinants() {
@@ -300,7 +326,17 @@ void POLYQUANT_EPCI::print_success() {
       Polyquant_cout(line);
     }
   }
-  Polyquant_cout("");
+  for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
+    auto state_idx = this->NO_states[state_vec_idx];
+    Polyquant_cout("");
+    std::stringstream title;
+    title << "NATURAL SPIN ORBITALS  state " << state_idx;
+    dump_orbitals(this->C_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->occ_nso[state_vec_idx], title.str());
+
+    title.str(std::string());
+    title << "NATURAL ORBITALS  state " << state_idx;
+    dump_orbitals(this->C_no[state_vec_idx], this->occ_no[state_vec_idx], this->occ_no[state_vec_idx], title.str());
+  }
 }
 
 void POLYQUANT_EPCI::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
@@ -338,6 +374,7 @@ void POLYQUANT_EPCI::run() {
     for (auto e = 0; e < this->energies.size(); e++) {
       this->energies[e] += constant_shift;
     }
+    this->calculate_NOs();
     this->print_success();
   } else {
     APP_ABORT("CI Calculation did not converge!");

@@ -729,7 +729,7 @@ void POLYQUANT_EPSCF::print_iteration() {
 void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
                                              const double occval) {
   for (auto i = 0; i < num_parts; i++) {
-    part_occ(i) = occval;
+    part_occ[i] = occval;
   }
 }
 void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval) {
@@ -770,7 +770,7 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 
     this->C_ref_mom = this->C;
   }
   for (auto i = 0; i < num_parts; i++) {
-    part_occ(i) = occval;
+    part_occ[i] = occval;
   }
 }
 

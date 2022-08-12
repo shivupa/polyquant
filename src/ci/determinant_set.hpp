@@ -1619,14 +1619,14 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
     for (auto int_idx = 0; int_idx < Di.size(); int_idx++) {
       buffer = Di[int_idx];
       while (buffer != 0) {
-        auto position = std::countr_zero(H);
+        auto position = std::countr_zero(buffer);
         auto orb_idx = ((Di.size() - int_idx - 1) * 64) + position;
         MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
         buffer &= buffer - 1UL;
       }
     }
     // off diagonal singles contributions
-    for (auto j_det = 0; j_det < i_det, j_det++) {
+    for (auto j_det = 0; j_det < i_det; j_det++) {
       auto j_unfold = det_idx_unfold(j_det);
       auto idx_jdet = j_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
       auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
