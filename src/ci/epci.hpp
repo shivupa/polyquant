@@ -27,7 +27,7 @@ public:
   void setup(const POLYQUANT_EPSCF &input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
-  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& orbs, Eigen::Matrix<double, Eigen::Dynamic, 1>& occs);
+  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs);
   void calculate_NOs();
   void setup_determinants();
   void run();

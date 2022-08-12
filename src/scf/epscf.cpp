@@ -459,8 +459,7 @@ void POLYQUANT_EPSCF::form_DM() {
 }
 
 void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::Matrix<double, Eigen::Dynamic, 1> &occ, const int num_basis,
-                                     const int num_part) {
+                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::Matrix<double, Eigen::Dynamic, 1> &occ, const int num_basis, const int num_part) {
   dm_last = dm;
   dm.setZero(num_basis, num_basis);
   dm.noalias() = coeff * occ.asDiagonal() * coeff.transpose();
@@ -733,8 +732,7 @@ void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::Matrix<double, Eigen::Dynami
     part_occ(i) = occval;
   }
 }
-void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
-                                          const double occval) {
+void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval) {
   if (C_ref_mom.empty()) {
     Polyquant_cout("Setting MOM reference orbitals");
     this->C_ref_mom = this->C;

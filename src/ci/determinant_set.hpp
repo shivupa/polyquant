@@ -152,7 +152,8 @@ public:
   void create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
   void create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
-  void create_1rdm( const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& MO_rdm1), const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C;
+  void create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
+                   const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
 
@@ -1604,81 +1605,48 @@ void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eig
 }
 
 template <typename T>
-void POLYQUANT_DETSET<T>::create_1rdm( const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& MO_rdm1, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
+                                      const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
 
-    // See: https://arxiv.org/abs/1311.6244
+  // See: https://arxiv.org/abs/1311.6244
   T buffer;
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto i_unfold = det_idx_unfold(i_det);
-    auto idx_idet = i_unfold[2*quantum_part_idx + quantum_part_spin_idx];
+    auto idx_idet = i_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
     auto ishift = 0;
     auto Di = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet);
     // diagonal
-    for ( auto int_idx = 0; int_idx < Di.size(); int_idx++){
+    for (auto int_idx = 0; int_idx < Di.size(); int_idx++) {
       buffer = Di[int_idx];
-      while(buffer != 0){
+      while (buffer != 0) {
         auto position = std::countr_zero(H);
         auto orb_idx = ((Di.size() - int_idx - 1) * 64) + position;
         MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
-        buffer &= buffer-1UL ;
+        buffer &= buffer - 1UL;
       }
     }
     // off diagonal singles contributions
-    for (auto j_det = 0; j_det < i_det, j_det++){
+    for (auto j_det = 0; j_det < i_det, j_det++) {
       auto j_unfold = det_idx_unfold(j_det);
-      auto idx_jdet = j_unfold[2*quantum_part_idx + quantum_part_spin_idx];
+      auto idx_jdet = j_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
       auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
       auto num_excitation = single_spin_num_excitation(Di, Dj);
-      if (num_excitation != 1){
-          continue;
+      if (num_excitation != 1) {
+        continue;
       }
       std::vector<int> holes, parts;
       double phase = 1.0;
       get_holes(Di, Dj, holes);
       get_parts(Di, Dj, parts);
       phase = get_phase(Di, Dj, holes, parts);
-      auto contribution = phase *  C(i_det, state_idx) *  C(j_det, state_idx);
+      auto contribution = phase * C(i_det, state_idx) * C(j_det, state_idx);
       // maybe contribution *= 2;
       auto k = holes[0];
       auto l = parts[0];
       MO_rdm1(k, l) += contribution;
       MO_rdm1(l, k) += contribution;
     }
-    }
   }
-       x  subroutine compute_density_matrix(det,Ndet,coef,mo_num, Nint,density_matrix)
-       x   do k=1,Ndet
-       x   do ispin=1,2
-       x   ishift = 0
-       x   do i=1,Nint
-       x   buffer = det(i,ispin,k)
-       x   do while (buffer /= 0_8)
-       x   j = trailz(buffer) + ishift
-       x   density_matrix(j,j) = density_matrix(j,j) + coef(k)*coef(k)
-       x   buffer = iand(buffer,buffer-1_8)
-       x   end do
-       x   ishift = ishift+64
-       x   end do
-       x   end do
-       x   do l=1,k-1
-       x   if (n_excitations(det(1,1,k),det(1,1,l),Nint) /= 1) then
-       x   cycle
-       x   end if
-       x   call get_excitation(det(1,1,k),det(1,1,l),exc,deg,phase,Nint)
-       x   if (exc(0,1,1) == 1) then
-       x   i = exc(1,1,1)
-       x   j = exc(1,2,1)
-       x   else
-       x   i = exc(1,1,2)
-       x   j = exc(1,2,2)
-       x   end if
-       x   c = phase*coef(k)*coef(l)
-       x   c = c+c
-       x   density_matrix(j,i) = density_matrix(j,i) + c
-       x   density_matrix(i,j) = density_matrix(i,j) + c
-       x   end do
-       x   end do
-       x   end
 }
 
 template <typename T>

@@ -276,10 +276,10 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
           ci_calc.NO_states.clear();
           if (NO_states.type() == json::value_t::array) {
             for (auto i = 0; i < NO_states.size(); i++) {
-                ci_calc.NO_states.push_back(NO_states[i]);
+              ci_calc.NO_states.push_back(NO_states[i]);
             }
           } else {
-                ci_calc.NO_states.push_back(0);
+            ci_calc.NO_states.push_back(0);
           }
         }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
@@ -543,8 +543,6 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
     quantum_part_idx++;
   }
 }
-
-
 
 void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
