@@ -116,92 +116,105 @@ void POLYQUANT_EPCI::calculate_NOs(){
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
 
-  dm1.resize(this->input_molecule.quantum_particles.size());
-  this->C_nso.resize(this->input_molecule.quantum_particles.size());
-  this->C_no.resize(this->input_molecule.quantum_particles.size());
-  this->occ_nso.resize(this->input_molecule.quantum_particles.size());
-  this->occ_no.resize(this->input_molecule.quantum_particles.size());
-  auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-      dm1[quantum_part_idx].resize(2);
-      this->C_nso[quantum_part_idx].resize(2);
-      this->C_no[quantum_part_idx].resize(1);
-      dm1[quantum_part_idx][0].setZero(num_basis, num_basis);
-      dm1[quantum_part_idx][1].setZero(num_basis, num_basis);
-    } else {
-      this->C_nso[quantum_part_idx].resize(1);
-      this->C_no[quantum_part_idx].resize(1);
-      dm1[quantum_part_idx].resize(1);
-      dm1[quantum_part_idx][0].setZero(num_basis, num_basis);
-    }
-  }
-  // calculate DM in MO basis
-  // transform to AO
-  // add FC contribution
-  quantum_part_idx = 0
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        this->detset.create_1rdm(quantum_part_idx, 0, MO_rdm1, this->C);
-        this->dm1[quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0];
-        this->dm1[quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
-        
-        MO_rdm1.clear();
-        this->detset.create_1rdm(quantum_part_idx, 1, MO_rdm1);
-        this->dm1[quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1];
-        this->dm1[quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
-      } else {
-        this->detset.create_1rdm(quantum_part_idx, 0, MO_rdm1);
-        this->dm1[quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0];
-        this->dm1[quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
-      }
-      quantum_part_idx++;
-  }
-  // if verbose dump
-  if (verbose == true) {
-    quantum_part_idx = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-      Polyquant_dump_mat_to_file(dm1[quantum_part_idx][0], "CI_DM_" + quantum_part_key + "_alpha.txt");
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        Polyquant_dump_mat_to_file(dm1[quantum_part_idx][1], "CI_DM_" + quantum_part_key + "_beta.txt");
-      }
-      quantum_part_idx++;
-    }
-  }
-    
+  this->dm1.resize(this->NO_states.size());
+  this->C_nso.resize(this->NO_states.size());
+  this->C_no.resize(this->NO_states.size());
+  this->occ_nso.resize(this->NO_states.size());
+  this->occ_no.resize(this->NO_statees.size());
 
-  // diag for NSOs and occ
-  // print
-  quantum_part_idx = 0
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        diag_dm_helper(this->dm1[quantum_part_idx][0], this->C_nso[quantum_part_idx][0], this->occ_nso[quantum_part_idx][0]);
-        diag_dm_helper(this->dm1[quantum_part_idx][1], this->C_nso[quantum_part_idx][1], this->occ_nso[quantum_part_idx][1]);
-    } else {
-        diag_dm_helper(this->dm1[quantum_part_idx][0], this->C_nso[quantum_part_idx][0], this->occ_nso[quantum_part_idx][0]);
+  for (int state_idx : this->NO_states){
+    this->dm1[state_idx].resize(this->input_molecule.quantum_particles.size());
+    this->C_nso[state_idx].resize(this->input_molecule.quantum_particles.size());
+    this->C_no[state_idx].resize(this->input_molecule.quantum_particles.size());
+    this->occ_nso[state_idx].resize(this->input_molecule.quantum_particles.size());
+    this->occ_no[state_idx].resize(this->input_molecule.quantum_particles.size());
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        dm1[state_idx][quantum_part_idx].resize(2);
+        this->C_nso[state_idx][quantum_part_idx].resize(2);
+        this->C_no[state_idx][quantum_part_idx].resize(1);
+        dm1[state_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
+        dm1[[state_idx]quantum_part_idx][1].setZero(num_basis, num_basis);
+      } else {
+        this->C_nso[state_idx][quantum_part_idx].resize(1);
+        this->C_no[state_idx][quantum_part_idx].resize(1);
+        dm1[state_idx][quantum_part_idx].resize(1);
+        dm1[state_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
+      }
     }
-    quantum_part_idx++;
-  }
-  dump_orbitals(this->C_nso, this->occ_nso, this->occ_nso, "NATURAL SPIN ORBITALS");
-  
-  // diag for NOs and occ
-  // print
-  quantum_part_idx = 0
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        diag_dm_helper(this->dm1[quantum_part_idx][0] + this->dm1[quantum_part_idx][1], this->C_no[quantum_part_idx][0], this->occ_nso[quantum_part_idx][0]);
-    } else {
-        if (quantum_part.num_parts > 1) {
-        diag_dm_helper(this->dm1[quantum_part_idx][0] + this->dm1[quantum_part_idx][0], this->C_no[quantum_part_idx][0], this->occ_nso[quantum_part_idx][0]);
+    // calculate DM in MO basis
+    // transform to AO
+    // add FC contribution
+    quantum_part_idx = 0
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
+        if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+          this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C);
+          this->dm1[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0];
+          this->dm1[state_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
+
+          MO_rdm1.clear();
+          this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C);
+          this->dm1[state_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1];
+          this->dm1[state_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
         } else {
-        diag_dm_helper(this->dm1[quantum_part_idx][0],  this->C_no[quantum_part_idx][0], this->occ_nso[quantum_part_idx][0]);
+          this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C);
+          this->dm1[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0].transpose() * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0];
+          this->dm1[state_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
         }
+        quantum_part_idx++;
     }
-    quantum_part_idx++;
+    // if verbose dump
+    if (verbose == true) {
+      quantum_part_idx = 0ul;
+      for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+        Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][0], "CI_State_" + state_idx + "_DM_" + quantum_part_key + "_alpha.txt");
+        if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+          Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][1], "CI_State_" + state_idx + "_DM_" + quantum_part_key + "_beta.txt");
+        }
+        quantum_part_idx++;
+      }
+    }
+
+
+    // diag for NSOs and occ
+    // print
+    quantum_part_idx = 0
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], this->C_nso[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
+          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][1], this->C_nso[state_idx][quantum_part_idx][1], this->occ_nso[state_idx][quantum_part_idx][1]);
+      } else {
+          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], this->C_nso[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
+      }
+      quantum_part_idx++;
+    }
+
+    std::stringstream title;
+    title << "NATURAL SPIN ORBITALS  state " << state_idx;
+    dump_orbitals(this->C_nso[state_idx], this->occ_nso[state_idx], this->occ_nso[state_idx], title.str());
+
+    // diag for NOs and occ
+    // print
+    quantum_part_idx = 0
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][1], this->C_no[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
+      } else {
+          if (quantum_part.num_parts > 1) {
+          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0] + this->dm1[state_idx][quantum_part_idx][0], this->C_no[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
+          } else {
+          diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0],  this->C_no[state_idx][quantum_part_idx][0], this->occ_nso[state_idx][quantum_part_idx][0]);
+          }
+      }
+      quantum_part_idx++;
+    }
+    title.str(std::string());
+    title << "NATURAL ORBITALS  state " << state_idx;
+    dump_orbitals(this->C_no[state_idx], this->occ_no[state_idx], this->occ_no[state_idx], title.str());
   }
-  dump_orbitals(this->C_no, this->occ_no, this->occ_no, "NATURAL ORBITALS");
 }
 void POLYQUANT_EPCI::setup_determinants() {
   auto function = __PRETTY_FUNCTION__;

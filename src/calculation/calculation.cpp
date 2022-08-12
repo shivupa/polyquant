@@ -271,6 +271,17 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
           ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
         }
+        if (this->input_params.input_data["keywords"]["ci_keywords"].contains("NOs")) {
+          auto NO_states = this->input_params.input_data["keywords"]["ci_keywords"]["NOs"];
+          ci_calc.NO_states.clear();
+          if (NO_states.type() == json::value_t::array) {
+            for (auto i = 0; i < NO_states.size(); i++) {
+                ci_calc.NO_states.push_back(NO_states[i]);
+            }
+          } else {
+                ci_calc.NO_states.push_back(0);
+          }
+        }
         if (this->input_params.input_data["keywords"]["ci_keywords"].contains("excitation_level")) {
           auto ex_lvl = this->input_params.input_data["keywords"]["ci_keywords"]["excitation_level"];
           if (ex_lvl.type() == json::value_t::array) {
