@@ -1607,7 +1607,7 @@ void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eig
 template <typename T>
 void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
                                       const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
-  // See: https://arxiv.org/abs/1311.6244
+  // General idea with minor changes (mainly in diagonal): https://arxiv.org/abs/1311.6244
   T buffer;
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto i_unfold = det_idx_unfold(i_det);
@@ -1627,14 +1627,29 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
     // off diagonal singles contributions
     std::vector<int> occ, virt;
     this->get_occ_virt(quantum_part_idx, Di, occ, virt);
-    for (auto orb_idx : occ){
-         MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
+    for (auto orb_idx : occ) {
+      MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
     }
     for (auto j_det = 0; j_det < i_det; j_det++) {
       auto j_unfold = det_idx_unfold(j_det);
       auto idx_jdet = j_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
       auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
       auto num_excitation = single_spin_num_excitation(Di, Dj);
+      if (num_excitation != 1) {
+        continue;
+      }
+
+      auto idx_idet_otherspin = i_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
+      auto idx_jdet_otherspin = j_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
+      auto Di_otherspin = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet_otherspin);
+      auto Dj_otherspin = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet_otherspin);
+
+      auto det_i = std::make_pair(Di, Di_otherspin);
+      auto det_j = std::make_pair(Dj, Dj_otherspin);
+
+      num_excitation = 0;
+      num_excitation = this->num_excitation(det_i, det_j);
+
       if (num_excitation != 1) {
         continue;
       }

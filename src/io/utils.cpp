@@ -82,7 +82,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
 
       for (auto mo_idx = 0; mo_idx < max_cols; mo_idx++) {
         line = "\n";
-        line += fmt::format("{:10}", "MO num");
+        line += fmt::format("{:10}", "Orb num");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
@@ -93,7 +93,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
         Polyquant_cout(line);
 
         line = "";
-        line += fmt::format("{:10}", "MO ene");
+        line += fmt::format("{:10}", "Orb ene");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
@@ -104,7 +104,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
         Polyquant_cout(line);
 
         line = "";
-        line += fmt::format("{:10}", "MO occ");
+        line += fmt::format("{:10}", "Orb occ");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;

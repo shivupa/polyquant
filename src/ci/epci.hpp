@@ -73,13 +73,16 @@ public:
   Eigen::Matrix<double, Eigen::Dynamic, 1> energies;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;
 
+  // FC_DM stored in AO basis since we need to make the FC operators fc_occ.asDiagonal() is FC_DM in MO basis
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> fc_occ;
   // state_idx, particle_type_idx, spin_idx -> dm
+  // DM stored in MO basis
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> dm1;
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_nso;
-  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_no;
+  // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_no;
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_nso;
-  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_no;
+  // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_no;
 
   std::vector<int> NO_states;
 
