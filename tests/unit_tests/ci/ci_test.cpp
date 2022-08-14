@@ -562,4 +562,37 @@ TEST_SUITE("CI") {
       CHECK(sigma(i, 0) == doctest::Approx(sigma_fast(i, 0)).epsilon(POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
     }
   }
+  TEST_CASE("CI: Natural Orbitals") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/PsH_wpos/H_minus.json");
+    test_calc.run();
+
+    std::vector<double> NO_occ_pyscf;
+    std::vector<std::vector<double>> NO_pyscf;
+    Polyquant_read_vec_from_file(NO_occ_pyscf, "../../tests/data/PsH_wpos/h_minus_NO_occ.txt");
+    Polyquant_read_vecofvec_from_file(NO_pyscf, "../../tests/data/PsH_wpos/h_minus_NO.txt");
+
+    for (auto i = 0; i < NO_occ_pyscf.size(); i++) {
+      CHECK(test_calc.ci_calc.occ_nso[0][0][0][i] == doctest::Approx(NO_occ_pyscf[i] / 2.0).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    }
+    for (auto i = 0; i < NO_pyscf.size(); i++) {
+      for (auto j = 0; j < NO_pyscf[i].size(); j++) {
+        CHECK(std::abs(test_calc.ci_calc.C_nso[0][0][0](i, j)) == doctest::Approx(std::abs(NO_pyscf[i][j])).epsilon(1e-3));
+      }
+    }
+  }
+  TEST_CASE("CI: Multispecies Natural Orbitals") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos_CI.json");
+    test_calc.run();
+
+    CHECK(test_calc.ci_calc.occ_nso[0][0][0].sum() == doctest::Approx(1.0).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    CHECK(test_calc.ci_calc.occ_nso[0][1][0].sum() == doctest::Approx(1.0).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    for (auto j = 0; j < test_calc.scf_calc.C[0][0].rows(); j++) {
+      CHECK(std::abs(test_calc.ci_calc.C_nso[0][0][0](j, 0)) == doctest::Approx(std::abs(test_calc.scf_calc.C[0][0](j, 0))).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    }
+    for (auto j = 0; j < test_calc.scf_calc.C[1][0].rows(); j++) {
+      CHECK(std::abs(test_calc.ci_calc.C_nso[0][1][0](j, 0)) == doctest::Approx(std::abs(test_calc.scf_calc.C[1][0](j, 0))).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    }
+  }
 }
