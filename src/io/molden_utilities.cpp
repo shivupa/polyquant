@@ -15,9 +15,9 @@ void POLYQUANT_MOLDEN::create_file(const std::string &fname) {
 }
 
 void POLYQUANT_MOLDEN::dump(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff,
-                            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_a_occupation,
+                            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_occupation,
                             Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels,
-                            Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_b_occupation) {
+                            Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_occupation) {
   this->dump_header();
   this->dump_atoms(atoms);
   this->dump_basis(atoms, basis);
@@ -116,9 +116,9 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
 }
 
 void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy,
-                                     std::vector<std::string> &MO_a_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_a_occupation,
+                                     std::vector<std::string> &MO_a_symmetry_labels, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_occupation,
                                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy,
-                                     std::vector<std::string> &MO_b_symmetry_labels, Eigen::DiagonalMatrix<double, Eigen::Dynamic> &MO_b_occupation) {
+                                     std::vector<std::string> &MO_b_symmetry_labels, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_occupation) {
   this->molden_file << "[MO]" << std::endl;
 
   auto nmo_a = MO_a_coeff.cols();
@@ -126,7 +126,7 @@ void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen
     this->molden_file << "  Sym= " << std::uppercase << MO_a_symmetry_labels[mo_idx] << std::endl;
     this->molden_file << "  Ene= " << std::setprecision(10) << std::setw(20) << MO_a_energy[mo_idx] << std::endl;
     this->molden_file << "  Spin= Alpha" << std::endl;
-    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_a_occupation.diagonal()(mo_idx) << std::endl;
+    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_a_occupation[mo_idx] << std::endl;
     for (auto ao_idx = 0; ao_idx < MO_a_coeff.rows(); ao_idx++) {
       this->molden_file << "    " << std::setw(10) << ao_idx + 1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_a_coeff(ao_map[ao_idx], mo_idx) << std::endl;
       // this->molden_file << "    " << std::setw(10) << ao_idx+1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_a_coeff(ao_idx, mo_idx) << std::endl;
@@ -137,7 +137,7 @@ void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen
     this->molden_file << "  Sym= " << std::uppercase << MO_b_symmetry_labels[mo_idx] << std::endl;
     this->molden_file << "  Ene= " << std::setprecision(10) << std::setw(20) << MO_b_energy[mo_idx] << std::endl;
     this->molden_file << "  Spin= Beta" << std::endl;
-    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_b_occupation.diagonal()(mo_idx) << std::endl;
+    this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_b_occupation[mo_idx] << std::endl;
     for (auto ao_idx = 0; ao_idx < MO_b_coeff.rows(); ao_idx++) {
       this->molden_file << "    " << std::setw(10) << ao_idx + 1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_b_coeff(ao_map[ao_idx], mo_idx) << std::endl;
       // this->molden_file << "    " << std::setw(10) << ao_idx+1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_b_coeff(ao_idx, mo_idx) << std::endl;

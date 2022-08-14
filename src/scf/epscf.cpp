@@ -459,11 +459,10 @@ void POLYQUANT_EPSCF::form_DM() {
 }
 
 void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
-                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &occ, const int num_basis,
-                                     const int num_part) {
+                                     const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::Matrix<double, Eigen::Dynamic, 1> &occ, const int num_basis, const int num_part) {
   dm_last = dm;
   dm.setZero(num_basis, num_basis);
-  dm.noalias() = coeff * occ * coeff.transpose();
+  dm.noalias() = coeff * occ.asDiagonal() * coeff.transpose();
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
@@ -727,14 +726,13 @@ void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("E(particles) : " + std::to_string(E_parts));
 }
 
-void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
+void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
                                              const double occval) {
   for (auto i = 0; i < num_parts; i++) {
-    part_occ.diagonal()(i) = occval;
+    part_occ[i] = occval;
   }
 }
-void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::Dynamic> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts,
-                                          const double occval) {
+void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval) {
   if (C_ref_mom.empty()) {
     Polyquant_cout("Setting MOM reference orbitals");
     this->C_ref_mom = this->C;
@@ -772,7 +770,7 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::DiagonalMatrix<double, Eigen::D
     this->C_ref_mom = this->C;
   }
   for (auto i = 0; i < num_parts; i++) {
-    part_occ.diagonal()(i) = occval;
+    part_occ[i] = occval;
   }
 }
 
@@ -794,12 +792,12 @@ void POLYQUANT_EPSCF::form_occ() {
         filename << "occ_alpha_";
         filename << quantum_part_key;
         filename << ".txt";
-        Polyquant_dump_diagmat_to_file(this->occ[quantum_part_idx][0], filename.str());
+        Polyquant_dump_vec_to_file(this->occ[quantum_part_idx][0], filename.str());
         filename.str(std::string());
         filename << "occ_beta_";
         filename << quantum_part_key;
         filename << ".txt";
-        Polyquant_dump_diagmat_to_file(this->occ[quantum_part_idx][1], filename.str());
+        Polyquant_dump_vec_to_file(this->occ[quantum_part_idx][1], filename.str());
       }
     } else {
       if (occupation_mode == "aufbau") {
@@ -817,7 +815,7 @@ void POLYQUANT_EPSCF::form_occ() {
         filename << "occ_alpha_";
         filename << quantum_part_key;
         filename << ".txt";
-        Polyquant_dump_diagmat_to_file(this->occ[quantum_part_idx][0], filename.str());
+        Polyquant_dump_vec_to_file(this->occ[quantum_part_idx][0], filename.str());
       }
     }
     quantum_part_idx++;
@@ -856,7 +854,7 @@ void POLYQUANT_EPSCF::permute_initial_MOs() {
 void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
-  dump_orbitals(this->C, this->E_orbitals, this->occ);
+  dump_orbitals(this->C, this->E_orbitals, this->occ, "CONVERGED MOLECULAR ORBITALS");
 }
 
 void POLYQUANT_EPSCF::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
@@ -1029,6 +1027,5 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   this->print_iteration();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
-  Polyquant_cout("Orbitals from file");
-  dump_orbitals(this->C, this->E_orbitals, this->occ);
+  dump_orbitals(this->C, this->E_orbitals, this->occ, "GUESS ORBITALS FROM FILE");
 }

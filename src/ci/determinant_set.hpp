@@ -152,6 +152,9 @@ public:
   void create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
   void create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
+  void create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
+                   const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
 
   // void create_ham();
@@ -1597,6 +1600,78 @@ void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eig
         reduced_val += this->Slater_Condon(i, k) * C(k, j);
       }
       sigma(i, j) = reduced_val;
+    }
+  }
+}
+
+template <typename T>
+void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
+                                      const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+  // General idea with minor changes (mainly in diagonal): https://arxiv.org/abs/1311.6244
+  T buffer;
+  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
+    auto i_unfold = det_idx_unfold(i_det);
+    auto idx_idet = i_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
+    auto ishift = 0;
+    auto Di = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet);
+    // diagonal
+    // for (auto int_idx = 0; int_idx < Di.size(); int_idx++) {
+    //   buffer = Di[int_idx];
+    //   while (buffer != 0) {
+    //     auto position = std::countr_zero(buffer);
+    //     auto orb_idx = ((Di.size() - int_idx - 1) * 64) + position;
+    //     MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
+    //     buffer &= buffer - 1UL;
+    //   }
+    // }
+    // off diagonal singles contributions
+    std::vector<int> occ, virt;
+    this->get_occ_virt(quantum_part_idx, Di, occ, virt);
+    for (auto orb_idx : occ) {
+      MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
+    }
+    for (auto j_det = 0; j_det < i_det; j_det++) {
+      auto j_unfold = det_idx_unfold(j_det);
+      auto idx_jdet = j_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
+      auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
+      auto num_excitation = single_spin_num_excitation(Di, Dj);
+      // confirm that the excitation level is 1 for the part/spin of interest
+      if (num_excitation != 1) {
+        continue;
+      }
+
+      // calculate over all excitation level
+      num_excitation = 0;
+      auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
+      for (int excitation_quantum_part_idx = 0; excitation_quantum_part_idx < num_parts; excitation_quantum_part_idx++) {
+        auto idx_idet_spin0 = i_unfold[2 * quantum_part_idx + (quantum_part_spin_idx)];
+        auto idx_idet_spin1 = i_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
+        auto idx_jdet_spin0 = j_unfold[2 * quantum_part_idx + (quantum_part_spin_idx)];
+        auto idx_jdet_spin1 = j_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
+        auto Di_spin0 = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet_spin0);
+        auto Dj_spin0 = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet_spin0);
+        auto Di_spin1 = this->get_det(quantum_part_idx, 1 - quantum_part_spin_idx, idx_idet_spin1);
+        auto Dj_spin1 = this->get_det(quantum_part_idx, 1 - quantum_part_spin_idx, idx_jdet_spin1);
+        auto det_i = std::make_pair(Di_spin0, Di_spin1);
+        auto det_j = std::make_pair(Dj_spin0, Dj_spin1);
+        num_excitation += this->num_excitation(det_i, det_j);
+      }
+      if (num_excitation != 1) {
+        continue;
+      }
+      std::vector<int> holes, parts;
+      double phase = 1.0;
+      holes.clear();
+      parts.clear();
+      get_holes(Di, Dj, holes);
+      get_parts(Di, Dj, parts);
+      phase = get_phase(Di, Dj, holes, parts);
+      auto contribution = phase * C(i_det, state_idx) * C(j_det, state_idx);
+      // maybe contribution *= 2;
+      auto k = holes[0];
+      auto l = parts[0];
+      MO_rdm1(k, l) += contribution;
+      MO_rdm1(l, k) += contribution;
     }
   }
 }

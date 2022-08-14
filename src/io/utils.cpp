@@ -66,9 +66,9 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
 }
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>> &occ) {
+                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::string title) {
   auto stride = 5;
-  Polyquant_cout("MOLECULAR ORBITALS");
+  Polyquant_cout(title);
   for (auto i = 0; i < E_orbitals.size(); i++) {
     for (auto j = 0; j < E_orbitals[i].size(); j++) {
       std::string line = "";
@@ -82,7 +82,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
 
       for (auto mo_idx = 0; mo_idx < max_cols; mo_idx++) {
         line = "\n";
-        line += fmt::format("{:10}", "MO num");
+        line += fmt::format("{:10}", "Orb num");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
@@ -93,7 +93,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
         Polyquant_cout(line);
 
         line = "";
-        line += fmt::format("{:10}", "MO ene");
+        line += fmt::format("{:10}", "Orb ene");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
@@ -104,12 +104,12 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
         Polyquant_cout(line);
 
         line = "";
-        line += fmt::format("{:10}", "MO occ");
+        line += fmt::format("{:10}", "Orb occ");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
           }
-          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j].diagonal()((mo_idx * stride) + mo_offset)));
+          line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j][(mo_idx * stride) + mo_offset]));
         }
         line += fmt::format("{:10}", "");
         Polyquant_cout(line);
