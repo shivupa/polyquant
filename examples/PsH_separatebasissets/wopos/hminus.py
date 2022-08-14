@@ -1,4 +1,5 @@
 from pyscf import gto, scf, ci
+import numpy as np
 
 mol = gto.Mole()
 mol.verbose = 5
@@ -36,4 +37,20 @@ dm1 = myci.make_rdm1()
 
 
 mo = mf.mo_coeff
-print( mo.T @ dm1 @ mo)
+print()
+print(dm1)
+print()
+print(mo @ dm1 @ mo.T)
+print()
+eigvals, eigvecs = np.linalg.eigh(dm1)
+eigvecs = mo @ eigvecs
+print(np.sum(eigvals))
+eigvals = np.flip(eigvals)
+eigvecs = np.fliplr(eigvecs)
+print(eigvals)
+print(eigvecs)
+print()
+
+
+dm1_mo = dm1
+dm1_ao = mo @ dm1 @ mo.T

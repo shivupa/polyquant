@@ -51,6 +51,7 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
       fc_occ[quantum_part_idx][0].setZero(num_basis);
       fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
     }
+    quantum_part_idx++;
   }
 
   quantum_part_idx = 0ul;
@@ -65,7 +66,6 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
         Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][0], "FC_DM_" + quantum_part_key + "_alpha.txt");
       }
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        fc_occ[quantum_part_idx][1].setZero(num_basis);
         this->input_epscf.form_occ_helper_aufbau(fc_occ[quantum_part_idx][1], quantum_part_idx, 1, num_parts_beta, 1.0);
         this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], fc_occ[quantum_part_idx][1], num_basis, num_parts_beta);
         if (verbose == true) {
@@ -161,6 +161,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         dm1[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
       }
+      quantum_part_idx++;
     }
     // calculate DM in MO basis
     // transform to AO

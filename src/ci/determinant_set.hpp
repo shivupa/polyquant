@@ -1635,21 +1635,27 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
       auto idx_jdet = j_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
       auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
       auto num_excitation = single_spin_num_excitation(Di, Dj);
+      // confirm that the excitation level is 1 for the part/spin of interest
       if (num_excitation != 1) {
         continue;
       }
 
-      auto idx_idet_otherspin = i_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
-      auto idx_jdet_otherspin = j_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
-      auto Di_otherspin = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet_otherspin);
-      auto Dj_otherspin = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet_otherspin);
-
-      auto det_i = std::make_pair(Di, Di_otherspin);
-      auto det_j = std::make_pair(Dj, Dj_otherspin);
-
+      // calculate over all excitation level
       num_excitation = 0;
-      num_excitation = this->num_excitation(det_i, det_j);
-
+      auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
+      for (int excitation_quantum_part_idx = 0; excitation_quantum_part_idx < num_parts; excitation_quantum_part_idx++) {
+        auto idx_idet_spin0 = i_unfold[2 * quantum_part_idx + (quantum_part_spin_idx)];
+        auto idx_idet_spin1 = i_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
+        auto idx_jdet_spin0 = j_unfold[2 * quantum_part_idx + (quantum_part_spin_idx)];
+        auto idx_jdet_spin1 = j_unfold[2 * quantum_part_idx + (1 - quantum_part_spin_idx)];
+        auto Di_spin0 = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet_spin0);
+        auto Dj_spin0 = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet_spin0);
+        auto Di_spin1 = this->get_det(quantum_part_idx, 1 - quantum_part_spin_idx, idx_idet_spin1);
+        auto Dj_spin1 = this->get_det(quantum_part_idx, 1 - quantum_part_spin_idx, idx_jdet_spin1);
+        auto det_i = std::make_pair(Di_spin0, Di_spin1);
+        auto det_j = std::make_pair(Dj_spin0, Dj_spin1);
+        num_excitation += this->num_excitation(det_i, det_j);
+      }
       if (num_excitation != 1) {
         continue;
       }
