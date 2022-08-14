@@ -1607,7 +1607,6 @@ void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eig
 template <typename T>
 void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
                                       const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
-
   // See: https://arxiv.org/abs/1311.6244
   T buffer;
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
@@ -1616,16 +1615,21 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
     auto ishift = 0;
     auto Di = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet);
     // diagonal
-    for (auto int_idx = 0; int_idx < Di.size(); int_idx++) {
-      buffer = Di[int_idx];
-      while (buffer != 0) {
-        auto position = std::countr_zero(buffer);
-        auto orb_idx = ((Di.size() - int_idx - 1) * 64) + position;
-        MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
-        buffer &= buffer - 1UL;
-      }
-    }
+    // for (auto int_idx = 0; int_idx < Di.size(); int_idx++) {
+    //   buffer = Di[int_idx];
+    //   while (buffer != 0) {
+    //     auto position = std::countr_zero(buffer);
+    //     auto orb_idx = ((Di.size() - int_idx - 1) * 64) + position;
+    //     MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
+    //     buffer &= buffer - 1UL;
+    //   }
+    // }
     // off diagonal singles contributions
+    std::vector<int> occ, virt;
+    this->get_occ_virt(quantum_part_idx, Di, occ, virt);
+    for (auto orb_idx : occ){
+         MO_rdm1(orb_idx, orb_idx) += C(i_det, state_idx) * C(i_det, state_idx);
+    }
     for (auto j_det = 0; j_det < i_det; j_det++) {
       auto j_unfold = det_idx_unfold(j_det);
       auto idx_jdet = j_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
@@ -1636,6 +1640,8 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
       }
       std::vector<int> holes, parts;
       double phase = 1.0;
+      holes.clear();
+      parts.clear();
       get_holes(Di, Dj, holes);
       get_parts(Di, Dj, parts);
       phase = get_phase(Di, Dj, holes, parts);
