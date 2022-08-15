@@ -402,7 +402,40 @@ void POLYQUANT_EPCI::run() {
     }
     this->calculate_NOs();
     this->print_success();
+    this->dump_molden();
   } else {
     APP_ABORT("CI Calculation did not converge!");
+  }
+}
+
+void POLYQUANT_EPCI::dump_molden() {
+  for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
+    auto state_idx = this->NO_states[state_vec_idx];
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+      bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
+      auto &NO_a_coeff = this->C_nso[state_idx][quantum_part_idx][0];
+      auto &NO_a_energy = this->occ_nso[state_idx][quantum_part_idx][0];
+      auto &NO_a_occupation = this->occ_nso[state_idx][quantum_part_idx][0];
+      auto &NO_b_coeff = unique_beta ? this->C_nso[state_idx][quantum_part_idx][1] : this->C_nso[state_idx][quantum_part_idx][0];
+      auto &NO_b_energy = unique_beta ? this->occ_nso[state_idx][quantum_part_idx][1] : this->occ_nso[state_idx][quantum_part_idx][0];
+      auto &NO_b_occupation = unique_beta ? this->occ_nso[state_idx][quantum_part_idx][1] : this->occ_nso[state_idx][quantum_part_idx][0];
+
+      std::vector<std::string> NO_a_symmetry_labels;
+      NO_a_symmetry_labels.resize(NO_a_coeff.cols(), "A");
+      std::vector<std::string> NO_b_symmetry_labels;
+      NO_b_symmetry_labels.resize(NO_b_coeff.cols(), "A");
+      std::vector<libint2::Atom> atoms = this->input_molecule.to_libint_atom();
+      try {
+        std::stringstream molden_filename;
+        molden_filename << "NSO_State_" << state_idx << "_part_" << quantum_part_key << "_polyquant.molden";
+        POLYQUANT_MOLDEN molden_dumper(molden_filename.str());
+        molden_dumper.dump(atoms, this->input_basis.basis[quantum_part_idx], NO_a_coeff, NO_a_energy, NO_a_symmetry_labels, NO_a_occupation, NO_b_coeff, NO_b_energy, NO_b_symmetry_labels,
+                           NO_b_occupation);
+      } catch (std::logic_error e) {
+        Polyquant_cout("Not dumping molden for " + quantum_part_key + " because : " + e.what());
+      }
+      quantum_part_idx++;
+    }
   }
 }
