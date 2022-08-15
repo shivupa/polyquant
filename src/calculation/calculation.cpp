@@ -330,6 +330,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
     }
     if (dump_for_qmcpack) {
       dump_post_mf_for_qmcpack(hdf5_filename);
+      dump_post_mf_NOs_for_qmcpack(hdf5_filename);
     }
   }
 }
@@ -534,13 +535,18 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
       }
       classical_part_idx++;
     }
-    std::string particle_filename = "NaturalOrbitals_" + quantum_part_key + "_" + filename;
-    Polyquant_cout("Dumping HDF5 to filename: " + particle_filename);
-    POLYQUANT_HDF5 hdf5_f(particle_filename);
-    hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
-                                       quantum_part_name, scf_calc.E_orbitals[quantum_part_idx], scf_calc.C[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge, core_elec,
-                                       atomic_names, atomic_centers, unique_shells);
-    quantum_part_idx++;
+
+    for (int state_vec_idx = 0; state_vec_idx < ci_calc.NO_states.size(); state_vec_idx++) {
+      auto state_idx = ci_calc.NO_states[state_vec_idx];
+      std::stringstream particle_filename;
+      particle_filename << "NSO_State_" << state_idx << "_part_" << quantum_part_key << "_" << filename;
+      Polyquant_cout("Dumping HDF5 to filename: " + particle_filename.str());
+      POLYQUANT_HDF5 hdf5_f(particle_filename.str());
+      hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
+                                         quantum_part_name, ci_calc.occ_nso[state_vec_idx][quantum_part_idx], ci_calc.C_nso[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
+                                         atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
+      quantum_part_idx++;
+    }
   }
 }
 
