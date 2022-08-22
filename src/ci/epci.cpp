@@ -136,7 +136,6 @@ void POLYQUANT_EPCI::calculate_NOs() {
 
   for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
     auto state_idx = this->NO_states[state_vec_idx];
-    std::cout << "SHIV   " << state_vec_idx << "   " << state_idx << std::endl;
     this->dm1[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
     this->C_nso[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
     // this->C_no[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
@@ -387,8 +386,8 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
     int num_mo = this->input_basis.num_basis[quantum_part_a_idx];
     int num_part_total = quantum_part_a.num_parts;
     int ms2 = quantum_part_a.multiplicity - 1; // we store mult they want spin
-    bool restricted = quantum_part_a.restricted;
     bool unique_beta = (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false);
+    bool restricted  = !unique_beta;
     auto &MO_a_coeff = this->input_epscf.C[quantum_part_a_idx][0];
     auto &MO_a_energy = this->input_epscf.E_orbitals[quantum_part_a_idx][0];
     auto &MO_b_coeff = unique_beta ? this->input_epscf.C[quantum_part_a_idx][1] : this->input_epscf.C[quantum_part_a_idx][0];
@@ -401,6 +400,7 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
     auto quantum_part_b_idx = 0ul;
     for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
       if (quantum_part_b_idx < quantum_part_a_idx) {
+        quantum_part_b_idx++;
         continue;
       }
         std::string particle_filename;

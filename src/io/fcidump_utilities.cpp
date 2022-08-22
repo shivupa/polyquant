@@ -24,6 +24,8 @@ void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restri
     // do we need to consider alpha/beta species of each particles orbitals?
     if (restricted == false){
         spin_types = 2;
+    } else {
+        spin_types = 1;
     }
     this->dump_constant(E_constant);
     this->dump_MO_e(MO_a_energy, MO_b_energy);
@@ -63,7 +65,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
       for (int spin_b=0; spin_b< spin_types ; spin_b ++) {
     int rows = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].rows();
     int cols = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].cols();
-        for (int i=0; i < rows ; i ++) {
+        for (int i=0; i < cols ; i ++) {
             // lower triangle
           for (int a=0; a <= i ; a ++){
             line = "";
@@ -86,7 +88,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
             // lower "triangle" NOTE we only have 4 fold symm if quantum_part_a_idx != quantum_part_b_idx otherwise we have the usual 8
         for (int i=0; i< nmo_a ; i ++) {
           for (int j=0; j<= i ; j ++) {
-              if (quantum_part_a_index == quantum_part_b_index){
+              // if (quantum_part_a_index == quantum_part_b_index){
          // for (int a=0; a<= i ; a ++) {
          //    for (int b=0; b<= a ; b ++){
           //       if (input_ints.idx2(i,j) >= input_ints.idx2(a,b)){
@@ -107,7 +109,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
             this->fcidump_file << line << std::endl;
             }
            }
-              }
+              //}
            
   }
         }
@@ -116,6 +118,10 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
   }
 
    void POLYQUANT_FCIDUMP::dump_constant(double E_constant){
+      // don't output one body ints if not the same particle type
+      if (quantum_part_a_index != quantum_part_b_index){
+          return;
+      }
        std::string line = "";
             line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}",E_constant,0,0,0,0);
             this->fcidump_file << line << std::endl;
