@@ -8,6 +8,11 @@ mol = pyscf.M(
 
 mf = mol.HF().run()
 mf.analyze()
+
+cisolver = pyscf.fci.FCI(mf)
+print('E(FCI) = %.12f' % cisolver.kernel()[0])
+
+exit()
 mycc = mf.CISD().run()
 print('RCISD correlation energy', mycc.e_corr)
 

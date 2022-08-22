@@ -325,21 +325,19 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   }
   if (post_mean_field_type == "FCIDUMP") {
     this->ci_calc.setup(this->scf_calc);
-    this->ci_calc.fcidump(fcidump_file);
+    this->ci_calc.calculate_integrals();
+    this->ci_calc.fcidump(fcidump_filename);
   } else if (post_mean_field_type == "CI") {
     this->ci_calc.setup(this->scf_calc);
     this->ci_calc.run();
+    if (dump_for_qmcpack) {
+      dump_post_mf_for_qmcpack(hdf5_filename);
+      dump_post_mf_NOs_for_qmcpack(hdf5_filename);
+    }
   } else if (post_mean_field_type == "FILE") {
     this->ci_calc.setup(this->scf_calc);
     // ci_calc.from_file(hdf5_filename);
     APP_ABORT("FROM_FILE for ci not implemented.");
-  }
-  if (dump_for_qmcpack) {
-    dump_post_mf_for_qmcpack(hdf5_filename);
-    dump_post_mf_NOs_for_qmcpack(hdf5_filename);
-  }
-  if (dump_for_qmcpack) {
-    dump_post_mf_for_qmcpack(hdf5_filename);
   }
 }
 

@@ -22,7 +22,7 @@ void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restri
       this->dump_header(num_mo, num_part_total, ms2,restricted, MO_symmetry_labels, isym, point_group);
     }
     // do we need to consider alpha/beta species of each particles orbitals?
-    if (restricted != false){
+    if (restricted == false){
         spin_types = 2;
     }
     this->dump_one_body_ints(input_ints);
@@ -63,7 +63,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
     int cols = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].cols();
         for (int i=0; i < rows ; i ++) {
           for (int a=0; a < cols ; a ++){
-              this->fcidump_file << std::setw(10) << input_ints.mo_one_body_ints[quantum_part_a_index][spin_a](i,a) << std::setw(3) << i+1 << std::setw(3)<< a+1 << std::endl;
+              this->fcidump_file << std::setw(20) << input_ints.mo_one_body_ints[quantum_part_a_index][spin_a](i,a) << std::setw(3) << i+1 << std::setw(3) << a+1 <<  std::setw(3)<< 0 << std::setw(3)<< 0 << std::endl;
             }
   }
   }
@@ -82,7 +82,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
            for (int a=0; a< nmo_b ; a ++) {
             for (int b=0; b< nmo_b ; b ++){
               // TODO idx8 call will probably have to change
-              this->fcidump_file << std::setw(10) << input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints.idx2(i,j), input_ints.idx2(a,b))<< std::setw(3)<< i+1 <<std::setw(3)<< j+1 <<std::setw(3)<< a+1 <<std::setw(3)<< b+1 << std::endl;
+              this->fcidump_file << std::setw(20) << input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints.idx2(i,j), input_ints.idx2(a,b))<< std::setw(3)<< i+1 <<std::setw(3)<< j+1 <<std::setw(3)<< a+1 <<std::setw(3)<< b+1 << std::endl;
             }
            }
   }
