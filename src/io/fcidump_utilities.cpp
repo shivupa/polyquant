@@ -57,13 +57,16 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
           return;
       }
 	   //if restricted loop over alpha and beta
+    std::string line;
     for (int spin_a=0; spin_a< spin_types ; spin_a ++) {
       for (int spin_b=0; spin_b< spin_types ; spin_b ++) {
     int rows = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].rows();
     int cols = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].cols();
         for (int i=0; i < rows ; i ++) {
           for (int a=0; a < cols ; a ++){
-              this->fcidump_file << std::setw(20) << input_ints.mo_one_body_ints[quantum_part_a_index][spin_a](i,a) << std::setw(3) << i+1 << std::setw(3) << a+1 <<  std::setw(3)<< 0 << std::setw(3)<< 0 << std::endl;
+            line = "";
+            line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", input_ints.mo_one_body_ints[quantum_part_a_index][spin_a](i,a), i+1, a+1, 0, 0);
+            this->fcidump_file << line << std::endl;
             }
   }
   }
@@ -73,6 +76,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
 
   void POLYQUANT_FCIDUMP::dump_two_body_ints(POLYQUANT_INTEGRAL& input_ints){
 	   //if restricted loop over alpha and beta
+    std::string line;
     for (int spin_a=0; spin_a< spin_types ; spin_a ++) {
       for (int spin_b=0; spin_b< spin_types ; spin_b ++) {
     int nmo_a = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].rows();
@@ -82,7 +86,9 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
            for (int a=0; a< nmo_b ; a ++) {
             for (int b=0; b< nmo_b ; b ++){
               // TODO idx8 call will probably have to change
-              this->fcidump_file << std::setw(20) << input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints.idx2(i,j), input_ints.idx2(a,b))<< std::setw(3)<< i+1 <<std::setw(3)<< j+1 <<std::setw(3)<< a+1 <<std::setw(3)<< b+1 << std::endl;
+            line = "";
+            line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints.idx2(i,j), input_ints.idx2(a,b)), i+1, j+1, a+1, b+1);
+            this->fcidump_file << line << std::endl;
             }
            }
   }
