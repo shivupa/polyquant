@@ -66,7 +66,7 @@ public:
    * @param quantum_part_*_idx index of particles to parse
    *
    */
-  void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL& input_ints, int quantum_part_a_idx,int quantum_part_b_idx );
+  void dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL& input_ints, double E_constant, Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_a_energy, Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_b_energy, int quantum_part_a_idx,int quantum_part_b_idx );
 
 
    // variables
@@ -79,7 +79,8 @@ private:
   void dump_header(int num_mo, int num_part_tot, int ms2, bool restricted, std::vector<int> mo_symmetry_labels, int isym, std::string point_group);
   void dump_one_body_ints(POLYQUANT_INTEGRAL& input_ints);
   void dump_two_body_ints(POLYQUANT_INTEGRAL& input_ints);
-  void dump_other_vals();
+   void dump_constant(double E_constant);
+   void dump_MO_e(Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_a_energy, Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_b_energy);
 };
 } // namespace polyquant
 #endif

@@ -14,7 +14,7 @@ void POLYQUANT_FCIDUMP::create_file(const std::string &fname) {
   this->fcidump_file.open(this->filename);
 }
 
-void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL& input_ints, int quantum_part_a_idx,int quantum_part_b_idx ){
+void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL& input_ints, double E_constant, Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_a_energy, Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_b_energy, int quantum_part_a_idx,int quantum_part_b_idx ){
     quantum_part_a_index = quantum_part_a_idx;
     quantum_part_b_index = quantum_part_b_idx;
     // if this is an FCIDUMP for the same types, dump header info
@@ -25,9 +25,10 @@ void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total,int ms2, bool restri
     if (restricted == false){
         spin_types = 2;
     }
+    this->dump_constant(E_constant);
+    this->dump_MO_e(MO_a_energy, MO_b_energy);
     this->dump_one_body_ints(input_ints);
     this->dump_two_body_ints(input_ints);
-    this->dump_other_vals();
 }
 
 // variables
@@ -97,6 +98,25 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
     }
   }
 
-   void POLYQUANT_FCIDUMP::dump_other_vals(){
-	   std::string placeholder;
+   void POLYQUANT_FCIDUMP::dump_constant(double E_constant){
+       std::string line = "";
+            line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}",E_constant,0,0,0,0);
+            this->fcidump_file << line << std::endl;
    }
+   void POLYQUANT_FCIDUMP::dump_MO_e(Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_a_energy, Eigen::Matrix<double, Eigen::Dynamic, 1>& MO_b_energy){
+    std::string line;
+    int nmo = MO_a_energy.size();
+        for (int i=0; i< nmo ; i ++) {
+            line = "";
+            line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", MO_a_energy(i), i+1, 0, 0, 0);
+            this->fcidump_file << line << std::endl;
+            }
+    if (spin_types == 2) {
+    int nmo = MO_b_energy.size();
+        for (int i=0; i< nmo ; i ++) {
+            line = "";
+            line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", MO_b_energy(i), i+1, 0, 0, 0);
+            this->fcidump_file << line << std::endl;
+            }
+    }
+           }
