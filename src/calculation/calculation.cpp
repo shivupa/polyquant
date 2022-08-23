@@ -213,6 +213,9 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       this->scf_calc.permute_orbitals_start = true;
     }
     scf_calc.run();
+    if (dump_for_qmcpack) {
+      dump_mf_for_qmcpack(hdf5_filename);
+    }
   } else if (mean_field_type == "FILE") {
     if (permute_orbitals_vector.size() != 0) {
       this->scf_calc.permute_orbitals_vector = permute_orbitals_vector;
@@ -226,10 +229,10 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
     }
     if (!skip_scf) {
       scf_calc.run();
+      if (dump_for_qmcpack) {
+        dump_mf_for_qmcpack(hdf5_filename);
+      }
     }
-  }
-  if (dump_for_qmcpack) {
-    dump_mf_for_qmcpack(hdf5_filename);
   }
 }
 
