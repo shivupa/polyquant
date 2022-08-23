@@ -387,7 +387,7 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
     int num_part_total = quantum_part_a.num_parts;
     int ms2 = quantum_part_a.multiplicity - 1; // we store mult they want spin
     bool unique_beta = (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false);
-    bool restricted  = !unique_beta;
+    bool restricted = !unique_beta;
     auto &MO_a_coeff = this->input_epscf.C[quantum_part_a_idx][0];
     auto &MO_a_energy = this->input_epscf.E_orbitals[quantum_part_a_idx][0];
     auto &MO_b_coeff = unique_beta ? this->input_epscf.C[quantum_part_a_idx][1] : this->input_epscf.C[quantum_part_a_idx][0];
