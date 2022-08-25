@@ -185,6 +185,9 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
   auto atom_idx = 0ul;
   auto shell_idx = 0ul;
   for (auto atom_shells : unique_shells) {
+    if (atom_shells.size() == 0) {
+        continue; // no basis functions on atom
+    }
     shell_idx = 0ul;
     auto atom_basis_group = basis_group.create_group("atomicBasisSet" + std::to_string(atom_idx));
     // dump number of basis types
