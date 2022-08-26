@@ -274,6 +274,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params.input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
         ci_calc.detset.slow_diag = this->input_params.input_data["keywords"]["ci_keywords"]["slow_diag"];
       }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("build_matrix")) {
+        ci_calc.detset.build_matrix = this->input_params.input_data["keywords"]["ci_keywords"]["build_matrix"];
+      }
       if (this->input_params.input_data["keywords"]["ci_keywords"].contains("NO_states")) {
         auto NO_states = this->input_params.input_data["keywords"]["ci_keywords"]["NO_states"];
         ci_calc.NO_states.clear();

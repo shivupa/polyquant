@@ -174,7 +174,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
         MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
-        Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
+        // Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
         this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
 
         // MO_rdm nmo x nmo
@@ -187,7 +187,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
         MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
-        Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
+        // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
         this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
@@ -196,7 +196,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
         MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
-        Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
+        // Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
         this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
@@ -443,20 +443,42 @@ void POLYQUANT_EPCI::run() {
   }
   Scalar constant_shift = this->input_molecule.E_nuc + frozen_core_shift;
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);
-  Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger);
-  Eigen::Index maxit = this->iteration_max;
-  int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
-  if (solver.info() == Spectra::CompInfo::Successful) {
-    this->energies = solver.eigenvalues();
-    this->C_ci = solver.eigenvectors();
-    for (auto e = 0; e < this->energies.size(); e++) {
-      this->energies[e] += constant_shift;
+
+  if (this->detset.build_matrix == false) {
+    Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger);
+    Eigen::Index maxit = this->iteration_max;
+    int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
+    if (solver.info() == Spectra::CompInfo::Successful) {
+      this->energies = solver.eigenvalues();
+      this->C_ci = solver.eigenvectors();
+      for (auto e = 0; e < this->energies.size(); e++) {
+        this->energies[e] += constant_shift;
+      }
+      this->calculate_NOs();
+      this->print_success();
+      this->dump_molden();
+    } else {
+      APP_ABORT("CI Calculation did not converge!");
     }
-    this->calculate_NOs();
-    this->print_success();
-    this->dump_molden();
   } else {
-    APP_ABORT("CI Calculation did not converge!");
+    this->detset.create_ham();
+
+    Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
+    Spectra::DavidsonSymEigsSolver<Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int>> solver(op_sparse, this->num_states, initialsubspacevec, maxsubspacevec, logger);
+    Eigen::Index maxit = this->iteration_max;
+    int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
+    if (solver.info() == Spectra::CompInfo::Successful) {
+      this->energies = solver.eigenvalues();
+      this->C_ci = solver.eigenvectors();
+      for (auto e = 0; e < this->energies.size(); e++) {
+        this->energies[e] += constant_shift;
+      }
+      this->calculate_NOs();
+      this->print_success();
+      this->dump_molden();
+    } else {
+      APP_ABORT("CI Calculation did not converge!");
+    }
   }
 }
 
