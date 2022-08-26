@@ -317,6 +317,8 @@ void POLYQUANT_EPCI::setup_determinants() {
   this->detset.create_excitation(excitation_level);
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) + " determinants");
   this->detset.print_determinants();
+  this->detset.create_unique_excitation_map_singles();
+  this->detset.create_unique_excitation_map_doubles();
 }
 
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
