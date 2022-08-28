@@ -466,9 +466,6 @@ void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
-
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     this->E_particles_last[quantum_part_idx] = this->E_particles[quantum_part_idx];
@@ -633,6 +630,8 @@ void POLYQUANT_EPSCF::reset_incfock() {
 }
 
 void POLYQUANT_EPSCF::run_iteration() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->iteration_num += 1;
   this->form_fock();
   this->diag_fock();
