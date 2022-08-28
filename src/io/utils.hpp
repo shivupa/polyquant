@@ -184,6 +184,22 @@ template <typename T> void Polyquant_dump_diagmat_to_file(const Eigen::DiagonalM
   }
 };
 /**
+ * @brief A helper function to dump a sparse matrix object to file.
+ *
+ * @param mat The sparse matrix to write.
+ **/
+template <typename T> void Polyquant_dump_sparse_mat_to_file(const Eigen::SparseMatrix<T, Eigen::RowMajor> &mat, const std::string &filename) {
+  std::ofstream matfile;
+  matfile.open(filename);
+  for (Eigen::Index i = 0; i < mat.rows(); i++) {
+    for (Eigen::Index j = 0; j < mat.cols(); j++) {
+      matfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat.coeff(i, j) << "  ";
+    }
+    matfile << std::endl;
+  }
+};
+
+/**
  * @brief A helper function to dump a dense matrix object to file.
  *
  * @param mat The dense matrix to write.

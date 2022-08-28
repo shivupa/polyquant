@@ -136,7 +136,6 @@ void POLYQUANT_EPCI::calculate_NOs() {
 
   for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
     auto state_idx = this->NO_states[state_vec_idx];
-    std::cout << "SHIV   " << state_vec_idx << "   " << state_idx << std::endl;
     this->dm1[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
     this->C_nso[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
     // this->C_no[state_vec_idx].resize(this->input_molecule.quantum_particles.size());
@@ -175,7 +174,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
         MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
-        Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
+        // Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
         this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
 
         // MO_rdm nmo x nmo
@@ -188,7 +187,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
         MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
-        Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
+        // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
         this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
@@ -197,7 +196,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
         MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
-        Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
+        // Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
         this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
@@ -318,6 +317,8 @@ void POLYQUANT_EPCI::setup_determinants() {
   this->detset.create_excitation(excitation_level);
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) + " determinants");
   this->detset.print_determinants();
+  this->detset.create_unique_excitation_map_singles();
+  this->detset.create_unique_excitation_map_doubles();
 }
 
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
@@ -371,6 +372,58 @@ void POLYQUANT_EPCI::print_error() { APP_ABORT("Something wrong!"); }
 
 void POLYQUANT_EPCI::print_params() { Polyquant_cout("Running CI"); }
 
+void POLYQUANT_EPCI::fcidump(std::string &filename) {
+  // Assemble data
+  // &FCI
+  // NORB=36,
+  // NELEC=14,
+  // MS2=0,
+  // UHF=.FALSE.,
+  // ORBSYM=1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,
+  // ISYM=1,
+  // PNTGRP=C2V,
+  // &END
+  auto quantum_part_a_idx = 0ul;
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+    int num_mo = this->input_basis.num_basis[quantum_part_a_idx];
+    int num_part_total = quantum_part_a.num_parts;
+    int ms2 = quantum_part_a.multiplicity - 1; // we store mult they want spin
+    bool unique_beta = (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false);
+    bool restricted = !unique_beta;
+    auto &MO_a_coeff = this->input_epscf.C[quantum_part_a_idx][0];
+    auto &MO_a_energy = this->input_epscf.E_orbitals[quantum_part_a_idx][0];
+    auto &MO_b_coeff = unique_beta ? this->input_epscf.C[quantum_part_a_idx][1] : this->input_epscf.C[quantum_part_a_idx][0];
+    auto &MO_b_energy = unique_beta ? this->input_epscf.E_orbitals[quantum_part_a_idx][1] : this->input_epscf.E_orbitals[quantum_part_a_idx][0];
+    auto E_constant = this->input_molecule.E_nuc;
+    std::vector<int> MO_symmetry_labels;
+    MO_symmetry_labels.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), 1);
+    int isym = 1;
+    std::string point_group = "C1";
+    auto quantum_part_b_idx = 0ul;
+    for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+      if (quantum_part_b_idx < quantum_part_a_idx) {
+        quantum_part_b_idx++;
+        continue;
+      }
+      std::string particle_filename;
+      if (quantum_part_a_idx == quantum_part_b_idx) {
+        particle_filename = quantum_part_a_key + "_" + filename;
+      } else {
+        particle_filename = quantum_part_a_key + "_" + quantum_part_b_key + "_" + filename;
+      }
+      POLYQUANT_FCIDUMP fcidump_f(particle_filename);
+      // todo: learn about this-> references
+      fcidump_f.dump(num_mo, num_part_total, ms2, restricted, MO_symmetry_labels, isym, point_group, this->input_integral, E_constant, MO_a_energy, MO_b_energy, quantum_part_a_idx,
+                     quantum_part_b_idx);
+      // need integrals
+      // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
+      // std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> mo_two_body_ints;
+      // call function in IO
+      quantum_part_b_idx++;
+    }
+    quantum_part_a_idx++;
+  }
+}
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -391,20 +444,42 @@ void POLYQUANT_EPCI::run() {
   }
   Scalar constant_shift = this->input_molecule.E_nuc + frozen_core_shift;
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);
-  Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger);
-  Eigen::Index maxit = this->iteration_max;
-  int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
-  if (solver.info() == Spectra::CompInfo::Successful) {
-    this->energies = solver.eigenvalues();
-    this->C_ci = solver.eigenvectors();
-    for (auto e = 0; e < this->energies.size(); e++) {
-      this->energies[e] += constant_shift;
+
+  if (this->detset.build_matrix == false) {
+    Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger);
+    Eigen::Index maxit = this->iteration_max;
+    int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
+    if (solver.info() == Spectra::CompInfo::Successful) {
+      this->energies = solver.eigenvalues();
+      this->C_ci = solver.eigenvectors();
+      for (auto e = 0; e < this->energies.size(); e++) {
+        this->energies[e] += constant_shift;
+      }
+      this->calculate_NOs();
+      this->print_success();
+      this->dump_molden();
+    } else {
+      APP_ABORT("CI Calculation did not converge!");
     }
-    this->calculate_NOs();
-    this->print_success();
-    this->dump_molden();
   } else {
-    APP_ABORT("CI Calculation did not converge!");
+    this->detset.create_ham();
+
+    Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
+    Spectra::DavidsonSymEigsSolver<Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int>> solver(op_sparse, this->num_states, initialsubspacevec, maxsubspacevec, logger);
+    Eigen::Index maxit = this->iteration_max;
+    int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
+    if (solver.info() == Spectra::CompInfo::Successful) {
+      this->energies = solver.eigenvalues();
+      this->C_ci = solver.eigenvectors();
+      for (auto e = 0; e < this->energies.size(); e++) {
+        this->energies[e] += constant_shift;
+      }
+      this->calculate_NOs();
+      this->print_success();
+      this->dump_molden();
+    } else {
+      APP_ABORT("CI Calculation did not converge!");
+    }
   }
 }
 

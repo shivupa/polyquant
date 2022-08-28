@@ -6,8 +6,15 @@ mol = pyscf.M(
     unit = 'b',
     basis = 'sto-3g', verbose=9)
 
-mf = mol.HF().run()
+mf = mol.RHF().run()
 mf.analyze()
+
+cisolver = pyscf.fci.FCI(mf)
+print('E(FCI) = %.12f' % cisolver.kernel()[0])
+
+from pyscf.tools import fcidump
+fcidump.from_scf(mf, 'fcidump.example1', tol=0)
+exit()
 mycc = mf.CISD().run()
 print('RCISD correlation energy', mycc.e_corr)
 

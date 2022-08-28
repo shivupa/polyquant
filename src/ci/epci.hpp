@@ -4,6 +4,7 @@
 #include "ci/determinant_set.hpp"
 #include "integral/integral.hpp"
 #include "io/davidson_logging.hpp"
+#include "io/fcidump_utilities.hpp"
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
@@ -38,6 +39,7 @@ public:
   void print_error();
   void print_params();
   void dump_molden();
+  void fcidump(std::string &filename);
 
   int iteration_num = 0;
 

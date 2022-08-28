@@ -11,7 +11,7 @@
   },
   "driver": "energy",
   "model": {
-    "method": "CI",
+    "method": "FCIDUMP",
     "basis": 
         { "electron" :
           {
@@ -33,6 +33,7 @@
    "pure" : true,
    "ci_keywords" : {
        "convergence_E" : 1e-8,
+       "fcidump_filename" : "INTEGRALS",
        "num_states" : 2,
        "num_subspace_vec" : 20,
        "slow_diag" : false,
