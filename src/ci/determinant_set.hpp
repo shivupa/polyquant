@@ -37,6 +37,7 @@ public:
 
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
   void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const;
+  void get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const;
   void get_unique_excitation_list_of_indices(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<int> &return_idx_list) const;
   void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
   void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level);
@@ -74,9 +75,9 @@ public:
 
   // indexes that are single excitations same spin
   // unique_singles[part_type_idx][spin_idx][det_i].size() ->num connected singles
-  std::vector<std::vector<std::vector<std::set<size_t>>>> unique_singles;
+  std::vector<std::vector<std::vector<std::vector<size_t>>>> unique_singles;
   // indexes that are double excitations same spin
-  std::vector<std::vector<std::vector<std::set<size_t>>>> unique_doubles;
+  std::vector<std::vector<std::vector<std::vector<size_t>>>> unique_doubles;
   /**
    * @brief map of det index vector - vector of size (num quantum particle types * 2 spins)
    * index 0, 1 correspond to particle 0 spin 0, particle 0 spin 1 etc.
@@ -252,6 +253,34 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
     }
   }
 }
+template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const {
+  std::vector<int> occ, virt;
+  occ.clear();
+  virt.clear();
+  auto det = this->unique_dets[idx_part][idx_spin][idx_det];
+  this->get_occ_virt(idx_part, det, occ, virt);
+
+  if (excitation_level > virt.size()) {
+    APP_ABORT("Excitation level exceeds virtual size!");
+  }
+
+  for (auto &&iocc : iter::combinations(occ, excitation_level)) {
+    for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
+      std::vector<T> temp_det(det);
+      // https://stackoverflow.com/a/47990
+      for (auto &occbit : iocc) {
+        auto int_idx = (temp_det.size() - 1) - (occbit / 64ul);
+        temp_det[int_idx] &= ~(1UL << (occbit % 64ul));
+      }
+      for (auto &virtbit : ivirt) {
+        auto int_idx = (temp_det.size() - 1) - (virtbit / 64ul);
+        temp_det[int_idx] |= 1UL << (virtbit % 64ul);
+      }
+      return_dets.insert(temp_det);
+    }
+  }
+}
+
 
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list_of_indices(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<int> &return_idx_list) const {
   if (excitation_level == 1) {
@@ -339,29 +368,40 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
   POLYQUANT_TIMER timer(function);
   auto idx_part = 0;
   unique_singles.resize(this->input_integral.input_molecule.quantum_particles.size());
+
   for (auto const &[quantum_part_key, quantum_part] : this->input_integral.input_molecule.quantum_particles) {
     unique_singles[idx_part].resize(2);
     for (auto idx_spin = 0; idx_spin < 2; idx_spin++) {
       unique_singles[idx_part][idx_spin].resize(this->unique_dets[idx_part][idx_spin].size());
       for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
-
-        std::vector<std::vector<T>> excited_dets;
-        this->get_unique_excitation_list(idx_part, idx_spin, idx_det, 1, excited_dets);
-        auto curr_idx = 0;
-        while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
-          auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-          auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-          auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-          if (det_in_excited_dets_list != excited_dets.end()) {
-            unique_singles[idx_part][idx_spin][idx_det].insert(curr_idx);
-            excited_dets.erase(det_in_excited_dets_list);
-          }
-          // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
-          //     return_idx_list.push_back(curr_idx);
-          //     excited_dets.pop_back();
-          // }
-          curr_idx++;
+        std::set<std::vector<T>> excited_dets;
+        this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 1, excited_dets);
+        unique_singles[idx_part][idx_spin][idx_det].reserve(excited_dets.size());
+        #pragma omp parallel for
+        for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++){
+           auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+           auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+           auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+           if (det_in_excited_dets_list != excited_dets.end()) {
+             unique_singles[idx_part][idx_spin][idx_det].push_back(curr_idx);
+             //excited_dets.erase(det_in_excited_dets_list);
+           }
         }
+        // auto curr_idx = 0;
+        // while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
+        //   auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+        //   auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+        //   auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+        //   if (det_in_excited_dets_list != excited_dets.end()) {
+        //     unique_singles[idx_part][idx_spin][idx_det].insert(curr_idx);
+        //     excited_dets.erase(det_in_excited_dets_list);
+        //   }
+        //   // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
+        //   //     return_idx_list.push_back(curr_idx);
+        //   //     excited_dets.pop_back();
+        //   // }
+        //   curr_idx++;
+        // }
         // std::sort(unique_singles[idx_part][idx_spin][idx_det].begin(), unique_singles[idx_part][idx_spin][idx_det].end());
       }
     }
@@ -383,24 +423,33 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
         continue;
       }
       for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
-
-        std::vector<std::vector<T>> excited_dets;
-        this->get_unique_excitation_list(idx_part, idx_spin, idx_det, 2, excited_dets);
-        auto curr_idx = 0;
-        while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
-          auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-          auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-          auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-          if (det_in_excited_dets_list != excited_dets.end()) {
-            unique_doubles[idx_part][idx_spin][idx_det].insert(curr_idx);
-            excited_dets.erase(det_in_excited_dets_list);
-          }
-          // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
-          //     return_idx_list.push_back(curr_idx);
-          //     excited_dets.pop_back();
-          // }
-          curr_idx++;
+        std::set<std::vector<T>> excited_dets;
+        this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 2, excited_dets);
+        unique_doubles[idx_part][idx_spin][idx_det].reserve(excited_dets.size());
+        #pragma omp parallel for
+        for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++){
+           auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+           auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+           auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+           if (det_in_excited_dets_list != excited_dets.end()) {
+             unique_doubles[idx_part][idx_spin][idx_det].push_back(curr_idx);
+             //excited_dets.erase(det_in_excited_dets_list);
+           }
         }
+        // while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
+        //   auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+        //   auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+        //   auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+        //   if (det_in_excited_dets_list != excited_dets.end()) {
+        //     unique_doubles[idx_part][idx_spin][idx_det].insert(curr_idx);
+        //     excited_dets.erase(det_in_excited_dets_list);
+        //   }
+        //   // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
+        //   //     return_idx_list.push_back(curr_idx);
+        //   //     excited_dets.pop_back();
+        //   // }
+        //   curr_idx++;
+        // }
         // std::sort(unique_doubles[idx_part][idx_spin][idx_det].begin(), unique_doubles[idx_part][idx_spin][idx_det].end());
       }
     }
