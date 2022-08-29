@@ -16,21 +16,26 @@ public:
   };
 
   ~POLYQUANT_TIMER() {
-    this->set_end_time();
-    this->print_timer_end();
+    if (print_on_destruction) {
+      this->set_end_time();
+      this->print_timer_end();
+    }
   };
 
+  void set_print_on_destruction(bool print_val) { this->print_on_destruction = print_val; };
   void set_calling_function(const std::string &calling_func) { this->calling_function = calling_func; };
 
   void set_start_time() { this->start = std::chrono::high_resolution_clock::now(); };
 
   void set_end_time() { this->end = std::chrono::high_resolution_clock::now(); };
 
+  std::chrono::system_clock::duration get_duration() { return end - start; }
+
   void print_timer_end() {
     // use std::format once supported
     // use std::chrono::days etc once it is used
     // typedef std::chrono::duration<int, std::ratio<86400>> days;
-    auto duration = this->end - this->start;
+    auto duration = get_duration();
     // auto d = std::chrono::duration_cast<days>(duration);
     auto d = std::chrono::duration_cast<std::chrono::days>(duration);
     duration -= d;
@@ -53,6 +58,7 @@ public:
   };
 
 private:
+  bool print_on_destruction = true;
   std::string calling_function = "UNKNOWN";
   std::chrono::time_point<std::chrono::high_resolution_clock> start;
   std::chrono::time_point<std::chrono::high_resolution_clock> end;
