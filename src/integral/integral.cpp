@@ -383,7 +383,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             offset += j * num_ao_b * num_ao_b;
             offset += s;
             auto stride = num_ao_b;
-            auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
+            auto idx2 = i * num_mo_a * num_mo_b * num_ao_b;
             idx2 += j * num_mo_b * num_ao_b;
             idx2 += k * num_ao_b;
             idx2 += s;

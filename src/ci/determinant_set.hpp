@@ -367,43 +367,67 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
 template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_singles() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  auto nthreads = omp_get_max_threads();
+  std::vector<std::vector<std::vector<double>>> threads_map_contributions;
+  threads_map_contributions.resize(nthreads);
+  for (auto i = 0; i < nthreads; i++) {
+    threads_map_contributions[i].clear();
+  }
   auto idx_part = 0;
   unique_singles.resize(this->input_integral.input_molecule.quantum_particles.size());
-
   for (auto const &[quantum_part_key, quantum_part] : this->input_integral.input_molecule.quantum_particles) {
     unique_singles[idx_part].resize(2);
     for (auto idx_spin = 0; idx_spin < 2; idx_spin++) {
       unique_singles[idx_part][idx_spin].resize(this->unique_dets[idx_part][idx_spin].size());
-      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
-        std::set<std::vector<T>> excited_dets;
-        this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 1, excited_dets);
-        unique_singles[idx_part][idx_spin][idx_det].reserve(excited_dets.size());
-#pragma omp parallel for
-        for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
-          auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-          auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-          auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-          if (det_in_excited_dets_list != excited_dets.end()) {
-            unique_singles[idx_part][idx_spin][idx_det].push_back(curr_idx);
-            // excited_dets.erase(det_in_excited_dets_list);
+      for (auto i = 0; i < nthreads; i++) {
+        threads_map_contributions[i].clear();
+        threads_map_contributions[i].resize(this->unique_dets[idx_part][idx_spin].size());
+      }
+#pragma omp parallel
+      {
+        auto thread_id = omp_get_thread_num();
+        for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
+          if (idx_det % nthreads != thread_id) {
+            continue;
+          }
+          std::set<std::vector<T>> excited_dets;
+          this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 1, excited_dets);
+          for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
+            auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+            auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+            auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+            if (det_in_excited_dets_list != excited_dets.end()) {
+              threads_map_contributions[thread_id][idx_det].push_back(curr_idx);
+              // unique_singles[idx_part][idx_spin][idx_det].push_back(curr_idx);
+              //  excited_dets.erase(det_in_excited_dets_list);
+            }
           }
         }
-        // auto curr_idx = 0;
-        // while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
-        //   auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-        //   auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-        //   auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-        //   if (det_in_excited_dets_list != excited_dets.end()) {
-        //     unique_singles[idx_part][idx_spin][idx_det].insert(curr_idx);
-        //     excited_dets.erase(det_in_excited_dets_list);
-        //   }
-        //   // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
-        //   //     return_idx_list.push_back(curr_idx);
-        //   //     excited_dets.pop_back();
-        //   // }
-        //   curr_idx++;
-        // }
-        // std::sort(unique_singles[idx_part][idx_spin][idx_det].begin(), unique_singles[idx_part][idx_spin][idx_det].end());
+      }
+
+      // auto curr_idx = 0;
+      // while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
+      //   auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+      //   auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+      //   auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+      //   if (det_in_excited_dets_list != excited_dets.end()) {
+      //     unique_singles[idx_part][idx_spin][idx_det].insert(curr_idx);
+      //     excited_dets.erase(det_in_excited_dets_list);
+      //   }
+      //   // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
+      //   //     return_idx_list.push_back(curr_idx);
+      //   //     excited_dets.pop_back();
+      //   // }
+      //   curr_idx++;
+      // }
+      // std::sort(unique_singles[idx_part][idx_spin][idx_det].begin(), unique_singles[idx_part][idx_spin][idx_det].end());
+
+      // merge vectors
+      //
+      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
+        auto thread_id = idx_det % nthreads;
+        unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+                                                           threads_map_contributions[thread_id][idx_det].end());
       }
     }
     idx_part++;
@@ -413,6 +437,13 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
 template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_doubles() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  auto nthreads = omp_get_max_threads();
+  std::vector<std::vector<std::vector<double>>> threads_map_contributions;
+  threads_map_contributions.resize(nthreads);
+  for (auto i = 0; i < nthreads; i++) {
+    threads_map_contributions[i].clear();
+  }
+
   auto idx_part = 0;
   unique_doubles.resize(this->input_integral.input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_integral.input_molecule.quantum_particles) {
@@ -423,35 +454,36 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
       if (this->unique_dets[idx_part][idx_spin][0][0] < 2) {
         continue;
       }
-      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
-        std::set<std::vector<T>> excited_dets;
-        this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 2, excited_dets);
-        unique_doubles[idx_part][idx_spin][idx_det].reserve(excited_dets.size());
-#pragma omp parallel for
-        for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
-          auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-          auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-          auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-          if (det_in_excited_dets_list != excited_dets.end()) {
-            unique_doubles[idx_part][idx_spin][idx_det].push_back(curr_idx);
-            // excited_dets.erase(det_in_excited_dets_list);
+      for (auto i = 0; i < nthreads; i++) {
+        threads_map_contributions[i].clear();
+        threads_map_contributions[i].resize(this->unique_dets[idx_part][idx_spin].size());
+      }
+#pragma omp parallel
+      {
+        auto thread_id = omp_get_thread_num();
+        for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
+          if (idx_det % nthreads != thread_id) {
+            continue;
+          }
+          std::set<std::vector<T>> excited_dets;
+          this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 2, excited_dets);
+          for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
+            auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
+            auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
+            auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
+            if (det_in_excited_dets_list != excited_dets.end()) {
+              threads_map_contributions[thread_id][idx_det].push_back(curr_idx);
+              // unique_doubles[idx_part][idx_spin][idx_det].push_back(curr_idx);
+              //  excited_dets.erase(det_in_excited_dets_list);
+            }
           }
         }
-        // while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
-        //   auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-        //   auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-        //   auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-        //   if (det_in_excited_dets_list != excited_dets.end()) {
-        //     unique_doubles[idx_part][idx_spin][idx_det].insert(curr_idx);
-        //     excited_dets.erase(det_in_excited_dets_list);
-        //   }
-        //   // if (*excited_dets.end() == this->unique_dets[idx_part][idx_spin][curr_idx]) {
-        //   //     return_idx_list.push_back(curr_idx);
-        //   //     excited_dets.pop_back();
-        //   // }
-        //   curr_idx++;
-        // }
-        // std::sort(unique_doubles[idx_part][idx_spin][idx_det].begin(), unique_doubles[idx_part][idx_spin][idx_det].end());
+      }
+      // merge vectors
+      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
+        auto thread_id = idx_det % nthreads;
+        unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+                                                           threads_map_contributions[thread_id][idx_det].end());
       }
     }
     idx_part++;
@@ -1811,24 +1843,24 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
             continue;
           }
           // calculate over all excitation level
-          auto num_ex = 0;
-          auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
-          for (int excitation_quantum_part_idx = 0; excitation_quantum_part_idx < num_parts; excitation_quantum_part_idx++) {
-            auto idx_idet_spin0 = i_unfold[2 * excitation_quantum_part_idx + (quantum_part_spin_idx)];
-            auto idx_idet_spin1 = i_unfold[2 * excitation_quantum_part_idx + (1 - quantum_part_spin_idx)];
-            auto idx_jdet_spin0 = j_unfold[2 * excitation_quantum_part_idx + (quantum_part_spin_idx)];
-            auto idx_jdet_spin1 = j_unfold[2 * excitation_quantum_part_idx + (1 - quantum_part_spin_idx)];
-            auto Di_spin0 = this->get_det(excitation_quantum_part_idx, quantum_part_spin_idx, idx_idet_spin0);
-            auto Dj_spin0 = this->get_det(excitation_quantum_part_idx, quantum_part_spin_idx, idx_jdet_spin0);
-            auto Di_spin1 = this->get_det(excitation_quantum_part_idx, 1 - quantum_part_spin_idx, idx_idet_spin1);
-            auto Dj_spin1 = this->get_det(excitation_quantum_part_idx, 1 - quantum_part_spin_idx, idx_jdet_spin1);
-            auto det_i = std::make_pair(Di_spin0, Di_spin1);
-            auto det_j = std::make_pair(Dj_spin0, Dj_spin1);
-            num_ex += this->num_excitation(det_i, det_j);
-          }
-          if (num_ex != 1) {
-            continue;
-          }
+          // auto num_ex = 0;
+          // auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
+          // for (int excitation_quantum_part_idx = 0; excitation_quantum_part_idx < num_parts; excitation_quantum_part_idx++) {
+          //   auto idx_idet_spin0 = i_unfold[2 * excitation_quantum_part_idx + (quantum_part_spin_idx)];
+          //   auto idx_idet_spin1 = i_unfold[2 * excitation_quantum_part_idx + (1 - quantum_part_spin_idx)];
+          //   auto idx_jdet_spin0 = j_unfold[2 * excitation_quantum_part_idx + (quantum_part_spin_idx)];
+          //   auto idx_jdet_spin1 = j_unfold[2 * excitation_quantum_part_idx + (1 - quantum_part_spin_idx)];
+          //   auto Di_spin0 = this->get_det(excitation_quantum_part_idx, quantum_part_spin_idx, idx_idet_spin0);
+          //   auto Dj_spin0 = this->get_det(excitation_quantum_part_idx, quantum_part_spin_idx, idx_jdet_spin0);
+          //   auto Di_spin1 = this->get_det(excitation_quantum_part_idx, 1 - quantum_part_spin_idx, idx_idet_spin1);
+          //   auto Dj_spin1 = this->get_det(excitation_quantum_part_idx, 1 - quantum_part_spin_idx, idx_jdet_spin1);
+          //   auto det_i = std::make_pair(Di_spin0, Di_spin1);
+          //   auto det_j = std::make_pair(Dj_spin0, Dj_spin1);
+          //   num_ex += this->num_excitation(det_i, det_j);
+          // }
+          // if (num_ex != 1) {
+          //   continue;
+          // }
           std::vector<int> holes, parts;
           double phase = 1.0;
           holes.clear();
@@ -1964,7 +1996,10 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
         }
       }
     }
-
+  }
+#pragma omp parallel
+  {
+    auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
@@ -2030,6 +2065,12 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
         }
       }
     }
+  }
+
+#pragma omp parallel
+  {
+    int nthreads = omp_get_num_threads();
+    auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
@@ -2111,7 +2152,11 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
         }
       }
     }
+  }
 
+#pragma omp parallel
+  {
+    auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
@@ -2197,6 +2242,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
         }
       }
     }
+  }
+#pragma omp parallel
+  {
+    auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
