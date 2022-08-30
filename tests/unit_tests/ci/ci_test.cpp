@@ -25,8 +25,19 @@ TEST_SUITE("CI") {
     test_calc.scf_calc.input_integral.calculate_frozen_core_ints(fc_dm, frozen_core);
     test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 0)) == doctest::Approx(32.7032520).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](0, 1)) == doctest::Approx(0.5580913772).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    std::vector<std::vector<double>> reference_values;
+    std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/ref_mo_onebody.txt";
+    Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
+
+    auto num_mo = test_calc.scf_calc.C[0][0].cols();
+    auto idx = 0;
+    for (auto i = 0; i < num_mo; i++) {
+    for (auto j = i; j < num_mo; j++) {
+
+        std::cout << i << "  " << j << "     " << test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](i,j) << "     " <<  reference_values[i][j] <<std::endl;
+        CHECK(std::abs(test_calc.scf_calc.input_integral.mo_one_body_ints[0][0](i,j)) == doctest::Approx(std::abs(reference_values[i][j])).epsilon(1e-5));
+    }
+    }
   }
 
   TEST_CASE("CI: two body MO basis") {
@@ -37,9 +48,24 @@ TEST_SUITE("CI") {
     std::vector deleted_virtual = {0};
     test_calc.scf_calc.input_integral.calculate_mo_2_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
 
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 0)) == doctest::Approx(4.74449478).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 1)) == doctest::Approx(0.4166223).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](0, 2)) == doctest::Approx(1.00454538).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    std::vector<std::vector<double>> reference_values;
+    std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/ref_eri.txt";
+    Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
+
+    auto num_mo = test_calc.scf_calc.C[0][0].cols();
+    auto idx = 0;
+    for (auto i = 0; i < num_mo; i++) {
+    for (auto j = i; j < num_mo; j++) {
+    for (auto k = 0; k < num_mo; k++) {
+    for (auto l = k; l < num_mo; l++) {
+        auto a = test_calc.scf_calc.input_integral.idx2(i,j);
+        auto b = test_calc.scf_calc.input_integral.idx2(k,l);
+        CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](a,b)) == doctest::Approx(std::abs(reference_values[idx][4])).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        idx++;
+    }
+    }
+    }
+    }
   }
   TEST_CASE("CI: setup/detset construction ") {
     POLYQUANT_CALCULATION test_calc;

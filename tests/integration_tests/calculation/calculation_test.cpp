@@ -271,38 +271,11 @@ TEST_SUITE("CALCULATION") {
     auto count = 0;
     for (auto i = 0; i < test_calc.ci_calc.detset.N_dets; i++) {
       for (auto j = 0; j < test_calc.ci_calc.detset.N_dets; j++) {
-        auto idx_i_unfold = test_calc.ci_calc.detset.det_idx_unfold(i);
-        auto idx_j_unfold = test_calc.ci_calc.detset.det_idx_unfold(j);
-        auto ex = test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][0][idx_i_unfold[0]], test_calc.ci_calc.detset.unique_dets[0][0][idx_j_unfold[0]]);
-        ex += test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc.detset.unique_dets[0][1][idx_j_unfold[1]]);
-        auto elem_thru_SC = test_calc.ci_calc.detset.Slater_Condon(i, j);
-        auto diff = elem_thru_SC - reference_values[count][0];
-        CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-        auto idx_part = 0;
-        auto det_i_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
-        auto det_i_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
-        auto det_j_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_j_unfold[idx_part * 2 + 0]);
-        auto det_j_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_j_unfold[idx_part * 2 + 1]);
-        auto phase = 1.0;
-        std::vector<int> holes, parts;
-        holes.clear();
-        parts.clear();
-        test_calc.ci_calc.detset.get_holes(det_i_a, det_j_a, holes);
-        test_calc.ci_calc.detset.get_parts(det_i_a, det_j_a, parts);
-        if (holes.size() > 0) {
-          phase *= test_calc.ci_calc.detset.get_phase(det_i_a, det_j_a, holes, parts);
-        }
-        holes.clear();
-        parts.clear();
-        test_calc.ci_calc.detset.get_holes(det_i_b, det_j_b, holes);
-        test_calc.ci_calc.detset.get_parts(det_i_b, det_j_b, parts);
-        if (holes.size() > 0) {
-          phase *= test_calc.ci_calc.detset.get_phase(det_i_b, det_j_b, holes, parts);
-        }
-        if (diff > 1e-9) {
-          std::cout << ex << "           " << idx_i_unfold[0] << " " << idx_i_unfold[1] << " " << idx_j_unfold[0] << " " << idx_j_unfold[1] << "          " << phase << " "
-                    << reference_values[count][1] << "           " << elem_thru_SC << " " << reference_values[count][0] << " = " << diff << std::endl;
-        }
+        auto elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(i,j);
+        if (j < i)
+            elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(j,i);
+        auto diff = elem_from_polyquant - reference_values[count][0];
+        CHECK(elem_from_polyquant == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
         count++;
       }
     }
