@@ -271,9 +271,9 @@ TEST_SUITE("CALCULATION") {
     auto count = 0;
     for (auto i = 0; i < test_calc.ci_calc.detset.N_dets; i++) {
       for (auto j = 0; j < test_calc.ci_calc.detset.N_dets; j++) {
-        auto elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(i,j);
+        auto elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(i, j);
         if (j < i)
-            elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(j,i);
+          elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(j, i);
         auto diff = elem_from_polyquant - reference_values[count][0];
         CHECK(elem_from_polyquant == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
         count++;

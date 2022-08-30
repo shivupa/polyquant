@@ -296,7 +296,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                           }
                         }
                       }
-                        shell_pqrs_bf++;
+                      shell_pqrs_bf++;
                     }
                   }
                 }

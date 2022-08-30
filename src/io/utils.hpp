@@ -111,17 +111,16 @@ template <typename t> void Polyquant_read_vec_from_file(std::vector<t> &vec, con
   }
 };
 
-template<typename t> void Polyquant_dump_vecofvec_to_file(const std::vector<std::vector<t>> &vec, const std::string &filename) {
-std::ofstream vvfile;
+template <typename t> void Polyquant_dump_vecofvec_to_file(const std::vector<std::vector<t>> &vec, const std::string &filename) {
+  std::ofstream vvfile;
   vvfile.open(filename);
   for (size_t i = 0; i < vec.size(); i++) {
-  for (size_t j = 0; j < vec[i].size(); j++) {
-    vvfile<< std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec[i][j];
-  }
-  vvfile << std::endl;
+    for (size_t j = 0; j < vec[i].size(); j++) {
+      vvfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec[i][j];
+    }
+    vvfile << std::endl;
   }
 };
-
 
 template <typename t> void Polyquant_read_vecofvec_from_file(std::vector<std::vector<t>> &vec, const std::string &filename) {
   std::ifstream vecfile(filename);
