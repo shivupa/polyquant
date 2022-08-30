@@ -253,12 +253,14 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   {
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
+    auto shell_counter = 0;
     for (size_t i = 0; i < num_shell_a; i++) {
       for (size_t q = 0; q < num_shell_a; q++) {
         for (size_t r = 0; r < num_shell_b; r++) {
           for (size_t s = 0; s < num_shell_b; s++) {
             for (size_t p = 0; p < num_shell_a; p++) {
-              if ((i + p + q + r + s) % nthreads != thread_id)
+              shell_counter++;
+              if (shell_counter % nthreads != thread_id)
                 continue;
               auto shell_i_bf_start = shell2bf_a[i];
               auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][i].size();
@@ -280,7 +282,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                     for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
                       if (buf_1234 != nullptr) {
                         auto eri_pqrs = buf_1234[shell_pqrs_bf];
-                        shell_pqrs_bf++;
                         if (eri_pqrs != 0) {
                           for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                             if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
@@ -295,6 +296,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                           }
                         }
                       }
+                        shell_pqrs_bf++;
                     }
                   }
                 }
@@ -311,6 +313,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   // temp2.setZero();
 #pragma omp parallel
   {
+    auto fn_counter = 0;
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto i = 0; i < num_mo_a; i++) {
@@ -318,7 +321,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
         for (auto r = 0; r < num_ao_b; r++) {
           for (auto s = 0; s < num_ao_b; s++) {
             double elem = 0.0;
-            if ((i + j + r + s) % nthreads != thread_id)
+            fn_counter++;
+            if (fn_counter % nthreads != thread_id)
               continue;
             // for (auto q = 0; q < num_ao_a; q++) {
             //   auto idx1 = i * num_ao_a * num_ao_b * num_ao_b;
@@ -356,6 +360,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   // temp3.setZero();
 #pragma omp parallel
   {
+    auto fn_counter = 0;
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto i = 0; i < num_mo_a; i++) {
@@ -363,7 +368,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
         for (auto k = 0; k < num_mo_b; k++) {
           for (auto s = 0; s < num_ao_b; s++) {
             double elem = 0.0;
-            if ((i + j + k + s) % nthreads != thread_id)
+            fn_counter++;
+            if (fn_counter % nthreads != thread_id)
               continue;
             // for (auto r = 0; r < num_ao_b; r++) {
             //   auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
@@ -400,6 +406,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   eri.resize(eri_size_a, eri_size_b);
 #pragma omp parallel
   {
+    auto fn_counter = 0;
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto i = 0; i < num_mo_a; i++) {
@@ -407,7 +414,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
         for (auto k = 0; k < num_mo_b; k++) {
           for (auto l = 0; l < num_mo_b; l++) {
             double elem = 0.0;
-            if ((i + j + k + l) % nthreads != thread_id)
+            fn_counter++;
+            if (fn_counter % nthreads != thread_id)
               continue;
             // for (auto s = 0; s < num_ao_b; s++) {
             //   auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;

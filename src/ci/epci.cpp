@@ -463,7 +463,7 @@ void POLYQUANT_EPCI::run() {
     }
   } else {
     this->detset.create_ham();
-
+    // row major so Upper has more continguous memory
     Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
     Spectra::DavidsonSymEigsSolver<Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int>> solver(op_sparse, this->num_states, initialsubspacevec, maxsubspacevec, logger);
     Eigen::Index maxit = this->iteration_max;

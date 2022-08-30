@@ -1841,12 +1841,12 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
       }
       // off diagonal singles contributions
       for (auto idx_jdet : unique_singles[quantum_part_idx][quantum_part_spin_idx][idx_idet]) {
-        auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
         std::vector<int> j_unfold = i_unfold;
         j_unfold[2 * quantum_part_idx + quantum_part_spin_idx] = idx_jdet;
         auto det_j_search = this->dets.find(j_unfold);
         if (det_j_search != this->dets.end()) {
           auto j_det = det_j_search->second;
+        auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
           if (i_det < j_det) {
             continue;
           }
@@ -1946,6 +1946,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part
   for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
     std::cout << triplet_list_threads[thread_id].size() << std::endl;
     for (auto trip_elem : triplet_list_threads[thread_id]) {
+        std::cout << trip_elem.row() << "    " << trip_elem.col() << "                " << trip_elem.value() << std::endl;
       ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
     }
   }
@@ -2005,15 +2006,14 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       }
     }
   }
-#pragma omp parallel
   {
-    auto thread_id = omp_get_thread_num();
+    //auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
-        if (row_idx % nthreads == thread_id) {
+        //if (row_idx % nthreads == thread_id) {
           ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
-        }
+        //}
       }
     }
   }
@@ -2075,16 +2075,15 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
     }
   }
 
-#pragma omp parallel
   {
-    int nthreads = omp_get_num_threads();
-    auto thread_id = omp_get_thread_num();
+    //int nthreads = omp_get_num_threads();
+    //auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
-        if (row_idx % nthreads == thread_id) {
+        //if (row_idx % nthreads == thread_id) {
           ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
-        }
+        //}
       }
     }
   }
@@ -2161,15 +2160,14 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
     }
   }
 
-#pragma omp parallel
   {
-    auto thread_id = omp_get_thread_num();
+    //auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
-        if (row_idx % nthreads == thread_id) {
+        //if (row_idx % nthreads == thread_id) {
           ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
-        }
+        //}
       }
     }
   }
@@ -2250,15 +2248,14 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
       }
     }
   }
-#pragma omp parallel
   {
-    auto thread_id = omp_get_thread_num();
+    //auto thread_id = omp_get_thread_num();
     for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
       for (auto trip_elem : triplet_list_threads[t_idx]) {
         auto row_idx = trip_elem.row();
-        if (row_idx % nthreads == thread_id) {
+        //if (row_idx % nthreads == thread_id) {
           ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
-        }
+        //}
       }
     }
   }
