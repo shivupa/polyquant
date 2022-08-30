@@ -429,6 +429,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
         unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
                                                            threads_map_contributions[thread_id][idx_det].end());
       }
+      // std::stringstream filename;
+      // filename << "uniquesingles_map_" << idx_part <<"_"<< idx_spin << ".txt";
+      //   Polyquant_dump_vecofvec_to_file(unique_singles[idx_part][idx_spin], filename.str());
     }
     idx_part++;
   }
@@ -485,6 +488,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
         unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
                                                            threads_map_contributions[thread_id][idx_det].end());
       }
+      // std::stringstream filename;
+      // filename << "uniquedoubles_map_" << idx_part <<"_"<< idx_spin << ".txt";
+      //   Polyquant_dump_vecofvec_to_file(unique_doubles[idx_part][idx_spin], filename.str());
     }
     idx_part++;
   }
@@ -2100,7 +2106,6 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham() {
   // mixed alpha beta
   single_species_create_ham_class_two(0, 0, 0, 1);
 
-  // Polyquant_dump_sparse_mat_to_file(ham, "ci_ham.txt");
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one(int idx_part, int idx_spin) {
@@ -2292,7 +2297,6 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham() {
   // Ba Bb
   two_species_create_ham_class_two(1, 0, 1, 1);
 
-  // Polyquant_dump_sparse_mat_to_file(ham, "ci_ham.txt");
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
@@ -2311,6 +2315,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
     ss << "Sigma vector building not supported for " << num_parts << " unique quantum particles." << std::endl;
     APP_ABORT(ss.str());
   }
+  // Polyquant_dump_sparse_mat_to_file(ham, "ci_ham.txt");
 }
 
 // template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
