@@ -1815,6 +1815,7 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
     MO_rdm1_thread_contributions[i].resize(MO_rdm1.rows(), MO_rdm1.cols());
     MO_rdm1_thread_contributions[i].setZero();
   }
+  MO_rdm1.setZero();
 #pragma omp parallel
   {
     auto thread_id = omp_get_thread_num();
@@ -1837,8 +1838,9 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
         auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
         std::vector<int> j_unfold = i_unfold;
         j_unfold[2 * quantum_part_idx + quantum_part_spin_idx] = idx_jdet;
-        if (this->dets.find(j_unfold) != this->dets.end()) {
-          auto j_det = this->dets.find(j_unfold)->second;
+        auto det_j_search = this->dets.find(j_unfold);
+        if (det_j_search != this->dets.end()) {
+          auto j_det = det_j_search->second;
           if (i_det < j_det) {
             continue;
           }
