@@ -47,7 +47,7 @@
        "convergence_E" : 1e-8,
        "num_states" : 5,
        "slow_diag" : false,
-       "num_subspace_vec" : 20,
+       "num_subspace_vec" : 8,
        "excitation_level" : [
            [1,1,1],
            [1,0,1]
