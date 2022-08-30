@@ -347,7 +347,8 @@ TEST_SUITE("CI") {
     for (auto pos_excitation = 0; pos_excitation < test_ci.detset.unique_dets[1][0].size(); pos_excitation++) {
       std::vector<int> j_unfold = {0, 0, pos_excitation, 0};
       auto ex = test_ci.detset.single_spin_num_excitation(test_ci.detset.unique_dets[1][0][0], test_ci.detset.unique_dets[1][0][pos_excitation]);
-      if (ex == 1) {
+      if (ex == 1)
+      {
         auto folded_j_idx = test_ci.detset.dets.find(j_unfold)->second;
         auto single_ham_elem = test_ci.detset.Slater_Condon(folded_i_idx, folded_j_idx);
         CHECK(single_ham_elem == doctest::Approx(0.000000000).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));

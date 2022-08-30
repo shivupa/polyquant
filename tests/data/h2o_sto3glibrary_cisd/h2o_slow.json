@@ -29,6 +29,7 @@
        "num_states" : 2,
        "num_subspace_vec" : 20,
        "slow_diag" : true,
+       "build_matrix" : false,
        "excitation_level" : [ 
            [2,2,2]
        ],
