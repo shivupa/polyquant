@@ -1,15 +1,35 @@
 import pyscf
 import numpy as np
 
+O_sto3g_alls = """
+O    S
+      0.1307093214E+03       0.1543289673E+00
+      0.2380886605E+02       0.5353281423E+00
+      0.6443608313E+01       0.4446345422E+00
+O    S
+      0.5033151319E+01      -0.9996722919E-01
+      0.1169596125E+01       0.3995128261E+00
+      0.3803889600E+00       0.7001154689E+00
+O    S
+      0.5033151319E+01       0.1559162750E+00
+      0.1169596125E+01       0.6076837186E+00
+      0.3803889600E+00       0.3919573931E+00
+"""
+
+basis_dict = { "H" : "sto-3g" , "O" : pyscf.gto.parse(O_sto3g_alls)}
+
 mol = pyscf.M(
     # atom = 'H        0.7569685, 0.0000000, -0.5858752;H       -0.7569685, 0.0000000, -0.5858752;O        0.0000000, 0.0000000,  0.0000000',
     atom=" H 1.430463,    0.000000,    -1.107144; H -1.430463,    0.000000,    -1.107144; O 0.000000,    0.000000,    0.000000",
     unit="b",
-    basis="sto-3g",
+    basis=basis_dict,
+    #basis="sto-3g",
     verbose=0,
 )
 
-mf = mol.RHF().run()
+mf = mol.RHF()
+mf.conv_tol = 1e-9
+mf.run()
 mf.analyze()
 
 t = mol.intor("int1e_kin")
@@ -32,10 +52,12 @@ def tri(i, j):
         return int((j * (j + 1)) / 2 + i)
 
 
-for i in range(7):
-    for j in range(i, 7):
-        for k in range(7):
-            for l in range(k, 7):
+nmo = mf.mo_coeff.shape[-1]
+
+for i in range(nmo):
+    for j in range(i, nmo):
+        for k in range(nmo):
+            for l in range(k, nmo):
                 print(i, j, k, l, mo_ints[tri(i, j)][tri(k, l)])
 
 

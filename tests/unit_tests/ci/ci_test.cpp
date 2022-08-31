@@ -11,7 +11,7 @@ using namespace polyquant;
 TEST_SUITE("CI") {
   TEST_CASE("CI: one body MO basis") {
     POLYQUANT_CALCULATION test_calc;
-    test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+    test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o_sto3galls.json");
     test_calc.run();
     std::vector frozen_core = {0};
     std::vector deleted_virtual = {0};
@@ -42,7 +42,7 @@ TEST_SUITE("CI") {
 
   TEST_CASE("CI: two body MO basis") {
     POLYQUANT_CALCULATION test_calc;
-    test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+    test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o_sto3galls.json");
     test_calc.run();
     std::vector frozen_core = {0};
     std::vector deleted_virtual = {0};
@@ -60,7 +60,9 @@ TEST_SUITE("CI") {
           for (auto l = k; l < num_mo; l++) {
             auto a = test_calc.scf_calc.input_integral.idx2(i, j);
             auto b = test_calc.scf_calc.input_integral.idx2(k, l);
-            CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](a, b)) == doctest::Approx(std::abs(reference_values[idx][4])).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+            std::cout << i << "  " << j << "    " << k << "  " << l << "          " << test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](a, b) << "   " << reference_values[idx][4]
+                      << std::endl;
+            CHECK(std::abs(test_calc.scf_calc.input_integral.mo_two_body_ints[0][0][0][0](a, b)) == doctest::Approx(std::abs(reference_values[idx][4])).epsilon(1e-5));
             idx++;
           }
         }
