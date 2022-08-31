@@ -207,12 +207,13 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
             engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
-            for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-              for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
-                for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
-                  for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
-                    if (buf_1234 != nullptr) {
+            if (buf_1234 != nullptr) {
+              for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+                for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
+                  for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
+                    for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
                       auto eri_ijkl = buf_1234[shell_ijkl_bf];
+                      shell_ijkl_bf++;
                       auto D_kl = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
                                                                       quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
                       const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
@@ -238,7 +239,6 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
                         FA[thread_id](shell_k_bf, shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                       }
                     }
-                    shell_ijkl_bf++;
                   }
                 }
               }

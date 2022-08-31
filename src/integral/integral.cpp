@@ -226,11 +226,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   auto shell2bf_b = this->input_basis.basis[quantum_part_b_idx].shell2bf();
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> eri;
-  eri.setZero();
-  Eigen::Matrix<double, Eigen::Dynamic, 1> temp1;
-  Eigen::Matrix<double, Eigen::Dynamic, 1> temp2;
-
-  Eigen::Matrix<double, Eigen::Dynamic, 1> temp3;
 
   auto eri_size_a = (num_mo_a * (num_mo_a + 1) / 2);
   auto eri_size_b = (num_mo_b * (num_mo_b + 1) / 2);
@@ -242,26 +237,28 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   engines.resize(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
   engines[0].set_precision(this->tolerance_2e);
+  Eigen::Matrix<double, Eigen::Dynamic, 1> temp;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> temp_threads;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eri_threads;
+  temp_threads.resize(nthreads);
+  eri_threads.resize(nthreads);
   for (int i = 0; i < nthreads; i++) {
     engines[i] = engines[0];
+    temp_threads[i].resize(num_mo_a * num_ao_a * num_ao_b * num_ao_b);
+    temp_threads[i].setZero();
   }
-
-  // temp1 = Eigen::Tensor<double, 4>(num_mo_a, num_shell_a, num_shell_b, num_shell_b);
-  temp1.resize(num_mo_a * num_ao_a * num_ao_b * num_ao_b);
-  temp1.setZero();
 #pragma omp parallel
   {
-    int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     auto shell_counter = 0;
     for (size_t i = 0; i < num_shell_a; i++) {
       for (size_t q = 0; q < num_shell_a; q++) {
         for (size_t r = 0; r < num_shell_b; r++) {
           for (size_t s = 0; s < num_shell_b; s++) {
+            shell_counter++;
+            if (shell_counter % nthreads != thread_id)
+              continue;
             for (size_t p = 0; p < num_shell_a; p++) {
-              shell_counter++;
-              if (shell_counter % nthreads != thread_id)
-                continue;
               auto shell_i_bf_start = shell2bf_a[i];
               auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][i].size();
               auto shell_q_bf_start = shell2bf_a[q];
@@ -276,12 +273,13 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
               engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
               const auto *buf_1234 = buf[0];
               auto shell_pqrs_bf = 0;
-              for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
-                for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
-                  for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
-                    for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
-                      if (buf_1234 != nullptr) {
+              if (buf_1234 != nullptr) {
+                for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
+                  for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
+                    for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
+                      for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
                         auto eri_pqrs = buf_1234[shell_pqrs_bf];
+                        shell_pqrs_bf++;
                         if (eri_pqrs != 0) {
                           for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                             if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
@@ -291,12 +289,11 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                               idx1 += shell_q_bf * num_ao_b * num_ao_b;
                               idx1 += shell_r_bf * num_ao_b;
                               idx1 += shell_s_bf;
-                              temp1(idx1) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
+                              temp_threads[thread_id](idx1) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
                             }
                           }
                         }
                       }
-                      shell_pqrs_bf++;
                     }
                   }
                 }
@@ -307,8 +304,15 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
       }
     }
   }
-  temp2.resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
-  temp2.setZero();
+  temp.resize(num_mo_a * num_ao_a * num_ao_b * num_ao_b);
+  temp.setZero();
+  for (int thread_id = 0; thread_id < nthreads; thread_id++) {
+    temp += temp_threads[thread_id];
+    temp_threads[thread_id].resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
+    temp_threads[thread_id].setZero();
+  }
+  // temp2.resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
+  // temp2.setZero();
   // temp2 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_shell_b, num_shell_b);
   // temp2.setZero();
 #pragma omp parallel
@@ -345,19 +349,27 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             idx2 += j * num_ao_b * num_ao_b;
             idx2 += r * num_ao_b;
             idx2 += s;
-            temp2(idx2) = mo_coeffs_a(Eigen::seqN(0, num_ao_a), j + frozen_core[quantum_part_a_idx]).dot(temp1(Eigen::seqN(offset, num_ao_a, stride)));
+            // temp2(idx2) = mo_coeffs_a(Eigen::seqN(0, num_ao_a), j + frozen_core[quantum_part_a_idx]).dot(temp1(Eigen::seqN(offset, num_ao_a, stride)));
+            temp_threads[thread_id](idx2) = mo_coeffs_a(Eigen::seqN(0, num_ao_a), j + frozen_core[quantum_part_a_idx]).dot(temp(Eigen::seqN(offset, num_ao_a, stride)));
           }
         }
       }
     }
   }
-  temp1.resize(0);
-  temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
-  temp3.setZero();
-  // delete temp1;
-  // temp1 = Eigen::Tensor<double, 1>(0);
-  // temp3 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_mo_b, num_shell_b);
+  temp.resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
+  temp.setZero();
+  for (int thread_id = 0; thread_id < nthreads; thread_id++) {
+    temp += temp_threads[thread_id];
+    temp_threads[thread_id].resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
+    temp_threads[thread_id].setZero();
+  }
+  // temp1.resize(0);
+  // temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
   // temp3.setZero();
+  //  delete temp1;
+  //  temp1 = Eigen::Tensor<double, 1>(0);
+  //  temp3 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_mo_b, num_shell_b);
+  //  temp3.setZero();
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -393,26 +405,35 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             idx2 += j * num_mo_b * num_ao_b;
             idx2 += k * num_ao_b;
             idx2 += s;
-            temp3(idx2) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), k + frozen_core[quantum_part_b_idx]).dot(temp2(Eigen::seqN(offset, num_ao_b, stride)));
+            // temp3(idx2) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), k + frozen_core[quantum_part_b_idx]).dot(temp2(Eigen::seqN(offset, num_ao_b, stride)));
+            temp_threads[thread_id](idx2) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), k + frozen_core[quantum_part_b_idx]).dot(temp(Eigen::seqN(offset, num_ao_b, stride)));
           }
         }
       }
     }
   }
-  temp2.resize(0);
+  temp.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
+  temp.setZero();
+  for (int thread_id = 0; thread_id < nthreads; thread_id++) {
+    temp += temp_threads[thread_id];
+    temp_threads[thread_id].resize(0);
+    eri_threads[thread_id].resize(eri_size_a, eri_size_b);
+    eri_threads[thread_id].setZero();
+  }
+  // temp2.resize(0);
   // temp2.setZero();
   // temp2 = Eigen::Tensor<double, 1>(0);
   // delete temp2;
-  eri.resize(eri_size_a, eri_size_b);
+  // eri.resize(eri_size_a, eri_size_b);
 #pragma omp parallel
   {
     auto fn_counter = 0;
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     for (auto i = 0; i < num_mo_a; i++) {
-      for (auto j = 0; j < num_mo_a; j++) {
+      for (auto j = i; j < num_mo_a; j++) {
         for (auto k = 0; k < num_mo_b; k++) {
-          for (auto l = 0; l < num_mo_b; l++) {
+          for (auto l = k; l < num_mo_b; l++) {
             double elem = 0.0;
             fn_counter++;
             if (fn_counter % nthreads != thread_id)
@@ -431,11 +452,18 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             offset += j * num_mo_b * num_ao_b;
             offset += k * num_ao_b;
             auto stride = 1;
-            eri(this->idx2(i, j), this->idx2(k, l)) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), l + frozen_core[quantum_part_b_idx]).dot(temp3(Eigen::seqN(offset, num_ao_b, stride)));
+            // eri(this->idx2(i, j), this->idx2(k, l)) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), l + frozen_core[quantum_part_b_idx]).dot(temp3(Eigen::seqN(offset, num_ao_b, stride)));
+            eri_threads[thread_id](this->idx2(i, j), this->idx2(k, l)) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), l + frozen_core[quantum_part_b_idx]).dot(temp(Eigen::seqN(offset, num_ao_b, stride)));
           }
         }
       }
     }
+  }
+  eri.resize(eri_size_a, eri_size_b);
+  eri.setZero();
+  for (int thread_id = 0; thread_id < nthreads; thread_id++) {
+    eri += eri_threads[thread_id];
+    eri_threads[thread_id].resize(0, 0);
   }
   libint2::finalize();
   return eri;
