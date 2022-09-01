@@ -2369,7 +2369,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
     APP_ABORT(ss.str());
   }
   this->ham.makeCompressed();
-  Polyquant_dump_sparse_mat_to_file(ham, "ci_ham.txt");
+  //Polyquant_dump_sparse_mat_to_file(ham, "ci_ham.txt");
 }
 
 // template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
