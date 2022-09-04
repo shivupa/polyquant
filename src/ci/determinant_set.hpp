@@ -2202,17 +2202,17 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
           }
         }
       }
-      // loop over connected singles beta
+
       for (auto idx_J_B_det : unique_singles[idx_part][second_spin_idx][idx_I_B_det]) {
         if (idx_J_B_det < idx_I_B_det) {
           continue;
         }
-        // beta single
+        // beta singles
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_I_A_det;
         jdet_idx[second_spin_idx] = idx_J_B_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
-          auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
+          auto integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
