@@ -179,6 +179,7 @@ public:
   void two_species_create_ham();
   void two_species_create_ham_class_one(int idx_part, int idx_spin);
   void two_species_create_ham_class_two(int idx_part, int idx_spin, int other_idx_part, int other_idx_spin);
+  void two_species_create_ham_singleshot(int idx_part, int idx_spin, int other_idx_part, int other_idx_spin);
 
   void create_ham();
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
@@ -2221,6 +2222,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
           }
         }
       }
+
       // loop over alpha double excitations
       for (auto idx_J_A_det : unique_doubles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det < idx_I_A_det) {
@@ -2489,32 +2491,363 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
   // }
 }
 
+template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singleshot(int idx_part, int idx_spin, int other_idx_part, int other_idx_spin) {
+
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+
+  if ((idx_part == other_idx_part && idx_spin == other_idx_spin)) {
+    APP_ABORT("two_species_create_ham_class_two called with same particle and spin idxs, which is inconsistent with two species class two contributions.");
+  }
+
+  std::vector<std::pair<int, int>> idx_part_spin = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
+
+  std::pair<int, int> idx_A_part_spin = {idx_part, idx_spin};
+  std::pair<int, int> idx_B_part_spin = {other_idx_part, other_idx_spin};
+
+  idx_part_spin.erase(std::remove(idx_part_spin.begin(), idx_part_spin.end(), idx_A_part_spin), idx_part_spin.end());
+  idx_part_spin.erase(std::remove(idx_part_spin.begin(), idx_part_spin.end(), idx_B_part_spin), idx_part_spin.end());
+
+  if (idx_part_spin.size() != 2) {
+    APP_ABORT("two_species_create_ham_class_two idx_part_spin didn't remove the correct spin/part idx combos.");
+  }
+
+  std::pair<int, int> idx_C_part_spin = idx_part_spin.back();
+  idx_part_spin.pop_back();
+  std::pair<int, int> idx_D_part_spin = idx_part_spin.back();
+  idx_part_spin.pop_back();
+
+  auto first_spin_idx = idx_spin;
+  // auto second_spin_idx = idx_spin - 1 % this->input_integral.mo_one_body_ints[idx_part].size();
+  auto second_spin_idx = 1 - idx_spin;
+
+  auto nthreads = omp_get_max_threads();
+
+  std::vector<std::vector<Eigen::Triplet<double>>> triplet_list_threads;
+  triplet_list_threads.resize(nthreads);
+
+  std::vector<Eigen::SparseMatrix<double, Eigen::RowMajor>> ham_threads;
+  ham_threads.resize(nthreads);
+
+#pragma omp parallel
+  {
+    auto thread_id = omp_get_thread_num();
+    for (auto i_det = 0; i_det < this->N_dets; i_det++) {
+      if (i_det % nthreads != thread_id) {
+        continue;
+      }
+      auto idet_unfold = det_idx_unfold(i_det);
+      auto idx_I_A_det = idet_unfold[2 * idx_A_part_spin.first + idx_A_part_spin.second];
+      auto idx_I_B_det = idet_unfold[2 * idx_B_part_spin.first + idx_B_part_spin.second];
+      auto idx_I_C_det = idet_unfold[2 * idx_C_part_spin.first + idx_C_part_spin.second];
+      auto idx_I_D_det = idet_unfold[2 * idx_D_part_spin.first + idx_D_part_spin.second];
+
+      // diagonal
+      triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
+      // A singles
+      for (auto idx_J_A_det : unique_singles[idx_A_part_spin.first][idx_A_part_spin.second][idx_I_A_det]) {
+        if (idx_J_A_det < idx_I_A_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_J_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+        // A+B doubles
+        for (auto idx_J_B_det : unique_singles[idx_B_part_spin.first][idx_B_part_spin.second][idx_I_B_det]) {
+          std::vector<int> jdet_idx(4);
+          jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_J_A_det;
+          jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_J_B_det;
+          jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+          jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+          if (this->dets.find(jdet_idx) != this->dets.end()) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            if (integral != 0) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
+            // triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(folded_jdet_idx, i_det, integral));
+          }
+        }
+        // A+C doubles
+        for (auto idx_J_C_det : unique_singles[idx_C_part_spin.first][idx_C_part_spin.second][idx_I_C_det]) {
+          std::vector<int> jdet_idx(4);
+          jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_J_A_det;
+          jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+          jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_J_C_det;
+          jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+          if (this->dets.find(jdet_idx) != this->dets.end()) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            if (integral != 0) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
+          }
+        }
+        // A+D doubles
+        for (auto idx_J_D_det : unique_singles[idx_D_part_spin.first][idx_D_part_spin.second][idx_I_D_det]) {
+          std::vector<int> jdet_idx(4);
+          jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_J_A_det;
+          jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+          jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+          jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_J_D_det;
+          if (this->dets.find(jdet_idx) != this->dets.end()) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            if (integral != 0) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
+          }
+        }
+      }
+      // B singles
+      for (auto idx_J_B_det : unique_singles[idx_B_part_spin.first][idx_B_part_spin.second][idx_I_B_det]) {
+        if (idx_J_B_det < idx_I_B_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_J_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+        // B+C doubles
+        for (auto idx_J_C_det : unique_singles[idx_C_part_spin.first][idx_C_part_spin.second][idx_I_C_det]) {
+          std::vector<int> jdet_idx(4);
+          jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+          jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_J_B_det;
+          jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_J_C_det;
+          jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+          if (this->dets.find(jdet_idx) != this->dets.end()) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            if (integral != 0) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
+          }
+        }
+        // B+D doubles
+        for (auto idx_J_D_det : unique_singles[idx_D_part_spin.first][idx_D_part_spin.second][idx_I_D_det]) {
+          std::vector<int> jdet_idx(4);
+          jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+          jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_J_B_det;
+          jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+          jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_J_D_det;
+          if (this->dets.find(jdet_idx) != this->dets.end()) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            if (integral != 0) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
+          }
+        }
+      }
+      // C singles
+      for (auto idx_J_C_det : unique_singles[idx_C_part_spin.first][idx_C_part_spin.second][idx_I_C_det]) {
+        if (idx_J_C_det < idx_I_C_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_J_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+        // C+D doubles
+        for (auto idx_J_D_det : unique_singles[idx_D_part_spin.first][idx_D_part_spin.second][idx_I_D_det]) {
+          std::vector<int> jdet_idx(4);
+          jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+          jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+          jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_J_C_det;
+          jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_J_D_det;
+          if (this->dets.find(jdet_idx) != this->dets.end()) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            if (integral != 0) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
+          }
+        }
+      }
+      // D singles
+      for (auto idx_J_D_det : unique_singles[idx_D_part_spin.first][idx_D_part_spin.second][idx_I_D_det]) {
+        if (idx_J_D_det < idx_I_D_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_J_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      }
+      // A doubles
+      for (auto idx_J_A_det : unique_doubles[idx_A_part_spin.first][idx_A_part_spin.second][idx_I_A_det]) {
+        if (idx_J_A_det < idx_I_A_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_J_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      }
+      // B doubles
+      for (auto idx_J_B_det : unique_doubles[idx_B_part_spin.first][idx_B_part_spin.second][idx_I_B_det]) {
+        if (idx_J_B_det < idx_I_B_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_J_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      }
+      // C doubles
+      for (auto idx_J_C_det : unique_doubles[idx_C_part_spin.first][idx_C_part_spin.second][idx_I_C_det]) {
+        if (idx_J_C_det < idx_I_C_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_J_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      }
+      // D doubles
+      for (auto idx_J_D_det : unique_doubles[idx_D_part_spin.first][idx_D_part_spin.second][idx_I_D_det]) {
+        if (idx_J_D_det < idx_I_D_det) {
+          continue;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_I_A_det;
+        jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_I_B_det;
+        jdet_idx[2 * idx_C_part_spin.first + idx_C_part_spin.second] = idx_I_C_det;
+        jdet_idx[2 * idx_D_part_spin.first + idx_D_part_spin.second] = idx_J_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      }
+
+    }
+    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+    ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
+    ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
+      // release memory from the processed triplet list!
+      triplet_list_threads[thread_id] = std::vector<Eigen::Triplet<double>>();
+      {
+#pragma omp critical
+        ham += ham_threads[thread_id];
+      }
+  }
+}
+
 template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham() {
 
-  // Diagonal Contribution
-  create_ham_diagonal(0, 0);
-  // Four class one contributions
-  // Aa Aa
-  two_species_create_ham_class_one(0, 0);
-  // Ab Ab
-  two_species_create_ham_class_one(0, 1);
-  // Ba Ba
-  two_species_create_ham_class_one(1, 0);
-  // Bb Bb
-  two_species_create_ham_class_one(1, 1);
+  // // Diagonal Contribution
+  // create_ham_diagonal(0, 0);
+  // // Four class one contributions
+  // // Aa Aa
+  // two_species_create_ham_class_one(0, 0);
+  // // Ab Ab
+  // two_species_create_ham_class_one(0, 1);
+  // // Ba Ba
+  // two_species_create_ham_class_one(1, 0);
+  // // Bb Bb
+  // two_species_create_ham_class_one(1, 1);
 
-  // Aa Ab
-  two_species_create_ham_class_two(0, 0, 0, 1);
-  // Aa Ba
-  two_species_create_ham_class_two(0, 0, 1, 0);
-  // Aa Bb
-  two_species_create_ham_class_two(0, 0, 1, 1);
-  // Ab Ba
-  two_species_create_ham_class_two(0, 1, 1, 0);
-  // Ab Bb
-  two_species_create_ham_class_two(0, 1, 1, 1);
-  // Ba Bb
-  two_species_create_ham_class_two(1, 0, 1, 1);
+  // // Aa Ab
+  // two_species_create_ham_class_two(0, 0, 0, 1);
+  // // Aa Ba
+  // two_species_create_ham_class_two(0, 0, 1, 0);
+  // // Aa Bb
+  // two_species_create_ham_class_two(0, 0, 1, 1);
+  // // Ab Ba
+  // two_species_create_ham_class_two(0, 1, 1, 0);
+  // // Ab Bb
+  // two_species_create_ham_class_two(0, 1, 1, 1);
+  // // Ba Bb
+  // two_species_create_ham_class_two(1, 0, 1, 1);
+  two_species_create_ham_singleshot(0, 0, 0, 1);
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
