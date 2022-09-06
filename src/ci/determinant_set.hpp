@@ -404,6 +404,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
               //  excited_dets.erase(det_in_excited_dets_list);
             }
           }
+#pragma omp critical
+        unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(), threads_map_contributions[thread_id][idx_det].end());
         }
       }
 
@@ -426,11 +428,11 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
 
       // merge vectors
       //
-      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
-        auto thread_id = idx_det % nthreads;
-        unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
-                                                           threads_map_contributions[thread_id][idx_det].end());
-      }
+      // for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
+      //   auto thread_id = idx_det % nthreads;
+      //   unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+      //                                                      threads_map_contributions[thread_id][idx_det].end());
+      // }
       // std::stringstream filename;
       // filename << "uniquesingles_map_" << idx_part <<"_"<< idx_spin << ".txt";
       //   Polyquant_dump_vecofvec_to_file(unique_singles[idx_part][idx_spin], filename.str());
@@ -482,14 +484,17 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
               //  excited_dets.erase(det_in_excited_dets_list);
             }
           }
+#pragma omp critical
+        unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+                                                           threads_map_contributions[thread_id][idx_det].end());
         }
       }
       // merge vectors
-      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
-        auto thread_id = idx_det % nthreads;
-        unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
-                                                           threads_map_contributions[thread_id][idx_det].end());
-      }
+      // for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
+      //   auto thread_id = idx_det % nthreads;
+      //   unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+      //                                                      threads_map_contributions[thread_id][idx_det].end());
+      // }
       // std::stringstream filename;
       // filename << "uniquedoubles_map_" << idx_part <<"_"<< idx_spin << ".txt";
       //   Polyquant_dump_vecofvec_to_file(unique_doubles[idx_part][idx_spin], filename.str());
@@ -1257,10 +1262,12 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
         }
       }
     }
+#pragma omp critical
+    sigma += threads_sigma_contributions[thread_id];
   }
-  for (auto i = 0; i < nthreads; i++) {
-    sigma += threads_sigma_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   sigma += threads_sigma_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1341,10 +1348,13 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
         }
       }
     }
+
+#pragma omp critical
+    sigma += threads_sigma_contributions[thread_id];
   }
-  for (auto i = 0; i < nthreads; i++) {
-    sigma += threads_sigma_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   sigma += threads_sigma_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1437,10 +1447,14 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
         }
       }
     }
+
+#pragma omp critical
+    sigma += threads_sigma_contributions[thread_id];
+
   }
-  for (auto i = 0; i < nthreads; i++) {
-    sigma += threads_sigma_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   sigma += threads_sigma_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1520,10 +1534,15 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
         }
       }
     }
+
+
+#pragma omp critical
+    sigma += threads_sigma_contributions[thread_id];
+
   }
-  for (auto i = 0; i < nthreads; i++) {
-    sigma += threads_sigma_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   sigma += threads_sigma_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1608,10 +1627,13 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
         }
       }
     }
+
+#pragma omp critical
+    sigma += threads_sigma_contributions[thread_id];
   }
-  for (auto i = 0; i < nthreads; i++) {
-    sigma += threads_sigma_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   sigma += threads_sigma_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1718,10 +1740,13 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
         }
       }
     }
+
+#pragma omp critical
+    sigma += threads_sigma_contributions[thread_id];
   }
-  for (auto i = 0; i < nthreads; i++) {
-    sigma += threads_sigma_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   sigma += threads_sigma_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1887,10 +1912,13 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
         }
       }
     }
+
+#pragma omp critical
+    MO_rdm1 += MO_rdm1_thread_contributions[thread_id];
   }
-  for (auto i = 0; i < nthreads; i++) {
-    MO_rdm1 += MO_rdm1_thread_contributions[i];
-  }
+  // for (auto i = 0; i < nthreads; i++) {
+  //   MO_rdm1 += MO_rdm1_thread_contributions[i];
+  // }
 }
 
 template <typename T>
@@ -1949,15 +1977,18 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
-  }
-  for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+
+#pragma omp critical
     ham += ham_threads[thread_id];
-    // std::cout << triplet_list_threads[thread_id].size() << std::endl;
-    // for (auto trip_elem : triplet_list_threads[thread_id]) {
-    //   std::cout << diagonal_Hii.size() << "                     " << trip_elem.row() << "    " << trip_elem.col() << "                " << trip_elem.value() << std::endl;
-    //   ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
-    // }
   }
+   // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+   //   ham += ham_threads[thread_id];
+   //   // std::cout << triplet_list_threads[thread_id].size() << std::endl;
+   //   // for (auto trip_elem : triplet_list_threads[thread_id]) {
+   //   //   std::cout << diagonal_Hii.size() << "                     " << trip_elem.row() << "    " << trip_elem.col() << "                " << trip_elem.value() << std::endl;
+   //   //   ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
+   //   // }
+   // }
   // #pragma omp parallel
   //   {
   //     auto thread_id = omp_get_thread_num();
@@ -2029,11 +2060,14 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       ham_threads[thread_id].resize(this->N_dets, this->N_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
+
+#pragma omp critical
+    ham += ham_threads[thread_id];
     }
   }
-  for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
-    ham += ham_threads[thread_id];
-  }
+  //   for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+  //     ham += ham_threads[thread_id];
+  //   }
   // {
   //   auto thread_id = omp_get_thread_num();
   //   for (auto t_idx = 0; t_idx < nthreads; t_idx++) {
@@ -2106,11 +2140,13 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
-  }
-
-  for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+#pragma omp critical
     ham += ham_threads[thread_id];
   }
+
+//   for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+//     ham += ham_threads[thread_id];
+//   }
 
   // #pragma omp parallel
   //   {
@@ -2368,11 +2404,14 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
+
+#pragma omp critical
+        ham += ham_threads[thread_id];
   }
 
-  for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
-    ham += ham_threads[thread_id];
-  }
+  // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+  //   ham += ham_threads[thread_id];
+  // }
 
   // #pragma omp parallel
   //   {
@@ -2467,10 +2506,13 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
+#pragma omp critical
+        ham += ham_threads[thread_id];
+
   }
-  for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
-    ham += ham_threads[thread_id];
-  }
+  // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+  //   ham += ham_threads[thread_id];
+  // }
   // #pragma omp parallel
   //   {
   //     auto thread_id = omp_get_thread_num();
