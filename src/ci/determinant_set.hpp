@@ -179,7 +179,7 @@ public:
   void two_species_create_ham();
   void two_species_create_ham_class_one(int idx_part, int idx_spin);
   void two_species_create_ham_class_two(int idx_part, int idx_spin, int other_idx_part, int other_idx_spin);
-  //void two_species_create_ham_singleshot(int idx_part, int idx_spin, int other_idx_part, int other_idx_spin);
+  // void two_species_create_ham_singleshot(int idx_part, int idx_spin, int other_idx_part, int other_idx_spin);
   void two_species_create_ham_singleshot();
 
   void create_ham();
@@ -406,7 +406,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
             }
           }
 #pragma omp critical
-        unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(), threads_map_contributions[thread_id][idx_det].end());
+          unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+                                                             threads_map_contributions[thread_id][idx_det].end());
         }
       }
 
@@ -486,8 +487,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
             }
           }
 #pragma omp critical
-        unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
-                                                           threads_map_contributions[thread_id][idx_det].end());
+          unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+                                                             threads_map_contributions[thread_id][idx_det].end());
         }
       }
       // merge vectors
@@ -1451,7 +1452,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
 
 #pragma omp critical
     sigma += threads_sigma_contributions[thread_id];
-
   }
   // for (auto i = 0; i < nthreads; i++) {
   //   sigma += threads_sigma_contributions[i];
@@ -1536,10 +1536,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
       }
     }
 
-
 #pragma omp critical
     sigma += threads_sigma_contributions[thread_id];
-
   }
   // for (auto i = 0; i < nthreads; i++) {
   //   sigma += threads_sigma_contributions[i];
@@ -1982,14 +1980,14 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part
 #pragma omp critical
     ham += ham_threads[thread_id];
   }
-   // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
-   //   ham += ham_threads[thread_id];
-   //   // std::cout << triplet_list_threads[thread_id].size() << std::endl;
-   //   // for (auto trip_elem : triplet_list_threads[thread_id]) {
-   //   //   std::cout << diagonal_Hii.size() << "                     " << trip_elem.row() << "    " << trip_elem.col() << "                " << trip_elem.value() << std::endl;
-   //   //   ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
-   //   // }
-   // }
+  // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+  //   ham += ham_threads[thread_id];
+  //   // std::cout << triplet_list_threads[thread_id].size() << std::endl;
+  //   // for (auto trip_elem : triplet_list_threads[thread_id]) {
+  //   //   std::cout << diagonal_Hii.size() << "                     " << trip_elem.row() << "    " << trip_elem.col() << "                " << trip_elem.value() << std::endl;
+  //   //   ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
+  //   // }
+  // }
   // #pragma omp parallel
   //   {
   //     auto thread_id = omp_get_thread_num();
@@ -2063,7 +2061,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
 #pragma omp critical
-    ham += ham_threads[thread_id];
+      ham += ham_threads[thread_id];
     }
   }
   //   for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
@@ -2145,9 +2143,9 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
     ham += ham_threads[thread_id];
   }
 
-//   for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
-//     ham += ham_threads[thread_id];
-//   }
+  //   for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
+  //     ham += ham_threads[thread_id];
+  //   }
 
   // #pragma omp parallel
   //   {
@@ -2407,7 +2405,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
 #pragma omp critical
-        ham += ham_threads[thread_id];
+    ham += ham_threads[thread_id];
   }
 
   // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
@@ -2508,8 +2506,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 #pragma omp critical
-        ham += ham_threads[thread_id];
-
+    ham += ham_threads[thread_id];
   }
   // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
   //   ham += ham_threads[thread_id];
@@ -2577,7 +2574,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_I_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
           auto integral = 0.0;
           integral += same_part_ham_single(0, idet_unfold, jdet_idx);
           integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
@@ -2596,10 +2593,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           jdet_idx[2 * 1 + 1] = idx_I_D_det;
           if (this->dets.find(jdet_idx) != this->dets.end()) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            // auto integral = Slater_Condon(i_det, folded_jdet_idx);
             auto integral = 0.0;
-          integral += same_part_ham_double(0, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+            integral += same_part_ham_double(0, idet_unfold, jdet_idx);
+            integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             if (integral != 0) {
               auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
               auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2617,9 +2614,9 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           jdet_idx[2 * 1 + 1] = idx_I_D_det;
           if (this->dets.find(jdet_idx) != this->dets.end()) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            // auto integral = Slater_Condon(i_det, folded_jdet_idx);
             auto integral = 0.0;
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+            integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             if (integral != 0) {
               auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
               auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2636,9 +2633,9 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           jdet_idx[2 * 1 + 1] = idx_J_D_det;
           if (this->dets.find(jdet_idx) != this->dets.end()) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            // auto integral = Slater_Condon(i_det, folded_jdet_idx);
             auto integral = 0.0;
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+            integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             if (integral != 0) {
               auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
               auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2659,10 +2656,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_I_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_single(0, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_single(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_single(0, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2678,9 +2675,9 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           jdet_idx[2 * 1 + 1] = idx_I_D_det;
           if (this->dets.find(jdet_idx) != this->dets.end()) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            // auto integral = Slater_Condon(i_det, folded_jdet_idx);
             auto integral = 0.0;
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+            integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             if (integral != 0) {
               auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
               auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2697,9 +2694,9 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           jdet_idx[2 * 1 + 1] = idx_J_D_det;
           if (this->dets.find(jdet_idx) != this->dets.end()) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            // auto integral = Slater_Condon(i_det, folded_jdet_idx);
             auto integral = 0.0;
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+            integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             if (integral != 0) {
               auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
               auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2720,10 +2717,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_I_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_single(1, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_single(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_single(1, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2739,10 +2736,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           jdet_idx[2 * 1 + 1] = idx_J_D_det;
           if (this->dets.find(jdet_idx) != this->dets.end()) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            //auto integral = Slater_Condon(i_det, folded_jdet_idx);
+            // auto integral = Slater_Condon(i_det, folded_jdet_idx);
             auto integral = 0.0;
             integral += same_part_ham_double(1, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+            integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             if (integral != 0) {
               auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
               auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2763,10 +2760,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_J_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_single(1, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_single(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_single(1, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2786,10 +2783,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_I_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_double(0, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_double(0, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2809,10 +2806,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_I_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_double(0, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_double(0, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2832,10 +2829,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_I_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_double(1, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_double(1, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2855,10 +2852,10 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         jdet_idx[2 * 1 + 1] = idx_J_D_det;
         if (this->dets.find(jdet_idx) != this->dets.end()) {
           auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-          //auto integral = Slater_Condon(i_det, folded_jdet_idx);
-            auto integral = 0.0;
-            integral += same_part_ham_double(1, idet_unfold, jdet_idx);
-            integral += charge_factor * mixed_part_ham_double(0, 1,  idet_unfold, jdet_idx);
+          // auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          auto integral = 0.0;
+          integral += same_part_ham_double(1, idet_unfold, jdet_idx);
+          integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
@@ -2866,17 +2863,16 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-
     }
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
-      // release memory from the processed triplet list!
-      triplet_list_threads[thread_id] = std::vector<Eigen::Triplet<double>>();
-      {
+    // release memory from the processed triplet list!
+    triplet_list_threads[thread_id] = std::vector<Eigen::Triplet<double>>();
+    {
 #pragma omp critical
-        ham += ham_threads[thread_id];
-      }
+      ham += ham_threads[thread_id];
+    }
   }
 }
 
