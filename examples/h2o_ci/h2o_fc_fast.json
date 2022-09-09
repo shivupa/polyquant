@@ -36,10 +36,10 @@
        "num_states" : 2,
        "num_subspace_vec" : 20,
        "slow_diag" : false,
-       "excitation_level" : [ 
+       "excitation_level" : [
            [2,2,2]
        ],
-       "frozen_core" : [0],
+       "frozen_core" : [1],
        "deleted_virtual" : [0]
    }
   },
