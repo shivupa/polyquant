@@ -170,12 +170,17 @@ void POLYQUANT_EPCI::calculate_NOs() {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
       auto num_mo = 0;
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        num_mo = this->input_epscf.C[quantum_part_idx][0].cols();
+        num_mo = this->input_epscf.C[quantum_part_idx][0].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
-        MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
+        // MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
         // Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
-        this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        // this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        this->dm1[state_vec_idx][quantum_part_idx][0].setZero(this->input_epscf.C[quantum_part_idx][0].cols(), this->input_epscf.C[quantum_part_idx][0].cols());
+        // fill fc block
+        this->dm1[state_vec_idx][quantum_part_idx][0] += fc_occ[quantum_part_idx][0].asDiagonal();
+        // fill active block
+        this->dm1[state_vec_idx][quantum_part_idx][0].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
 
         // MO_rdm nmo x nmo
         // C nao x nmo
@@ -183,21 +188,31 @@ void POLYQUANT_EPCI::calculate_NOs() {
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
 
-        num_mo = this->input_epscf.C[quantum_part_idx][1].cols();
+        num_mo = this->input_epscf.C[quantum_part_idx][1].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
-        MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
-        // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
-        this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
+        // MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
+        // // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
+        // this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
+        this->dm1[state_vec_idx][quantum_part_idx][1].setZero(this->input_epscf.C[quantum_part_idx][1].cols(), this->input_epscf.C[quantum_part_idx][1].cols());
+        // fill fc block
+        this->dm1[state_vec_idx][quantum_part_idx][1] += fc_occ[quantum_part_idx][1].asDiagonal();
+        // fill active block
+        this->dm1[state_vec_idx][quantum_part_idx][1].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
       } else {
-        num_mo = this->input_epscf.C[quantum_part_idx][0].cols();
+        num_mo = this->input_epscf.C[quantum_part_idx][0].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
-        MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
-        // Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
-        this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        // MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
+        // // Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
+        // this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        this->dm1[state_vec_idx][quantum_part_idx][0].setZero(this->input_epscf.C[quantum_part_idx][0].cols(), this->input_epscf.C[quantum_part_idx][0].cols());
+        // fill fc block
+        this->dm1[state_vec_idx][quantum_part_idx][0] += fc_occ[quantum_part_idx][0].asDiagonal();
+        // fill active block
+        this->dm1[state_vec_idx][quantum_part_idx][0].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
       }
