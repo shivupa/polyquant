@@ -395,15 +395,19 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
           }
           std::set<std::vector<T>> excited_dets;
           this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 1, excited_dets);
-          for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
+
+          auto curr_idx = 0;
+          while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
+            // for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
             auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
             auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
             auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
             if (det_in_excited_dets_list != excited_dets.end()) {
               threads_map_contributions[thread_id][idx_det].push_back(curr_idx);
               // unique_singles[idx_part][idx_spin][idx_det].push_back(curr_idx);
-              //  excited_dets.erase(det_in_excited_dets_list);
+              excited_dets.erase(det_in_excited_dets_list);
             }
+            curr_idx++;
           }
 #pragma omp critical
           unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
@@ -476,15 +480,17 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
           }
           std::set<std::vector<T>> excited_dets;
           this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 2, excited_dets);
-          for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
+          auto curr_idx = 0;
+          while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
             auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
             auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
             auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
             if (det_in_excited_dets_list != excited_dets.end()) {
               threads_map_contributions[thread_id][idx_det].push_back(curr_idx);
               // unique_doubles[idx_part][idx_spin][idx_det].push_back(curr_idx);
-              //  excited_dets.erase(det_in_excited_dets_list);
+              excited_dets.erase(det_in_excited_dets_list);
             }
+            curr_idx++;
           }
 #pragma omp critical
           unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
