@@ -144,7 +144,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      if (quantum_part.num_parts > 1) {
         dm1[state_vec_idx][quantum_part_idx].resize(2);
         this->C_nso[state_vec_idx][quantum_part_idx].resize(2);
         // this->C_no[state_vec_idx][quantum_part_idx].resize(1);
@@ -169,7 +169,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
       auto num_mo = 0;
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      if (quantum_part.num_parts > 1) {
         num_mo = this->input_epscf.C[quantum_part_idx][0].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
@@ -187,20 +187,23 @@ void POLYQUANT_EPCI::calculate_NOs() {
         // C @ MO_rdm @ C.T
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
-
-        num_mo = this->input_epscf.C[quantum_part_idx][1].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
-        MO_rdm1.setZero(num_mo, num_mo);
-        this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
-        // MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
-        // // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
-        // this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
-        this->dm1[state_vec_idx][quantum_part_idx][1].setZero(this->input_epscf.C[quantum_part_idx][1].cols(), this->input_epscf.C[quantum_part_idx][1].cols());
-        // fill fc block
-        this->dm1[state_vec_idx][quantum_part_idx][1] += fc_occ[quantum_part_idx][1].asDiagonal();
-        // fill active block
-        this->dm1[state_vec_idx][quantum_part_idx][1].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
-        // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
-        // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
+        if (quantum_part.restricted == false) {
+          num_mo = this->input_epscf.C[quantum_part_idx][1].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
+          MO_rdm1.setZero(num_mo, num_mo);
+          this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
+          // MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
+          // // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
+          // this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
+          this->dm1[state_vec_idx][quantum_part_idx][1].setZero(this->input_epscf.C[quantum_part_idx][1].cols(), this->input_epscf.C[quantum_part_idx][1].cols());
+          // fill fc block
+          this->dm1[state_vec_idx][quantum_part_idx][1] += fc_occ[quantum_part_idx][1].asDiagonal();
+          // fill active block
+          this->dm1[state_vec_idx][quantum_part_idx][1].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
+          // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
+          // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
+        } else {
+          this->dm1[state_vec_idx][quantum_part_idx][1] = this->dm1[state_vec_idx][quantum_part_idx][0];
+        }
       } else {
         num_mo = this->input_epscf.C[quantum_part_idx][0].cols() - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
@@ -229,7 +232,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         dump_file << quantum_part_key;
         dump_file << "_alpha.txt";
         Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][0], dump_file.str());
-        if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        if (quantum_part.num_parts > 1) {
           std::stringstream dump_file;
           dump_file << "CI_state_";
           dump_file << state_idx;
@@ -246,12 +249,16 @@ void POLYQUANT_EPCI::calculate_NOs() {
     // print
     quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      if (quantum_part.num_parts > 1) {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
         this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][1], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][1]);
-        this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][1] * NOs_mobasis;
+        if (quantum_part.restricted == false) {
+          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][1] * NOs_mobasis;
+        } else {
+          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
+        }
       } else {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);

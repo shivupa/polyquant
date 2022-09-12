@@ -78,7 +78,6 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
       Polyquant_cout(line);
       auto num_mo = E_orbitals[i][j].size();
       auto max_cols = (num_mo + stride - 1) / stride;
-      std::cout << max_cols << std::endl;
 
       for (auto mo_idx = 0; mo_idx < max_cols; mo_idx++) {
         line = "\n";
