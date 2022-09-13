@@ -331,7 +331,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
   if (excitation_level.size() > 2) {
     APP_ABORT("The CI code can currently handle up to a maximum of 2 unique quantum particle types.");
   }
-  // TODO generalize this
+  // TODO generalize this and parallellize...
   this->N_dets = 0;
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_0 = std::make_pair(this->unique_dets[0][0][0], this->unique_dets[0][1][0]);
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_1;
@@ -2917,7 +2917,10 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
   POLYQUANT_TIMER timer(function);
   this->ham.resize(this->N_dets, this->N_dets);
   std::vector<int> sizes;
-  sizes.resize(this->N_dets, this->N_dets);
+  // sizes.resize(this->N_dets, this->N_dets);
+  // estimate
+  auto estimate_n_interacting_dets = std::min(this->N_dets, std::sqrt(this->N_dets) * 100);
+  sizes.resize(this->N_dets, estimate_n_interacting_dets);
   this->ham.reserve(sizes);
   // this->ham.reserve(this->N_dets * this->N_dets);
   auto num_parts = this->input_integral.input_molecule.quantum_particles.size();
