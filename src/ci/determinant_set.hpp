@@ -74,6 +74,7 @@ public:
    *
    */
   std::vector<std::vector<std::vector<std::vector<T>>>> unique_dets;
+  int estimate_n_interacting_dets;
 
   // indexes that are single excitations same spin
   // unique_singles[part_type_idx][spin_idx][det_i].size() ->num connected singles
@@ -1979,7 +1980,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part
       }
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
     }
-    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
@@ -2062,7 +2063,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
           }
         }
       }
-      ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+      ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
@@ -2142,7 +2143,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 #pragma omp critical
@@ -2303,7 +2304,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
         }
       }
 
-      ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+      ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
       // release memory from the processed triplet list!
@@ -2406,7 +2407,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
@@ -2508,7 +2509,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 #pragma omp critical
@@ -2870,7 +2871,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
     // release memory from the processed triplet list!
@@ -2919,7 +2920,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
   std::vector<int> sizes;
   // sizes.resize(this->N_dets, this->N_dets);
   // estimate
-  auto estimate_n_interacting_dets = std::min(this->N_dets, std::sqrt(this->N_dets) * 100);
+  int estimate = std::sqrt(this->N_dets) * 10;
+  this->estimate_n_interacting_dets = (estimate < this->N_dets) ? estimate : this->N_dets;
   sizes.resize(this->N_dets, estimate_n_interacting_dets);
   this->ham.reserve(sizes);
   // this->ham.reserve(this->N_dets * this->N_dets);
