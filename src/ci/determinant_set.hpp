@@ -1980,7 +1980,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part
       }
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
     }
-    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
@@ -2063,7 +2063,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
           }
         }
       }
-      ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+      ham_threads[thread_id].resize(this->N_dets, this->N_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
@@ -2143,7 +2143,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 #pragma omp critical
@@ -2304,7 +2304,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
         }
       }
 
-      ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+      ham_threads[thread_id].resize(this->N_dets, this->N_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
       // release memory from the processed triplet list!
@@ -2407,7 +2407,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 
@@ -2509,7 +2509,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
 #pragma omp critical
@@ -2871,7 +2871,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         }
       }
     }
-    ham_threads[thread_id].resize(this->N_dets, this->estimate_n_interacting_dets);
+    ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
     ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
     // release memory from the processed triplet list!
