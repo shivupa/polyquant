@@ -57,6 +57,13 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
     center_labels.push_back(label);
     quantum_nuclei.push_back(0);
   }
+
+  // Store if we are using nuclear charge modification
+  bool charge_mod = false;
+  if (input.input_data["molecule"].contains("modify_nuclear_charge")) {
+    charge_mod = true;
+  }
+
   if (input.input_data.contains("keywords")) {
     // if (input.input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
@@ -109,7 +116,11 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         CLASSICAL_PARTICLE_SET classical_part;
         classical_particles[curr_label] = classical_part;
         classical_particles[curr_label].mass = atom_symb_to_mass(center_labels[i]);
-        classical_particles[curr_label].charge = atom_symb_to_num(center_labels[i]);
+        double nuc_charge = atom_symb_to_num(center_labels[i]);
+        if (charge_mod) {
+          nuc_charge = input.input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
+        }
+        classical_particles[curr_label].charge = nuc_charge;
         classical_particles[curr_label].num_parts = 0;
       }
       classical_particles[curr_label].num_parts += 1;
