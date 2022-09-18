@@ -95,7 +95,7 @@ public:
    * know where the nuclei are
    */
   void compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells, libint2::Operator obtype,
-                          const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
+                          const std::vector<std::pair<double, std::array<double, 3>>> &atoms = std::vector<std::pair<double, std::array<double, 3>>>());
 
   /**
    * @brief Calculate Schwarz integrals (diagonal 2 body ints)

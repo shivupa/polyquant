@@ -146,7 +146,7 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->nuclear[quantum_part_idx].resize(num_basis, num_basis);
       this->nuclear[quantum_part_idx].setZero();
-      this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_libint_atom("no_ghost"));
+      this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_point_charges_for_integrals("no_ghost"));
       if (verbose == true) {
         std::stringstream filename;
         filename << "nuclear";
@@ -793,7 +793,7 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
  * integrals.
  */
 void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells, libint2::Operator obtype,
-                                            const std::vector<libint2::Atom> &atoms) {
+                                            const std::vector<std::pair<double, std::array<double, 3>>> &atoms) {
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -810,7 +810,7 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
     // the nuclei are charges in this case; in QM/MM there will also be
     // classical charges
     if (obtype == libint2::Operator::nuclear) {
-      engines[0].set_params(libint2::make_point_charges(atoms));
+      engines[0].set_params(atoms);
     }
     if (nthreads > 1) {
       if (thread_id == 0) {
