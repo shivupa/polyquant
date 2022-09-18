@@ -118,7 +118,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         classical_particles[curr_label].mass = atom_symb_to_mass(center_labels[i]);
         double nuc_charge = atom_symb_to_num(center_labels[i]);
         if (charge_mod) {
-          nuc_charge = input.input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
+          if (input.input_data["molecule"]["modify_nuclear_charge"].contains(center_labels[i])) {
+            nuc_charge = input.input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
+          }
         }
         classical_particles[curr_label].charge = nuc_charge;
         classical_particles[curr_label].num_parts = 0;
