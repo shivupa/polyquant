@@ -110,6 +110,8 @@ public:
   int num_states = 1;
   int num_subspace_vec = 5;
   bool verbose = false;
+
+  double det_print_threshold = 0.1;
   size_t cache_size = std::numeric_limits<size_t>::max();
 };
 } // namespace polyquant

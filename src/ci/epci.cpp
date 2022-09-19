@@ -363,15 +363,17 @@ void POLYQUANT_EPCI::print_success() {
     line += fmt::format("{: ^10}{:^30}{: ^10}{:^20}{: ^10}\n", "", "Det idx", "", "C", "");
     line += fmt::format("{: ^10}{:-^30}{: ^10}{:-^20}{: ^10}", "", "", "", "", "");
     Polyquant_cout(line);
+    line = "";
     for (auto i = 0; i < this->detset.N_dets; i++) {
-      line = "";
       std::stringstream unfold_string;
       auto i_unfold = this->detset.det_idx_unfold(i);
       for (auto unfold_idx : i_unfold) {
         unfold_string << unfold_idx;
         unfold_string << " ";
       }
-      line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}\n", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
+      if (std::abs(this->C_ci(i, state_idx)) > this->det_print_threshold) {
+        line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}\n", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
+      }
     }
     Polyquant_cout(line);
   }
