@@ -371,9 +371,9 @@ void POLYQUANT_EPCI::print_success() {
         unfold_string << unfold_idx;
         unfold_string << " ";
       }
-      line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
-      Polyquant_cout(line);
+      line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}\n", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
     }
+    Polyquant_cout(line);
   }
   for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
     auto state_idx = this->NO_states[state_vec_idx];
