@@ -392,7 +392,7 @@ std::vector<std::pair<double, std::array<double, 3>>> POLYQUANT_MOLECULE::to_poi
     for (auto i = 0; i < classical_part.second.num_parts; i++) {
       if (classical_part_key != "all") {
         if (classical_part_key == "no_ghost") {
-          if (classical_part.second.mass < 1) {
+          if (classical_part.second.charge == 0.0) {
             continue;
           }
         } else if (classical_part.first != classical_part_key) {
