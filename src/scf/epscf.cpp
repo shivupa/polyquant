@@ -921,7 +921,7 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   POLYQUANT_TIMER timer(function);
   // calculate integrals we need
   this->input_integral.calculate_overlap();
-  this->input_integral.symmetric_orthogonalization();
+  this->input_integral.calculate_orthogonalization();
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_unique_shell_pairs();

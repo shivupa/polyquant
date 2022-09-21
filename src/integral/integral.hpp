@@ -147,7 +147,11 @@ public:
    */
   void compute_2body_ints(Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec, const libint2::BasisSet &shells, libint2::Operator obtype);
 
+  std::string orth_method = "canonical";
+  std::vector<std::string> known_orth_method = ["canonical", "symmetric];
+  void calculate_orthogonalization();
   void symmetric_orthogonalization();
+  void canonical_orthogonalization();
 
   /**
    * @brief Overlap integral matrix
