@@ -691,6 +691,7 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLY
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
+  this->parse_integral_parameters();
   this->overlap.resize(molecule.quantum_particles.size());
   this->kinetic.resize(molecule.quantum_particles.size());
   this->nuclear.resize(molecule.quantum_particles.size());
@@ -955,6 +956,20 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       s = eigensolver.eigenvalues();
       L = eigensolver.eigenvectors();
       s = s.array().rsqrt();
+
+      double thresh = std::pow(10.0  , - (this->eig_s2_linear_dep_threshold));
+      int drop_cols = 0;
+
+      while (s(drop_cols) < thresh) {
+          drop_cols++;
+      }
+      if (drop_cols > 0) {
+  std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+          Polyquant_cout(message);
+          s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
+          L = L( Eigen::placeholders::all ,Eigen::seq(drop_cols, Eigen::placeholders::last));
+      }
+      
       this->orth_X[quantum_part_idx] = s.asDiagonal();
       this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
       if (verbose == true) {
@@ -966,5 +981,26 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       }
     }
     quantum_part_idx++;
+  }
+}
+
+void POLYQUANT_INTEGRAL::parse_integral_parameters() {
+// parse 2e tolerance
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
+      this->tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
+    }
+  }
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("eig_s2_linear_dep_threshold")) {
+        if(this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_integer) {
+      this->eig_s2_linear_dep_threshold = this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"];
+        } else {
+APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a signed integer in the input.");
+        }
+    }
+  }
+  if (this->input_params.input_data.contains("verbose")) {
+    this->verbose = this->input_params.input_data["verbose"];
   }
 }

@@ -35,7 +35,8 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule);
   ~POLYQUANT_INTEGRAL();
-
+  int eig_s2_linear_dep_threshold = 6;
+  void parse_integral_parameters();
   void calculate_overlap();
   void calculate_Schwarz();
   void calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core);
