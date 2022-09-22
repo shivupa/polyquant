@@ -977,13 +977,13 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
 }
 
 void POLYQUANT_INTEGRAL::calculate_orthogonalization() {
-    if (this->orth_method == "symmetric) {
+    if (this->orth_method == "symmetric") {
         this->symmetric_orthogonalization();
     } else if (this->orth_method == "canonical") {
         this->canonical_orthogonalization();
     } else {
         // this should never handle. We should error at input
-        APP_ABORT("Orthogonalization method : " + this->orth_method " not recognized!");
+        APP_ABORT("Orthogonalization method : " + this->orth_method + " not recognized!");
     }
 }
 
@@ -1004,6 +1004,7 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
                    "orthogonalization."));
         // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
         // Let me know if this is ever encountered in a real world calculation.
+    }
       s = eigensolver.eigenvalues();
       L = eigensolver.eigenvectors();
 
@@ -1021,7 +1022,8 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
       }
 
       // orth_X = L @ s^{-1/2}
-      this->orth_X[quantum_part_idx].noalias() = L * s.array().rsqrt().asDiagonal();
+      s = s.array().rsqrt();
+      this->orth_X[quantum_part_idx].noalias() = L * s.asDiagonal();
       if (verbose == true) {
         std::stringstream filename;
         filename << "orthogonalizer_";
@@ -1046,7 +1048,7 @@ void POLYQUANT_INTEGRAL::parse_integral_parameters() {
     if (this->input_params.input_data["keywords"].contains("orth_method")) {
       this->orth_method = this->input_params.input_data["keywords"]["orth_method"];
       for (auto &character : this->orth_method){
-          character = std::to_lower(character);
+          character = std::tolower(character);
       }
       if (std::find(this->known_orth_method.begin(), this->known_orth_method.end(), this->orth_method) == this->known_orth_method.end()){
           APP_ABORT("Orthogonalization method " + this->orth_method + " is not recognized.");
