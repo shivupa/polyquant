@@ -662,6 +662,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_mo = this->num_mo[quantum_part_idx];
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
@@ -670,9 +671,9 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->occ[quantum_part_idx].resize(1);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_mo);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
     } else if (quantum_part.restricted == false) {
@@ -683,10 +684,10 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->occ[quantum_part_idx].resize(2);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_basis);
-      this->occ[quantum_part_idx][1].setZero(num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][1].setZero(num_basis, num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_mo);
+      this->occ[quantum_part_idx][1].setZero(num_mo);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
+      this->C[quantum_part_idx][1].setZero(num_basis, num_mo);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
@@ -701,10 +702,10 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->F[quantum_part_idx].resize(1);
       this->occ[quantum_part_idx].resize(1);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_mo);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
     }
