@@ -68,7 +68,7 @@ TEST_SUITE("INTEGRAL") {
     test_int.setup_integral(test_inp, test_bas, test_mol);
     test_int.calculate_overlap();
     test_int.canonical_orthogonalization();
-    CHECK(test_int.orth_X[0](0, 0) == doctest::Approx(1.2111064830).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
-    CHECK(test_int.orth_X[0](3, 5) == doctest::Approx(-0.1122800384).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    CHECK(test_int.orth_X[0](0, 0) == doctest::Approx(0.74728727469997979771).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
+    CHECK(test_int.orth_X[0](3, 5) == doctest::Approx(0.0).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
 }
