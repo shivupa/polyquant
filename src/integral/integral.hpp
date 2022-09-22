@@ -5,9 +5,9 @@
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
+#include <locale>
 #include <numeric>
 #include <vector>
-#include <locale>
 
 namespace polyquant {
 

@@ -145,6 +145,8 @@ public:
   std::string occupation_mode = "aufbau";
   std::deque<bool> freeze_density;
 
+  std::vector<int> num_mo;
+
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
 
   /**

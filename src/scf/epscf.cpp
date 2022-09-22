@@ -923,6 +923,12 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   // calculate integrals we need
   this->input_integral.calculate_overlap();
   this->input_integral.calculate_orthogonalization();
+  this->num_mo.resize(this->input_molecule.quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    this->num_mo[quantum_part_idx] = this->input_integral.orth_X[quantum_part_idx].cols();
+    quantum_part_idx++;
+  }
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_unique_shell_pairs();

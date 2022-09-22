@@ -977,14 +977,14 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
 }
 
 void POLYQUANT_INTEGRAL::calculate_orthogonalization() {
-    if (this->orth_method == "symmetric") {
-        this->symmetric_orthogonalization();
-    } else if (this->orth_method == "canonical") {
-        this->canonical_orthogonalization();
-    } else {
-        // this should never handle. We should error at input
-        APP_ABORT("Orthogonalization method : " + this->orth_method + " not recognized!");
-    }
+  if (this->orth_method == "symmetric") {
+    this->symmetric_orthogonalization();
+  } else if (this->orth_method == "canonical") {
+    this->canonical_orthogonalization();
+  } else {
+    // this should never handle. We should error at input
+    APP_ABORT("Orthogonalization method : " + this->orth_method + " not recognized!");
+  }
 }
 
 void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
@@ -1004,21 +1004,21 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
                    "orthogonalization."));
         // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
         // Let me know if this is ever encountered in a real world calculation.
-    }
+      }
       s = eigensolver.eigenvalues();
       L = eigensolver.eigenvectors();
 
-      double thresh = std::pow(10.0  , - (this->eig_s2_linear_dep_threshold));
+      double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
       int drop_cols = 0;
 
       while (s(drop_cols) < thresh) {
-          drop_cols++;
+        drop_cols++;
       }
       if (drop_cols > 0) {
-  std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
-          Polyquant_cout(message);
-          s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
-          L = L( Eigen::placeholders::all ,Eigen::seq(drop_cols, Eigen::placeholders::last));
+        std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+        Polyquant_cout(message);
+        s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
+        L = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
       }
 
       // orth_X = L @ s^{-1/2}
@@ -1037,7 +1037,7 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
 }
 
 void POLYQUANT_INTEGRAL::parse_integral_parameters() {
-// parse 2e tolerance
+  // parse 2e tolerance
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
       this->tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
@@ -1047,21 +1047,21 @@ void POLYQUANT_INTEGRAL::parse_integral_parameters() {
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("orth_method")) {
       this->orth_method = this->input_params.input_data["keywords"]["orth_method"];
-      for (auto &character : this->orth_method){
-          character = std::tolower(character);
+      for (auto &character : this->orth_method) {
+        character = std::tolower(character);
       }
-      if (std::find(this->known_orth_method.begin(), this->known_orth_method.end(), this->orth_method) == this->known_orth_method.end()){
-          APP_ABORT("Orthogonalization method " + this->orth_method + " is not recognized.");
+      if (std::find(this->known_orth_method.begin(), this->known_orth_method.end(), this->orth_method) == this->known_orth_method.end()) {
+        APP_ABORT("Orthogonalization method " + this->orth_method + " is not recognized.");
       }
     }
   }
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("eig_s2_linear_dep_threshold")) {
-        if(this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_integer) {
-      this->eig_s2_linear_dep_threshold = this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"];
-        } else {
-APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a signed integer in the input.");
-        }
+      if (this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_integer) {
+        this->eig_s2_linear_dep_threshold = this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"];
+      } else {
+        APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a signed integer in the input.");
+      }
     }
   }
   if (this->input_params.input_data.contains("verbose")) {
