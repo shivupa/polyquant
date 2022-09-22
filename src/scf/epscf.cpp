@@ -391,7 +391,8 @@ void POLYQUANT_EPSCF::diag_fock() {
     if (this->diis_extrapolation) {
       this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
     }
-    F_prime = this->input_integral.orth_X[quantum_part_idx] * F_diis * this->input_integral.orth_X[quantum_part_idx];
+    std::cout << F_diis.rows() << " " << F_diis.cols() << "  " << this->input_integral.orth_X[quantum_part_idx].rows() << " " << this->input_integral.orth_X[quantum_part_idx].cols() << std::endl;
+    F_prime = this->input_integral.orth_X[quantum_part_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx];
     diag_fock_helper(quantum_part_idx, F_prime, this->C[quantum_part_idx][0], this->E_orbitals[quantum_part_idx][0]);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][1];
@@ -419,7 +420,7 @@ void POLYQUANT_EPSCF::diag_fock() {
       if (this->diis_extrapolation) {
         this->diis[quantum_part_idx][1].extrapolate(F_diis, FD_commutator);
       }
-      F_prime = this->input_integral.orth_X[quantum_part_idx] * F_diis * this->input_integral.orth_X[quantum_part_idx];
+      F_prime = this->input_integral.orth_X[quantum_part_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx];
       diag_fock_helper(quantum_part_idx, F_prime, this->C[quantum_part_idx][1], this->E_orbitals[quantum_part_idx][1]);
     }
     quantum_part_idx++;
