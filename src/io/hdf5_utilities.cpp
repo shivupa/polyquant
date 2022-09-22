@@ -133,8 +133,8 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
     E_orb_dataset.write(orbital_energies);
     // write orbital coeffs
     std::vector<double> flattened_mo_coeff;
-    for (auto i = 0ul; i < num_ao; i++) {
-      for (auto j = 0ul; j < num_mo; j++) {
+    for (auto i = 0ul; i < num_mo; i++) {
+      for (auto j = 0ul; j < num_ao; j++) {
         flattened_mo_coeff.push_back(mo_coeff[spin_idx](j, i));
       }
     }

@@ -10,29 +10,20 @@ POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
 
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
-  Polyquant_cout("SETTING UP INPUT FILE");
+  Polyquant_section_header("Input Parameters");
   this->input_params = POLYQUANT_INPUT(filename);
   // parse molecule
-  Polyquant_cout("SETTING UP MOLECULE");
+  Polyquant_section_header("Molecule Specification");
   this->input_molecule = POLYQUANT_MOLECULE(this->input_params);
   // parse basis
-  Polyquant_cout("SETTING UP BASIS");
+  Polyquant_section_header("Basis Specification");
   this->input_basis = POLYQUANT_BASIS(this->input_params, this->input_molecule);
   // parse integral
-  Polyquant_cout("SETTING UP INTEGRAL");
   this->input_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis, this->input_molecule);
-  // parse 2e tolerance
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
-      this->input_integral.tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
-    }
-  }
-  if (this->input_params.input_data.contains("verbose")) {
-    this->input_integral.verbose = this->input_params.input_data["verbose"];
-  }
 }
 
 void POLYQUANT_CALCULATION::run() {
+  Polyquant_section_header("Calculation Requested");
   std::string mean_field_type = this->parse_mean_field();
   std::string post_mean_field_type = this->parse_post_mean_field();
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
@@ -163,7 +154,6 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         if (freeze_dens_inp.type() == json::value_t::array) {
           for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
             freeze_density_from_input.push_back(freeze_dens_inp[i]);
-            std::cout << std::boolalpha << freeze_density_from_input[i] << std::endl;
           }
         }
       }
@@ -277,6 +267,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params.input_data["keywords"]["ci_keywords"].contains("build_matrix")) {
         ci_calc.detset.build_matrix = this->input_params.input_data["keywords"]["ci_keywords"]["build_matrix"];
       }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("det_print_threshold")) {
+        ci_calc.det_print_threshold = this->input_params.input_data["keywords"]["ci_keywords"]["det_print_threshold"];
+      }
       if (this->input_params.input_data["keywords"]["ci_keywords"].contains("NO_states")) {
         auto NO_states = this->input_params.input_data["keywords"]["ci_keywords"]["NO_states"];
         ci_calc.NO_states.clear();
@@ -388,7 +381,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     std::string quantum_part_name = quantum_part_key;
     bool restricted = quantum_part.restricted;
     int num_ao = this->input_basis.num_basis[quantum_part_idx];
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
+    int num_mo = this->scf_calc.num_mo[quantum_part_idx];
     int num_part_alpha = quantum_part.num_parts_alpha;
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
@@ -397,7 +390,6 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {
-    //   std::cout << shell << std::endl;
     //   i++;
     // }
     // auto idx =
@@ -493,7 +485,7 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
     std::string quantum_part_name = quantum_part_key;
     bool restricted = quantum_part.restricted;
     int num_ao = this->input_basis.num_basis[quantum_part_idx];
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
+    int num_mo = this->scf_calc.num_mo[quantum_part_idx];
     int num_part_alpha = quantum_part.num_parts_alpha;
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
@@ -502,7 +494,6 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {
-    //   std::cout << shell << std::endl;
     //   i++;
     // }
     // auto idx =
@@ -557,8 +548,8 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
       hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
                                          quantum_part_name, ci_calc.occ_nso[state_vec_idx][quantum_part_idx], ci_calc.C_nso[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
                                          atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
-      quantum_part_idx++;
     }
+    quantum_part_idx++;
   }
 }
 

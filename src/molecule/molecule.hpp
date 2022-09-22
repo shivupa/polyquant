@@ -55,6 +55,7 @@ public:
    */
   std::vector<libint2::Atom> to_libint_atom(std::string classical_part_key = "all") const;
 
+  std::vector<std::pair<double, std::array<double, 3>>> to_point_charges_for_integrals(std::string classical_part_key = "all") const;
   /**
    * @brief Create an xyz representation of the molecule.
    *

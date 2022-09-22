@@ -255,4 +255,29 @@ TEST_SUITE("CALCULATION") {
       }
     }
   }
+  TEST_CASE("CALCULATION: H2O/sto-3g(library) explicit ham.") {
+    POLYQUANT_CALCULATION test_calc;
+    test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary_cisd/h2o_explicitham.json");
+    test_calc.run();
+    CHECK(test_calc.scf_calc.converged == true);
+
+    CHECK(test_calc.ci_calc.energies[0] == doctest::Approx(-75.01170307729812).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.ci_calc.energies[1] == doctest::Approx(-74.59209776692875).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+
+    std::vector<std::vector<double>> reference_values;
+    std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/cisd_ham_elements.txt";
+    Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
+    std::cout << test_calc.ci_calc.detset.N_dets << std::endl;
+    auto count = 0;
+    for (auto i = 0; i < test_calc.ci_calc.detset.N_dets; i++) {
+      for (auto j = 0; j < test_calc.ci_calc.detset.N_dets; j++) {
+        auto elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(i, j);
+        if (j < i)
+          elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(j, i);
+        auto diff = elem_from_polyquant - reference_values[count][0];
+        CHECK(elem_from_polyquant == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        count++;
+      }
+    }
+  }
 }

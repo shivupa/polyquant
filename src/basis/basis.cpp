@@ -153,13 +153,12 @@ void POLYQUANT_BASIS::print_basis() {
   for (auto &quantum_particle_basis : this->basis) {
     // TODO proper shell dumping for output file...
     for (auto shell : quantum_particle_basis) {
-      std::cout << shell << std::endl;
+      Polyquant_cout(shell);
     }
   }
 }
 
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {
-  Polyquant_cout("BASIS");
   this->set_pure_from_input(input);
   this->set_libint_shell_norm();
   // parse basis name from data

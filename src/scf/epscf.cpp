@@ -207,12 +207,13 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
             engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
-            for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-              for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
-                for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
-                  for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
-                    if (buf_1234 != nullptr) {
+            if (buf_1234 != nullptr) {
+              for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+                for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
+                  for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
+                    for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
                       auto eri_ijkl = buf_1234[shell_ijkl_bf];
+                      shell_ijkl_bf++;
                       auto D_kl = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
                                                                       quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
                       const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
@@ -238,7 +239,6 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
                         FA[thread_id](shell_k_bf, shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
                       }
                     }
-                    shell_ijkl_bf++;
                   }
                 }
               }
@@ -391,7 +391,7 @@ void POLYQUANT_EPSCF::diag_fock() {
     if (this->diis_extrapolation) {
       this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
     }
-    F_prime = this->input_integral.orth_X[quantum_part_idx] * F_diis * this->input_integral.orth_X[quantum_part_idx];
+    F_prime = this->input_integral.orth_X[quantum_part_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx];
     diag_fock_helper(quantum_part_idx, F_prime, this->C[quantum_part_idx][0], this->E_orbitals[quantum_part_idx][0]);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][1];
@@ -419,7 +419,7 @@ void POLYQUANT_EPSCF::diag_fock() {
       if (this->diis_extrapolation) {
         this->diis[quantum_part_idx][1].extrapolate(F_diis, FD_commutator);
       }
-      F_prime = this->input_integral.orth_X[quantum_part_idx] * F_diis * this->input_integral.orth_X[quantum_part_idx];
+      F_prime = this->input_integral.orth_X[quantum_part_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx];
       diag_fock_helper(quantum_part_idx, F_prime, this->C[quantum_part_idx][1], this->E_orbitals[quantum_part_idx][1]);
     }
     quantum_part_idx++;
@@ -466,9 +466,6 @@ void POLYQUANT_EPSCF::form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen
 }
 
 void POLYQUANT_EPSCF::calculate_E_elec() {
-
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     this->E_particles_last[quantum_part_idx] = this->E_particles[quantum_part_idx];
@@ -633,6 +630,8 @@ void POLYQUANT_EPSCF::reset_incfock() {
 }
 
 void POLYQUANT_EPSCF::run_iteration() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   this->iteration_num += 1;
   this->form_fock();
   this->diag_fock();
@@ -662,6 +661,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_mo = this->num_mo[quantum_part_idx];
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
@@ -670,9 +670,9 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->occ[quantum_part_idx].resize(1);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_mo);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
     } else if (quantum_part.restricted == false) {
@@ -683,10 +683,10 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->occ[quantum_part_idx].resize(2);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_basis);
-      this->occ[quantum_part_idx][1].setZero(num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][1].setZero(num_basis, num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_mo);
+      this->occ[quantum_part_idx][1].setZero(num_mo);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
+      this->C[quantum_part_idx][1].setZero(num_basis, num_mo);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
@@ -701,10 +701,10 @@ void POLYQUANT_EPSCF::guess_DM() {
       this->F[quantum_part_idx].resize(1);
       this->occ[quantum_part_idx].resize(1);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_basis);
+      this->occ[quantum_part_idx][0].setZero(num_mo);
       this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_basis);
+      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
     }
@@ -712,7 +712,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   }
 }
 
-void POLYQUANT_EPSCF::print_start_iterations() { Polyquant_cout("Excess particle SCF Program"); }
+void POLYQUANT_EPSCF::print_start_iterations() { Polyquant_section_header("Multispecies SCF Calculation"); }
 
 void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
@@ -854,6 +854,7 @@ void POLYQUANT_EPSCF::permute_initial_MOs() {
 void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
+  Polyquant_cout("");
   dump_orbitals(this->C, this->E_orbitals, this->occ, "CONVERGED MOLECULAR ORBITALS");
 }
 
@@ -922,7 +923,13 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   POLYQUANT_TIMER timer(function);
   // calculate integrals we need
   this->input_integral.calculate_overlap();
-  this->input_integral.symmetric_orthogonalization();
+  this->input_integral.calculate_orthogonalization();
+  this->num_mo.resize(this->input_molecule.quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    this->num_mo[quantum_part_idx] = this->input_integral.orth_X[quantum_part_idx].cols();
+    quantum_part_idx++;
+  }
   this->input_integral.calculate_kinetic();
   this->input_integral.calculate_nuclear();
   this->input_integral.calculate_unique_shell_pairs();

@@ -22,8 +22,8 @@ void POLYQUANT_EPCI::calculate_integrals() {
 
   std::vector<int> num_basis;
   for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-    num_basis.push_back(this->input_basis.num_basis[i] - this->frozen_core[i] - this->deleted_virtual[i]);
-    this->detset.max_orb.push_back(this->input_basis.num_basis[i] - this->frozen_core[i] - this->deleted_virtual[i]);
+    num_basis.push_back(this->input_epscf.num_mo[i] - this->frozen_core[i] - this->deleted_virtual[i]);
+    this->detset.max_orb.push_back(num_basis[i]);
   }
   this->detset.set_integral(this->input_integral);
 }
@@ -37,19 +37,20 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
   this->detset.frozen_core_energy.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_ao = this->input_basis.num_basis[quantum_part_idx];
+    auto num_mo = this->input_epscf.num_mo[quantum_part_idx];
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       fc_dm[quantum_part_idx].resize(2);
       fc_occ[quantum_part_idx].resize(2);
-      fc_occ[quantum_part_idx][0].setZero(num_basis);
-      fc_occ[quantum_part_idx][1].setZero(num_basis);
-      fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
-      fc_dm[quantum_part_idx][1].setZero(num_basis, num_basis);
+      fc_occ[quantum_part_idx][0].setZero(num_mo);
+      fc_occ[quantum_part_idx][1].setZero(num_mo);
+      fc_dm[quantum_part_idx][0].setZero(num_ao, num_ao);
+      fc_dm[quantum_part_idx][1].setZero(num_ao, num_ao);
     } else {
       fc_dm[quantum_part_idx].resize(1);
       fc_occ[quantum_part_idx].resize(1);
-      fc_occ[quantum_part_idx][0].setZero(num_basis);
-      fc_dm[quantum_part_idx][0].setZero(num_basis, num_basis);
+      fc_occ[quantum_part_idx][0].setZero(num_mo);
+      fc_dm[quantum_part_idx][0].setZero(num_ao, num_ao);
     }
     quantum_part_idx++;
   }
@@ -144,7 +145,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      if (quantum_part.num_parts > 1) {
         dm1[state_vec_idx][quantum_part_idx].resize(2);
         this->C_nso[state_vec_idx][quantum_part_idx].resize(2);
         // this->C_no[state_vec_idx][quantum_part_idx].resize(1);
@@ -169,35 +170,53 @@ void POLYQUANT_EPCI::calculate_NOs() {
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
       auto num_mo = 0;
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        num_mo = this->input_epscf.C[quantum_part_idx][0].cols();
+      if (quantum_part.num_parts > 1) {
+        num_mo = this->input_epscf.num_mo[quantum_part_idx] - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
-        MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
+        // MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
         // Polyquant_dump_mat(MO_rdm1, "Error SHIV1");
-        this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        // this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        this->dm1[state_vec_idx][quantum_part_idx][0].setZero(this->input_epscf.num_mo[quantum_part_idx], this->input_epscf.num_mo[quantum_part_idx]);
+        // fill fc block
+        this->dm1[state_vec_idx][quantum_part_idx][0] += fc_occ[quantum_part_idx][0].asDiagonal();
+        // fill active block
+        this->dm1[state_vec_idx][quantum_part_idx][0].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
 
         // MO_rdm nmo x nmo
         // C nao x nmo
         // C @ MO_rdm @ C.T
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
-
-        num_mo = this->input_epscf.C[quantum_part_idx][1].cols();
-        MO_rdm1.setZero(num_mo, num_mo);
-        this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
-        MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
-        // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
-        this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
-        // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
-        // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
+        if (quantum_part.restricted == false) {
+          num_mo = this->input_epscf.num_mo[quantum_part_idx] - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
+          MO_rdm1.setZero(num_mo, num_mo);
+          this->detset.create_1rdm(state_idx, quantum_part_idx, 1, MO_rdm1, this->C_ci);
+          // MO_rdm1 += fc_occ[quantum_part_idx][1].asDiagonal();
+          // // Polyquant_dump_mat(MO_rdm1, "Error SHIV2");
+          // this->dm1[state_vec_idx][quantum_part_idx][1] = MO_rdm1;
+          this->dm1[state_vec_idx][quantum_part_idx][1].setZero(this->input_epscf.num_mo[quantum_part_idx], this->input_epscf.num_mo[quantum_part_idx]);
+          // fill fc block
+          this->dm1[state_vec_idx][quantum_part_idx][1] += fc_occ[quantum_part_idx][1].asDiagonal();
+          // fill active block
+          this->dm1[state_vec_idx][quantum_part_idx][1].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
+          // this->dm1[state_vec_idx][quantum_part_idx][1] = this->input_epscf.C[quantum_part_idx][1] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][1].transpose();
+          // this->dm1[state_vec_idx][quantum_part_idx][1] += this->fc_dm[quantum_part_idx][1];
+        } else {
+          this->dm1[state_vec_idx][quantum_part_idx][1] = this->dm1[state_vec_idx][quantum_part_idx][0];
+        }
       } else {
-        num_mo = this->input_epscf.C[quantum_part_idx][0].cols();
+        num_mo = this->input_epscf.num_mo[quantum_part_idx] - this->frozen_core[quantum_part_idx] - this->deleted_virtual[quantum_part_idx];
         MO_rdm1.setZero(num_mo, num_mo);
         this->detset.create_1rdm(state_idx, quantum_part_idx, 0, MO_rdm1, this->C_ci);
-        MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
-        // Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
-        this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        // MO_rdm1 += fc_occ[quantum_part_idx][0].asDiagonal();
+        // // Polyquant_dump_mat(MO_rdm1, "Error SHIV3");
+        // this->dm1[state_vec_idx][quantum_part_idx][0] = MO_rdm1;
+        this->dm1[state_vec_idx][quantum_part_idx][0].setZero(this->input_epscf.num_mo[quantum_part_idx], this->input_epscf.num_mo[quantum_part_idx]);
+        // fill fc block
+        this->dm1[state_vec_idx][quantum_part_idx][0] += fc_occ[quantum_part_idx][0].asDiagonal();
+        // fill active block
+        this->dm1[state_vec_idx][quantum_part_idx][0].block(this->frozen_core[quantum_part_idx], this->frozen_core[quantum_part_idx], num_mo, num_mo) = MO_rdm1;
         // this->dm1[state_vec_idx][quantum_part_idx][0] = this->input_epscf.C[quantum_part_idx][0] * MO_rdm1 * this->input_epscf.C[quantum_part_idx][0].transpose();
         // this->dm1[state_vec_idx][quantum_part_idx][0] += this->fc_dm[quantum_part_idx][0];
       }
@@ -214,7 +233,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         dump_file << quantum_part_key;
         dump_file << "_alpha.txt";
         Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][0], dump_file.str());
-        if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        if (quantum_part.num_parts > 1) {
           std::stringstream dump_file;
           dump_file << "CI_state_";
           dump_file << state_idx;
@@ -231,12 +250,16 @@ void POLYQUANT_EPCI::calculate_NOs() {
     // print
     quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      if (quantum_part.num_parts > 1) {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
         this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][1], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][1]);
-        this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][1] * NOs_mobasis;
+        if (quantum_part.restricted == false) {
+          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][1] * NOs_mobasis;
+        } else {
+          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
+        }
       } else {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
@@ -321,6 +344,7 @@ void POLYQUANT_EPCI::setup_determinants() {
   this->detset.create_unique_excitation_map_doubles();
 }
 
+void POLYQUANT_EPCI::print_start() { Polyquant_section_header("Multispecies CI Calculation"); }
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
 
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
@@ -341,17 +365,19 @@ void POLYQUANT_EPCI::print_success() {
     line += fmt::format("{: ^10}{:^30}{: ^10}{:^20}{: ^10}\n", "", "Det idx", "", "C", "");
     line += fmt::format("{: ^10}{:-^30}{: ^10}{:-^20}{: ^10}", "", "", "", "", "");
     Polyquant_cout(line);
+    line = "";
     for (auto i = 0; i < this->detset.N_dets; i++) {
-      line = "";
       std::stringstream unfold_string;
       auto i_unfold = this->detset.det_idx_unfold(i);
       for (auto unfold_idx : i_unfold) {
         unfold_string << unfold_idx;
         unfold_string << " ";
       }
-      line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
-      Polyquant_cout(line);
+      if (std::abs(this->C_ci(i, state_idx)) > this->det_print_threshold) {
+        line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}\n", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
+      }
     }
+    Polyquant_cout(line);
   }
   for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
     auto state_idx = this->NO_states[state_vec_idx];
@@ -385,7 +411,7 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
   // &END
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
-    int num_mo = this->input_basis.num_basis[quantum_part_a_idx];
+    int num_mo = this->input_epscf.num_mo[quantum_part_a_idx];
     int num_part_total = quantum_part_a.num_parts;
     int ms2 = quantum_part_a.multiplicity - 1; // we store mult they want spin
     bool unique_beta = (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false);
@@ -427,6 +453,7 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  this->print_start();
   this->calculate_integrals();
   this->setup_determinants();
   this->detset.precompute_diagonal_Slater_Condon();
@@ -463,7 +490,7 @@ void POLYQUANT_EPCI::run() {
     }
   } else {
     this->detset.create_ham();
-
+    // row major so Upper has more continguous memory
     Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
     Spectra::DavidsonSymEigsSolver<Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int>> solver(op_sparse, this->num_states, initialsubspacevec, maxsubspacevec, logger);
     Eigen::Index maxit = this->iteration_max;

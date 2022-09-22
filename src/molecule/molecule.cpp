@@ -41,7 +41,6 @@ void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) 
 void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
-  Polyquant_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) / 3);
   for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3); ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
@@ -57,6 +56,13 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
     center_labels.push_back(label);
     quantum_nuclei.push_back(0);
   }
+
+  // Store if we are using nuclear charge modification
+  bool charge_mod = false;
+  if (input.input_data["molecule"].contains("modify_nuclear_charge")) {
+    charge_mod = true;
+  }
+
   if (input.input_data.contains("keywords")) {
     // if (input.input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
@@ -109,7 +115,13 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         CLASSICAL_PARTICLE_SET classical_part;
         classical_particles[curr_label] = classical_part;
         classical_particles[curr_label].mass = atom_symb_to_mass(center_labels[i]);
-        classical_particles[curr_label].charge = atom_symb_to_num(center_labels[i]);
+        double nuc_charge = atom_symb_to_num(center_labels[i]);
+        if (charge_mod) {
+          if (input.input_data["molecule"]["modify_nuclear_charge"].contains(center_labels[i])) {
+            nuc_charge = input.input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
+          }
+        }
+        classical_particles[curr_label].charge = nuc_charge;
         classical_particles[curr_label].num_parts = 0;
       }
       classical_particles[curr_label].num_parts += 1;
@@ -226,13 +238,14 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // create electrons
   std::string curr_label = "electron";
   if (quantum_particles.count(curr_label) == 0) {
-    auto num_parts = -this->charge;
+    double num_parts = -this->charge;
     for (auto part : classical_particles) {
       num_parts += part.second.charge * part.second.num_parts;
     }
     for (auto part : quantum_particles) {
       num_parts += part.second.charge * part.second.num_parts;
     }
+    num_parts = std::round(num_parts);
     Polyquant_cout("Creating " + std::to_string(num_parts) + " electrons");
 
     QUANTUM_PARTICLE_SET quantum_part;
@@ -370,6 +383,28 @@ std::vector<libint2::Atom> POLYQUANT_MOLECULE::to_libint_atom(std::string classi
     }
   }
   return atoms;
+}
+
+std::vector<std::pair<double, std::array<double, 3>>> POLYQUANT_MOLECULE::to_point_charges_for_integrals(std::string classical_part_key) const {
+  std::vector<std::pair<double, std::array<double, 3>>> atom_point_charges;
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      if (classical_part_key != "all") {
+        if (classical_part_key == "no_ghost") {
+          if (classical_part.second.charge == 0.0) {
+            continue;
+          }
+        } else if (classical_part.first != classical_part_key) {
+          continue;
+        }
+      }
+      auto center_idx = classical_part.second.center_idx[i];
+      std::array<double, 3> pos = {centers[center_idx][0], centers[center_idx][1], centers[center_idx][2]};
+      std::pair<double, std::array<double, 3>> temp_atom = std::make_pair(classical_part.second.charge, pos);
+      atom_point_charges.push_back(temp_atom);
+    }
+  }
+  return atom_point_charges;
 }
 
 void POLYQUANT_MOLECULE::calculate_E_nuc() {

@@ -36,6 +36,14 @@ void APP_ABORT(const std::string &reason);
  */
 template <typename T> void Polyquant_cout(const T &message) { std::cout << std::setprecision(20) << message << std::endl; }
 
+template <typename T> void Polyquant_section_header(const T &message) {
+  fmt::print("\n{0:^{2}}┌{0:─^{3}}┐\n"
+             "{0:^{2}}│{0:^{3}}│\n"
+             "{0:^{2}}│{1:^{3}}│\n"
+             "{0:^{2}}│{0:^{3}}│\n"
+             "{0:^{2}}└{0:─^{3}}┘\n\n",
+             "", message, 20, 40);
+}
 // replace with C++20 std::source_location::function_name once supported
 // std::string source_loc(){
 //    return __PRETTY_FUNCTION__;
@@ -108,6 +116,17 @@ template <typename t> void Polyquant_read_vec_from_file(std::vector<t> &vec, con
     double value; // could have multiple values per line here
     linestream >> value;
     vec.push_back(value);
+  }
+};
+
+template <typename t> void Polyquant_dump_vecofvec_to_file(const std::vector<std::vector<t>> &vec, const std::string &filename) {
+  std::ofstream vvfile;
+  vvfile.open(filename);
+  for (size_t i = 0; i < vec.size(); i++) {
+    for (size_t j = 0; j < vec[i].size(); j++) {
+      vvfile << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << vec[i][j];
+    }
+    vvfile << std::endl;
   }
 };
 

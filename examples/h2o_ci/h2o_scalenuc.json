@@ -7,7 +7,8 @@
     ],
     "symbols": ["H", "H", "O"],
     "molecular_charge": 0,
-    "molecular_multiplicity": 1
+    "molecular_multiplicity": 1,
+    "modify_nuclear_charge" : { "H" : 1.1 , "O": 7.8 }
   },
   "driver": "energy",
   "model": {

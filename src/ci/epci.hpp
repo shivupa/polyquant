@@ -32,6 +32,7 @@ public:
   void calculate_NOs();
   void setup_determinants();
   void run();
+  void print_start();
   void print_start_iterations();
   void print_iteration();
   void print_success();
@@ -110,6 +111,8 @@ public:
   int num_states = 1;
   int num_subspace_vec = 5;
   bool verbose = false;
+
+  double det_print_threshold = 0.1;
   size_t cache_size = std::numeric_limits<size_t>::max();
 };
 } // namespace polyquant

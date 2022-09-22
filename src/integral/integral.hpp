@@ -5,6 +5,7 @@
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include <libint2.hpp> // IWYU pragma: keep
+#include <locale>
 #include <numeric>
 #include <vector>
 
@@ -35,7 +36,8 @@ public:
    */
   POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule);
   ~POLYQUANT_INTEGRAL();
-
+  int eig_s2_linear_dep_threshold = 6;
+  void parse_integral_parameters();
   void calculate_overlap();
   void calculate_Schwarz();
   void calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core);
@@ -95,7 +97,7 @@ public:
    * know where the nuclei are
    */
   void compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &output_matrix, const libint2::BasisSet &shells, libint2::Operator obtype,
-                          const std::vector<libint2::Atom> &atoms = std::vector<libint2::Atom>());
+                          const std::vector<std::pair<double, std::array<double, 3>>> &atoms = std::vector<std::pair<double, std::array<double, 3>>>());
 
   /**
    * @brief Calculate Schwarz integrals (diagonal 2 body ints)
@@ -146,7 +148,11 @@ public:
    */
   void compute_2body_ints(Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec, const libint2::BasisSet &shells, libint2::Operator obtype);
 
+  std::string orth_method = "canonical";
+  std::vector<std::string> known_orth_method = {"canonical", "symmetric"};
+  void calculate_orthogonalization();
   void symmetric_orthogonalization();
+  void canonical_orthogonalization();
 
   /**
    * @brief Overlap integral matrix

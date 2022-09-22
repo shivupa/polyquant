@@ -28,9 +28,10 @@
     },
    "ci_keywords" : {
        "convergence_E" : 1e-8,
-       "num_states" : 1,
+       "num_states" : 5,
        "slow_diag" : false,
-       "num_subspace_vec" : 10,
+       "build_matrix" : true,
+       "num_subspace_vec" : 8,
        "excitation_level" : [
            [1,1,2]
            ]
