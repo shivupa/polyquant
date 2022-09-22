@@ -344,6 +344,7 @@ void POLYQUANT_EPCI::setup_determinants() {
   this->detset.create_unique_excitation_map_doubles();
 }
 
+void POLYQUANT_EPCI::print_start() { Polyquant_section_header("Multispecies CI Calculation"); }
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
 
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
@@ -452,6 +453,7 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  this->print_start();
   this->calculate_integrals();
   this->setup_determinants();
   this->detset.precompute_diagonal_Slater_Condon();

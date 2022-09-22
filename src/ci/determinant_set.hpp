@@ -1989,9 +1989,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part
   }
   // for (auto thread_id = 0; thread_id < nthreads; thread_id++) {
   //   ham += ham_threads[thread_id];
-  //   // std::cout << triplet_list_threads[thread_id].size() << std::endl;
   //   // for (auto trip_elem : triplet_list_threads[thread_id]) {
-  //   //   std::cout << diagonal_Hii.size() << "                     " << trip_elem.row() << "    " << trip_elem.col() << "                " << trip_elem.value() << std::endl;
   //   //   ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
   //   // }
   // }
@@ -2055,7 +2053,6 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
           }
           if (integral != 0.0) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            // std::cout << i_det << " " << folded_jdet_idx << "  " << "             a" << integral << std::endl;
             auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
             auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
@@ -2169,7 +2166,6 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
   //   }
 
   // for (auto thread_id = 0; thread_id < nthreads; thread_id++){
-  //     std::cout << triplet_list_threads[thread_id].size() << std::endl;
   //     for (auto trip_elem : triplet_list_threads[thread_id]){
   //         ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
   //     }
@@ -2334,7 +2330,6 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
     //   }
 
     // for (auto thread_id = 0; thread_id < nthreads; thread_id++){
-    //     std::cout << triplet_list_threads[thread_id].size() << std::endl;
     //     for (auto trip_elem : triplet_list_threads[thread_id]){
     //         ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
     //     }
@@ -2433,7 +2428,6 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
   //   }
 
   // for (auto thread_id = 0; thread_id < nthreads; thread_id++){
-  //     std::cout << triplet_list_threads[thread_id].size() << std::endl;
   //     for (auto trip_elem : triplet_list_threads[thread_id]){
   //         ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
   //     }
@@ -2531,7 +2525,6 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
   //     }
   //   }
   // for (auto thread_id = 0; thread_id < nthreads; thread_id++){
-  //     std::cout << triplet_list_threads[thread_id].size() << std::endl;
   //     for (auto trip_elem : triplet_list_threads[thread_id]){
   //         ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
   //     }
@@ -2943,9 +2936,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
 //   // this->ham.conservativeResize(this->N_dets, this->N_dets);
 //   this->ham.resize(this->N_dets, this->N_dets);
 //   // std::vector<Eigen::Triplet<double>> tripletList;
-//   std::cout << "Diagonal Ham" << std::endl;
 //   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
-//     std::cout << i_det << " " << this->Slater_Condon(i_det, i_det) << std::endl;
 //     for (auto j_det = 0; j_det < this->N_dets; j_det++) {
 //       auto matrix_element = this->Slater_Condon(i_det, j_det);
 //       ham(i_det, j_det) = matrix_element;

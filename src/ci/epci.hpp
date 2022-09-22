@@ -32,6 +32,7 @@ public:
   void calculate_NOs();
   void setup_determinants();
   void run();
+  void print_start();
   void print_start_iterations();
   void print_iteration();
   void print_success();

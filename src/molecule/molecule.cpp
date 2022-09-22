@@ -41,7 +41,6 @@ void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) 
 void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
-  Polyquant_cout(static_cast<int>(input.input_data["molecule"]["geometry"].size()) / 3);
   for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3); ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {

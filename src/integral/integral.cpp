@@ -12,10 +12,10 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
+  Polyquant_cout("Calculating One Body Overlap Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     if (this->overlap[quantum_part_idx].cols() == 0 && this->overlap[quantum_part_idx].rows() == 0) {
-      Polyquant_cout("Calculating One Body Overlap Integrals...");
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->overlap[quantum_part_idx].resize(num_basis, num_basis);
       this->overlap[quantum_part_idx].setZero();
@@ -37,10 +37,10 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
+  Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     if (this->Schwarz[quantum_part_idx].cols() == 0 && this->Schwarz[quantum_part_idx].rows() == 0) {
-      Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
       auto num_basis_a = this->input_basis.basis[quantum_part_idx].size();
       auto num_basis_b = this->input_basis.basis[quantum_part_idx].size();
       this->Schwarz[quantum_part_idx].resize(num_basis_a, num_basis_b);
@@ -99,10 +99,10 @@ void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
+  Polyquant_cout("Calculating unique shell pairs...");
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_a_part] : this->input_molecule.quantum_particles) {
     if (std::get<0>(this->unique_shell_pairs[quantum_part_a_idx]).size() == 0 && std::get<1>(this->unique_shell_pairs[quantum_part_a_idx]).size() == 0) {
-      Polyquant_cout("Calculating pseudo unique shell pairs...");
       this->unique_shell_pairs[quantum_part_a_idx] = this->compute_shellpairs(this->input_basis.basis[quantum_part_a_idx], threshold);
     }
     quantum_part_a_idx++;
@@ -114,10 +114,10 @@ void POLYQUANT_INTEGRAL::calculate_kinetic() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
+  Polyquant_cout("Calculating One Body Kinetic Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     if (this->kinetic[quantum_part_idx].cols() == 0 && this->kinetic[quantum_part_idx].rows() == 0) {
-      Polyquant_cout("Calculating One Body Kinetic Integrals...");
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->kinetic[quantum_part_idx].resize(num_basis, num_basis);
       this->kinetic[quantum_part_idx].setZero();
@@ -139,10 +139,10 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
+  Polyquant_cout("Calculating One Body Nuclear Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     if (this->nuclear[quantum_part_idx].cols() == 0 && this->nuclear[quantum_part_idx].rows() == 0) {
-      Polyquant_cout("Calculating One Body Nuclear Integrals...");
       auto num_basis = this->input_basis.num_basis[quantum_part_idx];
       this->nuclear[quantum_part_idx].resize(num_basis, num_basis);
       this->nuclear[quantum_part_idx].setZero();
@@ -518,14 +518,9 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
   // construct the overlap integrals engine
   auto nthreads = omp_get_max_threads();
   std::vector<libint2::Engine> engines;
-  std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
-  Polyquant_cout(message);
   engines.resize(nthreads);
   engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
   engines[0].set_precision(0.0);
-  if (nthreads > 1) {
-    Polyquant_cout("Making more engines for each thread");
-  }
   for (auto i = 1ul; i < nthreads; i++) {
     engines[i] = engines[0];
   }
@@ -565,13 +560,10 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
   auto num_shell_b = shells_b.size();
   auto shell2bf_b = shells_b.shell2bf();
   std::vector<libint2::Engine> engines;
-  std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
-  Polyquant_cout(message);
   engines.resize(nthreads);
   engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
   engines[0].set_precision(this->tolerance_2e);
   if (nthreads > 1) {
-    Polyquant_cout("Making more engines for each thread");
     for (auto i = 1ul; i < nthreads; i++) {
       engines[i] = engines[0];
     }
@@ -686,8 +678,6 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
 }
 
 void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
@@ -703,9 +693,6 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLY
 
 std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>> POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
                                                                                                                                                                   const double threshold) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  Polyquant_cout("Computing non-negligible shell-pair list");
   // if bs2 became an argument then this could be used to calculate unique
   // shells between basis sets, however at this time we don't require that.
   const libint2::BasisSet &bs2 = bs1;
@@ -800,10 +787,6 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
     int nthreads = omp_get_num_threads();
     auto thread_id = omp_get_thread_num();
     std::vector<libint2::Engine> engines;
-    if (thread_id == 0) {
-      std::string message = "Computing on " + std::to_string(nthreads) + " threads.";
-      Polyquant_cout(message);
-    }
     // construct the one body integrals engine
     engines.resize(nthreads);
     engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(), 0);
@@ -814,9 +797,6 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
       engines[0].set_params(atoms);
     }
     if (nthreads > 1) {
-      if (thread_id == 0) {
-        Polyquant_cout("Making more engines for each thread");
-      }
       for (auto i = 1ul; i < nthreads; i++) {
         engines[i] = engines[0];
       }
@@ -840,7 +820,6 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
           continue;
         }
         engines[thread_id].compute(shells[s1], shells[s2]);
-        // Polyquant_cout(message);
         const auto *buf_12 = buf[0];
         // Write values to the matrix
         if (buf_12 == nullptr) {

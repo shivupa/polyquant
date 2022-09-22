@@ -10,20 +10,20 @@ POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
 
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
-  Polyquant_cout("SETTING UP INPUT FILE");
+  Polyquant_section_header("Input Parameters");
   this->input_params = POLYQUANT_INPUT(filename);
   // parse molecule
-  Polyquant_cout("SETTING UP MOLECULE");
+  Polyquant_section_header("Molecule Specification");
   this->input_molecule = POLYQUANT_MOLECULE(this->input_params);
   // parse basis
-  Polyquant_cout("SETTING UP BASIS");
+  Polyquant_section_header("Basis Specification");
   this->input_basis = POLYQUANT_BASIS(this->input_params, this->input_molecule);
   // parse integral
-  Polyquant_cout("SETTING UP INTEGRAL");
   this->input_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis, this->input_molecule);
 }
 
 void POLYQUANT_CALCULATION::run() {
+  Polyquant_section_header("Calculation Requested");
   std::string mean_field_type = this->parse_mean_field();
   std::string post_mean_field_type = this->parse_post_mean_field();
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
@@ -154,7 +154,6 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         if (freeze_dens_inp.type() == json::value_t::array) {
           for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
             freeze_density_from_input.push_back(freeze_dens_inp[i]);
-            std::cout << std::boolalpha << freeze_density_from_input[i] << std::endl;
           }
         }
       }
@@ -391,7 +390,6 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {
-    //   std::cout << shell << std::endl;
     //   i++;
     // }
     // auto idx =
@@ -496,7 +494,6 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
     //  "cartesian"
     // auto i = 0ul;
     // for (auto shell : basis) {
-    //   std::cout << shell << std::endl;
     //   i++;
     // }
     // auto idx =

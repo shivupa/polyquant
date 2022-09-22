@@ -391,7 +391,6 @@ void POLYQUANT_EPSCF::diag_fock() {
     if (this->diis_extrapolation) {
       this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
     }
-    std::cout << F_diis.rows() << " " << F_diis.cols() << "  " << this->input_integral.orth_X[quantum_part_idx].rows() << " " << this->input_integral.orth_X[quantum_part_idx].cols() << std::endl;
     F_prime = this->input_integral.orth_X[quantum_part_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx];
     diag_fock_helper(quantum_part_idx, F_prime, this->C[quantum_part_idx][0], this->E_orbitals[quantum_part_idx][0]);
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
@@ -713,7 +712,7 @@ void POLYQUANT_EPSCF::guess_DM() {
   }
 }
 
-void POLYQUANT_EPSCF::print_start_iterations() { Polyquant_cout("Excess particle SCF Program"); }
+void POLYQUANT_EPSCF::print_start_iterations() { Polyquant_section_header("Multispecies SCF Calculation"); }
 
 void POLYQUANT_EPSCF::print_iteration() {
   Polyquant_cout("Iteration " + std::to_string(this->iteration_num) + " :");
@@ -855,6 +854,7 @@ void POLYQUANT_EPSCF::permute_initial_MOs() {
 void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
+  Polyquant_cout("");
   dump_orbitals(this->C, this->E_orbitals, this->occ, "CONVERGED MOLECULAR ORBITALS");
 }
 

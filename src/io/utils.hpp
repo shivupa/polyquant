@@ -36,6 +36,14 @@ void APP_ABORT(const std::string &reason);
  */
 template <typename T> void Polyquant_cout(const T &message) { std::cout << std::setprecision(20) << message << std::endl; }
 
+template <typename T> void Polyquant_section_header(const T &message) {
+  fmt::print("\n{0:^{2}}┌{0:─^{3}}┐\n"
+             "{0:^{2}}│{0:^{3}}│\n"
+             "{0:^{2}}│{1:^{3}}│\n"
+             "{0:^{2}}│{0:^{3}}│\n"
+             "{0:^{2}}└{0:─^{3}}┘\n\n",
+             "", message, 20, 40);
+}
 // replace with C++20 std::source_location::function_name once supported
 // std::string source_loc(){
 //    return __PRETTY_FUNCTION__;
