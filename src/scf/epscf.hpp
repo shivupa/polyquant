@@ -17,14 +17,7 @@ public:
   POLYQUANT_EPSCF() = default;
 
   POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral)
-      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral) {
-    auto quantum_part_idx = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-
-      std::cout << "        Particle type " << quantum_part_idx << "  :  " << std::boolalpha << this->freeze_density[quantum_part_idx] << std::endl;
-      quantum_part_idx++;
-    }
-  };
+      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
 
   void form_H_core() override;
 
@@ -151,6 +144,8 @@ public:
 
   std::string occupation_mode = "aufbau";
   std::deque<bool> freeze_density;
+
+  std::vector<int> num_mo;
 
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
 

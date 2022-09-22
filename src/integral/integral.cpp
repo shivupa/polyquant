@@ -691,6 +691,7 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLY
   this->input_params = input;
   this->input_basis = basis;
   this->input_molecule = molecule;
+  this->parse_integral_parameters();
   this->overlap.resize(molecule.quantum_particles.size());
   this->kinetic.resize(molecule.quantum_particles.size());
   this->nuclear.resize(molecule.quantum_particles.size());
@@ -951,12 +952,18 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(this->overlap[quantum_part_idx]);
       if (eigensolver.info() != Eigen::Success)
         (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
-                   "orthogonalization."));
+                   "orthogonalization. Could indicate a possible linear dependency."));
       s = eigensolver.eigenvalues();
       L = eigensolver.eigenvectors();
+
+      Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
+      std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
+
+      // orth_X = L @ s^{-1/2} @ L.T
       s = s.array().rsqrt();
       this->orth_X[quantum_part_idx] = s.asDiagonal();
       this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
+
       if (verbose == true) {
         std::stringstream filename;
         filename << "orthogonalizer_";
@@ -966,5 +973,98 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       }
     }
     quantum_part_idx++;
+  }
+}
+
+void POLYQUANT_INTEGRAL::calculate_orthogonalization() {
+  if (this->orth_method == "symmetric") {
+    this->symmetric_orthogonalization();
+  } else if (this->orth_method == "canonical") {
+    this->canonical_orthogonalization();
+  } else {
+    // this should never handle. We should error at input
+    APP_ABORT("Orthogonalization method : " + this->orth_method + " not recognized!");
+  }
+}
+
+void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
+  Polyquant_cout("Calculating Canonical Orthogonalization Matrix...");
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+    if (this->orth_X[quantum_part_idx].cols() == 0 && this->orth_X[quantum_part_idx].rows() == 0) {
+      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+      this->orth_X[quantum_part_idx].resize(num_basis, num_basis);
+      Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(this->overlap[quantum_part_idx]);
+      if (eigensolver.info() != Eigen::Success) {
+        (APP_ABORT("Error diagonalizing overlap matrix for canonical "
+                   "orthogonalization."));
+        // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
+        // Let me know if this is ever encountered in a real world calculation.
+      }
+      s = eigensolver.eigenvalues();
+      L = eigensolver.eigenvectors();
+
+      double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
+      int drop_cols = 0;
+
+      while (s(drop_cols) < thresh) {
+        drop_cols++;
+      }
+      if (drop_cols > 0) {
+        std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+        Polyquant_cout(message);
+        s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
+        L = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
+      }
+
+      // orth_X = L @ s^{-1/2}
+      s = s.array().rsqrt();
+      this->orth_X[quantum_part_idx].noalias() = L * s.asDiagonal();
+      if (verbose == true) {
+        std::stringstream filename;
+        filename << "orthogonalizer_";
+        filename << quantum_part_idx;
+        filename << ".txt";
+        Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+      }
+    }
+    quantum_part_idx++;
+  }
+}
+
+void POLYQUANT_INTEGRAL::parse_integral_parameters() {
+  // parse 2e tolerance
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
+      this->tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
+    }
+  }
+
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("orth_method")) {
+      this->orth_method = this->input_params.input_data["keywords"]["orth_method"];
+      for (auto &character : this->orth_method) {
+        character = std::tolower(character);
+      }
+      if (std::find(this->known_orth_method.begin(), this->known_orth_method.end(), this->orth_method) == this->known_orth_method.end()) {
+        APP_ABORT("Orthogonalization method " + this->orth_method + " is not recognized.");
+      }
+    }
+  }
+  if (this->input_params.input_data.contains("keywords")) {
+    if (this->input_params.input_data["keywords"].contains("eig_s2_linear_dep_threshold")) {
+      if (this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_integer) {
+        this->eig_s2_linear_dep_threshold = this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"];
+      } else {
+        APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a signed integer in the input.");
+      }
+    }
+  }
+  if (this->input_params.input_data.contains("verbose")) {
+    this->verbose = this->input_params.input_data["verbose"];
   }
 }

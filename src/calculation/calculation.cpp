@@ -21,15 +21,6 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse integral
   Polyquant_cout("SETTING UP INTEGRAL");
   this->input_integral = POLYQUANT_INTEGRAL(this->input_params, this->input_basis, this->input_molecule);
-  // parse 2e tolerance
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
-      this->input_integral.tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
-    }
-  }
-  if (this->input_params.input_data.contains("verbose")) {
-    this->input_integral.verbose = this->input_params.input_data["verbose"];
-  }
 }
 
 void POLYQUANT_CALCULATION::run() {
@@ -391,7 +382,7 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     std::string quantum_part_name = quantum_part_key;
     bool restricted = quantum_part.restricted;
     int num_ao = this->input_basis.num_basis[quantum_part_idx];
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
+    int num_mo = this->scf_calc.num_mo[quantum_part_idx];
     int num_part_alpha = quantum_part.num_parts_alpha;
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
@@ -496,7 +487,7 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
     std::string quantum_part_name = quantum_part_key;
     bool restricted = quantum_part.restricted;
     int num_ao = this->input_basis.num_basis[quantum_part_idx];
-    int num_mo = this->input_basis.num_basis[quantum_part_idx];
+    int num_mo = this->scf_calc.num_mo[quantum_part_idx];
     int num_part_alpha = quantum_part.num_parts_alpha;
     int num_part_beta = quantum_part.num_parts_beta;
     int num_part_total = quantum_part.num_parts;
@@ -560,8 +551,8 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
       hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
                                          quantum_part_name, ci_calc.occ_nso[state_vec_idx][quantum_part_idx], ci_calc.C_nso[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
                                          atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
-      quantum_part_idx++;
     }
+    quantum_part_idx++;
   }
 }
 
