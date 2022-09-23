@@ -935,8 +935,9 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
       s = eigensolver.eigenvalues();
       L = eigensolver.eigenvectors();
 
-      Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
       std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
+      Polyquant_cout(message);
+      Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
 
       // orth_X = L @ s^{-1/2} @ L.T
       s = s.array().rsqrt();
@@ -987,6 +988,9 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
       s = eigensolver.eigenvalues();
       L = eigensolver.eigenvectors();
 
+      std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
+      Polyquant_cout(message);
+
       double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
       int drop_cols = 0;
 
@@ -994,7 +998,7 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         drop_cols++;
       }
       if (drop_cols > 0) {
-        std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+        message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
         Polyquant_cout(message);
         s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
         L = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
