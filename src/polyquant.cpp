@@ -37,7 +37,6 @@ int main(int argc, char **argv) {
       POLYQUANT_TIMER timer("TOTAL RUNTIME");
       Polyquant_dump_program_header();
       std::string filename = input_parameters["input"].as<std::string>();
-      std::cout << filename << std::endl;
       // set up calculation object
       POLYQUANT_CALCULATION calc = POLYQUANT_CALCULATION(filename);
       // run calculation

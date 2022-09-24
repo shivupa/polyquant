@@ -1040,10 +1040,10 @@ void POLYQUANT_INTEGRAL::parse_integral_parameters() {
   }
   if (this->input_params.input_data.contains("keywords")) {
     if (this->input_params.input_data["keywords"].contains("eig_s2_linear_dep_threshold")) {
-      if (this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_integer) {
+      if (this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_unsigned) {
         this->eig_s2_linear_dep_threshold = this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"];
       } else {
-        APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a signed integer in the input.");
+        APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a positive integer in the input.");
       }
     }
   }
