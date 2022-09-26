@@ -336,7 +336,8 @@ void POLYQUANT_EPSCF::form_fock() {
 void POLYQUANT_EPSCF::diag_fock_helper(int quantum_part_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &F_prime, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_C,
                                        Eigen::Matrix<double, Eigen::Dynamic, 1> &mo_e) {
   auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime(num_basis, num_basis);
+  auto num_mo = this->num_mo[quantum_part_idx];
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime(num_mo, num_mo);
   Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(F_prime);
   mo_e = eigensolver.eigenvalues();
   C_prime = eigensolver.eigenvectors();
@@ -359,18 +360,22 @@ void POLYQUANT_EPSCF::diag_fock() {
       continue;
     }
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_mo = this->num_mo[quantum_part_idx];
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->E_orbitals[quantum_part_idx].resize(2);
     } else {
       this->E_orbitals[quantum_part_idx].resize(1);
     }
 
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_basis, num_basis);
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][0];
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
-    FD_commutator.noalias() = this->F[quantum_part_idx][0] * this->D[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
-                              this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][0] * this->F[quantum_part_idx][0];
-    this->iteration_rms_error[quantum_part_idx][0] = FD_commutator.norm() / (num_basis * num_basis);
+    FD_commutator.noalias() = this->input_integral.orth_X[quantum_part_idx].transpose() *
+                              (this->F[quantum_part_idx][0] * this->D[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
+                               this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][0] * this->F[quantum_part_idx][0]) *
+                              this->input_integral.orth_X[quantum_part_idx];
+    // FD_comm = X.T @ ( F @ D @ S -  S @ D @ F) @ X;
+    this->iteration_rms_error[quantum_part_idx][0] = FD_commutator.norm() / (num_basis * num_mo);
     if (this->incremental_fock) {
       if (this->incremental_fock_doing_incremental[quantum_part_idx][0]) {
         if (this->iteration_rms_error[quantum_part_idx][0] < this->incremental_fock_reset_threshold[quantum_part_idx][0] ||
@@ -396,9 +401,11 @@ void POLYQUANT_EPSCF::diag_fock() {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis = this->F[quantum_part_idx][1];
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
-      FD_commutator.noalias() = this->F[quantum_part_idx][1] * this->D[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
-                                this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][1] * this->F[quantum_part_idx][1];
-      this->iteration_rms_error[quantum_part_idx][1] = FD_commutator.norm() / (num_basis * num_basis);
+      FD_commutator.noalias() = this->input_integral.orth_X[quantum_part_idx].transpose() *
+                                (this->F[quantum_part_idx][1] * this->D[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
+                                 this->input_integral.overlap[quantum_part_idx] * this->D[quantum_part_idx][1] * this->F[quantum_part_idx][1]) *
+                                this->input_integral.orth_X[quantum_part_idx];
+      this->iteration_rms_error[quantum_part_idx][1] = FD_commutator.norm() / (num_basis * num_mo);
       if (this->incremental_fock) {
         if (this->incremental_fock_doing_incremental[quantum_part_idx][1]) {
           if (this->iteration_rms_error[quantum_part_idx][1] < this->incremental_fock_reset_threshold[quantum_part_idx][1] ||
@@ -993,6 +1000,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     auto Super_Twist_group = root_group.get_group("Super_Twist");
 
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+    auto num_mo = this->num_mo[quantum_part_idx];
     auto Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
     hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
     auto Dimensions = Dataspace.current_dimensions();
@@ -1001,7 +1009,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     std::vector<double> data(Dataspace.size());
     Dataset.read(data);
 #pragma omp parallel for
-    for (auto i = 0; i < num_basis; i++) {
+    for (auto i = 0; i < num_mo; i++) {
       for (auto j = 0; j < num_basis; j++) {
         this->C[quantum_part_idx][0](j, i) = data[i * num_basis + j];
       }
@@ -1014,7 +1022,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
       Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
       Dataset.read(data);
 #pragma omp parallel for
-      for (auto i = 0; i < num_basis; i++) {
+      for (auto i = 0; i < num_mo; i++) {
         for (auto j = 0; j < num_basis; j++) {
           this->C[quantum_part_idx][1](j, i) = data[i * num_basis + j];
         }
