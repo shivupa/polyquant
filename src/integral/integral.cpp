@@ -997,16 +997,19 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
       while (s(drop_cols) < thresh) {
         drop_cols++;
       }
+
+      // orth_X = L @ s^{-1/2}
       if (drop_cols > 0) {
         message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
         Polyquant_cout(message);
         s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
-        L = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
+        this->orth_X[quantum_part_idx].noalias() = L_new * s.asDiagonal();
+      } else {
+        s = s.array().rsqrt();
+        this->orth_X[quantum_part_idx].noalias() = L * s.asDiagonal();
       }
 
-      // orth_X = L @ s^{-1/2}
-      s = s.array().rsqrt();
-      this->orth_X[quantum_part_idx].noalias() = L * s.asDiagonal();
       if (verbose == true) {
         std::stringstream filename;
         filename << "orthogonalizer_";
