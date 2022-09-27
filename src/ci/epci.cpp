@@ -20,10 +20,8 @@ void POLYQUANT_EPCI::calculate_integrals() {
   this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C, this->frozen_core, this->deleted_virtual);
   this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C, this->frozen_core, this->deleted_virtual);
 
-  std::vector<int> num_basis;
   for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
-    num_basis.push_back(this->input_epscf.num_mo[i] - this->frozen_core[i] - this->deleted_virtual[i]);
-    this->detset.max_orb.push_back(num_basis[i]);
+    this->detset.max_orb.push_back(this->input_epscf.num_mo[i] - this->frozen_core[i] - this->deleted_virtual[i]);
   }
   this->detset.set_integral(this->input_integral);
 }

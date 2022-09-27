@@ -137,7 +137,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         scf_calc.Cauchy_Schwarz_screening = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
-        scf_calc.Cauchy_Schwarz_threshold = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_threshold"];
+        APP_ABORT("Cauchy_Schwarz_threshold cannot be set by the user!");
+        // scf_calc.Cauchy_Schwarz_threshold = this->input_params.input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_threshold"];
       }
       if (this->input_params.input_data["keywords"]["mf_keywords"].contains("force_independent_converged")) {
         scf_calc.independent_converged = this->input_params.input_data["keywords"]["mf_keywords"]["force_independent_converged"];
