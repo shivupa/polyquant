@@ -9,14 +9,17 @@
   },
   "driver": "energy",
   "model": {
-    "method": "scf",
+    "method": "CI",
     "basis": 
-    {"electron": {"Li" : [{ "custom" : 
-            {"type" : "file",
-             "filename" : "../../tests/data/li-_custombasis_wpos/Li_basis.g94"}}]},
-    "positron" : {"Li" : [{ "custom" : 
-            {"type" : "file",
-             "filename" : "../../tests/data/li-_custombasis_wpos/Li_basis.g94"}}]}}
+        { "electron" :
+          {"Li" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "Li_basis.g94"}}]},
+          "positron" :
+          {"Li" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "Li_basis.g94"}}]}
+        }
   },
   "keywords": {
     "restricted" : true,
@@ -46,6 +49,17 @@
         "Cauchy_Schwarz_screening" : true,
         "incremental_fock" : true
     },
+   "ci_keywords" : {
+       "convergence_E" : 1e-6,
+       "num_states" : 2,
+       "num_subspace_vec" : 40,
+       "build_matrix" : false,
+       "excitation_level" : [
+           [1,1,1],
+           [1,0,1]
+           ],
+       "frozen_core" : [0,0]
+   },
    "pure" : true
       }
 }
