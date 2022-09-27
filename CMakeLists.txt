@@ -6,8 +6,8 @@ include(FetchContent)
 # Set up the project and version info
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
-set(POLYQUANT_VERSION_MINOR 5)
-set(POLYQUANT_VERSION_PATCH 3)
+set(POLYQUANT_VERSION_MINOR 6)
+set(POLYQUANT_VERSION_PATCH 0)
 set(POLYQUANT_VERSION "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
