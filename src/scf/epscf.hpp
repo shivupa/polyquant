@@ -212,7 +212,7 @@ public:
   int incremental_fock_reset_freq = 8;
   double incremental_fock_initial_onset_thresh = 1e-5;
   bool Cauchy_Schwarz_screening = false;
-  double Cauchy_Schwarz_threshold = 1e-12;
+  std::vector<double> Cauchy_Schwarz_threshold;
 
   /**
    * @brief Exceeded iterations?
