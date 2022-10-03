@@ -91,6 +91,7 @@ public:
   std::vector<int> NO_states;
 
   std::vector<std::tuple<int, int, int>> excitation_level;
+  int max_collective_excitation_level = std::numeric_limits<int>::max();
   std::vector<int> frozen_core;
   std::vector<int> deleted_virtual;
   /**

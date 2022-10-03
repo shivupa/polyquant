@@ -300,6 +300,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
           ci_calc.excitation_level = ex_lvl_obj;
         }
       }
+      if (this->input_params.input_data["keywords"]["ci_keywords"].contains("max_collective_excitation_level")) {
+        ci_calc.max_collective_excitation_level = this->input_params.input_data["keywords"]["ci_keywords"]["max_collective_excitation_level"];
+      }
       if (this->input_params.input_data["keywords"]["ci_keywords"].contains("fcidump_filename")) {
         fcidump_filename = this->input_params.input_data["keywords"]["ci_keywords"]["fcidump_filename"];
       }

@@ -335,7 +335,7 @@ void POLYQUANT_EPCI::setup_determinants() {
   }
 
   // create acceptable determinant combinations wrt total excitation_level
-  this->detset.create_excitation(excitation_level);
+  this->detset.create_excitation(excitation_level, max_collective_excitation_level);
   Polyquant_cout("Created " + std::to_string(this->detset.N_dets) + " determinants");
   this->detset.print_determinants();
   this->detset.create_unique_excitation_map_singles();
