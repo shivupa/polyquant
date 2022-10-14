@@ -165,6 +165,17 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   }
 
   if (input.input_data.contains("keywords")) {
+    if (input.input_data["keywords"].contains("symmetry"){
+      if (input.input_data["keywords"]["symmetry"] == "auto") {
+        do_symmetry = true;
+      } else if (input.input_data["keywords"]["symmetry"] == "off") {
+        do_symmetry = false;
+        point_group = "C1";
+        sub_group = "C1";
+      } else {
+        APP_ABORT("Setting for keywords->symmetry can be [auto, off].");
+      }
+    }
     // if (input.input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
     if (input.input_data["keywords"].contains("quantum_nuclei")) {
@@ -416,7 +427,9 @@ void POLYQUANT_MOLECULE::setup_molecule(const POLYQUANT_INPUT &input) {
     set_molecular_multiplicity(input);
     set_molecular_restricted(input);
     parse_particles(input);
-    symmetrize_molecule();
+    if (do_symmetry) {
+      symmetrize_molecule();
+    }
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
     Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));

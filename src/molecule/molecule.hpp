@@ -43,6 +43,7 @@ public:
 
   std::string point_group;
   std::string sub_group;
+  bool do_symmetry = true;
 
   void parse_particles(const POLYQUANT_INPUT &input);
   void print_molecule();
