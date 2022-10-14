@@ -13,6 +13,14 @@ void APP_ABORT(const std::string &reason) {
   }
   exit(1);
 }
+
+void APP_WARN(const std::string &reason) {
+  std::vector<std::string> WARN_MESSAGE = {"WARNING. PLEASE DO NOT IGNORE THIS WARNING.", "    WARNING REASON:"};
+  WARN_MESSAGE.push_back(reason);
+  for (auto line : WARN_MESSAGE) {
+    Polyquant_cout(line);
+  }
+}
 void Polyquant_dump_program_header() {
   // clang-format off
     std::string program_title_text = R"POLYQUANT(

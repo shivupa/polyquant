@@ -28,6 +28,7 @@ namespace polyquant {
 //  * @param reason a string stating the reason to abort.
 //  */
 void APP_ABORT(const std::string &reason);
+void APP_WARN(const std::string &reason);
 /**
  * @brief A helper function to print only if we are on rank 0.
  *
