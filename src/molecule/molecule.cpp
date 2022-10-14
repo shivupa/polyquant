@@ -38,6 +38,107 @@ void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) 
   }
 }
 
+void POLYQUANT_MOLECULE::symmetrize_molecule() {
+
+  msym_error_t ret = MSYM_SUCCESS;
+  const char *error = NULL;
+
+  // create atoms in msym structs
+  std::vector<msym_element_t> elements_for_msym;
+  elements_for_msym = this->to_point_msym_charges_for_symmetry();
+  int length = elements_for_msym.size();
+
+  if (length == 1) {
+    std::cout << "Setting point group to C1 since there is only 1 atom" << std::endl;
+    point_group = "C1";
+    sub_group = "C1";
+    return;
+  }
+
+  /* Do not free these variables */
+  // int mlength;
+  // msym_element_t *melements = NULL;
+
+  msym_context ctx = msymCreateContext();
+  // Figure out setting symmetry thresholds here for now use default
+  //  if(NULL != thresholds){
+  //      if(MSYM_SUCCESS != (ret = msymSetThresholds(ctx, thresholds))) goto err;
+  //  }
+
+  // set atoms in ctx
+  if (MSYM_SUCCESS != (ret = msymSetElements(ctx, length, elements_for_msym.data()))) {
+    APP_ABORT("Error setting atoms for symmetrizing");
+  }
+
+  /* Get elements msym elements */
+  // i have no idea why this is required i need to check with their library
+  // if(MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))){
+  //    APP_ABORT("Error getting atoms for symmetrizing");
+  //}
+
+  // geometrical information
+  std::vector<double> com;
+  com.resize(3);
+  if (MSYM_SUCCESS != (ret = msymGetCenterOfMass(ctx, com.data()))) {
+    APP_ABORT("Error calculating center of mass");
+  }
+  double radius = 0.0;
+  if (MSYM_SUCCESS != (ret = msymGetRadius(ctx, &radius))) {
+    APP_ABORT("Error calculationg radius");
+  }
+
+  std::cout << "SYMMMETRY TESTING : COM  " << com[0] << "   " << com[1] << "    " << com[2] << std::endl;
+  std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
+
+  if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
+    APP_ABORT("Error Figuring out symmetry");
+  }
+  point_group.resize(6);
+  if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group.data()))) {
+    // if(MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group))){
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
+    APP_ABORT("Error Getting Point group");
+  }
+  std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << point_group << std::endl;
+  sub_group = point_group;
+
+  // TODO add a way to descend in symmetry
+  // open issue for this
+
+  // Symmetrize and Align Molecule
+  double symerr = 0.0;
+  if (MSYM_SUCCESS != (ret = msymSymmetrizeElements(ctx, &symerr))) {
+    APP_ABORT("Error Symmetrizing molecule!");
+  }
+  if (MSYM_SUCCESS != (ret = msymAlignAxes(ctx))) {
+    APP_ABORT("Error Aligning molecule!");
+  }
+
+  int mlength;
+  msym_element_t *melements = NULL;
+
+  if (MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))) {
+    APP_ABORT("Error getting the symmetrized structure.");
+  }
+  if (mlength != elements_for_msym.size()) {
+    APP_ABORT("Number of atoms changed during symmetrizing molecule.");
+  }
+  elements_for_msym.clear();
+  for (auto i = 0; i < mlength; i++) {
+    elements_for_msym.push_back(melements[i]);
+  }
+
+  from_point_msym_charges_for_symmetry(elements_for_msym);
+
+  //    APP_ABORT("Error getting atoms for symmetrizing");
+  //}
+
+  // if(MSYM_SUCCESS != (ret = msymGetSubgroups(ctx, &msgl, &msg))) goto err;
+}
+
 void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center coordinates
   // todo check for geom and symbols
@@ -315,6 +416,7 @@ void POLYQUANT_MOLECULE::setup_molecule(const POLYQUANT_INPUT &input) {
     set_molecular_multiplicity(input);
     set_molecular_restricted(input);
     parse_particles(input);
+    symmetrize_molecule();
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
     Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));
@@ -401,6 +503,65 @@ std::vector<std::pair<double, std::array<double, 3>>> POLYQUANT_MOLECULE::to_poi
       auto center_idx = classical_part.second.center_idx[i];
       std::array<double, 3> pos = {centers[center_idx][0], centers[center_idx][1], centers[center_idx][2]};
       std::pair<double, std::array<double, 3>> temp_atom = std::make_pair(classical_part.second.charge, pos);
+      atom_point_charges.push_back(temp_atom);
+    }
+  }
+  return atom_point_charges;
+}
+
+void POLYQUANT_MOLECULE::from_point_msym_charges_for_symmetry(std::vector<msym_element_t> &symm_chrgs) {
+  auto symm_chrg_idx = 0;
+  for (auto classical_part : classical_particles) {
+    if (classical_part.second.charge == 0.0) {
+      APP_WARN("When symmetrizing molecules ghost atoms are not moved. If you have basis functions on your ghost atoms, then they won't be where you are expecting them to be. You should take the "
+               "symmetric structure (from output file or xyz dump) and restart the calculation with a symmetric structure. or turn off symmetry.");
+      continue;
+    }
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      auto center_idx = classical_part.second.center_idx[i];
+
+      msym_element_t temp_atom = symm_chrgs[symm_chrg_idx];
+      auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
+      for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
+        if (temp_atom.name[letter_idx] != classical_part.first[letter_idx]) {
+          APP_ABORT("Atom names are symmetrize don't match. Something happened during reorder.");
+        }
+      }
+
+      centers[center_idx][0] = temp_atom.v[0];
+      centers[center_idx][1] = temp_atom.v[1];
+      centers[center_idx][2] = temp_atom.v[2];
+      symm_chrg_idx++;
+    }
+  }
+}
+
+std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmetry(std::string classical_part_key) const {
+  std::vector<msym_element_t> atom_point_charges;
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      if (classical_part_key != "all") {
+        if (classical_part_key == "no_ghost") {
+          if (classical_part.second.charge == 0.0) {
+            continue;
+          }
+        } else if (classical_part.first != classical_part_key) {
+          continue;
+        }
+      }
+      auto center_idx = classical_part.second.center_idx[i];
+
+      msym_element_t temp_atom;
+      temp_atom.v[0] = centers[center_idx][0];
+      temp_atom.v[1] = centers[center_idx][1];
+      temp_atom.v[2] = centers[center_idx][2];
+      temp_atom.n = (int)(classical_part.second.charge);
+      temp_atom.m = (int)(classical_part.second.mass);
+
+      auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
+      for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
+        temp_atom.name[letter_idx] = classical_part.first[letter_idx];
+      }
       atom_point_charges.push_back(temp_atom);
     }
   }

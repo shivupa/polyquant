@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma, keep
+#include <libmsym/msym.h>
 #include <numeric>
 #include <string>
 #include <vector>
@@ -38,6 +39,11 @@ public:
   void set_molecular_charge(const POLYQUANT_INPUT &input);
   void set_molecular_multiplicity(const POLYQUANT_INPUT &input);
   void set_molecular_restricted(const POLYQUANT_INPUT &input);
+  void symmetrize_molecule();
+
+  std::string point_group;
+  std::string sub_group;
+
   void parse_particles(const POLYQUANT_INPUT &input);
   void print_molecule();
 
@@ -56,6 +62,8 @@ public:
   std::vector<libint2::Atom> to_libint_atom(std::string classical_part_key = "all") const;
 
   std::vector<std::pair<double, std::array<double, 3>>> to_point_charges_for_integrals(std::string classical_part_key = "all") const;
+  std::vector<msym_element_t> to_point_msym_charges_for_symmetry(std::string classical_part_key = "all") const;
+  void from_point_msym_charges_for_symmetry(std::vector<msym_element_t> &symm_chrgs);
   /**
    * @brief Create an xyz representation of the molecule.
    *
