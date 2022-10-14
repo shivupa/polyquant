@@ -352,20 +352,20 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
               auto excitation_degree_1 = 0;
               excitation_degree_1 = this->num_excitation(hf_det_pair_1, det_pair_1);
               if (excitation_degree_1 <= std::get<2>(excitation_level[1])) {
-                  if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level) {
-                std::vector<int> det_idx = {i, j, k, l};
-                this->dets[det_idx] = this->N_dets;
-                this->N_dets++;
-                  }
+                if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level) {
+                  std::vector<int> det_idx = {i, j, k, l};
+                  this->dets[det_idx] = this->N_dets;
+                  this->N_dets++;
+                }
               }
             }
           }
         } else {
-            if(excitation_degree_0 <= max_collective_excitation_level) {
-          std::vector<int> det_idx = {i, j};
-          this->dets[det_idx] = this->N_dets;
-          this->N_dets++;
-            }
+          if (excitation_degree_0 <= max_collective_excitation_level) {
+            std::vector<int> det_idx = {i, j};
+            this->dets[det_idx] = this->N_dets;
+            this->N_dets++;
+          }
         }
       }
     }
