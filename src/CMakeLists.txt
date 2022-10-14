@@ -11,6 +11,7 @@ target_link_libraries(polyquant_lib PUBLIC fmt::fmt)
 target_link_libraries(polyquant_lib PUBLIC Spectra)
 
 add_subdirectory(molecule)
+target_link_libraries(polyquant_lib PUBLIC msym)
 
 add_subdirectory(basis)
 target_link_libraries(polyquant_lib PUBLIC cpr::cpr)
