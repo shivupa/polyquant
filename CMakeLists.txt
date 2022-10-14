@@ -163,6 +163,15 @@ FetchContent_Declare(
   GIT_TAG origin/logging )
 FetchContent_MakeAvailable(spectra)
 ########################################
+# symmetry
+# I can't get this to import the target correctly so unfortunately this needs to be installed separately
+#FetchContent_Declare(
+#  libmsym
+#  GIT_REPOSITORY https://github.com/mcodev31/libmsym
+#  GIT_TAG master)
+#FetchContent_MakeAvailable(libmsym)
+find_package(libmsym)
+########################################
 # libint for gaussian AO integrals
 find_package(Libint2)
 if (LIBINT2_FOUND)
