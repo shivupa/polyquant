@@ -63,6 +63,11 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
 
   // set atoms in ctx
   if (MSYM_SUCCESS != (ret = msymSetElements(ctx, length, elements_for_msym.data()))) {
+
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
     APP_ABORT("Error setting atoms for symmetrizing");
   }
 
@@ -107,6 +112,11 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   // Symmetrize and Align Molecule
   double symerr = 0.0;
   if (MSYM_SUCCESS != (ret = msymSymmetrizeElements(ctx, &symerr))) {
+
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
     APP_ABORT("Error Symmetrizing molecule!");
   }
   if (MSYM_SUCCESS != (ret = msymAlignAxes(ctx))) {
@@ -522,19 +532,22 @@ void POLYQUANT_MOLECULE::from_point_msym_charges_for_symmetry(std::vector<msym_e
   auto symm_chrg_idx = 0;
   for (auto classical_part : classical_particles) {
     if (classical_part.second.charge == 0.0) {
-      APP_WARN("When symmetrizing molecules ghost atoms are not moved. If you have basis functions on your ghost atoms, then they won't be where you are expecting them to be. You should take the "
-               "symmetric structure (from output file or xyz dump) and restart the calculation with a symmetric structure. or turn off symmetry.");
-      continue;
+      APP_WARN("When symmetrizing molecules ghost atoms are treated as Deuteriums. This shifts the center of mass, and the point group is of the supermolecule made of the atoms and the ghost atom.");
+      // continue;
     }
     for (auto i = 0; i < classical_part.second.num_parts; i++) {
       auto center_idx = classical_part.second.center_idx[i];
 
       msym_element_t temp_atom = symm_chrgs[symm_chrg_idx];
-      auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
-      for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
-        if (temp_atom.name[letter_idx] != classical_part.first[letter_idx]) {
-          APP_ABORT("Atom names are symmetrize don't match. Something happened during reorder.");
+      if (temp_atom.name[0] != 'D') {
+        auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
+        for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
+          if (temp_atom.name[letter_idx] != classical_part.first[letter_idx]) {
+            APP_ABORT("Atom names are symmetrize don't match. Something happened during reorder.");
+          }
         }
+      } else {
+        Polyquant_cout("Adjusting Ghost atom");
       }
 
       centers[center_idx][0] = temp_atom.v[0];
@@ -586,9 +599,14 @@ std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmet
       temp_atom.n = (int)(classical_part.second.charge);
       temp_atom.m = (int)(classical_part.second.mass);
 
-      auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
-      for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
-        temp_atom.name[letter_idx] = classical_part.first[letter_idx];
+      if (classical_part.first == "X") {
+        temp_atom.name[0] = 'D';
+        temp_atom.name[1] = '\0';
+      } else {
+        auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
+        for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
+          temp_atom.name[letter_idx] = classical_part.first[letter_idx];
+        }
       }
       atom_point_charges.push_back(temp_atom);
     }
