@@ -126,7 +126,7 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
         for (auto ao_idx = 0; ao_idx < C[i][j].rows(); ao_idx++) {
           line = "";
           std::string ao_label = fmt::format("{}{} {}{}", ao_labels[i][ao_idx][0], ao_labels[i][ao_idx][1], ao_labels[i][ao_idx][2], ao_labels[i][ao_idx][3]);
-          line += fmt::format("{:^10}{:>10}", ao_idx + 1, ao_label);
+          line += fmt::format("{:^10}{:<10}", ao_idx + 1, ao_label);
           for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
             if ((mo_idx * stride) + mo_offset == num_mo) {
               break;
