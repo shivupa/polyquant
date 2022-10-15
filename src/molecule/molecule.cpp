@@ -55,12 +55,8 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     return;
   }
 
-  /* Do not free these variables */
-  // int mlength;
-  // msym_element_t *melements = NULL;
-
-  msym_context ctx = msymCreateContext();
-  // Figure out setting symmetry thresholds here for now use default
+  ctx = msymCreateContext();
+  // TODO Figure out setting symmetry thresholds here for now use default
   //  if(NULL != thresholds){
   //      if(MSYM_SUCCESS != (ret = msymSetThresholds(ctx, thresholds))) goto err;
   //  }
@@ -165,7 +161,7 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   }
 
   if (input.input_data.contains("keywords")) {
-    if (input.input_data["keywords"].contains("symmetry"){
+    if (input.input_data["keywords"].contains("symmetry")) {
       if (input.input_data["keywords"]["symmetry"] == "auto") {
         do_symmetry = true;
       } else if (input.input_data["keywords"]["symmetry"] == "off") {
@@ -549,6 +545,25 @@ void POLYQUANT_MOLECULE::from_point_msym_charges_for_symmetry(std::vector<msym_e
   }
 }
 
+std::string POLYQUANT_MOLECULE::get_label_of_center(const std::array<double, 3> &center_pos) const {
+  std::string label = "";
+
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      auto center_idx = classical_part.second.center_idx[i];
+      auto match_threshold = 1e-12;
+      if (std::abs(centers[center_idx][0] - center_pos[0]) < match_threshold && std::abs(centers[center_idx][1] - center_pos[1]) < match_threshold &&
+          std::abs(centers[center_idx][2] - center_pos[2]) < match_threshold) {
+        label = classical_part.first + std::to_string(i);
+        return label;
+      }
+    }
+  }
+  if (label == "") {
+    APP_ABORT("Could not find a label for the center provided.");
+    return "";
+  }
+}
 std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmetry(std::string classical_part_key) const {
   std::vector<msym_element_t> atom_point_charges;
   for (auto classical_part : classical_particles) {

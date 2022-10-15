@@ -46,6 +46,18 @@ public:
   void set_pure_from_input(const POLYQUANT_INPUT &input);
   void set_libint_shell_norm();
   void print_basis();
+  void set_ao_labels(const POLYQUANT_MOLECULE &molecule);
+
+  std::vector<std::vector<std::string>> gamess_cartesian_ordering_labels = {
+      {""},
+      {"x", "y", "z"},
+      {"xx", "yy", "zz", "xy", "xz", "yz"},
+      {"xxx", "yyy", "zzz", "xxy", "xxz", "yyx", "yyz", "zzx", "zzy", "xyz"},
+      {"xxxx", "yyyy", "zzzz", "xxxy", "xxxz", "yyyx", "yyyz", "zzzx", "zzzy", "xxyy", "xxzz", "yyzz", "xxyz", "yyxz", "zzxy"},
+      {"xxxxx", "yyyyy", "zzzzz", "xxxxy", "xxxxz", "yyyyx", "yyyyz", "zzzzx", "zzzzy", "xxxyy", "xxxzz", "yyyxx", "yyyzz", "zzzxx", "zzzyy", "xxxyz", "yyyxz", "zzzxy", "xxyyz", "xxzzy", "yyzzx"},
+      {"xxxxxx", "yyyyyy", "zzzzzz", "xxxxxy", "xxxxxz", "yyyyyx", "yyyyyz", "zzzzzx", "zzzzzy", "xxxxyy", "xxxxzz", "yyyyxx", "yyyyzz", "zzzzxx",
+       "zzzzyy", "xxxxyz", "yyyyxz", "zzzzxy", "xxxyyy", "xxxzzz", "yyyzzz", "xxxyyz", "xxxzzy", "yyyxxz", "yyyzzx", "zzzxxy", "zzzyyx", "xxyyzz"}};
+
   /**
    * @brief The name of the basis to load
    *
@@ -56,6 +68,8 @@ public:
    *
    */
   std::vector<libint2::BasisSet> basis;
+  // basis idx , function idx, (atom lbl,
+  std::vector<std::vector<std::vector<std::string>>> ao_labels;
   /**
    * @brief Number of basis functions
    *

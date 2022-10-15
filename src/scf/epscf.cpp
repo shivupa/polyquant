@@ -896,7 +896,7 @@ void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
   Polyquant_cout("");
-  dump_orbitals(this->C, this->E_orbitals, this->occ, "CONVERGED MOLECULAR ORBITALS");
+  dump_orbitals(this->C, this->E_orbitals, this->occ, "CONVERGED MOLECULAR ORBITALS", this->input_basis.ao_labels);
 }
 
 void POLYQUANT_EPSCF::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
@@ -1080,5 +1080,5 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   this->print_iteration();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
-  dump_orbitals(this->C, this->E_orbitals, this->occ, "GUESS ORBITALS FROM FILE");
+  dump_orbitals(this->C, this->E_orbitals, this->occ, "GUESS ORBITALS FROM FILE", this->input_basis.ao_labels);
 }

@@ -74,7 +74,7 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
 }
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::string title) {
+                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::string title, std::vector<std::vector<std::vector<std::string>>> &ao_labels) {
   auto stride = 5;
   Polyquant_cout(title);
   for (auto i = 0; i < E_orbitals.size(); i++) {
@@ -89,50 +89,51 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
 
       for (auto mo_idx = 0; mo_idx < max_cols; mo_idx++) {
         line = "\n";
-        line += fmt::format("{:10}", "Orb num");
+        line += fmt::format("{:20}", "Orb num");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
           }
           line += fmt::format("{:^20}", fmt::format("{:> 3d}", (mo_idx * stride) + mo_offset + 1));
         }
-        line += fmt::format("{:10}", "");
+        line += fmt::format("{:20}", "");
         Polyquant_cout(line);
 
         line = "";
-        line += fmt::format("{:10}", "Orb ene");
+        line += fmt::format("{:20}", "Orb ene");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
           }
           line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", E_orbitals[i][j]((mo_idx * stride) + mo_offset)));
         }
-        line += fmt::format("{:10}", "");
+        line += fmt::format("{:20}", "");
         Polyquant_cout(line);
 
         line = "";
-        line += fmt::format("{:10}", "Orb occ");
+        line += fmt::format("{:20}", "Orb occ");
         for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
           if ((mo_idx * stride) + mo_offset == num_mo) {
             break;
           }
           line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", occ[i][j][(mo_idx * stride) + mo_offset]));
         }
-        line += fmt::format("{:10}", "");
+        line += fmt::format("{:20}", "");
         Polyquant_cout(line);
 
         Polyquant_cout("");
 
         for (auto ao_idx = 0; ao_idx < C[i][j].rows(); ao_idx++) {
           line = "";
-          line += fmt::format("{:^10}", ao_idx + 1);
+          std::string ao_label = fmt::format("{}{} {}{}", ao_labels[i][ao_idx][0], ao_labels[i][ao_idx][1], ao_labels[i][ao_idx][2], ao_labels[i][ao_idx][3]);
+          line += fmt::format("{:^10}{:>10}", ao_idx + 1, ao_label);
           for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
             if ((mo_idx * stride) + mo_offset == num_mo) {
               break;
             }
             line += fmt::format("{:^20}", fmt::format("{:> 15.8f}", C[i][j](ao_idx, (mo_idx * stride) + mo_offset)));
           }
-          line += fmt::format("{:10}", "");
+          line += fmt::format("{:20}", "");
           Polyquant_cout(line);
         }
 

@@ -158,6 +158,56 @@ void POLYQUANT_BASIS::print_basis() {
   }
 }
 
+void POLYQUANT_BASIS::set_ao_labels(const POLYQUANT_MOLECULE &molecule) {
+  ao_labels.resize(this->basis.size());
+  auto basis_idx = 0;
+  for (auto &quantum_particle_basis : this->basis) {
+    // H1_3fxxz cart O2_4d+2 sph
+    for (auto shell : quantum_particle_basis) {
+      std::string atom_label = molecule.get_label_of_center(shell.O);
+      for (auto contr : shell.contr) {
+        if (contr.pure) {
+          int n = contr.l + 1;
+          std::string n_label = std::to_string(n);
+          // {"H1", "3", "f", "xxz"}
+          std::string l_label(1, shell.am_symbol(contr.l));
+          for (auto list_elem : ao_labels[basis_idx]) {
+            if (list_elem[0] == atom_label && list_elem[1] == n_label && list_elem[2] == l_label) {
+              n += 1;
+              n_label = std::to_string(n);
+            }
+          }
+          for (int m = -contr.l; m <= contr.l; m++) {
+            std::string m_label = fmt::format("{:>+d}", m);
+            std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
+            ao_labels[basis_idx].push_back(ao_label);
+            std::cout << atom_label << n_label << l_label << m_label << std::endl;
+          }
+
+        } else {
+          int n = contr.l + 1;
+          std::string n_label = std::to_string(n);
+          // {"H1", "3", "f", "xxz"}
+          std::string l_label(1, shell.am_symbol(contr.l));
+          for (auto list_elem : ao_labels[basis_idx]) {
+            if (list_elem[0] == atom_label && list_elem[1] == n_label && list_elem[2] == l_label) {
+              n += 1;
+              n_label = std::to_string(n);
+            }
+          }
+          for (int m = 0; m < contr.size(); m++) {
+            std::string m_label = gamess_cartesian_ordering_labels[contr.l][m];
+            std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
+            ao_labels[basis_idx].push_back(ao_label);
+            std::cout << atom_label << n_label << l_label << m_label << std::endl;
+          }
+        }
+      }
+    }
+    basis_idx++;
+  }
+}
+
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {
   this->set_pure_from_input(input);
   this->set_libint_shell_norm();
@@ -180,4 +230,5 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
     APP_ABORT("Cannot set up basis. Input json missing 'model' section.");
   }
   this->print_basis();
+  this->set_ao_labels(molecule);
 }

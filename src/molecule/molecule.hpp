@@ -41,8 +41,11 @@ public:
   void set_molecular_restricted(const POLYQUANT_INPUT &input);
   void symmetrize_molecule();
 
+  std::string get_label_of_center(const std::array<double, 3> &center_pos) const;
+
   std::string point_group;
   std::string sub_group;
+  msym_context ctx;
   bool do_symmetry = true;
 
   void parse_particles(const POLYQUANT_INPUT &input);
