@@ -181,7 +181,6 @@ void POLYQUANT_BASIS::set_ao_labels(const POLYQUANT_MOLECULE &molecule) {
             std::string m_label = fmt::format("{:>+d}", m);
             std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
             ao_labels[basis_idx].push_back(ao_label);
-            std::cout << atom_label << n_label << l_label << m_label << std::endl;
           }
 
         } else {
@@ -199,7 +198,6 @@ void POLYQUANT_BASIS::set_ao_labels(const POLYQUANT_MOLECULE &molecule) {
             std::string m_label = gamess_cartesian_ordering_labels[contr.l][m];
             std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
             ao_labels[basis_idx].push_back(ao_label);
-            std::cout << atom_label << n_label << l_label << m_label << std::endl;
           }
         }
       }
