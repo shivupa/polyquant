@@ -206,6 +206,195 @@ void POLYQUANT_BASIS::set_ao_labels(const POLYQUANT_MOLECULE &molecule) {
   }
 }
 
+void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
+
+  msym_error_t ret = MSYM_SUCCESS;
+  const msym_equivalence_set_t *mes = NULL;
+  int mesl = 0;
+  if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(molecule.ctx, &mesl, &mes))) {
+    APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
+  }
+  std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
+
+  std::vector<std::vector<msym_basis_function_t>> mbfs;
+  mbfs.resize(this->basis.size());
+  Polyquant_cout("Building Basis for mysm");
+  auto basis_idx = 0;
+
+  for (auto &quantum_particle_basis : this->basis) {
+    auto ctx = molecule.ctx;
+    auto ao_idx = 0;
+    for (auto shell : quantum_particle_basis) {
+      for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++) {
+        for (auto atom_in_sym_eq_set_idx = 0; atom_in_sym_eq_set_idx < mes[sym_eq_set_idx].length; atom_in_sym_eq_set_idx++) {
+          if (shell.O[0] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0] && shell.O[1] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1] &&
+              shell.O[2] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) {
+            std::cout << "MATCHED SHELL TO ATOM" << std::endl;
+
+            for (auto contr : shell.contr) {
+              if (contr.pure) {
+                for (int m = -contr.l; m <= contr.l; m++) {
+                  msym_basis_function_t temp_bfs;
+                  temp_bfs.element = mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx];
+                  temp_bfs.type = _msym_basis_function::MSYM_BASIS_TYPE_REAL_SPHERICAL_HARMONIC;
+                  temp_bfs.f.rsh.n = std::stoi(ao_labels[basis_idx][ao_idx][1]);
+                  temp_bfs.f.rsh.l = contr.l;
+                  temp_bfs.f.rsh.m = m;
+                  mbfs[basis_idx].push_back(temp_bfs);
+                  ao_idx++;
+                }
+              } else {
+                for (int m = -contr.l; m <= contr.l; m++) {
+                  msym_basis_function_t temp_bfs;
+                  temp_bfs.element = mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx];
+                  temp_bfs.type = _msym_basis_function::MSYM_BASIS_TYPE_CARTESIAN;
+                  temp_bfs.f.rsh.n = std::stoi(ao_labels[basis_idx][ao_idx][1]);
+                  temp_bfs.f.rsh.l = contr.l;
+                  temp_bfs.f.rsh.m = m;
+                  mbfs[basis_idx].push_back(temp_bfs);
+                  ao_idx++;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      //     for (auto contr : shell.contr) {
+      //       if (contr.pure) {
+      //         int n = contr.l + 1;
+      //         std::string n_label = std::to_string(n);
+      //         // {"H1", "3", "f", "xxz"}
+      //         std::string l_label(1, shell.am_symbol(contr.l));
+      //         for (auto list_elem : ao_labels[basis_idx]) {
+      //           if (list_elem[0] == atom_label && list_elem[1] == n_label && list_elem[2] == l_label) {
+      //             n += 1;
+      //             n_label = std::to_string(n);
+      //           }
+      //         }
+      //         for (int m = -contr.l; m <= contr.l; m++) {
+      //           std::string m_label = fmt::format("{:>+d}", m);
+      //           std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
+      //           ao_labels[basis_idx].push_back(ao_label);
+      //         }
+
+      //       } else {
+      //         int n = contr.l + 1;
+      //         std::string n_label = std::to_string(n);
+      //         // {"H1", "3", "f", "xxz"}
+      //         std::string l_label(1, shell.am_symbol(contr.l));
+      //         for (auto list_elem : ao_labels[basis_idx]) {
+      //           if (list_elem[0] == atom_label && list_elem[1] == n_label && list_elem[2] == l_label) {
+      //             n += 1;
+      //             n_label = std::to_string(n);
+      //           }
+      //         }
+      //         for (int m = 0; m < contr.size(); m++) {
+      //           std::string m_label = gamess_cartesian_ordering_labels[contr.l][m];
+      //           std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
+      //           ao_labels[basis_idx].push_back(ao_label);
+      //         }
+      //       }
+      //     }
+    }
+    basis_idx++;
+    auto bfsl = mbfs[basis_idx].size();
+    if (MSYM_SUCCESS != (ret = msymSetBasisFunctions(ctx, bfsl, mbfs[basis_idx].data()))) {
+      APP_ABORT("Error setting basis functions.");
+    }
+
+    msym_point_group_type_t mtype;
+    int mn;
+    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(ctx, &mtype, &mn))) {
+      APP_ABORT("Error getting point group type.");
+    }
+
+    if ((MSYM_POINT_GROUP_TYPE_Dnh == mtype || MSYM_POINT_GROUP_TYPE_Cnv == mtype) && 0 == mn) {
+      APP_ABORT("Equivalence sets, subgroups and symmetry elements are updated when setting basis functions on linear groups. Need to add code to update them.");
+    }
+
+    int msopsl = 0;
+    const msym_symmetry_operation_t *msops = NULL;
+    if (MSYM_SUCCESS != (ret = msymGetSymmetryOperations(ctx, &msopsl, &msops))) {
+      APP_ABORT("Error getting symmetry operations");
+    }
+    // print symmetry operations
+    std::cout << " Printing symmetry operations" << std::endl;
+    for (int i = 0; i < msopsl; i++) {
+      const msym_symmetry_operation_t *sop = &msops[i];
+      std::string rn = "";
+      std::string cn = "";
+      switch (sop->orientation) {
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_ORIENTATION_HORIZONTAL:
+        rn = "h";
+        break;
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_ORIENTATION_VERTICAL:
+        rn = "v";
+        cn = "'";
+        break;
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_ORIENTATION_DIHEDRAL:
+        rn = "d";
+        cn = "''";
+        break;
+      default:
+        break;
+      }
+      switch (sop->type) {
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_PROPER_ROTATION:
+        if (sop->order == 2)
+          std::cout << "C" << sop->order << cn << std::endl;
+        else
+          std::cout << "C" << sop->order << cn << "^" << sop->power << " around (" << sop->v[0] << ", " << sop->v[1] << ", " << sop->v[2] << ")" << std::endl;
+        break;
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_IMPROPER_ROTATION:
+        std::cout << "S" << sop->order << "^" << sop->power << " around (" << sop->v[0] << ", " << sop->v[1] << ", " << sop->v[2] << ")" << std::endl;
+        break;
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_REFLECTION:
+        std::cout << "R" << rn << " with normal vector (" << sop->v[0] << ", " << sop->v[1] << ", " << sop->v[2] << ")" << std::endl;
+        break;
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_INVERSION:
+        std::cout << "i" << std::endl;
+        break;
+      case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_IDENTITY:
+        std::cout << "E" << std::endl;
+        break;
+      default:
+        std::cout << "?" << std::endl;
+        break;
+      }
+    }
+
+    double(*psalcs)[bfsl] = NULL;                                 // SALCs in matrix form, and input for symmetrization
+    double *pcmem = NULL;                                         // Some temporary memory
+    double(*salcs)[bfsl] = psalcs = calloc(bfsl, sizeof(*salcs)); // SALCs in matrix form, and input for symmetrization
+    double *cmem = pcmem = calloc(bfsl, sizeof(*cmem));           // Some temporary memory
+    int *species = pspecies = calloc(bfsl, sizeof(*species));
+    msym_partner_function_t *pf = ppf = calloc(bfsl, sizeof(*pf));
+
+    double *irrep = NULL;
+    if (MSYM_SUCCESS != (ret = msymGetBasisFunctions(ctx, &mbfsl, &mbfs))) {
+      APP_ABORT("Error");
+    }
+    if (MSYM_SUCCESS != (ret = msymGetSubrepresentationSpaces(ctx, &msrsl, &msrs))) {
+      APP_ABORT("Error");
+    }
+    if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
+      APP_ABORT("Error");
+    }
+
+    calloc(mct->d, sizeof(*irrep));
+
+    // TODO print symmetry operations here or in the molecule specification?
+    //
+    // TODO print character table?
+  }
+  std::cout << mbfs[0].size() << std::endl;
+
+  //   for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++){
+
+  //   }
+}
+
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {
   this->set_pure_from_input(input);
   this->set_libint_shell_norm();
@@ -229,4 +418,5 @@ void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_M
   }
   this->print_basis();
   this->set_ao_labels(molecule);
+  this->symmetrize_basis(molecule);
 }
