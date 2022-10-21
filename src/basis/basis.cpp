@@ -260,45 +260,8 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
         }
       }
 
-      //     for (auto contr : shell.contr) {
-      //       if (contr.pure) {
-      //         int n = contr.l + 1;
-      //         std::string n_label = std::to_string(n);
-      //         // {"H1", "3", "f", "xxz"}
-      //         std::string l_label(1, shell.am_symbol(contr.l));
-      //         for (auto list_elem : ao_labels[basis_idx]) {
-      //           if (list_elem[0] == atom_label && list_elem[1] == n_label && list_elem[2] == l_label) {
-      //             n += 1;
-      //             n_label = std::to_string(n);
-      //           }
-      //         }
-      //         for (int m = -contr.l; m <= contr.l; m++) {
-      //           std::string m_label = fmt::format("{:>+d}", m);
-      //           std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
-      //           ao_labels[basis_idx].push_back(ao_label);
-      //         }
-
-      //       } else {
-      //         int n = contr.l + 1;
-      //         std::string n_label = std::to_string(n);
-      //         // {"H1", "3", "f", "xxz"}
-      //         std::string l_label(1, shell.am_symbol(contr.l));
-      //         for (auto list_elem : ao_labels[basis_idx]) {
-      //           if (list_elem[0] == atom_label && list_elem[1] == n_label && list_elem[2] == l_label) {
-      //             n += 1;
-      //             n_label = std::to_string(n);
-      //           }
-      //         }
-      //         for (int m = 0; m < contr.size(); m++) {
-      //           std::string m_label = gamess_cartesian_ordering_labels[contr.l][m];
-      //           std::vector<std::string> ao_label = {atom_label, n_label, l_label, m_label};
-      //           ao_labels[basis_idx].push_back(ao_label);
-      //         }
-      //       }
-      //     }
     }
-    basis_idx++;
-    auto bfsl = mbfs[basis_idx].size();
+    int bfsl = mbfs[basis_idx].size();
     if (MSYM_SUCCESS != (ret = msymSetBasisFunctions(ctx, bfsl, mbfs[basis_idx].data()))) {
       APP_ABORT("Error setting basis functions.");
     }
@@ -364,29 +327,53 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
       }
     }
 
-    double(*psalcs)[bfsl] = NULL;                                 // SALCs in matrix form, and input for symmetrization
-    double *pcmem = NULL;                                         // Some temporary memory
-    double(*salcs)[bfsl] = psalcs = calloc(bfsl, sizeof(*salcs)); // SALCs in matrix form, and input for symmetrization
-    double *cmem = pcmem = calloc(bfsl, sizeof(*cmem));           // Some temporary memory
-    int *species = pspecies = calloc(bfsl, sizeof(*species));
-    msym_partner_function_t *pf = ppf = calloc(bfsl, sizeof(*pf));
+    //salcs
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> salcs;
+    salcs.resize(bfsl,bfsl);
+    salcs.setZero();
+    //Temp data
+    Eigen::Matrix<double, Eigen::Dynamic, 1> pcmem;
+    pcmem.resize(bfsl);
+    pcmem.setZero();
 
-    double *irrep = NULL;
-    if (MSYM_SUCCESS != (ret = msymGetBasisFunctions(ctx, &mbfsl, &mbfs))) {
-      APP_ABORT("Error");
-    }
+    std::vector<msym_partner_function_t> pf(bfsl);
+
+    std::vector<int> species(bfsl);
+    int msrsl=0;
+    const msym_subrepresentation_space_t *msrs = NULL;
+    const msym_character_table_t *mct = NULL;
+
+    //double *irrep = NULL;
+    //int num_basis_funcs = static_cast<int>(bfsl);
+    //int* length = &num_basis_funcs;
+    //msym_basis_function_t **basis;
+    //basis  = static_cast<msym_basis_function_t**>(calloc(*length, sizeof(msym_basis_function_t*)));
+    //std::cout << "SHIV HELP " << *length << "   " << bfsl << std::endl;
+    //if (MSYM_SUCCESS != (ret = msymGetBasisFunctions(ctx, length, basis))) {
+    //  APP_ABORT("Error");
+    //}
+
+    //std::cout << "SHIV HELP " << *length << "   " << bfsl << std::endl;
+
     if (MSYM_SUCCESS != (ret = msymGetSubrepresentationSpaces(ctx, &msrsl, &msrs))) {
-      APP_ABORT("Error");
+
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
+      APP_ABORT("Error getting subrepresentation spaces");
     }
     if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
-      APP_ABORT("Error");
+      APP_ABORT("Error getting character table");
     }
+      APP_ABORT("we ok just wanna stop here");
 
-    calloc(mct->d, sizeof(*irrep));
+    //calloc(mct->d, sizeof(*irrep));
 
     // TODO print symmetry operations here or in the molecule specification?
     //
     // TODO print character table?
+    basis_idx++;
   }
   std::cout << mbfs[0].size() << std::endl;
 
