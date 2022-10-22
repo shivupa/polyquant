@@ -363,10 +363,23 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
     std::cout << error << std::endl;
       APP_ABORT("Error getting subrepresentation spaces");
     }
+    if(MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, salcs.data(), species.data(), pf.data()))) {
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
+      APP_ABORT("Error getting salcs");
+    }
+    auto count = 0;
+    for (auto count = 0; count < msrsl; count++){
+        std::cout << " func " << count << " " << msrs[count].s << " " << msrs[count].salcl << std::endl;
+    }
+    Polyquant_dump_mat(salcs, "SALCS");
+    // Dont really need to print symmetry table
     if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
       APP_ABORT("Error getting character table");
     }
-      APP_ABORT("we ok just wanna stop here");
+    APP_ABORT("we ok just wanna stop here");
 
     //calloc(mct->d, sizeof(*irrep));
 
