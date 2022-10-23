@@ -103,6 +103,7 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     std::cout << error << std::endl;
     APP_ABORT("Error Getting Point group");
   }
+  point_group.erase(point_group.find('\0'));
   std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << point_group << std::endl;
   sub_group = point_group;
 
