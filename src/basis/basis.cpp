@@ -284,6 +284,8 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
     // print symmetry operations
     std::cout << " Printing symmetry operations" << std::endl;
     for (int i = 0; i < msopsl; i++) {
+
+      std::stringstream symm_op;
       const msym_symmetry_operation_t *sop = &msops[i];
       std::string rn = "";
       std::string cn = "";
@@ -304,33 +306,41 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
       }
       switch (sop->type) {
       case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_PROPER_ROTATION:
+          symm_op << "C" << sop->order << cn;
         if (sop->order == 2)
           std::cout << "C" << sop->order << cn << std::endl;
         else
           std::cout << "C" << sop->order << cn << "^" << sop->power << " around (" << sop->v[0] << ", " << sop->v[1] << ", " << sop->v[2] << ")" << std::endl;
         break;
       case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_IMPROPER_ROTATION:
+          symm_op << "S" << sop->order << "^" << sop->power;
         std::cout << "S" << sop->order << "^" << sop->power << " around (" << sop->v[0] << ", " << sop->v[1] << ", " << sop->v[2] << ")" << std::endl;
         break;
       case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_REFLECTION:
+          symm_op << "R" << rn;
         std::cout << "R" << rn << " with normal vector (" << sop->v[0] << ", " << sop->v[1] << ", " << sop->v[2] << ")" << std::endl;
         break;
       case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_INVERSION:
+          symm_op << "i";
         std::cout << "i" << std::endl;
         break;
       case _msym_symmetry_operation::MSYM_SYMMETRY_OPERATION_TYPE_IDENTITY:
+          symm_op << "E";
         std::cout << "E" << std::endl;
         break;
       default:
+          symm_op << "?";
         std::cout << "?" << std::endl;
         break;
       }
+      symm_op_names.push_back(symm_op.str());
+      std::cout << symm_op.str() << std::endl;
     }
 
     //salcs
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> salcs;
-    salcs.resize(bfsl,bfsl);
-    salcs.setZero();
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> combined_salcs;
+    combined_salcs.resize(bfsl,bfsl);
+    combined_salcs.setZero();
     //Temp data
     Eigen::Matrix<double, Eigen::Dynamic, 1> pcmem;
     pcmem.resize(bfsl);
@@ -363,7 +373,7 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
     std::cout << error << std::endl;
       APP_ABORT("Error getting subrepresentation spaces");
     }
-    if(MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, salcs.data(), species.data(), pf.data()))) {
+    if(MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, combined_salcs.data(), species.data(), pf.data()))) {
     auto error = msymErrorString(ret);
     std::cout << error << std::endl;
     error = msymGetErrorDetails();
@@ -371,14 +381,47 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
       APP_ABORT("Error getting salcs");
     }
     auto count = 0;
-    for (auto count = 0; count < msrsl; count++){
-        std::cout << " func " << count << " " << msrs[count].s << " " << msrs[count].salcl << std::endl;
-    }
-    Polyquant_dump_mat(salcs, "SALCS");
+    Polyquant_dump_mat(combined_salcs, "COMBINED SALCS");
     // Dont really need to print symmetry table
     if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
       APP_ABORT("Error getting character table");
     }
+    std::cout << "char tab dim " << mct->d << std::endl;
+
+    std::vector<std::string> irrep_names;
+    std::vector<int> salc_per_irrep;
+    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> salcs;
+    auto offset = 0;
+    for (auto count = 0; count < msrsl; count++){
+        std::cout << " func " << count << " " << msrs[count].s << " " << msrs[count].salcl << std::endl;
+        salc_per_irrep.push_back(msrs[count].salcl);
+        salcs.push_back(combined_salcs(Eigen::placeholders::all, Eigen::seq(offset, offset+salc_per_irrep[count]-1)));
+        offset += salc_per_irrep[count];
+    }
+    for (auto i =0; i < mct->d; i++) {
+        std::cout << mct->classc[i] << std::endl;
+        std::cout << mct->s[i].name  << "  " << mct->s[i].d << "  " << mct->s[i].r << std::endl;
+        std::string temp_irrep_name = mct->s[i].name;
+        irrep_names.push_back(temp_irrep_name);
+    }
+
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> character_table;
+    character_table.resize(irrep_names.size(), symm_op_names.size());
+    for(auto i = 0; i < irrep_names.size(); i++){
+    for(auto j = 0; j < symm_op_names.size(); j++){
+        character_table(i,j) = static_cast<double*>(mct->table)[i*symm_op_names.size() +j];
+        std::cout << character_table(i,j) << std::endl;
+    }
+    }
+    Polyquant_dump_character_table(character_table, molecule.point_group, irrep_names, symm_op_names);
+
+    for (auto i =0; i < irrep_names.size(); i++) {
+        std::cout << "   Irrep   ";
+        std::cout << irrep_names[i] << " functions ";
+        std::cout << salc_per_irrep[i] << "   " << std::endl;
+        Polyquant_dump_mat(salcs[i], irrep_names[i]);
+    }
+    
     APP_ABORT("we ok just wanna stop here");
 
     //calloc(mct->d, sizeof(*irrep));
