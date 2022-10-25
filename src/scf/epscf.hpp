@@ -91,6 +91,8 @@ public:
 
   void guess_DM() override;
 
+  void resize_objects() ;
+
   void setup_standard();
 
   void calculate_integrals();
@@ -115,45 +117,63 @@ public:
   /**
    * @brief H_core matrix
    *
+   * indexes: particle, symmetry block
+   *
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> H_core;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> H_core;
 
   /**
    * @brief One particle density matrix
    *
+   * indexes: particle, spin, symmetry block
+   *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> D;
   /**
    * @brief One particle density matrix from the previous iteration
    *
+   * indexes: particle, spin, symmetry block
+   *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D_last;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> D_last;
 
   /**
    * @brief Fock matrix
    *
+   * indexes: particle, spin, symmetry block
+   *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> F;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> F;
 
   /**
    * @brief MO Coefficient matrix
    *
+   * indexes: particle, spin, symmetry block
+   *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_ref_mom;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_ref_mom;
 
   std::string occupation_mode = "aufbau";
   std::deque<bool> freeze_density;
 
-  std::vector<int> num_mo;
+  std::vector<std::vector<int>> num_mo;
 
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ;
+   /**
+   * @brief MO occupations
+   *
+   * indexes: particle, spin, symmetry block
+   *
+   */
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ;
 
   /**
    * @brief MO energy vector
    *
+   * indexes: particle, spin, symmetry block
+   *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> E_orbitals;
   /**
    * @brief Energy of the quantum particles
    *
@@ -180,12 +200,18 @@ public:
    */
   std::vector<double> iteration_E_diff;
   /**
-   * @brief Iteration rmsc DM
+   * @brief Iteration rmse DM
    *
    */
   std::vector<std::vector<double>> iteration_rms_error;
 
-  std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> diis;
+  /**
+   * @brief DIIS extrapolators
+   *
+   * indexes: particle, spin, symmetry block
+   *
+   */
+  std::vector<std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> diis;
   /**
    * @brief Stop running iterations?
    *
@@ -206,12 +232,45 @@ public:
   double diis_mixing_fraction = 0.0;
   int diis_size = 5;
   bool incremental_fock = true;
+
+  /**
+   * @brief Threshold on rms dm error to reset incremental fock formation
+   *
+   * indexes: particle, spin, symmetry block
+   *
+   */
   std::vector<std::vector<double>> incremental_fock_reset_threshold;
-  std::vector<std::vector<int>> incremental_fock_reset_iteration;
-  std::vector<std::vector<int>> incremental_fock_doing_incremental;
+
+  /**
+   * @brief Number of iterations after which to reset incremental fock formation
+   *
+   * indexes: particle, spin, symmetry block
+   *
+   */
+  std::vector<std::vector<std::vector<int>>> incremental_fock_reset_iteration;
+
+  /**
+   * @brief Are we using incrementally building the fock matrix?
+   *
+   * indexes: particle, spin, symmetry block
+   *
+   */
+  std::vector<std::vector<std::vector<bool>>> incremental_fock_doing_incremental;
   int incremental_fock_reset_freq = 8;
   double incremental_fock_initial_onset_thresh = 1e-5;
+
+  /**
+   * @brief Are we using Cauchy-Schwarz screening to skip parts of the fock build?
+   *
+   */
   bool Cauchy_Schwarz_screening = false;
+
+  /**
+   * @brief Cauchy-Schwarz screening threshold
+   *
+   * indexes: particle
+   *
+   */
   std::vector<double> Cauchy_Schwarz_threshold;
 
   /**

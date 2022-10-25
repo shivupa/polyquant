@@ -182,8 +182,9 @@ public:
   /**
    * @brief The orthogonalization matrix
    *
+   * [idx_part][irrep_idx]
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> orth_X;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> orth_X;
 
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
   /**

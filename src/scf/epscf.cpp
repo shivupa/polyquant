@@ -6,16 +6,23 @@ void POLYQUANT_EPSCF::form_H_core() {
   this->H_core.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
-    this->H_core[quantum_part_idx] += (1.0 / quantum_part.mass) * this->input_integral.kinetic[quantum_part_idx];
-    this->H_core[quantum_part_idx] += (-quantum_part.charge) * this->input_integral.nuclear[quantum_part_idx];
-    if (verbose == true) {
-      std::stringstream filename;
-      filename << "H_core_";
-      filename << quantum_part_key;
-      filename << ".txt";
-      Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx], filename.str());
+    this->H_core[quantum_part_idx].resize(this->input_basis.irrep_names[quantum_part_idx].size());
+    for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h;
+        auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+        h.setZero(num_basis, num_basis);
+        h += (1.0 / quantum_part.mass) * this->input_integral.kinetic[quantum_part_idx];
+        h += (-quantum_part.charge) * this->input_integral.nuclear[quantum_part_idx];
+        this->H_core[quantum_part_idx][irrep_idx].noalias() = this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * h * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        if (verbose == true) {
+          std::stringstream filename;
+          filename << "H_core_";
+          filename << quantum_part_key;
+          filename << "_irrep_";
+          filename << irrep_idx;
+          filename << ".txt";
+          Polyquant_dump_mat_to_file(this->H_core[quantum_part_idx][irrep_idx], filename.str());
+        }
     }
     quantum_part_idx++;
   }
@@ -677,16 +684,23 @@ void POLYQUANT_EPSCF::run_iteration() {
 }
 
 void POLYQUANT_EPSCF::guess_DM() {
-  // TODO SAD or
-  // TODO move into separate functions
+  // TODO SAD or SAP
+}
+
+void POLYQUANT_EPSCF::resize_objects() {
   freeze_density.resize(this->input_molecule.quantum_particles.size(), false);
+
+  this->E_particles.resize(this->input_molecule.quantum_particles.size());
+  this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
+  this->Cauchy_Schwarz_threshold.resize(this->input_molecule.quantum_particles.size(), 1e-12);
+
+  this->iteration_rms_error.resize(this->input_molecule.quantum_particles.size());
+
   this->D.resize(this->input_molecule.quantum_particles.size());
   this->D_last.resize(this->input_molecule.quantum_particles.size());
   this->C.resize(this->input_molecule.quantum_particles.size());
   this->F.resize(this->input_molecule.quantum_particles.size());
   this->occ.resize(this->input_molecule.quantum_particles.size());
-  this->iteration_rms_error.resize(this->input_molecule.quantum_particles.size());
-  this->Cauchy_Schwarz_threshold.resize(this->input_molecule.quantum_particles.size(), 1e-12);
 
   this->reset_diis();
   this->reset_incfock();
@@ -694,57 +708,69 @@ void POLYQUANT_EPSCF::guess_DM() {
   if (this->input_molecule.quantum_particles.size() == 1) {
     this->independent_converged = true;
   }
+
   auto quantum_part_idx = 0ul;
-  this->E_particles.resize(this->input_molecule.quantum_particles.size());
-  this->E_particles_last.resize(this->input_molecule.quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-    auto num_mo = this->num_mo[quantum_part_idx];
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
       this->F[quantum_part_idx].resize(1);
       this->occ[quantum_part_idx].resize(1);
-      this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
-      this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_mo);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
+
+      for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+        auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+        auto num_mo = this->num_mo[quantum_part_idx][irrep_idx];
+        this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
+        this->F[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+      }
     } else if (quantum_part.restricted == false) {
       this->D[quantum_part_idx].resize(2);
       this->D_last[quantum_part_idx].resize(2);
       this->C[quantum_part_idx].resize(2);
       this->F[quantum_part_idx].resize(2);
       this->occ[quantum_part_idx].resize(2);
-      this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_mo);
-      this->occ[quantum_part_idx][1].setZero(num_mo);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
-      this->C[quantum_part_idx][1].setZero(num_basis, num_mo);
-      this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->D[quantum_part_idx][1].setZero(num_basis, num_basis);
-      this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->D_last[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->iteration_rms_error[quantum_part_idx].resize(2);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
+
+      for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+        auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+        auto num_mo = this->num_mo[quantum_part_idx][irrep_idx];
+        this->F[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->F[quantum_part_idx][1][irrep_idx].setZero(num_basis, num_basis);
+        this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        this->occ[quantum_part_idx][1][irrep_idx].setZero(num_mo);
+        this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
+        this->C[quantum_part_idx][1][irrep_idx].setZero(num_basis, num_mo);
+        this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->D[quantum_part_idx][1][irrep_idx].setZero(num_basis, num_basis);
+        this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->D_last[quantum_part_idx][1][irrep_idx].setZero(num_basis, num_basis);
+      }
     } else {
       this->D[quantum_part_idx].resize(1);
       this->D_last[quantum_part_idx].resize(1);
       this->C[quantum_part_idx].resize(1);
       this->F[quantum_part_idx].resize(1);
       this->occ[quantum_part_idx].resize(1);
-      this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->occ[quantum_part_idx][0].setZero(num_mo);
-      this->D[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->D_last[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->C[quantum_part_idx][0].setZero(num_basis, num_mo);
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
+
+      for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+        auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+        auto num_mo = this->num_mo[quantum_part_idx][irrep_idx];
+        this->F[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
+        this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
+      }
     }
     quantum_part_idx++;
   }
@@ -968,7 +994,10 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   this->num_mo.resize(this->input_molecule.quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    this->num_mo[quantum_part_idx] = this->input_integral.orth_X[quantum_part_idx].cols();
+      this->num_mo[quantum_part_idx].resize(this->input_molecule.quantum_particles.size());
+      for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+        this->num_mo[quantum_part_idx][irrep_idx] = this->input_integral.orth_X[quantum_part_idx][irrep_idx].cols();
+      }
     quantum_part_idx++;
   }
   this->input_integral.calculate_kinetic();
@@ -985,6 +1014,7 @@ void POLYQUANT_EPSCF::setup_standard() {
   this->calculate_integrals();
   // start the SCF process
   this->form_H_core();
+  this->resize_objects();
   this->guess_DM();
 }
 
@@ -1019,6 +1049,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   this->calculate_integrals();
   // start the SCF process
   this->form_H_core();
+  this->resize_objects();
   this->guess_DM();
   // write over the current dm
   auto quantum_part_idx = 0ul;

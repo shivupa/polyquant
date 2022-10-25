@@ -77,10 +77,11 @@ public:
    */
   std::vector<size_t> num_basis;
 
-  std::vector<std::string> symm_op_names;
-  std::vector<std::string> irrep_names;
-  std::vector<int> salc_per_irrep;
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> salcs;
+  // indexing particle idx, irrep idx
+  std::vector<std::vector<std::string>>  symm_op_names;
+  std::vector<std::vector<std::string>>  irrep_names;
+  std::vector<std::vector<int>> salc_per_irrep;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> salcs;
   bool pure = true;
 };
 } // namespace polyquant

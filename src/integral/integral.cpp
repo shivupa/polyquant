@@ -686,6 +686,9 @@ void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLY
   this->kinetic.resize(molecule.quantum_particles.size());
   this->nuclear.resize(molecule.quantum_particles.size());
   this->orth_X.resize(molecule.quantum_particles.size());
+  for (auto basis_idx = 0; basis_idx < molecule.quantum_particles.size(); basis_idx++){
+      this->orth_X[basis_idx].resize(basis.irrep_names[basis_idx].size());
+  }
   this->Schwarz.resize(molecule.quantum_particles.size());
   this->frozen_core_ints.resize(molecule.quantum_particles.size());
   this->unique_shell_pairs.resize(molecule.quantum_particles.size());
@@ -923,33 +926,39 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
   POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    if (this->orth_X[quantum_part_idx].cols() == 0 && this->orth_X[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      this->orth_X[quantum_part_idx].resize(num_basis, num_basis);
-      Eigen::Matrix<double, Eigen::Dynamic, 1> s;
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(this->overlap[quantum_part_idx]);
-      if (eigensolver.info() != Eigen::Success)
-        (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
-                   "orthogonalization. Could indicate a possible linear dependency."));
-      s = eigensolver.eigenvalues();
-      L = eigensolver.eigenvectors();
+    for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+      if (this->orth_X[quantum_part_idx][irrep_idx].cols() == 0 && this->orth_X[quantum_part_idx][irrep_idx].rows() == 0) {
+        auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+        auto num_salc = this->input_basis.salcs[quantum_part_idx][irrep_idx].cols();
+        this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
+        Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
+        if (eigensolver.info() != Eigen::Success)
+          (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
+                     "orthogonalization. Could indicate a possible linear dependency."));
+        s = eigensolver.eigenvalues();
+        L = eigensolver.eigenvectors();
 
-      std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
-      Polyquant_cout(message);
-      Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
+        std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
+        Polyquant_cout(message);
+        Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
 
-      // orth_X = L @ s^{-1/2} @ L.T
-      s = s.array().rsqrt();
-      this->orth_X[quantum_part_idx] = s.asDiagonal();
-      this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
+        // orth_X = L @ s^{-1/2} @ L.T
+        s = s.array().rsqrt();
+        this->orth_X[quantum_part_idx][irrep_idx] = s.asDiagonal();
+        this->orth_X[quantum_part_idx][irrep_idx] = L * this->orth_X[quantum_part_idx][irrep_idx] * L.transpose();
 
-      if (verbose == true) {
-        std::stringstream filename;
-        filename << "orthogonalizer_";
-        filename << quantum_part_idx;
-        filename << ".txt";
-        Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+        if (verbose == true) {
+          std::stringstream filename;
+          filename << "orthogonalizer_";
+          filename << quantum_part_idx;
+          filename << "_irrep_";
+          filename << irrep_idx;
+          filename << ".txt";
+          Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx][irrep_idx], filename.str());
+        }
       }
     }
     quantum_part_idx++;
@@ -973,50 +982,56 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
   POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    if (this->orth_X[quantum_part_idx].cols() == 0 && this->orth_X[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      this->orth_X[quantum_part_idx].resize(num_basis, num_basis);
-      Eigen::Matrix<double, Eigen::Dynamic, 1> s;
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(this->overlap[quantum_part_idx]);
-      if (eigensolver.info() != Eigen::Success) {
-        (APP_ABORT("Error diagonalizing overlap matrix for canonical "
-                   "orthogonalization."));
-        // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
-        // Let me know if this is ever encountered in a real world calculation.
-      }
-      s = eigensolver.eigenvalues();
-      L = eigensolver.eigenvectors();
+    for ( auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++ ){
+      if (this->orth_X[quantum_part_idx][irrep_idx].cols() == 0 && this->orth_X[quantum_part_idx][irrep_idx].rows() == 0) {
+        auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+        auto num_salc = this->input_basis.salcs[quantum_part_idx][irrep_idx].cols();
+        this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
+        Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
+        if (eigensolver.info() != Eigen::Success) {
+          (APP_ABORT("Error diagonalizing overlap matrix for canonical "
+                     "orthogonalization."));
+          // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
+          // Let me know if this is ever encountered in a real world calculation.
+        }
+        s = eigensolver.eigenvalues();
+        L = eigensolver.eigenvectors();
 
-      std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
-      Polyquant_cout(message);
-
-      double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
-      int drop_cols = 0;
-
-      while (s(drop_cols) < thresh) {
-        drop_cols++;
-      }
-
-      // orth_X = L @ s^{-1/2}
-      if (drop_cols > 0) {
-        message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+        std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
         Polyquant_cout(message);
-        s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
-        s = s.array().rsqrt();
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
-        this->orth_X[quantum_part_idx].noalias() = L_new * s.asDiagonal();
-      } else {
-        s = s.array().rsqrt();
-        this->orth_X[quantum_part_idx].noalias() = L * s.asDiagonal();
-      }
 
-      if (verbose == true) {
-        std::stringstream filename;
-        filename << "orthogonalizer_";
-        filename << quantum_part_idx;
-        filename << ".txt";
-        Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+        double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
+        int drop_cols = 0;
+
+        while (s(drop_cols) < thresh) {
+          drop_cols++;
+        }
+
+        // orth_X = L @ s^{-1/2}
+        if (drop_cols > 0) {
+          message = "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+          Polyquant_cout(message);
+          s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
+          s = s.array().rsqrt();
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
+          this->orth_X[quantum_part_idx][irrep_idx].noalias() = L_new * s.asDiagonal();
+        } else {
+          s = s.array().rsqrt();
+          this->orth_X[quantum_part_idx][irrep_idx].noalias() = L * s.asDiagonal();
+        }
+
+        if (verbose == true) {
+          std::stringstream filename;
+          filename << "orthogonalizer_";
+          filename << quantum_part_idx;
+          filename << "_irrep_";
+          filename << irrep_idx;
+          filename << ".txt";
+          Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx][irrep_idx], filename.str());
+        }
       }
     }
     quantum_part_idx++;

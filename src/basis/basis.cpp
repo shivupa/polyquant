@@ -218,6 +218,13 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
 
   std::vector<std::vector<msym_basis_function_t>> mbfs;
   mbfs.resize(this->basis.size());
+
+  symm_op_names.resize(this->basis.size());
+  irrep_names.resize(this->basis.size());
+  salc_per_irrep.resize(this->basis.size());
+  salcs.resize(this->basis.size());
+
+
   Polyquant_cout("Symmetrizing basis... Building SALCs");
   auto basis_idx = 0;
 
@@ -334,7 +341,7 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
         symm_op_printstr << "?";
         break;
       }
-      symm_op_names.push_back(symm_op.str());
+      symm_op_names[basis_idx].push_back(symm_op.str());
       Polyquant_cout(symm_op_printstr.str());
     }
 
@@ -368,43 +375,40 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
     if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
       APP_ABORT("Error getting character table");
     }
-    std::vector<std::string> irrep_names;
-    std::vector<int> salc_per_irrep;
-    std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> salcs;
     auto offset = 0;
     for (auto count = 0; count < msrsl; count++) {
-      salc_per_irrep.push_back(msrs[count].salcl);
-      salcs.push_back(combined_salcs(Eigen::placeholders::all, Eigen::seq(offset, offset + salc_per_irrep[count] - 1)));
-      offset += salc_per_irrep[count];
+      salc_per_irrep[basis_idx].push_back(msrs[count].salcl);
+      salcs[basis_idx].push_back(combined_salcs(Eigen::placeholders::all, Eigen::seq(offset, offset + salc_per_irrep[basis_idx][count] - 1)));
+      offset += salc_per_irrep[basis_idx][count];
     }
     for (auto i = 0; i < mct->d; i++) {
       std::string temp_irrep_name = mct->s[i].name;
-      irrep_names.push_back(temp_irrep_name);
+      irrep_names[basis_idx].push_back(temp_irrep_name);
     }
 
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> character_table;
-    character_table.resize(irrep_names.size(), symm_op_names.size());
-    for (auto i = 0; i < irrep_names.size(); i++) {
-      for (auto j = 0; j < symm_op_names.size(); j++) {
-        character_table(i, j) = static_cast<double *>(mct->table)[i * symm_op_names.size() + j];
+    character_table.resize(irrep_names[basis_idx].size(), symm_op_names[basis_idx].size());
+    for (auto i = 0; i < irrep_names[basis_idx].size(); i++) {
+      for (auto j = 0; j < symm_op_names[basis_idx].size(); j++) {
+        character_table(i, j) = static_cast<double *>(mct->table)[i * symm_op_names[basis_idx].size() + j];
       }
     }
-    Polyquant_dump_character_table(character_table, molecule.point_group, irrep_names, symm_op_names);
+    Polyquant_dump_character_table(character_table, molecule.point_group, irrep_names[basis_idx], symm_op_names[basis_idx]);
 
     std::stringstream irrep_msg;
     irrep_msg << "    ";
     irrep_msg << "SALCs per Irreps\n";
     irrep_msg << "    ";
     irrep_msg << "----------------\n";
-    for (auto i = 0; i < irrep_names.size(); i++) {
+    for (auto i = 0; i < irrep_names[basis_idx].size(); i++) {
       irrep_msg << "    ";
       irrep_msg << "    ";
       irrep_msg << "Irrep ";
-      irrep_msg << irrep_names[i];
+      irrep_msg << irrep_names[basis_idx][i];
       irrep_msg << " with ";
-      irrep_msg << salc_per_irrep[i];
+      irrep_msg << salc_per_irrep[basis_idx][i];
       irrep_msg << " functions.\n";
-      // Polyquant_dump_mat(salcs[i], irrep_names[i]);
+      // Polyquant_dump_mat(salcs[basis_idx][i], irrep_names[basis_idx][i]);
     }
     Polyquant_cout(irrep_msg.str());
     basis_idx++;
