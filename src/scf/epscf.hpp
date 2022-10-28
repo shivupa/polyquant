@@ -21,36 +21,38 @@ public:
 
   void form_H_core() override;
 
-  double directscf_get_shell_density_norm_exchange(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                                   const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part,
-                                                   const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &shell_a_bf_start, const size_t &shell_a_bf_size,
-                                                   const size_t &shell_b_bf_start, const size_t &shell_b_bf_size);
+  double directscf_get_shell_density_norm_exchange(const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm,
+                                                   const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm_last,
+                                                   const QUANTUM_PARTICLE_SET &quantum_part, const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &quantum_part_irrep_idx,
+                                                   const size_t &shell_a_bf_start, const size_t &shell_a_bf_size, const size_t &shell_b_bf_start, const size_t &shell_b_bf_size);
 
-  double directscf_get_shell_density_norm_coulomb(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                                  const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
-                                                  const size_t &quantum_part_a_idx, const size_t &quantum_part_a_spin_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const size_t &quantum_part_b_idx,
-                                                  const size_t &quantum_part_b_spin_idx, const size_t &shell_a_bf_start, const size_t &shell_a_bf_size, const size_t &shell_b_bf_start,
-                                                  const size_t &shell_b_bf_size);
+  double directscf_get_shell_density_norm_coulomb(const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm,
+                                                  const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm_last,
+                                                  const QUANTUM_PARTICLE_SET &quantum_part_a, const size_t &quantum_part_a_idx, const size_t &quantum_part_a_spin_idx,
+                                                  const size_t &quantum_part_a_irrep_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const size_t &quantum_part_b_idx,
+                                                  const size_t &quantum_part_b_spin_idx, const size_t &quantum_part_b_irrep_idx, const size_t &shell_a_bf_start, const size_t &shell_a_bf_size,
+                                                  const size_t &shell_b_bf_start, const size_t &shell_b_bf_size);
 
-  double directscf_get_density_coulomb(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                       const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
-                                       const size_t &quantum_part_a_idx, const size_t &quantum_part_a_spin_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const size_t &quantum_part_b_idx,
-                                       const size_t &quantum_part_b_spin_idx, const size_t &a, const size_t &b);
+  double directscf_get_density_coulomb(const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm,
+                                       const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
+                                       const size_t &quantum_part_a_idx, const size_t &quantum_part_a_spin_idx, const size_t &quantum_part_a_irrep_idx, const QUANTUM_PARTICLE_SET &quantum_part_b,
+                                       const size_t &quantum_part_b_idx, const size_t &quantum_part_b_spin_idx, const size_t &quantum_part_b_irrep_idx, const size_t &a, const size_t &b);
 
-  double directscf_get_density_exchange(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                        const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part,
-                                        const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &a, const size_t &b);
+  double directscf_get_density_exchange(const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm,
+                                        const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part,
+                                        const size_t &quantum_part_idx, const size_t &quantum_part_spin_idx, const size_t &quantum_part_irrep_idx, const size_t &a, const size_t &b);
 
-  void form_fock_helper_single_fock_matrix(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock, const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
-                                           const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
-                                           const int quantum_part_a_idx, const int quantum_part_a_spin_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const int quantum_part_b_idx,
-                                           const int quantum_part_b_spin_idx);
+  void form_fock_helper_single_fock_matrix(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock,
+                                           const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm,
+                                           const std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
+                                           const int quantum_part_a_idx, const int quantum_part_a_spin_idx, const int quantum_part_a_irrep_idx, const QUANTUM_PARTICLE_SET &quantum_part_b,
+                                           const int quantum_part_b_idx, const int quantum_part_b_spin_idx, const int quantum_part_b_irrep_idx);
 
   void form_fock_helper();
 
   void form_fock() override;
 
-  void diag_fock_helper(int quantum_part_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &F_prime, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_C,
+  void diag_fock_helper(int quantum_part_idx, int quantum_part_irrep_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &F_prime, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &mo_C,
                         Eigen::Matrix<double, Eigen::Dynamic, 1> &mo_e);
 
   void diag_fock() override;
@@ -60,11 +62,16 @@ public:
   void form_DM_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm_last,
                       const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff, const Eigen::Matrix<double, Eigen::Dynamic, 1> &occ, const int num_basis, const int num_part);
 
-  void form_occ_helper_aufbau(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
+  void form_occ_helper_aufbau(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int quantum_part_irrep_idx, const int num_parts,
+                              const double occval);
 
-  void form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int num_parts, const double occval);
+  void form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int quantum_part_irrep_idx, const int num_parts,
+                           const double occval);
 
+  void form_occ_helper_initial_npart_per_irrep();
   void form_occ();
+
+  void form_combined_orbitals();
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
                                                                     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff2);
@@ -75,7 +82,7 @@ public:
 
   void permute_initial_MOs();
 
-  void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, std::vector<int> &permutation);
+  void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, const int quantum_part_irrep_idx, std::vector<int> &permutation);
 
   void calculate_E_elec() override;
 
@@ -89,9 +96,10 @@ public:
 
   void run_iteration() override;
 
+  void guess_DM_hcore();
   void guess_DM() override;
 
-  void resize_objects() ;
+  void resize_objects();
 
   void setup_standard();
 
@@ -117,10 +125,10 @@ public:
   /**
    * @brief H_core matrix
    *
-   * indexes: particle, symmetry block
+   * indexes: particle
    *
    */
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> H_core;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> H_core;
 
   /**
    * @brief One particle density matrix
@@ -154,12 +162,35 @@ public:
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C;
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_ref_mom;
 
+  // convience. Once we run a scf in separate symmetry blocks, we can reassemble
+  //  particle, spin
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_combined;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals_combined;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ_combined;
+  std::vector<std::vector<std::vector<std::string>>> symm_labels_combined;
+  std::vector<int> num_mo;
+
   std::string occupation_mode = "aufbau";
   std::deque<bool> freeze_density;
 
-  std::vector<std::vector<int>> num_mo;
+  /**
+   * @brief MO per irrep
+   *
+   * indexes: particle, symmetry block
+   *
+   */
+  std::vector<std::vector<int>> num_mo_per_irrep;
 
-   /**
+  /**
+   * @brief npart per irrep
+   *
+   * indexes: particle, spin, symmetry block
+   *
+   */
+  std::vector<std::vector<std::vector<int>>> npart_per_irrep;
+  bool freeze_npart_per_irrep = false;
+
+  /**
    * @brief MO occupations
    *
    * indexes: particle, spin, symmetry block
@@ -176,6 +207,8 @@ public:
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> E_orbitals;
   /**
    * @brief Energy of the quantum particles
+   *
+   * indexes: particle
    *
    */
   std::vector<double> E_particles;
@@ -201,6 +234,8 @@ public:
   std::vector<double> iteration_E_diff;
   /**
    * @brief Iteration rmse DM
+   *
+   * indexes: particle, spin
    *
    */
   std::vector<std::vector<double>> iteration_rms_error;
@@ -236,7 +271,7 @@ public:
   /**
    * @brief Threshold on rms dm error to reset incremental fock formation
    *
-   * indexes: particle, spin, symmetry block
+   * indexes: particle, spin
    *
    */
   std::vector<std::vector<double>> incremental_fock_reset_threshold;
@@ -244,18 +279,18 @@ public:
   /**
    * @brief Number of iterations after which to reset incremental fock formation
    *
-   * indexes: particle, spin, symmetry block
+   * indexes: particle, spin
    *
    */
-  std::vector<std::vector<std::vector<int>>> incremental_fock_reset_iteration;
+  std::vector<std::vector<int>> incremental_fock_reset_iteration;
 
   /**
    * @brief Are we using incrementally building the fock matrix?
    *
-   * indexes: particle, spin, symmetry block
-   *
+   * indexes: particle, spin
+   * (ints to avoid vector bool specialization)
    */
-  std::vector<std::vector<std::vector<bool>>> incremental_fock_doing_incremental;
+  std::vector<std::vector<int>> incremental_fock_doing_incremental;
   int incremental_fock_reset_freq = 8;
   double incremental_fock_initial_onset_thresh = 1e-5;
 

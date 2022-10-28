@@ -23,13 +23,13 @@ TEST_SUITE("CI") {
     dm.setZero();
     fc_dm[0].push_back(dm);
     test_calc.scf_calc.input_integral.calculate_frozen_core_ints(fc_dm, frozen_core);
-    test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
+    test_calc.scf_calc.input_integral.calculate_mo_1_body_integrals(test_calc.scf_calc.C_combined, frozen_core, deleted_virtual);
 
     std::vector<std::vector<double>> reference_values;
     std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/ref_mo_onebody.txt";
     Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
 
-    auto num_mo = test_calc.scf_calc.C[0][0].cols();
+    auto num_mo = test_calc.scf_calc.C_combined[0][0].cols();
     auto idx = 0;
     for (auto i = 0; i < num_mo; i++) {
       for (auto j = i; j < num_mo; j++) {
@@ -46,13 +46,13 @@ TEST_SUITE("CI") {
     test_calc.run();
     std::vector frozen_core = {0};
     std::vector deleted_virtual = {0};
-    test_calc.scf_calc.input_integral.calculate_mo_2_body_integrals(test_calc.scf_calc.C, frozen_core, deleted_virtual);
+    test_calc.scf_calc.input_integral.calculate_mo_2_body_integrals(test_calc.scf_calc.C_combined, frozen_core, deleted_virtual);
 
     std::vector<std::vector<double>> reference_values;
     std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/ref_eri.txt";
     Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
 
-    auto num_mo = test_calc.scf_calc.C[0][0].cols();
+    auto num_mo = test_calc.scf_calc.C_combined[0][0].cols();
     auto idx = 0;
     for (auto i = 0; i < num_mo; i++) {
       for (auto j = i; j < num_mo; j++) {

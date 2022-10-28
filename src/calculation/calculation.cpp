@@ -442,8 +442,8 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     Polyquant_cout("Dumping HDF5 to filename: " + particle_filename);
     POLYQUANT_HDF5 hdf5_f(particle_filename);
     hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
-                                       quantum_part_name, scf_calc.E_orbitals[quantum_part_idx], scf_calc.C[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge, core_elec,
-                                       atomic_names, atomic_centers, unique_shells);
+                                       quantum_part_name, scf_calc.E_orbitals_combined[quantum_part_idx], scf_calc.C_combined[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge,
+                                       core_elec, atomic_names, atomic_centers, unique_shells);
     quantum_part_idx++;
   }
 }

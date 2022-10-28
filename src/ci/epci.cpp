@@ -17,8 +17,8 @@ void POLYQUANT_EPCI::calculate_integrals() {
   POLYQUANT_TIMER timer(function);
 
   this->calculate_fc_energy();
-  this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C, this->frozen_core, this->deleted_virtual);
-  this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C, this->frozen_core, this->deleted_virtual);
+  this->input_integral.calculate_mo_1_body_integrals(this->input_epscf.C_combined, this->frozen_core, this->deleted_virtual);
+  this->input_integral.calculate_mo_2_body_integrals(this->input_epscf.C_combined, this->frozen_core, this->deleted_virtual);
 
   for (auto i = 0; i < this->input_molecule.quantum_particles.size(); i++) {
     this->detset.max_orb.push_back(this->input_epscf.num_mo[i] - this->frozen_core[i] - this->deleted_virtual[i]);
@@ -59,14 +59,16 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
     if (this->frozen_core[quantum_part_idx] != 0) {
       auto num_parts_alpha = this->frozen_core[quantum_part_idx];
       auto num_parts_beta = this->frozen_core[quantum_part_idx];
-      this->input_epscf.form_occ_helper_aufbau(fc_occ[quantum_part_idx][0], quantum_part_idx, 0, num_parts_alpha, 1.0);
-      this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C[quantum_part_idx][0], fc_occ[quantum_part_idx][0], num_basis, num_parts_alpha);
+      this->input_epscf.form_occ_helper_aufbau(fc_occ[quantum_part_idx][0], quantum_part_idx, 0, 0, num_parts_alpha, 1.0);
+      this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][0], fc_dm[quantum_part_idx][0], this->input_epscf.C_combined[quantum_part_idx][0], fc_occ[quantum_part_idx][0], num_basis,
+                                       num_parts_alpha);
       if (verbose == true) {
         Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][0], "FC_DM_" + quantum_part_key + "_alpha.txt");
       }
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        this->input_epscf.form_occ_helper_aufbau(fc_occ[quantum_part_idx][1], quantum_part_idx, 1, num_parts_beta, 1.0);
-        this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C[quantum_part_idx][1], fc_occ[quantum_part_idx][1], num_basis, num_parts_beta);
+        this->input_epscf.form_occ_helper_aufbau(fc_occ[quantum_part_idx][1], quantum_part_idx, 1, 0, num_parts_beta, 1.0);
+        this->input_epscf.form_DM_helper(fc_dm[quantum_part_idx][1], fc_dm[quantum_part_idx][1], this->input_epscf.C_combined[quantum_part_idx][1], fc_occ[quantum_part_idx][1], num_basis,
+                                         num_parts_beta);
         if (verbose == true) {
           Polyquant_dump_mat_to_file(fc_dm[quantum_part_idx][1], "FC_DM_" + quantum_part_key + "_beta.txt");
         }
@@ -251,17 +253,17 @@ void POLYQUANT_EPCI::calculate_NOs() {
       if (quantum_part.num_parts > 1) {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
-        this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
+        this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C_combined[quantum_part_idx][0] * NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][1], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][1]);
         if (quantum_part.restricted == false) {
-          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][1] * NOs_mobasis;
+          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C_combined[quantum_part_idx][1] * NOs_mobasis;
         } else {
-          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
+          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf.C_combined[quantum_part_idx][0] * NOs_mobasis;
         }
       } else {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
         diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
-        this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C[quantum_part_idx][0] * NOs_mobasis;
+        this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf.C_combined[quantum_part_idx][0] * NOs_mobasis;
       }
       quantum_part_idx++;
     }
@@ -414,10 +416,10 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
     int ms2 = quantum_part_a.multiplicity - 1; // we store mult they want spin
     bool unique_beta = (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false);
     bool restricted = !unique_beta;
-    auto &MO_a_coeff = this->input_epscf.C[quantum_part_a_idx][0];
-    auto &MO_a_energy = this->input_epscf.E_orbitals[quantum_part_a_idx][0];
-    auto &MO_b_coeff = unique_beta ? this->input_epscf.C[quantum_part_a_idx][1] : this->input_epscf.C[quantum_part_a_idx][0];
-    auto &MO_b_energy = unique_beta ? this->input_epscf.E_orbitals[quantum_part_a_idx][1] : this->input_epscf.E_orbitals[quantum_part_a_idx][0];
+    auto &MO_a_coeff = this->input_epscf.C_combined[quantum_part_a_idx][0];
+    auto &MO_a_energy = this->input_epscf.E_orbitals_combined[quantum_part_a_idx][0];
+    auto &MO_b_coeff = unique_beta ? this->input_epscf.C_combined[quantum_part_a_idx][1] : this->input_epscf.C_combined[quantum_part_a_idx][0];
+    auto &MO_b_energy = unique_beta ? this->input_epscf.E_orbitals_combined[quantum_part_a_idx][1] : this->input_epscf.E_orbitals_combined[quantum_part_a_idx][0];
     auto E_constant = this->input_molecule.E_nuc;
     std::vector<int> MO_symmetry_labels;
     MO_symmetry_labels.resize(MO_a_coeff.cols() + MO_b_coeff.cols(), 1);

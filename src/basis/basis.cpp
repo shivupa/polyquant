@@ -224,7 +224,6 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
   salc_per_irrep.resize(this->basis.size());
   salcs.resize(this->basis.size());
 
-
   Polyquant_cout("Symmetrizing basis... Building SALCs");
   auto basis_idx = 0;
 
