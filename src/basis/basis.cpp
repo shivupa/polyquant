@@ -407,7 +407,7 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
       irrep_msg << " with ";
       irrep_msg << salc_per_irrep[basis_idx][i];
       irrep_msg << " functions.\n";
-      // Polyquant_dump_mat(salcs[basis_idx][i], irrep_names[basis_idx][i]);
+      Polyquant_dump_mat(salcs[basis_idx][i], irrep_names[basis_idx][i]);
     }
     Polyquant_cout(irrep_msg.str());
     basis_idx++;

@@ -933,8 +933,9 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
         this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
         Eigen::Matrix<double, Eigen::Dynamic, 1> s;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
-        // this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
+            this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
         if (eigensolver.info() != Eigen::Success)
           (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
@@ -951,7 +952,7 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
         s = s.array().rsqrt();
         this->orth_X[quantum_part_idx][irrep_idx] = s.asDiagonal();
         this->orth_X[quantum_part_idx][irrep_idx] = L * this->orth_X[quantum_part_idx][irrep_idx] * L.transpose();
-        this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
 
         if (verbose == true) {
           std::stringstream filename;
