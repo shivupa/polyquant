@@ -369,7 +369,9 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
       APP_ABORT("Error getting salcs");
     }
     auto count = 0;
-    // Polyquant_dump_mat(combined_salcs, "COMBINED SALCS");
+    Polyquant_dump_mat(combined_salcs, "COMBINED SALCS");
+    reorder_combined_salcs(combined_salcs, basis_idx);
+    Polyquant_dump_mat(combined_salcs, "COMBINED SALCS REORDERED");
     //  Dont really need to print symmetry table
     if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
       APP_ABORT("Error getting character table");
@@ -412,6 +414,22 @@ void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
     Polyquant_cout(irrep_msg.str());
     basis_idx++;
   }
+}
+
+void POLYQUANT_BASIS::reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& combined_salcs, const size_t basis_idx) {
+
+    // for spherical basis functions, the p ordering is odd
+    // we use          p-1 p+0 p+1
+    // equiv cart      y   z   x
+    //
+    // cca             p+0 p+1 p-1
+    //                 z   x   y
+    //
+    // libmsym         y   z   x
+    //                 p-1 p+0 p+1
+    //
+    //  shouldn't need any reordering
+
 }
 
 void POLYQUANT_BASIS::load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule) {

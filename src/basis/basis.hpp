@@ -59,6 +59,7 @@ public:
        "zzzzyy", "xxxxyz", "yyyyxz", "zzzzxy", "xxxyyy", "xxxzzz", "yyyzzz", "xxxyyz", "xxxzzy", "yyyxxz", "yyyzzx", "zzzxxy", "zzzyyx", "xxyyzz"}};
 
   void symmetrize_basis(const POLYQUANT_MOLECULE &molecule);
+  void reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& combined_salcs, const size_t basis_idx);
   /**
    * @brief The name of the basis to load
    *

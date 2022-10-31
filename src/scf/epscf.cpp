@@ -366,26 +366,36 @@ void POLYQUANT_EPSCF::diag_fock() {
     }
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     this->iteration_rms_error[quantum_part_idx][0] = 0.0;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
+    FD_commutator.noalias() = (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
+                               this->input_integral.overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]);
     for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
       auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
       if (num_mo == 0) {
         continue;
       }
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis;
-      F_diis.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * this->F[quantum_part_idx][0] * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
-      FD_commutator.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() *
-                                (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
-                                 this->input_integral.overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]) *
-                                this->input_integral.orth_X[quantum_part_idx][irrep_idx];
-      // FD_comm = X.T @ ( F @ D @ S -  S @ D @ F) @ X;
-      this->iteration_rms_error[quantum_part_idx][0] += FD_commutator.norm() / (num_basis * num_mo);
+
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& X = this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& c = this->C[quantum_part_idx][0][irrep_idx];
+
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator_irrep = X.transpose() * FD_commutator * X;
+      F_diis = X.transpose() * this->F[quantum_part_idx][0] * X;
+      this->iteration_rms_error[quantum_part_idx][0] += FD_commutator_irrep.norm() / (num_mo * num_mo);
       if (this->diis_extrapolation) {
-        this->diis[quantum_part_idx][0][irrep_idx].extrapolate(F_diis, FD_commutator);
+        this->diis[quantum_part_idx][0][irrep_idx].extrapolate(F_diis, FD_commutator_irrep);
       }
-      F_prime = F_diis; // this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
-      diag_fock_helper(quantum_part_idx, irrep_idx, F_prime, this->C[quantum_part_idx][0][irrep_idx], this->E_orbitals[quantum_part_idx][0][irrep_idx]);
+      //F_diis = c * F_diis * c.transpose();
+      //F_diis = X.transpose() * F_diis * X;
+
+      //Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
+      //FD_commutator.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() *
+      //                          (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral.overlap[quantum_part_idx] -
+      //                           this->input_integral.overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]) *
+      //                          this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+      // FD_comm = X.T @ ( F @ D @ S -  S @ D @ F) @ X;
+      //F_prime = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+      diag_fock_helper(quantum_part_idx, irrep_idx, F_diis, this->C[quantum_part_idx][0][irrep_idx], this->E_orbitals[quantum_part_idx][0][irrep_idx]);
     }
     if (this->incremental_fock) {
       if (this->incremental_fock_doing_incremental[quantum_part_idx][0]) {
@@ -407,25 +417,38 @@ void POLYQUANT_EPSCF::diag_fock() {
 
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis;
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
+      FD_commutator.noalias() = (this->F[quantum_part_idx][1] * this->D_combined[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
+                                 this->input_integral.overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][1] * this->F[quantum_part_idx][1]);
       for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
         if (num_mo == 0) {
           continue;
         }
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis;
-        F_diis.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * this->F[quantum_part_idx][1] * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
-        FD_commutator.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() *
-                                  (this->F[quantum_part_idx][1] * this->D_combined[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
-                                   this->input_integral.overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][1] * this->F[quantum_part_idx][1]) *
-                                  this->input_integral.orth_X[quantum_part_idx][irrep_idx];
-        this->iteration_rms_error[quantum_part_idx][1] += FD_commutator.norm() / (num_basis * num_mo);
-        if (this->diis_extrapolation) {
-          this->diis[quantum_part_idx][1][irrep_idx].extrapolate(F_diis, FD_commutator);
-        }
-        F_prime = F_diis; // this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
-        diag_fock_helper(quantum_part_idx, irrep_idx, F_prime, this->C[quantum_part_idx][1][irrep_idx], this->E_orbitals[quantum_part_idx][1][irrep_idx]);
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& X = this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& c = this->C[quantum_part_idx][1][irrep_idx];
+
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator_irrep = X.transpose() * FD_commutator * X;
+      F_diis = X.transpose() * this->F[quantum_part_idx][1] * X;
+      this->iteration_rms_error[quantum_part_idx][1] += FD_commutator_irrep.norm() / (num_mo * num_mo);
+      if (this->diis_extrapolation) {
+        this->diis[quantum_part_idx][1][irrep_idx].extrapolate(F_diis, FD_commutator_irrep);
+      }
+      //F_diis = c * F_diis * c.transpose();
+      //F_diis = X.transpose() * F_diis * X;
+
+
+        //Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
+        //F_diis.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * this->F[quantum_part_idx][1] * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+        //Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
+        //FD_commutator.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() *
+        //                          (this->F[quantum_part_idx][1] * this->D_combined[quantum_part_idx][1] * this->input_integral.overlap[quantum_part_idx] -
+        //                           this->input_integral.overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][1] * this->F[quantum_part_idx][1]) *
+        //                          this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+        // F_prime = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * F_diis * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+        //diag_fock_helper(quantum_part_idx, irrep_idx, F_prime, this->C[quantum_part_idx][1][irrep_idx], this->E_orbitals[quantum_part_idx][1][irrep_idx]);
+        diag_fock_helper(quantum_part_idx, irrep_idx, F_diis, this->C[quantum_part_idx][1][irrep_idx], this->E_orbitals[quantum_part_idx][1][irrep_idx]);
       }
       if (this->incremental_fock) {
         if (this->incremental_fock_doing_incremental[quantum_part_idx][1]) {
@@ -509,7 +532,7 @@ void POLYQUANT_EPSCF::calculate_E_elec() {
       continue;
     }
     this->E_particles[quantum_part_idx] = 0.0;
-    // for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    //for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
     auto E_part_irrep = 0.0;
     // auto& salcs = this->input_basis.salcs[quantum_part_idx][irrep_idx];
     // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& X = this->input_integral.orth_X[quantum_part_idx][irrep_idx];
@@ -518,8 +541,25 @@ void POLYQUANT_EPSCF::calculate_E_elec() {
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fa = this->F[quantum_part_idx][0];
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &s = this->input_integral.overlap[quantum_part_idx];
     // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> s2 = X.transpose() * this->input_integral.overlap[quantum_part_idx] * X;
-    // Polyquant_dump_mat(s, "S");
+    Polyquant_dump_mat(s, "S");
     // Polyquant_dump_mat(s2, "X.T @ S @ X");
+    for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
+
+      auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
+      if (num_mo == 0 ) {
+          continue;
+      }
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& X = this->input_integral.orth_X[quantum_part_idx][irrep_idx];
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> s2 = X.transpose() * this->input_integral.overlap[quantum_part_idx] * X;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& c = this->C[quantum_part_idx][0][irrep_idx];
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> s3 = c.transpose() * this->input_integral.overlap[quantum_part_idx] * c;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &da_irrep = this->D[quantum_part_idx][0][irrep_idx];
+    Polyquant_dump_mat(s2, "X.T @ S @ X");
+    Polyquant_dump_mat(c, "C");
+    Polyquant_dump_mat(s3, "c.T @ S @ c");
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dax = (  da_irrep * s );
+    std::cout << (dax).trace() << std::endl;
+    }
 
     std::cout << "SHIIV " << da.rows() << std::endl;
     std::cout << da.cols() << std::endl;
@@ -739,6 +779,12 @@ void POLYQUANT_EPSCF::guess_DM_hcore() {
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
     auto num_basis = this->input_basis.num_basis[quantum_part_idx];
     for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& c = this->C[quantum_part_idx][0][irrep_idx];
+      std::cout << "SHIV " << num_mo << "              " << H_core[quantum_part_idx].cols() <<  std::endl;
+      if (num_mo == 0){
+           continue;
+      }
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H_prime;
       H_prime.noalias() = this->input_integral.orth_X[quantum_part_idx][irrep_idx].transpose() * this->H_core[quantum_part_idx] * this->input_integral.orth_X[quantum_part_idx][irrep_idx];
       diag_fock_helper(quantum_part_idx, irrep_idx, H_prime, this->C[quantum_part_idx][0][irrep_idx], this->E_orbitals[quantum_part_idx][0][irrep_idx]);
@@ -1078,7 +1124,7 @@ void POLYQUANT_EPSCF::form_occ() {
 void POLYQUANT_EPSCF::form_combined_orbitals() {
   for (auto l : this->input_basis.ao_labels[0]) {
     for (auto l2 : l) {
-      std::cout << l2;
+      std::cout << l2 << " " ;
     }
     std::cout << std::endl;
   }
