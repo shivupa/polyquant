@@ -994,10 +994,11 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         Eigen::Matrix<double, Eigen::Dynamic, 1> s;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
         // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
-        if (num_salc == 0 ) {
-            continue;
+        if (num_salc == 0) {
+          continue;
         }
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
+            this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
         if (eigensolver.info() != Eigen::Success) {
           (APP_ABORT("Error diagonalizing overlap matrix for canonical "
@@ -1038,7 +1039,7 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         std::cout << this->orth_X[quantum_part_idx][irrep_idx].rows() << std::endl;
         std::cout << this->orth_X[quantum_part_idx][irrep_idx].cols() << std::endl;
         // this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->orth_X[quantum_part_idx][irrep_idx];
-        //this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
+        // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
         // auto temp = this->input_basis.salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
 
         if (verbose == true) {
