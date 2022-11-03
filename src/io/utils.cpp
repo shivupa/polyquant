@@ -74,7 +74,8 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
 }
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::string title, std::vector<std::vector<std::vector<std::string>>> &ao_labels) {
+                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::vector<std::vector<std::vector<std::string>>> &symm_label, std::string title,
+                   std::vector<std::vector<std::vector<std::string>>> &ao_labels) {
   auto stride = 5;
   Polyquant_cout(title);
   for (auto i = 0; i < E_orbitals.size(); i++) {
@@ -95,6 +96,17 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
             break;
           }
           line += fmt::format("{:^20}", fmt::format("{:> 3d}", (mo_idx * stride) + mo_offset + 1));
+        }
+        line += fmt::format("{:20}", "");
+        Polyquant_cout(line);
+
+        line = "";
+        line += fmt::format("{:20}", "Orb sym");
+        for (auto mo_offset = 0; mo_offset < stride; mo_offset++) {
+          if ((mo_idx * stride) + mo_offset == num_mo) {
+            break;
+          }
+          line += fmt::format("{:^20}", fmt::format("{:>4}", symm_label[i][j][(mo_idx * stride) + mo_offset]));
         }
         line += fmt::format("{:20}", "");
         Polyquant_cout(line);

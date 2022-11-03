@@ -384,7 +384,16 @@ void POLYQUANT_EPCI::print_success() {
     Polyquant_cout("");
     std::stringstream title;
     title << "NATURAL SPIN ORBITALS  state " << state_idx;
-    dump_orbitals(this->C_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->occ_nso[state_vec_idx], title.str(), this->input_basis.ao_labels);
+    std::vector<std::vector<std::vector<std::string>>> symm_label;
+    symm_label.resize(this->occ_nso[state_idx].size());
+    for (auto &v : symm_label) {
+      v.resize(this->occ_nso[state_idx][0].size());
+      for (auto &v2 : v) {
+        v2.resize(this->occ_nso[state_idx][0][0].size(), "A");
+      }
+    }
+
+    dump_orbitals(this->C_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->occ_nso[state_vec_idx], symm_label, title.str(), this->input_basis.ao_labels);
 
     // title.str(std::string());
     // title << "NATURAL ORBITALS  state " << state_idx;

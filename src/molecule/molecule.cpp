@@ -584,7 +584,7 @@ std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmet
     for (auto i = 0; i < classical_part.second.num_parts; i++) {
       if (classical_part_key != "all") {
         if (classical_part_key == "no_ghost") {
-          if (classical_part.second.charge == 0.0) {
+          if (classical_part.second.mass == 0.0) {
             continue;
           }
         } else if (classical_part.first != classical_part_key) {
@@ -600,7 +600,7 @@ std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmet
       temp_atom.n = (int)(classical_part.second.charge);
       temp_atom.m = (int)(classical_part.second.mass);
 
-      if (classical_part.first == "X") {
+      if (classical_part.first == "X" || classical_part.second.mass == 0) {
         temp_atom.name[0] = 'D';
         temp_atom.name[1] = '\0';
       } else {
