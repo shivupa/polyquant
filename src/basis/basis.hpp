@@ -58,8 +58,11 @@ public:
       {"xxxxxx", "yyyyyy", "zzzzzz", "xxxxxy", "xxxxxz", "yyyyyx", "yyyyyz", "zzzzzx", "zzzzzy", "xxxxyy", "xxxxzz", "yyyyxx", "yyyyzz", "zzzzxx",
        "zzzzyy", "xxxxyz", "yyyyxz", "zzzzxy", "xxxyyy", "xxxzzz", "yyyzzz", "xxxyyz", "xxxzzy", "yyyxxz", "yyyzzx", "zzzxxy", "zzzyyx", "xxyyzz"}};
 
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> character_table;
+  Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> direct_product_table;
+  bool do_symmetry = true;
   void symmetrize_basis(const POLYQUANT_MOLECULE &molecule);
-  void reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& combined_salcs, const size_t basis_idx);
+  void reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &combined_salcs, const size_t basis_idx);
   /**
    * @brief The name of the basis to load
    *
