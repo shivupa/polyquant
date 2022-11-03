@@ -162,7 +162,6 @@ public:
 
   // convience. Once we run a scf in separate symmetry blocks, we can reassemble
   //  particle, spin
-  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> F_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D_last_combined;
