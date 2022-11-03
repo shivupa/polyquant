@@ -1029,7 +1029,10 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
       }
       std::sort(std::begin(orb_e_combined), std::end(orb_e_combined), std::less<double>());
       auto npart_spin = (quantum_part_spin_idx == 1) ? quantum_part.num_parts_beta : quantum_part.num_parts_alpha;
-      auto thresh_E = orb_e_combined[npart_spin];
+      double thresh_E = std::numeric_limits<double>::infinity();
+      if (npart_spin < orb_e_combined.size()) {
+        thresh_E = orb_e_combined[npart_spin];
+      }
 
       for (auto irrep_idx = 0; irrep_idx < this->input_basis.irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto npart_in_this_irrep = 0;

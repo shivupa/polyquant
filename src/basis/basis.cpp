@@ -209,15 +209,17 @@ void POLYQUANT_BASIS::set_ao_labels(const POLYQUANT_MOLECULE &molecule) {
 void POLYQUANT_BASIS::symmetrize_basis(const POLYQUANT_MOLECULE &molecule) {
 
   msym_error_t ret = MSYM_SUCCESS;
-  msym_point_group_type_t mtype;
-  int mn;
-  if (MSYM_SUCCESS != (ret = msymGetPointGroupType(molecule.ctx, &mtype, &mn))) {
-    APP_ABORT("Error getting point group type.");
-  }
+  if (molecule.point_group != "C1") {
+    msym_point_group_type_t mtype;
+    int mn;
+    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(molecule.ctx, &mtype, &mn))) {
+      APP_ABORT("Error getting point group type.");
+    }
 
-  if ((MSYM_POINT_GROUP_TYPE_Dnh == mtype || MSYM_POINT_GROUP_TYPE_Cnv == mtype) && 0 == mn) {
-    APP_WARN("Linear molecule detected. This is a bit harder to handle so for now we will just turn off symmetry");
-    do_symmetry = false;
+    if ((MSYM_POINT_GROUP_TYPE_Dnh == mtype || MSYM_POINT_GROUP_TYPE_Cnv == mtype) && 0 == mn) {
+      APP_WARN("Linear molecule detected. This is a bit harder to handle so for now we will just turn off symmetry");
+      do_symmetry = false;
+    }
   }
 
   if (molecule.point_group == "C1" || !do_symmetry) {
