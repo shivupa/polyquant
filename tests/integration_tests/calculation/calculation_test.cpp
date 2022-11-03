@@ -22,10 +22,10 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_orbitals_combined[0][1](0) == doctest::Approx(-0.5870915714).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][0](0, 0) == doctest::Approx(0.51800237).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][1](0, 0) == doctest::Approx(0.51800237).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-0.5377051).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][1](0, 0) == doctest::Approx(-0.5377051).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][0](0, 0) == doctest::Approx(0.26832645).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][1](0, 0) == doctest::Approx(0.26832645).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-0.5377051).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][1](0, 0) == doctest::Approx(-0.5377051).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][0](0, 0) == doctest::Approx(0.26832645).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][1](0, 0) == doctest::Approx(0.26832645).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[0](0, 0) == doctest::Approx(-0.96504951).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-0.8654374339).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
@@ -44,10 +44,10 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_orbitals_combined[0][1](0) == doctest::Approx(-20.2417374167).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][0](0, 0) == doctest::Approx(-5.97197546e-03).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][1](0, 0) == doctest::Approx(-5.97197546e-03).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][1](0, 0) == doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][0](0, 0) == doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][1](0, 0) == doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][1](0, 0) == doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][0](0, 0) == doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][1](0, 0) == doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[0](0, 0) == doctest::Approx(-5.07666209).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
@@ -63,8 +63,8 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(-84.1577900311).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[0][0](0) == doctest::Approx(-20.2417374167).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][0](0, 0) == doctest::Approx(-5.97197546e-03).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][0](0, 0) == doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-5.78684584e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][0](0, 0) == doctest::Approx(3.00443079e-01).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[0](0, 0) == doctest::Approx(-5.07666209).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-74.962926342808259506).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
@@ -78,14 +78,14 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(3.0365625787).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[0][0](0) == doctest::Approx(-6.7850710986).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][0](0, 0) == doctest::Approx(-0.0384832).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-4.3143).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][0](0, 0) == doctest::Approx(0.00148096).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-4.3143).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][0](0, 0) == doctest::Approx(0.00148096).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[0](0, 0) == doctest::Approx(5.01601).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_particles[1] == doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[1][0](0) == doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[1][0](0, 0) == doctest::Approx(-0.00598694).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[1][0](0, 0) == doctest::Approx(0.181054).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[1][0](0, 0) == doctest::Approx(0.00646869).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) == doctest::Approx(0.181054).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[1][0](0, 0) == doctest::Approx(0.00646869).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[1](0, 0) == doctest::Approx(-3.50184).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
@@ -99,14 +99,14 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(3.0365625787).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[0][0](0) == doctest::Approx(-6.7850710986).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][0](0, 0) == doctest::Approx(-0.0384832).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-4.3143).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][0](0, 0) == doctest::Approx(0.00148096).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-4.3143).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][0](0, 0) == doctest::Approx(0.00148096).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[0](0, 0) == doctest::Approx(5.01601).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_particles[1] == doctest::Approx(-81.1530733704).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[1][0](0) == doctest::Approx(-20.4054374486).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[1][0](0, 0) == doctest::Approx(-0.00598694).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[1][0](0, 0) == doctest::Approx(0.181054).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[1][0](0, 0) == doctest::Approx(0.00646869).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) == doctest::Approx(0.181054).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[1][0](0, 0) == doctest::Approx(0.00646869).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[1](0, 0) == doctest::Approx(-3.50184).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-78.1165107917).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
@@ -120,14 +120,14 @@ TEST_SUITE("CALCULATION") {
     CHECK(test_calc.scf_calc.E_particles[0] == doctest::Approx(-7.7455067859).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[0][0](0) == doctest::Approx(-2.417238715).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[0][0](0, 0) == doctest::Approx(0.697239).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-2.1305440797).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[0][0](0, 0) == doctest::Approx(0.494599).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[0][0](0, 0) == doctest::Approx(-2.1305440797).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[0][0](0, 0) == doctest::Approx(0.494599).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[0](0, 0) == doctest::Approx(-4.41628).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_particles[1] == doctest::Approx(0.2197833078).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_orbitals_combined[1][0](0) == doctest::Approx(-0.1098592288).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.C_combined[1][0](0, 0) == doctest::Approx(0.000439523).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.F[1][0](0, 0) == doctest::Approx(11.5013794256).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
-    // CHECK(test_calc.scf_calc.D[1][0](0, 0) == doctest::Approx(0.0000000154).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.F[1][0](0, 0) == doctest::Approx(11.5013794256).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_calc.scf_calc.D_combined[1][0](0, 0) == doctest::Approx(0.0000000154).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.H_core[1](0, 0) == doctest::Approx(15.603).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
     CHECK(test_calc.scf_calc.E_total == doctest::Approx(-7.5257234633).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
@@ -172,7 +172,7 @@ TEST_SUITE("CALCULATION") {
         ex += test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc.detset.unique_dets[0][1][idx_j_unfold[1]]);
         auto elem_thru_SC = test_calc.ci_calc.detset.Slater_Condon(i, j);
         auto diff = elem_thru_SC - reference_values[count][0];
-        CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(1e-4));
         auto idx_part = 0;
         auto det_i_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
         auto det_i_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
@@ -225,7 +225,7 @@ TEST_SUITE("CALCULATION") {
         ex += test_calc.ci_calc.detset.single_spin_num_excitation(test_calc.ci_calc.detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc.detset.unique_dets[0][1][idx_j_unfold[1]]);
         auto elem_thru_SC = test_calc.ci_calc.detset.Slater_Condon(i, j);
         auto diff = elem_thru_SC - reference_values[count][0];
-        CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        CHECK(elem_thru_SC == doctest::Approx(reference_values[count][0]).epsilon(1e-4));
         auto idx_part = 0;
         auto det_i_a = test_calc.ci_calc.detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
         auto det_i_b = test_calc.ci_calc.detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
@@ -275,7 +275,7 @@ TEST_SUITE("CALCULATION") {
         if (j < i)
           elem_from_polyquant = test_calc.ci_calc.detset.ham.coeff(j, i);
         auto diff = elem_from_polyquant - reference_values[count][0];
-        CHECK(elem_from_polyquant == doctest::Approx(reference_values[count][0]).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+        CHECK(elem_from_polyquant == doctest::Approx(reference_values[count][0]).epsilon(1e-4));
         count++;
       }
     }
