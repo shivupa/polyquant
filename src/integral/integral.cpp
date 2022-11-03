@@ -933,6 +933,9 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
         this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
         Eigen::Matrix<double, Eigen::Dynamic, 1> s;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+        if (num_salc == 0) {
+          continue;
+        }
         // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
             this->input_basis.salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
@@ -953,7 +956,7 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
         this->orth_X[quantum_part_idx][irrep_idx] = s.asDiagonal();
         this->orth_X[quantum_part_idx][irrep_idx] = L * this->orth_X[quantum_part_idx][irrep_idx] * L.transpose();
         // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis.salcs[quantum_part_idx][irrep_idx];
-
+        this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis.salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
         if (verbose == true) {
           std::stringstream filename;
           filename << "orthogonalizer_";
