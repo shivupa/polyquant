@@ -386,7 +386,7 @@ void POLYQUANT_EPCI::print_success() {
     title << "NATURAL SPIN ORBITALS  state " << state_idx;
     std::vector<std::vector<std::vector<std::string>>> symm_label;
     symm_label.resize(this->occ_nso[state_idx].size());
-    quantum_part_idx = 0ul;
+    auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
       auto &v = symm_label[quantum_part_idx];
       v.resize(this->occ_nso[state_idx][quantum_part_idx].size());
