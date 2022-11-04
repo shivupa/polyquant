@@ -170,7 +170,7 @@ FetchContent_MakeAvailable(spectra)
 #  GIT_REPOSITORY https://github.com/mcodev31/libmsym
 #  GIT_TAG master)
 #FetchContent_MakeAvailable(libmsym)
-find_package(libmsym)
+find_package(libmsym REQUIRED)
 ########################################
 # libint for gaussian AO integrals
 find_package(Libint2)
