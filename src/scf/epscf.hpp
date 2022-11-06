@@ -16,8 +16,8 @@ class POLYQUANT_EPSCF : public POLYQUANT_SCF {
 public:
   POLYQUANT_EPSCF() = default;
 
-  POLYQUANT_EPSCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral)
-      : POLYQUANT_SCF(input_params, input_molecule, input_basis, input_integral){};
+  POLYQUANT_EPSCF(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_INTEGRAL> integral)
+      : POLYQUANT_SCF(params, molecule, basis, integral){};
 
   void form_H_core() override;
 
@@ -167,7 +167,7 @@ public:
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> D_last_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ_combined;
-  std::vector<std::vector<std::vector<std::string>>> symm_labels_combined;
+  std::vector<std::vector<std::vector<int>>> symm_label_idxs;
   std::vector<int> num_mo;
 
   std::string occupation_mode = "aufbau";

@@ -27,26 +27,24 @@ public:
    * @param input the data from the input file.
    * @param molecule the molecule data.
    */
-  POLYQUANT_BASIS(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule);
+  POLYQUANT_BASIS(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule);
   /**
    * @brief Load a basis using the libint built in basis library.
    *
    * @param input
    * @param molecule
    */
-  void load_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule);
+  void load_basis(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule);
 
-  void load_quantum_particle_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, libint2::BasisSet &qp_basis);
-  void load_quantum_particle_atom_basis(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
-                                        const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
-  void load_quantum_particle_atom_basis_library(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
-                                                const int &center_basis_idx, libint2::BasisSet &qp_basis);
-  void load_quantum_particle_atom_basis_custom(const POLYQUANT_INPUT &input, const POLYQUANT_MOLECULE &molecule, const std::string &quantum_part_key, const std::string &classical_part_key,
-                                               const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
-  void set_pure_from_input(const POLYQUANT_INPUT &input);
+  void load_quantum_particle_basis(const std::string &quantum_part_key, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis(const std::string &quantum_part_key, const std::string &classical_part_key, const CLASSICAL_PARTICLE_SET &classical_part, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis_library(const std::string &quantum_part_key, const std::string &classical_part_key, const int &center_basis_idx, libint2::BasisSet &qp_basis);
+  void load_quantum_particle_atom_basis_custom(const std::string &quantum_part_key, const std::string &classical_part_key, const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part,
+                                               libint2::BasisSet &qp_basis);
+  void set_pure_from_input();
   void set_libint_shell_norm();
   void print_basis();
-  void set_ao_labels(const POLYQUANT_MOLECULE &molecule);
+  void set_ao_labels();
 
   std::vector<std::vector<std::string>> gamess_cartesian_ordering_labels = {
       {""},
@@ -61,13 +59,15 @@ public:
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> character_table;
   Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> direct_product_table;
   bool do_symmetry = true;
-  void symmetrize_basis(const POLYQUANT_MOLECULE &molecule);
+  void symmetrize_basis();
   void reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &combined_salcs, const size_t basis_idx);
   /**
    * @brief The name of the basis to load
    *
    */
   // std::vector<std::string> basis_name;
+  std::shared_ptr<POLYQUANT_INPUT> input;
+  std::shared_ptr<POLYQUANT_MOLECULE> molecule;
   /**
    * @brief the libint2 basis object
    *

@@ -28,17 +28,17 @@ public:
    *
    * @param input a POLYQUANT_INPUT instance
    */
-  POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input);
+  POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params);
 
   /**
    * @brief Set the up molecule object.
    *
    * @param input a POLYQUANT_INPUT instance
    */
-  void setup_molecule(const POLYQUANT_INPUT &input);
-  void set_molecular_charge(const POLYQUANT_INPUT &input);
-  void set_molecular_multiplicity(const POLYQUANT_INPUT &input);
-  void set_molecular_restricted(const POLYQUANT_INPUT &input);
+  void setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params);
+  void set_molecular_charge();
+  void set_molecular_multiplicity();
+  void set_molecular_restricted();
   void symmetrize_molecule();
 
   std::string get_label_of_center(const std::array<double, 3> &center_pos) const;
@@ -48,7 +48,7 @@ public:
   msym_context ctx;
   bool do_symmetry = true;
 
-  void parse_particles(const POLYQUANT_INPUT &input);
+  void parse_particles();
   void print_molecule();
 
   /**
@@ -74,6 +74,8 @@ public:
    * @return std::string containing the molecule in xyz format
    */
   std::string dump_xyz(std::string classical_part_key = "all") const;
+
+  std::shared_ptr<POLYQUANT_INPUT> input;
 
   std::vector<std::vector<double>> centers;
 

@@ -24,8 +24,8 @@ namespace polyquant {
 class POLYQUANT_EPCI {
 public:
   POLYQUANT_EPCI() = default;
-  POLYQUANT_EPCI(const POLYQUANT_EPSCF &input_scf) { this->setup(input_scf); };
-  void setup(const POLYQUANT_EPSCF &input_scf);
+  POLYQUANT_EPCI(std::shared_ptr<POLYQUANT_EPSCF> input_scf) { this->setup(input_scf); };
+  void setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
   void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs);
@@ -48,31 +48,31 @@ public:
    * @brief the input parameters
    *
    */
-  POLYQUANT_INPUT input_params;
+  std::shared_ptr<POLYQUANT_INPUT> input_params;
 
   /**
    * @brief the input molecule
    *
    */
-  POLYQUANT_MOLECULE input_molecule;
+  std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
   /**
    * @brief the input basis
    *
    */
-  POLYQUANT_BASIS input_basis;
+  std::shared_ptr<POLYQUANT_BASIS> input_basis;
 
   /**
    * @brief integrals calculated for the input molecule in the input basis
    *
    */
-  POLYQUANT_INTEGRAL input_integral;
+  std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
 
   /**
    * @brief the input scf calculation
    *
    */
-  POLYQUANT_EPSCF input_epscf;
+  std::shared_ptr<POLYQUANT_EPSCF> input_epscf;
   POLYQUANT_DETSET<uint64_t> detset;
   Eigen::Matrix<double, Eigen::Dynamic, 1> energies;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;

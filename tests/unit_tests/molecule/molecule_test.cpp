@@ -7,7 +7,7 @@
 using namespace polyquant;
 TEST_SUITE("MOLECULE") {
   TEST_CASE("MOLECULE: Construct Molecule.") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
     POLYQUANT_MOLECULE test_mol;
     test_mol.setup_molecule(test_inp);
     CHECK(test_mol.centers[0][1] == doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
@@ -21,7 +21,7 @@ TEST_SUITE("MOLECULE") {
     CHECK(xyz_test == xyz_ref);
   }
   TEST_CASE("MOLECULE: Construct Molecule with no keywords") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o_nokeyword.json");
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o_nokeyword.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
     CHECK(test_mol.centers[0][1] == doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     CHECK(test_mol.charge == 0);
@@ -29,7 +29,7 @@ TEST_SUITE("MOLECULE") {
     CHECK(test_mol.restricted == true);
   }
   TEST_CASE("MOLECULE: Construct Molecule with quantum nuclei specificed by center list.") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumHlibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3g_quantumHlibrary/h2o.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
     CHECK(test_mol.centers[1][1] == doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     CHECK(test_mol.charge == 0);
@@ -38,7 +38,7 @@ TEST_SUITE("MOLECULE") {
   }
   TEST_CASE("MOLECULE: Construct Molecule with quantum nuclei specificed by "
             "center label.") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3g_quantumHlibrary/h2o_alternate.json");
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3g_quantumHlibrary/h2o_alternate.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
     CHECK(test_mol.centers[1][1] == doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
     CHECK(test_mol.charge == 0);
@@ -46,7 +46,7 @@ TEST_SUITE("MOLECULE") {
     CHECK(test_mol.restricted == false);
   }
   TEST_CASE("MOLECULE: Construct Molecule with positron") {
-    POLYQUANT_INPUT test_inp("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
     POLYQUANT_MOLECULE test_mol(test_inp);
     CHECK(test_mol.quantum_particles["positron"].spin == 0.5);
     CHECK(test_mol.quantum_particles["positron"].mass == 1.0);

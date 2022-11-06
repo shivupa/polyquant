@@ -16,12 +16,12 @@ namespace polyquant {
 class POLYQUANT_SCF {
 public:
   POLYQUANT_SCF() = default;
-  POLYQUANT_SCF(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral);
-  void setup_calculation(const POLYQUANT_INPUT &input_params, const POLYQUANT_MOLECULE &input_molecule, const POLYQUANT_BASIS &input_basis, const POLYQUANT_INTEGRAL &input_integral);
-  void set_input(const POLYQUANT_INPUT &input_params);
-  void set_molecule(const POLYQUANT_MOLECULE &input_molecule);
-  void set_basis(const POLYQUANT_BASIS &input_basis);
-  void set_integral(const POLYQUANT_INTEGRAL &input_integral);
+  POLYQUANT_SCF(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_INTEGRAL> integral);
+  void setup_calculation(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_INTEGRAL> integral);
+  void set_input(std::shared_ptr<POLYQUANT_INPUT> params);
+  void set_molecule(std::shared_ptr<POLYQUANT_MOLECULE> molecule);
+  void set_basis(std::shared_ptr<POLYQUANT_BASIS> basis);
+  void set_integral(std::shared_ptr<POLYQUANT_INTEGRAL> integral);
 
   virtual void form_H_core() = 0;
   virtual void form_fock() = 0;
@@ -40,25 +40,25 @@ public:
    * @brief the input parameters
    *
    */
-  POLYQUANT_INPUT input_params;
+  std::shared_ptr<POLYQUANT_INPUT> input_params;
 
   /**
    * @brief the input molecule
    *
    */
-  POLYQUANT_MOLECULE input_molecule;
+  std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
   /**
    * @brief the input basis
    *
    */
-  POLYQUANT_BASIS input_basis;
+  std::shared_ptr<POLYQUANT_BASIS> input_basis;
 
   /**
    * @brief integrals calculated for the input molecule in the input basis
    *
    */
-  POLYQUANT_INTEGRAL input_integral;
+  std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
 };
 } // namespace polyquant
 #endif

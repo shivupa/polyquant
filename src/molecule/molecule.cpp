@@ -2,32 +2,32 @@
 
 using namespace polyquant;
 
-POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input) {
+POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  setup_molecule(input);
+  setup_molecule(input_params);
 }
 
-void POLYQUANT_MOLECULE::set_molecular_charge(const POLYQUANT_INPUT &input) {
-  if (input.input_data["molecule"].contains("molecular_charge")) {
-    this->charge = input.input_data["molecule"]["molecular_charge"];
+void POLYQUANT_MOLECULE::set_molecular_charge() {
+  if (input->input_data["molecule"].contains("molecular_charge")) {
+    this->charge = input->input_data["molecule"]["molecular_charge"];
   } else {
     APP_ABORT("Can't set up molecule. The molecule section of the input is missing 'molecular_charge'.");
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_multiplicity(const POLYQUANT_INPUT &input) {
-  if (input.input_data["molecule"].contains("molecular_multiplicity")) {
-    this->multiplicity = input.input_data["molecule"]["molecular_multiplicity"];
+void POLYQUANT_MOLECULE::set_molecular_multiplicity() {
+  if (input->input_data["molecule"].contains("molecular_multiplicity")) {
+    this->multiplicity = input->input_data["molecule"]["molecular_multiplicity"];
   } else {
     APP_ABORT("Can't set up molecule. The molecule section of the input is missing 'molecular_multiplicity'.");
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) {
-  if (input.input_data.contains("keywords")) {
-    if (input.input_data["keywords"].contains("restricted")) {
-      this->restricted = input.input_data["keywords"]["restricted"];
+void POLYQUANT_MOLECULE::set_molecular_restricted() {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("restricted")) {
+      this->restricted = input->input_data["keywords"]["restricted"];
     } else {
       Polyquant_cout("'keywords'->'restricted' missing. Defaulting to restricted.");
       this->restricted = true;
@@ -146,13 +146,13 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   // if(MSYM_SUCCESS != (ret = msymGetSubgroups(ctx, &msgl, &msg))) goto err;
 }
 
-void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
+void POLYQUANT_MOLECULE::parse_particles() {
   // Store center coordinates
   // todo check for geom and symbols
-  for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3); ++i) {
+  for (size_t i = 0; i < (input->input_data["molecule"]["geometry"].size() / 3); ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
-      atom.push_back(input.input_data["molecule"]["geometry"][(i * 3) + j]);
+      atom.push_back(input->input_data["molecule"]["geometry"][(i * 3) + j]);
       atom[j] *= this->angstrom_to_bohr;
     }
     centers.push_back(atom);
@@ -160,22 +160,22 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center labels
   std::vector<std::string> center_labels;
   std::vector<int> quantum_nuclei;
-  for (auto label : input.input_data["molecule"]["symbols"]) {
+  for (auto label : input->input_data["molecule"]["symbols"]) {
     center_labels.push_back(label);
     quantum_nuclei.push_back(0);
   }
 
   // Store if we are using nuclear charge modification
   bool charge_mod = false;
-  if (input.input_data["molecule"].contains("modify_nuclear_charge")) {
+  if (input->input_data["molecule"].contains("modify_nuclear_charge")) {
     charge_mod = true;
   }
 
-  if (input.input_data.contains("keywords")) {
-    if (input.input_data["keywords"].contains("symmetry")) {
-      if (input.input_data["keywords"]["symmetry"] == "auto") {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("symmetry")) {
+      if (input->input_data["keywords"]["symmetry"] == "auto") {
         do_symmetry = true;
-      } else if (input.input_data["keywords"]["symmetry"] == "off") {
+      } else if (input->input_data["keywords"]["symmetry"] == "off") {
         do_symmetry = false;
         point_group = "C1";
         sub_group = "C1";
@@ -183,13 +183,13 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         APP_ABORT("Setting for keywords->symmetry can be [auto, off].");
       }
     }
-    // if (input.input_data["keywords"].contains("molecule_keywords")) {
+    // if (input->input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
-    if (input.input_data["keywords"].contains("quantum_nuclei")) {
+    if (input->input_data["keywords"].contains("quantum_nuclei")) {
       // if a label is given change all nuclei with matching label to be
       // quantum https://github.com/nlohmann/json/issues/1564
-      if (std::all_of(input.input_data["keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_string(); })) {
-        for (std::string quantum_label : input.input_data["keywords"]["quantum_nuclei"]) {
+      if (std::all_of(input->input_data["keywords"]["quantum_nuclei"].begin(), input->input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_string(); })) {
+        for (std::string quantum_label : input->input_data["keywords"]["quantum_nuclei"]) {
           // https://stackoverflow.com/questions/42871932/how-to-find-all-positions-of-an-element-using-stdfind
           auto start_it = std::begin(center_labels);
           bool found_at_least_once = false;
@@ -206,9 +206,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
             Polyquant_cout("The label '" + quantum_label + "' was not found in the atomic labels. Skipping...");
           }
         }
-      } else if (std::all_of(input.input_data["keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_number(); })) {
+      } else if (std::all_of(input->input_data["keywords"]["quantum_nuclei"].begin(), input->input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_number(); })) {
         size_t idx = 0;
-        for (auto is_quantum : input.input_data["keywords"]["quantum_nuclei"]) {
+        for (auto is_quantum : input->input_data["keywords"]["quantum_nuclei"]) {
           quantum_nuclei[idx] = is_quantum;
           idx++;
         }
@@ -236,8 +236,8 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         classical_particles[curr_label].mass = atom_symb_to_mass(center_labels[i]);
         double nuc_charge = atom_symb_to_num(center_labels[i]);
         if (charge_mod) {
-          if (input.input_data["molecule"]["modify_nuclear_charge"].contains(center_labels[i])) {
-            nuc_charge = input.input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
+          if (input->input_data["molecule"]["modify_nuclear_charge"].contains(center_labels[i])) {
+            nuc_charge = input->input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
           }
         }
         classical_particles[curr_label].charge = nuc_charge;
@@ -290,9 +290,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
     }
   }
   // create any other quantum particles
-  if (input.input_data.contains("keywords")) {
-    if (input.input_data["keywords"].contains("quantum_particles")) {
-      for (auto qp : input.input_data["keywords"]["quantum_particles"]) {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("quantum_particles")) {
+      for (auto qp : input->input_data["keywords"]["quantum_particles"]) {
         std::string curr_label;
         if (qp.contains("name")) {
           curr_label = qp["name"];
@@ -427,13 +427,13 @@ void POLYQUANT_MOLECULE::print_molecule() {
   Polyquant_cout("");
 }
 
-void POLYQUANT_MOLECULE::setup_molecule(const POLYQUANT_INPUT &input) {
-
-  if (input.input_data.contains("molecule")) {
-    set_molecular_charge(input);
-    set_molecular_multiplicity(input);
-    set_molecular_restricted(input);
-    parse_particles(input);
+void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params) {
+  input = input_params;
+  if (input->input_data.contains("molecule")) {
+    set_molecular_charge();
+    set_molecular_multiplicity();
+    set_molecular_restricted();
+    parse_particles();
     if (do_symmetry) {
       symmetrize_molecule();
     }

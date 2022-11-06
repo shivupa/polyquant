@@ -14,9 +14,9 @@ TEST_SUITE("INTEGRAL") {
   }
 
   TEST_CASE("INTEGRAL: overlap AO basis") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
-    POLYQUANT_MOLECULE test_mol(test_inp);
-    POLYQUANT_BASIS test_bas(test_inp, test_mol);
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp);
+    std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int;
     test_int.setup_integral(test_inp, test_bas, test_mol);
     test_int.calculate_overlap();
@@ -27,9 +27,9 @@ TEST_SUITE("INTEGRAL") {
   }
 
   TEST_CASE("INTEGRAL: kinetic AO basis") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
-    POLYQUANT_MOLECULE test_mol(test_inp);
-    POLYQUANT_BASIS test_bas(test_inp, test_mol);
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp);
+    std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int(test_inp, test_bas, test_mol);
     test_int.calculate_kinetic();
     // Verified using pyscf
@@ -39,9 +39,9 @@ TEST_SUITE("INTEGRAL") {
   }
 
   TEST_CASE("INTEGRAL: nuclear AO basis") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
-    POLYQUANT_MOLECULE test_mol(test_inp);
-    POLYQUANT_BASIS test_bas(test_inp, test_mol);
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp);
+    std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int(test_inp, test_bas, test_mol);
     test_int.calculate_nuclear();
     // Verified using pyscf
@@ -50,9 +50,9 @@ TEST_SUITE("INTEGRAL") {
     CHECK(test_int.nuclear[0](3, 5) == doctest::Approx(0.22351644812734084).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
   TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
-    POLYQUANT_MOLECULE test_mol(test_inp);
-    POLYQUANT_BASIS test_bas(test_inp, test_mol);
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp);
+    std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int;
     test_int.setup_integral(test_inp, test_bas, test_mol);
     test_int.calculate_overlap();
@@ -62,9 +62,9 @@ TEST_SUITE("INTEGRAL") {
     CHECK(test_int.orth_X[0][3](0, 0) == doctest::Approx(0.9206084339).epsilon(POLYQUANT_TEST_EPSILON_TIGHT));
   }
   TEST_CASE("INTEGRAL: canonical orthogonalization AO basis") {
-    POLYQUANT_INPUT test_inp("../../tests/data/h2o_sto3glibrary/h2o.json");
-    POLYQUANT_MOLECULE test_mol(test_inp);
-    POLYQUANT_BASIS test_bas(test_inp, test_mol);
+    std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+    std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp);
+    std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_mol);
     POLYQUANT_INTEGRAL test_int;
     test_int.setup_integral(test_inp, test_bas, test_mol);
     test_int.calculate_overlap();
