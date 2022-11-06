@@ -13,6 +13,9 @@ Polyquant uses C++20. This is required because the CI operations use https://en.
 - [boostorg/boost](https://github.com/boostorg/boost)
   Super-project for modularized Boost 
 
+- [ mcodev31/libmsym](https://github.com/mcodev31/libmsym)
+   molecular point group symmetry lib 
+
 ### For a production build (These are installed via CMake's FetchContent)
 - [onqtam/doctest](https://github.com/onqtam/doctest)
    The fastest feature-rich C++11/14/17/20 single-header testing framework for unit tests and TDD 
