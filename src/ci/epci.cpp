@@ -24,6 +24,9 @@ void POLYQUANT_EPCI::calculate_integrals() {
     this->detset.max_orb.push_back(this->input_epscf->num_mo[i] - this->frozen_core[i] - this->deleted_virtual[i]);
   }
   this->detset.set_integral(this->input_integral);
+  this->detset.set_molecule(this->input_molecule);
+  this->detset.set_basis(this->input_basis);
+  this->detset.set_epscf(this->input_epscf);
 }
 
 void POLYQUANT_EPCI::calculate_fc_energy() {

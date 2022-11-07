@@ -6,6 +6,7 @@
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include "molecule/quantum_particles.hpp"
+#include "scf/epscf.hpp"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <algorithm>
@@ -37,6 +38,7 @@ public:
   }
   void resize(std::size_t size);
 
+  int get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D);
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
   void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const;
   void get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const;
@@ -95,8 +97,14 @@ public:
   std::vector<double> frozen_core_energy;
 
   std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
+  std::shared_ptr<POLYQUANT_BASIS> input_basis;
+  std::shared_ptr<POLYQUANT_EPSCF> input_epscf;
+  std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
+  void set_basis(std::shared_ptr<POLYQUANT_BASIS> basis) { this->input_basis = basis; };
   void set_integral(std::shared_ptr<POLYQUANT_INTEGRAL> integral) { this->input_integral = integral; };
+  void set_epscf(std::shared_ptr<POLYQUANT_EPSCF> scf) { this->input_epscf = scf; };
+  void set_molecule(std::shared_ptr<POLYQUANT_MOLECULE> molecule) { this->input_molecule = molecule; };
 
   // void construct_cache(size_t size_in_gb = 10000) {
   //   // This is actually super complicated. Some assumptions are made here that
@@ -137,6 +145,7 @@ public:
     return cols;
   }
   int N_dets;
+  int curr_symm_block;
   // y_out = M * x_in
   Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
   // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ham;
@@ -209,21 +218,64 @@ template <typename T> void POLYQUANT_DETSET<T>::resize(std::size_t size) {
     unique_dets[i].resize(2);
   }
 }
+
+template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D) {
+  int symm_idx = -1;
+  std::vector<int> occ, virt;
+  occ.clear();
+  virt.clear();
+  auto det = std::get<0>(D);
+  this->get_occ_virt(idx_part, det, occ, virt);
+  for (auto i_occ : occ) {
+    if (symm_idx < 0) {
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][i_occ];
+    } else {
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][i_occ]);
+    }
+  }
+
+  int beta_idx = this->input_epscf->symm_label_idxs[idx_part].size() - 1;
+  det = std::get<1>(D);
+  occ.clear();
+  virt.clear();
+  this->get_occ_virt(idx_part, det, occ, virt);
+  for (auto i_occ : occ) {
+    if (symm_idx < 0) {
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ];
+    } else {
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ]);
+    }
+  }
+
+  return symm_idx;
+}
+
 template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::vector<std::vector<int>> &occ) {
   std::string alpha_bit_string, beta_bit_string;
   int symm_idx = -1;
+  int beta_idx = this->input_epscf->symm_label_idxs[idx_part].size() - 1;
+
   alpha_bit_string.resize(max_orb[idx_part], '0');
   beta_bit_string.resize(max_orb[idx_part], '0');
+
   for (auto i_occ : occ[0]) {
     if (symm_idx < 0) {
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][i_occ];
     } else {
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][i_occ]);
     }
     alpha_bit_string[i_occ] = '1';
   }
   for (auto i_occ : occ[1]) {
+    if (symm_idx < 0) {
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ];
+    } else {
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ]);
+    }
     beta_bit_string[i_occ] = '1';
   }
-  Polyquant_cout("Creating det " + alpha_bit_string + " " + beta_bit_string + " for particle " + std::to_string(idx_part));
+  Polyquant_cout("Creating det " + alpha_bit_string + " " + beta_bit_string + " for particle " + std::to_string(idx_part) + " of the following irrep " +
+                 this->input_basis->irrep_names[idx_part][symm_idx]);
   std::reverse(alpha_bit_string.begin(), alpha_bit_string.end());
   std::reverse(beta_bit_string.begin(), beta_bit_string.end());
   std::vector<T> alpha_det;
@@ -340,9 +392,13 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
   this->N_dets = 0;
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_0 = std::make_pair(this->unique_dets[0][0][0], this->unique_dets[0][1][0]);
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_1;
+  int symm_idx = get_symm_idx(0, hf_det_pair_0);
   if (excitation_level.size() == 2) {
     hf_det_pair_1 = std::make_pair(this->unique_dets[1][0][0], this->unique_dets[1][1][0]);
+    symm_idx *= get_symm_idx(1, hf_det_pair_1);
   }
+  this->curr_symm_block = symm_idx;
+
   for (auto i = 0; i < this->unique_dets[0][0].size(); i++) {
     for (auto j = 0; j < this->unique_dets[0][1].size(); j++) {
       std::pair<std::vector<T>, std::vector<T>> det_pair_0 = std::make_pair(this->unique_dets[0][0][i], this->unique_dets[0][1][j]);
@@ -356,7 +412,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
               auto excitation_degree_1 = 0;
               excitation_degree_1 = this->num_excitation(hf_det_pair_1, det_pair_1);
               if (excitation_degree_1 <= std::get<2>(excitation_level[1])) {
-                if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level) {
+                int excitation_symm_idx = get_symm_idx(0, det_pair_0);
+                excitation_symm_idx *= get_symm_idx(1, det_pair_1);
+                if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
                   std::vector<int> det_idx = {i, j, k, l};
                   this->dets[det_idx] = this->N_dets;
                   this->N_dets++;
@@ -365,7 +423,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
             }
           }
         } else {
-          if (excitation_degree_0 <= max_collective_excitation_level) {
+          int excitation_symm_idx = get_symm_idx(0, det_pair_0);
+          if (excitation_degree_0 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
             std::vector<int> det_idx = {i, j};
             this->dets[det_idx] = this->N_dets;
             this->N_dets++;
