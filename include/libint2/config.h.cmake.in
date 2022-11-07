@@ -34,16 +34,16 @@
 #define LIBINT_TARGET_ARCH "x86_64-pc-linux-gnu"
 
 /* The version number. */
-#define LIBINT_VERSION "2.7.2"
+#define LIBINT_VERSION "2.8.0"
 
 /* The major version number. */
 #define LIBINT_MAJOR_VERSION 2
 
 /* The minor version number. */
-#define LIBINT_MINOR_VERSION 7
+#define LIBINT_MINOR_VERSION 8
 
 /* The micro version number. */
-#define LIBINT_MICRO_VERSION 2
+#define LIBINT_MICRO_VERSION 0
 
 /* Prefix for all names in API */
 /* #undef LIBINT_API_PREFIX */
