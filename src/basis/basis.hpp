@@ -42,6 +42,7 @@ public:
   void load_quantum_particle_atom_basis_custom(const std::string &quantum_part_key, const std::string &classical_part_key, const int &center_basis_idx, const CLASSICAL_PARTICLE_SET &classical_part,
                                                libint2::BasisSet &qp_basis);
   void set_pure_from_input();
+  void set_symmetry_from_input();
   void set_libint_shell_norm();
   void print_basis();
   void set_ao_labels();

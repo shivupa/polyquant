@@ -740,7 +740,7 @@ void POLYQUANT_EPSCF::reset_incfock() {
         this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->incremental_fock_initial_onset_thresh / 10.0;
         this->incremental_fock_reset_iteration[quantum_part_idx].resize(2);
         this->incremental_fock_reset_iteration[quantum_part_idx][0] = this->iteration_num;
-        this->incremental_fock_reset_iteration[quantum_part_idx][2] = this->iteration_num;
+        this->incremental_fock_reset_iteration[quantum_part_idx][1] = this->iteration_num;
         this->incremental_fock_doing_incremental[quantum_part_idx].resize(2);
         this->incremental_fock_doing_incremental[quantum_part_idx][0] = false;
         this->incremental_fock_doing_incremental[quantum_part_idx][1] = false;
@@ -1300,7 +1300,7 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   this->num_mo_per_irrep.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    this->num_mo_per_irrep[quantum_part_idx].resize(this->input_molecule->quantum_particles.size());
+    this->num_mo_per_irrep[quantum_part_idx].resize(this->input_basis->irrep_names[quantum_part_idx].size());
     for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       this->num_mo_per_irrep[quantum_part_idx][irrep_idx] = this->input_integral->orth_X[quantum_part_idx][irrep_idx].cols();
     }

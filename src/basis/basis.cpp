@@ -140,6 +140,14 @@ void POLYQUANT_BASIS::set_pure_from_input() {
   }
 }
 
+void POLYQUANT_BASIS::set_symmetry_from_input() {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("symmetry")) {
+      this->do_symmetry = input->input_data["keywords"]["symmetry"];
+    }
+  }
+}
+
 void POLYQUANT_BASIS::set_libint_shell_norm() {
   libint2::Shell::do_enforce_unit_normalization(true);
   std::stringstream buffer;
@@ -299,6 +307,10 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       }
       int bfsl = mbfs[basis_idx].size();
       if (MSYM_SUCCESS != (ret = msymSetBasisFunctions(ctx, bfsl, mbfs[basis_idx].data()))) {
+        auto error = msymErrorString(ret);
+        std::cout << error << std::endl;
+        error = msymGetErrorDetails();
+        std::cout << error << std::endl;
         APP_ABORT("Error setting basis functions.");
       }
 
@@ -382,6 +394,10 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       const msym_character_table_t *mct = NULL;
 
       if (MSYM_SUCCESS != (ret = msymGetSubrepresentationSpaces(ctx, &msrsl, &msrs))) {
+        auto error = msymErrorString(ret);
+        std::cout << error << std::endl;
+        error = msymGetErrorDetails();
+        std::cout << error << std::endl;
         APP_ABORT("Error getting subrepresentation spaces");
       }
       if (MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, combined_salcs.data(), species.data(), pf.data()))) {
@@ -491,6 +507,7 @@ void POLYQUANT_BASIS::load_basis(std::shared_ptr<POLYQUANT_INPUT> input_params, 
   input = input_params;
   molecule = input_molecule;
   this->set_pure_from_input();
+  this->set_symmetry_from_input();
   this->set_libint_shell_norm();
   // parse basis name from data
   if (input->input_data.contains("model")) {

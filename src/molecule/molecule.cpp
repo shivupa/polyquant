@@ -38,24 +38,35 @@ void POLYQUANT_MOLECULE::set_molecular_restricted() {
   }
 }
 
+void POLYQUANT_MOLECULE::set_symmetry_from_input() {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("symmetry")) {
+      this->do_symmetry = input->input_data["keywords"]["restricted"];
+    }
+  }
+  if (!this->do_symmetry) {
+    point_group = "C1";
+    sub_group = "C1";
+  }
+}
 void POLYQUANT_MOLECULE::symmetrize_molecule() {
 
   msym_error_t ret = MSYM_SUCCESS;
-  const char *error = NULL;
 
   // create atoms in msym structs
   std::vector<msym_element_t> elements_for_msym;
   elements_for_msym = this->to_point_msym_charges_for_symmetry();
   int length = elements_for_msym.size();
 
-  if (length == 1) {
+  ctx = msymCreateContext();
+
+  if (do_symmetry == false) {
     std::cout << "Setting point group to C1 since there is only 1 atom" << std::endl;
     point_group = "C1";
     sub_group = "C1";
     return;
   }
 
-  ctx = msymCreateContext();
   // TODO Figure out setting symmetry thresholds here for now use default
   //  if(NULL != thresholds){
   //      if(MSYM_SUCCESS != (ret = msymSetThresholds(ctx, thresholds))) goto err;
@@ -91,8 +102,24 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   std::cout << "SYMMMETRY TESTING : COM  " << com[0] << "   " << com[1] << "    " << com[2] << std::endl;
   std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
 
-  if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
-    APP_ABORT("Error Figuring out symmetry");
+  if (length != 1) {
+    if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
+
+      auto error = msymErrorString(ret);
+      std::cout << error << std::endl;
+      error = msymGetErrorDetails();
+      std::cout << error << std::endl;
+      APP_ABORT("Error Figuring out symmetry");
+    }
+  } else {
+    std::string pg = "D2h";
+    if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+      auto error = msymErrorString(ret);
+      std::cout << error << std::endl;
+      error = msymGetErrorDetails();
+      std::cout << error << std::endl;
+      APP_ABORT("Error setting PG to D2h");
+    }
   }
   point_group.resize(6);
   if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group.data()))) {
@@ -172,17 +199,6 @@ void POLYQUANT_MOLECULE::parse_particles() {
   }
 
   if (input->input_data.contains("keywords")) {
-    if (input->input_data["keywords"].contains("symmetry")) {
-      if (input->input_data["keywords"]["symmetry"] == "auto") {
-        do_symmetry = true;
-      } else if (input->input_data["keywords"]["symmetry"] == "off") {
-        do_symmetry = false;
-        point_group = "C1";
-        sub_group = "C1";
-      } else {
-        APP_ABORT("Setting for keywords->symmetry can be [auto, off].");
-      }
-    }
     // if (input->input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
     if (input->input_data["keywords"].contains("quantum_nuclei")) {
@@ -430,13 +446,14 @@ void POLYQUANT_MOLECULE::print_molecule() {
 void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params) {
   input = input_params;
   if (input->input_data.contains("molecule")) {
+    set_symmetry_from_input();
     set_molecular_charge();
     set_molecular_multiplicity();
     set_molecular_restricted();
     parse_particles();
-    if (do_symmetry) {
-      symmetrize_molecule();
-    }
+    // if (do_symmetry) {
+    symmetrize_molecule();
+    //}
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
     Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));

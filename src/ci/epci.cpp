@@ -523,6 +523,8 @@ void POLYQUANT_EPCI::run() {
       APP_ABORT("CI Calculation did not converge!");
     }
   }
+  delete logger;
+  logger = NULL;
 }
 
 void POLYQUANT_EPCI::dump_molden() {

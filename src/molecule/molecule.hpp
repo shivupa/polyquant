@@ -22,6 +22,7 @@ namespace polyquant {
 class POLYQUANT_MOLECULE {
 public:
   POLYQUANT_MOLECULE() = default;
+  ~POLYQUANT_MOLECULE() { msymReleaseContext(ctx); }
   /**
    * @brief Construct a new polyquant molecule object given an input object with
    * a call to setup_molecule.
@@ -36,6 +37,7 @@ public:
    * @param input a POLYQUANT_INPUT instance
    */
   void setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params);
+  void set_symmetry_from_input();
   void set_molecular_charge();
   void set_molecular_multiplicity();
   void set_molecular_restricted();
