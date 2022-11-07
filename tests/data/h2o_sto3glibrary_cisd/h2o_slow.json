@@ -24,6 +24,7 @@
         "iteration_max" : 200
     },
    "pure" : true,
+   "symmetry" : false,
    "ci_keywords" : {
        "convergence_E" : 1e-9,
        "num_states" : 2,
