@@ -225,6 +225,8 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     salc_per_irrep.resize(this->basis.size());
     salcs.resize(this->basis.size());
 
+    direct_product_table.resize(1, 1);
+    direct_product_table(0, 0) = 0;
     for (auto basis_idx = 0; basis_idx < this->basis.size(); basis_idx++) {
       irrep_names[basis_idx].resize(1);
       irrep_names[basis_idx][0] = "A";
