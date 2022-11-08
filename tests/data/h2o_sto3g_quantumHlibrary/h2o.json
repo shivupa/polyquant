@@ -18,11 +18,19 @@
     "method": "scf",
     "basis": 
     {"electron" :
-        {"O" : [{ "library" : {"type" : "sto-3g"} }],
-        "H" : [{ "library" : {"type" : "sto-3g"} }]},
-    "H" :
-        {"O" : [{ "library" : {"type" : "sto-3g"} }],
-        "H" : [{ "library" : {"type" : "sto-3g"} }]}}
+        {
+            "O" : [{ "custom" : 
+                {"type" : "file",
+                 "filename" : "../../tests/data/h2o_sto3gfile/O_basis.g94"}}],
+            "H" : [{ "library" : {"type" : "sto-3g"} }]
+        },
+      "H" :
+        {
+            "O" : [{ "custom" : 
+                {"type" : "file",
+                 "filename" : "../../tests/data/h2o_sto3gfile/O_basis.g94"}}],
+            "H" : [{ "library" : {"type" : "sto-3g"} }]}
+        }
   },
   "keywords": {
     "restricted" : false,
