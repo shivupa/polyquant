@@ -84,6 +84,16 @@ jobs:
           mkdir builddir
           echo $MKLROOT
           ls /usr/share/libint/*/basis/
+      - name: Install libmsym
+        run: |
+          git clone https://github.com/mcodev31/libmsym.git
+          cd libmsym
+          mkdir build
+          cd build
+          # build as shared library; build examples (built in ./examples,  not installed)
+          cmake -DBUILD_SHARED_LIBS:BOOL=ON -DMSYM_BUILD_EXAMPLES:BOOL=ON ../.
+          make
+          make install
       - name: Create a directory that the libint imported target requires. DO NOT DELETE THIS STEP.
         shell: bash
         run: |
