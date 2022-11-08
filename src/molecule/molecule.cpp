@@ -41,7 +41,7 @@ void POLYQUANT_MOLECULE::set_molecular_restricted() {
 void POLYQUANT_MOLECULE::set_symmetry_from_input() {
   if (input->input_data.contains("keywords")) {
     if (input->input_data["keywords"].contains("symmetry")) {
-      this->do_symmetry = input->input_data["keywords"]["restricted"];
+      this->do_symmetry = input->input_data["keywords"]["symmetry"];
     }
   }
   if (!this->do_symmetry) {
@@ -61,7 +61,7 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   ctx = msymCreateContext();
 
   if (do_symmetry == false) {
-    std::cout << "Setting point group to C1 since there is only 1 atom" << std::endl;
+    // std::cout << "Setting point group to C1 since there is only 1 atom" << std::endl;
     point_group = "C1";
     sub_group = "C1";
     return;

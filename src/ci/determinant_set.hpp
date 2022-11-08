@@ -38,7 +38,7 @@ public:
   }
   void resize(std::size_t size);
 
-  int get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D);
+  int get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx);
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
   void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const;
   void get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const;
@@ -219,8 +219,8 @@ template <typename T> void POLYQUANT_DETSET<T>::resize(std::size_t size) {
   }
 }
 
-template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D) {
-  int symm_idx = -1;
+template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx) {
+  // int symm_idx = -1;
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
@@ -392,10 +392,11 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
   this->N_dets = 0;
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_0 = std::make_pair(this->unique_dets[0][0][0], this->unique_dets[0][1][0]);
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_1;
-  int symm_idx = get_symm_idx(0, hf_det_pair_0);
+  int symm_idx = -1;
+  get_symm_idx(0, hf_det_pair_0, symm_idx);
   if (excitation_level.size() == 2) {
     hf_det_pair_1 = std::make_pair(this->unique_dets[1][0][0], this->unique_dets[1][1][0]);
-    symm_idx *= get_symm_idx(1, hf_det_pair_1);
+    get_symm_idx(1, hf_det_pair_1, symm_idx);
   }
   this->curr_symm_block = symm_idx;
 
@@ -408,12 +409,13 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
         if (excitation_level.size() == 2) {
           for (auto k = 0; k < this->unique_dets[1][0].size(); k++) {
             for (auto l = 0; l < this->unique_dets[1][1].size(); l++) {
+              int excitation_symm_idx = -1;
               std::pair<std::vector<T>, std::vector<T>> det_pair_1 = std::make_pair(this->unique_dets[1][0][k], this->unique_dets[1][1][l]);
               auto excitation_degree_1 = 0;
               excitation_degree_1 = this->num_excitation(hf_det_pair_1, det_pair_1);
               if (excitation_degree_1 <= std::get<2>(excitation_level[1])) {
-                int excitation_symm_idx = get_symm_idx(0, det_pair_0);
-                excitation_symm_idx *= get_symm_idx(1, det_pair_1);
+                get_symm_idx(0, det_pair_0, excitation_symm_idx);
+                get_symm_idx(1, det_pair_1, excitation_symm_idx);
                 if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
                   std::vector<int> det_idx = {i, j, k, l};
                   this->dets[det_idx] = this->N_dets;
@@ -423,7 +425,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
             }
           }
         } else {
-          int excitation_symm_idx = get_symm_idx(0, det_pair_0);
+          int excitation_symm_idx = -1;
+          get_symm_idx(0, det_pair_0, excitation_symm_idx);
           if (excitation_degree_0 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
             std::vector<int> det_idx = {i, j};
             this->dets[det_idx] = this->N_dets;
