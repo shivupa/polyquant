@@ -18,10 +18,10 @@
     "method": "scf",
     "basis": 
     {"electron" :
-        {"O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }],
+        {"O" : [{ "library" : {"type" : "sto-3g"} }],
         "H" : [{ "library" : {"type" : "sto-3g"} }]},
     "H" :
-        {"O" : [{ "library" : {"type" : "sto-3g", "atom" : "O"} }],
+        {"O" : [{ "library" : {"type" : "sto-3g"} }],
         "H" : [{ "library" : {"type" : "sto-3g"} }]}}
   },
   "keywords": {
