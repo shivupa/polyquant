@@ -157,6 +157,19 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
           }
         }
       }
+      if (this->input_params->input_data["keywords"]["mf_keywords"].contains("npart_per_irrep")) {
+        auto npart_per_irrep_inp = this->input_params->input_data["keywords"]["mf_keywords"]["npart_per_irrep"];
+        scf_calc->npart_per_irrep.resize(npart_per_irrep_inp.size());
+        for (auto i = 0; i < npart_per_irrep_inp.size(); i++) {
+          scf_calc->npart_per_irrep[i].resize(npart_per_irrep_inp[i].size());
+          for (auto j = 0; j < npart_per_irrep_inp[i].size(); j++) {
+            scf_calc->npart_per_irrep[i][j].resize(npart_per_irrep_inp[i][j].size());
+            for (auto k = 0; k < npart_per_irrep_inp[i][j].size(); k++) {
+              scf_calc->npart_per_irrep[i][j][k] = npart_per_irrep_inp[i][j][k];
+            }
+          }
+        }
+      }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("from_file")) {
         if (this->input_params->input_data["keywords"]["mf_keywords"]["from_file"]) {
           dump_for_qmcpack = true;

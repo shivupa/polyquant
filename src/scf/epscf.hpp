@@ -67,6 +67,7 @@ public:
                            const double occval);
 
   void form_occ_helper_initial_npart_per_irrep();
+  void form_occ_helper_initial_npart_per_irrep_from_input();
   void form_occ();
 
   void form_combined_orbitals();

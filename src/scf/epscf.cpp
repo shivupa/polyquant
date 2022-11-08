@@ -1056,6 +1056,30 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
   }
 }
 
+void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
+  // just check that what we got is of a resonable dim
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+    auto n_spin = 1;
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      n_spin = 2;
+    }
+    for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
+      auto npart_spin = (quantum_part_spin_idx == 1) ? quantum_part.num_parts_beta : quantum_part.num_parts_alpha;
+      // checking
+      auto npart_from_irreps = 0;
+      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+        npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
+      }
+      if (npart_from_irreps != npart_spin) {
+        APP_ABORT("Input part per irrep sum != npart from molecule");
+      }
+    }
+    quantum_part_idx++;
+  }
+}
+
 void POLYQUANT_EPSCF::form_occ() {
   // if (!freeze_npart_per_irrep) {
   //   form_occ_helper_initial_npart_per_irrep();
@@ -1322,7 +1346,9 @@ void POLYQUANT_EPSCF::setup_standard() {
   this->form_H_core();
   this->resize_objects();
   this->guess_DM();
-  this->form_occ_helper_initial_npart_per_irrep();
+  if (this->npart_per_irrep.size() == 0) {
+    this->form_occ_helper_initial_npart_per_irrep();
+  }
   this->form_occ();
   this->form_DM();
 }
