@@ -18,6 +18,6 @@ TEST_SUITE("BASIS") {
     std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp);
     POLYQUANT_BASIS test_bas(test_inp, test_mol);
     CHECK(test_bas.num_basis[0] == 7);
-    CHECK(test_bas.basis[0][0].O[1] == doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
+    CHECK(test_bas.basis[0][0].O[0] == doctest::Approx(1.4304631499).epsilon(POLYQUANT_TEST_EPSILON_LOOSE));
   }
 }

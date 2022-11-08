@@ -20,6 +20,7 @@
   },
   "keywords": {
     "restricted" : true,
+    "symmetry" : false,
     "quantum_particles" : [ 
         { "name" : "positron",
           "spin" : 0.5,
