@@ -64,7 +64,9 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const std::string
       qp_basis.set_pure(pure);
     }
   } catch (...) {
-    Polyquant_cout("Trying to read basis from EMSL");
+    std::stringstream emsl_msg;
+    emsl_msg << "Trying to read basis from EMSL for " << classical_part_key;
+    Polyquant_cout(emsl_msg.str());
     auto libint_atoms = molecule->to_libint_atom(classical_part_key);
     if (center_basis["library"].contains("atom")) {
       for (auto &libint_atom : libint_atoms) {
