@@ -95,6 +95,8 @@ public:
 
   std::vector<int> max_orb;
   std::vector<double> frozen_core_energy;
+  std::vector<int> frozen_core;
+  std::vector<int> deleted_virtual;
 
   std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
   std::shared_ptr<POLYQUANT_BASIS> input_basis;
@@ -227,10 +229,11 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
   auto det = std::get<0>(D);
   this->get_occ_virt(idx_part, det, occ, virt);
   for (auto i_occ : occ) {
+    auto shifted_i_occ = i_occ - frozen_core[idx_part];
     if (symm_idx < 0) {
-      symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][i_occ];
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][i_occ]);
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ]);
     }
   }
 
@@ -240,10 +243,11 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
   virt.clear();
   this->get_occ_virt(idx_part, det, occ, virt);
   for (auto i_occ : occ) {
+    auto shifted_i_occ = i_occ - frozen_core[idx_part];
     if (symm_idx < 0) {
-      symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ];
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ]);
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
     }
   }
 
@@ -259,18 +263,20 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   beta_bit_string.resize(max_orb[idx_part], '0');
 
   for (auto i_occ : occ[0]) {
+    auto shifted_i_occ = i_occ - frozen_core[idx_part];
     if (symm_idx < 0) {
-      symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][i_occ];
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][i_occ]);
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ]);
     }
     alpha_bit_string[i_occ] = '1';
   }
   for (auto i_occ : occ[1]) {
+    auto shifted_i_occ = i_occ - frozen_core[idx_part];
     if (symm_idx < 0) {
-      symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ];
+      symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][i_occ]);
+      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
     }
     beta_bit_string[i_occ] = '1';
   }
