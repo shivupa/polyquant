@@ -26,13 +26,7 @@
         "convergence_E" : 1e-12,
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
-        "from_file" : false,
-        "npart_per_irrep" : 
-        [
-            [
-                [2,0,0,0,0,0,0,0]
-            ]
-        ]
+        "from_file" : false
     },
     "ci_keywords" : {
        "convergence_E" : 1e-8,
