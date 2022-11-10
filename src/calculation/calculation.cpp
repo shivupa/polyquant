@@ -281,6 +281,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("build_matrix")) {
         ci_calc->detset.build_matrix = this->input_params->input_data["keywords"]["ci_keywords"]["build_matrix"];
       }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("exact_diag")) {
+        ci_calc->exact_diag = this->input_params->input_data["keywords"]["ci_keywords"]["exact_diag"];
+      }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("det_print_threshold")) {
         ci_calc->det_print_threshold = this->input_params->input_data["keywords"]["ci_keywords"]["det_print_threshold"];
       }

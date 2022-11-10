@@ -505,22 +505,43 @@ void POLYQUANT_EPCI::run() {
     }
   } else {
     this->detset.create_ham();
-    // row major so Upper has more continguous memory
-    Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
-    Spectra::DavidsonSymEigsSolver<Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int>> solver(op_sparse, this->num_states, initialsubspacevec, maxsubspacevec, logger);
-    Eigen::Index maxit = this->iteration_max;
-    int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
-    if (solver.info() == Spectra::CompInfo::Successful) {
-      this->energies = solver.eigenvalues();
-      this->C_ci = solver.eigenvectors();
-      for (auto e = 0; e < this->energies.size(); e++) {
-        this->energies[e] += constant_shift;
+
+    if (this->exact_diag) {
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h(this->detset.ham);
+      for (auto i = 0; i < h.rows(); i++) {
+        for (auto j = i; j < h.rows(); j++) {
+          if (i == j) {
+            continue;
+          } else {
+            h(j, i) = h(i, j);
+          }
+        }
       }
-      this->calculate_NOs();
-      this->print_success();
-      this->dump_molden();
+      Polyquant_dump_mat_to_file(h, "h_ci.txt");
+      Eigen::Matrix<double, Eigen::Dynamic, 1> eigs;
+      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(h);
+      eigs = eigensolver.eigenvalues();
+      for (auto i = 0; i < eigs.rows(); i++) {
+        std::cout << eigs[i] + constant_shift << std::endl;
+      }
     } else {
-      APP_ABORT("CI Calculation did not converge!");
+      // row major so Upper has more continguous memory
+      Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
+      Spectra::DavidsonSymEigsSolver<Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int>> solver(op_sparse, this->num_states, initialsubspacevec, maxsubspacevec, logger);
+      Eigen::Index maxit = this->iteration_max;
+      int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
+      if (solver.info() == Spectra::CompInfo::Successful) {
+        this->energies = solver.eigenvalues();
+        this->C_ci = solver.eigenvectors();
+        for (auto e = 0; e < this->energies.size(); e++) {
+          this->energies[e] += constant_shift;
+        }
+        this->calculate_NOs();
+        this->print_success();
+        this->dump_molden();
+      } else {
+        APP_ABORT("CI Calculation did not converge!");
+      }
     }
   }
   delete logger;
@@ -532,7 +553,8 @@ void POLYQUANT_EPCI::dump_molden() {
     auto state_idx = this->NO_states[state_vec_idx];
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-      bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
+      // bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
+      bool unique_beta = true;
       auto &NO_a_coeff = this->C_nso[state_idx][quantum_part_idx][0];
       auto &NO_a_energy = this->occ_nso[state_idx][quantum_part_idx][0];
       auto &NO_a_occupation = this->occ_nso[state_idx][quantum_part_idx][0];
