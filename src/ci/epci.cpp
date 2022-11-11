@@ -554,7 +554,7 @@ void POLYQUANT_EPCI::dump_molden() {
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
       // bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
-      bool unique_beta = true;
+      bool unique_beta = quantum_part.num_parts > 1;
       auto &NO_a_coeff = this->C_nso[state_idx][quantum_part_idx][0];
       auto &NO_a_energy = this->occ_nso[state_idx][quantum_part_idx][0];
       auto &NO_a_occupation = this->occ_nso[state_idx][quantum_part_idx][0];
