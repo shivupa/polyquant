@@ -1,8 +1,7 @@
 
 #include "ci/determinant_set.hpp"
 
-using namespace polyquant;
-
+namespace polyquant {
 template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(const std::vector<T> &Di, const std::vector<T> &Dj) const {
   int excitation_degree = 0;
   for (auto i = 0; i < Di.size(); i++) {
@@ -477,3 +476,4 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
 
 template class POLYQUANT_DETSET<uint64_t>;
+};

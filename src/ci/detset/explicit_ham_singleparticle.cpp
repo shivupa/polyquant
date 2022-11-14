@@ -1,7 +1,7 @@
 #include "ci/determinant_set.hpp"
 
-using namespace polyquant;
 
+namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_one(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -346,3 +346,4 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham() {
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
+};

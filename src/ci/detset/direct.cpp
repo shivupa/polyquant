@@ -1,8 +1,8 @@
 
 #include "ci/determinant_set.hpp"
 
-using namespace polyquant;
 
+namespace polyquant {
 template <typename T>
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
   auto function = __PRETTY_FUNCTION__;
@@ -51,3 +51,4 @@ void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eig
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
+};

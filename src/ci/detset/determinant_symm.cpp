@@ -1,8 +1,7 @@
 
 #include "ci/determinant_set.hpp"
 
-using namespace polyquant;
-
+namespace polyquant {
 template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx) {
   // int symm_idx = -1;
   std::vector<int> occ, virt;
@@ -37,3 +36,4 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
+};
