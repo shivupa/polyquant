@@ -580,8 +580,8 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   for (auto i = 0; i < this->ci_calc->detset.N_dets; i++) {
     auto i_unfold = this->ci_calc->detset.det_idx_unfold(i);
     for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {
-      auto curr_det_a = this->ci_calc->detset.get_det(idx_part, 0, i_unfold[2 * idx_part + 0]);
-      auto curr_det_b = this->ci_calc->detset.get_det(idx_part, 1, i_unfold[2 * idx_part + 1]);
+      auto curr_det_a = this->ci_calc->detset.get_det_withfcorbs(idx_part, 0, i_unfold[2 * idx_part + 0]);
+      auto curr_det_b = this->ci_calc->detset.get_det_withfcorbs(idx_part, 1, i_unfold[2 * idx_part + 1]);
       dets[idx_part][0].push_back(curr_det_a);
       dets[idx_part][1].push_back(curr_det_b);
     }
@@ -589,6 +589,11 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   std::string particle_filename = "Multidet_" + filename;
   Polyquant_cout("Dumping post MF HDF5 to filename: " + particle_filename);
   POLYQUANT_HDF5 hdf5_f(particle_filename);
-  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc->C_ci, this->ci_calc->detset.N_dets, this->ci_calc->num_states,
-                                          *std::max_element(this->ci_calc->detset.max_orb.begin(), this->ci_calc->detset.max_orb.end()));
+  std::vector<int> max_orb_with_fc;
+  max_orb_with_fc.resize(this->ci_calc->detset.max_orb.size());
+  for (auto i = 0; i < this->ci_calc->detset.max_orb.size(); i++){
+      max_orb_with_fc[i] += this->ci_calc->detset.max_orb[i] + this->ci_calc->detset.frozen_core[i];
+  }
+  int max_orb_maxval = *std::max_element(max_orb_with_fc.begin(), max_orb_with_fc.end());
+  hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc->C_ci, this->ci_calc->detset.N_dets, this->ci_calc->num_states, max_orb_maxval);
 }

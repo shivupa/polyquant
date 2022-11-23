@@ -68,6 +68,7 @@ public:
   double mixed_part_ham_double(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const;
 
   std::vector<T> get_det(int idx_part, int idx_spin, int i) const;
+  std::vector<T> get_det_withfcorbs(int idx_part, int idx_spin, int i) const;
   void print_determinants();
   // /**
   //  * @brief determinant set (number of quantum particles, alpha/beta, det num
