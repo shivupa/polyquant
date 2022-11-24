@@ -1039,10 +1039,10 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
           this->orth_X[quantum_part_idx][irrep_idx].noalias() = L * s.asDiagonal();
         }
         this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
-        std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].rows() << std::endl;
-        std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].cols() << std::endl;
-        std::cout << this->orth_X[quantum_part_idx][irrep_idx].rows() << std::endl;
-        std::cout << this->orth_X[quantum_part_idx][irrep_idx].cols() << std::endl;
+        // std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].rows() << std::endl;
+        // std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].cols() << std::endl;
+        // std::cout << this->orth_X[quantum_part_idx][irrep_idx].rows() << std::endl;
+        // std::cout << this->orth_X[quantum_part_idx][irrep_idx].cols() << std::endl;
         // this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->orth_X[quantum_part_idx][irrep_idx];
         // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
         // auto temp = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];

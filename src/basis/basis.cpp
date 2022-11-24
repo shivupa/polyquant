@@ -408,9 +408,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
         APP_ABORT("Error getting salcs");
       }
       auto count = 0;
-      Polyquant_dump_mat(combined_salcs, "COMBINED SALCS");
+      //Polyquant_dump_mat(combined_salcs, "COMBINED SALCS");
       reorder_combined_salcs(combined_salcs, basis_idx);
-      Polyquant_dump_mat(combined_salcs, "COMBINED SALCS REORDERED");
+      // Polyquant_dump_mat(combined_salcs, "COMBINED SALCS REORDERED");
       //  Dont really need to print symmetry table
       if (MSYM_SUCCESS != (ret = msymGetCharacterTable(ctx, &mct))) {
         APP_ABORT("Error getting character table");
@@ -423,13 +423,13 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       }
       for (auto i = 0; i < mct->d; i++) {
         std::string temp_irrep_name = mct->s[i].name;
-        std::cout << "STHISDF " << temp_irrep_name << " " << temp_irrep_name.size() << std::endl;
+        //std::cout << "STHISDF " << temp_irrep_name << " " << temp_irrep_name.size() << std::endl;
         for (auto c : temp_irrep_name) {
           auto a = static_cast<unsigned int>(c);
-          std::cout << "       STHISDsdF " << a << std::endl;
-          if (a < 0 || a > 127) {
-            std::cout << "       STHISDsdF " << a << std::endl;
-          }
+          //std::cout << "       STHISDsdF " << a << std::endl;
+          // if (a < 0 || a > 127) {
+          //   std::cout << "       STHISDsdF " << a << std::endl;
+          // }
         }
         temp_irrep_name.erase(std::remove_if(temp_irrep_name.begin(), temp_irrep_name.end(), [](char c) { return !(c >= 0 && c < 128); }), temp_irrep_name.end());
         irrep_names[basis_idx].push_back(temp_irrep_name);
@@ -482,7 +482,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
         irrep_msg << " with ";
         irrep_msg << salc_per_irrep[basis_idx][i];
         irrep_msg << " functions.\n";
-        Polyquant_dump_mat(salcs[basis_idx][i], irrep_names[basis_idx][i]);
+        //Polyquant_dump_mat(salcs[basis_idx][i], irrep_names[basis_idx][i]);
       }
       Polyquant_cout(irrep_msg.str());
       basis_idx++;
