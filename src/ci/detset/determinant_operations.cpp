@@ -480,7 +480,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     
     auto count = 0;
     // todo this has to change if T is ever not uint64_t
-    const int nbit = 64;//sizeof(T) * 8;
+    const uint64_t nbit = 64;//sizeof(T) * 8;
     std::vector<T> new_det;
     for (auto i : det){
         std::cout << "SHIV    ";
@@ -489,8 +489,8 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
         // extract the bits from the next int that would get bumped over
         auto begin = nbit-nfc;
         auto end = nbit;
-        uint8_t mask = (1 << (end - begin)) - 1;
-        uint8_t j = i  << nfc;
+        uint64_t mask = (1 << (end - begin)) - 1;
+        uint64_t j = i  << nfc;
         // set in this int
         if(count +1 != det.size() -1){
                 j = j | ((det[count+1] >> begin) & mask);
