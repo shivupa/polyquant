@@ -492,7 +492,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
         uint64_t mask = (1 << (end - begin)) - 1;
         uint64_t j = i  << nfc;
         // set in this int
-        if(count +1 != det.size() -1){
+        if(count +1 < det.size()){
                 j = j | ((det[count+1] >> begin) & mask);
         }
 
