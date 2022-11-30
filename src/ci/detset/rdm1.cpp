@@ -1,7 +1,6 @@
 
 #include "ci/determinant_set.hpp"
 
-
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
@@ -89,4 +88,4 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant

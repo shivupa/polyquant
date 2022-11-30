@@ -1,7 +1,6 @@
 
 #include "ci/determinant_set.hpp"
 
-
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
@@ -77,4 +76,4 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant

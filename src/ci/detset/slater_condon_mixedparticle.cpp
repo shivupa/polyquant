@@ -1,6 +1,5 @@
 #include "ci/determinant_set.hpp"
 
-
 namespace polyquant {
 template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_diag(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
@@ -298,4 +297,4 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant

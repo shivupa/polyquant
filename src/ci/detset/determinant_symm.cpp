@@ -36,4 +36,4 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant

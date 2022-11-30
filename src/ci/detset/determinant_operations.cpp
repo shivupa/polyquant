@@ -474,43 +474,42 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
 }
 
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
-template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int idx_part, int idx_spin, int i) const { 
-    auto det = unique_dets[idx_part][idx_spin][i]; 
-    auto nfc = this->frozen_core[idx_part];
-    
-    auto count = 0;
-    // todo this has to change if T is ever not uint64_t
-    const uint64_t nbit = 64;//sizeof(T) * 8;
-    std::vector<T> new_det;
-    for (auto i : det){
-        std::cout << "SHIV    ";
-        std::bitset<nbit> b(i);
-        std::cout << b << "         " << b.to_ulong() << "             ";
-        // extract the bits from the next int that would get bumped over
-        auto begin = nbit-nfc;
-        auto end = nbit;
-        uint64_t mask = (1 << (end - begin)) - 1;
-        uint64_t j = i  << nfc;
-        // set in this int
-        if(count +1 < det.size()){
-                j = j | ((det[count+1] >> begin) & mask);
-        }
+template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int idx_part, int idx_spin, int i) const {
+  auto det = unique_dets[idx_part][idx_spin][i];
+  auto nfc = this->frozen_core[idx_part];
 
-        // pad with fc orbs
-        if (count == det.size()-1){
-            for (auto fc = 0; fc < nfc; fc++)
-            {
-                j |= 1UL << fc;
-            }
-        }
-        count++;
-
-        std::bitset<nbit> c(j);
-        std::cout << c << "         " << c.to_ulong() <<std::endl;
-        new_det.push_back(j);
+  auto count = 0;
+  // todo this has to change if T is ever not uint64_t
+  const uint64_t nbit = 64; // sizeof(T) * 8;
+  std::vector<T> new_det;
+  for (auto i : det) {
+    std::cout << "SHIV    ";
+    std::bitset<nbit> b(i);
+    std::cout << b << "         " << b.to_ulong() << "             ";
+    // extract the bits from the next int that would get bumped over
+    auto begin = nbit - nfc;
+    auto end = nbit;
+    uint64_t mask = (1 << (end - begin)) - 1;
+    uint64_t j = i << nfc;
+    // set in this int
+    if (count + 1 < det.size()) {
+      j = j | ((det[count + 1] >> begin) & mask);
     }
-    return new_det;
+
+    // pad with fc orbs
+    if (count == det.size() - 1) {
+      for (auto fc = 0; fc < nfc; fc++) {
+        j |= 1UL << fc;
+      }
+    }
+    count++;
+
+    std::bitset<nbit> c(j);
+    std::cout << c << "         " << c.to_ulong() << std::endl;
+    new_det.push_back(j);
+  }
+  return new_det;
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant

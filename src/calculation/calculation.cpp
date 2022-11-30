@@ -591,8 +591,8 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   POLYQUANT_HDF5 hdf5_f(particle_filename);
   std::vector<int> max_orb_with_fc;
   max_orb_with_fc.resize(this->ci_calc->detset.max_orb.size());
-  for (auto i = 0; i < this->ci_calc->detset.max_orb.size(); i++){
-      max_orb_with_fc[i] += this->ci_calc->detset.max_orb[i] + this->ci_calc->detset.frozen_core[i];
+  for (auto i = 0; i < this->ci_calc->detset.max_orb.size(); i++) {
+    max_orb_with_fc[i] += this->ci_calc->detset.max_orb[i] + this->ci_calc->detset.frozen_core[i];
   }
   int max_orb_maxval = *std::max_element(max_orb_with_fc.begin(), max_orb_with_fc.end());
   hdf5_f.dump_post_mf_to_hdf5_for_QMCPACK(dets, this->ci_calc->C_ci, this->ci_calc->detset.N_dets, this->ci_calc->num_states, max_orb_maxval);

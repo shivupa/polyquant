@@ -1,6 +1,5 @@
 #include "ci/determinant_set.hpp"
 
-
 namespace polyquant {
 template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   if (i_det == j_det) {
@@ -131,4 +130,4 @@ template <typename T> void POLYQUANT_DETSET<T>::precompute_diagonal_Slater_Condo
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant

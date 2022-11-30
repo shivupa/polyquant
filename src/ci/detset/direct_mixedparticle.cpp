@@ -1,7 +1,6 @@
 
 #include "ci/determinant_set.hpp"
 
-
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
@@ -324,4 +323,4 @@ void POLYQUANT_DETSET<T>::sigma_two_species(Eigen::Ref<Eigen::Matrix<double, Eig
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
-};
+}; // namespace polyquant
