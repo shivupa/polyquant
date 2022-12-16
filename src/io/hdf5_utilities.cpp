@@ -376,7 +376,7 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
       std::string tag = "CI_" + std::to_string(part_idx * 2 + spin_idx);
       std::vector<uint64_t> flattened_dets;
       for (int i = 0; i < N_dets; i++) {
-        for (int j = N_int_per_det-1; j >= 0; j--) {
+        for (int j = N_int_per_det - 1; j >= 0; j--) {
           if (j < dets[part_idx][spin_idx][i].size()) {
             flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
           } else {
