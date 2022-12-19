@@ -14,7 +14,7 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
     if (symm_idx < 0) {
       symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ]);
+      symm_idx = this->input_symmetry->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ]);
     }
   }
 
@@ -28,7 +28,7 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
     if (symm_idx < 0) {
       symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
+      symm_idx = this->input_symmetry->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
     }
   }
 

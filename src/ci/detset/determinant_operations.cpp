@@ -28,7 +28,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
     if (symm_idx < 0) {
       symm_idx = this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ]);
+      symm_idx = this->input_symmetry->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][0][shifted_i_occ]);
     }
     alpha_bit_string[i_occ] = '1';
   }
@@ -37,12 +37,12 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
     if (symm_idx < 0) {
       symm_idx = this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ];
     } else {
-      symm_idx = this->input_basis->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
+      symm_idx = this->input_symmetry->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
     }
     beta_bit_string[i_occ] = '1';
   }
   Polyquant_cout("Creating det " + alpha_bit_string + " " + beta_bit_string + " for particle " + std::to_string(idx_part) + " of the following irrep " +
-                 this->input_basis->irrep_names[idx_part][symm_idx]);
+                 this->input_symmetry->irrep_names[idx_part][symm_idx]);
   std::reverse(alpha_bit_string.begin(), alpha_bit_string.end());
   std::reverse(beta_bit_string.begin(), beta_bit_string.end());
   std::vector<T> alpha_det;

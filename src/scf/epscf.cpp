@@ -6,7 +6,7 @@ void POLYQUANT_EPSCF::form_H_core() {
   this->H_core.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    // this->H_core[quantum_part_idx].resize(this->input_basis->irrep_names[quantum_part_idx].size());
+    // this->H_core[quantum_part_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
     // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h;
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
@@ -370,7 +370,7 @@ void POLYQUANT_EPSCF::diag_fock() {
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
     FD_commutator.noalias() = (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral->overlap[quantum_part_idx] -
                                this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]);
-    for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
       if (num_mo == 0) {
         continue;
@@ -421,7 +421,7 @@ void POLYQUANT_EPSCF::diag_fock() {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
       FD_commutator.noalias() = (this->F[quantum_part_idx][1] * this->D_combined[quantum_part_idx][1] * this->input_integral->overlap[quantum_part_idx] -
                                  this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][1] * this->F[quantum_part_idx][1]);
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
         if (num_mo == 0) {
           continue;
@@ -487,7 +487,7 @@ void POLYQUANT_EPSCF::form_DM() {
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < num_spin; quantum_part_spin_idx++) {
       this->D_last_combined[quantum_part_idx][quantum_part_spin_idx] = this->D_combined[quantum_part_idx][quantum_part_spin_idx];
       this->D_combined[quantum_part_idx][quantum_part_spin_idx].setZero(num_basis, num_basis);
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         form_DM_helper(this->D[quantum_part_idx][quantum_part_spin_idx][irrep_idx], this->D_last[quantum_part_idx][quantum_part_spin_idx][irrep_idx],
                        this->C[quantum_part_idx][quantum_part_spin_idx][irrep_idx], this->occ[quantum_part_idx][quantum_part_spin_idx][irrep_idx], num_basis, num_parts[quantum_part_spin_idx]);
         D_combined[quantum_part_idx][quantum_part_spin_idx] += this->D[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
@@ -504,7 +504,7 @@ void POLYQUANT_EPSCF::form_DM() {
       if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
         Polyquant_dump_mat_to_file(this->D_combined[quantum_part_a_idx][1], "DMcombined_" + quantum_part_a_key + "_beta.txt");
       }
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_a_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_a_idx].size(); irrep_idx++) {
         Polyquant_dump_mat_to_file(this->D[quantum_part_a_idx][0][irrep_idx], "DM_" + quantum_part_a_key + "_irrep_" + std::to_string(irrep_idx) + "_alpha.txt");
         if (quantum_part_a.num_parts > 1 && quantum_part_a.restricted == false) {
           Polyquant_dump_mat_to_file(this->D[quantum_part_a_idx][1][irrep_idx], "DM_" + quantum_part_a_key + "_irrep_" + std::to_string(irrep_idx) + "_beta.txt");
@@ -531,7 +531,7 @@ void POLYQUANT_EPSCF::calculate_E_elec() {
       continue;
     }
     this->E_particles[quantum_part_idx] = 0.0;
-    // for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    // for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
     auto E_part_irrep = 0.0;
     // auto& salcs = this->input_basis->salcs[quantum_part_idx][irrep_idx];
     // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& X = this->input_integral->orth_X[quantum_part_idx][irrep_idx];
@@ -541,7 +541,7 @@ void POLYQUANT_EPSCF::calculate_E_elec() {
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &s = this->input_integral->overlap[quantum_part_idx];
     // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> s2 = X.transpose() * this->input_integral->overlap[quantum_part_idx] * X;
     // Polyquant_dump_mat(s, "S");
-    // for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    // for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
     //   auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
     //   if (num_mo == 0) {
     //     continue;
@@ -708,7 +708,7 @@ void POLYQUANT_EPSCF::reset_diis() {
       }
       this->diis[quantum_part_idx].resize(nspin);
       for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < nspin; quantum_part_spin_idx++) {
-        for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+        for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
           this->diis[quantum_part_idx][quantum_part_spin_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
         }
       }
@@ -773,7 +773,7 @@ void POLYQUANT_EPSCF::guess_DM_hcore() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
-    for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &c = this->C[quantum_part_idx][0][irrep_idx];
       if (num_mo == 0) {
@@ -822,7 +822,7 @@ void POLYQUANT_EPSCF::resize_objects() {
 
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    auto num_irrep = this->input_basis->irrep_names[quantum_part_idx].size();
+    auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
@@ -846,7 +846,7 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
 
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
         this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
@@ -884,7 +884,7 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
 
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
         this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->E_orbitals[quantum_part_idx][1][irrep_idx].setZero(num_mo);
@@ -918,7 +918,7 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->iteration_rms_error[quantum_part_idx].resize(1);
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
 
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
         this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
@@ -1012,13 +1012,13 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
     }
     npart_per_irrep[quantum_part_idx].resize(n_spin);
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
-      npart_per_irrep[quantum_part_idx][quantum_part_spin_idx].resize(this->input_basis->irrep_names[quantum_part_idx].size());
+      npart_per_irrep[quantum_part_idx][quantum_part_spin_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
       auto total_nmo = 0;
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         total_nmo += this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
       }
       Eigen::Matrix<double, Eigen::Dynamic, 1> orb_e_combined;
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         if (this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size() == 0) {
           continue;
         }
@@ -1034,7 +1034,7 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
         thresh_E = orb_e_combined[npart_spin];
       }
 
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto npart_in_this_irrep = 0;
         while (npart_in_this_irrep < this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size() &&
                this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx](npart_in_this_irrep) < thresh_E) {
@@ -1045,7 +1045,7 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
 
       // checking
       auto npart_from_irreps = 0;
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
       }
       if (npart_from_irreps != npart_spin) {
@@ -1069,7 +1069,7 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
       auto npart_spin = (quantum_part_spin_idx == 1) ? quantum_part.num_parts_beta : quantum_part.num_parts_alpha;
       // checking
       auto npart_from_irreps = 0;
-      for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
       }
       if (npart_from_irreps != npart_spin) {
@@ -1086,7 +1086,7 @@ void POLYQUANT_EPSCF::form_occ() {
   // }
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         auto na = npart_per_irrep[quantum_part_idx][0][irrep_idx];
         auto nb = npart_per_irrep[quantum_part_idx][1][irrep_idx];
@@ -1153,7 +1153,7 @@ void POLYQUANT_EPSCF::form_combined_orbitals() {
   num_mo.resize(this->input_molecule->quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
-    auto num_irrep = this->input_basis->irrep_names[quantum_part_idx].size();
+    auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
     auto n_spin = 1;
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       n_spin = 2;
@@ -1201,8 +1201,8 @@ void POLYQUANT_EPSCF::form_combined_orbitals() {
         C_combined[quantum_part_idx][quantum_part_spin_idx].col(mo_idx) = C[quantum_part_idx][quantum_part_spin_idx][min_e_irrep].col(curr_bas_idx[min_e_irrep]);
         E_orbitals_combined[quantum_part_idx][quantum_part_spin_idx][mo_idx] = E_orbitals[quantum_part_idx][quantum_part_spin_idx][min_e_irrep][curr_bas_idx[min_e_irrep]];
         occ_combined[quantum_part_idx][quantum_part_spin_idx][mo_idx] = occ[quantum_part_idx][quantum_part_spin_idx][min_e_irrep][curr_bas_idx[min_e_irrep]];
-        // symm_labels_combined[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_basis->irrep_names[quantum_part_idx][min_e_irrep];
-        symm_labels[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_basis->irrep_names[quantum_part_idx][min_e_irrep];
+        // symm_labels_combined[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_symmetry->irrep_names[quantum_part_idx][min_e_irrep];
+        symm_labels[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_symmetry->irrep_names[quantum_part_idx][min_e_irrep];
         symm_label_idxs[quantum_part_idx][quantum_part_spin_idx][mo_idx] = min_e_irrep;
         curr_bas_idx[min_e_irrep]++;
       }
@@ -1294,12 +1294,12 @@ void POLYQUANT_EPSCF::dump_molden() {
     std::vector<int> MO_a_symmetry_label_idxs = this->symm_label_idxs[quantum_part_idx][0];
     std::vector<std::string> MO_a_symmetry_labels;
     for (auto mo_a_symidx : MO_a_symmetry_label_idxs) {
-      MO_a_symmetry_labels.push_back(this->input_basis->irrep_names[quantum_part_idx][mo_a_symidx]);
+      MO_a_symmetry_labels.push_back(this->input_symmetry->irrep_names[quantum_part_idx][mo_a_symidx]);
     }
     std::vector<int> MO_b_symmetry_label_idxs = unique_beta ? this->symm_label_idxs[quantum_part_idx][1] : this->symm_label_idxs[quantum_part_idx][0];
     std::vector<std::string> MO_b_symmetry_labels;
     for (auto mo_b_symidx : MO_b_symmetry_label_idxs) {
-      MO_b_symmetry_labels.push_back(this->input_basis->irrep_names[quantum_part_idx][mo_b_symidx]);
+      MO_b_symmetry_labels.push_back(this->input_symmetry->irrep_names[quantum_part_idx][mo_b_symidx]);
     }
     std::vector<libint2::Atom> atoms = this->input_molecule->to_libint_atom();
     try {
@@ -1324,8 +1324,8 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   this->num_mo_per_irrep.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    this->num_mo_per_irrep[quantum_part_idx].resize(this->input_basis->irrep_names[quantum_part_idx].size());
-    for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    this->num_mo_per_irrep[quantum_part_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       this->num_mo_per_irrep[quantum_part_idx][irrep_idx] = this->input_integral->orth_X[quantum_part_idx][irrep_idx].cols();
     }
     quantum_part_idx++;

@@ -105,10 +105,12 @@ public:
   std::vector<int> deleted_virtual;
 
   std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
   std::shared_ptr<POLYQUANT_BASIS> input_basis;
   std::shared_ptr<POLYQUANT_EPSCF> input_epscf;
   std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
+  void set_symmetry(std::shared_ptr<POLYQUANT_SYMMETRY> symmetry) { this->input_symmetry = symmetry; };
   void set_basis(std::shared_ptr<POLYQUANT_BASIS> basis) { this->input_basis = basis; };
   void set_integral(std::shared_ptr<POLYQUANT_INTEGRAL> integral) { this->input_integral = integral; };
   void set_epscf(std::shared_ptr<POLYQUANT_EPSCF> scf) { this->input_epscf = scf; };

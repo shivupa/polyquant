@@ -51,6 +51,12 @@ public:
   std::shared_ptr<POLYQUANT_INPUT> input_params;
 
   /**
+   * @brief the input symmetry handler
+   *
+   */
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
+
+  /**
    * @brief the input molecule
    *
    */

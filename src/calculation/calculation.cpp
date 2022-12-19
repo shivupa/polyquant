@@ -12,14 +12,17 @@ void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
   // parse input file
   Polyquant_section_header("Input Parameters");
   this->input_params = std::make_shared<POLYQUANT_INPUT>(filename);
+  // parse symmetry file
+  Polyquant_section_header("Symmetry Handler Setup");
+  this->input_symmetry = std::make_shared<POLYQUANT_SYMMETRY>(this->input_params);
   // parse molecule
   Polyquant_section_header("Molecule Specification");
-  this->input_molecule = std::make_shared<POLYQUANT_MOLECULE>(this->input_params);
+  this->input_molecule = std::make_shared<POLYQUANT_MOLECULE>(this->input_params, this->input_symmetry);
   // parse basis
   Polyquant_section_header("Basis Specification");
-  this->input_basis = std::make_shared<POLYQUANT_BASIS>(this->input_params, this->input_molecule);
+  this->input_basis = std::make_shared<POLYQUANT_BASIS>(this->input_params, this->input_symmetry, this->input_molecule);
   // parse integral
-  this->input_integral = std::make_shared<POLYQUANT_INTEGRAL>(this->input_params, this->input_basis, this->input_molecule);
+  this->input_integral = std::make_shared<POLYQUANT_INTEGRAL>(this->input_params, this->input_symmetry, this->input_basis, this->input_molecule);
 }
 
 void POLYQUANT_CALCULATION::run() {
@@ -81,7 +84,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   }
   Polyquant_cout("Will run a mean field calculation of type: ");
   Polyquant_cout(mean_field_type);
-  scf_calc = std::make_shared<POLYQUANT_EPSCF>(this->input_params, this->input_molecule, this->input_basis, this->input_integral);
+  scf_calc = std::make_shared<POLYQUANT_EPSCF>(this->input_params, this->input_symmetry, this->input_molecule, this->input_basis, this->input_integral);
   bool dump_for_qmcpack = false;
   bool skip_scf = false;
   std::deque<bool> freeze_density_from_input;

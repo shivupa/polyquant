@@ -2,9 +2,10 @@
 
 using namespace polyquant;
 
-POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule)
+POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis,
+                                       std::shared_ptr<POLYQUANT_MOLECULE> molecule)
     : POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL() {
-  this->setup_integral(input, basis, molecule);
+  this->setup_integral(input, symmetry, basis, molecule);
 }
 
 POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() {}
@@ -679,8 +680,10 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
   }
 }
 
-void POLYQUANT_INTEGRAL::setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule) {
+void POLYQUANT_INTEGRAL::setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis,
+                                        std::shared_ptr<POLYQUANT_MOLECULE> molecule) {
   this->input_params = input;
+  this->input_symmetry = symmetry;
   this->input_basis = basis;
   this->input_molecule = molecule;
   this->parse_integral_parameters();
@@ -689,7 +692,7 @@ void POLYQUANT_INTEGRAL::setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, 
   this->nuclear.resize(molecule->quantum_particles.size());
   this->orth_X.resize(molecule->quantum_particles.size());
   for (auto basis_idx = 0; basis_idx < molecule->quantum_particles.size(); basis_idx++) {
-    this->orth_X[basis_idx].resize(basis->irrep_names[basis_idx].size());
+    this->orth_X[basis_idx].resize(symmetry->irrep_names[basis_idx].size());
   }
   this->Schwarz.resize(molecule->quantum_particles.size());
   this->frozen_core_ints.resize(molecule->quantum_particles.size());
@@ -928,7 +931,7 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
   POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       if (this->orth_X[quantum_part_idx][irrep_idx].cols() == 0 && this->orth_X[quantum_part_idx][irrep_idx].rows() == 0) {
         auto num_basis = this->input_basis->num_basis[quantum_part_idx];
         auto num_salc = this->input_basis->salcs[quantum_part_idx][irrep_idx].cols();
@@ -991,7 +994,7 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
   POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    for (auto irrep_idx = 0; irrep_idx < this->input_basis->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       if (this->orth_X[quantum_part_idx][irrep_idx].cols() == 0 && this->orth_X[quantum_part_idx][irrep_idx].rows() == 0) {
         auto num_basis = this->input_basis->num_basis[quantum_part_idx];
         auto num_salc = this->input_basis->salcs[quantum_part_idx][irrep_idx].cols();

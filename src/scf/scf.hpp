@@ -16,9 +16,12 @@ namespace polyquant {
 class POLYQUANT_SCF {
 public:
   POLYQUANT_SCF() = default;
-  POLYQUANT_SCF(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_INTEGRAL> integral);
-  void setup_calculation(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_INTEGRAL> integral);
+  POLYQUANT_SCF(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis,
+                std::shared_ptr<POLYQUANT_INTEGRAL> integral);
+  void setup_calculation(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis,
+                         std::shared_ptr<POLYQUANT_INTEGRAL> integral);
   void set_input(std::shared_ptr<POLYQUANT_INPUT> params);
+  void set_symmetry(std::shared_ptr<POLYQUANT_SYMMETRY> symmetry);
   void set_molecule(std::shared_ptr<POLYQUANT_MOLECULE> molecule);
   void set_basis(std::shared_ptr<POLYQUANT_BASIS> basis);
   void set_integral(std::shared_ptr<POLYQUANT_INTEGRAL> integral);
@@ -41,6 +44,12 @@ public:
    *
    */
   std::shared_ptr<POLYQUANT_INPUT> input_params;
+
+  /**
+   * @brief the input symmetry handler
+   *
+   */
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
 
   /**
    * @brief the input molecule

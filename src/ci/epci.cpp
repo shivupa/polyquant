@@ -5,6 +5,7 @@ using namespace polyquant;
 void POLYQUANT_EPCI::setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf) {
   this->input_epscf = input_scf;
   this->input_params = this->input_epscf->input_params;
+  this->input_symmetry = this->input_epscf->input_symmetry;
   this->input_molecule = this->input_epscf->input_molecule;
   this->input_basis = this->input_epscf->input_basis;
   this->detset.frozen_core.resize(this->input_molecule->quantum_particles.size());
@@ -23,6 +24,7 @@ void POLYQUANT_EPCI::calculate_integrals() {
   for (auto i = 0; i < this->input_molecule->quantum_particles.size(); i++) {
     this->detset.max_orb.push_back(this->input_epscf->num_mo[i] - this->detset.frozen_core[i] - this->detset.deleted_virtual[i]);
   }
+  this->detset.set_symmetry(this->input_symmetry);
   this->detset.set_integral(this->input_integral);
   this->detset.set_molecule(this->input_molecule);
   this->detset.set_basis(this->input_basis);

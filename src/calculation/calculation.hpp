@@ -8,6 +8,7 @@
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include "scf/epscf.hpp"
+#include "symmetry/symmetry.hpp"
 #include <algorithm>
 #include <string>
 #include <unordered_set>
@@ -81,6 +82,12 @@ public:
    *
    */
   std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
+
+  /**
+   * @brief the input symmetry
+   *
+   */
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
 
   /**
    * @brief the MF calculation

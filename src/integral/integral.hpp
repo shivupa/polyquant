@@ -34,7 +34,7 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule);
+  POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule);
   ~POLYQUANT_INTEGRAL();
   int eig_s2_linear_dep_threshold = 6;
   void parse_integral_parameters();
@@ -57,7 +57,7 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  void setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule);
+  void setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule);
   /**
    * @brief Calculate the combined index for the vector containing the upper
    * triangle of a symmetric matrix from two indicies of the unflattened matrix.
@@ -209,6 +209,7 @@ public:
    *
    */
   std::shared_ptr<POLYQUANT_INPUT> input_params;
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
   /**
    * @brief the input basis
    *

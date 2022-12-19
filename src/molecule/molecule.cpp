@@ -2,11 +2,7 @@
 
 using namespace polyquant;
 
-POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  setup_molecule(input_params);
-}
+POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry) { setup_molecule(input_params, input_symmetry); }
 
 void POLYQUANT_MOLECULE::set_molecular_charge() {
   if (input->input_data["molecule"].contains("molecular_charge")) {
@@ -38,17 +34,6 @@ void POLYQUANT_MOLECULE::set_molecular_restricted() {
   }
 }
 
-void POLYQUANT_MOLECULE::set_symmetry_from_input() {
-  if (input->input_data.contains("keywords")) {
-    if (input->input_data["keywords"].contains("symmetry")) {
-      this->do_symmetry = input->input_data["keywords"]["symmetry"];
-    }
-  }
-  if (!this->do_symmetry) {
-    point_group = "C1";
-    sub_group = "C1";
-  }
-}
 void POLYQUANT_MOLECULE::symmetrize_molecule() {
 
   msym_error_t ret = MSYM_SUCCESS;
@@ -58,12 +43,9 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   elements_for_msym = this->to_point_msym_charges_for_symmetry();
   int length = elements_for_msym.size();
 
-  ctx = msymCreateContext();
+  auto &ctx = input_symm->ctx;
 
-  if (do_symmetry == false) {
-    // std::cout << "Setting point group to C1 since there is only 1 atom" << std::endl;
-    point_group = "C1";
-    sub_group = "C1";
+  if (input_symm->do_symmetry == false) {
     return;
   }
 
@@ -121,8 +103,8 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
       APP_ABORT("Error setting PG to D2h");
     }
   }
-  point_group.resize(6);
-  if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group.data()))) {
+  input_symm->point_group.resize(6);
+  if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), input_symm->point_group.data()))) {
     // if(MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group))){
     auto error = msymErrorString(ret);
     std::cout << error << std::endl;
@@ -130,9 +112,9 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     std::cout << error << std::endl;
     APP_ABORT("Error Getting Point group");
   }
-  point_group.erase(point_group.find('\0'));
-  std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << point_group << std::endl;
-  sub_group = point_group;
+  input_symm->point_group.erase(input_symm->point_group.find('\0'));
+  std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << input_symm->point_group << std::endl;
+  input_symm->sub_group = input_symm->point_group;
 
   // TODO add a way to descend in symmetry
   // open issue for this
@@ -443,17 +425,17 @@ void POLYQUANT_MOLECULE::print_molecule() {
   Polyquant_cout("");
 }
 
-void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params) {
+void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
   input = input_params;
+  input_symm = input_symmetry;
   if (input->input_data.contains("molecule")) {
-    set_symmetry_from_input();
     set_molecular_charge();
     set_molecular_multiplicity();
     set_molecular_restricted();
     parse_particles();
-    // if (do_symmetry) {
     symmetrize_molecule();
-    //}
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
     Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));

@@ -2,10 +2,10 @@
 
 using namespace polyquant;
 
-POLYQUANT_BASIS::POLYQUANT_BASIS(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule) {
+POLYQUANT_BASIS::POLYQUANT_BASIS(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  this->load_basis(input_params, input_molecule);
+  this->load_basis(input_params, input_symmetry, input_molecule);
 }
 
 void POLYQUANT_BASIS::load_quantum_particle_basis(const std::string &quantum_part_key, libint2::BasisSet &qp_basis) {
@@ -142,14 +142,6 @@ void POLYQUANT_BASIS::set_pure_from_input() {
   }
 }
 
-void POLYQUANT_BASIS::set_symmetry_from_input() {
-  if (input->input_data.contains("keywords")) {
-    if (input->input_data["keywords"].contains("symmetry")) {
-      this->do_symmetry = input->input_data["keywords"]["symmetry"];
-    }
-  }
-}
-
 void POLYQUANT_BASIS::set_libint_shell_norm() {
   libint2::Shell::do_enforce_unit_normalization(true);
   std::stringstream buffer;
@@ -217,29 +209,29 @@ void POLYQUANT_BASIS::set_ao_labels() {
 void POLYQUANT_BASIS::symmetrize_basis() {
 
   msym_error_t ret = MSYM_SUCCESS;
-  if (molecule->point_group != "C1") {
+  if (symmetry->point_group != "C1") {
     msym_point_group_type_t mtype;
     int mn;
-    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(molecule->ctx, &mtype, &mn))) {
+    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(symmetry->ctx, &mtype, &mn))) {
       APP_ABORT("Error getting point group type.");
     }
 
     if ((MSYM_POINT_GROUP_TYPE_Dnh == mtype || MSYM_POINT_GROUP_TYPE_Cnv == mtype) && 0 == mn) {
       APP_WARN("Linear molecule detected. This is a bit harder to handle so for now we will just turn off symmetry");
-      do_symmetry = false;
+      symmetry->do_symmetry = false;
     }
   }
 
-  if (molecule->point_group == "C1" || !do_symmetry) {
-    irrep_names.resize(this->basis.size());
+  if (symmetry->point_group == "C1" || !symmetry->do_symmetry) {
+    symmetry->irrep_names.resize(this->basis.size());
     salc_per_irrep.resize(this->basis.size());
     salcs.resize(this->basis.size());
 
-    direct_product_table.resize(1, 1);
-    direct_product_table(0, 0) = 0;
+    symmetry->direct_product_table.resize(1, 1);
+    symmetry->direct_product_table(0, 0) = 0;
     for (auto basis_idx = 0; basis_idx < this->basis.size(); basis_idx++) {
-      irrep_names[basis_idx].resize(1);
-      irrep_names[basis_idx][0] = "A";
+      symmetry->irrep_names[basis_idx].resize(1);
+      symmetry->irrep_names[basis_idx][0] = "A";
 
       salc_per_irrep[basis_idx].resize(1);
       salc_per_irrep[basis_idx][0] = this->num_basis[basis_idx];
@@ -252,7 +244,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
   } else {
     const msym_equivalence_set_t *mes = NULL;
     int mesl = 0;
-    if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(molecule->ctx, &mesl, &mes))) {
+    if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(symmetry->ctx, &mesl, &mes))) {
       APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
     }
     // std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
@@ -260,8 +252,8 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     std::vector<std::vector<msym_basis_function_t>> mbfs;
     mbfs.resize(this->basis.size());
 
-    symm_op_names.resize(this->basis.size());
-    irrep_names.resize(this->basis.size());
+    symmetry->symm_op_names.resize(this->basis.size());
+    symmetry->irrep_names.resize(this->basis.size());
     salc_per_irrep.resize(this->basis.size());
     salcs.resize(this->basis.size());
 
@@ -269,7 +261,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     auto basis_idx = 0;
 
     for (auto &quantum_particle_basis : this->basis) {
-      auto ctx = molecule->ctx;
+      auto ctx = symmetry->ctx;
       auto ao_idx = 0;
       for (auto shell : quantum_particle_basis) {
         for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++) {
@@ -375,7 +367,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
           symm_op_printstr << "?";
           break;
         }
-        symm_op_names[basis_idx].push_back(symm_op.str());
+        symmetry->symm_op_names[basis_idx].push_back(symm_op.str());
         Polyquant_cout(symm_op_printstr.str());
       }
 
@@ -432,30 +424,30 @@ void POLYQUANT_BASIS::symmetrize_basis() {
           //  }
         }
         temp_irrep_name.erase(std::remove_if(temp_irrep_name.begin(), temp_irrep_name.end(), [](char c) { return !(c >= 0 && c < 128); }), temp_irrep_name.end());
-        irrep_names[basis_idx].push_back(temp_irrep_name);
+        symmetry->irrep_names[basis_idx].push_back(temp_irrep_name);
       }
 
-      character_table.resize(irrep_names[basis_idx].size(), symm_op_names[basis_idx].size());
-      for (auto i = 0; i < irrep_names[basis_idx].size(); i++) {
-        for (auto j = 0; j < symm_op_names[basis_idx].size(); j++) {
-          character_table(i, j) = static_cast<double *>(mct->table)[i * symm_op_names[basis_idx].size() + j];
+      symmetry->character_table.resize(symmetry->irrep_names[basis_idx].size(), symmetry->symm_op_names[basis_idx].size());
+      for (auto i = 0; i < symmetry->irrep_names[basis_idx].size(); i++) {
+        for (auto j = 0; j < symmetry->symm_op_names[basis_idx].size(); j++) {
+          symmetry->character_table(i, j) = static_cast<double *>(mct->table)[i * symmetry->symm_op_names[basis_idx].size() + j];
         }
       }
-      Polyquant_dump_character_table(character_table, molecule->point_group, irrep_names[basis_idx], symm_op_names[basis_idx]);
+      Polyquant_dump_character_table(symmetry->character_table, symmetry->point_group, symmetry->irrep_names[basis_idx], symmetry->symm_op_names[basis_idx]);
 
-      direct_product_table.resize(irrep_names[basis_idx].size(), irrep_names[basis_idx].size());
-      for (auto i = 0; i < irrep_names[basis_idx].size(); i++) {
-        for (auto j = 0; j < irrep_names[basis_idx].size(); j++) {
+      symmetry->direct_product_table.resize(symmetry->irrep_names[basis_idx].size(), symmetry->irrep_names[basis_idx].size());
+      for (auto i = 0; i < symmetry->irrep_names[basis_idx].size(); i++) {
+        for (auto j = 0; j < symmetry->irrep_names[basis_idx].size(); j++) {
           Eigen::Matrix<double, Eigen::Dynamic, 1> prod;
-          prod.resize(irrep_names[basis_idx].size());
-          for (auto k = 0; k < irrep_names[basis_idx].size(); k++) {
-            prod[k] = character_table(i, k) * character_table(j, k);
+          prod.resize(symmetry->irrep_names[basis_idx].size());
+          for (auto k = 0; k < symmetry->irrep_names[basis_idx].size(); k++) {
+            prod[k] = symmetry->character_table(i, k) * symmetry->character_table(j, k);
           }
           int prod_idx = -1;
-          for (auto k = 0; k < irrep_names[basis_idx].size(); k++) {
+          for (auto k = 0; k < symmetry->irrep_names[basis_idx].size(); k++) {
             prod_idx = k;
-            for (auto l = 0; l < irrep_names[basis_idx].size(); l++) {
-              if (prod[l] != character_table(k, l)) {
+            for (auto l = 0; l < symmetry->irrep_names[basis_idx].size(); l++) {
+              if (prod[l] != symmetry->character_table(k, l)) {
                 prod_idx = -1;
                 break;
               }
@@ -464,21 +456,21 @@ void POLYQUANT_BASIS::symmetrize_basis() {
               break;
             }
           }
-          direct_product_table(i, j) = prod_idx;
+          symmetry->direct_product_table(i, j) = prod_idx;
         }
       }
-      Polyquant_dump_direct_product_table(direct_product_table, molecule->point_group, irrep_names[basis_idx]);
+      Polyquant_dump_direct_product_table(symmetry->direct_product_table, symmetry->point_group, symmetry->irrep_names[basis_idx]);
 
       std::stringstream irrep_msg;
       irrep_msg << "    ";
       irrep_msg << "SALCs per Irreps\n";
       irrep_msg << "    ";
       irrep_msg << "----------------\n";
-      for (auto i = 0; i < irrep_names[basis_idx].size(); i++) {
+      for (auto i = 0; i < symmetry->irrep_names[basis_idx].size(); i++) {
         irrep_msg << "    ";
         irrep_msg << "    ";
         irrep_msg << "Irrep ";
-        irrep_msg << irrep_names[basis_idx][i];
+        irrep_msg << symmetry->irrep_names[basis_idx][i];
         irrep_msg << " with ";
         irrep_msg << salc_per_irrep[basis_idx][i];
         irrep_msg << " functions.\n";
@@ -505,11 +497,11 @@ void POLYQUANT_BASIS::reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynami
   //  shouldn't need any reordering
 }
 
-void POLYQUANT_BASIS::load_basis(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule) {
+void POLYQUANT_BASIS::load_basis(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule) {
   input = input_params;
+  symmetry = input_symmetry;
   molecule = input_molecule;
   this->set_pure_from_input();
-  this->set_symmetry_from_input();
   this->set_libint_shell_norm();
   // parse basis name from data
   if (input->input_data.contains("model")) {

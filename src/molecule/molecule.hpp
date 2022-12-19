@@ -5,6 +5,7 @@
 #include "io/utils.hpp"
 #include "molecule/classical_particles.hpp"
 #include "molecule/quantum_particles.hpp"
+#include "symmetry/symmetry.hpp"
 #include <algorithm>
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma, keep
@@ -22,33 +23,29 @@ namespace polyquant {
 class POLYQUANT_MOLECULE {
 public:
   POLYQUANT_MOLECULE() = default;
-  ~POLYQUANT_MOLECULE() { msymReleaseContext(ctx); }
+  ~POLYQUANT_MOLECULE() {}
   /**
    * @brief Construct a new polyquant molecule object given an input object with
    * a call to setup_molecule.
    *
    * @param input a POLYQUANT_INPUT instance
+   * @param input_symmetry a POLYQUANT_SYMMETRY instance for symmetry handling
    */
-  POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params);
+  POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry);
 
   /**
    * @brief Set the up molecule object.
    *
    * @param input a POLYQUANT_INPUT instance
+   * @param input_symmetry a POLYQUANT_SYMMETRY instance for symmetry handling
    */
-  void setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params);
-  void set_symmetry_from_input();
+  void setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry);
   void set_molecular_charge();
   void set_molecular_multiplicity();
   void set_molecular_restricted();
   void symmetrize_molecule();
 
   std::string get_label_of_center(const std::array<double, 3> &center_pos) const;
-
-  std::string point_group;
-  std::string sub_group;
-  msym_context ctx;
-  bool do_symmetry = true;
 
   void parse_particles();
   void print_molecule();
@@ -78,6 +75,7 @@ public:
   std::string dump_xyz(std::string classical_part_key = "all") const;
 
   std::shared_ptr<POLYQUANT_INPUT> input;
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symm;
 
   std::vector<std::vector<double>> centers;
 
