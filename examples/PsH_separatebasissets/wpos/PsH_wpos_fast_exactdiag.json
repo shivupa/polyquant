@@ -23,7 +23,6 @@
   },
   "keywords": {
     "restricted" : true,
-    "symmetry" : false,
     "dump_for_qmcpack" : true,
     "hdf5_filename_qmcpack" : "H_wpos.h5",
     "quantum_particles" : [ 
@@ -43,9 +42,7 @@
         "convergence_E" : 1e-12,
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
-        "from_file" : true,
-        "from_file_skipiterations" : false,
-        "force_independent_converged" : true,
+        "from_file" : false,
         "incremental_fock" : true,
         "Cauchy_Schwarz_screening" : true
     },
@@ -53,9 +50,10 @@
        "convergence_E" : 1e-8,
        "num_states" : 5,
        "slow_diag" : false,
+       "exact_diag" : true,
        "num_subspace_vec" : 20,
        "excitation_level" : [
-           [1,1,2],
+           [1,1,1],
            [1,0,1]
            ]
    },
