@@ -1,7 +1,7 @@
 #include "io/input.hpp"
 #include "io/utils.hpp"
-#include "symmetry/symmetry.hpp"
 #include "molecule/molecule.hpp"
+#include "symmetry/symmetry.hpp"
 #include <doctest/doctest.h>
 #include <string>
 
