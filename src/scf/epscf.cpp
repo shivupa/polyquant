@@ -1142,7 +1142,7 @@ void POLYQUANT_EPSCF::form_occ() {
   }
 }
 
-void POLYQUANT_EPSCF::form_combined_orbitals() {
+void POLYQUANT_EPSCF::form_combined_orbitals(std::string title) {
   auto quantum_part_idx = 0ul;
   C_combined.resize(this->input_molecule->quantum_particles.size());
   E_orbitals_combined.resize(this->input_molecule->quantum_particles.size());
@@ -1210,7 +1210,7 @@ void POLYQUANT_EPSCF::form_combined_orbitals() {
     quantum_part_idx++;
   }
 
-  dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, symm_labels, "CONVERGED MOLECULAR ORBITALS", this->input_basis->ao_labels);
+  dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, symm_labels, title, this->input_basis->ao_labels);
 }
 
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_EPSCF::det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S,
@@ -1377,77 +1377,83 @@ void POLYQUANT_EPSCF::run() {
 }
 
 void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
-  /*
-auto function = __PRETTY_FUNCTION__;
-POLYQUANT_TIMER timer(function);
-this->print_start_iterations();
-this->print_params();
-this->calculate_integrals();
-// start the SCF process
-this->form_H_core();
-this->resize_objects();
-this->guess_DM();
-// write over the current dm
-auto quantum_part_idx = 0ul;
-for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-  auto idx = 0;
-  std::filesystem::path path(filename);
-  std::string dir = path.parent_path().string();
-  std::string file = path.filename().string();
-  std::string file_to_load = dir + quantum_part_key + "_" + file;
-
-  hdf5::file::File hdf5_file = hdf5::file::open(file_to_load, hdf5::file::AccessFlags::READONLY);
-  auto root_group = hdf5_file.root();
-  Polyquant_cout("Reading coefficients from file : " + file_to_load);
-  if (!root_group.exists("Super_Twist")) {
-    APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
-  }
-  auto Super_Twist_group = root_group.get_group("Super_Twist");
-
-  auto num_basis = this->input_basis->num_basis[quantum_part_idx];
-  auto num_mo = this->num_mo_per_irrep[quantum_part_idx];
-  auto Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
-  hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
-  auto Dimensions = Dataspace.current_dimensions();
-  Polyquant_cout("Reading eigenset_" + std::to_string(idx));
-  Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
-  std::vector<double> data(Dataspace.size());
-  Dataset.read(data);
-#pragma omp parallel for
-  for (auto i = 0; i < num_mo; i++) {
-    for (auto j = 0; j < num_basis; j++) {
-      this->C[quantum_part_idx][0](j, i) = data[i * num_basis + j];
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  if (!this->input_symmetry->do_symmetry) {
+    this->print_start_iterations();
+    this->print_params();
+    this->calculate_integrals();
+    // start the SCF process
+    this->form_H_core();
+    this->resize_objects();
+    this->guess_DM();
+    if (this->npart_per_irrep.size() == 0) {
+      this->form_occ_helper_initial_npart_per_irrep();
     }
-  }
-  if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-    Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx + 1));
-    Dataspace = Dataset.dataspace();
-    Dimensions = Dataspace.current_dimensions();
-    Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
-    Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
-    Dataset.read(data);
-#pragma omp parallel for
-    for (auto i = 0; i < num_mo; i++) {
-      for (auto j = 0; j < num_basis; j++) {
-        this->C[quantum_part_idx][1](j, i) = data[i * num_basis + j];
+    // write over the current dm
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      auto idx = 0;
+      std::filesystem::path path(filename);
+      std::string dir = path.parent_path().string();
+      std::string file = path.filename().string();
+      std::string file_to_load = dir + quantum_part_key + "_" + file;
+
+      hdf5::file::File hdf5_file = hdf5::file::open(file_to_load, hdf5::file::AccessFlags::READONLY);
+      auto root_group = hdf5_file.root();
+      Polyquant_cout("Reading coefficients from file : " + file_to_load);
+      if (!root_group.exists("Super_Twist")) {
+        APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
       }
+      auto Super_Twist_group = root_group.get_group("Super_Twist");
+
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+      auto quantum_part_irrep_idx = 0;
+      auto num_mo = this->num_mo_per_irrep[quantum_part_idx][quantum_part_irrep_idx];
+      auto Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
+      hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
+      auto Dimensions = Dataspace.current_dimensions();
+      Polyquant_cout("Reading eigenset_" + std::to_string(idx));
+      Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
+      std::vector<double> data(Dataspace.size());
+      Dataset.read(data);
+#pragma omp parallel for
+      for (auto i = 0; i < num_mo; i++) {
+        for (auto j = 0; j < num_basis; j++) {
+          this->C[quantum_part_idx][quantum_part_irrep_idx][0](j, i) = data[i * num_basis + j];
+        }
+      }
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx + 1));
+        Dataspace = Dataset.dataspace();
+        Dimensions = Dataspace.current_dimensions();
+        Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
+        Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
+        Dataset.read(data);
+#pragma omp parallel for
+        for (auto i = 0; i < num_mo; i++) {
+          for (auto j = 0; j < num_basis; j++) {
+            this->C[quantum_part_idx][quantum_part_irrep_idx][1](j, i) = data[i * num_basis + j];
+          }
+        }
+      }
+      idx += 2;
+      quantum_part_idx++;
     }
+    if (permute_orbitals_start) {
+      permute_initial_MOs();
+    }
+
+    this->form_occ();
+    this->form_DM();
+    // Polyquant_cout("Running a single SCF iteration");
+    // this->run_iteration();
+    this->form_fock();
+    this->print_iteration();
+    this->calculate_E_total();
+    Polyquant_cout(this->E_total);
+    this->form_combined_orbitals("GUESS ORBITALS FROM FILE");
+  } else {
+    APP_ABORT("Reading from file when symmetry is on is not currently supported!");
   }
-  idx += 2;
-  quantum_part_idx++;
-}
-if (permute_orbitals_start) {
-  permute_initial_MOs();
-}
-this->form_occ();
-this->form_DM();
-// Polyquant_cout("Running a single SCF iteration");
-// this->run_iteration();
-this->form_fock();
-this->print_iteration();
-this->calculate_E_total();
-Polyquant_cout(this->E_total);
-dump_orbitals(this->C, this->E_orbitals, this->occ, "GUESS ORBITALS FROM FILE", this->input_basis->ao_labels);
-  */
-  APP_ABORT("Fix read from file");
 }
