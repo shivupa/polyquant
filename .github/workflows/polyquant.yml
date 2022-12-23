@@ -88,6 +88,42 @@ jobs:
             cxx: "clang++-12",
             generators: "Ninja"
           }
+          - {
+            name: "Ubuntu_Latest_Clang13_Release_Ninja",
+            os: ubuntu-latest,
+            build_type: "Release",
+            pkgs: "clang-13 llvm-13-dev libomp-13-dev",
+            cc: "clang-13",
+            cxx: "clang++-13",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_Clang13_Debug_Ninja",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            pkgs: "clang-13 llvm-13-dev libomp-13-dev",
+            cc: "clang-13",
+            cxx: "clang++-13",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_Clang14_Release_Ninja",
+            os: ubuntu-latest,
+            build_type: "Release",
+            pkgs: "clang-14 llvm-14-dev libomp-14-dev",
+            cc: "clang-14",
+            cxx: "clang++-14",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_Clang14_Debug_Ninja",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            pkgs: "clang-14 llvm-14-dev libomp-14-dev",
+            cc: "clang-14",
+            cxx: "clang++-14",
+            generators: "Ninja"
+          }
     steps:
       - name: checkout project
         uses: actions/checkout@v2
