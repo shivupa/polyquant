@@ -74,6 +74,7 @@ jobs:
             libboost-all-dev \
             intel-mkl \
             liblapack-dev \
+            libeigen3-dev \
             libhdf5-dev \
             ${{ matrix.config.cc }} \
             ${{ matrix.config.cxx }}
