@@ -74,7 +74,7 @@ jobs:
             name: "Ubuntu_Latest_Clang12_Release_Ninja",
             os: ubuntu-latest,
             build_type: "Release",
-            pkgs: "clang-12 llvm-12-dev",
+            pkgs: "clang-12 llvm-12-dev libomp-dev",
             cc: "clang-12",
             cxx: "clang++-12",
             generators: "Ninja"
@@ -83,7 +83,7 @@ jobs:
             name: "Ubuntu_Latest_Clang12_Debug_Ninja",
             os: ubuntu-latest,
             build_type: "Debug",
-            pkgs: "clang-12 llvm-12-dev",
+            pkgs: "clang-12 llvm-12-dev libomp-dev",
             cc: "clang-12",
             cxx: "clang++-12",
             generators: "Ninja"
