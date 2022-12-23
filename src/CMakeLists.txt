@@ -6,7 +6,7 @@ add_library(polyquant_lib OBJECT)
 add_subdirectory(io)
 target_link_libraries(polyquant_lib PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(polyquant_lib PUBLIC Libint2::cxx)
-target_link_libraries(polyquant_lib PUBLIC h5cpp)
+target_link_libraries(polyquant_lib PUBLIC HighFive)
 target_link_libraries(polyquant_lib PUBLIC fmt::fmt)
 target_link_libraries(polyquant_lib PUBLIC Spectra)
 

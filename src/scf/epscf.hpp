@@ -1,10 +1,10 @@
 #ifndef POLYQUANT_EPSCF_H
 #define POLYQUANT_EPSCF_H
+#include "io/hdf5_utilities.hpp"
 #include "io/molden_utilities.hpp"
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <filesystem>
-#include <h5cpp/hdf5.hpp>
 #include <libint2.hpp> // IWYU pragma: keep
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <libint2/diis.h>

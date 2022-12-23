@@ -10,7 +10,8 @@
 #include <filesystem>
 #include <fmt/core.h>
 #include <fstream>
-#include <h5cpp/hdf5.hpp>
+#include <highfive/H5Easy.hpp>
+#include <highfive/H5File.hpp>
 #include <iomanip>
 #include <iostream>
 #include <libint2.hpp>       // IWYU pragma: keep
@@ -27,7 +28,7 @@ namespace polyquant {
 class POLYQUANT_HDF5 {
 public:
   POLYQUANT_HDF5() = default;
-  ~POLYQUANT_HDF5() { hdf5_file.close(); }
+  ~POLYQUANT_HDF5() {}
   /**
    * @brief Construct a HDF5 object using the create_file function.
    *
@@ -44,9 +45,12 @@ public:
    * @brief the hdf5 file object
    *
    */
-  hdf5::file::File hdf5_file;
+  std::unique_ptr<HighFive::File> hdf5_file;
   std::string filename;
 
+  template <typename T> bool load_data(T output, std::string path) { hdf5_file->getDataSet(path).read(output); }
+
+  bool exist(std::string path) { return hdf5_file->exist(path); }
   void dump_application();
   void dump_PBC(bool PBC);
   void dump_atoms(int num_atom, int num_species, std::vector<int> atomic_species_ids, std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec,
@@ -61,16 +65,6 @@ public:
                                    std::vector<int> atomic_charge, std::vector<int> core_elec, std::vector<std::string> atomic_names, std::vector<std::vector<double>> atomic_centers,
                                    std::vector<std::vector<libint2::Shell>> unique_shells);
   void dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C, int N_dets, int N_states, int N_mo);
-
-private:
-  hdf5::node::Group root_group;
-
-  hdf5::dataspace::Simple simple_space = hdf5::dataspace::Simple({1});
-  hdf5::datatype::Datatype bool_type = hdf5::datatype::create<bool>();
-  hdf5::datatype::Datatype int_type = hdf5::datatype::create<int>();
-  hdf5::datatype::Datatype double_type = hdf5::datatype::create<double>();
-  hdf5::datatype::Datatype vec_int_type = hdf5::datatype::create<std::vector<int>>();
-  hdf5::datatype::Datatype vec_double_type = hdf5::datatype::create<std::vector<double>>();
 };
 } // namespace polyquant
 #endif

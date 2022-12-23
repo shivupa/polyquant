@@ -1399,37 +1399,34 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
       std::string file = path.filename().string();
       std::string file_to_load = dir + quantum_part_key + "_" + file;
 
-      hdf5::file::File hdf5_file = hdf5::file::open(file_to_load, hdf5::file::AccessFlags::READONLY);
-      auto root_group = hdf5_file.root();
+      POLYQUANT_HDF5 hdf5_file(file_to_load);
       Polyquant_cout("Reading coefficients from file : " + file_to_load);
-      if (!root_group.exists("Super_Twist")) {
-        APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
-      }
-      auto Super_Twist_group = root_group.get_group("Super_Twist");
+
+      // if (!root_group.exists("Super_Twist")) {
+      //   APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
+      // }
+      // auto Super_Twist_group = root_group.get_group("Super_Twist");
 
       auto num_basis = this->input_basis->num_basis[quantum_part_idx];
       auto quantum_part_irrep_idx = 0;
       auto num_mo = this->num_mo_per_irrep[quantum_part_idx][quantum_part_irrep_idx];
-      auto Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx));
-      hdf5::dataspace::Simple Dataspace(Dataset.dataspace());
-      auto Dimensions = Dataspace.current_dimensions();
+
       Polyquant_cout("Reading eigenset_" + std::to_string(idx));
-      Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
-      std::vector<double> data(Dataspace.size());
-      Dataset.read(data);
+      std::vector<double> data;
+      std::string hpath = "/Super_Twist/eigenset_" + std::to_string(idx);
+      hdf5_file.load_data(data, hpath);
 #pragma omp parallel for
       for (auto i = 0; i < num_mo; i++) {
         for (auto j = 0; j < num_basis; j++) {
           this->C[quantum_part_idx][quantum_part_irrep_idx][0](j, i) = data[i * num_basis + j];
         }
       }
+
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        Dataset = Super_Twist_group.get_dataset("eigenset_" + std::to_string(idx + 1));
-        Dataspace = Dataset.dataspace();
-        Dimensions = Dataspace.current_dimensions();
+        hpath = "/Super_Twist/eigenset_" + std::to_string(idx + 1);
         Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
-        Polyquant_cout("    Dimensions " + std::to_string(Dimensions[0]) + " " + std::to_string(Dimensions[1]) + " for quantum particle " + std::to_string(quantum_part_idx));
-        Dataset.read(data);
+        data.clear();
+        hdf5_file.load_data(data, hpath);
 #pragma omp parallel for
         for (auto i = 0; i < num_mo; i++) {
           for (auto j = 0; j < num_basis; j++) {

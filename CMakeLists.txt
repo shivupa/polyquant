@@ -213,11 +213,14 @@ set(DISABLE_TESTS True CACHE BOOL "Disable building unit tests")
 set(BUILD_DOCS False CACHE BOOL "Build documentation")
 ########################################
 # HDF5
+set(HIGHFIVE_USE_EIGEN ON CACHE INTERNAL "")  # Forces the value
+set(HIGHFIVE_BUILD_DOCS OFF CACHE INTERNAL "")  # Forces the value
+set(HIGHFIVE_EXAMPLES OFF CACHE INTERNAL "")  # Forces the value
 FetchContent_Declare(
-  h5cpp
-  GIT_REPOSITORY https://github.com/shivupa/h5cpp
-  GIT_TAG origin/optional_docs)
-FetchContent_MakeAvailable(h5cpp)
+  HighFive
+  GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
+  GIT_TAG origin/master)
+FetchContent_MakeAvailable(HighFive)
 ########################################
 # Text Formatting
 # TODO replace with std::format once compilers support it

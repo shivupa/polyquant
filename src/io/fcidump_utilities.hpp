@@ -11,7 +11,6 @@
 #include <filesystem>
 #include <fmt/core.h>
 #include <fstream>
-#include <h5cpp/hdf5.hpp> //probably don't need
 #include <iomanip>
 #include <iostream>
 #include <libint2.hpp>       // IWYU pragma: keep
