@@ -106,6 +106,9 @@ endif(POLYQUANT_DOC)
 ################################################################################
 # Find libraries
 ########################################
+# OpenMP for parallelization
+find_package(OpenMP REQUIRED)
+########################################
 # json parsing
 FetchContent_Declare(
   nlohmann_json
@@ -147,9 +150,6 @@ if (NOT TARGET Eigen3::Eigen)
     set(EIGEN_BUILD_PKGCONFIG OFF)
     FetchContent_MakeAvailable(Eigen)
 endif (NOT TARGET Eigen3::Eigen)
-########################################
-# OpenMP for parallelization
-find_package(OpenMP REQUIRED)
 ########################################
 # LinAlg
 # set this list to prioritize a BLAS type
