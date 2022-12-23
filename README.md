@@ -33,10 +33,10 @@ Polyquant uses C++20. This is required because the CI operations use https://en.
 
    The `libint` branch has a configured library compatible with polyquant. It is recommended to build the libint branch, install, and then build the main branch.
 
-- [ess-dmsc/h5cpp](https://github.com/ess-dmsc/h5cpp)
-   C++ wrapper for the HDF5 C-library 
+- [BlueBrain/HighFive](https://github.com/BlueBrain/HighFive)
+   HighFive - Header-only C++ HDF5 interface 
 
-   `Polyquant` uses `ess-dmsc/h5cpp` to dump HDF5 files for use with QMCPACK.
+   `Polyquant` uses `BlueBrain/HighFive` to dump HDF5 files for use with QMCPACK and for restarts.
 
 ### For a debug build
 - [include_what_you_use](https://github.com/include-what-you-use/include-what-you-use)

@@ -4,7 +4,6 @@
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include <doctest/doctest.h>
-#include <h5cpp/hdf5.hpp>
 
 using namespace polyquant;
 TEST_SUITE("CALCULATION") {
@@ -134,20 +133,18 @@ TEST_SUITE("CALCULATION") {
   TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {
     POLYQUANT_CALCULATION test_calc("../../tests/data/li-_custombasis_wpos/Li_wpos_dumpHDF5.json");
     test_calc.run();
-    hdf5::file::File f1 = hdf5::file::open("electron_Li_wpos.h5", hdf5::file::AccessFlags::READONLY);
-    auto root_group1 = f1.root();
-    CHECK(root_group1.exists("PBC") == true);
-    CHECK(root_group1.exists("Super_Twist") == true);
-    CHECK(root_group1.exists("application") == true);
-    CHECK(root_group1.exists("atoms") == true);
-    CHECK(root_group1.exists("basisset") == true);
-    hdf5::file::File f2 = hdf5::file::open("positron_Li_wpos.h5", hdf5::file::AccessFlags::READONLY);
-    auto root_group2 = f2.root();
-    CHECK(root_group2.exists("PBC") == true);
-    CHECK(root_group2.exists("Super_Twist") == true);
-    CHECK(root_group2.exists("application") == true);
-    CHECK(root_group2.exists("atoms") == true);
-    CHECK(root_group2.exists("basisset") == true);
+    POLYQUANT_HDF5 file("electron_Li_wpos.h5");
+    CHECK(file.exist("/PBC") == true);
+    CHECK(file.exist("Super_Twist") == true);
+    CHECK(file.exist("application") == true);
+    CHECK(file.exist("atoms") == true);
+    CHECK(file.exist("basisset") == true);
+    POLYQUANT_HDF5 file2("positron_Li_wpos.h5");
+    CHECK(file2.exist("PBC") == true);
+    CHECK(file2.exist("Super_Twist") == true);
+    CHECK(file2.exist("application") == true);
+    CHECK(file2.exist("atoms") == true);
+    CHECK(file2.exist("basisset") == true);
   }
 
   TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
