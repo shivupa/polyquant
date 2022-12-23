@@ -34,7 +34,7 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule);
+  POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule);
   ~POLYQUANT_INTEGRAL();
   int eig_s2_linear_dep_threshold = 6;
   void parse_integral_parameters();
@@ -57,7 +57,7 @@ public:
    * @param basis the basis to calculate integrals in
    * @param molecule the molecule to calculate integrals for
    */
-  void setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule);
+  void setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_MOLECULE> molecule);
   /**
    * @brief Calculate the combined index for the vector containing the upper
    * triangle of a symmetric matrix from two indicies of the unflattened matrix.
@@ -182,8 +182,9 @@ public:
   /**
    * @brief The orthogonalization matrix
    *
+   * [idx_part][irrep_idx]
    */
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> orth_X;
+  std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> orth_X;
 
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
   /**
@@ -207,17 +208,18 @@ public:
    * @brief the input parameters
    *
    */
-  POLYQUANT_INPUT input_params;
+  std::shared_ptr<POLYQUANT_INPUT> input_params;
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
   /**
    * @brief the input basis
    *
    */
-  POLYQUANT_BASIS input_basis;
+  std::shared_ptr<POLYQUANT_BASIS> input_basis;
   /**
    * @brief the input molecule
    *
    */
-  POLYQUANT_MOLECULE input_molecule;
+  std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
   double tolerance_2e = std::numeric_limits<double>::epsilon();
   /*std::unordered_map<std::string, Eigen::Matrix<double, Eigen::Dynamic,

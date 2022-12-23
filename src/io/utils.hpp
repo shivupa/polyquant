@@ -28,6 +28,7 @@ namespace polyquant {
 //  * @param reason a string stating the reason to abort.
 //  */
 void APP_ABORT(const std::string &reason);
+void APP_WARN(const std::string &reason);
 /**
  * @brief A helper function to print only if we are on rank 0.
  *
@@ -189,6 +190,56 @@ template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dyna
     std::cout << std::endl;
   }
 };
+
+template <typename T>
+void Polyquant_dump_character_table(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &title, const std::vector<std::string> &row_titles,
+                                    const std::vector<std::string> &col_titles) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << " character table" << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+            << "  ";
+  for (size_t j = 0; j < mat.cols(); j++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << col_titles[j] << "  ";
+  }
+  std::cout << std::endl;
+
+  for (size_t i = 0; i < mat.rows(); i++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[i] << "  ";
+    for (size_t j = 0; j < mat.cols(); j++) {
+      std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << mat(i, j) << "  ";
+    }
+    std::cout << std::endl;
+  }
+};
+template <typename T> void Polyquant_dump_direct_product_table(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &title, const std::vector<std::string> &row_titles) {
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << title << " direct product table" << std::endl;
+  std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+            << "  ";
+  for (size_t j = 0; j < mat.cols(); j++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[j] << "  ";
+  }
+  std::cout << std::endl;
+
+  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+            << "  ";
+  for (size_t j = 0; j < mat.cols(); j++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << "---"
+              << "  ";
+  }
+  std::cout << std::endl;
+
+  for (size_t i = 0; i < mat.rows(); i++) {
+    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[i] << " |";
+    for (size_t j = 0; j < mat.cols(); j++) {
+      std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[mat(i, j)] << "  ";
+    }
+    std::cout << std::endl;
+  }
+};
+
 /**
  * @brief A helper function to dump a dense diagonalmatrix object to file.
  *
@@ -241,7 +292,8 @@ template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eig
 void Polyquant_dump_basis_to_file(const std::string &contents, const std::string &filename);
 
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
-                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::string title);
+                   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::vector<std::vector<std::vector<std::string>>> &symm_labels, std::string title,
+                   std::vector<std::vector<std::vector<std::string>>> &ao_labels);
 
 // TODO move these functions to some sort of algorithms folder or something
 /**

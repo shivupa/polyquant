@@ -2,32 +2,28 @@
 
 using namespace polyquant;
 
-POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input) {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
-  setup_molecule(input);
-}
+POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry) { setup_molecule(input_params, input_symmetry); }
 
-void POLYQUANT_MOLECULE::set_molecular_charge(const POLYQUANT_INPUT &input) {
-  if (input.input_data["molecule"].contains("molecular_charge")) {
-    this->charge = input.input_data["molecule"]["molecular_charge"];
+void POLYQUANT_MOLECULE::set_molecular_charge() {
+  if (input->input_data["molecule"].contains("molecular_charge")) {
+    this->charge = input->input_data["molecule"]["molecular_charge"];
   } else {
     APP_ABORT("Can't set up molecule. The molecule section of the input is missing 'molecular_charge'.");
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_multiplicity(const POLYQUANT_INPUT &input) {
-  if (input.input_data["molecule"].contains("molecular_multiplicity")) {
-    this->multiplicity = input.input_data["molecule"]["molecular_multiplicity"];
+void POLYQUANT_MOLECULE::set_molecular_multiplicity() {
+  if (input->input_data["molecule"].contains("molecular_multiplicity")) {
+    this->multiplicity = input->input_data["molecule"]["molecular_multiplicity"];
   } else {
     APP_ABORT("Can't set up molecule. The molecule section of the input is missing 'molecular_multiplicity'.");
   }
 }
 
-void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) {
-  if (input.input_data.contains("keywords")) {
-    if (input.input_data["keywords"].contains("restricted")) {
-      this->restricted = input.input_data["keywords"]["restricted"];
+void POLYQUANT_MOLECULE::set_molecular_restricted() {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("restricted")) {
+      this->restricted = input->input_data["keywords"]["restricted"];
     } else {
       Polyquant_cout("'keywords'->'restricted' missing. Defaulting to restricted.");
       this->restricted = true;
@@ -38,13 +34,134 @@ void POLYQUANT_MOLECULE::set_molecular_restricted(const POLYQUANT_INPUT &input) 
   }
 }
 
-void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
+void POLYQUANT_MOLECULE::symmetrize_molecule() {
+
+  msym_error_t ret = MSYM_SUCCESS;
+
+  // create atoms in msym structs
+  std::vector<msym_element_t> elements_for_msym;
+  elements_for_msym = this->to_point_msym_charges_for_symmetry();
+  int length = elements_for_msym.size();
+
+  auto &ctx = input_symm->ctx;
+
+  if (input_symm->do_symmetry == false) {
+    return;
+  }
+
+  // TODO Figure out setting symmetry thresholds here for now use default
+  //  if(NULL != thresholds){
+  //      if(MSYM_SUCCESS != (ret = msymSetThresholds(ctx, thresholds))) goto err;
+  //  }
+
+  // set atoms in ctx
+  if (MSYM_SUCCESS != (ret = msymSetElements(ctx, length, elements_for_msym.data()))) {
+
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
+    APP_ABORT("Error setting atoms for symmetrizing");
+  }
+
+  /* Get elements msym elements */
+  // i have no idea why this is required i need to check with their library
+  // if(MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))){
+  //    APP_ABORT("Error getting atoms for symmetrizing");
+  //}
+
+  // geometrical information
+  std::vector<double> com;
+  com.resize(3);
+  if (MSYM_SUCCESS != (ret = msymGetCenterOfMass(ctx, com.data()))) {
+    APP_ABORT("Error calculating center of mass");
+  }
+  double radius = 0.0;
+  if (MSYM_SUCCESS != (ret = msymGetRadius(ctx, &radius))) {
+    APP_ABORT("Error calculationg radius");
+  }
+
+  std::cout << "SYMMMETRY TESTING : COM  " << com[0] << "   " << com[1] << "    " << com[2] << std::endl;
+  std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
+
+  if (length != 1) {
+    if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
+
+      auto error = msymErrorString(ret);
+      std::cout << error << std::endl;
+      error = msymGetErrorDetails();
+      std::cout << error << std::endl;
+      APP_ABORT("Error Figuring out symmetry");
+    }
+  } else {
+    std::string pg = "D2h";
+    if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+      auto error = msymErrorString(ret);
+      std::cout << error << std::endl;
+      error = msymGetErrorDetails();
+      std::cout << error << std::endl;
+      APP_ABORT("Error setting PG to D2h");
+    }
+  }
+  input_symm->point_group.resize(6);
+  if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), input_symm->point_group.data()))) {
+    // if(MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group))){
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
+    APP_ABORT("Error Getting Point group");
+  }
+  input_symm->point_group.erase(input_symm->point_group.find('\0'));
+  std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << input_symm->point_group << std::endl;
+  input_symm->sub_group = input_symm->point_group;
+
+  // TODO add a way to descend in symmetry
+  // open issue for this
+
+  // Symmetrize and Align Molecule
+  double symerr = 0.0;
+  if (MSYM_SUCCESS != (ret = msymSymmetrizeElements(ctx, &symerr))) {
+
+    auto error = msymErrorString(ret);
+    std::cout << error << std::endl;
+    error = msymGetErrorDetails();
+    std::cout << error << std::endl;
+    APP_ABORT("Error Symmetrizing molecule!");
+  }
+  if (MSYM_SUCCESS != (ret = msymAlignAxes(ctx))) {
+    APP_ABORT("Error Aligning molecule!");
+  }
+
+  int mlength;
+  msym_element_t *melements = NULL;
+
+  if (MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))) {
+    APP_ABORT("Error getting the symmetrized structure.");
+  }
+  if (mlength != elements_for_msym.size()) {
+    APP_ABORT("Number of atoms changed during symmetrizing molecule.");
+  }
+  elements_for_msym.clear();
+  for (auto i = 0; i < mlength; i++) {
+    elements_for_msym.push_back(melements[i]);
+  }
+
+  from_point_msym_charges_for_symmetry(elements_for_msym);
+
+  //    APP_ABORT("Error getting atoms for symmetrizing");
+  //}
+
+  // if(MSYM_SUCCESS != (ret = msymGetSubgroups(ctx, &msgl, &msg))) goto err;
+}
+
+void POLYQUANT_MOLECULE::parse_particles() {
   // Store center coordinates
   // todo check for geom and symbols
-  for (size_t i = 0; i < (input.input_data["molecule"]["geometry"].size() / 3); ++i) {
+  for (size_t i = 0; i < (input->input_data["molecule"]["geometry"].size() / 3); ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
-      atom.push_back(input.input_data["molecule"]["geometry"][(i * 3) + j]);
+      atom.push_back(input->input_data["molecule"]["geometry"][(i * 3) + j]);
       atom[j] *= this->angstrom_to_bohr;
     }
     centers.push_back(atom);
@@ -52,25 +169,25 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
   // Store center labels
   std::vector<std::string> center_labels;
   std::vector<int> quantum_nuclei;
-  for (auto label : input.input_data["molecule"]["symbols"]) {
+  for (auto label : input->input_data["molecule"]["symbols"]) {
     center_labels.push_back(label);
     quantum_nuclei.push_back(0);
   }
 
   // Store if we are using nuclear charge modification
   bool charge_mod = false;
-  if (input.input_data["molecule"].contains("modify_nuclear_charge")) {
+  if (input->input_data["molecule"].contains("modify_nuclear_charge")) {
     charge_mod = true;
   }
 
-  if (input.input_data.contains("keywords")) {
-    // if (input.input_data["keywords"].contains("molecule_keywords")) {
+  if (input->input_data.contains("keywords")) {
+    // if (input->input_data["keywords"].contains("molecule_keywords")) {
     // create classical and quantum centers
-    if (input.input_data["keywords"].contains("quantum_nuclei")) {
+    if (input->input_data["keywords"].contains("quantum_nuclei")) {
       // if a label is given change all nuclei with matching label to be
       // quantum https://github.com/nlohmann/json/issues/1564
-      if (std::all_of(input.input_data["keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_string(); })) {
-        for (std::string quantum_label : input.input_data["keywords"]["quantum_nuclei"]) {
+      if (std::all_of(input->input_data["keywords"]["quantum_nuclei"].begin(), input->input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_string(); })) {
+        for (std::string quantum_label : input->input_data["keywords"]["quantum_nuclei"]) {
           // https://stackoverflow.com/questions/42871932/how-to-find-all-positions-of-an-element-using-stdfind
           auto start_it = std::begin(center_labels);
           bool found_at_least_once = false;
@@ -87,9 +204,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
             Polyquant_cout("The label '" + quantum_label + "' was not found in the atomic labels. Skipping...");
           }
         }
-      } else if (std::all_of(input.input_data["keywords"]["quantum_nuclei"].begin(), input.input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_number(); })) {
+      } else if (std::all_of(input->input_data["keywords"]["quantum_nuclei"].begin(), input->input_data["keywords"]["quantum_nuclei"].end(), [](const json &el) { return el.is_number(); })) {
         size_t idx = 0;
-        for (auto is_quantum : input.input_data["keywords"]["quantum_nuclei"]) {
+        for (auto is_quantum : input->input_data["keywords"]["quantum_nuclei"]) {
           quantum_nuclei[idx] = is_quantum;
           idx++;
         }
@@ -117,8 +234,8 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
         classical_particles[curr_label].mass = atom_symb_to_mass(center_labels[i]);
         double nuc_charge = atom_symb_to_num(center_labels[i]);
         if (charge_mod) {
-          if (input.input_data["molecule"]["modify_nuclear_charge"].contains(center_labels[i])) {
-            nuc_charge = input.input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
+          if (input->input_data["molecule"]["modify_nuclear_charge"].contains(center_labels[i])) {
+            nuc_charge = input->input_data["molecule"]["modify_nuclear_charge"][center_labels[i]];
           }
         }
         classical_particles[curr_label].charge = nuc_charge;
@@ -171,9 +288,9 @@ void POLYQUANT_MOLECULE::parse_particles(const POLYQUANT_INPUT &input) {
     }
   }
   // create any other quantum particles
-  if (input.input_data.contains("keywords")) {
-    if (input.input_data["keywords"].contains("quantum_particles")) {
-      for (auto qp : input.input_data["keywords"]["quantum_particles"]) {
+  if (input->input_data.contains("keywords")) {
+    if (input->input_data["keywords"].contains("quantum_particles")) {
+      for (auto qp : input->input_data["keywords"]["quantum_particles"]) {
         std::string curr_label;
         if (qp.contains("name")) {
           curr_label = qp["name"];
@@ -308,13 +425,17 @@ void POLYQUANT_MOLECULE::print_molecule() {
   Polyquant_cout("");
 }
 
-void POLYQUANT_MOLECULE::setup_molecule(const POLYQUANT_INPUT &input) {
-
-  if (input.input_data.contains("molecule")) {
-    set_molecular_charge(input);
-    set_molecular_multiplicity(input);
-    set_molecular_restricted(input);
-    parse_particles(input);
+void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry) {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  input = input_params;
+  input_symm = input_symmetry;
+  if (input->input_data.contains("molecule")) {
+    set_molecular_charge();
+    set_molecular_multiplicity();
+    set_molecular_restricted();
+    parse_particles();
+    symmetrize_molecule();
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
     Polyquant_cout("nuclear repulsion energy: " + std::to_string(this->E_nuc));
@@ -401,6 +522,92 @@ std::vector<std::pair<double, std::array<double, 3>>> POLYQUANT_MOLECULE::to_poi
       auto center_idx = classical_part.second.center_idx[i];
       std::array<double, 3> pos = {centers[center_idx][0], centers[center_idx][1], centers[center_idx][2]};
       std::pair<double, std::array<double, 3>> temp_atom = std::make_pair(classical_part.second.charge, pos);
+      atom_point_charges.push_back(temp_atom);
+    }
+  }
+  return atom_point_charges;
+}
+
+void POLYQUANT_MOLECULE::from_point_msym_charges_for_symmetry(std::vector<msym_element_t> &symm_chrgs) {
+  auto symm_chrg_idx = 0;
+  for (auto classical_part : classical_particles) {
+    if (classical_part.second.charge == 0.0) {
+      APP_WARN("When symmetrizing molecules ghost atoms are treated as Deuteriums. This shifts the center of mass, and the point group is of the supermolecule made of the atoms and the ghost atom.");
+      // continue;
+    }
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      auto center_idx = classical_part.second.center_idx[i];
+
+      msym_element_t temp_atom = symm_chrgs[symm_chrg_idx];
+      if (temp_atom.name[0] != 'D') {
+        auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
+        for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
+          if (temp_atom.name[letter_idx] != classical_part.first[letter_idx]) {
+            APP_ABORT("Atom names are symmetrize don't match. Something happened during reorder.");
+          }
+        }
+      } else {
+        Polyquant_cout("Adjusting Ghost atom");
+      }
+
+      centers[center_idx][0] = temp_atom.v[0];
+      centers[center_idx][1] = temp_atom.v[1];
+      centers[center_idx][2] = temp_atom.v[2];
+      symm_chrg_idx++;
+    }
+  }
+}
+
+std::string POLYQUANT_MOLECULE::get_label_of_center(const std::array<double, 3> &center_pos) const {
+  std::string label = "";
+
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      auto center_idx = classical_part.second.center_idx[i];
+      auto match_threshold = 1e-12;
+      if (std::abs(centers[center_idx][0] - center_pos[0]) < match_threshold && std::abs(centers[center_idx][1] - center_pos[1]) < match_threshold &&
+          std::abs(centers[center_idx][2] - center_pos[2]) < match_threshold) {
+        label = classical_part.first + std::to_string(i);
+        return label;
+      }
+    }
+  }
+  if (label == "") {
+    APP_ABORT("Could not find a label for the center provided.");
+    return "";
+  }
+}
+std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmetry(std::string classical_part_key) const {
+  std::vector<msym_element_t> atom_point_charges;
+  for (auto classical_part : classical_particles) {
+    for (auto i = 0; i < classical_part.second.num_parts; i++) {
+      if (classical_part_key != "all") {
+        if (classical_part_key == "no_ghost") {
+          if (classical_part.second.mass == 0.0) {
+            continue;
+          }
+        } else if (classical_part.first != classical_part_key) {
+          continue;
+        }
+      }
+      auto center_idx = classical_part.second.center_idx[i];
+
+      msym_element_t temp_atom;
+      temp_atom.v[0] = centers[center_idx][0];
+      temp_atom.v[1] = centers[center_idx][1];
+      temp_atom.v[2] = centers[center_idx][2];
+      temp_atom.n = (int)(classical_part.second.charge);
+      temp_atom.m = (int)(classical_part.second.mass);
+
+      if (classical_part.first == "X" || classical_part.second.mass == 0) {
+        temp_atom.name[0] = 'D';
+        temp_atom.name[1] = '\0';
+      } else {
+        auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
+        for (auto letter_idx = 0; letter_idx < nlet_in_name; letter_idx++) {
+          temp_atom.name[letter_idx] = classical_part.first[letter_idx];
+        }
+      }
       atom_point_charges.push_back(temp_atom);
     }
   }

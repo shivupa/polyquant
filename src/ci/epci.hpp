@@ -24,8 +24,8 @@ namespace polyquant {
 class POLYQUANT_EPCI {
 public:
   POLYQUANT_EPCI() = default;
-  POLYQUANT_EPCI(const POLYQUANT_EPSCF &input_scf) { this->setup(input_scf); };
-  void setup(const POLYQUANT_EPSCF &input_scf);
+  POLYQUANT_EPCI(std::shared_ptr<POLYQUANT_EPSCF> input_scf) { this->setup(input_scf); };
+  void setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
   void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs);
@@ -48,31 +48,37 @@ public:
    * @brief the input parameters
    *
    */
-  POLYQUANT_INPUT input_params;
+  std::shared_ptr<POLYQUANT_INPUT> input_params;
+
+  /**
+   * @brief the input symmetry handler
+   *
+   */
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
 
   /**
    * @brief the input molecule
    *
    */
-  POLYQUANT_MOLECULE input_molecule;
+  std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
   /**
    * @brief the input basis
    *
    */
-  POLYQUANT_BASIS input_basis;
+  std::shared_ptr<POLYQUANT_BASIS> input_basis;
 
   /**
    * @brief integrals calculated for the input molecule in the input basis
    *
    */
-  POLYQUANT_INTEGRAL input_integral;
+  std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
 
   /**
    * @brief the input scf calculation
    *
    */
-  POLYQUANT_EPSCF input_epscf;
+  std::shared_ptr<POLYQUANT_EPSCF> input_epscf;
   POLYQUANT_DETSET<uint64_t> detset;
   Eigen::Matrix<double, Eigen::Dynamic, 1> energies;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;
@@ -91,8 +97,7 @@ public:
   std::vector<int> NO_states;
 
   std::vector<std::tuple<int, int, int>> excitation_level;
-  std::vector<int> frozen_core;
-  std::vector<int> deleted_virtual;
+  int max_collective_excitation_level = std::numeric_limits<int>::max();
   /**
    * @brief Energy convergence
    *
@@ -111,6 +116,7 @@ public:
   int num_states = 1;
   int num_subspace_vec = 5;
   bool verbose = false;
+  bool exact_diag = false;
 
   double det_print_threshold = 0.1;
   size_t cache_size = std::numeric_limits<size_t>::max();

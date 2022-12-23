@@ -29,7 +29,8 @@
         "convergence_DM" : 1e-8,
         "iteration_max" : 200
     },
-   "pure" : true
+   "pure" : true,
+   "symmetry" : false
   }
 }
 

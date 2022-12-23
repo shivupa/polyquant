@@ -1,0 +1,45 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["H"],
+    "molecular_charge": -1,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CI",
+    "basis": 
+        { "electron" :
+          {
+            "H" : [{ "library" : 
+              {"type" : "aug-cc-pvtz"}}]
+          }
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "H_wopos.h5",
+    "mf_keywords" :{
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-10,
+        "iteration_max" : 200,
+        "from_file" : false,
+        "incremental_fock" : true,
+        "Cauchy_Schwarz_screening" : true
+    },
+   "ci_keywords" : {
+       "convergence_E" : 1e-8,
+       "num_states" : 7,
+       "slow_diag" : false,
+       "num_subspace_vec" : 20,
+       "excitation_level" : [
+           [2,2,2]
+           ],
+      "max_collective_excitation_level" : 3
+   },
+   "pure" : false
+      }
+}

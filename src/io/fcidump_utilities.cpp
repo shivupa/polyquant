@@ -14,9 +14,10 @@ void POLYQUANT_FCIDUMP::create_file(const std::string &fname) {
   this->fcidump_file.open(this->filename);
 }
 
-void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total, int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group, POLYQUANT_INTEGRAL &input_ints,
-                             double E_constant, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, int quantum_part_a_idx,
-                             int quantum_part_b_idx) {
+void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total, int ms2, bool restricted, std::vector<int> MO_symmetry_labels, int isym, std::string point_group,
+                             std::shared_ptr<POLYQUANT_INTEGRAL> integrals, double E_constant, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy,
+                             Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, int quantum_part_a_idx, int quantum_part_b_idx) {
+  input_ints = integrals;
   quantum_part_a_index = quantum_part_a_idx;
   quantum_part_b_index = quantum_part_b_idx;
   // if this is an FCIDUMP for the same types, dump header info
@@ -31,8 +32,8 @@ void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total, int ms2, bool restr
   }
   this->dump_constant(E_constant);
   this->dump_MO_e(MO_a_energy, MO_b_energy);
-  this->dump_one_body_ints(input_ints);
-  this->dump_two_body_ints(input_ints);
+  this->dump_one_body_ints();
+  this->dump_two_body_ints();
 }
 
 // variables
@@ -57,7 +58,7 @@ void POLYQUANT_FCIDUMP::dump_header(int num_mo, int num_part_tot, int ms2, bool 
   this->fcidump_file << std::setw(3) << " &END" << std::endl;
 }
 
-void POLYQUANT_FCIDUMP::dump_one_body_ints(POLYQUANT_INTEGRAL &input_ints) {
+void POLYQUANT_FCIDUMP::dump_one_body_ints() {
   // don't output one body ints if not the same particle type
   if (quantum_part_a_index != quantum_part_b_index) {
     return;
@@ -66,13 +67,13 @@ void POLYQUANT_FCIDUMP::dump_one_body_ints(POLYQUANT_INTEGRAL &input_ints) {
   std::string line;
   for (int spin_a = 0; spin_a < spin_types; spin_a++) {
     for (int spin_b = 0; spin_b < spin_types; spin_b++) {
-      int rows = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].rows();
-      int cols = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].cols();
+      int rows = input_ints->mo_one_body_ints[quantum_part_a_index][spin_a].rows();
+      int cols = input_ints->mo_one_body_ints[quantum_part_a_index][spin_a].cols();
       for (int i = 0; i < cols; i++) {
         // lower triangle
         for (int a = 0; a <= i; a++) {
           line = "";
-          line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", input_ints.mo_one_body_ints[quantum_part_a_index][spin_a](i, a), i + 1, a + 1, 0, 0);
+          line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", input_ints->mo_one_body_ints[quantum_part_a_index][spin_a](i, a), i + 1, a + 1, 0, 0);
           this->fcidump_file << line << std::endl;
         }
       }
@@ -80,24 +81,24 @@ void POLYQUANT_FCIDUMP::dump_one_body_ints(POLYQUANT_INTEGRAL &input_ints) {
   }
 }
 
-void POLYQUANT_FCIDUMP::dump_two_body_ints(POLYQUANT_INTEGRAL &input_ints) {
+void POLYQUANT_FCIDUMP::dump_two_body_ints() {
   // if restricted loop over alpha and beta
   std::string line;
   for (int spin_a = 0; spin_a < spin_types; spin_a++) {
     for (int spin_b = 0; spin_b < spin_types; spin_b++) {
-      int nmo_a = input_ints.mo_one_body_ints[quantum_part_a_index][spin_a].rows();
-      int nmo_b = input_ints.mo_one_body_ints[quantum_part_b_index][spin_b].rows();
+      int nmo_a = input_ints->mo_one_body_ints[quantum_part_a_index][spin_a].rows();
+      int nmo_b = input_ints->mo_one_body_ints[quantum_part_b_index][spin_b].rows();
       // lower "triangle" NOTE we only have 4 fold symm if quantum_part_a_idx != quantum_part_b_idx otherwise we have the usual 8
       for (int i = 0; i < nmo_a; i++) {
         for (int j = 0; j <= i; j++) {
           // if (quantum_part_a_index == quantum_part_b_index){
           // for (int a=0; a<= i ; a ++) {
           //    for (int b=0; b<= a ; b ++){
-          //       if (input_ints.idx2(i,j) >= input_ints.idx2(a,b)){
+          //       if (input_ints->idx2(i,j) >= input_ints->idx2(a,b)){
           //     // 8fold degeneracy
           //   line = "";
-          //   line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints.idx2(i,j),
-          //   input_ints.idx2(a,b)), i+1, j+1, a+1, b+1); this->fcidump_file << line << std::endl;
+          //   line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}", input_ints->mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints->idx2(i,j),
+          //   input_ints->idx2(a,b)), i+1, j+1, a+1, b+1); this->fcidump_file << line << std::endl;
           //       }
           //   }
           //  }
@@ -108,7 +109,7 @@ void POLYQUANT_FCIDUMP::dump_two_body_ints(POLYQUANT_INTEGRAL &input_ints) {
               // 4fold degeneracy
               line = "";
               line += fmt::format("{: >25.15f}{:>10d}{:>10d}{:>10d}{:>10d}",
-                                  input_ints.mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints.idx2(i, j), input_ints.idx2(a, b)), i + 1, j + 1, a + 1, b + 1);
+                                  input_ints->mo_two_body_ints[quantum_part_a_index][spin_a][quantum_part_b_index][spin_b](input_ints->idx2(i, j), input_ints->idx2(a, b)), i + 1, j + 1, a + 1, b + 1);
               this->fcidump_file << line << std::endl;
             }
           }

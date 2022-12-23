@@ -6,8 +6,8 @@ include(FetchContent)
 # Set up the project and version info
 project(POLYQUANT)
 set(POLYQUANT_VERSION_MAJOR 0)
-set(POLYQUANT_VERSION_MINOR 5)
-set(POLYQUANT_VERSION_PATCH 3)
+set(POLYQUANT_VERSION_MINOR 7)
+set(POLYQUANT_VERSION_PATCH 0)
 set(POLYQUANT_VERSION "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${POLYQUANT_VERSION_PATCH}")
 # these files can reside in the bin so we know exactly what was built we could
 # do this as a header and include the header if we wanted to selectively trigger
@@ -106,6 +106,9 @@ endif(POLYQUANT_DOC)
 ################################################################################
 # Find libraries
 ########################################
+# OpenMP for parallelization
+find_package(OpenMP REQUIRED)
+########################################
 # json parsing
 FetchContent_Declare(
   nlohmann_json
@@ -148,9 +151,6 @@ if (NOT TARGET Eigen3::Eigen)
     FetchContent_MakeAvailable(Eigen)
 endif (NOT TARGET Eigen3::Eigen)
 ########################################
-# OpenMP for parallelization
-find_package(OpenMP REQUIRED)
-########################################
 # LinAlg
 # set this list to prioritize a BLAS type
 set( LinAlg_BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
@@ -162,6 +162,15 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/shivupa/spectra.git
   GIT_TAG origin/logging )
 FetchContent_MakeAvailable(spectra)
+########################################
+# symmetry
+# I can't get this to import the target correctly so unfortunately this needs to be installed separately
+#FetchContent_Declare(
+#  libmsym
+#  GIT_REPOSITORY https://github.com/mcodev31/libmsym
+#  GIT_TAG master)
+#FetchContent_MakeAvailable(libmsym)
+find_package(libmsym REQUIRED)
 ########################################
 # libint for gaussian AO integrals
 find_package(Libint2)
@@ -204,11 +213,14 @@ set(DISABLE_TESTS True CACHE BOOL "Disable building unit tests")
 set(BUILD_DOCS False CACHE BOOL "Build documentation")
 ########################################
 # HDF5
+set(HIGHFIVE_USE_EIGEN ON CACHE INTERNAL "")  # Forces the value
+set(HIGHFIVE_BUILD_DOCS OFF CACHE INTERNAL "")  # Forces the value
+set(HIGHFIVE_EXAMPLES OFF CACHE INTERNAL "")  # Forces the value
 FetchContent_Declare(
-  h5cpp
-  GIT_REPOSITORY https://github.com/shivupa/h5cpp
-  GIT_TAG origin/optional_docs)
-FetchContent_MakeAvailable(h5cpp)
+  HighFive
+  GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
+  GIT_TAG origin/master)
+FetchContent_MakeAvailable(HighFive)
 ########################################
 # Text Formatting
 # TODO replace with std::format once compilers support it

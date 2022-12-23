@@ -2,8 +2,10 @@
 
 using namespace polyquant;
 
-POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) : POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL() {
-  this->setup_integral(input, basis, molecule);
+POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis,
+                                       std::shared_ptr<POLYQUANT_MOLECULE> molecule)
+    : POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL() {
+  this->setup_integral(input, symmetry, basis, molecule);
 }
 
 POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() {}
@@ -14,12 +16,12 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
   libint2::initialize();
   Polyquant_cout("Calculating One Body Overlap Integrals...");
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     if (this->overlap[quantum_part_idx].cols() == 0 && this->overlap[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
       this->overlap[quantum_part_idx].resize(num_basis, num_basis);
       this->overlap[quantum_part_idx].setZero();
-      this->compute_1body_ints(this->overlap[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::overlap);
+      this->compute_1body_ints(this->overlap[quantum_part_idx], this->input_basis->basis[quantum_part_idx], libint2::Operator::overlap);
       if (verbose == true) {
         std::stringstream filename;
         filename << "overlap";
@@ -39,13 +41,13 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
   libint2::initialize();
   Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     if (this->Schwarz[quantum_part_idx].cols() == 0 && this->Schwarz[quantum_part_idx].rows() == 0) {
-      auto num_basis_a = this->input_basis.basis[quantum_part_idx].size();
-      auto num_basis_b = this->input_basis.basis[quantum_part_idx].size();
+      auto num_basis_a = this->input_basis->basis[quantum_part_idx].size();
+      auto num_basis_b = this->input_basis->basis[quantum_part_idx].size();
       this->Schwarz[quantum_part_idx].resize(num_basis_a, num_basis_b);
       this->Schwarz[quantum_part_idx].setZero();
-      this->compute_Schwarz_ints(this->Schwarz[quantum_part_idx], this->input_basis.basis[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::coulomb);
+      this->compute_Schwarz_ints(this->Schwarz[quantum_part_idx], this->input_basis->basis[quantum_part_idx], this->input_basis->basis[quantum_part_idx], libint2::Operator::coulomb);
       if (verbose == true) {
         std::stringstream filename;
         filename << "Schwarz";
@@ -65,7 +67,7 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
   this->frozen_core_ints.resize(fc_dm.size());
   for (auto i = 0; i < frozen_core_ints.size(); i++) {
     this->frozen_core_ints[i].resize(fc_dm[i].size());
-    auto num_basis_i = this->input_basis.num_basis[i];
+    auto num_basis_i = this->input_basis->num_basis[i];
     for (auto j = 0; j < fc_dm[i].size(); j++) {
       this->frozen_core_ints[i][j].resize(num_basis_i, num_basis_i);
       this->frozen_core_ints[i][j].setZero();
@@ -73,10 +75,10 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
   }
   libint2::initialize();
   auto quantum_part_a_idx = 0ul;
-  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule->quantum_particles) {
     for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < fc_dm[quantum_part_a_idx].size(); quantum_part_a_spin_idx++) {
       auto quantum_part_b_idx = 0ul;
-      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule->quantum_particles) {
         for (auto quantum_part_b_spin_idx = 0; quantum_part_b_spin_idx < fc_dm[quantum_part_b_idx].size(); quantum_part_b_spin_idx++) {
           if (frozen_core[quantum_part_b_idx] != 0) {
             this->compute_frozen_core_ints(this->frozen_core_ints[quantum_part_a_idx][quantum_part_a_spin_idx], fc_dm[quantum_part_b_idx], quantum_part_a_idx, quantum_part_a_spin_idx,
@@ -101,9 +103,9 @@ void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
   libint2::initialize();
   Polyquant_cout("Calculating unique shell pairs...");
   auto quantum_part_a_idx = 0ul;
-  for (auto const &[quantum_part_a_key, quantum_a_part] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_a_key, quantum_a_part] : this->input_molecule->quantum_particles) {
     if (std::get<0>(this->unique_shell_pairs[quantum_part_a_idx]).size() == 0 && std::get<1>(this->unique_shell_pairs[quantum_part_a_idx]).size() == 0) {
-      this->unique_shell_pairs[quantum_part_a_idx] = this->compute_shellpairs(this->input_basis.basis[quantum_part_a_idx], threshold);
+      this->unique_shell_pairs[quantum_part_a_idx] = this->compute_shellpairs(this->input_basis->basis[quantum_part_a_idx], threshold);
     }
     quantum_part_a_idx++;
   }
@@ -116,12 +118,12 @@ void POLYQUANT_INTEGRAL::calculate_kinetic() {
   libint2::initialize();
   Polyquant_cout("Calculating One Body Kinetic Integrals...");
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     if (this->kinetic[quantum_part_idx].cols() == 0 && this->kinetic[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
       this->kinetic[quantum_part_idx].resize(num_basis, num_basis);
       this->kinetic[quantum_part_idx].setZero();
-      this->compute_1body_ints(this->kinetic[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::kinetic);
+      this->compute_1body_ints(this->kinetic[quantum_part_idx], this->input_basis->basis[quantum_part_idx], libint2::Operator::kinetic);
       if (verbose == true) {
         std::stringstream filename;
         filename << "kinetic";
@@ -141,12 +143,13 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
   libint2::initialize();
   Polyquant_cout("Calculating One Body Nuclear Integrals...");
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     if (this->nuclear[quantum_part_idx].cols() == 0 && this->nuclear[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
       this->nuclear[quantum_part_idx].resize(num_basis, num_basis);
       this->nuclear[quantum_part_idx].setZero();
-      this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis.basis[quantum_part_idx], libint2::Operator::nuclear, this->input_molecule.to_point_charges_for_integrals("no_ghost"));
+      this->compute_1body_ints(this->nuclear[quantum_part_idx], this->input_basis->basis[quantum_part_idx], libint2::Operator::nuclear,
+                               this->input_molecule->to_point_charges_for_integrals("no_ghost"));
       if (verbose == true) {
         std::stringstream filename;
         filename << "nuclear";
@@ -169,7 +172,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
     mo_one_body_ints[i].resize(mo_coeffs[i].size());
   }
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto charge = quantum_part.charge;
     // this next loop will be parallel if eigen is linked to parallel blas/lapack
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < mo_one_body_ints[quantum_part_idx].size(); quantum_part_spin_idx++) {
@@ -208,9 +211,9 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   libint2::initialize();
-  auto num_ao_a = this->input_basis.num_basis[quantum_part_a_idx];
+  auto num_ao_a = this->input_basis->num_basis[quantum_part_a_idx];
   int num_mo_a = mo_coeffs_a.cols() - frozen_core[quantum_part_a_idx] - deleted_virtual[quantum_part_a_idx];
-  auto num_ao_b = this->input_basis.num_basis[quantum_part_b_idx];
+  auto num_ao_b = this->input_basis->num_basis[quantum_part_b_idx];
   int num_mo_b = mo_coeffs_b.cols() - frozen_core[quantum_part_b_idx] - deleted_virtual[quantum_part_b_idx];
 
   // tmp = np.einsum('pi,pqrs->iqrs', C, I, optimize=True)
@@ -218,12 +221,12 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
   // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
   auto nthreads = omp_get_max_threads();
-  auto shells_a = this->input_basis.basis[quantum_part_a_idx];
-  auto shells_b = this->input_basis.basis[quantum_part_b_idx];
-  int num_shell_a = this->input_basis.basis[quantum_part_a_idx].size();
-  int num_shell_b = this->input_basis.basis[quantum_part_b_idx].size();
-  auto shell2bf_a = this->input_basis.basis[quantum_part_a_idx].shell2bf();
-  auto shell2bf_b = this->input_basis.basis[quantum_part_b_idx].shell2bf();
+  auto shells_a = this->input_basis->basis[quantum_part_a_idx];
+  auto shells_b = this->input_basis->basis[quantum_part_b_idx];
+  int num_shell_a = this->input_basis->basis[quantum_part_a_idx].size();
+  int num_shell_b = this->input_basis->basis[quantum_part_b_idx].size();
+  auto shell2bf_a = this->input_basis->basis[quantum_part_a_idx].shell2bf();
+  auto shell2bf_b = this->input_basis->basis[quantum_part_b_idx].shell2bf();
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> eri;
 
@@ -260,15 +263,15 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
               continue;
             for (size_t p = 0; p < num_shell_a; p++) {
               auto shell_i_bf_start = shell2bf_a[i];
-              auto shell_i_bf_size = this->input_basis.basis[quantum_part_a_idx][i].size();
+              auto shell_i_bf_size = this->input_basis->basis[quantum_part_a_idx][i].size();
               auto shell_q_bf_start = shell2bf_a[q];
-              auto shell_q_bf_size = this->input_basis.basis[quantum_part_a_idx][q].size();
+              auto shell_q_bf_size = this->input_basis->basis[quantum_part_a_idx][q].size();
               auto shell_r_bf_start = shell2bf_b[r];
-              auto shell_r_bf_size = this->input_basis.basis[quantum_part_b_idx][r].size();
+              auto shell_r_bf_size = this->input_basis->basis[quantum_part_b_idx][r].size();
               auto shell_s_bf_start = shell2bf_b[s];
-              auto shell_s_bf_size = this->input_basis.basis[quantum_part_b_idx][s].size();
+              auto shell_s_bf_size = this->input_basis->basis[quantum_part_b_idx][s].size();
               auto shell_p_bf_start = shell2bf_a[p];
-              auto shell_p_bf_size = this->input_basis.basis[quantum_part_a_idx][p].size();
+              auto shell_p_bf_size = this->input_basis->basis[quantum_part_a_idx][p].size();
               const auto &buf = engines[thread_id].results();
               engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
               const auto *buf_1234 = buf[0];
@@ -472,16 +475,16 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
 void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core,
                                                        std::vector<int> deleted_virtual) {
   mo_two_body_ints.resize(mo_coeffs.size());
-  auto num_basis = this->input_basis.num_basis;
+  auto num_basis = this->input_basis->num_basis;
   auto quantum_part_a_idx = 0ul;
   auto quantum_part_b_idx = 0ul;
-  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule.quantum_particles) {
+  for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule->quantum_particles) {
     mo_two_body_ints[quantum_part_a_idx].resize(mo_coeffs[quantum_part_a_idx].size());
     for (auto spin_a_idx = 0; spin_a_idx < mo_coeffs[quantum_part_a_idx].size(); spin_a_idx++) {
       mo_two_body_ints[quantum_part_a_idx][spin_a_idx].resize(mo_coeffs.size());
       auto num_part_a = (spin_a_idx == 0) ? quantum_part_a.num_parts_alpha : quantum_part_a.num_parts_beta;
       quantum_part_b_idx = 0;
-      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule.quantum_particles) {
+      for (auto const &[quantum_part_b_key, quantum_part_b] : this->input_molecule->quantum_particles) {
         mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx].resize(mo_coeffs[quantum_part_b_idx].size());
         for (auto spin_b_idx = 0; spin_b_idx < mo_coeffs[quantum_part_b_idx].size(); spin_b_idx++) {
           if (quantum_part_b_idx < quantum_part_a_idx) {
@@ -553,8 +556,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
                                                   const size_t quantum_part_a_idx, const size_t quantum_part_a_spin_idx, const size_t quantum_part_b_idx, const size_t quantum_part_b_spin_idx,
                                                   libint2::Operator obtype) {
   auto nthreads = omp_get_max_threads();
-  auto shells_a = this->input_basis.basis[quantum_part_a_idx];
-  auto shells_b = this->input_basis.basis[quantum_part_b_idx];
+  auto shells_a = this->input_basis->basis[quantum_part_a_idx];
+  auto shells_b = this->input_basis->basis[quantum_part_b_idx];
   auto num_shell_a = shells_a.size();
   auto shell2bf_a = shells_a.shell2bf();
   auto num_shell_b = shells_b.size();
@@ -574,10 +577,10 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
     outmat[i].resizeLike(output_matrix);
     outmat[i].setZero();
   }
-  auto quantum_part_a_it = this->input_molecule.quantum_particles.begin();
+  auto quantum_part_a_it = this->input_molecule->quantum_particles.begin();
   std::advance(quantum_part_a_it, quantum_part_a_idx);
   auto quantum_part_a = quantum_part_a_it->second;
-  auto quantum_part_b_it = this->input_molecule.quantum_particles.begin();
+  auto quantum_part_b_it = this->input_molecule->quantum_particles.begin();
   std::advance(quantum_part_b_it, quantum_part_b_idx);
   auto quantum_part_b = quantum_part_b_it->second;
   bool same_particle = quantum_part_a_idx == quantum_part_b_idx;
@@ -677,18 +680,23 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
   }
 }
 
-void POLYQUANT_INTEGRAL::setup_integral(const POLYQUANT_INPUT &input, const POLYQUANT_BASIS &basis, const POLYQUANT_MOLECULE &molecule) {
+void POLYQUANT_INTEGRAL::setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis,
+                                        std::shared_ptr<POLYQUANT_MOLECULE> molecule) {
   this->input_params = input;
+  this->input_symmetry = symmetry;
   this->input_basis = basis;
   this->input_molecule = molecule;
   this->parse_integral_parameters();
-  this->overlap.resize(molecule.quantum_particles.size());
-  this->kinetic.resize(molecule.quantum_particles.size());
-  this->nuclear.resize(molecule.quantum_particles.size());
-  this->orth_X.resize(molecule.quantum_particles.size());
-  this->Schwarz.resize(molecule.quantum_particles.size());
-  this->frozen_core_ints.resize(molecule.quantum_particles.size());
-  this->unique_shell_pairs.resize(molecule.quantum_particles.size());
+  this->overlap.resize(molecule->quantum_particles.size());
+  this->kinetic.resize(molecule->quantum_particles.size());
+  this->nuclear.resize(molecule->quantum_particles.size());
+  this->orth_X.resize(molecule->quantum_particles.size());
+  for (auto basis_idx = 0; basis_idx < molecule->quantum_particles.size(); basis_idx++) {
+    this->orth_X[basis_idx].resize(symmetry->irrep_names[basis_idx].size());
+  }
+  this->Schwarz.resize(molecule->quantum_particles.size());
+  this->frozen_core_ints.resize(molecule->quantum_particles.size());
+  this->unique_shell_pairs.resize(molecule->quantum_particles.size());
 }
 
 std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>>> POLYQUANT_INTEGRAL::compute_shellpairs(const libint2::BasisSet &bs1,
@@ -922,34 +930,47 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    if (this->orth_X[quantum_part_idx].cols() == 0 && this->orth_X[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      this->orth_X[quantum_part_idx].resize(num_basis, num_basis);
-      Eigen::Matrix<double, Eigen::Dynamic, 1> s;
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(this->overlap[quantum_part_idx]);
-      if (eigensolver.info() != Eigen::Success)
-        (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
-                   "orthogonalization. Could indicate a possible linear dependency."));
-      s = eigensolver.eigenvalues();
-      L = eigensolver.eigenvectors();
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      if (this->orth_X[quantum_part_idx][irrep_idx].cols() == 0 && this->orth_X[quantum_part_idx][irrep_idx].rows() == 0) {
+        auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+        auto num_salc = this->input_basis->salcs[quantum_part_idx][irrep_idx].cols();
+        this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
+        Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+        if (num_salc == 0) {
+          continue;
+        }
+        // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
+            this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
+        if (eigensolver.info() != Eigen::Success)
+          (APP_ABORT("Error diagonalizing overlap matrix for symmetric "
+                     "orthogonalization. Could indicate a possible linear dependency."));
+        s = eigensolver.eigenvalues();
+        L = eigensolver.eigenvectors();
 
-      std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
-      Polyquant_cout(message);
-      Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
+        std::string message =
+            "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
+        Polyquant_cout(message);
+        Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
 
-      // orth_X = L @ s^{-1/2} @ L.T
-      s = s.array().rsqrt();
-      this->orth_X[quantum_part_idx] = s.asDiagonal();
-      this->orth_X[quantum_part_idx] = L * this->orth_X[quantum_part_idx] * L.transpose();
-
-      if (verbose == true) {
-        std::stringstream filename;
-        filename << "orthogonalizer_";
-        filename << quantum_part_idx;
-        filename << ".txt";
-        Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+        // orth_X = L @ s^{-1/2} @ L.T
+        s = s.array().rsqrt();
+        this->orth_X[quantum_part_idx][irrep_idx] = s.asDiagonal();
+        this->orth_X[quantum_part_idx][irrep_idx] = L * this->orth_X[quantum_part_idx][irrep_idx] * L.transpose();
+        // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
+        this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
+        if (verbose == true) {
+          std::stringstream filename;
+          filename << "orthogonalizer_";
+          filename << quantum_part_idx;
+          filename << "_irrep_";
+          filename << irrep_idx;
+          filename << ".txt";
+          Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx][irrep_idx], filename.str());
+        }
       }
     }
     quantum_part_idx++;
@@ -972,51 +993,72 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   auto quantum_part_idx = 0ul;
-  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule.quantum_particles) {
-    if (this->orth_X[quantum_part_idx].cols() == 0 && this->orth_X[quantum_part_idx].rows() == 0) {
-      auto num_basis = this->input_basis.num_basis[quantum_part_idx];
-      this->orth_X[quantum_part_idx].resize(num_basis, num_basis);
-      Eigen::Matrix<double, Eigen::Dynamic, 1> s;
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(this->overlap[quantum_part_idx]);
-      if (eigensolver.info() != Eigen::Success) {
-        (APP_ABORT("Error diagonalizing overlap matrix for canonical "
-                   "orthogonalization."));
-        // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
-        // Let me know if this is ever encountered in a real world calculation.
-      }
-      s = eigensolver.eigenvalues();
-      L = eigensolver.eigenvectors();
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      if (this->orth_X[quantum_part_idx][irrep_idx].cols() == 0 && this->orth_X[quantum_part_idx][irrep_idx].rows() == 0) {
+        auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+        auto num_salc = this->input_basis->salcs[quantum_part_idx][irrep_idx].cols();
+        this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
+        Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+        // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
+        if (num_salc == 0) {
+          continue;
+        }
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
+            this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
+        if (eigensolver.info() != Eigen::Success) {
+          (APP_ABORT("Error diagonalizing overlap matrix for canonical "
+                     "orthogonalization."));
+          // This could indicate an extreme linear dependendency. I find this unlikely to occur.. We could implement doi.org/10.1063/1.5139948, but I find this extremely unlikely to be necessary.
+          // Let me know if this is ever encountered in a real world calculation.
+        }
+        s = eigensolver.eigenvalues();
+        L = eigensolver.eigenvectors();
 
-      std::string message = "For quantum particle " + std::to_string(quantum_part_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
-      Polyquant_cout(message);
-
-      double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
-      int drop_cols = 0;
-
-      while (s(drop_cols) < thresh) {
-        drop_cols++;
-      }
-
-      // orth_X = L @ s^{-1/2}
-      if (drop_cols > 0) {
-        message = "For quantum particle " + std::to_string(quantum_part_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+        std::string message =
+            "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", minimum eigenvalue of the overlap matrix :" + std::to_string(s(0));
         Polyquant_cout(message);
-        s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
-        s = s.array().rsqrt();
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
-        this->orth_X[quantum_part_idx].noalias() = L_new * s.asDiagonal();
-      } else {
-        s = s.array().rsqrt();
-        this->orth_X[quantum_part_idx].noalias() = L * s.asDiagonal();
-      }
 
-      if (verbose == true) {
-        std::stringstream filename;
-        filename << "orthogonalizer_";
-        filename << quantum_part_idx;
-        filename << ".txt";
-        Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx], filename.str());
+        double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
+        int drop_cols = 0;
+
+        while (s(drop_cols) < thresh) {
+          drop_cols++;
+        }
+
+        // orth_X = L @ s^{-1/2}
+        if (drop_cols > 0) {
+          message =
+              "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
+          Polyquant_cout(message);
+          s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
+          s = s.array().rsqrt();
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
+          this->orth_X[quantum_part_idx][irrep_idx].noalias() = L_new * s.asDiagonal();
+        } else {
+          s = s.array().rsqrt();
+          this->orth_X[quantum_part_idx][irrep_idx].noalias() = L * s.asDiagonal();
+        }
+        this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
+        // std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].rows() << std::endl;
+        // std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].cols() << std::endl;
+        // std::cout << this->orth_X[quantum_part_idx][irrep_idx].rows() << std::endl;
+        // std::cout << this->orth_X[quantum_part_idx][irrep_idx].cols() << std::endl;
+        // this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->orth_X[quantum_part_idx][irrep_idx];
+        // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
+        // auto temp = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
+
+        if (verbose == true) {
+          std::stringstream filename;
+          filename << "orthogonalizer_";
+          filename << quantum_part_idx;
+          filename << "_irrep_";
+          filename << irrep_idx;
+          filename << ".txt";
+          Polyquant_dump_mat_to_file(this->orth_X[quantum_part_idx][irrep_idx], filename.str());
+        }
       }
     }
     quantum_part_idx++;
@@ -1025,15 +1067,15 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
 
 void POLYQUANT_INTEGRAL::parse_integral_parameters() {
   // parse 2e tolerance
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("tolerance_2e")) {
-      this->tolerance_2e = this->input_params.input_data["keywords"]["tolerance_2e"];
+  if (this->input_params->input_data.contains("keywords")) {
+    if (this->input_params->input_data["keywords"].contains("tolerance_2e")) {
+      this->tolerance_2e = this->input_params->input_data["keywords"]["tolerance_2e"];
     }
   }
 
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("orth_method")) {
-      this->orth_method = this->input_params.input_data["keywords"]["orth_method"];
+  if (this->input_params->input_data.contains("keywords")) {
+    if (this->input_params->input_data["keywords"].contains("orth_method")) {
+      this->orth_method = this->input_params->input_data["keywords"]["orth_method"];
       for (auto &character : this->orth_method) {
         character = std::tolower(character);
       }
@@ -1042,16 +1084,16 @@ void POLYQUANT_INTEGRAL::parse_integral_parameters() {
       }
     }
   }
-  if (this->input_params.input_data.contains("keywords")) {
-    if (this->input_params.input_data["keywords"].contains("eig_s2_linear_dep_threshold")) {
-      if (this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_unsigned) {
-        this->eig_s2_linear_dep_threshold = this->input_params.input_data["keywords"]["eig_s2_linear_dep_threshold"];
+  if (this->input_params->input_data.contains("keywords")) {
+    if (this->input_params->input_data["keywords"].contains("eig_s2_linear_dep_threshold")) {
+      if (this->input_params->input_data["keywords"]["eig_s2_linear_dep_threshold"].type() == json::value_t::number_unsigned) {
+        this->eig_s2_linear_dep_threshold = this->input_params->input_data["keywords"]["eig_s2_linear_dep_threshold"];
       } else {
         APP_ABORT("Linear dependence is handled by the eigenvalues of the overlap 10^-eig_s2_linear_dep_threshold. Therefore eig_s2_linear_dep_threshold must be a positive integer in the input.");
       }
     }
   }
-  if (this->input_params.input_data.contains("verbose")) {
-    this->verbose = this->input_params.input_data["verbose"];
+  if (this->input_params->input_data.contains("verbose")) {
+    this->verbose = this->input_params->input_data["verbose"];
   }
 }

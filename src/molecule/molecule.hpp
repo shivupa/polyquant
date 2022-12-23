@@ -5,9 +5,11 @@
 #include "io/utils.hpp"
 #include "molecule/classical_particles.hpp"
 #include "molecule/quantum_particles.hpp"
+#include "symmetry/symmetry.hpp"
 #include <algorithm>
 #include <iostream>
 #include <libint2.hpp> // IWYU pragma, keep
+#include <libmsym/msym.h>
 #include <numeric>
 #include <string>
 #include <vector>
@@ -21,24 +23,31 @@ namespace polyquant {
 class POLYQUANT_MOLECULE {
 public:
   POLYQUANT_MOLECULE() = default;
+  ~POLYQUANT_MOLECULE() {}
   /**
    * @brief Construct a new polyquant molecule object given an input object with
    * a call to setup_molecule.
    *
    * @param input a POLYQUANT_INPUT instance
+   * @param input_symmetry a POLYQUANT_SYMMETRY instance for symmetry handling
    */
-  POLYQUANT_MOLECULE(const POLYQUANT_INPUT &input);
+  POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry);
 
   /**
    * @brief Set the up molecule object.
    *
    * @param input a POLYQUANT_INPUT instance
+   * @param input_symmetry a POLYQUANT_SYMMETRY instance for symmetry handling
    */
-  void setup_molecule(const POLYQUANT_INPUT &input);
-  void set_molecular_charge(const POLYQUANT_INPUT &input);
-  void set_molecular_multiplicity(const POLYQUANT_INPUT &input);
-  void set_molecular_restricted(const POLYQUANT_INPUT &input);
-  void parse_particles(const POLYQUANT_INPUT &input);
+  void setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry);
+  void set_molecular_charge();
+  void set_molecular_multiplicity();
+  void set_molecular_restricted();
+  void symmetrize_molecule();
+
+  std::string get_label_of_center(const std::array<double, 3> &center_pos) const;
+
+  void parse_particles();
   void print_molecule();
 
   /**
@@ -56,12 +65,17 @@ public:
   std::vector<libint2::Atom> to_libint_atom(std::string classical_part_key = "all") const;
 
   std::vector<std::pair<double, std::array<double, 3>>> to_point_charges_for_integrals(std::string classical_part_key = "all") const;
+  std::vector<msym_element_t> to_point_msym_charges_for_symmetry(std::string classical_part_key = "all") const;
+  void from_point_msym_charges_for_symmetry(std::vector<msym_element_t> &symm_chrgs);
   /**
    * @brief Create an xyz representation of the molecule.
    *
    * @return std::string containing the molecule in xyz format
    */
   std::string dump_xyz(std::string classical_part_key = "all") const;
+
+  std::shared_ptr<POLYQUANT_INPUT> input;
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symm;
 
   std::vector<std::vector<double>> centers;
 

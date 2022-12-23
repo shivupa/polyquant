@@ -8,6 +8,7 @@
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
 #include "scf/epscf.hpp"
+#include "symmetry/symmetry.hpp"
 #include <algorithm>
 #include <string>
 #include <unordered_set>
@@ -62,37 +63,43 @@ public:
    * @brief the input parameters
    *
    */
-  POLYQUANT_INPUT input_params;
+  std::shared_ptr<POLYQUANT_INPUT> input_params;
 
   /**
    * @brief the input molecule
    *
    */
-  POLYQUANT_MOLECULE input_molecule;
+  std::shared_ptr<POLYQUANT_MOLECULE> input_molecule;
 
   /**
    * @brief the input basis
    *
    */
-  POLYQUANT_BASIS input_basis;
+  std::shared_ptr<POLYQUANT_BASIS> input_basis;
 
   /**
    * @brief the input integrals
    *
    */
-  POLYQUANT_INTEGRAL input_integral;
+  std::shared_ptr<POLYQUANT_INTEGRAL> input_integral;
+
+  /**
+   * @brief the input symmetry
+   *
+   */
+  std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry;
 
   /**
    * @brief the MF calculation
    *
    */
-  POLYQUANT_EPSCF scf_calc;
+  std::shared_ptr<POLYQUANT_EPSCF> scf_calc;
 
   /**
    * @brief the CI calculation
    *
    */
-  POLYQUANT_EPCI ci_calc;
+  std::shared_ptr<POLYQUANT_EPCI> ci_calc;
 
   /**
    * @brief Mean-field calculation types that polyquant knows about
