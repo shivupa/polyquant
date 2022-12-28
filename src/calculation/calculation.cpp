@@ -250,6 +250,10 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   Polyquant_cout(post_mean_field_type);
   std::string mean_field_type = "FILE";
   std::string fcidump_filename;
+
+  if (post_mean_field_type == "FILE") {
+    APP_ABORT("FROM_FILE for ci not implemented.");
+  }
   this->run_mean_field(mean_field_type);
   ci_calc = std::make_shared<POLYQUANT_EPCI>(this->scf_calc);
 
