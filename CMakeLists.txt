@@ -40,6 +40,7 @@ message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 # add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/cmake-modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/bilke_cmake_modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
 ################################################################################
@@ -51,16 +52,32 @@ option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
 ################################################################################
 # set up code coverage configuration
 add_library(coverage_config INTERFACE)
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-  if(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    # Add required flags (GCC & LLVM/Clang)
-    target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      target_link_options(coverage_config INTERFACE --coverage)
-    else(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      target_link_libraries(coverage_config INTERFACE --coverage)
-    endif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-  endif(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if(CMAKE_BUILD_TYPE MATCHES DEBUG) 
+    if(POLYQUANT_CODE_COVERAGE)
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+
+        set(COVERAGE_EXCLUDES
+            ${PROJECT_BINARY_DIR}/*
+            ${PROJECT_SOURCE_DIR}/tests/*
+            /usr/*
+        )
+        # Add required flags (GCC & LLVM/Clang)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+          target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
+          if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+            target_link_options(coverage_config INTERFACE --coverage)
+          else(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+            target_link_libraries(coverage_config INTERFACE --coverage)
+          endif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+        endif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        setup_target_for_coverage_lcov(
+            NAME polyquant_coverage
+            EXECUTABLE ${CMAKE_CTEST_COMMAND}
+            DEPENDENCIES main_test
+        )
+
+    endif(POLYQUANT_CODE_COVERAGE)
 endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
 ################################################################################
 # enable testing 
