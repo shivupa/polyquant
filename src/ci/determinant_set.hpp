@@ -116,28 +116,6 @@ public:
   void set_epscf(std::shared_ptr<POLYQUANT_EPSCF> scf) { this->input_epscf = scf; };
   void set_molecule(std::shared_ptr<POLYQUANT_MOLECULE> molecule) { this->input_molecule = molecule; };
 
-  // void construct_cache(size_t size_in_gb = 10000) {
-  //   // This is actually super complicated. Some assumptions are made here that
-  //   // doesn't quite transfer to ACTUAL size used
-  //   // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
-  //   // It is assumed that map size() * sizeof(hashed object)
-  //   std::string message = "Setting CI determinant elements max cache size: ";
-  //   message += std::to_string(size_in_gb);
-  //   message += " GB";
-  //   std::pair<int, int> temp(0, 0);
-  //   this->cache_size = (size_in_gb * 1e9) / sizeof(temp);
-  //   message += " or ";
-  //   message += std::to_string(this->cache_size);
-  //   message += " objects";
-  //   Polyquant_cout(message);
-  //   polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> constructed_cache(this->cache_size);
-  //   this->cache = constructed_cache;
-  // }
-
-  // size_t cache_size;
-
-  // mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
-
   mutable std::vector<double> diagonal_Hii;
   void precompute_diagonal_Slater_Condon() const;
   double Slater_Condon(int i_det, int j_det) const;
