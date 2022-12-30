@@ -249,11 +249,12 @@ FetchContent_MakeAvailable(fmt)
 ########################################
 # testing
 FetchContent_Declare(
-  doctest
-  GIT_REPOSITORY https://github.com/onqtam/doctest.git
-  GIT_TAG origin/dev)
-FetchContent_MakeAvailable(doctest)
-include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG origin/devel)
+FetchContent_MakeAvailable(Catch2)
+set(CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/contrib" ${CMAKE_MODULE_PATH})
+include(Catch)
 ################################################################################
 # this will do stuff in the src/CMakeLists.txt
 add_subdirectory(src)
