@@ -1427,6 +1427,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
         hpath = "/Super_Twist/eigenset_" + std::to_string(idx + 1);
         Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
         data.clear();
+        data.resize(num_mo * num_basis);
         hdf5_file.load_data(data, hpath);
 #pragma omp parallel for
         for (auto i = 0; i < num_mo; i++) {
