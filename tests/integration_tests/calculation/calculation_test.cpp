@@ -277,3 +277,34 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) explicit ham.") {
     }
   }
 }
+
+TEST_CASE("CALCULATION: PsH/custom basis CI dump HDF5.") {
+  POLYQUANT_CALCULATION test_calc("../../tests/data/PsH_wpos/PsH_wpos_CI_hdf5.json");
+  test_calc.run();
+  POLYQUANT_HDF5 file("electron_PsH_wpos.h5");
+  REQUIRE(file.exist("/PBC"));
+  REQUIRE(file.exist("Super_Twist"));
+  REQUIRE(file.exist("application"));
+  REQUIRE(file.exist("atoms"));
+  REQUIRE(file.exist("basisset"));
+  POLYQUANT_HDF5 file2("positron_PsH_wpos.h5");
+  REQUIRE(file2.exist("PBC"));
+  REQUIRE(file2.exist("Super_Twist"));
+  REQUIRE(file2.exist("application"));
+  REQUIRE(file2.exist("atoms"));
+  REQUIRE(file2.exist("basisset"));
+  POLYQUANT_HDF5 file3("NSO_State_0_part_electron_PsH_wpos.h5");
+  REQUIRE(file3.exist("PBC"));
+  REQUIRE(file3.exist("Super_Twist"));
+  REQUIRE(file3.exist("application"));
+  REQUIRE(file3.exist("atoms"));
+  REQUIRE(file3.exist("basisset"));
+  POLYQUANT_HDF5 file4("NSO_State_0_part_positron_PsH_wpos.h5");
+  REQUIRE(file4.exist("PBC"));
+  REQUIRE(file4.exist("Super_Twist"));
+  REQUIRE(file4.exist("application"));
+  REQUIRE(file4.exist("atoms"));
+  REQUIRE(file4.exist("basisset"));
+  POLYQUANT_HDF5 file5("Multidet_PsH_wpos.h5");
+  REQUIRE(file5.exist("MultiDet"));
+}
