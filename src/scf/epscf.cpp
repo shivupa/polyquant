@@ -1419,7 +1419,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
 #pragma omp parallel for
       for (auto i = 0; i < num_mo; i++) {
         for (auto j = 0; j < num_basis; j++) {
-          this->C[quantum_part_idx][quantum_part_irrep_idx][0](j, i) = data[i * num_basis + j];
+          this->C[quantum_part_idx][0][quantum_part_irrep_idx](j, i) = data[i * num_basis + j];
         }
       }
 
@@ -1432,7 +1432,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
 #pragma omp parallel for
         for (auto i = 0; i < num_mo; i++) {
           for (auto j = 0; j < num_basis; j++) {
-            this->C[quantum_part_idx][quantum_part_irrep_idx][1](j, i) = data[i * num_basis + j];
+            this->C[quantum_part_idx][1][quantum_part_irrep_idx](j, i) = data[i * num_basis + j];
           }
         }
       }
