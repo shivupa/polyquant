@@ -308,3 +308,48 @@ TEST_CASE("CALCULATION: PsH/custom basis CI dump HDF5.") {
   POLYQUANT_HDF5 file5("Multidet_PsH_wpos.h5");
   REQUIRE(file5.exist("MultiDet"));
 }
+
+TEST_CASE("CALCULATION: SCF restart test no skipiterations.") {
+  POLYQUANT_CALCULATION test_calc("../../tests/data/h2sto3g_restart/h2.json");
+  test_calc.run();
+  POLYQUANT_CALCULATION test_calc2("../../tests/data/h2sto3g_restart/h2_restart_noskipiterations.json");
+  test_calc2.run();
+  REQUIRE_THAT(test_calc.scf_calc->E_particles[0], Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_particles[0], POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->E_orbitals_combined[0][0](0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_orbitals_combined[0][0](0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->E_orbitals_combined[0][1](0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_orbitals_combined[0][1](0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->C_combined[0][0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->C_combined[0][0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->C_combined[0][1](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->C_combined[0][1](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->F[0][0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->F[0][0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->F[0][1](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->F[0][1](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->D_combined[0][0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->D_combined[0][0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->D_combined[0][1](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->D_combined[0][1](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->H_core[0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->H_core[0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_total, POLYQUANT_TEST_EPSILON_LOOSE));
+}
+
+TEST_CASE("CALCULATION: SCF restart test skipiterations.") {
+  POLYQUANT_CALCULATION test_calc("../../tests/data/h2sto3g_restart/h2.json");
+  test_calc.run();
+  POLYQUANT_CALCULATION test_calc2("../../tests/data/h2sto3g_restart/h2_restart_skipiterations.json");
+  test_calc2.run();
+  REQUIRE_THAT(test_calc.scf_calc->E_particles[0], Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_particles[0], POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->C_combined[0][0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->C_combined[0][0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->C_combined[0][1](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->C_combined[0][1](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->F[0][0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->F[0][0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->F[0][1](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->F[0][1](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->D_combined[0][0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->D_combined[0][0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->D_combined[0][1](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->D_combined[0][1](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->H_core[0](0, 0), Catch::Matchers::WithinAbs(test_calc2.scf_calc->H_core[0](0, 0), POLYQUANT_TEST_EPSILON_LOOSE));
+
+  REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_total, POLYQUANT_TEST_EPSILON_LOOSE));
+}

@@ -48,7 +48,7 @@ public:
   std::unique_ptr<HighFive::File> hdf5_file;
   std::string filename;
 
-  template <typename T> void load_data(T output, std::string path) { hdf5_file->getDataSet(path).read(output); }
+  template <typename T> void load_data(T &output, std::string path) { output = H5Easy::load<T>(*hdf5_file, path); }
 
   bool exist(std::string path) { return hdf5_file->exist(path); }
   void dump_application();
