@@ -329,6 +329,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("fcidump_filename")) {
         fcidump_filename = this->input_params->input_data["keywords"]["ci_keywords"]["fcidump_filename"];
       }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("screening_threshold")) {
+        ci_calc->detset.screening_threshold = this->input_params->input_data["keywords"]["ci_keywords"]["screening_threshold"];
+      }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
         auto FC = this->input_params->input_data["keywords"]["ci_keywords"]["frozen_core"];
         if (FC.type() == json::value_t::array) {

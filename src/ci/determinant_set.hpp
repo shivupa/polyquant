@@ -132,11 +132,7 @@ public:
     const int cols = this->N_dets;
     return cols;
   }
-  int N_dets;
-  int curr_symm_block;
   // y_out = M * x_in
-  Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
-  // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ham;
   // void perform_op(const double *x_in, double *y_out) const;
 
   // needed for custom operator in Davidson
@@ -183,8 +179,12 @@ public:
   void create_ham();
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 
+  Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
+  int N_dets;
+  int curr_symm_block;
   bool slow_diag = false;
   bool build_matrix = true;
+  double screening_threshold = 0.0;
 };
 } // namespace polyquant
 #endif
