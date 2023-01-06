@@ -184,7 +184,7 @@ public:
   int curr_symm_block;
   bool slow_diag = false;
   bool build_matrix = true;
-  double screening_threshold = 0.0;
+  double screening_threshold = 1e-12;
 };
 } // namespace polyquant
 #endif
