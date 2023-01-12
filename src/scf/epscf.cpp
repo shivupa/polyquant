@@ -1056,6 +1056,7 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
   }
 }
 
+/*
 void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_file() {
   npart_per_irrep.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
@@ -1074,6 +1075,7 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_file() {
     quantum_part_idx++;
   }
 }
+*/
 
 void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
   // just check that what we got is of a resonable dim
