@@ -120,6 +120,8 @@ public:
 
   void setup_from_file(std::string &filename);
 
+  void symmetrize_orbitals();
+
   void print_params();
 
   void dump_molden();

@@ -1367,6 +1367,8 @@ void POLYQUANT_EPSCF::setup_standard() {
   this->guess_DM();
   if (this->npart_per_irrep.size() == 0) {
     this->form_occ_helper_initial_npart_per_irrep();
+  } else {
+    this->form_occ_helper_initial_npart_per_irrep_from_input();
   }
   this->form_occ();
   this->form_DM();
@@ -1407,7 +1409,9 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     this->resize_objects();
     // this->guess_DM();
     if (this->npart_per_irrep.size() == 0) {
-      this->form_occ_helper_initial_npart_per_irrep_from_file();
+      this->form_occ_helper_initial_npart_per_irrep();
+    } else {
+      this->form_occ_helper_initial_npart_per_irrep_from_input();
     }
     // write over the current dm
     auto quantum_part_idx = 0ul;
