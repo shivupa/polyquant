@@ -851,7 +851,7 @@ void POLYQUANT_EPSCF::resize_objects() {
         this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
-        this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
       }
     } else if (quantum_part.restricted == false) {
@@ -886,8 +886,8 @@ void POLYQUANT_EPSCF::resize_objects() {
 
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
-        this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
-        this->E_orbitals[quantum_part_idx][1][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][1][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][1][irrep_idx].setZero(num_mo);
         this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
@@ -920,7 +920,7 @@ void POLYQUANT_EPSCF::resize_objects() {
 
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
-        this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
@@ -1019,8 +1019,18 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
       }
       Eigen::Matrix<double, Eigen::Dynamic, 1> orb_e_combined;
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
-        if (this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size() == 0) {
+        auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
+        if (num_mo == 0) {
           continue;
+        }
+        if (this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size() == 0) {
+          APP_WARN("The orbitals are most likely being read from file, but the orbitals occupations were not provided in the input file. We will populate according to the aufbau principle for HCORE "
+                   "orbitals.");
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H_prime;
+          H_prime.noalias() = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() * this->H_core[quantum_part_idx] * this->input_integral->orth_X[quantum_part_idx][irrep_idx];
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime;
+          Eigen::Matrix<double, Eigen::Dynamic, 1> e_orb;
+          diag_fock_helper(quantum_part_idx, irrep_idx, H_prime, C_prime, this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx]);
         }
         Eigen::Matrix<double, Eigen::Dynamic, 1> temp;
         temp.resize(orb_e_combined.size() + this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size());
@@ -1044,16 +1054,17 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
       }
 
       // checking
-      auto npart_from_irreps = 0;
-      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
-        npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
-      }
-      if (npart_from_irreps != npart_spin) {
-        APP_ABORT("part per irrep sum != npart from molecule");
-      }
+      // auto npart_from_irreps = 0;
+      // for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      //   npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
+      // }
+      // if (npart_from_irreps != npart_spin) {
+      //   APP_ABORT("part per irrep sum != npart from molecule");
+      // }
     }
     quantum_part_idx++;
   }
+  this->form_occ_helper_initial_npart_per_irrep_from_input();
 }
 
 /*
@@ -1080,6 +1091,7 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_file() {
 void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
   // just check that what we got is of a resonable dim
   auto quantum_part_idx = 0ul;
+  Polyquant_cout("    Initial Particles per Irrep");
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     auto n_spin = 1;
@@ -1087,12 +1099,18 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
       n_spin = 2;
     }
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
+      std::stringstream ss;
+      ss << "        Particle " << quantum_part_idx << " ";
+      ss << "spin " << quantum_part_spin_idx << " : ";
       auto npart_spin = (quantum_part_spin_idx == 1) ? quantum_part.num_parts_beta : quantum_part.num_parts_alpha;
       // checking
       auto npart_from_irreps = 0;
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+        ss << this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx] << " ";
         npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
       }
+      // ss << std::endl;
+      Polyquant_cout(ss.str());
       if (npart_from_irreps != npart_spin) {
         APP_ABORT("Input part per irrep sum != npart from molecule");
       }
