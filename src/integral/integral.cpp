@@ -181,7 +181,7 @@ void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<E
       mo_one_body_ints[quantum_part_idx][quantum_part_spin_idx].setZero();
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mo_subset;
       if (frozen_core[quantum_part_idx] != 0 || deleted_virtual[quantum_part_idx] != 0) {
-        mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](Eigen::placeholders::all, Eigen::seqN(frozen_core[quantum_part_idx], nmo));
+        mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx](Eigen::all, Eigen::seqN(frozen_core[quantum_part_idx], nmo));
       } else {
         mo_subset = mo_coeffs[quantum_part_idx][quantum_part_spin_idx];
       }
@@ -1033,9 +1033,9 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
           message =
               "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
           Polyquant_cout(message);
-          s = s(Eigen::seq(drop_cols, Eigen::placeholders::last));
+          s = s(Eigen::seq(drop_cols, Eigen::last));
           s = s.array().rsqrt();
-          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::placeholders::all, Eigen::seq(drop_cols, Eigen::placeholders::last));
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::all, Eigen::seq(drop_cols, Eigen::last));
           this->orth_X[quantum_part_idx][irrep_idx].noalias() = L_new * s.asDiagonal();
         } else {
           s = s.array().rsqrt();

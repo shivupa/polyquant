@@ -349,10 +349,10 @@ void POLYQUANT_EPSCF::diag_fock_helper(int quantum_part_idx, int quantum_part_ir
     C_prime = eigensolver.eigenvectors();
     mo_C = this->input_integral->orth_X[quantum_part_idx][quantum_part_irrep_idx] * C_prime;
     for (auto i = 0; i < mo_C.cols(); i++) {
-      auto max_val = mo_C(Eigen::placeholders::all, i).maxCoeff();
-      auto min_val = mo_C(Eigen::placeholders::all, i).minCoeff();
+      auto max_val = mo_C(Eigen::all, i).maxCoeff();
+      auto min_val = mo_C(Eigen::all, i).minCoeff();
       if (std::abs(min_val) > std::abs(max_val) && min_val < 0) {
-        mo_C(Eigen::placeholders::all, i) *= -1;
+        mo_C(Eigen::all, i) *= -1;
       }
     }
   }
@@ -967,8 +967,7 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
     // Paper doi: 10.1021/jp801738f
     // eq. 2.7
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset =
-        this->C_ref_mom[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx](Eigen::placeholders::all, Eigen::seqN(0, num_parts));
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset = this->C_ref_mom[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx](Eigen::all, Eigen::seqN(0, num_parts));
     orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], orb_subset, this->C[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx]);
     // orbital_overlap = C_ref.T @ S @ C
     // M x N           = M x a @ a x a @ a x N

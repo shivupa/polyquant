@@ -410,7 +410,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       auto offset = 0;
       for (auto count = 0; count < msrsl; count++) {
         salc_per_irrep[basis_idx].push_back(msrs[count].salcl);
-        salcs[basis_idx].push_back(combined_salcs(Eigen::placeholders::all, Eigen::seq(offset, offset + salc_per_irrep[basis_idx][count] - 1)));
+        salcs[basis_idx].push_back(combined_salcs(Eigen::all, Eigen::seq(offset, offset + salc_per_irrep[basis_idx][count] - 1)));
         offset += salc_per_irrep[basis_idx][count];
       }
       for (auto i = 0; i < mct->d; i++) {
@@ -423,7 +423,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
           //    std::cout << "       STHISDsdF " << a << std::endl;
           //  }
         }
-        temp_irrep_name.erase(std::remove_if(temp_irrep_name.begin(), temp_irrep_name.end(), [](char c) { return !(c >= 0 && c < 128); }), temp_irrep_name.end());
+        // temp_irrep_name.erase(std::remove_if(temp_irrep_name.begin(), temp_irrep_name.end(), [](char c) { return !(c >= 0 && c < 128); }), temp_irrep_name.end());
         symmetry->irrep_names[basis_idx].push_back(temp_irrep_name);
       }
 
