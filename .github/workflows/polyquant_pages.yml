@@ -56,7 +56,10 @@ jobs:
             liblapack-dev \
             libeigen3-dev \
             libhdf5-dev \
+            lcov \
+            doxygen \
             ${{ matrix.config.pkgs }}
+          pip install sphinx sphinx-rtd-theme breathe exhale m2r
           ninja --version
           cmake --version
           ${{ matrix.config.cc }} --version
