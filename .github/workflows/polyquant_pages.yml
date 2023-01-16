@@ -59,7 +59,7 @@ jobs:
             lcov \
             doxygen \
             ${{ matrix.config.pkgs }}
-          pip install sphinx sphinx-rtd-theme breathe exhale m2r
+          pip install sphinx sphinx-rtd-theme breathe exhale m2r m2r2
           ninja --version
           cmake --version
           ${{ matrix.config.cc }} --version
