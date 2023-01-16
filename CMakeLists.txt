@@ -114,11 +114,15 @@ if(POLYQUANT_DOC)
   set(SPHINX_SOURCE ${POLYQUANT_BINARY_DIR}/docs/source)
   set(SPHINX_BUILD ${POLYQUANT_BINARY_DIR}/docs)
   add_custom_target(
-    Sphinx ALL
+    polyquant_docs_html ALL
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
-    COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${SPHINX_BUILD}
-    COMMENT "Generating documentation with Sphinx")
+    COMMENT "Generating documentation with Sphinx (html)")
+  add_custom_target(
+    polyquant_docs_pdf ALL
+    COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
+    WORKING_DIRECTORY ${SPHINX_BUILD}
+    COMMENT "Generating documentation with Sphinx (pdf)")
 endif(POLYQUANT_DOC)
 ################################################################################
 # Find libraries

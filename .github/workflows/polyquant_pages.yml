@@ -109,7 +109,7 @@ jobs:
       - name: Build docs
         shell: bash
         working-directory: builddir
-        run: cmake --build . --target Sphinx --config ${{ matrix.config.build_type }}
+        run: cmake --build . --target polyquant_docs_html --config ${{ matrix.config.build_type }}
       - name: Move coverage report
         shell: bash
         working-directory: builddir
