@@ -7,7 +7,8 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  actions: write
+  contents: write
   pages: write
   id-token: write
 
@@ -20,7 +21,7 @@ jobs:
       matrix:
         config:
           - {
-            name: "Ubuntu_Latest_GCC11_Debug_Ninja",
+            name: "Ubuntu_Latest_GCC11_Debug_Ninja_Docs",
             os: ubuntu-latest,
             build_type: "Debug",
             pkgs: "gcc-11 g++-11",
