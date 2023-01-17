@@ -1180,7 +1180,7 @@ void POLYQUANT_EPSCF::form_occ() {
   }
 }
 
-void POLYQUANT_EPSCF::form_combined_orbitals(std::string title) {
+void POLYQUANT_EPSCF::form_combined_orbitals() {
   auto quantum_part_idx = 0ul;
   C_combined.resize(this->input_molecule->quantum_particles.size());
   E_orbitals_combined.resize(this->input_molecule->quantum_particles.size());
@@ -1247,9 +1247,9 @@ void POLYQUANT_EPSCF::form_combined_orbitals(std::string title) {
     }
     quantum_part_idx++;
   }
-
-  dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, symm_labels, title, this->input_basis->ao_labels);
 }
+
+void POLYQUANT_EPSCF::print_combined_orbitals(std::string title) { dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, symm_labels, title, this->input_basis->ao_labels); }
 
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_EPSCF::det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S,
                                                                                    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
@@ -1286,6 +1286,7 @@ void POLYQUANT_EPSCF::print_success() {
   Polyquant_cout(this->E_total);
   Polyquant_cout("");
   form_combined_orbitals();
+  print_combined_orbitals();
 }
 
 void POLYQUANT_EPSCF::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
@@ -1485,6 +1486,11 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
       permute_initial_MOs();
     }
 
+    this->form_combined_orbitals();
+    if (this->input_symmetry.do_symmetry == true) {
+      this->symmetrize_orbitals();
+    }
+
     this->form_occ();
     this->form_DM();
     this->form_fock();
@@ -1493,7 +1499,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     this->print_iteration();
     this->calculate_E_total();
     Polyquant_cout(this->E_total);
-    this->form_combined_orbitals("GUESS ORBITALS FROM FILE");
+    this->print_combined_orbitals("GUESS ORBITALS FROM FILE");
   } else {
     APP_ABORT("Reading from file when symmetry is on is not currently supported!");
   }
