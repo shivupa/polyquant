@@ -1320,6 +1320,34 @@ void POLYQUANT_EPSCF::print_params() {
   Polyquant_cout(buffer.str());
 }
 
+void POLYQUANT_EPSCF::symmetrize_orbitals() {
+  msym_error_t ret = MSYM_SUCCESS;
+  auto ctx = symmetry->ctx;
+
+  std::vector<int> species(bfsl);
+  std::vector<msym_partner_function_t> pf(bfsl);
+
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto n_spin = 1;
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      n_spin = 2;
+    }
+    for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
+      auto nmo = this->num_mo[quantum_part_idx];
+      if (MSYM_SUCCESS != (ret = msymSymmetrizeWavefunctions(ctx, bfsl, C_combined[quantum_part_idx][quantum_part_spin_idx].data(), species.data(), pf.data()))) {
+        APP_ABORT("Error symmetrizing orbitals");
+      }
+
+      for (auto mo_idx = 0; mo_idx < nmo; mo_idx) {
+        auto determined_irrep = species[mo_idx];
+        symm_labels[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_symmetry->irrep_names[quantum_part_idx][determined_irrep];
+        symm_label_idxs[quantum_part_idx][quantum_part_spin_idx][mo_idx] = determined_irrep;
+      }
+    }
+  }
+}
+
 void POLYQUANT_EPSCF::dump_molden() {
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
