@@ -408,7 +408,7 @@ void POLYQUANT_MOLECULE::print_molecule() {
     Polyquant_cout("mass: " + std::to_string(quantum_part.mass));
     Polyquant_cout("charge: " + std::to_string(quantum_part.charge));
     Polyquant_cout("spin: " + std::to_string(quantum_part.spin));
-    Polyquant_cout("multiplicity: " + std::to_string(quantum_part.multiplicity));
+    Polyquant_cout("expected multiplicity: " + std::to_string(quantum_part.multiplicity));
     Polyquant_cout("number of particles: " + std::to_string(quantum_part.num_parts));
     Polyquant_cout("number of particles (alpha): " + std::to_string(quantum_part.num_parts_alpha));
     Polyquant_cout("number of particles (beta): " + std::to_string(quantum_part.num_parts_beta));
