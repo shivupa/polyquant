@@ -590,6 +590,64 @@ void POLYQUANT_EPSCF::calculate_E_total() {
   this->E_total += this->input_molecule->E_nuc;
 }
 
+void POLYQUANT_EPSCF::calculate_S_squared() {
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
+
+  S_squared.resize(this->input_molecule->quantum_particles.size());
+  multiplicity.resize(this->input_molecule->quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto n_spin = 1;
+    auto n_a = quantum_part.num_parts_alpha;
+    auto n_b = quantum_part.num_parts_beta;
+
+    auto spin_sq = 0.0;
+    auto mult = 0.0;
+    auto spin_sq_xy = 0.0;
+    auto spin_sq_z = 0.0;
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_a = this->C_combined[quantum_part_idx][0](Eigen::all, Eigen::seqN(0, n_a));
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_b = this->C_combined[quantum_part_idx][1](Eigen::all, Eigen::seqN(0, n_b));
+
+      orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], orb_subset_a, orb_subset_b);
+
+      spin_sq_xy = (n_a + n_b) * 0.5;
+      spin_sq_xy -= orbital_overlap.array().square().sum();
+
+      spin_sq_z = 0.25 * std::pow(n_a - n_b, 2);
+
+      spin_sq = spin_sq_xy + spin_sq_z;
+      mult = std::sqrt(spin_sq + 0.25) - 0.5;
+      mult = 2 * mult + 1;
+
+    } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_a = this->C_combined[quantum_part_idx][0](Eigen::all, Eigen::seqN(0, n_a));
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_b = this->C_combined[quantum_part_idx][0](Eigen::all, Eigen::seqN(0, n_b));
+
+      orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], orb_subset_a, orb_subset_b);
+
+      spin_sq_xy = (n_a + n_b) * 0.5;
+      spin_sq_xy -= orbital_overlap.array().square().sum();
+      std::cout << "SHIV TESTING " << orbital_overlap.array().square().sum() << std::endl;
+
+      spin_sq_z = 0.25 * std::pow(n_a - n_b, 2);
+
+      mult = std::sqrt(spin_sq + 0.25) - 0.5;
+      mult = 2 * mult + 1;
+    } else {
+      spin_sq = 0.5 + 0.25;
+      mult = std::sqrt(spin_sq + 0.25) - 0.5;
+      mult = 2 * mult + 1;
+    }
+
+    S_squared[quantum_part_idx] = spin_sq;
+    multiplicity[quantum_part_idx] = mult;
+
+    quantum_part_idx++;
+  }
+}
+
 void POLYQUANT_EPSCF::check_stop() {
   std::string pad(7, ' ');
   std::string divider(95, '-');
@@ -1185,7 +1243,6 @@ void POLYQUANT_EPSCF::form_combined_orbitals() {
   C_combined.resize(this->input_molecule->quantum_particles.size());
   E_orbitals_combined.resize(this->input_molecule->quantum_particles.size());
   occ_combined.resize(this->input_molecule->quantum_particles.size());
-  std::vector<std::vector<std::vector<std::string>>> symm_labels;
   symm_label_idxs.resize(this->input_molecule->quantum_particles.size());
   symm_labels.resize(this->input_molecule->quantum_particles.size());
   num_mo.resize(this->input_molecule->quantum_particles.size());
@@ -1249,7 +1306,9 @@ void POLYQUANT_EPSCF::form_combined_orbitals() {
   }
 }
 
-void POLYQUANT_EPSCF::print_combined_orbitals(std::string title) { dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, symm_labels, title, this->input_basis->ao_labels); }
+void POLYQUANT_EPSCF::print_combined_orbitals(std::string title) {
+  dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, this->symm_labels, title, this->input_basis->ao_labels);
+}
 
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_EPSCF::det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S,
                                                                                    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
@@ -1282,10 +1341,29 @@ void POLYQUANT_EPSCF::permute_initial_MOs() {
   // }
 }
 void POLYQUANT_EPSCF::print_success() {
+  form_combined_orbitals();
+  calculate_S_squared();
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
+
+  std::string pad(7, ' ');
+  std::string divider(76, '-');
+  std::string line;
+  line = divider;
+  Polyquant_cout(line);
+  line = pad;
+  line += fmt::format("{:<30}:{:>30f}", "Total Energy", this->E_total);
+  Polyquant_cout(line);
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    line = pad;
+    line += fmt::format("{:<20}:{:>20f} S^2={:>5f} Mult={:>5f}", quantum_part_key, E_particles[quantum_part_idx], S_squared[quantum_part_idx], multiplicity[quantum_part_idx]);
+    Polyquant_cout(line);
+    quantum_part_idx++;
+  }
+  line = divider;
+  Polyquant_cout(line);
   Polyquant_cout("");
-  form_combined_orbitals();
   print_combined_orbitals();
 }
 
@@ -1322,13 +1400,14 @@ void POLYQUANT_EPSCF::print_params() {
 
 void POLYQUANT_EPSCF::symmetrize_orbitals() {
   msym_error_t ret = MSYM_SUCCESS;
-  auto ctx = symmetry->ctx;
-
-  std::vector<int> species(bfsl);
-  std::vector<msym_partner_function_t> pf(bfsl);
+  auto ctx = this->input_symmetry->ctx;
 
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+
+    int bfsl = this->input_basis->num_basis[quantum_part_idx];
+    std::vector<int> species(bfsl);
+    std::vector<msym_partner_function_t> pf(bfsl);
     auto n_spin = 1;
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       n_spin = 2;
@@ -1345,6 +1424,7 @@ void POLYQUANT_EPSCF::symmetrize_orbitals() {
         symm_label_idxs[quantum_part_idx][quantum_part_spin_idx][mo_idx] = determined_irrep;
       }
     }
+    quantum_part_idx++;
   }
 }
 
@@ -1515,7 +1595,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     }
 
     this->form_combined_orbitals();
-    if (this->input_symmetry.do_symmetry == true) {
+    if (this->input_symmetry->do_symmetry == true) {
       this->symmetrize_orbitals();
     }
 

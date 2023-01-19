@@ -91,6 +91,8 @@ public:
 
   void calculate_E_total() override;
 
+  void calculate_S_squared();
+
   void check_stop() override;
 
   void reset_diis();
@@ -100,6 +102,7 @@ public:
   void run_iteration() override;
 
   void guess_DM_hcore();
+
   void guess_DM() override;
 
   void resize_objects();
@@ -175,6 +178,7 @@ public:
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ_combined;
   std::vector<std::vector<std::vector<int>>> symm_label_idxs;
+  std::vector<std::vector<std::vector<std::string>>> symm_labels;
   std::vector<int> num_mo;
 
   std::string occupation_mode = "aufbau";
@@ -219,6 +223,8 @@ public:
    *
    */
   std::vector<double> E_particles;
+  std::vector<double> S_squared;
+  std::vector<double> multiplicity;
   /**
    * @brief Energy of the quantum particles from the previous iteration
    *
