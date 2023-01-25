@@ -11,7 +11,7 @@
   },
   "driver": "energy",
   "model": {
-    "method": "FILE",
+    "method": "CI",
     "basis": 
         { "electron" :
           {
@@ -28,7 +28,15 @@
     "mf_keywords" :{
         "convergence_E" : 1e-9,
         "convergence_DM" : 1e-8,
-        "iteration_max" : 200
+        "iteration_max" : 200,
+        "from_file" : true,
+        "from_file_skipiterations" : true,
+        "npart_per_irrep" :
+        [
+            [
+                [3,0,1,1]
+            ]
+        ]
     },
    "pure" : true,
    "symmetry" : true,
