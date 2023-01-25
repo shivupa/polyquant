@@ -93,6 +93,9 @@ public:
   // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_no;
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_nso;
   // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_no;
+  //
+  std::vector<std::vector<std::vector<std::vector<int>>>> symm_label_idxs;
+  std::vector<std::vector<std::vector<std::vector<std::string>>>> symm_labels;
 
   std::vector<int> NO_states;
 

@@ -136,6 +136,8 @@ void POLYQUANT_EPCI::calculate_NOs() {
 
   this->dm1.resize(this->NO_states.size());
   this->C_nso.resize(this->NO_states.size());
+  this->symm_label_idxs.resize(this->NO_states.size());
+  this->symm_labels.resize(this->NO_states.size());
   // this->C_no.resize(this->NO_states.size());
   this->occ_nso.resize(this->NO_states.size());
   // this->occ_no.resize(this->NO_states.size());
@@ -144,6 +146,8 @@ void POLYQUANT_EPCI::calculate_NOs() {
     auto state_idx = this->NO_states[state_vec_idx];
     this->dm1[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     this->C_nso[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
+    this->symm_label_idxs[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
+    this->symm_labels[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     // this->C_no[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     this->occ_nso[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     // this->occ_no[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
@@ -153,18 +157,28 @@ void POLYQUANT_EPCI::calculate_NOs() {
       if (quantum_part.num_parts > 1) {
         dm1[state_vec_idx][quantum_part_idx].resize(2);
         this->C_nso[state_vec_idx][quantum_part_idx].resize(2);
+        this->symm_label_idxs[state_vec_idx][quantum_part_idx].resize(2);
+        this->symm_labels[state_vec_idx][quantum_part_idx].resize(2);
         // this->C_no[state_vec_idx][quantum_part_idx].resize(1);
         this->occ_nso[state_vec_idx][quantum_part_idx].resize(2);
         // this->occ_no[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
         dm1[state_vec_idx][quantum_part_idx][1].setZero(num_basis, num_basis);
+        this->symm_label_idxs[state_vec_idx][quantum_part_idx][0].resize(num_basis);
+        this->symm_labels[state_vec_idx][quantum_part_idx][0].resize(num_basis, "A");
+        this->symm_label_idxs[state_vec_idx][quantum_part_idx][1].resize(num_basis);
+        this->symm_labels[state_vec_idx][quantum_part_idx][1].resize(num_basis, "A");
       } else {
         this->C_nso[state_vec_idx][quantum_part_idx].resize(1);
+        this->symm_label_idxs[state_vec_idx][quantum_part_idx].resize(1);
+        this->symm_labels[state_vec_idx][quantum_part_idx].resize(1);
         // this->C_no[state_vec_idx][quantum_part_idx].resize(1);
         this->occ_nso[state_vec_idx][quantum_part_idx].resize(1);
         // this->occ_no[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
+        this->symm_label_idxs[state_vec_idx][quantum_part_idx][0].resize(num_basis);
+        this->symm_labels[state_vec_idx][quantum_part_idx][0].resize(num_basis, "A");
       }
       quantum_part_idx++;
     }
@@ -389,19 +403,19 @@ void POLYQUANT_EPCI::print_success() {
     Polyquant_cout("");
     std::stringstream title;
     title << "NATURAL SPIN ORBITALS  state " << state_idx;
-    std::vector<std::vector<std::vector<std::string>>> symm_label;
-    symm_label.resize(this->occ_nso[state_idx].size());
-    auto quantum_part_idx = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-      auto &v = symm_label[quantum_part_idx];
-      v.resize(this->occ_nso[state_idx][quantum_part_idx].size());
-      for (auto spin_idx = 0; spin_idx < this->occ_nso[state_idx][quantum_part_idx].size(); spin_idx++) {
-        auto &v2 = symm_label[quantum_part_idx][spin_idx];
-        v2.resize(this->occ_nso[state_idx][quantum_part_idx][spin_idx].size(), "A");
-      }
-      quantum_part_idx++;
-    }
-    dump_orbitals(this->C_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->occ_nso[state_vec_idx], symm_label, title.str(), this->input_basis->ao_labels);
+    // std::vector<std::vector<std::vector<std::string>>> symm_label;
+    // symm_label.resize(this->occ_nso[state_idx].size());
+    // auto quantum_part_idx = 0ul;
+    // for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    //   auto &v = symm_label[quantum_part_idx];
+    //   v.resize(this->occ_nso[state_idx][quantum_part_idx].size());
+    //   for (auto spin_idx = 0; spin_idx < this->occ_nso[state_idx][quantum_part_idx].size(); spin_idx++) {
+    //     auto &v2 = symm_label[quantum_part_idx][spin_idx];
+    //     v2.resize(this->occ_nso[state_idx][quantum_part_idx][spin_idx].size(), "A");
+    //   }
+    //   quantum_part_idx++;
+    // }
+    dump_orbitals(this->C_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->symm_labels[state_vec_idx], title.str(), this->input_basis->ao_labels);
 
     // title.str(std::string());
     // title << "NATURAL ORBITALS  state " << state_idx;

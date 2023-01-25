@@ -383,8 +383,8 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       pcmem.resize(bfsl);
       pcmem.setZero();
 
-      pf[basis_idx].resize(bfsl);
-      species[basis_idx].resize(bfsl);
+      this->pf[basis_idx].resize(bfsl);
+      this->species[basis_idx].resize(bfsl);
 
       int msrsl = 0;
       const msym_subrepresentation_space_t *msrs = NULL;

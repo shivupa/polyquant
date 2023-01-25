@@ -125,7 +125,8 @@ public:
 
   void setup_from_file(std::string &filename);
 
-  void symmetrize_orbitals();
+  void symmetrize_orbitals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C_tosym, std::vector<std::vector<std::vector<int>>> &symm_label_idxs_to_fill,
+                           std::vector<std::vector<std::vector<std::string>>> &symm_labels_to_fill);
 
   void print_params();
 
