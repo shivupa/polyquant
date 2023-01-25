@@ -286,6 +286,10 @@ void POLYQUANT_EPCI::calculate_NOs() {
       }
       quantum_part_idx++;
     }
+
+    if (this->input_symmetry->do_symmetry == true) {
+      this->input_epscf->symmetrize_orbitals(this->C_nso[state_idx], this->symm_label_idxs[state_idx], this->symm_labels[state_idx]);
+    }
     // diag for NOs and occ
     // print
     // quantum_part_idx = 0;
