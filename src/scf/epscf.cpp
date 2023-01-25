@@ -1454,7 +1454,6 @@ void POLYQUANT_EPSCF::symmetrize_orbitals(std::vector<std::vector<Eigen::Matrix<
     int bfsl = this->input_basis->num_basis[quantum_part_idx];
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < C_tosym[quantum_part_idx].size(); quantum_part_spin_idx++) {
       auto nmo = this->num_mo[quantum_part_idx];
-      Polyquant_dump_mat(C_tosym[quantum_part_idx][quantum_part_spin_idx], "Shiv");
       if (MSYM_SUCCESS != (ret = msymSymmetrizeWavefunctions(ctx, bfsl, C_tosym[quantum_part_idx][quantum_part_spin_idx].data(), this->input_basis->species[quantum_part_idx].data(),
                                                              this->input_basis->pf[quantum_part_idx].data()))) {
         auto error = msymErrorString(ret);
