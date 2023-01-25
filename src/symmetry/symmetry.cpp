@@ -14,7 +14,6 @@ void POLYQUANT_SYMMETRY::set_symmetry_from_input() {
     point_group = "C1";
     sub_group = "C1";
   }
-  ctx = msymCreateContext();
 }
 
 void POLYQUANT_SYMMETRY::setup_symmetry(std::shared_ptr<POLYQUANT_INPUT> input_params) {
@@ -22,4 +21,11 @@ void POLYQUANT_SYMMETRY::setup_symmetry(std::shared_ptr<POLYQUANT_INPUT> input_p
   POLYQUANT_TIMER timer(function);
   input = input_params;
   set_symmetry_from_input();
+}
+
+void POLYQUANT_SYMMETRY::create_ctx_for_particle_types(int n) {
+  ctx.resize(n);
+  for (int i = 0; i < n; i++) {
+    ctx[i] = msymCreateContext();
+  }
 }

@@ -1400,11 +1400,9 @@ void POLYQUANT_EPSCF::print_params() {
 
 void POLYQUANT_EPSCF::symmetrize_orbitals() {
   msym_error_t ret = MSYM_SUCCESS;
-  auto ctx = this->input_symmetry->ctx;
-
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-
+    auto &ctx = this->input_symmetry->ctx[quantum_part_idx];
     int bfsl = this->input_basis->num_basis[quantum_part_idx];
     std::vector<int> species(bfsl);
     std::vector<msym_partner_function_t> pf(bfsl);

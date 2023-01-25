@@ -212,7 +212,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
   if (symmetry->point_group != "C1") {
     msym_point_group_type_t mtype;
     int mn;
-    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(symmetry->ctx, &mtype, &mn))) {
+    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(symmetry->ctx[0], &mtype, &mn))) {
       APP_ABORT("Error getting point group type.");
     }
 
@@ -242,11 +242,6 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     }
 
   } else {
-    const msym_equivalence_set_t *mes = NULL;
-    int mesl = 0;
-    if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(symmetry->ctx, &mesl, &mes))) {
-      APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
-    }
     // std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
 
     std::vector<std::vector<msym_basis_function_t>> mbfs;
@@ -257,14 +252,19 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     salc_per_irrep.resize(this->basis.size());
     salcs.resize(this->basis.size());
 
-    pf.resize(this->basis.size());
-    species.resize(this->basis.size());
+    this->pf.resize(this->basis.size());
+    this->species.resize(this->basis.size());
 
     Polyquant_cout("Symmetrizing basis... Building SALCs");
     auto basis_idx = 0;
 
     for (auto &quantum_particle_basis : this->basis) {
-      auto ctx = symmetry->ctx;
+      auto &ctx = symmetry->ctx[basis_idx];
+      const msym_equivalence_set_t *mes = NULL;
+      int mesl = 0;
+      if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(ctx, &mesl, &mes))) {
+        APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
+      }
       auto ao_idx = 0;
       for (auto shell : quantum_particle_basis) {
         for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++) {
