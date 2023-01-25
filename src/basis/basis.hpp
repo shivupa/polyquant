@@ -82,6 +82,10 @@ public:
   // indexing particle idx, irrep idx
   std::vector<std::vector<int>> salc_per_irrep;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> salcs;
+
+  // symmetry info we will want to store for symmetrizing wfn
+  std::vector<std::vector<msym_partner_function_t>> pf;
+  std::vector<std::vector<int>> species;
   bool pure = true;
 };
 } // namespace polyquant

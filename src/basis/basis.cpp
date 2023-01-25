@@ -257,6 +257,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     salc_per_irrep.resize(this->basis.size());
     salcs.resize(this->basis.size());
 
+    pf.resize(this->basis.size());
+    species.resize(this->basis.size());
+
     Polyquant_cout("Symmetrizing basis... Building SALCs");
     auto basis_idx = 0;
 
@@ -380,9 +383,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       pcmem.resize(bfsl);
       pcmem.setZero();
 
-      std::vector<msym_partner_function_t> pf(bfsl);
+      pf[basis_idx].resize(bfsl);
+      species[basis_idx].resize(bfsl);
 
-      std::vector<int> species(bfsl);
       int msrsl = 0;
       const msym_subrepresentation_space_t *msrs = NULL;
       const msym_character_table_t *mct = NULL;
@@ -394,7 +397,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
         std::cout << error << std::endl;
         APP_ABORT("Error getting subrepresentation spaces");
       }
-      if (MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, combined_salcs.data(), species.data(), pf.data()))) {
+      if (MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, combined_salcs.data(), species[basis_idx].data(), pf[basis_idx].data()))) {
         // auto error = msymErrorString(ret);
         // error = msymGetErrorDetails();
         APP_ABORT("Error getting salcs");
