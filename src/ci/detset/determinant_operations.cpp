@@ -485,9 +485,9 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
   const uint64_t nbit = 64; // sizeof(T) * 8;
   std::vector<T> new_det;
   for (auto i : det) {
-    std::cout << "SHIV    ";
-    std::bitset<nbit> b(i);
-    std::cout << b << "         " << b.to_ulong() << "             ";
+    // std::cout << "SHIV    ";
+    // std::bitset<nbit> b(i);
+    // std::cout << b << "         " << b.to_ulong() << "             ";
     // extract the bits from the next int that would get bumped over
     auto begin = nbit - nfc;
     auto end = nbit;
@@ -506,7 +506,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     count++;
 
     std::bitset<nbit> c(j);
-    std::cout << c << "         " << c.to_ulong() << std::endl;
+    // std::cout << c << "         " << c.to_ulong() << std::endl;
     new_det.push_back(j);
   }
   return new_det;
