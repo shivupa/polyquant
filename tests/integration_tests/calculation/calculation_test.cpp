@@ -353,3 +353,33 @@ TEST_CASE("CALCULATION: SCF restart test skipiterations.") {
 
   REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_total, POLYQUANT_TEST_EPSILON_LOOSE));
 }
+
+TEST_CASE("CALCULATION: PsH compare to literature CISD (10.1063/1.5094035).") {
+  POLYQUANT_CALCULATION test_calc("../../tests/data/PsH_wpos/compare_CISD.json");
+  test_calc.run();
+
+  REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-0.6660682662312821245, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[0], Catch::Matchers::WithinAbs(-0.7518012921837637, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[1], Catch::Matchers::WithinAbs(-0.5725496537160829, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[2], Catch::Matchers::WithinAbs(-0.5725496537160818, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[3], Catch::Matchers::WithinAbs(-0.5725496537160812, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[4], Catch::Matchers::WithinAbs(-0.5647619479403091, POLYQUANT_TEST_EPSILON_LOOSE));
+  // this next state is a triplet state so it doesn't appear in the paper
+  REQUIRE_THAT(test_calc.ci_calc->energies[5], Catch::Matchers::WithinAbs(-0.5617888160599843, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[6], Catch::Matchers::WithinAbs(-0.4975578201024861, POLYQUANT_TEST_EPSILON_LOOSE));
+}
+
+TEST_CASE("CALCULATION: PsH compare to literature FCI (10.1063/1.5094035).") {
+  POLYQUANT_CALCULATION test_calc("../../tests/data/PsH_wpos/compare_FCI.json");
+  test_calc.run();
+
+  REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-0.6660682662312821245, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[0], Catch::Matchers::WithinAbs(-0.7566614834903975, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[1], Catch::Matchers::WithinAbs(-0.5999611891752913, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[2], Catch::Matchers::WithinAbs(-0.5999611891752892, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[3], Catch::Matchers::WithinAbs(-0.5999611891752891, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[4], Catch::Matchers::WithinAbs(-0.590804669033228, POLYQUANT_TEST_EPSILON_LOOSE));
+  // this next state is a triplet state so it doesn't appear in the paper
+  REQUIRE_THAT(test_calc.ci_calc->energies[5], Catch::Matchers::WithinAbs(-0.5762392256391691, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.ci_calc->energies[6], Catch::Matchers::WithinAbs(-0.5146066022417264, POLYQUANT_TEST_EPSILON_LOOSE));
+}
