@@ -84,6 +84,7 @@ public:
   bool permute_orbitals_start = false;
 
   void permute_initial_MOs();
+  void reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &C_to_orth, const int quantum_part_idx);
 
   void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, const int quantum_part_irrep_idx, std::vector<int> &permutation);
 

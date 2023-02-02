@@ -1372,6 +1372,24 @@ void POLYQUANT_EPSCF::permute_MOs(const int quantum_part_idx, const int quantum_
   this->C[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx] = this->C[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx] * swapper_mat;
 }
 
+void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &C_to_orth, const int quantum_part_idx) {
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_orth_X;
+  Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+  orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(orbital_overlap);
+  if (eigensolver.info() != Eigen::Success)
+    APP_ABORT("Error reorthogonalizing orbitals!");
+  // Duplicated code from integral symm orth. Should generalize symm orth call in integral api and reduce repeated code.
+  s = eigensolver.eigenvalues();
+  L = eigensolver.eigenvectors();
+  s = s.array().rsqrt();
+  MO_orth_X = s.asDiagonal();
+  MO_orth_X = L * MO_orth_X * L.transpose();
+  C_to_orth = C_to_orth * MO_orth_X;
+}
+
 void POLYQUANT_EPSCF::permute_initial_MOs() {
   Polyquant_cout("Permuting Initial Orbtials");
   permute_orbitals_start = false;
@@ -1620,6 +1638,8 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
       }
     }
 
+    reorthogonalize_MOs(this->C_combined[quantum_part_idx][0], quantum_part_idx);
+
     if (this->input_symmetry->do_symmetry == false) {
       auto quantum_part_irrep_idx = 0;
       this->C[quantum_part_idx][0][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][0];
@@ -1636,6 +1656,8 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
           this->C_combined[quantum_part_idx][1](j, i) = data[i * num_basis + j];
         }
       }
+
+      reorthogonalize_MOs(this->C_combined[quantum_part_idx][1], quantum_part_idx);
       if (this->input_symmetry->do_symmetry == false) {
         auto quantum_part_irrep_idx = 0;
         this->C[quantum_part_idx][1][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][0];
