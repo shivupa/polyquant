@@ -93,6 +93,31 @@ protected:
    * +--------+---+---------------------------------------------------------------------------------------------------------+---------------------------------------------+
    * \endrst
    *
+   * For the consumers of molden files, such as pyscf and iodata, it is assumed that p orbitals are ordered according as cartesian functions.
+   *
+   * \rst
+   * +----------------------------------------+----------+---------+
+   * | Circumstance                           | sph      | cart    |
+   * +========================================+==========+=========+
+   * | (A) Current FOR_SOLIDHARM_MOLDEN       | 0, 1, -1 | z, x, y |
+   * +----------------------------------------+----------+---------+
+   * | (B) Accepted MOLDEN (cart for p shell) | 1, -1, 0 | x, y, z |
+   * +----------------------------------------+----------+---------+
+   * | Current internal sph harm              | -1, 0, 1 | y, z, x |
+   * +----------------------------------------+----------+---------+
+   * \endrst
+   *
+   * For compatability, this would mean that we would need to reorder as follows
+   *
+   * \rst
+   * +-------------------------------+---------+
+   * | Reordering                    | idx     |
+   * +===============================+=========+
+   * | Reorder internal to match (A) | 1, 2, 0 |
+   * +-------------------------------+---------+
+   * | Reorder internal to match (B) | 2, 0, 1 |
+   * +-------------------------------+---------+
+   * \endrst
    */
   void dump_basis(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis);
   void dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels,
