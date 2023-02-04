@@ -1,0 +1,21 @@
+For the consumers of molden files, such as pyscf and iodata, it is assumed that p orbitals are ordered according as cartesian functions.
+
++----------------------------------------+----------+---------+
+| Circumstance                           | sph      | cart    |
++========================================+==========+=========+
+| (A) Current FORM_SOLIDHARM_MOLDEN      | 0, 1, -1 | z, x, y |
++----------------------------------------+----------+---------+
+| (B) Accepted MOLDEN (cart for p shell) | 1, -1, 0 | x, y, z |
++----------------------------------------+----------+---------+
+| Current internal sph harm              | -1, 0, 1 | y, z, x |
++----------------------------------------+----------+---------+
+
+For compatability, this would mean that we would need to reorder as follows
+
++-------------------------------+---------+
+| Reordering                    | idx     |
++===============================+=========+
+| Reorder internal to match (A) | 1, 2, 0 |
++-------------------------------+---------+
+| Reorder internal to match (B) | 2, 0, 1 |
++-------------------------------+---------+

@@ -1,0 +1,385 @@
+
+
+
+                         ..                           MM                           
+                       pd'  `7MM"""Mq.   .g8""8q.     MM                           
+                      6P      MM   `MM..dP'    `YM.   MM                           
+                     6M'      MM   ,M9 dM'      `MM   MM                           
+                     MN       MMmmdM9  MM        MM   MM                           
+                     MN       MM       MM.      ,MP   MM                           
+                     YM.      MM       `Mb.    ,dP'   MM                           
+                      Mb    .JMML.       `"bmmd"'     MM                           
+                       Yq.                   MMb      MM                           
+                         ``                   `bood'  MM                           
+
+                    ,,                                                          
+`7MM"""Mq.        `7MM                                                     mm   
+  MM   `MM.         MM                                                     MM   
+  MM   ,M9 ,pW"Wq.  MM `7M'   `MF',dW"Yvd `7MM  `7MM   ,6"Yb.  `7MMpMMMb.mmMMmm 
+  MMmmdM9 6W'   `Wb MM   VA   ,V ,W'   MM   MM    MM  8)   MM    MM    MM  MM   
+  MM      8M     M8 MM    VA ,V  8M    MM   MM    MM   ,pm9MM    MM    MM  MM   
+  MM      YA.   ,A9 MM     VVV   YA.   MM   MM    MM  8M   MM    MM    MM  MM   
+.JMML.     `Ybmd9'.JMML.   ,V     `MbmdMM   `Mbod"YML.`Moo9^Yo..JMML  JMML.`Mbmo
+                          ,V           MM                                       
+                       OOb"          .JMML.                                     
+
+
+
+
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+                    │            Input Parameters            │
+                    │                                        │
+                    └────────────────────────────────────────┘
+
+Reading Input File: h2.json
+Input file: 
+{
+    "driver": "energy",
+    "keywords": {
+        "dump_for_qmcpack": true,
+        "pure": true,
+        "restricted": false
+    },
+    "model": {
+        "basis": {
+            "electron": {
+                "H": [
+                    {
+                        "custom": {
+                            "filename": "electron_basis.g94",
+                            "type": "file"
+                        }
+                    }
+                ]
+            }
+        },
+        "method": "scf"
+    },
+    "molecule": {
+        "geometry": [
+            0.0,
+            0.0,
+            0.3755,
+            0.0,
+            0.0,
+            -0.3755
+        ],
+        "molecular_charge": 0,
+        "molecular_multiplicity": 1,
+        "symbols": [
+            "H",
+            "H"
+        ]
+    }
+}
+End input file
+Timer polyquant::POLYQUANT_INPUT::POLYQUANT_INPUT(const std::string&)    0d:0h:0m:0s:0ms:72us:797ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+                    │         Symmetry Handler Setup         │
+                    │                                        │
+                    └────────────────────────────────────────┘
+
+Timer void polyquant::POLYQUANT_SYMMETRY::setup_symmetry(std::shared_ptr<polyquant::POLYQUANT_INPUT>)    0d:0h:0m:0s:0ms:0us:835ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+                    │         Molecule Specification         │
+                    │                                        │
+                    └────────────────────────────────────────┘
+
+The input section 'keywords' didn't contain a section called about quantum nuclei. All nuclei are going to be treated classically. No quantum particles present besides electrons.
+No additional quantum particles found.
+Creating 2.000000 electrons
+SYMMMETRY TESTING : IDENTIFIED POINT GROUPD0h
+nuclear repulsion energy: 0.704630
+
+Molecule parameters
+Classical particle types
+Classical particle type  1: 
+name: H
+mass: 1.007825
+charge: 1.000000
+number of particles: 2
+Center idx    x   y   z
+0    0.000000    0.000000    0.709592
+1    0.000000    0.000000    -0.709592
+
+
+Quantum particle types
+Quantum Particle type 1: 
+name: electron
+mass: 1.000000
+charge: -1.000000
+spin: 0.500000
+expected multiplicity: 1
+number of particles: 2
+number of particles (alpha): 1
+number of particles (beta): 1
+Center idx    x   y   z
+exchange: true
+electron exchange: false
+restricted: false
+
+
+Timer void polyquant::POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<polyquant::POLYQUANT_INPUT>, std::shared_ptr<polyquant::POLYQUANT_SYMMETRY>)    0d:0h:0m:0s:0ms:206us:11ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+                    │          Basis Specification           │
+                    │                                        │
+                    └────────────────────────────────────────┘
+
+(Of developer interest only) Enforcing unit normalization in Libint: true
+
+Added basis for electron
+Number of basis functions: 14
+Shell:( O={0,0,0.70959215979697665144}
+   {l=3,sph=1}
+  0.5 0.30948311499459146834
+
+Shell:( O={0,0,-0.70959215979697665144}
+   {l=3,sph=1}
+  0.5 0.30948311499459146834
+
+WARNING. PLEASE DO NOT IGNORE THIS WARNING.
+    WARNING REASON:
+Linear molecule detected. This is a bit harder to handle so for now we will just turn off symmetry
+Timer polyquant::POLYQUANT_BASIS::POLYQUANT_BASIS(std::shared_ptr<polyquant::POLYQUANT_INPUT>, std::shared_ptr<polyquant::POLYQUANT_SYMMETRY>, std::shared_ptr<polyquant::POLYQUANT_MOLECULE>)    0d:0h:0m:0s:0ms:126us:704ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Timer polyquant::POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string&)    0d:0h:0m:0s:0ms:731us:731ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+                    │         Calculation Requested          │
+                    │                                        │
+                    └────────────────────────────────────────┘
+
+Figuring out if we need to run a mean-field calculation for the particles...
+Figuring out if we need to run a post mean-field calculation for the particles...
+Will run a mean field calculation of type: 
+SCF
+
+                    ┌────────────────────────────────────────┐
+                    │                                        │
+                    │      Multispecies SCF Calculation      │
+                    │                                        │
+                    └────────────────────────────────────────┘
+
+Running SCF
+Parameters
+    Maximum iterations = 500
+    convergence_E = 1.000000e-10
+    convergence_DM = 1.000000e-08
+    diis_extrapolation = 1
+    diis_start = 5
+    diis_damping = 0.000000e+00
+    diis_mixing_fraction = 0.000000e+00
+    diis_size = 5
+    incremental_fock = 1
+    incremental_fock_reset_freq = 8
+    incremental_fock_initial_onset_thresh = 1.000000e-05
+    Cauchy_Schwarz_screening = 0
+    Independent converged = false
+    Freeze density   
+        Particle type 0  :  true
+
+Calculating One Body Overlap Integrals...
+Timer void polyquant::POLYQUANT_INTEGRAL::calculate_overlap()    0d:0h:0m:0s:0ms:529us:184ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Calculating Canonical Orthogonalization Matrix...
+For quantum particle 0 irrep 0, minimum eigenvalue of the overlap matrix :0.395601
+Timer void polyquant::POLYQUANT_INTEGRAL::canonical_orthogonalization()    0d:0h:0m:0s:0ms:46us:989ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Calculating One Body Kinetic Integrals...
+Timer void polyquant::POLYQUANT_INTEGRAL::calculate_kinetic()    0d:0h:0m:0s:0ms:80us:960ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Calculating One Body Nuclear Integrals...
+Timer void polyquant::POLYQUANT_INTEGRAL::calculate_nuclear()    0d:0h:0m:0s:0ms:456us:757ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Calculating unique shell pairs...
+Timer void polyquant::POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double)    0d:0h:0m:0s:0ms:58us:358ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Timer void polyquant::POLYQUANT_EPSCF::calculate_integrals()    0d:0h:0m:0s:1ms:646us:135ns    Current Memory usage:   0 TB   3 GB 980 MB 764 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+    Initial Particles per Irrep
+        Particle 0 spin 0 : 1 
+        Particle 0 spin 1 : 1 
+-----------------------------------------------------------------------------------------------
+Resetting Incremental Fock build for Particle 0 spin 0
+Resetting Incremental Fock build for Particle 0 spin 1
+Timer virtual void polyquant::POLYQUANT_EPSCF::run_iteration()    0d:0h:0m:0s:13ms:247us:652ns    Current Memory usage:   0 TB   3 GB 979 MB  92 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+       Iteration                        :                                1
+         Species    Energy     dE/E    E conv?  rms[F,Da] Da conv?  rms[F,Db]  Db conv? 
+       ---------------------------------------------------------------------------------       
+        electron   2.207943  1.00e+00   false    4.79e-18    true    3.99e-18    true   
+          Total    2.207943                                                             
+-----------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+Resetting Incremental Fock build for Particle 0 spin 0
+Resetting Incremental Fock build for Particle 0 spin 1
+Next iteration doing an incremental fock build for electron spin 0
+Next iteration doing an incremental fock build for electron spin 1
+Timer virtual void polyquant::POLYQUANT_EPSCF::run_iteration()    0d:0h:0m:0s:13ms:455us:398ns    Current Memory usage:   0 TB   3 GB 972 MB 984 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+       Iteration                        :                                2
+         Species    Energy     dE/E    E conv?  rms[F,Da] Da conv?  rms[F,Db]  Db conv? 
+       ---------------------------------------------------------------------------------       
+        electron   2.207943  4.02e-16    true    4.84e-18    true    3.81e-18    true   
+          Total    2.207943                                                             
+-----------------------------------------------------------------------------------------------
+SCF SUCCESS
+2.9125729282656633856
+----------------------------------------------------------------------------
+       Total Energy                  :                      2.912573
+       electron            :            2.207943 S^2=0.000000 Mult=1.000000
+----------------------------------------------------------------------------
+
+CONVERGED MOLECULAR ORBITALS
+
+Particle 0 Spin 0
+
+
+Orb num                       1                   2                   3                   4                   5                             
+Orb sym                        A                   A                   A                   A                   A                            
+Orb ene                    1.33980099          1.80375102          1.80375102          1.83933521          1.83933521                       
+Orb occ                    1.00000000          0.00000000          0.00000000          0.00000000          0.00000000                       
+
+    1     H04 f-3         -0.00000000          0.00000000          0.00000000         -0.00000000          0.00000000                       
+    2     H04 f-2          0.00000000          0.70727988          0.04350142         -0.00000000         -0.00000000                       
+    3     H04 f-1         -0.00000000          0.00000000          0.00000000          0.03880450          0.75461794                       
+    4     H04 f+0          0.77362221         -0.00000000          0.00000000         -0.00000000          0.00000000                       
+    5     H04 f+1          0.00000000          0.00000000         -0.00000000          0.75461794         -0.03880450                       
+    6     H04 f+2         -0.00000000         -0.04350142          0.70727988          0.00000000         -0.00000000                       
+    7     H04 f+3         -0.00000000         -0.00000000         -0.00000000          0.00000000         -0.00000000                       
+    8     H14 f-3         -0.00000000          0.00000000         -0.00000000         -0.00000000         -0.00000000                       
+    9     H14 f-2          0.00000000          0.70727988          0.04350142         -0.00000000         -0.00000000                       
+    10    H14 f-1          0.00000000          0.00000000          0.00000000          0.03880450          0.75461794                       
+    11    H14 f+0          0.77362221         -0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    12    H14 f+1          0.00000000          0.00000000          0.00000000          0.75461794         -0.03880450                       
+    13    H14 f+2         -0.00000000         -0.04350142          0.70727988          0.00000000         -0.00000000                       
+    14    H14 f+3          0.00000000          0.00000000         -0.00000000          0.00000000          0.00000000                       
+
+
+Orb num                       6                   7                   8                   9                  10                             
+Orb sym                        A                   A                   A                   A                   A                            
+Orb ene                    1.94610741          1.94610741          2.07219101          2.15750788          2.15750788                       
+Orb occ                    0.00000000          0.00000000          0.00000000          0.00000000          0.00000000                       
+
+    1     H04 f-3          0.00000000          0.55825014         -0.00000000          0.00000000         -0.00000000                       
+    2     H04 f-2          0.00000000         -0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    3     H04 f-1         -0.00000000          0.00000000          0.00000000         -0.66445269         -0.05687324                       
+    4     H04 f+0          0.00000000          0.00000000          0.65524384         -0.00000000         -0.00000000                       
+    5     H04 f+1         -0.00000000         -0.00000000          0.00000000          0.05687324         -0.66445269                       
+    6     H04 f+2          0.00000000         -0.00000000         -0.00000000          0.00000000          0.00000000                       
+    7     H04 f+3          0.55825014         -0.00000000          0.00000000         -0.00000000         -0.00000000                       
+    8     H14 f-3          0.00000000          0.55825014         -0.00000000          0.00000000         -0.00000000                       
+    9     H14 f-2          0.00000000          0.00000000          0.00000000          0.00000000         -0.00000000                       
+    10    H14 f-1         -0.00000000          0.00000000          0.00000000          0.66445269          0.05687324                       
+    11    H14 f+0         -0.00000000          0.00000000         -0.65524384         -0.00000000         -0.00000000                       
+    12    H14 f+1         -0.00000000          0.00000000          0.00000000         -0.05687324          0.66445269                       
+    13    H14 f+2          0.00000000          0.00000000          0.00000000         -0.00000000         -0.00000000                       
+    14    H14 f+3          0.55825014         -0.00000000         -0.00000000          0.00000000          0.00000000                       
+
+
+Orb num                      11                  12                  13                  14                             
+Orb sym                        A                   A                   A                   A                            
+Orb ene                    2.28709011          2.28709011          2.49235150          2.49235150                       
+Orb occ                    0.00000000          0.00000000          0.00000000          0.00000000                       
+
+    1     H04 f-3          0.00000000         -0.00000000          0.00000000         -1.12423267                       
+    2     H04 f-2          0.39196791         -0.58672146          0.00000000          0.00000000                       
+    3     H04 f-1          0.00000000          0.00000000          0.00000000          0.00000000                       
+    4     H04 f+0          0.00000000         -0.00000000          0.00000000          0.00000000                       
+    5     H04 f+1          0.00000000         -0.00000000          0.00000000         -0.00000000                       
+    6     H04 f+2          0.58672146          0.39196791          0.00000000          0.00000000                       
+    7     H04 f+3          0.00000000          0.00000000         -1.12423267         -0.00000000                       
+    8     H14 f-3          0.00000000         -0.00000000          0.00000000          1.12423267                       
+    9     H14 f-2         -0.39196791          0.58672146         -0.00000000          0.00000000                       
+    10    H14 f-1         -0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    11    H14 f+0         -0.00000000          0.00000000         -0.00000000         -0.00000000                       
+    12    H14 f+1         -0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    13    H14 f+2         -0.58672146         -0.39196791          0.00000000          0.00000000                       
+    14    H14 f+3          0.00000000          0.00000000          1.12423267          0.00000000                       
+
+
+Particle 0 Spin 1
+
+
+Orb num                       1                   2                   3                   4                   5                             
+Orb sym                        A                   A                   A                   A                   A                            
+Orb ene                    1.33980099          1.80375102          1.80375102          1.83933521          1.83933521                       
+Orb occ                    1.00000000          0.00000000          0.00000000          0.00000000          0.00000000                       
+
+    1     H04 f-3          0.00000000          0.00000000          0.00000000         -0.00000000         -0.00000000                       
+    2     H04 f-2          0.00000000          0.69163720          0.15419206          0.00000000          0.00000000                       
+    3     H04 f-1         -0.00000000         -0.00000000         -0.00000000          0.01946932          0.75536413                       
+    4     H04 f+0          0.77362221         -0.00000000          0.00000000         -0.00000000          0.00000000                       
+    5     H04 f+1         -0.00000000         -0.00000000          0.00000000          0.75536413         -0.01946932                       
+    6     H04 f+2         -0.00000000         -0.15419206          0.69163720         -0.00000000          0.00000000                       
+    7     H04 f+3          0.00000000         -0.00000000         -0.00000000          0.00000000         -0.00000000                       
+    8     H14 f-3          0.00000000          0.00000000         -0.00000000         -0.00000000         -0.00000000                       
+    9     H14 f-2          0.00000000          0.69163720          0.15419206          0.00000000          0.00000000                       
+    10    H14 f-1         -0.00000000          0.00000000         -0.00000000          0.01946932          0.75536413                       
+    11    H14 f+0          0.77362221         -0.00000000         -0.00000000          0.00000000          0.00000000                       
+    12    H14 f+1          0.00000000         -0.00000000          0.00000000          0.75536413         -0.01946932                       
+    13    H14 f+2         -0.00000000         -0.15419206          0.69163720         -0.00000000          0.00000000                       
+    14    H14 f+3         -0.00000000          0.00000000         -0.00000000          0.00000000          0.00000000                       
+
+
+Orb num                       6                   7                   8                   9                  10                             
+Orb sym                        A                   A                   A                   A                   A                            
+Orb ene                    1.94610741          1.94610741          2.07219101          2.15750788          2.15750788                       
+Orb occ                    0.00000000          0.00000000          0.00000000          0.00000000          0.00000000                       
+
+    1     H04 f-3         -0.00000000          0.55825014          0.00000000          0.00000000          0.00000000                       
+    2     H04 f-2          0.00000000          0.00000000         -0.00000000          0.00000000         -0.00000000                       
+    3     H04 f-1         -0.00000000          0.00000000          0.00000000         -0.65547942          0.12279526                       
+    4     H04 f+0          0.00000000         -0.00000000          0.65524384         -0.00000000         -0.00000000                       
+    5     H04 f+1         -0.00000000          0.00000000         -0.00000000         -0.12279526         -0.65547942                       
+    6     H04 f+2          0.00000000          0.00000000         -0.00000000          0.00000000         -0.00000000                       
+    7     H04 f+3          0.55825014          0.00000000          0.00000000          0.00000000         -0.00000000                       
+    8     H14 f-3         -0.00000000          0.55825014          0.00000000          0.00000000          0.00000000                       
+    9     H14 f-2          0.00000000         -0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    10    H14 f-1         -0.00000000          0.00000000          0.00000000          0.65547942         -0.12279526                       
+    11    H14 f+0         -0.00000000         -0.00000000         -0.65524384         -0.00000000          0.00000000                       
+    12    H14 f+1         -0.00000000         -0.00000000          0.00000000          0.12279526          0.65547942                       
+    13    H14 f+2          0.00000000         -0.00000000         -0.00000000         -0.00000000         -0.00000000                       
+    14    H14 f+3          0.55825014          0.00000000         -0.00000000         -0.00000000         -0.00000000                       
+
+
+Orb num                      11                  12                  13                  14                             
+Orb sym                        A                   A                   A                   A                            
+Orb ene                    2.28709011          2.28709011          2.49235150          2.49235150                       
+Orb occ                    0.00000000          0.00000000          0.00000000          0.00000000                       
+
+    1     H04 f-3          0.00000000          0.00000000          0.00000000         -1.12423267                       
+    2     H04 f-2         -0.22984664         -0.66712175          0.00000000          0.00000000                       
+    3     H04 f-1          0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    4     H04 f+0          0.00000000         -0.00000000          0.00000000         -0.00000000                       
+    5     H04 f+1          0.00000000          0.00000000         -0.00000000         -0.00000000                       
+    6     H04 f+2          0.66712175         -0.22984664          0.00000000          0.00000000                       
+    7     H04 f+3          0.00000000         -0.00000000         -1.12423267         -0.00000000                       
+    8     H14 f-3         -0.00000000          0.00000000          0.00000000          1.12423267                       
+    9     H14 f-2          0.22984664          0.66712175         -0.00000000          0.00000000                       
+    10    H14 f-1         -0.00000000          0.00000000          0.00000000          0.00000000                       
+    11    H14 f+0         -0.00000000          0.00000000          0.00000000          0.00000000                       
+    12    H14 f+1         -0.00000000         -0.00000000         -0.00000000          0.00000000                       
+    13    H14 f+2         -0.66712175          0.22984664         -0.00000000          0.00000000                       
+    14    H14 f+3         -0.00000000          0.00000000          1.12423267          0.00000000                       
+
+MOLDEN file electron_polyquant.molden exists. Overwriting it.
+
+dumping molden header
+dumping molden atom parameters
+Timer virtual void polyquant::POLYQUANT_EPSCF::run()    0d:0h:0m:0s:30ms:792us:739ns    Current Memory usage:   0 TB   3 GB 972 MB 984 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
+Timer TOTAL RUNTIME    0d:0h:0m:0s:33ms:627us:222ns    Current Memory usage:   0 TB   3 GB 972 MB 984 KB   0  B free:   0 TB  16 GB 231 MB 748 KB   0  B
+
