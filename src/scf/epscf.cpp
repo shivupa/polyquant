@@ -1373,6 +1373,7 @@ void POLYQUANT_EPSCF::permute_MOs(const int quantum_part_idx, const int quantum_
 }
 
 void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &C_to_orth, const int quantum_part_idx) {
+  std::string line;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_orth_X;
   Eigen::Matrix<double, Eigen::Dynamic, 1> s;
@@ -1388,6 +1389,13 @@ void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, 
   MO_orth_X = s.asDiagonal();
   MO_orth_X = L * MO_orth_X * L.transpose();
   C_to_orth = C_to_orth * MO_orth_X;
+  // checking
+  orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
+  orbital_overlap.diagonal().array() -= 1;
+  Eigen::Index max_row, max_col;
+  double max = orbital_overlap.maxCoeff(&max_row, &max_col);
+  line = fmt::format("Maximum difference MO overlap matrix from identity matrix (after orthogonalization) : S_mo({:02}, {:02}) = {:> 10.6f}", max_row, max_col, max);
+  Polyquant_cout(line);
 }
 
 void POLYQUANT_EPSCF::permute_initial_MOs() {
