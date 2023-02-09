@@ -4,7 +4,7 @@
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S_squared, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
-   // only for restricted cases
+  // only for restricted cases
   auto nthreads = omp_get_max_threads();
 
   auto nstates = C.cols();
@@ -94,21 +94,19 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
                 auto Dj_a = this->get_det(quantum_part_idx, spin_0, idx_jdet_a);
                 auto Dj_b = this->get_det(quantum_part_idx, spin_1, idx_jdet_b);
 
-                std::vector<int> holes, parts;
-                double phase = 1.0;
-                holes.clear();
-                parts.clear();
-                get_holes(Di_a, Dj_a, holes);
-                get_parts(Di_a, Dj_a, parts);
-                phase *= get_phase(Di_a, Dj_a, holes, parts);
+                std::vector<int> holes_a, parts_a;
+                std::vector<int> holes_b, parts_b;
+                get_holes(Di_a, Dj_a, holes_a);
+                get_parts(Di_a, Dj_a, parts_a);
+                get_holes(Di_b, Dj_b, holes_b);
+                get_parts(Di_b, Dj_b, parts_b);
+                if (holes_a[0] == parts_b[0] && holes_b[0] == parts_a[0]) {
+                  double phase = 1.0;
+                  phase *= get_phase(Di_a, Dj_a, holes_a, parts_a);
+                  phase *= get_phase(Di_b, Dj_b, holes_b, parts_b);
 
-                holes.clear();
-                parts.clear();
-                get_holes(Di_b, Dj_b, holes);
-                get_parts(Di_b, Dj_b, parts);
-                phase *= get_phase(Di_b, Dj_b, holes, parts);
-
-                S_sq_thread_contributions[thread_id](state_idx, quantum_part_idx) += phase * C_I * C_J;
+                  S_sq_thread_contributions[thread_id](state_idx, quantum_part_idx) += phase * C_I * C_J;
+                }
               }
             }
           }
