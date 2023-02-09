@@ -279,9 +279,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
         ci_calc->num_subspace_vec = this->input_params->input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
       }
-      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("cache_size")) {
-        ci_calc->cache_size = this->input_params->input_data["keywords"]["ci_keywords"]["cache_size"];
-      }
+      // if (this->input_params->input_data["keywords"]["ci_keywords"].contains("cache_size")) {
+      //   ci_calc->cache_size = this->input_params->input_data["keywords"]["ci_keywords"]["cache_size"];
+      // }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
         ci_calc->detset.slow_diag = this->input_params->input_data["keywords"]["ci_keywords"]["slow_diag"];
       }

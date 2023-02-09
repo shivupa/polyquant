@@ -30,6 +30,7 @@ public:
   void calculate_fc_energy();
   void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs);
   void calculate_NOs();
+  void calculate_S_squared();
   void setup_determinants();
   void run();
   void print_start();
@@ -82,6 +83,8 @@ public:
   POLYQUANT_DETSET<uint64_t> detset;
   Eigen::Matrix<double, Eigen::Dynamic, 1> energies;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;
+  // state_idx, quantum_part_type idx
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> S_squared;
 
   // FC_DM stored in AO basis since we need to make the FC operators fc_occ.asDiagonal() is FC_DM in MO basis
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
@@ -122,7 +125,6 @@ public:
   bool exact_diag = false;
 
   double det_print_threshold = 0.1;
-  size_t cache_size = std::numeric_limits<size_t>::max();
 };
 } // namespace polyquant
 #endif

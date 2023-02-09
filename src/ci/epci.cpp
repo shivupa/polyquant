@@ -312,6 +312,13 @@ void POLYQUANT_EPCI::calculate_NOs() {
     // }
   }
 }
+
+void POLYQUANT_EPCI::calculate_S_squared() {
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  this->detset.evaluate_s2(this->S_squared, this->C_ci);
+}
+
 void POLYQUANT_EPCI::setup_determinants() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -382,8 +389,19 @@ void POLYQUANT_EPCI::print_success() {
   for (auto state_idx = 0; state_idx < this->num_states; state_idx++) {
     Polyquant_cout(divider.str());
     std::string line;
-    line += fmt::format("State {} Energy {}\n", state_idx, this->energies[state_idx]);
+    line += fmt::format("State {} Energy {} ", state_idx, this->energies[state_idx]);
+
+    auto quantum_part_idx = 0ul;
+    auto Ssqtot = 0.0;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      line += fmt::format("S^2 ({}) {: >5}", quantum_part_key, S_squared(state_idx, quantum_part_idx));
+      Ssqtot += S_squared(state_idx, quantum_part_idx);
+      quantum_part_idx++;
+    }
+    line += fmt::format("S^2 ({}) {: >5}", "total", Ssqtot);
+    line += "\n";
     Polyquant_cout(line);
+
     line = "";
     line += fmt::format("{: ^10}{:^30}{: ^10}{:^20}{: ^10}\n", "", "Det idx", "", "C", "");
     line += fmt::format("{: ^10}{:-^30}{: ^10}{:-^20}{: ^10}", "", "", "", "", "");
@@ -518,6 +536,7 @@ void POLYQUANT_EPCI::run() {
         this->energies[e] += constant_shift;
       }
       this->calculate_NOs();
+      this->calculate_S_squared();
       this->print_success();
       this->dump_molden();
     } else {
@@ -557,6 +576,7 @@ void POLYQUANT_EPCI::run() {
           this->energies[e] += constant_shift;
         }
         this->calculate_NOs();
+        this->calculate_S_squared();
         this->print_success();
         this->dump_molden();
       } else {
