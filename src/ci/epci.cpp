@@ -394,11 +394,11 @@ void POLYQUANT_EPCI::print_success() {
     auto quantum_part_idx = 0ul;
     auto Ssqtot = 0.0;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-      line += fmt::format("S^2 ({}) {: >5}", quantum_part_key, S_squared(state_idx, quantum_part_idx));
+      line += fmt::format("    S^2 ({}) {: >10.5f}", quantum_part_key, S_squared(state_idx, quantum_part_idx));
       Ssqtot += S_squared(state_idx, quantum_part_idx);
       quantum_part_idx++;
     }
-    line += fmt::format("S^2 ({}) {: >5}", "total", Ssqtot);
+    // line += fmt::format("S^2 ({}) {: >5}", "total", Ssqtot);
     line += "\n";
     Polyquant_cout(line);
 
