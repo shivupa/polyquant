@@ -1,5 +1,5 @@
 import pyscf
-from pyscf import gto
+from pyscf import gto, fci
 basis_str = """
 Be    S
       2.940000E+03           6.800000E-04          -1.230000E-04           0.000000E+00
@@ -23,26 +23,29 @@ mol = pyscf.M(
         atom = ' Be 0.0, 0.0, 0.0',
     unit = 'b',
     cart = False,
-    basis = {'Be': gto.parse(basis_str)},
+    symmetry='D2h',
+    #basis = {'Be': gto.parse(basis_str)},
+    basis = 'cc-pvdz', #{'Be': gto.parse(basis_str)},
     verbose=9)
 
-mf = mol.UHF()
+mf = mol.RHF()
 mf.run()
 mf.analyze()
-mc = mf.CISD()
+mc = fci.FCI(mol, mf.mo_coeff)
 
 
 mc.nroots=13
 mc.run()
 e = mc.e_tot
-norb = mc.nmo[0]
-nelec = mc.nocc[0]
+norb = mf.mo_energy.size
+nelec = (2,2)
 thresh = 0.1
 for i, c in enumerate(mc.ci):
     print(f"State {i:}")
-    for na,a in enumerate(c):
-        if abs(a) > thresh:
-            print(na,a)
+    print(mc.spin_square(c, norb, nelec))
+    #for na,a in enumerate(c):
+    #    if abs(a) > thresh:
+    #        print(na,a)
     #c = mc.to_fcivec(c)
     #print('state = %d, E = %.9f, S^2=%.4f' %
     #      (i, e[i], pyscf.fci.spin_op.spin_square(c, norb, nelec)[0]))
