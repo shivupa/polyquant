@@ -128,18 +128,22 @@ template <typename T> void POLYQUANT_DETSET<T>::create_S_sq_penalty(std::string 
       continue;
     }
     Eigen::SparseMatrix<double, Eigen::RowMajor> S2_penalty;
+    std::stringstream ss;
     if (type == "first_order") {
       auto expected_S2_for_part = 0.0;
       // H' = H + aS^2
       create_S_sq_minus_expected_S_sq_matrix_singleshot(S2_penalty, quantum_part_idx, expected_S2_for_part);
+      ss << "S2 penalty number of nonzero matrix elem : " << S2_penalty.nonZeros() << std::endl;
       this->ham += alpha * S2_penalty;
     } else {
       auto expected_S2_for_part = expected_S2[quantum_part_idx];
       // H' = H + a(S^2 -I<S^2 expected>)^2
       create_S_sq_minus_expected_S_sq_matrix_singleshot(S2_penalty, quantum_part_idx, expected_S2_for_part);
       S2_penalty = (S2_penalty * S2_penalty).pruned();
+      ss << "S2 penalty number of nonzero matrix elem : " << S2_penalty.nonZeros() << std::endl;
       this->ham += alpha * S2_penalty;
     }
+    Polyquant_cout(ss.str());
     quantum_part_idx++;
   }
 }
@@ -236,13 +240,12 @@ void POLYQUANT_DETSET<T>::create_S_sq_minus_expected_S_sq_matrix_singleshot(Eige
           }
         }
       }
-
-      S2_threads[thread_id].resize(this->N_dets, this->N_dets);
-      S2_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
-      S2_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
-      // release memory from the processed triplet list!
-      triplet_list_threads[thread_id] = std::vector<Eigen::Triplet<double>>();
     }
+    S2_threads[thread_id].resize(this->N_dets, this->N_dets);
+    S2_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
+    S2_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
+    // release memory from the processed triplet list!
+    triplet_list_threads[thread_id] = std::vector<Eigen::Triplet<double>>();
 #pragma omp critical
     S2_pen += S2_threads[thread_id];
   }
