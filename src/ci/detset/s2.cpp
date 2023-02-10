@@ -105,7 +105,7 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
                   phase *= get_phase(Di_a, Dj_a, holes_a, parts_a);
                   phase *= get_phase(Di_b, Dj_b, holes_b, parts_b);
 
-                  S_sq_thread_contributions[thread_id](state_idx, quantum_part_idx) += phase * C_I * C_J;
+                  S_sq_thread_contributions[thread_id](state_idx, quantum_part_idx) += -phase * C_I * C_J;
                 }
               }
             }
