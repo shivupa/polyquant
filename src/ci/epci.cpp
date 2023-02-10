@@ -264,7 +264,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
         dump_file << "_DM_";
         dump_file << quantum_part_key;
         dump_file << "_alpha.txt";
-        Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][0], dump_file.str());
+        Polyquant_dump_mat_to_file(dm1[state_vec_idx][quantum_part_idx][0], dump_file.str());
         if (quantum_part.num_parts > 1) {
           std::stringstream dump_file;
           dump_file << "CI_state_";
@@ -272,7 +272,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
           dump_file << "_DM_";
           dump_file << quantum_part_key;
           dump_file << "_beta.txt";
-          Polyquant_dump_mat_to_file(dm1[state_idx][quantum_part_idx][1], dump_file.str());
+          Polyquant_dump_mat_to_file(dm1[state_vec_idx][quantum_part_idx][1], dump_file.str());
         }
         quantum_part_idx++;
       }
@@ -284,24 +284,24 @@ void POLYQUANT_EPCI::calculate_NOs() {
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
       if (quantum_part.num_parts > 1) {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
-        diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
-        this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf->C_combined[quantum_part_idx][0] * NOs_mobasis;
-        diag_dm_helper(this->dm1[state_idx][quantum_part_idx][1], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][1]);
+        diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_vec_idx][quantum_part_idx][0]);
+        this->C_nso[state_vec_idx][quantum_part_idx][0].noalias() = this->input_epscf->C_combined[quantum_part_idx][0] * NOs_mobasis;
+        diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][1], NOs_mobasis, this->occ_nso[state_vec_idx][quantum_part_idx][1]);
         if (quantum_part.restricted == false) {
-          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf->C_combined[quantum_part_idx][1] * NOs_mobasis;
+          this->C_nso[state_vec_idx][quantum_part_idx][1].noalias() = this->input_epscf->C_combined[quantum_part_idx][1] * NOs_mobasis;
         } else {
-          this->C_nso[state_idx][quantum_part_idx][1].noalias() = this->input_epscf->C_combined[quantum_part_idx][0] * NOs_mobasis;
+          this->C_nso[state_vec_idx][quantum_part_idx][1].noalias() = this->input_epscf->C_combined[quantum_part_idx][0] * NOs_mobasis;
         }
       } else {
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
-        diag_dm_helper(this->dm1[state_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_idx][quantum_part_idx][0]);
-        this->C_nso[state_idx][quantum_part_idx][0].noalias() = this->input_epscf->C_combined[quantum_part_idx][0] * NOs_mobasis;
+        diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][0], NOs_mobasis, this->occ_nso[state_vec_idx][quantum_part_idx][0]);
+        this->C_nso[state_vec_idx][quantum_part_idx][0].noalias() = this->input_epscf->C_combined[quantum_part_idx][0] * NOs_mobasis;
       }
       quantum_part_idx++;
     }
 
     if (this->input_symmetry->do_symmetry == true) {
-      this->input_epscf->symmetrize_orbitals(this->C_nso[state_idx], this->symm_label_idxs[state_idx], this->symm_labels[state_idx]);
+      this->input_epscf->symmetrize_orbitals(this->C_nso[state_vec_idx], this->symm_label_idxs[state_vec_idx], this->symm_labels[state_vec_idx]);
     }
     // diag for NOs and occ
     // print
@@ -646,12 +646,12 @@ void POLYQUANT_EPCI::dump_molden() {
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
       // bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
       bool unique_beta = quantum_part.num_parts > 1;
-      auto &NO_a_coeff = this->C_nso[state_idx][quantum_part_idx][0];
-      auto &NO_a_energy = this->occ_nso[state_idx][quantum_part_idx][0];
-      auto &NO_a_occupation = this->occ_nso[state_idx][quantum_part_idx][0];
-      auto &NO_b_coeff = unique_beta ? this->C_nso[state_idx][quantum_part_idx][1] : this->C_nso[state_idx][quantum_part_idx][0];
-      auto &NO_b_energy = unique_beta ? this->occ_nso[state_idx][quantum_part_idx][1] : this->occ_nso[state_idx][quantum_part_idx][0];
-      auto &NO_b_occupation = unique_beta ? this->occ_nso[state_idx][quantum_part_idx][1] : this->occ_nso[state_idx][quantum_part_idx][0];
+      auto &NO_a_coeff = this->C_nso[state_vec_idx][quantum_part_idx][0];
+      auto &NO_a_energy = this->occ_nso[state_vec_idx][quantum_part_idx][0];
+      auto &NO_a_occupation = this->occ_nso[state_vec_idx][quantum_part_idx][0];
+      auto &NO_b_coeff = unique_beta ? this->C_nso[state_vec_idx][quantum_part_idx][1] : this->C_nso[state_vec_idx][quantum_part_idx][0];
+      auto &NO_b_energy = unique_beta ? this->occ_nso[state_vec_idx][quantum_part_idx][1] : this->occ_nso[state_vec_idx][quantum_part_idx][0];
+      auto &NO_b_occupation = unique_beta ? this->occ_nso[state_vec_idx][quantum_part_idx][1] : this->occ_nso[state_vec_idx][quantum_part_idx][0];
 
       std::vector<std::string> NO_a_symmetry_labels;
       NO_a_symmetry_labels.resize(NO_a_coeff.cols(), "A");
