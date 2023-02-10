@@ -179,6 +179,8 @@ public:
   void two_species_create_ham_singleshot();
 
   void create_ham();
+  void create_S_sq_penalty(std::string type, std::vector<double> expected_S2, std::vector<double> spin_penalty);
+  void create_S_sq_minus_expected_S_sq_matrix_singleshot(Eigen::SparseMatrix<double, Eigen::RowMajor> &S2_pen, int idx_part, double expected_S2_for_part);
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 
   Eigen::SparseMatrix<double, Eigen::RowMajor> ham;

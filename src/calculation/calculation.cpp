@@ -276,6 +276,36 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("num_states")) {
         ci_calc->num_states = this->input_params->input_data["keywords"]["ci_keywords"]["num_states"];
       }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("spin_penalty_type")) {
+        auto spin_penalty_type = this->input_params->input_data["keywords"]["ci_keywords"]["spin_penalty_type"];
+        if (spin_penalty_type == "first_order") {
+          ci_calc->first_order_spin_penalty = true;
+          ci_calc->second_order_spin_penalty = false;
+        } else if (spin_penalty_type == "second_order") {
+          ci_calc->first_order_spin_penalty = false;
+          ci_calc->second_order_spin_penalty = true;
+        } else {
+          APP_ABORT("keywords->ci_keywords->spin_penalty_type can only be first_order or second_order");
+        }
+      }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("expected_S2")) {
+        auto s_sq = this->input_params->input_data["keywords"]["ci_keywords"]["expected_S2"];
+        ci_calc->expected_S2.clear();
+        if (s_sq.type() == json::value_t::array) {
+          for (auto i = 0; i < s_sq.size(); i++) {
+            ci_calc->expected_S2.push_back(s_sq[i]);
+          }
+        }
+      }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("spin_penalty")) {
+        auto s_p = this->input_params->input_data["keywords"]["ci_keywords"]["spin_penalty"];
+        ci_calc->spin_penalty.clear();
+        if (s_p.type() == json::value_t::array) {
+          for (auto i = 0; i < s_p.size(); i++) {
+            ci_calc->spin_penalty.push_back(s_p[i]);
+          }
+        }
+      }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
         ci_calc->num_subspace_vec = this->input_params->input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
       }

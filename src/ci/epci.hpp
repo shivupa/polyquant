@@ -124,6 +124,12 @@ public:
   bool verbose = false;
   bool exact_diag = false;
 
+  bool first_order_spin_penalty = false;
+  bool second_order_spin_penalty = false;
+  std::vector<double> expected_S2;
+  std::vector<double> spin_penalty;
+  double default_spin_penalty = 0.1;
+
   double det_print_threshold = 0.1;
 };
 } // namespace polyquant

@@ -11,6 +11,19 @@ void POLYQUANT_EPCI::setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf) {
   this->detset.frozen_core.resize(this->input_molecule->quantum_particles.size());
   this->detset.deleted_virtual.resize(this->input_molecule->quantum_particles.size());
   this->input_integral = this->input_epscf->input_integral;
+
+  if (this->first_order_spin_penalty || this->second_order_spin_penalty) {
+    auto num_species = this->input_molecule->quantum_particles.size();
+    if (this->expected_S2.size() == 0) {
+      this->expected_S2.resize(num_species);
+      for (auto i = 0; i < num_species; i++) {
+        this->expected_S2[i] = this->input_epscf->S_squared[i];
+      }
+    }
+    if (this->spin_penalty.size() == 0) {
+      this->spin_penalty.resize(num_species, default_spin_penalty);
+    }
+  }
 }
 
 void POLYQUANT_EPCI::calculate_integrals() {
@@ -374,7 +387,37 @@ void POLYQUANT_EPCI::setup_determinants() {
   this->detset.create_unique_excitation_map_doubles();
 }
 
-void POLYQUANT_EPCI::print_start() { Polyquant_section_header("Multispecies CI Calculation"); }
+void POLYQUANT_EPCI::print_start() {
+  Polyquant_section_header("Multispecies CI Calculation");
+  std::stringstream buffer;
+  buffer << "Parameters" << std::endl;
+  buffer << "    Maximum iterations = " << iteration_max << std::endl;
+  buffer << "    convergence_E = " << std::scientific << this->convergence_E << std::endl;
+  buffer << "    convergence_DM = " << std::scientific << this->convergence_DM << std::endl;
+  buffer << "    number of states = " << this->num_states << std::endl;
+  buffer << "    number subspace vecs = " << this->num_subspace_vec << std::endl;
+  buffer << "    first_order_spin_penalty = " << std::boolalpha << this->first_order_spin_penalty << std::endl;
+  buffer << "    second_order_spin_penalty = " << std::boolalpha << this->second_order_spin_penalty << std::endl;
+  buffer << "    screening_threshold = " << this->detset.screening_threshold << std::endl;
+  buffer << "    Direct( matrix-free) = " << std::boolalpha << !this->detset.build_matrix << std::endl;
+
+  if (this->first_order_spin_penalty || this->second_order_spin_penalty) {
+    buffer << "    Expected S^2   " << std::endl;
+    auto quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      buffer << "        Particle type " << quantum_part_idx << "  :  " << this->expected_S2[quantum_part_idx] << std::endl;
+      quantum_part_idx++;
+    }
+    buffer << "    spin penalty   " << std::endl;
+    quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      buffer << "        Particle type " << quantum_part_idx << "  :  " << this->spin_penalty[quantum_part_idx] << std::endl;
+      quantum_part_idx++;
+    }
+  }
+  Polyquant_cout(buffer.str());
+}
+
 void POLYQUANT_EPCI::print_start_iterations() { Polyquant_cout("Starting CI Iterations"); }
 
 void POLYQUANT_EPCI::print_iteration() { Polyquant_cout("Iteration "); }
@@ -544,6 +587,14 @@ void POLYQUANT_EPCI::run() {
     }
   } else {
     this->detset.create_ham();
+
+    if (this->first_order_spin_penalty) {
+      std::string penalty_type = "first_order";
+      this->detset.create_S_sq_penalty(penalty_type, this->expected_S2, this->spin_penalty);
+    } else if (this->second_order_spin_penalty) {
+      std::string penalty_type = "second_order";
+      this->detset.create_S_sq_penalty(penalty_type, this->expected_S2, this->spin_penalty);
+    }
 
     if (this->exact_diag) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h(this->detset.ham);
