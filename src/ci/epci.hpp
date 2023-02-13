@@ -28,7 +28,9 @@ public:
   void setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
-  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs);
+  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs,
+                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &transforming_orbs);
+  void resize_for_NOs();
   void calculate_NOs();
   void calculate_S_squared();
   void setup_determinants();
