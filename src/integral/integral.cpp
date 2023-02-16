@@ -239,6 +239,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   std::vector<libint2::Engine> engines;
   engines.resize(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
+  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
   engines[0].set_precision(this->tolerance_2e);
   Eigen::Matrix<double, Eigen::Dynamic, 1> temp;
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> temp_threads;
@@ -522,7 +523,7 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
   auto nthreads = omp_get_max_threads();
   std::vector<libint2::Engine> engines;
   engines.resize(nthreads);
-  engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
+  engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0, 0.0);
   engines[0].set_precision(0.0);
   for (auto i = 1ul; i < nthreads; i++) {
     engines[i] = engines[0];
@@ -714,6 +715,7 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
   std::vector<libint2::Engine> engines;
   engines.reserve(nthreads);
   engines.emplace_back(libint2::Operator::overlap, std::max(bs1.max_nprim(), bs2.max_nprim()), std::max(bs1.max_l(), bs2.max_l()), 0);
+  engines[0].set_precision(0.0);
   for (size_t i = 1; i != nthreads; ++i) {
     engines.push_back(engines[0]);
   }
@@ -772,13 +774,39 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
     auto &list = return_splist[s1];
     std::sort(list.begin(), list.end());
   }
+  // Shell pairs will be used for coloumb interaction. Thats all we use in this code anyways
+  for (size_t i = 0; i != nthreads; ++i) {
+    engines[i].set(libint2::Operator::coulomb);
+  }
   /// to use precomputed shell pair data must decide on max precision a priori
   const auto max_engine_precision = tolerance_2e / 1e10;
   const auto ln_max_engine_precision = std::log(max_engine_precision);
   std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata(return_splist.size());
-  for (auto s1 = 0l; s1 != nsh1; ++s1) {
-    for (const auto &s2 : return_splist[s1]) {
-      spdata[s1].emplace_back(std::make_shared<libint2::ShellPair>(bs1[s1], bs2[s2], ln_max_engine_precision));
+
+#pragma omp parallel
+  {
+    auto thread_id = omp_get_thread_num();
+    auto schwarz_factor_evaluator = [&](const libint2::Shell &s1, size_t p1, const libint2::Shell &s2, size_t p2) -> double {
+      auto &engine = engines[thread_id];
+      auto &buf = engine.results();
+      auto ps1 = s1.extract_primitive(p1, false);
+      auto ps2 = s2.extract_primitive(p2, false);
+      const auto n12 = ps1.size() * ps2.size();
+      engine.compute(ps1, ps2, ps1, ps2);
+      if (buf[0]) {
+        Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n12, n12);
+        // We ONLY use schwarzinf screening
+        auto norm2 = buf_mat.lpNorm<Eigen::Infinity>();
+        return std::sqrt(norm2);
+      } else
+        return 0.;
+    };
+    for (auto s1 = 0l; s1 != nsh1; ++s1) {
+      if (s1 % nthreads == thread_id) {
+        for (const auto &s2 : return_splist[s1]) {
+          spdata[s1].emplace_back(std::make_shared<libint2::ShellPair>(bs1[s1], bs2[s2], ln_max_engine_precision, libint2::ScreeningMethod::SchwarzInf, schwarz_factor_evaluator));
+        }
+      }
     }
   }
   return std::make_tuple(return_splist, spdata);

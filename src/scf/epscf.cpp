@@ -138,6 +138,7 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
   engines.resize(nthreads);
   FA.resize(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
+  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
   engines[0].set_precision(this->input_integral->tolerance_2e);
   for (int i = 0; i < nthreads; i++) {
     engines[i] = engines[0];
@@ -629,7 +630,6 @@ void POLYQUANT_EPSCF::calculate_S_squared() {
 
       spin_sq_xy = (n_a + n_b) * 0.5;
       spin_sq_xy -= orbital_overlap.array().square().sum();
-      std::cout << "SHIV TESTING " << orbital_overlap.array().square().sum() << std::endl;
 
       spin_sq_z = 0.25 * std::pow(n_a - n_b, 2);
 
