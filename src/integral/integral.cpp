@@ -238,9 +238,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
 
   std::vector<libint2::Engine> engines;
   engines.resize(nthreads);
-  engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
-  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
-  engines[0].set_precision(this->tolerance_2e);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0, 0.0);
+  engines[0].set_precision(0.0);
   Eigen::Matrix<double, Eigen::Dynamic, 1> temp;
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> temp_threads;
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eri_threads;
@@ -255,45 +254,50 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   {
     auto thread_id = omp_get_thread_num();
     auto shell_counter = 0;
-    for (size_t i = 0; i < num_shell_a; i++) {
+
+    for (size_t p = 0; p < num_shell_a; p++) {
+      auto shell_p_bf_start = shell2bf_a[p];
+      auto shell_p_bf_size = this->input_basis->basis[quantum_part_a_idx][p].size();
       for (size_t q = 0; q < num_shell_a; q++) {
+        auto shell_q_bf_start = shell2bf_a[q];
+        auto shell_q_bf_size = this->input_basis->basis[quantum_part_a_idx][q].size();
         for (size_t r = 0; r < num_shell_b; r++) {
+          auto shell_r_bf_start = shell2bf_b[r];
+          auto shell_r_bf_size = this->input_basis->basis[quantum_part_b_idx][r].size();
           for (size_t s = 0; s < num_shell_b; s++) {
+            auto shell_s_bf_start = shell2bf_b[s];
+            auto shell_s_bf_size = this->input_basis->basis[quantum_part_b_idx][s].size();
             shell_counter++;
-            if (shell_counter % nthreads != thread_id)
+            if (shell_counter % nthreads != thread_id) {
               continue;
-            for (size_t p = 0; p < num_shell_a; p++) {
+            }
+            const auto &buf = engines[thread_id].results();
+            engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
+            for (size_t i = 0; i < num_shell_a; i++) {
               auto shell_i_bf_start = shell2bf_a[i];
               auto shell_i_bf_size = this->input_basis->basis[quantum_part_a_idx][i].size();
-              auto shell_q_bf_start = shell2bf_a[q];
-              auto shell_q_bf_size = this->input_basis->basis[quantum_part_a_idx][q].size();
-              auto shell_r_bf_start = shell2bf_b[r];
-              auto shell_r_bf_size = this->input_basis->basis[quantum_part_b_idx][r].size();
-              auto shell_s_bf_start = shell2bf_b[s];
-              auto shell_s_bf_size = this->input_basis->basis[quantum_part_b_idx][s].size();
-              auto shell_p_bf_start = shell2bf_a[p];
-              auto shell_p_bf_size = this->input_basis->basis[quantum_part_a_idx][p].size();
-              const auto &buf = engines[thread_id].results();
-              engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
               const auto *buf_1234 = buf[0];
-              auto shell_pqrs_bf = 0;
               if (buf_1234 != nullptr) {
-                for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
-                  for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
-                    for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
-                      for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
-                        auto eri_pqrs = buf_1234[shell_pqrs_bf];
-                        shell_pqrs_bf++;
-                        if (eri_pqrs != 0) {
-                          for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-                            if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
-                              // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
-                              // num_mo_a * num_shell_a * num_shell_b * num_shell_b
-                              auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
-                              idx1 += shell_q_bf * num_ao_b * num_ao_b;
-                              idx1 += shell_r_bf * num_ao_b;
-                              idx1 += shell_s_bf;
-                              temp_threads[thread_id](idx1) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
+                for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+                  auto shell_pqrs_bf = 0;
+                  for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
+                    auto C_pi = mo_coeffs_a(shell_p_bf, shell_i_bf);
+                    if (C_pi != 0.0) {
+                      for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
+                        for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
+                          for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
+                            auto eri_pqrs = buf_1234[shell_pqrs_bf];
+                            shell_pqrs_bf++;
+                            if (eri_pqrs != 0) {
+                              if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
+                                // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
+                                // num_mo_a * num_shell_a * num_shell_b * num_shell_b
+                                auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
+                                idx1 += shell_q_bf * num_ao_b * num_ao_b;
+                                idx1 += shell_r_bf * num_ao_b;
+                                idx1 += shell_s_bf;
+                                temp_threads[thread_id](idx1) += C_pi * eri_pqrs;
+                              }
                             }
                           }
                         }
@@ -566,7 +570,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
   std::vector<libint2::Engine> engines;
   engines.resize(nthreads);
   engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
-  engines[0].set_precision(this->tolerance_2e);
+  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
   if (nthreads > 1) {
     for (auto i = 1ul; i < nthreads; i++) {
       engines[i] = engines[0];
@@ -607,19 +612,20 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
           auto shellpairdata_kl_iter = std::get<1>(this->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
           for (auto &shell_l : std::get<0>(this->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
             shellcounter++;
+            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+            shellpairdata_kl_iter++;
             if (shellcounter % nthreads != thread_id) {
               continue;
             }
             auto shell_l_bf_start = shell2bf_b[shell_l];
             auto shell_l_bf_size = shells_b[shell_l].size();
-            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
-            shellpairdata_kl_iter++;
 
             const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
-            engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
+            engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
+                                                                                               shellpairdata_kl);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
             for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
@@ -779,7 +785,7 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
     engines[i].set(libint2::Operator::coulomb);
   }
   /// to use precomputed shell pair data must decide on max precision a priori
-  const auto max_engine_precision = tolerance_2e / 1e10;
+  const auto max_engine_precision = std::numeric_limits<double>::epsilon() / 1e10;
   const auto ln_max_engine_precision = std::log(max_engine_precision);
   std::vector<std::vector<std::shared_ptr<libint2::ShellPair>>> spdata(return_splist.size());
 
