@@ -175,13 +175,13 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
           auto shellpairdata_kl_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
           for (auto &shell_l : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
             shellcounter++;
+            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+            shellpairdata_kl_iter++;
             if (shellcounter % nthreads != thread_id) {
               continue;
             }
             auto shell_l_bf_start = shell2bf_b[shell_l];
             auto shell_l_bf_size = shells_b[shell_l].size();
-            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
-            shellpairdata_kl_iter++;
             auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
                                                                             quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
             // for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space
@@ -209,7 +209,8 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
-            engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
+            engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
+                                                                                               shellpairdata_kl);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
             if (buf_1234 != nullptr) {
