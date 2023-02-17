@@ -139,7 +139,7 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
   FA.resize(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
   engines[0].set(libint2::ScreeningMethod::SchwarzInf);
-  engines[0].set_precision(this->input_integral->tolerance_2e);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
   for (int i = 0; i < nthreads; i++) {
     engines[i] = engines[0];
     FA[i].resizeLike(fock);
@@ -148,8 +148,8 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
 #pragma omp parallel
   {
     int shellcounter = 0;
+    auto thread_id = omp_get_thread_num();
     for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
-      auto thread_id = omp_get_thread_num();
       auto shell_i_bf_start = shell2bf_a[shell_i];
       auto shell_i_bf_size = shells_a[shell_i].size();
       auto shellpairdata_ij_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_a_idx]).at(shell_i).begin();
@@ -194,9 +194,9 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
               auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
                                                                                shell_l_bf_start, shell_l_bf_size);
             }
+            auto D_norm = std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm});
             if (this->Cauchy_Schwarz_screening) {
-              if (std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm}) *
-                      this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
+              if (D_norm * this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
                   this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
                 continue;
               }
@@ -209,6 +209,9 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
+            if (this->Cauchy_Schwarz_screening) {
+              engines[thread_id].set_precision(D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
+            }
             engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
                                                                                                shellpairdata_kl);
             const auto *buf_1234 = buf[0];
