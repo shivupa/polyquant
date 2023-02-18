@@ -258,10 +258,10 @@ public:
   /**
    * @brief DIIS extrapolators
    *
-   * indexes: particle, spin, symmetry block
+   * indexes: particle, spin
    *
    */
-  std::vector<std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> diis;
+  std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> diis;
   /**
    * @brief Stop running iterations?
    *
