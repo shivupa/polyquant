@@ -46,6 +46,7 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   if (input_symm->do_symmetry == false) {
     return;
   }
+
   auto quantum_part_idx = 0ul;
   for (auto &[quantum_part_key, quantum_part] : this->quantum_particles) {
     auto &ctx = input_symm->ctx[quantum_part_idx];
@@ -79,13 +80,17 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     }
     double radius = 0.0;
     if (MSYM_SUCCESS != (ret = msymGetRadius(ctx, &radius))) {
-      APP_ABORT("Error calculationg radius");
+      APP_ABORT("Error calculation radius");
     }
 
     // std::cout << "SYMMMETRY TESTING : COM  " << com[0] << "   " << com[1] << "    " << com[2] << std::endl;
     // std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
 
     if (length != 1) {
+      if (!input_symm->point_group.empty()) {
+        APP_ABORT("Symmetry handler point group is already set, but this calculation is not an atom. Currently the point group can only be manually specified for atoms as SO(3).");
+      }
+
       if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
 
         auto error = msymErrorString(ret);
@@ -95,6 +100,22 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
         APP_ABORT("Error Figuring out symmetry");
       }
     } else {
+      // single atom
+      if (!input_symm->point_group.empty()) {
+        if (input_symm->point_group == "SO(3)") {
+          std::cout << "SYMMETRY: IDENTIFIED POINT GROUP " << input_symm->point_group << std::endl;
+          if (com[0] != 0.0 || com[1] != 0.0 || com[2] != 0.0) {
+            APP_ABORT("For SO(3) symmetry the atom must be located at the origin.");
+          }
+          return;
+        } else {
+
+          std::stringstream buffer;
+          buffer << "Symmetric point group " << input_symm->point_group << " not identified for a single atom." << std::endl;
+          APP_ABORT(buffer.str());
+        }
+      }
+
       std::string pg = "D2h";
       if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
         auto error = msymErrorString(ret);
@@ -114,7 +135,7 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
       APP_ABORT("Error Getting Point group");
     }
     input_symm->point_group.erase(input_symm->point_group.find('\0'));
-    std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << input_symm->point_group << std::endl;
+    std::cout << "SYMMMETRY: IDENTIFIED POINT GROUP " << input_symm->point_group << std::endl;
     input_symm->sub_group = input_symm->point_group;
 
     // TODO add a way to descend in symmetry
