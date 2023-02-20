@@ -232,9 +232,14 @@ template <typename T> void Polyquant_dump_direct_product_table(const Eigen::Matr
   std::cout << std::endl;
 
   for (size_t i = 0; i < mat.rows(); i++) {
-    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[i] << " |";
+    std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << row_titles[i] << " |";
     for (size_t j = 0; j < mat.cols(); j++) {
-      std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[mat(i, j)] << "  ";
+      if (mat(i, j) >= 0) {
+        std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << row_titles[mat(i, j)] << "  ";
+      } else {
+        std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << "MULT"
+                  << "  ";
+      }
     }
     std::cout << std::endl;
   }
