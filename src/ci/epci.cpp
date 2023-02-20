@@ -539,6 +539,11 @@ void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   this->print_start();
+  if (this->input_symmetry->do_symmetry) {
+    if (this->input_symmetry->point_group == "SO(3)") {
+      APP_ABORT("SO(3) symmetry can only be used in SCF");
+    }
+  }
   this->calculate_integrals();
   this->setup_determinants();
   this->detset.precompute_diagonal_Slater_Condon();

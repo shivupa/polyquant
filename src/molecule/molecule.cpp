@@ -87,9 +87,9 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     // std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
 
     if (length != 1) {
-      if (!input_symm->point_group.empty()) {
-        APP_ABORT("Symmetry handler point group is already set, but this calculation is not an atom. Currently the point group can only be manually specified for atoms as SO(3).");
-      }
+      // if (!input_symm->point_group.empty()) {
+      //   APP_ABORT("Symmetry handler point group is already set, but this calculation is not an atom. Currently the point group can only be manually specified for atoms as SO(3).");
+      // }
 
       if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
 
@@ -101,28 +101,26 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
       }
     } else {
       // single atom
-      if (!input_symm->point_group.empty()) {
-        if (input_symm->point_group == "SO(3)") {
-          std::cout << "SYMMETRY: IDENTIFIED POINT GROUP " << input_symm->point_group << std::endl;
-          if (com[0] != 0.0 || com[1] != 0.0 || com[2] != 0.0) {
-            APP_ABORT("For SO(3) symmetry the atom must be located at the origin.");
-          }
-          return;
-        } else {
-
-          std::stringstream buffer;
-          buffer << "Symmetric point group " << input_symm->point_group << " not identified for a single atom." << std::endl;
-          APP_ABORT(buffer.str());
+      if (input_symm->point_group == "SO(3)") {
+        std::cout << "SYMMETRY: IDENTIFIED POINT GROUP " << input_symm->point_group << std::endl;
+        if (com[0] != 0.0 || com[1] != 0.0 || com[2] != 0.0) {
+          APP_ABORT("For SO(3) symmetry the atom must be located at the origin.");
         }
-      }
+        return;
+      } else if (input_symm->point_group == "D2h" || input_symm->point_group == "") {
+        std::string pg = "D2h";
+        if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+          auto error = msymErrorString(ret);
+          std::cout << error << std::endl;
+          error = msymGetErrorDetails();
+          std::cout << error << std::endl;
+          APP_ABORT("Error setting PG to D2h");
+        }
+      } else {
 
-      std::string pg = "D2h";
-      if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
-        auto error = msymErrorString(ret);
-        std::cout << error << std::endl;
-        error = msymGetErrorDetails();
-        std::cout << error << std::endl;
-        APP_ABORT("Error setting PG to D2h");
+        std::stringstream buffer;
+        buffer << "Symmetric point group " << input_symm->point_group << " not identified for a single atom." << std::endl;
+        APP_ABORT(buffer.str());
       }
     }
     input_symm->point_group.resize(6);
