@@ -132,7 +132,7 @@ public:
   std::vector<double> spin_penalty;
   double default_spin_penalty = 0.1;
 
-  double det_print_threshold = 0.1;
+  double det_print_threshold = 0.01;
 };
 } // namespace polyquant
 #endif

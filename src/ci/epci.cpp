@@ -136,8 +136,7 @@ void POLYQUANT_EPCI::diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen:
   occs = eigensolver.eigenvalues();
   NOs_mobasis = eigensolver.eigenvectors();
   std::vector<int> argsort_indices;
-  bool ascending = false;
-  argsort_indices = argsort(occs, ascending);
+  argsort_indices = argsort(occs, std::greater<double>{});
   Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> swapper_mat(NOs_mobasis.cols());
   swapper_mat.indices() = Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>, Eigen::Unaligned>(argsort_indices.data(), argsort_indices.size());
   // multiply from right : permute cols, multiply from left, permute rows
@@ -418,6 +417,40 @@ void POLYQUANT_EPCI::print_success() {
     divider << "*";
   divider << std::endl;
 
+  std::vector<std::vector<double>> print_coeff;
+  std::vector<std::vector<std::string>> print_det_idx;
+  print_coeff.resize(this->num_states);
+  print_det_idx.resize(this->num_states);
+
+#pragma omp parallel
+  {
+
+    std::vector<std::vector<double>> print_coeff_private;
+    std::vector<std::vector<std::string>> print_det_idx_private;
+    print_coeff_private.resize(this->num_states);
+    print_det_idx_private.resize(this->num_states);
+#pragma omp for nowait
+    for (auto i = 0; i < this->detset.N_dets; i++) {
+      for (auto state_idx = 0; state_idx < this->num_states; state_idx++) {
+        if (std::abs(this->C_ci(i, state_idx)) > this->det_print_threshold) {
+          auto i_unfold = this->detset.det_idx_unfold(i);
+          std::stringstream unfold_string;
+          for (auto unfold_idx : i_unfold) {
+            unfold_string << unfold_idx;
+            unfold_string << " ";
+          }
+          print_coeff_private[state_idx].push_back(this->C_ci(i, state_idx));
+          print_det_idx_private[state_idx].push_back(unfold_string.str());
+        }
+      }
+    }
+#pragma omp critical
+    for (auto state_idx = 0; state_idx < this->num_states; state_idx++) {
+      print_coeff[state_idx].insert(print_coeff[state_idx].end(), print_coeff_private[state_idx].begin(), print_coeff_private[state_idx].end());
+      print_det_idx[state_idx].insert(print_det_idx[state_idx].end(), print_det_idx_private[state_idx].begin(), print_det_idx_private[state_idx].end());
+    }
+  }
+
   for (auto state_idx = 0; state_idx < this->num_states; state_idx++) {
     Polyquant_cout(divider.str());
     std::string line;
@@ -439,16 +472,11 @@ void POLYQUANT_EPCI::print_success() {
     line += fmt::format("{: ^10}{:-^30}{: ^10}{:-^20}{: ^10}", "", "", "", "", "");
     Polyquant_cout(line);
     line = "";
-    for (auto i = 0; i < this->detset.N_dets; i++) {
-      std::stringstream unfold_string;
-      auto i_unfold = this->detset.det_idx_unfold(i);
-      for (auto unfold_idx : i_unfold) {
-        unfold_string << unfold_idx;
-        unfold_string << " ";
-      }
-      if (std::abs(this->C_ci(i, state_idx)) > this->det_print_threshold) {
-        line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}\n", "", unfold_string.str(), "", this->C_ci(i, state_idx), "");
-      }
+
+    auto idxs = argsort(print_coeff[state_idx], [](double left, double right) -> bool { return std::abs(left) > std::abs(right); });
+
+    for (auto i : idxs) {
+      line += fmt::format("{: ^10}{:^30}{: ^10}{:>20.12f}{: ^10}\n", "", print_det_idx[state_idx][i], "", print_coeff[state_idx][i], "");
     }
     Polyquant_cout(line);
   }

@@ -345,17 +345,10 @@ template <typename T> struct PairHash {
  * @param vector input
  * @return sorted indicies std vector
  */
-template <typename T> std::vector<int> argsort(const std::vector<T> &in_vec, bool ascending = true) {
+template <typename T, typename CompType = std::greater<>> std::vector<int> argsort(const std::vector<T> &in_vec, CompType comparison = CompType{}) {
   std::vector<int> indices(in_vec.size());
   std::iota(indices.begin(), indices.end(), 0);
-  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
-    // sort indices according to corresponding array element
-    if (ascending) {
-      return in_vec[left] < in_vec[right];
-    } else {
-      return in_vec[left] > in_vec[right];
-    }
-  });
+  std::sort(indices.begin(), indices.end(), [&in_vec, &comparison](int left, int right) -> bool { return comparison(in_vec[left], in_vec[right]); });
   return indices;
 };
 /**
@@ -363,17 +356,10 @@ template <typename T> std::vector<int> argsort(const std::vector<T> &in_vec, boo
  * @param vector input
  * @return sorted indicies std vector
  */
-template <typename T> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, bool ascending = true) {
+template <typename T, typename CompType = std::greater<>> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, CompType comparison = CompType{}) {
   std::vector<int> indices(in_vec.size());
   std::iota(indices.begin(), indices.end(), 0);
-  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
-    // sort indices according to corresponding array element
-    if (ascending) {
-      return in_vec(left) < in_vec(right);
-    } else {
-      return in_vec(left) > in_vec(right);
-    }
-  });
+  std::sort(indices.begin(), indices.end(), [&in_vec, &comparison](int left, int right) -> bool { return comparison(in_vec(left), in_vec(right)); });
   return indices;
 };
 ;

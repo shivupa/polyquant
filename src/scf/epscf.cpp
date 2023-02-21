@@ -1100,8 +1100,7 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 
     }
     // descending argsort based on overlap with occupied orbitals
     std::vector<int> argsort_indices;
-    bool ascending = false;
-    argsort_indices = argsort(total_ovlp_with_prev_occ, ascending);
+    argsort_indices = argsort(total_ovlp_with_prev_occ, std::less<double>{});
     // reorder orbitals with respect to overlap
     // i.e. permute the columns
     this->permute_MOs(quantum_part_idx, quantum_part_spin_idx, quantum_part_irrep_idx, argsort_indices);
