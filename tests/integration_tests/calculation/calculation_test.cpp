@@ -383,3 +383,19 @@ TEST_CASE("CALCULATION: PsH compare to literature FCI (10.1063/1.5094035).") {
   REQUIRE_THAT(test_calc.ci_calc->energies[5], Catch::Matchers::WithinAbs(-0.5762392256391691, POLYQUANT_TEST_EPSILON_LOOSE));
   REQUIRE_THAT(test_calc.ci_calc->energies[6], Catch::Matchers::WithinAbs(-0.5146066022417264, POLYQUANT_TEST_EPSILON_LOOSE));
 }
+
+TEST_CASE("CALCULATION: PsH compare No Sym, D2H, SO(3).") {
+  POLYQUANT_CALCULATION nosym("../../tests/data/PsH_wpos/symmetry/PsH_wpos_nosym.json");
+  POLYQUANT_CALCULATION d2h("../../tests/data/PsH_wpos/symmetry/PsH_wpos_symd2h.json");
+  POLYQUANT_CALCULATION so3("../../tests/data/PsH_wpos/symmetry/PsH_wpos_symso3.json");
+  nosym.run();
+  d2h.run();
+  so3.run();
+
+  REQUIRE_THAT(nosym.scf_calc->E_total, Catch::Matchers::WithinAbs(d2h.scf_calc->E_total, POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(nosym.scf_calc->E_total, Catch::Matchers::WithinAbs(so3.scf_calc->E_total, POLYQUANT_TEST_EPSILON_LOOSE));
+  for (auto i = 0; i < nosym.scf_calc->E_orbitals_combined[0][0].size(); i++) {
+    REQUIRE_THAT(nosym.scf_calc->E_orbitals_combined[0][0](0), Catch::Matchers::WithinAbs(d2h.scf_calc->E_orbitals_combined[0][0](0), POLYQUANT_TEST_EPSILON_LOOSE));
+    REQUIRE_THAT(nosym.scf_calc->E_orbitals_combined[0][0](0), Catch::Matchers::WithinAbs(so3.scf_calc->E_orbitals_combined[0][0](0), POLYQUANT_TEST_EPSILON_LOOSE));
+  }
+}
