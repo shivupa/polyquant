@@ -55,8 +55,8 @@ std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> get_in
 
   libint2::Engine engine;
   engine = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
-  //engine.set(libint2::ScreeningMethod::SchwarzInf);
-  engine.set_precision(0.0);//std::numeric_limits<double>::epsilon());
+  // engine.set(libint2::ScreeningMethod::SchwarzInf);
+  engine.set_precision(0.0); // std::numeric_limits<double>::epsilon());
   {
     int shellcounter = 0;
     for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
@@ -82,8 +82,8 @@ std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> get_in
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engine.results();
-            //engine.compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij, shellpairdata_kl);
-            engine.compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l] );
+            // engine.compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij, shellpairdata_kl);
+            engine.compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
             if (buf_1234 != nullptr) {
@@ -558,8 +558,8 @@ TEST_CASE("CALCULATION: Angular S.") {
   reference_values_file = "../../tests/data/angular/0_s/eri.txt";
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
-    //std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
-    //          << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
+    // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
+    //           << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
     CHECK_THAT(value, Catch::Matchers::WithinAbs(ref_int_map[key], POLYQUANT_TEST_EPSILON_VERYTIGHT));
   }
 }
@@ -592,17 +592,13 @@ TEST_CASE("CALCULATION: Angular P.") {
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> int_map = get_ints(d2h);
   reference_values_file = "../../tests/data/angular/1_p/eri.txt";
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
-  // pyscf orders p orbitals differently 
+  // pyscf orders p orbitals differently
   std::vector<int> reorder_internal_to_pyscf = {1, 2, 0, 4, 5, 3};
   for (const auto &[key, value] : int_map) {
-      std::tuple<int,int,int,int> pyscf_key = {
-          reorder_internal_to_pyscf[std::get<0>(key)], 
-          reorder_internal_to_pyscf[std::get<1>(key)], 
-          reorder_internal_to_pyscf[std::get<2>(key)], 
-          reorder_internal_to_pyscf[std::get<3>(key)]
-      };
-    //std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
-    //          << "          " << value << "  " << ref_int_map[pyscf_key] << "        " << value - ref_int_map[pyscf_key] << std::endl;
+    std::tuple<int, int, int, int> pyscf_key = {reorder_internal_to_pyscf[std::get<0>(key)], reorder_internal_to_pyscf[std::get<1>(key)], reorder_internal_to_pyscf[std::get<2>(key)],
+                                                reorder_internal_to_pyscf[std::get<3>(key)]};
+    // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
+    //           << "          " << value << "  " << ref_int_map[pyscf_key] << "        " << value - ref_int_map[pyscf_key] << std::endl;
     CHECK_THAT(value, Catch::Matchers::WithinAbs(ref_int_map[pyscf_key], POLYQUANT_TEST_EPSILON_VERYTIGHT));
   }
 }
@@ -635,8 +631,8 @@ TEST_CASE("CALCULATION: Angular D.") {
   reference_values_file = "../../tests/data/angular/2_d/eri.txt";
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
-    //std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
-    //          << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
+    // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
+    //           << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
     CHECK_THAT(value, Catch::Matchers::WithinAbs(ref_int_map[key], POLYQUANT_TEST_EPSILON_VERYTIGHT));
   }
 }
@@ -670,8 +666,8 @@ TEST_CASE("CALCULATION: Angular F.") {
   reference_values_file = "../../tests/data/angular/3_f/eri.txt";
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
-    //std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
-    //          << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
+    // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
+    //           << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
     CHECK_THAT(value, Catch::Matchers::WithinAbs(ref_int_map[key], POLYQUANT_TEST_EPSILON_VERYTIGHT));
   }
 }
@@ -705,8 +701,8 @@ TEST_CASE("CALCULATION: Angular G.") {
   reference_values_file = "../../tests/data/angular/4_g/eri.txt";
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
-    //std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
-    //          << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
+    // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
+    //           << "          " << value << "  " << ref_int_map[key] << "        " << value - ref_int_map[key] << std::endl;
     CHECK_THAT(value, Catch::Matchers::WithinAbs(ref_int_map[key], POLYQUANT_TEST_EPSILON_VERYTIGHT));
   }
 }
