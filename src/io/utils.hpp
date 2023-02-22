@@ -18,8 +18,9 @@ using json = nlohmann::json;
 
 namespace polyquant {
 
-#define POLYQUANT_TEST_EPSILON_LOOSE 0.000001
-#define POLYQUANT_TEST_EPSILON_TIGHT 0.00000001
+#define POLYQUANT_TEST_EPSILON_LOOSE 1e-6
+#define POLYQUANT_TEST_EPSILON_TIGHT 1e-8
+#define POLYQUANT_TEST_EPSILON_VERYTIGHT 1e-10
 #define POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT 1e-14
 
 // /**
@@ -339,7 +340,6 @@ template <typename T> struct PairHash {
     return seed;
   }
 };
-
 /**
  * Argsort for std vector
  * @param vector input
