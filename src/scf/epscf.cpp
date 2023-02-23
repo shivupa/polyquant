@@ -138,8 +138,12 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
   engines.resize(nthreads);
   FA.resize(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
-  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
-  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  //if (this->Cauchy_Schwarz_screening) {
+  //  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
+  //  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  //} else {
+    engines[0].set_precision(0.0);
+  //}
   for (int i = 0; i < nthreads; i++) {
     engines[i] = engines[0];
     FA[i].resizeLike(fock);
@@ -156,51 +160,53 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
       for (auto &shell_j : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
         auto shell_j_bf_start = shell2bf_a[shell_j];
         auto shell_j_bf_size = shells_a[shell_j].size();
-        const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
-        shellpairdata_ij_iter++;
-        auto D_shell_ij_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_a, quantum_part_a_idx,
-                                                                        quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
+        //const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
+        //shellpairdata_ij_iter++;
+        //auto D_shell_ij_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_a, quantum_part_a_idx,
+        //                                                                quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
         for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
           auto shell_k_bf_start = shell2bf_b[shell_k];
           auto shell_k_bf_size = shells_b[shell_k].size();
-          auto D_shell_ik_norm = 0.0;
-          auto D_shell_jk_norm = 0.0;
-          if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-            // TODO technically we should assert quantum_part_a_irrep_idx == quantum_part_b_irrep_idx
-            D_shell_ik_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_k_bf_start,
-                                                                        shell_k_bf_size);
-            D_shell_jk_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size, shell_k_bf_start,
-                                                                        shell_k_bf_size);
-          }
-          auto shellpairdata_kl_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
+          //auto D_shell_ik_norm = 0.0;
+          //auto D_shell_jk_norm = 0.0;
+          //if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+          //  D_shell_ik_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_k_bf_start,
+          //                                                              shell_k_bf_size);
+          //  D_shell_jk_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size, shell_k_bf_start,
+          //                                                              shell_k_bf_size);
+          //}
+          //auto shellpairdata_kl_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
           for (auto &shell_l : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
             shellcounter++;
-            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
-            shellpairdata_kl_iter++;
+            //const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+            //shellpairdata_kl_iter++;
             if (shellcounter % nthreads != thread_id) {
               continue;
             }
             auto shell_l_bf_start = shell2bf_b[shell_l];
             auto shell_l_bf_size = shells_b[shell_l].size();
-            auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
-                                                                            quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
+            //auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
+            //                                                                quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
             // for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space
             // but this is unsupported for now
-            auto D_shell_il_norm = 0.0;
-            auto D_shell_jl_norm = 0.0;
-            if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-              auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
-                                                                               shell_l_bf_start, shell_l_bf_size);
-              auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
-                                                                               shell_l_bf_start, shell_l_bf_size);
-            }
-            auto D_norm = std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm});
-            if (this->Cauchy_Schwarz_screening) {
-              if (D_norm * this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
-                  this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
-                continue;
-              }
-            }
+            //auto D_shell_il_norm = 0.0;
+            //auto D_shell_jl_norm = 0.0;
+            //if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+            //  auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
+            //                                                                   shell_l_bf_start, shell_l_bf_size);
+            //  auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
+            //                                                                   shell_l_bf_start, shell_l_bf_size);
+            //}
+            //auto D_norm = std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm});
+            // Ideally we should screen based on a density threshold. This seemed to not be working correctly
+            // eq 5 10.1063/1.476741 
+            //if (this->Cauchy_Schwarz_screening){// && this->Cauchy_Schwarz_threshold[quantum_part_a_idx] > 1e-10) {
+            //  if (D_norm * this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
+            //      this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
+            //    continue;
+            //  }
+            //}
+
             // compute the permutational degeneracy for the given shell
             // set this may look like the libint example but we are
             // breaking bra-ket symmetry so we are 4 fold symmetric
@@ -209,11 +215,15 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
-            if (this->Cauchy_Schwarz_screening) {
-              engines[thread_id].set_precision(D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
-            }
-            engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
-                                                                                               shellpairdata_kl);
+            //if (this->Cauchy_Schwarz_screening) { //&& this->Cauchy_Schwarz_threshold[quantum_part_a_idx] > 1e-10) {
+            //  engines[thread_id].set_precision(D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
+            //  engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
+            //                                                                                     shellpairdata_kl);
+            //} else {
+            //engines[thread_id].set_precision(0.0); // D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
+            engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
+            //}
+            // engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
             if (buf_1234 != nullptr) {

@@ -136,7 +136,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         scf_calc->incremental_fock_initial_onset_thresh = this->input_params->input_data["keywords"]["mf_keywords"]["incremental_fock_initial_onset_thresh"];
       }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_screening")) {
-        scf_calc->Cauchy_Schwarz_screening = this->input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
+          APP_ABORT("Cauchy Schwarz screening (integrals and density) is not working. e-/e+ are very sensitive. This should be handled carefully.");
+        //scf_calc->Cauchy_Schwarz_screening = this->input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
       }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
         APP_ABORT("Cauchy_Schwarz_threshold cannot be set by the user!");
