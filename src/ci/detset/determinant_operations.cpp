@@ -23,6 +23,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   alpha_bit_string.resize(max_orb[idx_part], '0');
   beta_bit_string.resize(max_orb[idx_part], '0');
 
+  // repeated code from det_sym refactor
   for (auto i_occ : occ[0]) {
     auto shifted_i_occ = i_occ + frozen_core[idx_part];
     if (symm_idx < 0) {

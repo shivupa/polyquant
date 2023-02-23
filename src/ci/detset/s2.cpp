@@ -52,15 +52,20 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
           // xor_vector.resize(nint);
           // na_vector.resize(nint);
 
+          // what orbitals are only occupied in alpha or beta?
           for (auto i_int = 0; i_int < n_int; i_int++) {
             xor_vector.push_back(Di_a[i_int] ^ Di_b[i_int]);
           }
 
+          // Of the singly occupied orbitals, which of these are singly occupied in alpha?
+          // (Which consequently just tells us singly occupied beta as well).
           for (auto i_int = 0; i_int < n_int; i_int++) {
             na_vector.push_back(xor_vector[i_int] & Di_a[i_int]);
           }
 
+          // num total unpaired electrons
           auto num_total = 0;
+          // num total unpaired alpha electrons
           auto num_a = 0;
           for (auto i_int = 0; i_int < n_int; i_int++) {
             if (xor_vector[i_int] != 0ul) {
@@ -139,6 +144,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_S_sq_penalty(std::string 
       auto expected_S2_for_part = expected_S2[quantum_part_idx];
       // H' = H + a(S^2 -I<S^2 expected>)^2
       create_S_sq_minus_expected_S_sq_matrix_singleshot(S2_penalty, quantum_part_idx, expected_S2_for_part);
+      // pruned here is suppressing things that are zero Exactly not pruning based on a threshold
       S2_penalty = (S2_penalty * S2_penalty).pruned();
       ss << "S2 penalty number of nonzero matrix elem : " << S2_penalty.nonZeros() << std::endl;
       this->ham += alpha * S2_penalty;
@@ -184,7 +190,7 @@ void POLYQUANT_DETSET<T>::create_S_sq_minus_expected_S_sq_matrix_singleshot(Eige
       auto n_int = Di_a.size();
       std::vector<T> xor_vector;
       std::vector<T> na_vector;
-
+      // not good repeated code from above refactoring is desirable...
       for (auto i_int = 0; i_int < n_int; i_int++) {
         xor_vector.push_back(Di_a[i_int] ^ Di_b[i_int]);
       }
