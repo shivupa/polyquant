@@ -18,19 +18,22 @@ Be    P
       6.018000E-02           4.793380E-01           1.000000E+00
 Be    D
       2.354000E-01           1.0000000
+END
 """
 mol = pyscf.M(
         atom = ' Be 0.0, 0.0, 0.0',
     unit = 'b',
     cart = False,
+    #symmetry='D2h',
     symmetry='D2h',
-    #basis = {'Be': gto.parse(basis_str)},
-    basis = 'cc-pvdz', #{'Be': gto.parse(basis_str)},
+    basis = {'Be': gto.parse(basis_str)},
+    #basis = 'cc-pvdz', #{'Be': gto.parse(basis_str)},
     verbose=9)
 
 mf = mol.RHF()
 mf.run()
 mf.analyze()
+exit()
 mc = fci.FCI(mol, mf.mo_coeff)
 
 

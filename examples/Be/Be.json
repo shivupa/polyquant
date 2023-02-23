@@ -12,9 +12,9 @@
     "method": "CI",
     "basis": 
         { "electron" :
-          {"Be" : [{ "library" : 
-              {"type" : "cc-pvdz"}}]
-          }
+          {"Be" : [{ "custom" : 
+              {"type" : "file",
+               "filename" : "electron_basis.g94"}}]}
         }
   },
   "keywords": {
