@@ -28,7 +28,6 @@
         "iteration_max" : 200,
         "from_file" : false,
         "incremental_fock" : true,
-        "Cauchy_Schwarz_screening" : true,
         "npart_per_irrep" :
         [
             [
