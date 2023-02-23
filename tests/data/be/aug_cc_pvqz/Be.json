@@ -5,7 +5,7 @@
     ],
     "symbols": ["Be"],
     "molecular_charge": 0,
-    "molecular_multiplicity": 0
+    "molecular_multiplicity": 1
   },
   "driver": "energy",
   "model": {
@@ -14,7 +14,7 @@
         { "electron" :
           {"Be" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "../../tests/data/be_augccpvdz/electron_basis.g94"}}]}
+             "filename" : "../../tests/data/be/aug_cc_pvqz/electron_basis.g94"}}]}
         }
   },
   "keywords": {
@@ -28,7 +28,6 @@
         "iteration_max" : 200,
         "from_file" : false,
         "incremental_fock" : true,
-        "Cauchy_Schwarz_screening" : true,
         "npart_per_irrep" :
         [
             [
