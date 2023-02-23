@@ -581,7 +581,6 @@ TEST_CASE("CALCULATION: Be/aug-cc-pvqz compare SCF to PySCF.") {
   }
 }
 
-
 TEST_CASE("CALCULATION: Angular S.") {
   POLYQUANT_CALCULATION d2h("../../tests/data/angular/0_s/h.json");
   d2h.run();
@@ -712,7 +711,7 @@ TEST_CASE("CALCULATION: Angular F.") {
     std::cout << d2h.scf_calc->E_orbitals_combined[0][0](i) << "     " << reference_mo_energies[i] << "              " << std::scientific
               << d2h.scf_calc->E_orbitals_combined[0][0](i) - reference_mo_energies[i] << std::endl;
     // I am not sure what it is about this test but I cant get < 1e-10 agreement but that should be ok
-    REQUIRE_THAT(d2h.scf_calc->E_orbitals_combined[0][0](i), Catch::Matchers::WithinAbs(reference_mo_energies[i], 100*POLYQUANT_TEST_EPSILON_VERYTIGHT));
+    REQUIRE_THAT(d2h.scf_calc->E_orbitals_combined[0][0](i), Catch::Matchers::WithinAbs(reference_mo_energies[i], 100 * POLYQUANT_TEST_EPSILON_VERYTIGHT));
   }
 
   std::cout << "ERI" << std::endl;

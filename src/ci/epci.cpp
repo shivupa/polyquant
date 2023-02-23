@@ -633,6 +633,7 @@ void POLYQUANT_EPCI::run() {
       Eigen::Matrix<double, Eigen::Dynamic, 1> eigs;
       Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(h);
       eigs = eigensolver.eigenvalues();
+      std::cout << "constant_shift " << constant_shift << std::endl;
       for (auto i = 0; i < eigs.rows(); i++) {
         std::cout << eigs[i] + constant_shift << std::endl;
       }
