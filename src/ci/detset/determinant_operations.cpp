@@ -158,6 +158,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
   }
   // TODO generalize this and parallellize...
   this->N_dets = 0;
+  this->N_dets_complete_space = 0;
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_0 = std::make_pair(this->unique_dets[0][0][0], this->unique_dets[0][1][0]);
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_1;
   int symm_idx = -1;
@@ -184,6 +185,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
               if (excitation_degree_1 <= std::get<2>(excitation_level[1])) {
                 get_symm_idx(0, det_pair_0, excitation_symm_idx);
                 get_symm_idx(1, det_pair_1, excitation_symm_idx);
+                if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level ) {
+                    this->N_dets_complete_space++;
+                }
                 if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
                   std::vector<int> det_idx = {i, j, k, l};
                   this->dets[det_idx] = this->N_dets;
@@ -195,6 +199,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
         } else {
           int excitation_symm_idx = -1;
           get_symm_idx(0, det_pair_0, excitation_symm_idx);
+          if (excitation_degree_0 <= max_collective_excitation_level ){
+            this->N_dets_complete_space++;
+          }
           if (excitation_degree_0 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
             std::vector<int> det_idx = {i, j};
             this->dets[det_idx] = this->N_dets;
@@ -506,7 +513,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     }
     count++;
 
-    std::bitset<nbit> c(j);
+    // std::bitset<nbit> c(j);
     // std::cout << c << "         " << c.to_ulong() << std::endl;
     new_det.push_back(j);
   }
