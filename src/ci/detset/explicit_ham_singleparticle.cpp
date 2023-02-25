@@ -245,9 +245,9 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
       }
 
       for (auto idx_J_B_det : unique_singles[idx_part][second_spin_idx][idx_I_B_det]) {
-        if (idx_J_B_det < idx_I_B_det) {
-          continue;
-        }
+        // if (idx_J_B_det < idx_I_B_det) {
+        //   continue;
+        // }
         // beta singles
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_I_A_det;
@@ -256,19 +256,21 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
           auto integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
-            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
-            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            if (i_det < folded_jdet_idx) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
           }
         }
       }
 
       // loop over alpha double excitations
       for (auto idx_J_A_det : unique_doubles[idx_part][first_spin_idx][idx_I_A_det]) {
-        if (idx_J_A_det < idx_I_A_det) {
-          continue;
-        }
-        // alpha double
+        // if (idx_J_A_det < idx_I_A_det) {
+        //   continue;
+        // }
+        //  alpha double
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_J_A_det;
         jdet_idx[second_spin_idx] = idx_I_B_det;
@@ -276,18 +278,20 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
           auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
-            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
-            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            if (i_det < folded_jdet_idx) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
           }
         }
       }
       // loop over beta double excitations
       for (auto idx_J_B_det : unique_doubles[idx_part][second_spin_idx][idx_I_B_det]) {
-        if (idx_J_B_det < idx_I_B_det) {
-          continue;
-        }
-        // alpha double
+        // if (idx_J_B_det < idx_I_B_det) {
+        //   continue;
+        // }
+        //  alpha double
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_I_A_det;
         jdet_idx[second_spin_idx] = idx_J_B_det;
@@ -295,9 +299,11 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
           auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
-            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
-            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
-            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            if (i_det < folded_jdet_idx) {
+              auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+              auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+              triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+            }
           }
         }
       }
