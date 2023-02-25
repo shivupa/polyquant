@@ -498,6 +498,15 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(std::vector<std::vector<E
           auto num_part_b = (spin_b_idx == 0) ? quantum_part_b.num_parts_alpha : quantum_part_b.num_parts_beta;
           mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx][spin_b_idx] = transform_mo_2_body_integrals(
               quantum_part_a_idx, quantum_part_b_idx, mo_coeffs[quantum_part_a_idx][spin_a_idx], mo_coeffs[quantum_part_b_idx][spin_b_idx], num_part_a, num_part_b, frozen_core, deleted_virtual);
+          std::stringstream filename;
+          filename << "mo2body_";
+          filename << quantum_part_a_idx;
+          filename << spin_a_idx;
+          filename << quantum_part_b_idx;
+          filename << spin_b_idx;
+          filename << ".txt";
+
+          Polyquant_dump_mat_to_file(mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx][spin_b_idx],  filename.str());
         }
         quantum_part_b_idx++;
       }
