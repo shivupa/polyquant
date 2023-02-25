@@ -184,8 +184,9 @@ public:
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 
   Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
-  int N_dets; //Number of determinants in this symmetry block
-  int N_dets_complete_space; //Number of determinants in the full space (not the full ci space, but the full space of the current excitation level). If symmetry is off this is equal to N_dets, if symmetry is on this should be ~N_irrep * N_dets.
+  int N_dets;                // Number of determinants in this symmetry block
+  int N_dets_complete_space; // Number of determinants in the full space (not the full ci space, but the full space of the current excitation level). If symmetry is off this is equal to N_dets, if
+                             // symmetry is on this should be ~N_irrep * N_dets.
   int curr_symm_block;
   bool slow_diag = false;
   bool build_matrix = true;

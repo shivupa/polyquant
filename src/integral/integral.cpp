@@ -255,9 +255,9 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     auto thread_id = omp_get_thread_num();
     auto shell_counter = 0;
 
-    for (size_t p = 0; p < num_shell_a; p++) {
-      auto shell_p_bf_start = shell2bf_a[p];
-      auto shell_p_bf_size = this->input_basis->basis[quantum_part_a_idx][p].size();
+    for (size_t i = 0; i < num_shell_a; i++) {
+      auto shell_i_bf_start = shell2bf_a[i];
+      auto shell_i_bf_size = this->input_basis->basis[quantum_part_a_idx][i].size();
       for (size_t q = 0; q < num_shell_a; q++) {
         auto shell_q_bf_start = shell2bf_a[q];
         auto shell_q_bf_size = this->input_basis->basis[quantum_part_a_idx][q].size();
@@ -271,33 +271,32 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             if (shell_counter % nthreads != thread_id) {
               continue;
             }
-            const auto &buf = engines[thread_id].results();
-            engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
-            for (size_t i = 0; i < num_shell_a; i++) {
-              auto shell_i_bf_start = shell2bf_a[i];
-              auto shell_i_bf_size = this->input_basis->basis[quantum_part_a_idx][i].size();
+            for (size_t p = 0; p < num_shell_a; p++) {
+              auto shell_p_bf_start = shell2bf_a[p];
+              auto shell_p_bf_size = this->input_basis->basis[quantum_part_a_idx][p].size();
+              const auto &buf = engines[thread_id].results();
+              engines[thread_id].compute(shells_a[p], shells_a[q], shells_b[r], shells_b[s]);
               const auto *buf_1234 = buf[0];
-              if (buf_1234 != nullptr) {
-                for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-                  auto shell_pqrs_bf = 0;
-                  for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
-                    auto C_pi = mo_coeffs_a(shell_p_bf, shell_i_bf);
-                    if (C_pi != 0.0) {
-                      for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
-                        for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
-                          for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
-                            auto eri_pqrs = buf_1234[shell_pqrs_bf];
-                            shell_pqrs_bf++;
-                            if (eri_pqrs != 0) {
-                              if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
-                                // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
-                                // num_mo_a * num_shell_a * num_shell_b * num_shell_b
-                                auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
-                                idx1 += shell_q_bf * num_ao_b * num_ao_b;
-                                idx1 += shell_r_bf * num_ao_b;
-                                idx1 += shell_s_bf;
-                                temp_threads[thread_id](idx1) += C_pi * eri_pqrs;
-                              }
+              auto shell_pqrs_bf = 0;
+              for (auto shell_p_bf = shell_p_bf_start; shell_p_bf < shell_p_bf_start + shell_p_bf_size; ++shell_p_bf) {
+                for (auto shell_q_bf = shell_q_bf_start; shell_q_bf < shell_q_bf_start + shell_q_bf_size; ++shell_q_bf) {
+                  for (auto shell_r_bf = shell_r_bf_start; shell_r_bf < shell_r_bf_start + shell_r_bf_size; ++shell_r_bf) {
+                    for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
+                      auto eri_pqrs = buf_1234[shell_pqrs_bf];
+                      shell_pqrs_bf++;
+                      if (eri_pqrs != 0) {
+                        for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+                          if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
+                            auto C_pi = mo_coeffs_a(shell_p_bf, shell_i_bf);
+                            if (C_pi != 0.0) {
+                              auto val = C_pi * eri_pqrs;
+                              // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
+                              // num_mo_a * num_shell_a * num_shell_b * num_shell_b
+                              auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
+                              idx1 += shell_q_bf * num_ao_b * num_ao_b;
+                              idx1 += shell_r_bf * num_ao_b;
+                              idx1 += shell_s_bf;
+                              temp_threads[thread_id](idx1) += val;
                             }
                           }
                         }
@@ -319,10 +318,10 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     temp_threads[thread_id].resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
     temp_threads[thread_id].setZero();
   }
-  // temp2.resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
-  // temp2.setZero();
-  // temp2 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_shell_b, num_shell_b);
-  // temp2.setZero();
+// temp2.resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
+// temp2.setZero();
+// temp2 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_shell_b, num_shell_b);
+// temp2.setZero();
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -371,13 +370,13 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     temp_threads[thread_id].resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
     temp_threads[thread_id].setZero();
   }
-  // temp1.resize(0);
-  // temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
-  // temp3.setZero();
-  //  delete temp1;
-  //  temp1 = Eigen::Tensor<double, 1>(0);
-  //  temp3 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_mo_b, num_shell_b);
-  //  temp3.setZero();
+// temp1.resize(0);
+// temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
+// temp3.setZero();
+//  delete temp1;
+//  temp1 = Eigen::Tensor<double, 1>(0);
+//  temp3 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_mo_b, num_shell_b);
+//  temp3.setZero();
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -428,11 +427,11 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     eri_threads[thread_id].resize(eri_size_a, eri_size_b);
     eri_threads[thread_id].setZero();
   }
-  // temp2.resize(0);
-  // temp2.setZero();
-  // temp2 = Eigen::Tensor<double, 1>(0);
-  // delete temp2;
-  // eri.resize(eri_size_a, eri_size_b);
+// temp2.resize(0);
+// temp2.setZero();
+// temp2 = Eigen::Tensor<double, 1>(0);
+// delete temp2;
+// eri.resize(eri_size_a, eri_size_b);
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -498,15 +497,16 @@ void POLYQUANT_INTEGRAL::calculate_mo_2_body_integrals(std::vector<std::vector<E
           auto num_part_b = (spin_b_idx == 0) ? quantum_part_b.num_parts_alpha : quantum_part_b.num_parts_beta;
           mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx][spin_b_idx] = transform_mo_2_body_integrals(
               quantum_part_a_idx, quantum_part_b_idx, mo_coeffs[quantum_part_a_idx][spin_a_idx], mo_coeffs[quantum_part_b_idx][spin_b_idx], num_part_a, num_part_b, frozen_core, deleted_virtual);
-          std::stringstream filename;
-          filename << "mo2body_";
-          filename << quantum_part_a_idx;
-          filename << spin_a_idx;
-          filename << quantum_part_b_idx;
-          filename << spin_b_idx;
-          filename << ".txt";
-
-          Polyquant_dump_mat_to_file(mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx][spin_b_idx],  filename.str());
+          if (verbose == true) {
+            std::stringstream filename;
+            filename << "mo2body_";
+            filename << quantum_part_a_idx;
+            filename << spin_a_idx;
+            filename << quantum_part_b_idx;
+            filename << spin_b_idx;
+            filename << ".txt";
+            Polyquant_dump_mat_to_file(mo_two_body_ints[quantum_part_a_idx][spin_a_idx][quantum_part_b_idx][spin_b_idx], filename.str());
+          }
         }
         quantum_part_b_idx++;
       }

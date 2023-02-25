@@ -185,8 +185,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
               if (excitation_degree_1 <= std::get<2>(excitation_level[1])) {
                 get_symm_idx(0, det_pair_0, excitation_symm_idx);
                 get_symm_idx(1, det_pair_1, excitation_symm_idx);
-                if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level ) {
-                    this->N_dets_complete_space++;
+                if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level) {
+                  this->N_dets_complete_space++;
                 }
                 if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
                   std::vector<int> det_idx = {i, j, k, l};
@@ -199,7 +199,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
         } else {
           int excitation_symm_idx = -1;
           get_symm_idx(0, det_pair_0, excitation_symm_idx);
-          if (excitation_degree_0 <= max_collective_excitation_level ){
+          if (excitation_degree_0 <= max_collective_excitation_level) {
             this->N_dets_complete_space++;
           }
           if (excitation_degree_0 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
