@@ -638,8 +638,11 @@ void POLYQUANT_EPCI::run() {
       eigs = eigensolver.eigenvalues()(Eigen::seqN(0, this->num_states));
       this->energies = eigensolver.eigenvalues()(Eigen::seqN(0, this->num_states));
       std::cout << "constant_shift " << constant_shift << std::endl;
-      for (auto i = 0; i < eigs.rows(); i++) {
-        std::cout << eigs[i] + constant_shift << std::endl;
+      for (auto i = 0; i < eigensolver.eigenvalues().rows(); i++) {
+        std::cout << eigensolver.eigenvalues()[i] + constant_shift << std::endl;
+      }
+      for (auto e = 0; e < this->energies.size(); e++) {
+        this->energies[e] += constant_shift;
       }
       this->C_ci = eigensolver.eigenvectors()(Eigen::all, Eigen::seqN(0, this->num_states));
       this->calculate_NOs();
