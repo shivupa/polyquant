@@ -217,17 +217,17 @@ template <typename T> void Polyquant_dump_direct_product_table(const Eigen::Matr
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << " direct product table" << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+  std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << ""
             << "  ";
   for (size_t j = 0; j < mat.cols(); j++) {
-    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[j] << "  ";
+    std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << row_titles[j] << "  ";
   }
   std::cout << std::endl;
 
-  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+  std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << ""
             << "  ";
   for (size_t j = 0; j < mat.cols(); j++) {
-    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << "---"
+    std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << "---"
               << "  ";
   }
   std::cout << std::endl;
