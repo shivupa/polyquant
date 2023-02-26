@@ -182,7 +182,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
             skip_scf = this->input_params->input_data["keywords"]["mf_keywords"]["from_file_skipiterations"];
           }
         } else {
-          dump_for_qmcpack = false;
+          //dump_for_qmcpack = false;
           mean_field_type = "SCF";
         }
       } else if (mean_field_type == "FILE") {
