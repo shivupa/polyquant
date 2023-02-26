@@ -630,14 +630,22 @@ void POLYQUANT_EPCI::run() {
           }
         }
       }
-      Polyquant_dump_mat_to_file(h, "h_ci.txt");
+      if (this->verbose) {
+        Polyquant_dump_mat_to_file(h, "h_ci.txt");
+      }
       Eigen::Matrix<double, Eigen::Dynamic, 1> eigs;
       Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(h);
-      eigs = eigensolver.eigenvalues();
+      eigs = eigensolver.eigenvalues()(Eigen::seqN(0, this->num_states));
+      this->energies = eigensolver.eigenvalues()(Eigen::seqN(0, this->num_states));
       std::cout << "constant_shift " << constant_shift << std::endl;
       for (auto i = 0; i < eigs.rows(); i++) {
         std::cout << eigs[i] + constant_shift << std::endl;
       }
+      this->C_ci = eigensolver.eigenvectors()(Eigen::all, Eigen::seqN(0, this->num_states));
+      this->calculate_NOs();
+      this->calculate_S_squared();
+      this->print_success();
+      this->dump_molden();
     } else {
       // row major so Upper has more continguous memory
       Spectra::SparseSymMatProd<double, Eigen::Upper, Eigen::RowMajor, int> op_sparse(this->detset.ham);
