@@ -1,0 +1,45 @@
+SALCs all correct
+
+# SO3 (real spherical harmonics)
+# Irreps ID maps
+# SO3       ->  Dooh        ->   D2h
+# s       0 ->  A1g   0     ->   A1g  0
+
+# p+0   105 ->  A1u   5     ->   B1u 5
+# p-1   106 ->  E1uy  6     ->   B2u 6
+# p+1   107 ->  E1ux  7     ->   B3u 7
+
+# d+0   200 ->  A1g   0     ->   A1g 0
+# d-1   203 ->  E1gy  3     ->   B3g 3
+# d+1   202 ->  E1gx  2     ->   B2g 2
+# d-2   211 ->  E2gy  11    ->   B1g 1
+# d+2   210 ->  E2gx  10    ->   A1g 0
+
+# f0    305 ->  A1u   5     ->   B1u 5
+# f-1   306 ->  E1uy  6     ->   B2u 6
+# f+1   307 ->  E1ux  7     ->   B3u 7
+# f-2   314 ->  E2uy  14    ->   A1u 4
+# f+2   315 ->  E2ux  15    ->   B1u 5
+# f-3   316 ->  E3uy  16    ->   B2u 6
+# f+3   317 ->  E3ux  17    ->   B3u 7
+
+# g0    400 ->  A1g   0     ->   A1g 0
+# g-1   403 ->  E1gy  3     ->   B3g 3
+# g+1   402 ->  E1gx  2     ->   B2g 2
+# g-2   411 ->  E2gy  11    ->   B1g 1
+# g+2   410 ->  E2gx  10    ->   A1g 0
+# g-3   413 ->  E3gy  13    ->   B3g 3
+# g+3   412 ->  E3gx  12    ->   B2g 2
+# g-4   421 ->  E4gy  21    ->   B1g 1
+# g+4   420 ->  E4gx  20    ->   A1g 0
+
+
+Subspace 0 A1g correct s+0, d+0, d+2
+Subspace 1 B1g correct d-2
+Subspace 2 A1u correct nothing in this basis
+Subspace 3 B1u correct p+0
+Subspace 4 B3g correct d-1
+Subspace 5 B3u correct p+1
+Subspace 6 B2g correct d+1
+Subspace 7 B2u correct p-1
+
