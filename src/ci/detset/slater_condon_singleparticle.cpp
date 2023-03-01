@@ -120,8 +120,8 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_p
     get_holes(det_i_b, det_j_b, holes);
     get_parts(det_i_b, det_j_b, parts);
     phase = get_phase(det_i_b, det_j_b, holes, parts);
-    elem += this->input_integral->mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx](this->input_integral->idx2(holes[0], parts[0]), this->input_integral->idx2(holes[1], parts[1]));
-    elem -= this->input_integral->mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx](this->input_integral->idx2(holes[0], parts[1]), this->input_integral->idx2(holes[1], parts[0]));
+    elem += this->input_integral->mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx](this->input_integral->idx2(holes[0], parts[0]), this->input_integral->idx2(holes[1], parts[1]));
+    elem -= this->input_integral->mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx](this->input_integral->idx2(holes[0], parts[1]), this->input_integral->idx2(holes[1], parts[0]));
     elem *= phase;
   } else if (det_i_b == det_j_b) {
     std::vector<int> holes, parts;
@@ -129,8 +129,8 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_p
     get_holes(det_i_a, det_j_a, holes);
     get_parts(det_i_a, det_j_a, parts);
     phase = get_phase(det_i_a, det_j_a, holes, parts);
-    elem += this->input_integral->mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx](this->input_integral->idx2(holes[0], parts[0]), this->input_integral->idx2(holes[1], parts[1]));
-    elem -= this->input_integral->mo_two_body_ints[idx_part][beta_spin_idx][idx_part][beta_spin_idx](this->input_integral->idx2(holes[0], parts[1]), this->input_integral->idx2(holes[1], parts[0]));
+    elem += this->input_integral->mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx](this->input_integral->idx2(holes[0], parts[0]), this->input_integral->idx2(holes[1], parts[1]));
+    elem -= this->input_integral->mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][alpha_spin_idx](this->input_integral->idx2(holes[0], parts[1]), this->input_integral->idx2(holes[1], parts[0]));
     elem *= phase;
   } else {
     std::vector<int> aholes, aparts;
