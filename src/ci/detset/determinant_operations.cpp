@@ -414,7 +414,7 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
     // mask[j] = mask[j] & (~(1ul << ((n + 1) + 1)));
     mask[j] = mask[j] & (~(1 << (n + 1)) + 1);
     for (auto l = j; l <= k; l++) {
-      nperm += std::popcount(Di[j] & mask[l]);
+      nperm += std::popcount(Di[l] & mask[l]);
     }
   }
   if ((holes.size() == 2) && (holes[1] < parts[0] || holes[0] > parts[1])) {
