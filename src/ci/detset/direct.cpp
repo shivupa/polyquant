@@ -42,7 +42,10 @@ void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eig
       auto reduced_val = 0.0;
 #pragma omp parallel for reduction(+ : reduced_val)
       for (auto k = 0; k < this->N_dets; k++) {
-        reduced_val += this->Slater_Condon(i, k) * C(k, j);
+        auto integral = this->Slater_Condon(i, k);
+        if (integral != 0.0) {
+          reduced_val += integral * C(k, j);
+        }
       }
       sigma(i, j) = reduced_val;
     }
