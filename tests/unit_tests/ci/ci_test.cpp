@@ -194,14 +194,21 @@ TEST_CASE("CI: get phase ", "[CI]") {
   detset.get_holes(hf_det_vec, single_ext_vec, holes);
   detset.get_parts(hf_det_vec, single_ext_vec, parts);
   auto phase = detset.get_phase(hf_det_vec, single_ext_vec, holes, parts);
-  REQUIRE(phase == 1.0);
+  CHECK(phase == 1.0);
 
   holes.clear();
   parts.clear();
   detset.get_holes(hf_det_vec, double_ext_vec, holes);
   detset.get_parts(hf_det_vec, double_ext_vec, parts);
   phase = detset.get_phase(hf_det_vec, double_ext_vec, holes, parts);
-  REQUIRE(phase == 1.0);
+  CHECK(phase == 1.0);
+
+  holes.clear();
+  parts.clear();
+  detset.get_holes(double_ext_vec, single_ext_vec, holes);
+  detset.get_parts(double_ext_vec, single_ext_vec, parts);
+  phase = detset.get_phase(double_ext_vec, single_ext_vec, holes, parts);
+  CHECK(phase == -1.0);
 }
 TEST_CASE("CI: get occ virt ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
