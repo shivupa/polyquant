@@ -1,5 +1,6 @@
 import pyscf
-from pyscf import gto, fci
+import numpy as np
+from pyscf import gto, ci
 basis_str = """
 Be    S
       2.940000E+03           6.800000E-04          -1.230000E-04           0.000000E+00
@@ -11,13 +12,19 @@ Be    S
       1.159000E+00           2.950740E-01          -1.334350E-01           0.000000E+00
       1.811000E-01           1.258700E-02           5.307670E-01           0.000000E+00
       5.890000E-02          -3.756000E-03           5.801170E-01           1.000000E+00
+Be    S
+      1.790000E-02           1.000000E+00
 Be    P
       3.619000E+00           2.911100E-02           0.000000E+00
       7.110000E-01           1.693650E-01           0.000000E+00
       1.951000E-01           5.134580E-01           0.000000E+00
       6.018000E-02           4.793380E-01           1.000000E+00
+Be    P
+      1.110000E-02           1.000000E+00
 Be    D
       2.354000E-01           1.0000000
+Be    D
+      7.220000E-02           1.000000E+00
 END
 """
 mol = pyscf.M(
@@ -27,58 +34,82 @@ mol = pyscf.M(
     #symmetry='D2h',
     symmetry='D2h',
     basis = {'Be': gto.parse(basis_str)},
-    #basis = 'cc-pvdz', #{'Be': gto.parse(basis_str)},
+    #basis = 'aug-cc-pvdz', #{'Be': gto.parse(basis_str)},
     verbose=9)
 
 mf = mol.RHF()
+mf.tol = 1e-12
 mf.run()
 mf.analyze()
-exit()
-mc = fci.FCI(mol, mf.mo_coeff)
+
+myci = ci.CISD(mf,frozen=1)
+myci.tol = 1e-12
+myci.nstates = 10
+
+eris = myci.ao2mo(mf.mo_coeff)
+myci.kernel()
+
+civec = np.zeros_like(myci.ci[0])
+size = 10
+h = np.zeros((size,size))
+for i in range(size):
+    for j in range(i,size):
+        civeci = np.zeros_like(myci.ci[0])
+        civecj = np.zeros_like(myci.ci[0])
+        civeci[i] = 1
+        civecj[j] = 1
+        hcivec = ci.cisd.contract(myci, civecj, eris)
+        h[i,j] = civeci.T @ hcivec
 
 
-mc.nroots=13
-mc.run()
-e = mc.e_tot
-norb = mf.mo_energy.size
-nelec = (2,2)
-thresh = 0.1
-for i, c in enumerate(mc.ci):
-    print(f"State {i:}")
-    print(mc.spin_square(c, norb, nelec))
-    #for na,a in enumerate(c):
-    #    if abs(a) > thresh:
-    #        print(na,a)
-    #c = mc.to_fcivec(c)
-    #print('state = %d, E = %.9f, S^2=%.4f' %
-    #      (i, e[i], pyscf.fci.spin_op.spin_square(c, norb, nelec)[0]))
-
-exit()
-cisolver = pyscf.fci.FCI(mf)
-print('E(FCI) = %.12f' % cisolver.kernel()[0])
-
-
-# from pyscf.tools import fcidump
-# fcidump.from_scf(mf, 'fcidump.example1', tol=0)
+print(myci.ci[0][np.argsort(np.abs(myci.ci[0]))[::-1]][0:100])
+print(myci.e_tot)
 # exit()
-# mycc = mf.CISD().run()
-# print('RCISD correlation energy', mycc.e_corr)
-# 
-# #mf = mol.UHF().run()
-# #mycc = mf.CISD().run()
-# #print('UCISD correlation energy', mycc.e_corr)
+# mc = fci.FCI(mol, mf.mo_coeff)
 # 
 # 
-# t = mol.intor('int1e_kin')
-# v = mol.intor('int1e_nuc')
-# h = t + v
+# mc.nroots=13
+# mc.run()
+# e = mc.e_tot
+# norb = mf.mo_energy.size
+# nelec = (2,2)
+# thresh = 0.1
+# for i, c in enumerate(mc.ci):
+#     print(f"State {i:}")
+#     print(mc.spin_square(c, norb, nelec))
+#     #for na,a in enumerate(c):
+#     #    if abs(a) > thresh:
+#     #        print(na,a)
+#     #c = mc.to_fcivec(c)
+#     #print('state = %d, E = %.9f, S^2=%.4f' %
+#     #      (i, e[i], pyscf.fci.spin_op.spin_square(c, norb, nelec)[0]))
 # 
-# h_mo = mf.mo_coeff.T @ h @ mf.mo_coeff
-# s_mo = mf.mo_coeff.T @ mol.intor('int1e_ovlp') @ mf.mo_coeff
+# exit()
+# cisolver = pyscf.fci.FCI(mf)
+# print('E(FCI) = %.12f' % cisolver.kernel()[0])
 # 
 # 
-# eri_4fold = pyscf.ao2mo.kernel(mol, mf.mo_coeff)
-# 
-# 
-# from utils import cisd
-# cisd(mol, printroots=2)
+# # from pyscf.tools import fcidump
+# # fcidump.from_scf(mf, 'fcidump.example1', tol=0)
+# # exit()
+# # mycc = mf.CISD().run()
+# # print('RCISD correlation energy', mycc.e_corr)
+# # 
+# # #mf = mol.UHF().run()
+# # #mycc = mf.CISD().run()
+# # #print('UCISD correlation energy', mycc.e_corr)
+# # 
+# # 
+# # t = mol.intor('int1e_kin')
+# # v = mol.intor('int1e_nuc')
+# # h = t + v
+# # 
+# # h_mo = mf.mo_coeff.T @ h @ mf.mo_coeff
+# # s_mo = mf.mo_coeff.T @ mol.intor('int1e_ovlp') @ mf.mo_coeff
+# # 
+# # 
+# # eri_4fold = pyscf.ao2mo.kernel(mol, mf.mo_coeff)
+# # 
+# # 
+# # from utils import cisd
+# # cisd(mol, printroots=2)
