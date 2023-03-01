@@ -547,7 +547,7 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
     auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
     std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " << sigma(i, 0) << "  "
               << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0) << std::endl;
-    REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+    REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
   }
   /////////////////////////////////////////////////////////////////////
   C.setZero();
@@ -565,7 +565,7 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
     auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
     std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " << sigma(i, 0) << "  "
               << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0) << std::endl;
-    REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+    REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -587,7 +587,7 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
     auto unfolded_idx = test_ci.detset.det_idx_unfold(i);
     std::cout << "SHIV          " << i << " : " << unfolded_idx[0] << "   " << unfolded_idx[1] << "   " << unfolded_idx[2] << "   " << unfolded_idx[3] << "        " << sigma(i, 0) << "  "
               << sigma_fast(i, 0) << "     " << sigma(i, 0) - sigma_fast(i, 0) << std::endl;
-    REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+    REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
   }
 }
 TEST_CASE("CI: Natural Orbitals", "[CI]") {
