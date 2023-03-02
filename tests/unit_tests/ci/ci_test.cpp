@@ -161,6 +161,16 @@ TEST_CASE("CI: get holes ", "[CI]") {
   REQUIRE(holes.size() == 2);
   REQUIRE(holes[0] == 1);
   REQUIRE(holes[1] == 4);
+
+  holes.clear();
+  std::bitset<10> hf_det_longer("0001111111");
+  std::bitset<10> double_ext_longer("0110111101");
+  std::vector<uint64_t> big_hf_det_vec = {hf_det_longer.to_ulong(), 0ul};
+  std::vector<uint64_t> big_double_ext_vec = {double_ext_longer.to_ulong(), 0ul};
+  detset.get_holes(big_hf_det_vec, big_double_ext_vec, holes);
+  REQUIRE(holes.size() == 2);
+  REQUIRE(holes[0] == 64 + 1);
+  REQUIRE(holes[1] == 64 + 6);
 }
 TEST_CASE("CI: get parts ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
@@ -179,6 +189,16 @@ TEST_CASE("CI: get parts ", "[CI]") {
   REQUIRE(parts.size() == 2);
   REQUIRE(parts[0] == 5);
   REQUIRE(parts[1] == 6);
+
+  parts.clear();
+  std::bitset<10> hf_det_longer("0001111111");
+  std::bitset<10> double_ext_longer("0110111101");
+  std::vector<uint64_t> big_hf_det_vec = {hf_det_longer.to_ulong(), 0ul};
+  std::vector<uint64_t> big_double_ext_vec = {double_ext_longer.to_ulong(), 0ul};
+  detset.get_parts(big_hf_det_vec, big_double_ext_vec, parts);
+  REQUIRE(parts.size() == 2);
+  REQUIRE(parts[0] == 64 + 7);
+  REQUIRE(parts[1] == 64 + 8);
 }
 TEST_CASE("CI: get phase ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
@@ -209,6 +229,15 @@ TEST_CASE("CI: get phase ", "[CI]") {
   detset.get_parts(double_ext_vec, single_ext_vec, parts);
   phase = detset.get_phase(double_ext_vec, single_ext_vec, holes, parts);
   CHECK(phase == -1.0);
+
+  std::vector<uint64_t> hf_det_vec2 = {0ul, hf_det.to_ulong()};
+  std::vector<uint64_t> single_ext_vec2 = {0ul, single_ext.to_ulong()};
+  holes.clear();
+  parts.clear();
+  detset.get_holes(hf_det_vec2, single_ext_vec2, holes);
+  detset.get_parts(hf_det_vec2, single_ext_vec2, parts);
+  phase = detset.get_phase(hf_det_vec2, single_ext_vec2, holes, parts);
+  CHECK(phase == 1.0);
 }
 TEST_CASE("CI: get occ virt ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
@@ -225,6 +254,50 @@ TEST_CASE("CI: get occ virt ", "[CI]") {
   for (auto i = 0; i < virt.size(); i++) {
     REQUIRE(virt[i] == occ.size() + i);
   }
+
+  POLYQUANT_DETSET<uint64_t> detset2;
+  detset2.max_orb = {64 + 10};
+  occ.clear();
+  virt.clear();
+  std::bitset<10> hf_det_longer("0001111111");
+  std::vector<uint64_t> big_hf_det_vec = {hf_det_longer.to_ulong(), 0ul};
+  detset2.get_occ_virt(0, big_hf_det_vec, occ, virt);
+  CHECK(occ.size() == 7);
+  CHECK(virt.size() == 64 + 3);
+  CHECK(occ[0] == 64 + 0);
+  CHECK(occ[1] == 64 + 1);
+  CHECK(occ[2] == 64 + 2);
+  CHECK(occ[3] == 64 + 3);
+  CHECK(occ[4] == 64 + 4);
+  CHECK(occ[5] == 64 + 5);
+  CHECK(occ[6] == 64 + 6);
+  for (auto i = 0; i < 64; i++) {
+    CHECK(virt[i] == i);
+  }
+  CHECK(virt[64] == 64 + 7);
+  CHECK(virt[65] == 64 + 8);
+  CHECK(virt[66] == 64 + 9);
+
+  std::bitset<10> double_ext_longer("0110111101");
+  std::vector<uint64_t> big_double_ext_vec = {double_ext_longer.to_ulong(), 0ul};
+  occ.clear();
+  virt.clear();
+  detset2.get_occ_virt(0, big_double_ext_vec, occ, virt);
+  CHECK(occ.size() == 7);
+  CHECK(virt.size() == 64 + 3);
+  CHECK(occ[0] == 64 + 0);
+  CHECK(occ[1] == 64 + 2);
+  CHECK(occ[2] == 64 + 3);
+  CHECK(occ[3] == 64 + 4);
+  CHECK(occ[4] == 64 + 5);
+  CHECK(occ[5] == 64 + 7);
+  CHECK(occ[6] == 64 + 8);
+  for (auto i = 0; i < 64; i++) {
+    CHECK(virt[i] == i);
+  }
+  CHECK(virt[64] == 64 + 1);
+  CHECK(virt[65] == 64 + 6);
+  CHECK(virt[66] == 64 + 9);
 }
 TEST_CASE("CI: same part ham diag ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
