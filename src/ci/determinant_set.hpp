@@ -116,7 +116,7 @@ public:
   void set_epscf(std::shared_ptr<POLYQUANT_EPSCF> scf) { this->input_epscf = scf; };
   void set_molecule(std::shared_ptr<POLYQUANT_MOLECULE> molecule) { this->input_molecule = molecule; };
 
-  mutable std::vector<double> diagonal_Hii;
+  mutable Eigen::Matrix<double, Eigen::Dynamic, 1> diagonal_Hii;
   void precompute_diagonal_Slater_Condon() const;
   double Slater_Condon(int i_det, int j_det) const;
 
