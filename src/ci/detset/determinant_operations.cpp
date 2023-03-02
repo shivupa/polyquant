@@ -11,7 +11,6 @@ template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(const 
 }
 
 template <typename T> int POLYQUANT_DETSET<T>::num_excitation(const std::pair<std::vector<T>, std::vector<T>> &Di, const std::pair<std::vector<T>, std::vector<T>> &Dj) const {
-  int excitation_degree = 0;
   return single_spin_num_excitation(Di.first, Dj.first) + single_spin_num_excitation(Di.second, Dj.second);
 }
 
