@@ -579,8 +579,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
   std::vector<libint2::Engine> engines;
   engines.resize(nthreads);
   engines[0] = libint2::Engine(obtype, std::max(shells_a.max_nprim(), shells_b.max_nprim()), std::max(shells_a.max_l(), shells_b.max_l()), 0);
-  engines[0].set(libint2::ScreeningMethod::SchwarzInf);
-  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  // engines[0].set(libint2::ScreeningMethod::SchwarzInf);
+  engines[0].set_precision(0.0); // std::numeric_limits<double>::epsilon());
   if (nthreads > 1) {
     for (auto i = 1ul; i < nthreads; i++) {
       engines[i] = engines[0];
@@ -633,8 +633,9 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
-            engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
-                                                                                               shellpairdata_kl);
+            // engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
+            //                                                                                    shellpairdata_kl);
+            engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
             for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
