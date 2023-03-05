@@ -2,7 +2,7 @@
 #include "ci/determinant_set.hpp"
 
 namespace polyquant {
-template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx) {
+template <typename T> void POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx) {
   // int symm_idx = -1;
   std::vector<int> occ, virt;
   occ.clear();
@@ -31,8 +31,6 @@ template <typename T> int POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const 
       symm_idx = this->input_symmetry->direct_product_table(symm_idx, this->input_epscf->symm_label_idxs[idx_part][beta_idx][shifted_i_occ]);
     }
   }
-
-  return symm_idx;
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
