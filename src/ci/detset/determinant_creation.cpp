@@ -36,7 +36,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
 
   Polyquant_cout("Creating det " + alpha_bit_string_for_printing + " " + beta_bit_string_for_printing + " for particle " + std::to_string(idx_part) + " of the following irrep " +
                  this->input_symmetry->irrep_names[idx_part][symm_idx]);
- }
+}
 
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const {
   std::vector<int> occ, virt;

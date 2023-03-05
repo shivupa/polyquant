@@ -437,7 +437,7 @@ void POLYQUANT_EPCI::print_success() {
           auto i_unfold = this->detset.det_idx_unfold(i);
           std::stringstream unfold_string;
           if (this->verbose) {
-              unfold_string << i << ", unfolded: ";
+            unfold_string << i << ", unfolded: ";
           }
           for (auto unfold_idx : i_unfold) {
             unfold_string << unfold_idx;
@@ -586,10 +586,10 @@ void POLYQUANT_EPCI::run() {
   for (auto fc_energy : this->detset.frozen_core_energy) {
     frozen_core_shift += fc_energy;
   }
-  Scalar constant_shift = this->input_molecule->E_nuc + frozen_core_shift;
-  auto hf_det_ene = this->detset.diagonal_Hii[0];
-  constant_shift += hf_det_ene;
-  this->detset.diagonal_Hii.array() -= hf_det_ene;
+  this->constant_shift = this->input_molecule->E_nuc + frozen_core_shift;
+  this->hf_det_energy = this->detset.diagonal_Hii[0];
+  this->constant_shift += this->hf_det_energy;
+  this->detset.diagonal_Hii.array() -= this->hf_det_energy;
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);
 
   if (this->detset.build_matrix == false) {

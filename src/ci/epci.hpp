@@ -131,8 +131,11 @@ public:
   std::vector<double> expected_S2;
   std::vector<double> spin_penalty;
   double default_spin_penalty = 0.1;
-
   double det_print_threshold = 0.01;
+  // this is how much the diagonal values of the hamiltonian are shifted by
+  double hf_det_energy = 0.0;
+  // this is how much to shift the eigenvalues (hf_det_energy + e_nuc + e_fc)
+  double constant_shift = 0.0;
 };
 } // namespace polyquant
 #endif
