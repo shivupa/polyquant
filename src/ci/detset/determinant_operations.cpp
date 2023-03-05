@@ -73,6 +73,11 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
     T m = high & (bit_kind_size - 1);
     T n = low & (bit_kind_size - 1);
 
+    // since we use a vector with the highest orbital on the right-most bit
+    // we need to change j and k to be enumerating from the end of the list
+    j = Di.size() - j - 1;
+    k = Di.size() - k - 1;
+
     if (j == k) {
       nperm += std::popcount(Di[j] & (((1 << m) - 1) & (~(1 << n) + 1)));
     } else {
