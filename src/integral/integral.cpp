@@ -284,7 +284,7 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                     for (auto shell_s_bf = shell_s_bf_start; shell_s_bf < shell_s_bf_start + shell_s_bf_size; ++shell_s_bf) {
                       auto eri_pqrs = buf_1234[shell_pqrs_bf];
                       shell_pqrs_bf++;
-                      if (eri_pqrs != 0) {
+                      if (eri_pqrs != 0.0) {
                         for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
                           if (shell_i_bf >= frozen_core[quantum_part_a_idx] && shell_i_bf < (mo_coeffs_a.cols() - deleted_virtual[quantum_part_a_idx])) {
                             auto C_pi = mo_coeffs_a(shell_p_bf, shell_i_bf);
