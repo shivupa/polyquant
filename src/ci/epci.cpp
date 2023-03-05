@@ -436,6 +436,9 @@ void POLYQUANT_EPCI::print_success() {
         if (std::abs(this->C_ci(i, state_idx)) > this->det_print_threshold) {
           auto i_unfold = this->detset.det_idx_unfold(i);
           std::stringstream unfold_string;
+          if (this->verbose) {
+              unfold_string << i << ", unfolded: ";
+          }
           for (auto unfold_idx : i_unfold) {
             unfold_string << unfold_idx;
             unfold_string << " ";
@@ -552,13 +555,8 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
         particle_filename = quantum_part_a_key + "_" + quantum_part_b_key + "_" + filename;
       }
       POLYQUANT_FCIDUMP fcidump_f(particle_filename);
-      // todo: learn about this-> references
       fcidump_f.dump(num_mo, num_part_total, ms2, restricted, MO_symmetry_labels, isym, point_group, this->input_integral, E_constant, MO_a_energy, MO_b_energy, quantum_part_a_idx,
                      quantum_part_b_idx);
-      // need integrals
-      // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> mo_one_body_ints;
-      // std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> mo_two_body_ints;
-      // call function in IO
       quantum_part_b_idx++;
     }
     quantum_part_a_idx++;
