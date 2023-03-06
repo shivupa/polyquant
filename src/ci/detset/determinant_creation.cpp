@@ -8,8 +8,10 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   int symm_idx = -1;
   int beta_idx = this->input_epscf->symm_label_idxs[idx_part].size() - 1;
 
-  alpha_bit_string.resize(max_orb[idx_part], '0');
-  beta_bit_string.resize(max_orb[idx_part], '0');
+  T num_int = max_orb[idx_part] >> 64 + 1;
+
+  alpha_bit_string.resize(num_int*64, '0');
+  beta_bit_string.resize( num_int*64, '0');
 
   for (auto i_occ : occ[0]) {
     alpha_bit_string[i_occ] = '1';
@@ -39,6 +41,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const {
+  T bit_kind_shift = 6; // 2**6 = 64
+  T bit_kind_size = 64; // 64bit
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
@@ -54,18 +58,20 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
       std::vector<T> temp_det(det);
       // https://stackoverflow.com/a/47990
       for (auto &occbit : iocc) {
-        auto int_idx = (temp_det.size() - 1) - (occbit / 64ul);
-        temp_det[int_idx] &= ~(1UL << (occbit % 64ul));
+        auto int_idx = (temp_det.size() - 1) - (occbit >> bit_kind_shift);
+        temp_det[int_idx] &= ~(1UL << (occbit & (bit_kind_size-1)));
       }
       for (auto &virtbit : ivirt) {
-        auto int_idx = (temp_det.size() - 1) - (virtbit / 64ul);
-        temp_det[int_idx] |= 1UL << (virtbit % 64ul);
+        auto int_idx = (temp_det.size() - 1) - (virtbit >> bit_kind_shift);
+        temp_det[int_idx] |= 1UL << (virtbit & (bit_kind_size-1));
       }
       return_dets.push_back(temp_det);
     }
   }
 }
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const {
+  T bit_kind_shift = 6; // 2**6 = 64
+  T bit_kind_size = 64; // 64bit
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
@@ -81,12 +87,12 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_set(int id
       std::vector<T> temp_det(det);
       // https://stackoverflow.com/a/47990
       for (auto &occbit : iocc) {
-        auto int_idx = (temp_det.size() - 1) - (occbit / 64ul);
-        temp_det[int_idx] &= ~(1UL << (occbit % 64ul));
+        auto int_idx = (temp_det.size() - 1) - (occbit >> bit_kind_shift);
+        temp_det[int_idx] &= ~(1UL << (occbit & (bit_kind_size-1)));
       }
       for (auto &virtbit : ivirt) {
-        auto int_idx = (temp_det.size() - 1) - (virtbit / 64ul);
-        temp_det[int_idx] |= 1UL << (virtbit % 64ul);
+        auto int_idx = (temp_det.size() - 1) - (virtbit >> bit_kind_shift);
+        temp_det[int_idx] |= 1UL << (virtbit & (bit_kind_size-1));
       }
       return_dets.insert(temp_det);
     }
@@ -379,6 +385,8 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
 
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int idx_part, int idx_spin, int i) const {
+  T bit_kind_shift = 6; // 2**6 = 64
+  T bit_kind_size = 64; // 64bit
   auto det = unique_dets[idx_part][idx_spin][i];
   auto nfc = this->frozen_core[idx_part];
   if (nfc == 0) {
