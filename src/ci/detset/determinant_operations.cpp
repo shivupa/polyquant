@@ -67,7 +67,7 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
   for (auto l = 0; l < holes.size(); l++) {
     // notice compared to qp2 we add 1 to low rather than subtracting from high because we store 0 indexed things in parts and holes
     T high = std::max(parts[l], holes[l]);
-    T low = std::min(parts[l], holes[l])+1;
+    T low = std::min(parts[l], holes[l]) + 1;
     // what int are we in?
     T j = low >> bit_kind_shift;
     T k = high >> bit_kind_shift;
@@ -80,10 +80,10 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
     T n = low & (bit_kind_size - 1);
 
     if (j == k) {
-        // create a mask for the space between high and low in the same int
+      // create a mask for the space between high and low in the same int
       nperm += std::popcount(Di[j] & (((1 << m) - 1) & (~(1 << n) + 1)));
     } else {
-        // create a mask for the space between high and low in different ints
+      // create a mask for the space between high and low in different ints
       nperm += std::popcount(Di[j] & ((~(0) & (~(1 << n) + 1))));
       nperm += std::popcount(Di[k] & (((1 << m) - 1)));
       for (int i = k + 1; i < j; i++) {
