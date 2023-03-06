@@ -271,8 +271,11 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
       auto ex = test_calc.ci_calc->detset.single_spin_num_excitation(test_calc.ci_calc->detset.unique_dets[0][0][idx_i_unfold[0]], test_calc.ci_calc->detset.unique_dets[0][0][idx_j_unfold[0]]);
       ex += test_calc.ci_calc->detset.single_spin_num_excitation(test_calc.ci_calc->detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc->detset.unique_dets[0][1][idx_j_unfold[1]]);
       auto elem_thru_SC = test_calc.ci_calc->detset.Slater_Condon(i, j);
+      if (i == j) {
+        elem_thru_SC += test_calc.ci_calc->hf_det_energy;
+      }
       auto diff = elem_thru_SC - reference_values[count][0];
-      REQUIRE_THAT(elem_thru_SC, Catch::Matchers::WithinAbs(reference_values[count][0], 1e-4));
+      CHECK_THAT(elem_thru_SC, Catch::Matchers::WithinAbs(reference_values[count][0], 1e-4));
       auto idx_part = 0;
       auto det_i_a = test_calc.ci_calc->detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
       auto det_i_b = test_calc.ci_calc->detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
@@ -324,8 +327,11 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) CI slow.") {
       auto ex = test_calc.ci_calc->detset.single_spin_num_excitation(test_calc.ci_calc->detset.unique_dets[0][0][idx_i_unfold[0]], test_calc.ci_calc->detset.unique_dets[0][0][idx_j_unfold[0]]);
       ex += test_calc.ci_calc->detset.single_spin_num_excitation(test_calc.ci_calc->detset.unique_dets[0][1][idx_i_unfold[1]], test_calc.ci_calc->detset.unique_dets[0][1][idx_j_unfold[1]]);
       auto elem_thru_SC = test_calc.ci_calc->detset.Slater_Condon(i, j);
+      if (i == j) {
+        elem_thru_SC += test_calc.ci_calc->hf_det_energy;
+      }
       auto diff = elem_thru_SC - reference_values[count][0];
-      REQUIRE_THAT(elem_thru_SC, Catch::Matchers::WithinAbs(reference_values[count][0], 1e-4));
+      CHECK_THAT(elem_thru_SC, Catch::Matchers::WithinAbs(reference_values[count][0], 1e-4));
       auto idx_part = 0;
       auto det_i_a = test_calc.ci_calc->detset.get_det(idx_part, 0, idx_i_unfold[idx_part * 2 + 0]);
       auto det_i_b = test_calc.ci_calc->detset.get_det(idx_part, 1, idx_i_unfold[idx_part * 2 + 1]);
@@ -374,8 +380,11 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) explicit ham.") {
       auto elem_from_polyquant = test_calc.ci_calc->detset.ham.coeff(i, j);
       if (j < i)
         elem_from_polyquant = test_calc.ci_calc->detset.ham.coeff(j, i);
+      if (i == j) {
+        elem_from_polyquant += test_calc.ci_calc->hf_det_energy;
+      }
       auto diff = elem_from_polyquant - reference_values[count][0];
-      REQUIRE_THAT(elem_from_polyquant, Catch::Matchers::WithinAbs(reference_values[count][0], 1e-4));
+      CHECK_THAT(elem_from_polyquant, Catch::Matchers::WithinAbs(reference_values[count][0], 1e-4));
       count++;
     }
   }
