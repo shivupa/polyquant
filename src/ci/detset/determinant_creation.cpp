@@ -394,29 +394,37 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
   if (nfc == 0) {
     return det;
   }
+
+  T num_int = ((max_orb[idx_part]+nfc) >> bit_kind_shift) + 1;
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
-  const uint64_t nbit = 64; // sizeof(T) * 8;
   std::vector<T> new_det;
+  if (num_int != det.size()){
+      uint64_t j = 0;
+    auto begin = bit_kind_size - nfc;
+    auto end = bit_kind_size;
+    uint64_t mask = (1 << (end - begin)) - 1;
+    // set in this int
+    j |= ((det[0] >> begin) & mask);
+    new_det.push_back(j);
+  }
   for (auto i : det) {
     // std::cout << "SHIV    ";
-    // std::bitset<nbit> b(i);
+    // std::bitset<bit_kind_size> b(i);
     // std::cout << b << "         " << b.to_ulong() << "             ";
     // extract the bits from the next int that would get bumped over
-    auto begin = nbit - nfc;
-    auto end = nbit;
+    auto begin = bit_kind_size - nfc;
+    auto end = bit_kind_size;
     uint64_t mask = (1 << (end - begin)) - 1;
     uint64_t j = i << nfc;
     // set in this int
     if (count + 1 != det.size() - 1) {
-      j = j | ((det[count + 1] >> begin) & mask);
+      j |= ((det[count + 1] >> begin) & mask);
     }
     // pad with fc orbs
-    if (count == det.size() - 1) {
-      for (auto fc = 0; fc < nfc; fc++) {
-        j |= 1UL << fc;
-      }
-    }
+    // first we create a mask for nfc number of orbitals
+    // and flip the mask
+    j |= ~(~(0) & (~(1<<nfc)+1));
     count++;
 
     // std::bitset<nbit> c(j);
