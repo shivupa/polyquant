@@ -4,14 +4,16 @@
 namespace polyquant {
 
 template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::vector<std::vector<int>> &occ) {
+  T bit_kind_shift = 6; // 2**6 = 64
+  T bit_kind_size = 64; // 64bit
   std::string alpha_bit_string, beta_bit_string;
   int symm_idx = -1;
   int beta_idx = this->input_epscf->symm_label_idxs[idx_part].size() - 1;
 
-  T num_int = max_orb[idx_part] >> 64 + 1;
+  T num_int = (max_orb[idx_part] >> bit_kind_shift) + 1;
 
-  alpha_bit_string.resize(num_int*64, '0');
-  beta_bit_string.resize( num_int*64, '0');
+  alpha_bit_string.resize(num_int * 64, '0');
+  beta_bit_string.resize(num_int * 64, '0');
 
   for (auto i_occ : occ[0]) {
     alpha_bit_string[i_occ] = '1';
@@ -59,11 +61,11 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
       // https://stackoverflow.com/a/47990
       for (auto &occbit : iocc) {
         auto int_idx = (temp_det.size() - 1) - (occbit >> bit_kind_shift);
-        temp_det[int_idx] &= ~(1UL << (occbit & (bit_kind_size-1)));
+        temp_det[int_idx] &= ~(1UL << (occbit & (bit_kind_size - 1)));
       }
       for (auto &virtbit : ivirt) {
         auto int_idx = (temp_det.size() - 1) - (virtbit >> bit_kind_shift);
-        temp_det[int_idx] |= 1UL << (virtbit & (bit_kind_size-1));
+        temp_det[int_idx] |= 1UL << (virtbit & (bit_kind_size - 1));
       }
       return_dets.push_back(temp_det);
     }
@@ -88,11 +90,11 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_set(int id
       // https://stackoverflow.com/a/47990
       for (auto &occbit : iocc) {
         auto int_idx = (temp_det.size() - 1) - (occbit >> bit_kind_shift);
-        temp_det[int_idx] &= ~(1UL << (occbit & (bit_kind_size-1)));
+        temp_det[int_idx] &= ~(1UL << (occbit & (bit_kind_size - 1)));
       }
       for (auto &virtbit : ivirt) {
         auto int_idx = (temp_det.size() - 1) - (virtbit >> bit_kind_shift);
-        temp_det[int_idx] |= 1UL << (virtbit & (bit_kind_size-1));
+        temp_det[int_idx] |= 1UL << (virtbit & (bit_kind_size - 1));
       }
       return_dets.insert(temp_det);
     }
