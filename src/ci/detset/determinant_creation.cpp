@@ -424,7 +424,9 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     // pad with fc orbs
     // first we create a mask for nfc number of orbitals
     // and flip the mask
-    j |= ~(~(0) & (~(1<<nfc)+1));
+    if (count == det.size() - 1) {
+        j |= ~(~(0) & (~(1<<nfc)+1));
+    }
     count++;
 
     // std::bitset<nbit> c(j);
