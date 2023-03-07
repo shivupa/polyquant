@@ -191,6 +191,9 @@ public:
   bool slow_diag = false;
   bool build_matrix = true;
   double screening_threshold = 0.0;
+
+  const T bit_kind_shift = 6;                   // TODO this only applies to 64bit right now
+  static const T bit_kind_size = 8 * sizeof(T); // TODO this only applies to 64bit right now
 };
 } // namespace polyquant
 #endif

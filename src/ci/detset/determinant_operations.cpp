@@ -19,7 +19,7 @@ template <typename T> void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, st
     auto H = (Di[i] ^ Dj[i]) & Di[i];
     while (H != 0) {
       auto position = std::countr_zero(H);
-      auto orb_idx = ((Di.size() - i - 1) * 64) + position;
+      auto orb_idx = ((Di.size() - i - 1) * bit_kind_size) + position;
       holes.push_back(orb_idx);
       H &= ~(1UL << position);
     }
@@ -32,7 +32,7 @@ template <typename T> void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, st
     auto P = (Di[i] ^ Dj[i]) & Dj[i];
     while (P != 0) {
       auto position = std::countr_zero(P);
-      auto orb_idx = ((Di.size() - i - 1) * 64) + position;
+      auto orb_idx = ((Di.size() - i - 1) * bit_kind_size) + position;
       parts.push_back(orb_idx);
       P &= ~(1UL << position);
     }
@@ -42,8 +42,6 @@ template <typename T> void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, st
 
 template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const {
   T nperm = 0;
-  T bit_kind_shift = 6; // 2**6 = 64
-  T bit_kind_size = 64; // 64bit
   std::vector<double> phase_list = {1.0, -1.0};
   // only applicable to uint64
 
@@ -127,9 +125,9 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
 
 template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const {
   for (auto i = 0; i < D.size(); i++) {
-    std::bitset<64> D_bitset(D[i]);
+    std::bitset<bit_kind_size> D_bitset(D[i]);
     for (auto j = 0; j < D_bitset.size(); j++) {
-      auto orb_idx = ((D.size() - i - 1) * 64) + j;
+      auto orb_idx = ((D.size() - i - 1) * bit_kind_size) + j;
       // max_orb - 1 because we are dealing with the index
       if (orb_idx >= this->max_orb[idx_part]) {
         break;

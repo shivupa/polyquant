@@ -33,7 +33,6 @@ TEST_CASE("CI: one body MO basis", "[CI]") {
   auto idx = 0;
   for (auto i = 0; i < num_mo; i++) {
     for (auto j = i; j < num_mo; j++) {
-
       std::cout << i << "  " << j << "     " << test_calc.scf_calc->input_integral->mo_one_body_ints[0][0](i, j) << "     " << reference_values[i][j] << std::endl;
       REQUIRE_THAT(std::abs(test_calc.scf_calc->input_integral->mo_one_body_ints[0][0](i, j)), Catch::Matchers::WithinAbs(std::abs(reference_values[i][j]), 1e-5));
     }
@@ -69,6 +68,7 @@ TEST_CASE("CI: two body MO basis", "[CI]") {
     }
   }
 }
+
 TEST_CASE("CI: setup/detset construction ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
@@ -128,6 +128,7 @@ TEST_CASE("CI: setup/detset construction ", "[CI]") {
   }
   REQUIRE(det_found);
 }
+
 TEST_CASE("CI: frozen core energy ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
@@ -143,6 +144,7 @@ TEST_CASE("CI: frozen core energy ", "[CI]") {
   // Unverified number
   REQUIRE_THAT(test_ci.detset.frozen_core_energy[0], Catch::Matchers::WithinAbs(-71.3745646924, POLYQUANT_TEST_EPSILON_LOOSE));
 }
+
 TEST_CASE("CI: get holes ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
   std::bitset<8> hf_det("0011111");
@@ -171,7 +173,17 @@ TEST_CASE("CI: get holes ", "[CI]") {
   REQUIRE(holes.size() == 2);
   REQUIRE(holes[0] == 64 + 1);
   REQUIRE(holes[1] == 64 + 6);
+
+  holes.clear();
+  big_hf_det_vec[1] = 1ul;
+  big_double_ext_vec[1] = 32ul;
+  detset.get_holes(big_hf_det_vec, big_double_ext_vec, holes);
+  REQUIRE(holes.size() == 3);
+  REQUIRE(holes[0] == 0);
+  REQUIRE(holes[1] == 64 + 1);
+  REQUIRE(holes[2] == 64 + 6);
 }
+
 TEST_CASE("CI: get parts ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
   std::bitset<8> hf_det("0011111");
@@ -199,8 +211,19 @@ TEST_CASE("CI: get parts ", "[CI]") {
   REQUIRE(parts.size() == 2);
   REQUIRE(parts[0] == 64 + 7);
   REQUIRE(parts[1] == 64 + 8);
+
+  parts.clear();
+  big_hf_det_vec[1] = 1ul;
+  big_double_ext_vec[1] = 32ul;
+  detset.get_parts(big_hf_det_vec, big_double_ext_vec, parts);
+  REQUIRE(parts.size() == 3);
+  REQUIRE(parts[0] == 5);
+  REQUIRE(parts[1] == 64 + 7);
+  REQUIRE(parts[2] == 64 + 8);
 }
+
 TEST_CASE("CI: get phase ", "[CI]") {
+  // verified with respect to the fortran code in arXiv:1311.6244
   POLYQUANT_DETSET<uint64_t> detset;
   std::bitset<8> hf_det("0011111");
   std::vector<uint64_t> hf_det_vec = {hf_det.to_ulong()};

@@ -4,16 +4,14 @@
 namespace polyquant {
 
 template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::vector<std::vector<int>> &occ) {
-  T bit_kind_shift = 6; // 2**6 = 64
-  T bit_kind_size = 64; // 64bit
   std::string alpha_bit_string, beta_bit_string;
   int symm_idx = -1;
   int beta_idx = this->input_epscf->symm_label_idxs[idx_part].size() - 1;
 
   T num_int = (max_orb[idx_part] >> bit_kind_shift) + 1;
 
-  alpha_bit_string.resize(num_int * 64, '0');
-  beta_bit_string.resize(num_int * 64, '0');
+  alpha_bit_string.resize(num_int * bit_kind_size, '0');
+  beta_bit_string.resize(num_int * bit_kind_size, '0');
 
   for (auto i_occ : occ[0]) {
     alpha_bit_string[i_occ] = '1';
@@ -28,9 +26,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   std::vector<T> alpha_det;
   std::vector<T> beta_det;
 
-  for (auto i = 0ul; i < alpha_bit_string.length(); i += 64) {
-    alpha_det.push_back(std::stoull(alpha_bit_string.substr(i, 64), 0, 2));
-    beta_det.push_back(std::stoull(beta_bit_string.substr(i, 64), 0, 2));
+  for (auto i = 0ul; i < alpha_bit_string.length(); i += bit_kind_size) {
+    alpha_det.push_back(std::stoull(alpha_bit_string.substr(i, bit_kind_size), 0, 2));
+    beta_det.push_back(std::stoull(beta_bit_string.substr(i, bit_kind_size), 0, 2));
   }
   unique_dets[idx_part][0].push_back(alpha_det);
   unique_dets[idx_part][1].push_back(beta_det);
@@ -43,8 +41,6 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const {
-  T bit_kind_shift = 6; // 2**6 = 64
-  T bit_kind_size = 64; // 64bit
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
@@ -72,8 +68,6 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
   }
 }
 template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const {
-  T bit_kind_shift = 6; // 2**6 = 64
-  T bit_kind_size = 64; // 64bit
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();
@@ -361,7 +355,7 @@ template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
         ss << "    ";
         std::string det;
         for (auto i_detframe : i_det) {
-          det += std::bitset<64>(i_detframe).to_string();
+          det += std::bitset<bit_kind_size>(i_detframe).to_string();
           det += " ";
         }
         std::reverse(det.begin(), det.end());
@@ -387,23 +381,21 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
 
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int idx_part, int idx_spin, int i) const {
-  T bit_kind_shift = 6; // 2**6 = 64
-  T bit_kind_size = 64; // 64bit
   auto det = unique_dets[idx_part][idx_spin][i];
   auto nfc = this->frozen_core[idx_part];
   if (nfc == 0) {
     return det;
   }
 
-  T num_int = ((max_orb[idx_part]+nfc) >> bit_kind_shift) + 1;
+  T num_int = ((max_orb[idx_part] + nfc) >> bit_kind_shift) + 1;
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
   std::vector<T> new_det;
-  if (num_int != det.size()){
-      uint64_t j = 0;
-    auto begin = bit_kind_size - nfc;
-    auto end = bit_kind_size;
-    uint64_t mask = (1 << (end - begin)) - 1;
+  if (num_int != det.size()) {
+    T j = 0;
+    T begin = bit_kind_size - nfc;
+    T end = bit_kind_size;
+    T mask = (1 << (end - begin)) - 1;
     // set in this int
     j |= ((det[0] >> begin) & mask);
     new_det.push_back(j);
@@ -415,8 +407,8 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     // extract the bits from the next int that would get bumped over
     auto begin = bit_kind_size - nfc;
     auto end = bit_kind_size;
-    uint64_t mask = (1 << (end - begin)) - 1;
-    uint64_t j = i << nfc;
+    T mask = (1 << (end - begin)) - 1;
+    T j = i << nfc;
     // set in this int
     if (count + 1 != det.size() - 1) {
       j |= ((det[count + 1] >> begin) & mask);
@@ -425,7 +417,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     // first we create a mask for nfc number of orbitals
     // and flip the mask
     if (count == det.size() - 1) {
-        j |= ~(~(0) & (~(1<<nfc)+1));
+      j |= ~(~(0) & (~(1 << nfc) + 1));
     }
     count++;
 
