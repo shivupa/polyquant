@@ -125,6 +125,7 @@ public:
   int num_subspace_vec = 5;
   bool verbose = false;
   bool exact_diag = false;
+  bool symmetrize_NOs = true;
 
   bool first_order_spin_penalty = false;
   bool second_order_spin_penalty = false;

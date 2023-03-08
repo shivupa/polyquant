@@ -177,9 +177,9 @@ void POLYQUANT_EPCI::resize_for_NOs() {
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
         dm1[state_vec_idx][quantum_part_idx][1].setZero(num_basis, num_basis);
         this->symm_label_idxs[state_vec_idx][quantum_part_idx][0].resize(num_basis);
-        this->symm_labels[state_vec_idx][quantum_part_idx][0].resize(num_basis, "A");
+        this->symm_labels[state_vec_idx][quantum_part_idx][0].resize(num_basis, "?");
         this->symm_label_idxs[state_vec_idx][quantum_part_idx][1].resize(num_basis);
-        this->symm_labels[state_vec_idx][quantum_part_idx][1].resize(num_basis, "A");
+        this->symm_labels[state_vec_idx][quantum_part_idx][1].resize(num_basis, "?");
       } else {
         this->C_nso[state_vec_idx][quantum_part_idx].resize(1);
         this->symm_label_idxs[state_vec_idx][quantum_part_idx].resize(1);
@@ -190,7 +190,7 @@ void POLYQUANT_EPCI::resize_for_NOs() {
         dm1[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
         this->symm_label_idxs[state_vec_idx][quantum_part_idx][0].resize(num_basis);
-        this->symm_labels[state_vec_idx][quantum_part_idx][0].resize(num_basis, "A");
+        this->symm_labels[state_vec_idx][quantum_part_idx][0].resize(num_basis, "?");
       }
       quantum_part_idx++;
     }
@@ -308,7 +308,7 @@ void POLYQUANT_EPCI::calculate_NOs() {
       quantum_part_idx++;
     }
 
-    if (this->input_symmetry->do_symmetry == true) {
+    if (this->input_symmetry->do_symmetry && this->symmetrize_NOs) {
       this->input_epscf->symmetrize_orbitals(this->C_nso[state_vec_idx], this->symm_label_idxs[state_vec_idx], this->symm_labels[state_vec_idx]);
     }
   }
