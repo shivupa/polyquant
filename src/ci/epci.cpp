@@ -587,7 +587,7 @@ void POLYQUANT_EPCI::run() {
     frozen_core_shift += fc_energy;
   }
   this->constant_shift = this->input_molecule->E_nuc + frozen_core_shift;
-  this->hf_det_energy = this->detset.diagonal_Hii[0];
+  this->hf_det_energy = 0.0; //this->detset.diagonal_Hii[0];
   this->constant_shift += this->hf_det_energy;
   this->detset.diagonal_Hii.array() -= this->hf_det_energy;
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);
