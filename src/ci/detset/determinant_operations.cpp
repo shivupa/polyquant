@@ -15,26 +15,30 @@ template <typename T> int POLYQUANT_DETSET<T>::num_excitation(const std::pair<st
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_holes(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes) const {
+  T one = 1;
+  T zero = 0;
   for (auto i = 0; i < Di.size(); i++) {
     auto H = (Di[i] ^ Dj[i]) & Di[i];
-    while (H != 0) {
+    while (H != zero) {
       auto position = std::countr_zero(H);
       auto orb_idx = ((Di.size() - i - 1) * bit_kind_size) + position;
       holes.push_back(orb_idx);
-      H &= ~(1UL << position);
+      H &= ~(one << position);
     }
   }
   std::sort(holes.begin(), holes.end());
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &parts) const {
+  T one = 1;
+  T zero = 0;
   for (auto i = 0; i < Di.size(); i++) {
     auto P = (Di[i] ^ Dj[i]) & Dj[i];
-    while (P != 0) {
+    while (P != zero) {
       auto position = std::countr_zero(P);
       auto orb_idx = ((Di.size() - i - 1) * bit_kind_size) + position;
       parts.push_back(orb_idx);
-      P &= ~(1UL << position);
+      P &= ~(one << position);
     }
   }
   std::sort(parts.begin(), parts.end());
@@ -42,48 +46,58 @@ template <typename T> void POLYQUANT_DETSET<T>::get_parts(std::vector<T> &Di, st
 
 template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, std::vector<T> &Dj, std::vector<int> &holes, std::vector<int> &parts) const {
   T nperm = 0;
+  T one = 1;
+  T zero = 0;
   std::vector<double> phase_list = {1.0, -1.0};
   // only applicable to uint64
 
-  // std::vector<T> mask;
-  // mask.resize(Di.size());
-  // std::fill(mask.begin(), mask.end(), 0);
-  // for testing
-  // if (!std::is_sorted(holes.begin(), holes.end())) {
-  //   APP_ABORT("For phase computation, holes are not sorted!");
-  // }
-  // if (!std::is_sorted(parts.begin(), parts.end())) {
-  //   APP_ABORT("For phase computation, parts are not sorted!");
-  // }
-  // if (holes.size() != parts.size()) {
-  //   APP_ABORT("For phase computation, num holes != num parts");
-  // }
-  // if (holes.size() > 2 and holes.size() > 0) {
-  //   APP_ABORT("For phase computation, num holes/parts > 2");
-  // }
-
   for (auto l = 0; l < holes.size(); l++) {
     // notice compared to qp2 we add 1 to low rather than subtracting from high because we store 0 indexed things in parts and holes
+    // std::cout << " phase cal ";
+    // std::cout << " holes[l] parts[l] " << holes[l] << " " << parts[l];
     T high = std::max(parts[l], holes[l]);
-    T low = std::min(parts[l], holes[l]) + 1;
+    T low = std::min(parts[l], holes[l]) + one;
+    // std::cout << " high low " << high << " " << low;
     // what int are we in?
     T j = low >> bit_kind_shift;
     T k = high >> bit_kind_shift;
     // since we use a vector with the highest orbital on the right-most bit
     // we need to change j and k to be enumerating from the end of the list
-    j = Di.size() - j - 1;
-    k = Di.size() - k - 1;
+    j = Di.size() - j - one;
+    k = Di.size() - k - one;
+    // std::cout << " j k  " << j << " " << k;
     // what bit in this int?
-    T m = high & (bit_kind_size - 1);
-    T n = low & (bit_kind_size - 1);
+    T m = high & (bit_kind_size - one);
+    T n = low & (bit_kind_size - one);
+    // std::cout << " m n  " << m << " " << n;
+    // std::cout << std::endl;
 
     if (j == k) {
       // create a mask for the space between high and low in the same int
-      nperm += std::popcount(Di[j] & (((1 << m) - 1) & (~(1 << n) + 1)));
+      //T mask = (((1ul << m) - 1ul) & (~(1ul << n) + 1ul));
+      //T bitstring = Di[j];
+      //std::cout << "bitstring" << std::endl;
+      //std::cout << bitstring << " " << std::bitset<64>(bitstring).to_string() << std::endl;
+      //std::cout << "mask" << std::endl;
+      //std::cout << mask << " " << std::bitset<64>(mask).to_string() << std::endl;
+      nperm += std::popcount(Di[j] & (((one << m) - one) & (~(one << n) + one)));
     } else {
       // create a mask for the space between high and low in different ints
-      nperm += std::popcount(Di[j] & ((~(0) & (~(1 << n) + 1))));
-      nperm += std::popcount(Di[k] & (((1 << m) - 1)));
+      //T mask = ((~(0ul) & (~(1ul << n) + 1ul)));
+      //T bitstring = Di[j];
+      nperm += std::popcount(Di[j] & ((~(zero) & (~(one << n) + one))));
+      // std::cout << "bitstring" << std::endl;
+      // std::cout << bitstring << " " << std::bitset<64>(bitstring).to_string() << std::endl;
+      // std::cout << "mask" << std::endl;
+      // std::cout << mask << " " << std::bitset<64>(mask).to_string() << std::endl;
+
+      // mask = (((1ul << m) - 1ul));
+      // bitstring = Di[k];
+      // std::cout << "bitstring" << std::endl;
+      // std::cout << bitstring << " " << std::bitset<64>(bitstring).to_string() << std::endl;
+      // std::cout << "mask" << std::endl;
+      // std::cout << mask << " " << std::bitset<64>(mask).to_string() << std::endl;
+      nperm += std::popcount(Di[k] & (((one << m) - one)));
       for (int i = k + 1; i < j; i++) {
         nperm += std::popcount(Di[i]);
       }
@@ -99,28 +113,6 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
     }
   }
   return phase_list[nperm & 1];
-  /*
-  for (auto i = 0; i < holes.size(); i++) {
-    T k = high / 64;
-    T m = high % 64;
-    T j = low / 64;
-    T n = low % 64;
-    for (auto l = j; l < k; l++) {
-      mask[l] = ~(0);
-    }
-    mask[k] = (1 << m) - 1;
-    // mask[j] = mask[j] & (~(1ul << ((n + 1) + 1)));
-    mask[j] = mask[j] & (~(1 << (n + 1)) + 1);
-    for (auto l = j; l <= k; l++) {
-      // nperm += std::popcount(Di[j] & mask[l]);
-      nperm += std::popcount(Di[l] & mask[l]);
-    }
-  }
-  if ((holes.size() == 2) && (holes[1] < parts[0] || holes[0] > parts[1])) {
-    nperm++;
-  }
-  return std::pow(-1.0, nperm);
-  */
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const {

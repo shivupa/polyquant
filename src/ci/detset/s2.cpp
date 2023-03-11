@@ -4,6 +4,8 @@
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S_squared, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+  T one = 1;
+  T zero = 0;
   // only for restricted cases
   auto nthreads = omp_get_max_threads();
 
@@ -68,9 +70,9 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
           // num total unpaired alpha electrons
           auto num_a = 0;
           for (auto i_int = 0; i_int < n_int; i_int++) {
-            if (xor_vector[i_int] != 0ul) {
+            if (xor_vector[i_int] != zero) {
               num_total += std::popcount(xor_vector[i_int]);
-              if (na_vector[i_int] != 0ul) {
+              if (na_vector[i_int] != zero) {
                 num_a += std::popcount(na_vector[i_int]);
               }
             }
@@ -125,7 +127,6 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::create_S_sq_penalty(std::string type, std::vector<double> expected_S2, std::vector<double> spin_penalty) {
-
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto alpha = spin_penalty[quantum_part_idx];
@@ -157,6 +158,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_S_sq_penalty(std::string 
 template <typename T>
 void POLYQUANT_DETSET<T>::create_S_sq_minus_expected_S_sq_matrix_singleshot(Eigen::SparseMatrix<double, Eigen::RowMajor> &S2_pen, int quantum_part_idx, double expected_S2_for_part) {
 
+  T one = 1;
+  T zero = 0;
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
 
@@ -202,9 +205,9 @@ void POLYQUANT_DETSET<T>::create_S_sq_minus_expected_S_sq_matrix_singleshot(Eige
       auto num_total = 0;
       auto num_a = 0;
       for (auto i_int = 0; i_int < n_int; i_int++) {
-        if (xor_vector[i_int] != 0ul) {
+        if (xor_vector[i_int] != zero) {
           num_total += std::popcount(xor_vector[i_int]);
-          if (na_vector[i_int] != 0ul) {
+          if (na_vector[i_int] != zero) {
             num_a += std::popcount(na_vector[i_int]);
           }
         }
