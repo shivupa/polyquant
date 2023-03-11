@@ -338,8 +338,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
       }
     }
   }
+  /*
   this->ham.makeCompressed();
-
   for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto idet_unfold = det_idx_unfold(i_det);
     auto idx_I_A_det = idet_unfold[first_spin_idx];
@@ -532,6 +532,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
   //         ham.coeffRef(trip_elem.row(), trip_elem.col()) += trip_elem.value();
   //     }
   // }
+  */
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham() {
