@@ -140,8 +140,33 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_p
     get_parts(det_i_a, det_j_a, aparts);
     get_holes(det_i_b, det_j_b, bholes);
     get_parts(det_i_b, det_j_b, bparts);
-    phase *= get_phase(det_i_a, det_j_a, aholes, aparts);
-    phase *= get_phase(det_i_b, det_j_b, bholes, bparts);
+    auto aphase = get_phase(det_i_a, det_j_a, aholes, aparts);
+    auto bphase = get_phase(det_i_b, det_j_b, bholes, bparts);
+    phase *= aphase * bphase;
+    //std::cout << "det_i(" << i_unfold[idx_part * 2 + 0] << ", " << i_unfold[idx_part * 2 + 1] << ") = ";
+    //std::cout << "{";
+    //for ( auto i : det_i_a){
+    //    std::cout << i << ", ";
+    //}
+    //std::cout << "}, {";
+    //for ( auto i : det_i_b){
+    //    std::cout << i << ", ";
+    //}
+    //std::cout << "}" << std::endl;
+
+    //std::cout << "det_j(" << j_unfold[idx_part * 2 + 0] << ", " << j_unfold[idx_part * 2 + 1] << ") = ";
+    //std::cout << "{";
+    //for ( auto i : det_j_a){
+    //    std::cout << i << ", ";
+    //}
+    //std::cout << "}, {";
+    //for ( auto i : det_j_b){
+    //    std::cout << i << ", ";
+    //}
+    //std::cout << "}" << std::endl;
+
+    //std::cout << "ah ap bh bp :" << aholes[0] << " " <<aparts[0] << " " <<bholes[0] << " " <<bparts[0] << std::endl;
+    //std::cout << "aphase bphase : " << aphase << " " << bphase << std::endl;
     elem +=
         this->input_integral->mo_two_body_ints[idx_part][alpha_spin_idx][idx_part][beta_spin_idx](this->input_integral->idx2(aholes[0], aparts[0]), this->input_integral->idx2(bholes[0], bparts[0]));
     elem *= phase;
