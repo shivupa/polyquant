@@ -184,8 +184,8 @@ TEST_CASE("CI: get holes ", "[CI]") {
   REQUIRE(holes[2] == 64 + 6);
 
   holes.clear();
-  std::vector<uint64_t> bigger_hf_det_vec = {7,127};
-  std::vector<uint64_t> bigger_single_ext_vec = {519,63};
+  std::vector<uint64_t> bigger_hf_det_vec = {7, 127};
+  std::vector<uint64_t> bigger_single_ext_vec = {519, 63};
   detset.get_holes(bigger_hf_det_vec, bigger_single_ext_vec, holes);
   REQUIRE(holes.size() == 1);
   REQUIRE(holes[0] == 6);
@@ -229,8 +229,8 @@ TEST_CASE("CI: get parts ", "[CI]") {
   REQUIRE(parts[2] == 64 + 8);
 
   parts.clear();
-  std::vector<uint64_t> bigger_hf_det_vec = {7,127};
-  std::vector<uint64_t> bigger_single_ext_vec = {519,63};
+  std::vector<uint64_t> bigger_hf_det_vec = {7, 127};
+  std::vector<uint64_t> bigger_single_ext_vec = {519, 63};
   detset.get_parts(bigger_hf_det_vec, bigger_single_ext_vec, parts);
   REQUIRE(parts.size() == 1);
   REQUIRE(parts[0] == 73);
@@ -278,8 +278,8 @@ TEST_CASE("CI: get phase ", "[CI]") {
 
   holes.clear();
   parts.clear();
-  std::vector<uint64_t> bigger_hf_det_vec = {7,127};
-  std::vector<uint64_t> bigger_single_ext_vec = {519,63};
+  std::vector<uint64_t> bigger_hf_det_vec = {7, 127};
+  std::vector<uint64_t> bigger_single_ext_vec = {519, 63};
   detset.get_holes(bigger_hf_det_vec, bigger_single_ext_vec, holes);
   detset.get_parts(bigger_hf_det_vec, bigger_single_ext_vec, parts);
   phase = detset.get_phase(bigger_hf_det_vec, bigger_single_ext_vec, holes, parts);
@@ -287,10 +287,10 @@ TEST_CASE("CI: get phase ", "[CI]") {
 
   holes.clear();
   parts.clear();
-  std::vector<uint64_t> Be_bug_det_i_a = {0,1};
-  std::vector<uint64_t> Be_bug_det_i_b = {0,17179869184};
-  std::vector<uint64_t> Be_bug_det_j_a = {0,16};
-  std::vector<uint64_t> Be_bug_det_j_b = {4,0};
+  std::vector<uint64_t> Be_bug_det_i_a = {0, 1};
+  std::vector<uint64_t> Be_bug_det_i_b = {0, 17179869184};
+  std::vector<uint64_t> Be_bug_det_j_a = {0, 16};
+  std::vector<uint64_t> Be_bug_det_j_b = {4, 0};
 
   detset.get_holes(Be_bug_det_i_a, Be_bug_det_j_a, holes);
   detset.get_parts(Be_bug_det_i_a, Be_bug_det_j_a, parts);
@@ -300,9 +300,8 @@ TEST_CASE("CI: get phase ", "[CI]") {
   parts.clear();
   detset.get_holes(Be_bug_det_i_b, Be_bug_det_j_b, holes);
   detset.get_parts(Be_bug_det_i_b, Be_bug_det_j_b, parts);
-  auto bphase = detset.get_phase( Be_bug_det_i_b , Be_bug_det_j_b , holes, parts);
+  auto bphase = detset.get_phase(Be_bug_det_i_b, Be_bug_det_j_b, holes, parts);
   CHECK(bphase == 1.0);
-
 }
 TEST_CASE("CI: get occ virt ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
@@ -366,8 +365,8 @@ TEST_CASE("CI: get occ virt ", "[CI]") {
 
   occ.clear();
   virt.clear();
-  std::vector<uint64_t> bigger_hf_det_vec = {7,127};
-  //std::vector<uint64_t> bigger_single_ext_vec = {519,63};
+  std::vector<uint64_t> bigger_hf_det_vec = {7, 127};
+  // std::vector<uint64_t> bigger_single_ext_vec = {519,63};
   POLYQUANT_DETSET<uint64_t> detset3;
   detset3.max_orb = {100};
   detset3.get_occ_virt(0, bigger_hf_det_vec, occ, virt);
@@ -377,18 +376,18 @@ TEST_CASE("CI: get occ virt ", "[CI]") {
     CHECK(occ[i] == i);
   }
   for (auto i = 7; i < 64; i++) {
-    CHECK(virt[i-7] == i);
+    CHECK(virt[i - 7] == i);
   }
-  CHECK(occ[7] == 64+0);
-  CHECK(occ[8] == 64+1);
-  CHECK(occ[9] == 64+2);
+  CHECK(occ[7] == 64 + 0);
+  CHECK(occ[8] == 64 + 1);
+  CHECK(occ[9] == 64 + 2);
   for (auto i = 57; i < 90; i++) {
-    CHECK(virt[i] == 10+i);
+    CHECK(virt[i] == 10 + i);
   }
 
   occ.clear();
   virt.clear();
-  std::vector<uint64_t> bigger_single_ext_vec = {519,63};
+  std::vector<uint64_t> bigger_single_ext_vec = {519, 63};
   detset3.max_orb = {100};
   detset3.get_occ_virt(0, bigger_single_ext_vec, occ, virt);
   CHECK(occ.size() == 10);
@@ -397,23 +396,23 @@ TEST_CASE("CI: get occ virt ", "[CI]") {
     CHECK(occ[i] == i);
   }
   for (auto i = 6; i < 64; i++) {
-    CHECK(virt[i-6] == i);
+    CHECK(virt[i - 6] == i);
   }
-  CHECK(occ[6] == 64+0);
-  CHECK(occ[7] == 64+1);
-  CHECK(occ[8] == 64+2);
-  CHECK(occ[9] == 64+9);
+  CHECK(occ[6] == 64 + 0);
+  CHECK(occ[7] == 64 + 1);
+  CHECK(occ[8] == 64 + 2);
+  CHECK(occ[9] == 64 + 9);
   auto shift = 0;
   for (auto i = 0; i < 90; i++) {
-      std::cout << i << " " << virt[i] << std::endl;
+    std::cout << i << " " << virt[i] << std::endl;
   }
   for (auto i = 58; i < 90; i++) {
-      if (i == 64+9-10){
-          shift = 1;
-          continue;
-      }
-    CHECK(virt[i] == 9+i+shift);
-      std::cout << i << " " << virt[i] << std::endl;
+    if (i == 64 + 9 - 10) {
+      shift = 1;
+      continue;
+    }
+    CHECK(virt[i] == 9 + i + shift);
+    std::cout << i << " " << virt[i] << std::endl;
   }
 }
 TEST_CASE("CI: same part ham diag ", "[CI]") {

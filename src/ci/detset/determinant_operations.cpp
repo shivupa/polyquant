@@ -74,17 +74,17 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
 
     if (j == k) {
       // create a mask for the space between high and low in the same int
-      //T mask = (((1ul << m) - 1ul) & (~(1ul << n) + 1ul));
-      //T bitstring = Di[j];
-      //std::cout << "bitstring" << std::endl;
-      //std::cout << bitstring << " " << std::bitset<64>(bitstring).to_string() << std::endl;
-      //std::cout << "mask" << std::endl;
-      //std::cout << mask << " " << std::bitset<64>(mask).to_string() << std::endl;
+      // T mask = (((1ul << m) - 1ul) & (~(1ul << n) + 1ul));
+      // T bitstring = Di[j];
+      // std::cout << "bitstring" << std::endl;
+      // std::cout << bitstring << " " << std::bitset<64>(bitstring).to_string() << std::endl;
+      // std::cout << "mask" << std::endl;
+      // std::cout << mask << " " << std::bitset<64>(mask).to_string() << std::endl;
       nperm += std::popcount(Di[j] & (((one << m) - one) & (~(one << n) + one)));
     } else {
       // create a mask for the space between high and low in different ints
-      //T mask = ((~(0ul) & (~(1ul << n) + 1ul)));
-      //T bitstring = Di[j];
+      // T mask = ((~(0ul) & (~(1ul << n) + 1ul)));
+      // T bitstring = Di[j];
       nperm += std::popcount(Di[j] & ((~(zero) & (~(one << n) + one))));
       // std::cout << "bitstring" << std::endl;
       // std::cout << bitstring << " " << std::bitset<64>(bitstring).to_string() << std::endl;
