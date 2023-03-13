@@ -1374,7 +1374,12 @@ void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_orth_X;
   Eigen::Matrix<double, Eigen::Dynamic, 1> s;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+  Eigen::Index max_row, max_col;
   orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
+  orbital_overlap_to_check = orbital_overlap;
+  orbital_overlap_to_check.array() -= 1;
+  double max = orbital_overlap_to_check.maxCoeff(&max_row, &max_col);
+  line = fmt::format("Maximum difference MO overlap matrix from identity matrix (before orthogonalization) : S_mo({:02}, {:02}) = {:> 10e}", max_row, max_col, max);
   Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(orbital_overlap);
   if (eigensolver.info() != Eigen::Success)
     APP_ABORT("Error reorthogonalizing orbitals!");
@@ -1388,8 +1393,7 @@ void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, 
   // checking
   orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
   orbital_overlap.diagonal().array() -= 1;
-  Eigen::Index max_row, max_col;
-  double max = orbital_overlap.maxCoeff(&max_row, &max_col);
+  max = orbital_overlap.maxCoeff(&max_row, &max_col);
   line = fmt::format("Maximum difference MO overlap matrix from identity matrix (after orthogonalization) : S_mo({:02}, {:02}) = {:> 10e}", max_row, max_col, max);
   Polyquant_cout(line);
 }
