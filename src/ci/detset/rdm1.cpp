@@ -40,9 +40,9 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
         if (det_j_search != this->dets.end()) {
           auto j_det = det_j_search->second;
           auto Dj = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_jdet);
-          if (i_det < j_det) {
-            continue;
-          }
+          //if (i_det < j_det) {
+          //  continue;
+          //}
           // calculate over all excitation level
           // auto num_ex = 0;
           // auto num_parts = this->input_integral->input_molecule->quantum_particles.size();
@@ -74,7 +74,7 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
           auto k = holes[0];
           auto l = parts[0];
           MO_rdm1_thread_contributions[thread_id](k, l) += contribution;
-          MO_rdm1_thread_contributions[thread_id](l, k) += contribution;
+          //MO_rdm1_thread_contributions[thread_id](l, k) += contribution;
         }
       }
     }
