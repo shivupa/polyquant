@@ -1376,7 +1376,7 @@ void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
   Eigen::Index max_row, max_col;
   orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
-  orbital_overlap_to_check = orbital_overlap;
+  auto orbital_overlap_to_check = orbital_overlap;
   orbital_overlap_to_check.array() -= 1;
   double max = orbital_overlap_to_check.maxCoeff(&max_row, &max_col);
   line = fmt::format("Maximum difference MO overlap matrix from identity matrix (before orthogonalization) : S_mo({:02}, {:02}) = {:> 10e}", max_row, max_col, max);
