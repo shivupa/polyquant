@@ -310,7 +310,8 @@ void POLYQUANT_BASIS::symmetrize_basis_SO3() {
   }
 }
 void POLYQUANT_BASIS::symmetrize_basis() {
-
+  // thresh for assigning shell to atoms
+  static constexpr double thresh = std::numeric_limits<double>::epsilon() * 1e2;
   msym_error_t ret = MSYM_SUCCESS;
   if (symmetry->point_group != "C1" && symmetry->point_group != "SO(3)") {
     msym_point_group_type_t mtype;
@@ -346,7 +347,6 @@ void POLYQUANT_BASIS::symmetrize_basis() {
   } else if (symmetry->point_group == "SO(3)") {
     symmetrize_basis_SO3();
   } else {
-    // std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
 
     std::vector<std::vector<msym_basis_function_t>> mbfs;
     mbfs.resize(this->basis.size());
@@ -369,14 +369,17 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(ctx, &mesl, &mes))) {
         APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
       }
+      // std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
       auto ao_idx = 0;
       for (auto shell : quantum_particle_basis) {
         for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++) {
           for (auto atom_in_sym_eq_set_idx = 0; atom_in_sym_eq_set_idx < mes[sym_eq_set_idx].length; atom_in_sym_eq_set_idx++) {
-            if (shell.O[0] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0] && shell.O[1] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1] &&
-                shell.O[2] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) {
+            if (
+                    std::abs(shell.O[0] -  mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0]) < thresh &&
+                    std::abs(shell.O[1] -  mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1]) < thresh &&
+                    std::abs(shell.O[2] -  mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) < thresh
+                    ) {
               // std::cout << "MATCHED SHELL TO ATOM" << std::endl;
-
               for (auto contr : shell.contr) {
                 if (contr.pure) {
                   for (int m = -contr.l; m <= contr.l; m++) {
