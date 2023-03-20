@@ -1634,17 +1634,19 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     auto num_mo = this->num_mo[quantum_part_idx];
 
     Polyquant_cout("Reading eigenset_" + std::to_string(idx));
-    std::vector<double> data;
-    data.resize(num_mo * num_basis);
+    // std::vector<double> data;
+    // data.resize(num_mo * num_basis);
     std::string hpath = "/Super_Twist/eigenset_" + std::to_string(idx);
-    hdf5_file.load_data(data, hpath);
+    // hdf5_file.load_data(data, hpath);
+    hdf5_file.load_data(this->C_combined[quantum_part_idx][0], hpath);
+    this->C_combined[quantum_part_idx][0].transposeInPlace();
 
-#pragma omp parallel for
-    for (auto i = 0; i < num_mo; i++) {
-      for (auto j = 0; j < num_basis; j++) {
-        this->C_combined[quantum_part_idx][0](j, i) = data[i * num_basis + j];
-      }
-    }
+    // #pragma omp parallel for
+    // for (auto i = 0; i < num_mo; i++) {
+    //   for (auto j = 0; j < num_basis; j++) {
+    //     this->C_combined[quantum_part_idx][0](j, i) = data[i * num_basis + j];
+    //   }
+    // }
 
     reorthogonalize_MOs(this->C_combined[quantum_part_idx][0], quantum_part_idx);
 
@@ -1655,15 +1657,17 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       hpath = "/Super_Twist/eigenset_" + std::to_string(idx + 1);
       Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
-      data.clear();
-      data.resize(num_mo * num_basis);
-      hdf5_file.load_data(data, hpath);
-#pragma omp parallel for
-      for (auto i = 0; i < num_mo; i++) {
-        for (auto j = 0; j < num_basis; j++) {
-          this->C_combined[quantum_part_idx][1](j, i) = data[i * num_basis + j];
-        }
-      }
+      // data.clear();
+      // data.resize(num_mo * num_basis);
+      // hdf5_file.load_data(data, hpath);
+      // #pragma omp parallel for
+      // for (auto i = 0; i < num_mo; i++) {
+      //   for (auto j = 0; j < num_basis; j++) {
+      //     this->C_combined[quantum_part_idx][1](j, i) = data[i * num_basis + j];
+      //   }
+      // }
+      hdf5_file.load_data(this->C_combined[quantum_part_idx][1], hpath);
+      this->C_combined[quantum_part_idx][1].transposeInPlace();
 
       reorthogonalize_MOs(this->C_combined[quantum_part_idx][1], quantum_part_idx);
       if (this->input_symmetry->do_symmetry == false) {
