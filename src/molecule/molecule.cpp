@@ -91,13 +91,23 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
       //   APP_ABORT("Symmetry handler point group is already set, but this calculation is not an atom. Currently the point group can only be manually specified for atoms as SO(3).");
       // }
 
+      if (input_symm->point_group.empty()) {
       if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
-
         auto error = msymErrorString(ret);
         std::cout << error << std::endl;
         error = msymGetErrorDetails();
         std::cout << error << std::endl;
         APP_ABORT("Error Figuring out symmetry");
+      }
+      } else {
+          std::string pg = this->input_symm->point_group;
+        if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+          auto error = msymErrorString(ret);
+          std::cout << error << std::endl;
+          error = msymGetErrorDetails();
+          std::cout << error << std::endl;
+          APP_ABORT("Error setting PG to custom PG");
+        }
       }
     } else {
       // single atom
