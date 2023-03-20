@@ -97,7 +97,7 @@ void POLYQUANT_HDF5::dump_generalparameters(bool complex_vals, bool ecp, bool re
   H5Easy::dump(*hdf5_file, path, num_mo, H5Easy::DumpMode::Overwrite);
   // write bohr_unit
   path = parameters_group + "/Unit";
-  int bohr_u;
+  int bohr_u = 1;
   H5Easy::dump(*hdf5_file, path, bohr_u, H5Easy::DumpMode::Overwrite);
   // write num_part_alpha
   path = parameters_group + "/NbAlpha";
@@ -128,17 +128,19 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
     Polyquant_cout(buffer.str());
 
     path = super_twist_group + "/" + tag;
-    H5Easy::dump(*hdf5_file, path, E_orb[spin_idx], H5Easy::DumpMode::Overwrite);
+    Eigen::Matrix<double, 1, Eigen::Dynamic> E_orb_rowmat = E_orb[spin_idx].transpose();
+    H5Easy::dump(*hdf5_file, path, E_orb_rowmat, H5Easy::DumpMode::Overwrite);
 
     // write orbital coeffs
-    std::vector<double> flattened_mo_coeff;
-    for (auto i = 0ul; i < num_mo; i++) {
-      for (auto j = 0ul; j < num_ao; j++) {
-        flattened_mo_coeff.push_back(mo_coeff[spin_idx](j, i));
-      }
-    }
+    // std::vector<double> flattened_mo_coeff;
+    // for (auto i = 0ul; i < num_mo; i++) {
+    //   for (auto j = 0ul; j < num_ao; j++) {
+    //     flattened_mo_coeff.push_back(mo_coeff[spin_idx](j, i));
+    //   }
+    // }
     path = super_twist_group + "/eigenset_" + std::to_string(spin_idx);
-    H5Easy::dump(*hdf5_file, path, flattened_mo_coeff, H5Easy::DumpMode::Overwrite);
+    //H5Easy::dump(*hdf5_file, path, flattened_mo_coeff, H5Easy::DumpMode::Overwrite);
+    H5Easy::dump(*hdf5_file, path, mo_coeff[spin_idx].transpose(), H5Easy::DumpMode::Overwrite);
   }
 }
 
