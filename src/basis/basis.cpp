@@ -374,11 +374,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       for (auto shell : quantum_particle_basis) {
         for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++) {
           for (auto atom_in_sym_eq_set_idx = 0; atom_in_sym_eq_set_idx < mes[sym_eq_set_idx].length; atom_in_sym_eq_set_idx++) {
-            if (
-                    std::abs(shell.O[0] -  mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0]) < thresh &&
-                    std::abs(shell.O[1] -  mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1]) < thresh &&
-                    std::abs(shell.O[2] -  mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) < thresh
-                    ) {
+            if (std::abs(shell.O[0] - mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0]) < thresh &&
+                std::abs(shell.O[1] - mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1]) < thresh &&
+                std::abs(shell.O[2] - mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) < thresh) {
               // std::cout << "MATCHED SHELL TO ATOM" << std::endl;
               for (auto contr : shell.contr) {
                 if (contr.pure) {

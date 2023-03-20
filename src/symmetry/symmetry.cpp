@@ -20,8 +20,8 @@ void POLYQUANT_SYMMETRY::set_symmetry_from_input() {
         this->point_group = "SO(3)";
         this->sub_group = "SO(3)";
       } else {
-          this->point_group = pg_from_inp;
-        //APP_ABORT("keywords->point_group is unrecognized. Currently the only keyword that can be manually specified is SO(3).");
+        this->point_group = pg_from_inp;
+        // APP_ABORT("keywords->point_group is unrecognized. Currently the only keyword that can be manually specified is SO(3).");
       }
     }
   }

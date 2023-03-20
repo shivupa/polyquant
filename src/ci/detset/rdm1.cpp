@@ -33,7 +33,7 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
       for (auto orb_idx : occ) {
         auto contribution = C(i_det, state_idx) * C(i_det, state_idx);
         if (std::abs(contribution) > thresh) {
-        MO_rdm1_thread_contributions[thread_id](orb_idx, orb_idx) += contribution;
+          MO_rdm1_thread_contributions[thread_id](orb_idx, orb_idx) += contribution;
         }
       }
       // off diagonal singles contributions
@@ -57,17 +57,17 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
           auto contribution = phase * C(i_det, state_idx) * C(j_det, state_idx);
           auto k = holes[0];
           auto l = parts[0];
-        if (std::abs(contribution) > thresh) {
-          MO_rdm1_thread_contributions[thread_id](k, l) += contribution;
-          MO_rdm1_thread_contributions[thread_id](l, k) += contribution;
-        }
+          if (std::abs(contribution) > thresh) {
+            MO_rdm1_thread_contributions[thread_id](k, l) += contribution;
+            MO_rdm1_thread_contributions[thread_id](l, k) += contribution;
+          }
         }
       }
     }
 
 #pragma omp critical
     MO_rdm1 += MO_rdm1_thread_contributions[thread_id];
-    //MO_rdm1 = (MO_rdm1 + MO_rdm1.transpose()) / 2.0;
+    // MO_rdm1 = (MO_rdm1 + MO_rdm1.transpose()) / 2.0;
   }
   // for (auto i = 0; i < nthreads; i++) {
   //   MO_rdm1 += MO_rdm1_thread_contributions[i];
