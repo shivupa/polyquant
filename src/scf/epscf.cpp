@@ -6,13 +6,10 @@ void POLYQUANT_EPSCF::form_H_core() {
   this->H_core.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    // this->H_core[quantum_part_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
-    // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h;
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
     this->H_core[quantum_part_idx] += (1.0 / quantum_part.mass) * this->input_integral->kinetic[quantum_part_idx];
     this->H_core[quantum_part_idx] += (-quantum_part.charge) * this->input_integral->nuclear[quantum_part_idx];
-    // this->H_core[quantum_part_idx][irrep_idx].noalias() = this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * h * this->input_basis->salcs[quantum_part_idx][irrep_idx];
     if (verbose == true) {
       std::stringstream filename;
       filename << "H_core_";
