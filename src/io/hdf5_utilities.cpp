@@ -129,7 +129,13 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
 
     path = super_twist_group + "/" + tag;
     Eigen::Matrix<double, 1, Eigen::Dynamic> E_orb_rowmat = E_orb[spin_idx].transpose();
-    H5Easy::dump(*hdf5_file, path, E_orb_rowmat, H5Easy::DumpMode::Overwrite);
+    // H5Easy::dump(*hdf5_file, path, E_orb_rowmat, H5Easy::DumpMode::Overwrite);
+    if (this->exist(path)) {
+      auto dataset = (*hdf5_file).getDataSet(path);
+      dataset.write(E_orb_rowmat);
+    } else {
+      (*hdf5_file).createDataSet(path, E_orb_rowmat);
+    }
 
     // write orbital coeffs
     // std::vector<double> flattened_mo_coeff;
