@@ -379,25 +379,46 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
   for (int part_idx = 0; part_idx < dets.size(); part_idx++) {
     for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++) {
       std::string tag = "/CI_" + std::to_string(part_idx * 2 + spin_idx);
-      std::vector<uint64_t> flattened_dets;
+      Eigen::Matrix<double, Eigen::Dynamic, 1> flattened_dets;
+      flattened_dets.resize(N_dets * N_int_per_det);
+      flattened_dets.setZero();
+      // std::vector<uint64_t> flattened_dets;
+      auto idx = 0;
       for (int i = 0; i < N_dets; i++) {
         for (int j = N_int_per_det - 1; j >= 0; j--) {
           if (j < dets[part_idx][spin_idx][i].size()) {
-            flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
+            // flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
+            flattened_dets[idx] = dets[part_idx][spin_idx][i][j];
           } else {
-            flattened_dets.push_back(0);
+            // flattened_dets.push_back(0);
+            flattened_dets[idx] = 0.0;
           }
+          idx++;
         }
       }
       path = multidet_group + tag;
-      H5Easy::dump(*hdf5_file, path, flattened_dets, H5Easy::DumpMode::Overwrite);
+      // H5Easy::dump(*hdf5_file, path, flattened_dets, H5Easy::DumpMode::Overwrite);
+
+      if (this->exist(path)) {
+        auto dataset = (*hdf5_file).getDataSet(path);
+        dataset.write(flattened_dets);
+      } else {
+        //(*hdf5_file).createDataSet(path, flattened_dets);
+        // dataset.write(flattened_dets);
+        auto dataset = (*hdf5_file).createDataSet<uint64_t>(path, HighFive::DataSpace::From(flattened_dets));
+        dataset.write(flattened_dets);
+      }
     }
   }
 
   for (auto i = 0ul; i < N_states; i++) {
     std::vector<double> coeff;
+    // Eigen::Matrix<double, Eigen::Dynamic, 1> coeff;
+    // coeff.resize(N_dets );
+    // coeff.setZero();
     for (auto j = 0ul; j < N_dets; j++) {
       coeff.push_back(C(j, i));
+      // coeff[j] = C(j, i);
     }
     std::string tag = "/Coeff";
     if (i > 0) {
@@ -405,6 +426,13 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
     }
 
     path = multidet_group + tag;
+    // if (this->exist(path)) {
+    //   auto dataset = (*hdf5_file).getDataSet(path);
+    //   dataset.write(coeff);
+    // } else {
+    //   auto dataset = (*hdf5_file).createDataSet<uint64_t>(path, HighFive::DataSpace::From(coeff));
+    //   dataset.write(coeff);
+    // }
     H5Easy::dump(*hdf5_file, path, coeff, H5Easy::DumpMode::Overwrite);
   }
 
