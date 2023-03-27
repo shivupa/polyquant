@@ -37,8 +37,13 @@ void POLYQUANT_HDF5::write_str(std::string path, std::string val) {
   // std::cout << "SHIV " << attr_name << std::endl;
   // auto group = (*hdf5_file).getGroup(group_name);
   // auto attr = group.createAttribute(attr_name, HighFive::DataSpace{1}, val_type);
-  auto ds = (*hdf5_file).createDataSet(path, HighFive::DataSpace{1}, val_type);
-  ds.write(val_arr);
+  if (!this->exist(path)) {
+    auto ds = (*hdf5_file).createDataSet(path, HighFive::DataSpace{1}, val_type);
+    ds.write(val_arr);
+  } else {
+    auto ds = (*hdf5_file).getDataSet(path);
+    ds.write(val_arr);
+  }
 
   // std::wstring ws(val.begin(), val.end());
   // attr.write(val_arr);
