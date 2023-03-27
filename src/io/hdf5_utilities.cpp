@@ -15,6 +15,9 @@ void POLYQUANT_HDF5::create_file(const std::string &fname) {
 }
 
 void POLYQUANT_HDF5::write_str(std::string path, std::string val) {
+  if (val.size() > 100) {
+    APP_ABORT("HDF5 string work around requires a constant sized char array. Recompile with a larger array in POLYQUANT_HDF5::write_str array");
+  }
   char val_arr[100];
   // HighFive::FixedLenStringArray<20> val_arr{val.c_str()};
   // char val_arr[val.size() + 1];
