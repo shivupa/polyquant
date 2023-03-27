@@ -387,7 +387,7 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
   for (int part_idx = 0; part_idx < dets.size(); part_idx++) {
     for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++) {
       std::string tag = "/CI_" + std::to_string(part_idx * 2 + spin_idx);
-      Eigen::Matrix<double, Eigen::Dynamic, 1> flattened_dets;
+      Eigen::Matrix<uint64_t, Eigen::Dynamic, 1> flattened_dets;
       flattened_dets.resize(N_dets * N_int_per_det);
       flattened_dets.setZero();
       // std::vector<uint64_t> flattened_dets;
