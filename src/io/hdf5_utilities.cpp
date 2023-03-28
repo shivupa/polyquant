@@ -392,8 +392,8 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
       flattened_dets.setZero();
       // std::vector<uint64_t> flattened_dets;
       for (int i = 0; i < N_dets; i++) {
-        for (int j = 0; j <  N_int_per_det; j++) {
-            flattened_dets(i, j) = dets[part_idx][spin_idx][i][N_int_per_det - j - 1];
+        for (int j = 0; j < N_int_per_det; j++) {
+          flattened_dets(i, j) = dets[part_idx][spin_idx][i][N_int_per_det - j - 1];
         }
       }
       path = multidet_group + tag;

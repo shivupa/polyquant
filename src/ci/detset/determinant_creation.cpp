@@ -421,7 +421,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     T mask = (one << (end - begin)) - one;
     T j = i << nfc;
     // set in this int
-    if (count + 1 != det.size() ) {
+    if (count + 1 != det.size()) {
       j |= ((det[count + 1] >> begin) & mask);
     }
     // pad with fc orbs

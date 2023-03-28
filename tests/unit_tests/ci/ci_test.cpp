@@ -208,7 +208,6 @@ TEST_CASE("CI: frozen core get_det ", "[CI]") {
   std::cout << "after pad" << det[1] << " " << det[0] << std::endl;
   REQUIRE(2 == det[0]);
   REQUIRE(7 == det[1]);
-
 }
 
 TEST_CASE("CI: get holes ", "[CI]") {
