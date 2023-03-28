@@ -145,6 +145,61 @@ TEST_CASE("CI: frozen core energy ", "[CI]") {
   REQUIRE_THAT(test_ci.detset.frozen_core_energy[0], Catch::Matchers::WithinAbs(-71.3745646924, POLYQUANT_TEST_EPSILON_LOOSE));
 }
 
+TEST_CASE("CI: get_det ", "[CI]") {
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.run();
+  POLYQUANT_EPCI test_ci;
+  std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+  test_ci.excitation_level.push_back(ex_lvl);
+  test_ci.setup(test_calc.scf_calc);
+  test_ci.calculate_integrals();
+  test_ci.calculate_fc_energy();
+  test_ci.setup_determinants();
+  REQUIRE(test_ci.detset.frozen_core_energy[0] == 0.0);
+  REQUIRE(test_ci.detset.max_orb[0] == 7);
+  REQUIRE(test_ci.detset.N_dets == 21);
+  REQUIRE(test_ci.detset.dets.size() == 21);
+  std::bitset<8> hf_det("0011111");
+
+  auto det = test_ci.detset.get_det(0, 0, 0);
+  REQUIRE(hf_det.to_ulong() == det[0]);
+  det = test_ci.detset.get_det(0, 1, 0);
+  REQUIRE(hf_det.to_ulong() == det[0]);
+
+  det = test_ci.detset.get_det_withfcorbs(0, 0, 0);
+  REQUIRE(hf_det.to_ulong() == det[0]);
+  det = test_ci.detset.get_det_withfcorbs(0, 1, 0);
+  REQUIRE(hf_det.to_ulong() == det[0]);
+}
+
+TEST_CASE("CI: frozen core get_det ", "[CI]") {
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.run();
+  POLYQUANT_EPCI test_ci;
+  std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+  test_ci.excitation_level.push_back(ex_lvl);
+  test_ci.detset.frozen_core.push_back(2);
+  test_ci.detset.deleted_virtual.push_back(0);
+  test_ci.setup(test_calc.scf_calc);
+  test_ci.calculate_integrals();
+  test_ci.calculate_fc_energy();
+  test_ci.setup_determinants();
+  std::bitset<8> hf_det_withfc("0011111");
+  std::bitset<6> hf_det("00111");
+
+  auto det = test_ci.detset.get_det(0, 0, 0);
+  REQUIRE(hf_det.to_ulong() == det[0]);
+  det = test_ci.detset.get_det(0, 1, 0);
+  REQUIRE(hf_det.to_ulong() == det[0]);
+
+  det = test_ci.detset.get_det_withfcorbs(0, 0, 0);
+  REQUIRE(hf_det_withfc.to_ulong() == det[0]);
+  det = test_ci.detset.get_det_withfcorbs(0, 1, 0);
+  REQUIRE(hf_det_withfc.to_ulong() == det[0]);
+}
+
 TEST_CASE("CI: get holes ", "[CI]") {
   POLYQUANT_DETSET<uint64_t> detset;
   std::bitset<8> hf_det("0011111");
