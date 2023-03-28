@@ -402,15 +402,15 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
   std::vector<T> new_det;
-  if (num_int != det.size()) {
-    T j = 0;
-    T begin = bit_kind_size - nfc;
-    T end = bit_kind_size;
-    T mask = (one << (end - begin)) - one;
-    // set in this int
-    j |= ((det[0] >> begin) & mask);
-    new_det.push_back(j);
-  }
+  // if (num_int != det.size()) {
+  //   T j = 0;
+  //   T begin = bit_kind_size - nfc;
+  //   T end = bit_kind_size;
+  //   T mask = (one << (end - begin)) - one;
+  //   // set in this int
+  //   j |= ((det[0] >> begin) & mask);
+  //   new_det.push_back(j);
+  // }
   for (auto i : det) {
     // std::cout << "SHIV    ";
     // std::bitset<bit_kind_size> b(i);
@@ -421,7 +421,7 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     T mask = (one << (end - begin)) - one;
     T j = i << nfc;
     // set in this int
-    if (count + 1 != det.size() - 1) {
+    if (count + 1 != det.size() ) {
       j |= ((det[count + 1] >> begin) & mask);
     }
     // pad with fc orbs
