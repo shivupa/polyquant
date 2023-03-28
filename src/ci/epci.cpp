@@ -382,7 +382,6 @@ void POLYQUANT_EPCI::print_start() {
   buffer << "Parameters" << std::endl;
   buffer << "    Maximum iterations = " << iteration_max << std::endl;
   buffer << "    convergence_E = " << std::scientific << this->convergence_E << std::endl;
-  buffer << "    convergence_DM = " << std::scientific << this->convergence_DM << std::endl;
   buffer << "    number of states = " << this->num_states << std::endl;
   buffer << "    number subspace vecs = " << this->num_subspace_vec << std::endl;
   buffer << "    first_order_spin_penalty = " << std::boolalpha << this->first_order_spin_penalty << std::endl;

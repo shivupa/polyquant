@@ -112,11 +112,6 @@ public:
    */
   double convergence_E = 1e-6;
   /**
-   * @brief Root mean squared change in DM convergence
-   *
-   */
-  double convergence_DM = 1e-8;
-  /**
    * @brief Maximum iteration number
    *
    */
