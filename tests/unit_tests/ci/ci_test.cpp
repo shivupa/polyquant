@@ -198,6 +198,17 @@ TEST_CASE("CI: frozen core get_det ", "[CI]") {
   REQUIRE(hf_det_withfc.to_ulong() == det[0]);
   det = test_ci.detset.get_det_withfcorbs(0, 1, 0);
   REQUIRE(hf_det_withfc.to_ulong() == det[0]);
+
+  test_ci.detset.max_orb[0] = 75;
+  std::vector<uint64_t> det2 = {0UL, 9223372036854775809UL};
+  test_ci.detset.unique_dets[0][0][0] = det2;
+  det = test_ci.detset.get_det_withfcorbs(0, 0, 0);
+
+  std::cout << "Before pad" << det2[1] << " " << det2[0] << std::endl;
+  std::cout << "after pad" << det[1] << " " << det[0] << std::endl;
+  REQUIRE(2 == det[0]);
+  REQUIRE(7 == det[1]);
+
 }
 
 TEST_CASE("CI: get holes ", "[CI]") {
