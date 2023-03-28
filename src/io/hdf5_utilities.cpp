@@ -387,20 +387,24 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
   for (int part_idx = 0; part_idx < dets.size(); part_idx++) {
     for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++) {
       std::string tag = "/CI_" + std::to_string(part_idx * 2 + spin_idx);
-      Eigen::Matrix<uint64_t, Eigen::Dynamic, 1> flattened_dets;
-      flattened_dets.resize(N_dets * N_int_per_det);
+      Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> flattened_dets;
+      flattened_dets.resize(N_dets, N_int_per_det);
       flattened_dets.setZero();
       // std::vector<uint64_t> flattened_dets;
       auto idx = 0;
       for (int i = 0; i < N_dets; i++) {
         for (int j = N_int_per_det - 1; j >= 0; j--) {
+          auto count = 0;
           if (j < dets[part_idx][spin_idx][i].size()) {
             // flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
-            flattened_dets[idx] = dets[part_idx][spin_idx][i][j];
+            // flattened_dets[idx] = dets[part_idx][spin_idx][i][j];
+            flattened_dets(i, count) = dets[part_idx][spin_idx][i][j];
           } else {
             // flattened_dets.push_back(0);
-            flattened_dets[idx] = 0.0;
+            // flattened_dets[idx] = 0;
+            flattened_dets(i, count) = 0;
           }
+          count++;
           idx++;
         }
       }
