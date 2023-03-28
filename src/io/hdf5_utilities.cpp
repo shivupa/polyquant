@@ -391,35 +391,23 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
       flattened_dets.resize(N_dets, N_int_per_det);
       flattened_dets.setZero();
       // std::vector<uint64_t> flattened_dets;
-      auto idx = 0;
       for (int i = 0; i < N_dets; i++) {
-        for (int j = N_int_per_det - 1; j >= 0; j--) {
-          auto count = 0;
-          if (j < dets[part_idx][spin_idx][i].size()) {
-            // flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
-            // flattened_dets[idx] = dets[part_idx][spin_idx][i][j];
-            flattened_dets(i, count) = dets[part_idx][spin_idx][i][j];
-          } else {
-            // flattened_dets.push_back(0);
-            // flattened_dets[idx] = 0;
-            flattened_dets(i, count) = 0;
-          }
-          count++;
-          idx++;
+        for (int j = 0; j <  N_int_per_det; j++) {
+            flattened_dets(i, j) = dets[part_idx][spin_idx][i][N_int_per_det - j - 1];
         }
       }
       path = multidet_group + tag;
-      // H5Easy::dump(*hdf5_file, path, flattened_dets, H5Easy::DumpMode::Overwrite);
+      H5Easy::dump(*hdf5_file, path, flattened_dets, H5Easy::DumpMode::Overwrite);
 
-      if (this->exist(path)) {
-        auto dataset = (*hdf5_file).getDataSet(path);
-        dataset.write(flattened_dets);
-      } else {
-        //(*hdf5_file).createDataSet(path, flattened_dets);
-        // dataset.write(flattened_dets);
-        auto dataset = (*hdf5_file).createDataSet<uint64_t>(path, HighFive::DataSpace::From(flattened_dets));
-        dataset.write(flattened_dets);
-      }
+      // if (this->exist(path)) {
+      //   auto dataset = (*hdf5_file).getDataSet(path);
+      //   dataset.write(flattened_dets);
+      // } else {
+      //   //(*hdf5_file).createDataSet(path, flattened_dets);
+      //   // dataset.write(flattened_dets);
+      //   auto dataset = (*hdf5_file).createDataSet<uint64_t>(path, HighFive::DataSpace::From(flattened_dets));
+      //   dataset.write(flattened_dets);
+      // }
     }
   }
 
