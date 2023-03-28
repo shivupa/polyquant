@@ -8,7 +8,6 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   T zero = 0;
   std::string alpha_bit_string, beta_bit_string;
   int symm_idx = -1;
-  int beta_idx = this->input_epscf->symm_label_idxs[idx_part].size() - 1;
 
   int maximum_orbital_across_all_parts = *std::max_element(max_orb.begin(), max_orb.end());
   T num_int = (maximum_orbital_across_all_parts >> bit_kind_shift) + one;
