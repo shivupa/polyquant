@@ -43,9 +43,8 @@ target[((hsi*3+1)*1+lsi)*1] = fp3;
 LIBINT2_REALTYPE fp1;
 fp1 = inteval->oo2z[vi] * target[((hsi*3+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp2;
-fp2 = inteval->PB_y[vi] * target[((hsi*3+1)*1+lsi)*1];
 LIBINT2_REALTYPE fp0;
-fp0 = fp2 + fp1;
+fp0 = libint2::fma_plus(inteval->PB_y[vi], target[((hsi*3+1)*1+lsi)*1], fp1);
 target[((hsi*3+2)*1+lsi)*1] = fp0;
 }
 }

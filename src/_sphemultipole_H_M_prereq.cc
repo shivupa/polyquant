@@ -1,0 +1,990 @@
+/*
+ *  Copyright (C) 2004-2021 Edward F. Valeev
+ *
+ *  This file is part of Libint.
+ *
+ *  Libint is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Libint is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include <libint2.h>
+#include <CR_aB_X0__0___Overlap_X0__0___Ab__up_.h>
+#include <CR_aB_Y0__0___Overlap_Y0__0___Ab__up_.h>
+#include <CR_aB_Z0__0___Overlap_Z0__0___Ab__up_.h>
+#include <CR_aB_s__0___CartesianMultipole_sB_0_c_0_c_0_Sb__s__0___Ab__up_.h>
+#include <GenericContract.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__s__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__d__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__f__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__g__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__h__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__i__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__k__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__l__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__m__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__p__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pd__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pf__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pg__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pp__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__ps__0___Ab__up_.h>
+#include <OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__s__0___Ab__up_.h>
+
+#ifdef __cplusplus
+LIBINT_PRAGMA_CLANG(diagnostic push)
+LIBINT_PRAGMA_CLANG(diagnostic ignored "-Wunused-variable")
+LIBINT_PRAGMA_GCC(diagnostic push)
+LIBINT_PRAGMA_GCC(diagnostic ignored "-Wunused-variable")
+extern "C" {
+#endif
+void _sphemultipole_H_M_prereq(const Libint_t* inteval, LIBINT2_REALTYPE* parent_stack) {
+
+LIBINT2_REALTYPE*const  stack = parent_stack;
+{
+const int hsi = 0;
+{
+const int lsi = 0;
+{
+const int vi = 0;
+LIBINT2_REALTYPE fp3;
+CR_aB_Z0__0___Overlap_Z0__0___Ab__up_(inteval, &(fp3), &(inteval->_0_Overlap_0_z[vi]));
+LIBINT2_REALTYPE fp2;
+CR_aB_Y0__0___Overlap_Y0__0___Ab__up_(inteval, &(fp2), &(inteval->_0_Overlap_0_y[vi]));
+LIBINT2_REALTYPE fp1;
+CR_aB_X0__0___Overlap_X0__0___Ab__up_(inteval, &(fp1), &(inteval->_0_Overlap_0_x[vi]));
+LIBINT2_REALTYPE fp0;
+CR_aB_s__0___CartesianMultipole_sB_0_c_0_c_0_Sb__s__0___Ab__up_(inteval, &(fp0), &(fp1), &(fp2), &(fp3));
+LIBINT2_REALTYPE fp4;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__s__0___Ab__up_(inteval, &(fp4), &(fp0));
+LIBINT2_REALTYPE fp5;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__s__0___Ab__up_(inteval, &(fp5), &(fp4));
+LIBINT2_REALTYPE fp7;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__s__0___Ab__up_(inteval, &(fp7), &(fp4));
+LIBINT2_REALTYPE fp12;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__s__0___Ab__up_(inteval, &(fp12), &(fp7), &(fp5));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+12875)*1+lsi)*1]), &(fp12), &(fp7), &(fp5));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+12878)*1+lsi)*1]), &(fp5), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+12881)*1+lsi)*1]), &(fp7), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+12884)*1+lsi)*1]), &(stack[((hsi*3+12875)*1+lsi)*1]), &(fp12), &(stack[((hsi*3+12881)*1+lsi)*1]), &(stack[((hsi*3+12878)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+12890)*1+lsi)*1]), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+12893)*1+lsi)*1]), &(stack[((hsi*3+12878)*1+lsi)*1]), &(fp5), &(stack[((hsi*3+12890)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+12899)*1+lsi)*1]), &(stack[((hsi*3+12881)*1+lsi)*1]), &(fp7), &(stack[((hsi*3+12890)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+12905)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]), &(stack[((hsi*3+12875)*1+lsi)*1]), &(stack[((hsi*6+12899)*1+lsi)*1]), &(stack[((hsi*6+12893)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+12921)*1+lsi)*1]), &(stack[((hsi*6+12893)*1+lsi)*1]), &(stack[((hsi*3+12878)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+12931)*1+lsi)*1]), &(stack[((hsi*6+12899)*1+lsi)*1]), &(stack[((hsi*3+12881)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12941)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]), &(stack[((hsi*10+12931)*1+lsi)*1]), &(stack[((hsi*10+12921)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12966)*1+lsi)*1]), &(stack[((hsi*10+12921)*1+lsi)*1]), &(stack[((hsi*6+12893)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12981)*1+lsi)*1]), &(stack[((hsi*10+12931)*1+lsi)*1]), &(stack[((hsi*6+12899)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+12996)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]), &(stack[((hsi*15+12981)*1+lsi)*1]), &(stack[((hsi*15+12966)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13032)*1+lsi)*1]), &(stack[((hsi*15+12966)*1+lsi)*1]), &(stack[((hsi*10+12921)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13053)*1+lsi)*1]), &(stack[((hsi*15+12981)*1+lsi)*1]), &(stack[((hsi*10+12931)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13074)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]), &(stack[((hsi*21+13053)*1+lsi)*1]), &(stack[((hsi*21+13032)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13123)*1+lsi)*1]), &(stack[((hsi*21+13032)*1+lsi)*1]), &(stack[((hsi*15+12966)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13151)*1+lsi)*1]), &(stack[((hsi*21+13053)*1+lsi)*1]), &(stack[((hsi*15+12981)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13179)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]), &(stack[((hsi*28+13151)*1+lsi)*1]), &(stack[((hsi*28+13123)*1+lsi)*1]));
+LIBINT2_REALTYPE fp8;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__s__0___Ab__up_(inteval, &(fp8), &(fp7), &(fp5));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13215)*1+lsi)*1]), &(fp8), &(fp5), &(fp7));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13218)*1+lsi)*1]), &(stack[((hsi*3+13215)*1+lsi)*1]), &(fp8), &(stack[((hsi*3+12878)*1+lsi)*1]), &(stack[((hsi*3+12881)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13224)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]), &(stack[((hsi*3+13215)*1+lsi)*1]), &(stack[((hsi*6+12893)*1+lsi)*1]), &(stack[((hsi*6+12899)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13234)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]), &(stack[((hsi*10+12921)*1+lsi)*1]), &(stack[((hsi*10+12931)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13249)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]), &(stack[((hsi*15+12966)*1+lsi)*1]), &(stack[((hsi*15+12981)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13270)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]), &(stack[((hsi*21+13032)*1+lsi)*1]), &(stack[((hsi*21+13053)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13298)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]), &(stack[((hsi*28+13123)*1+lsi)*1]), &(stack[((hsi*28+13151)*1+lsi)*1]));
+LIBINT2_REALTYPE fp13;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__s__0___Ab__up_(inteval, &(fp13), &(fp12), &(fp8));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13334)*1+lsi)*1]), &(fp13), &(fp8), &(fp12));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13337)*1+lsi)*1]), &(stack[((hsi*3+13334)*1+lsi)*1]), &(fp13), &(stack[((hsi*3+13215)*1+lsi)*1]), &(stack[((hsi*3+12875)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13343)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]), &(stack[((hsi*3+13334)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13353)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13368)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13389)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13417)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13453)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]));
+LIBINT2_REALTYPE fp19;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__s__0___Ab__up_(inteval, &(fp19), &(fp12), &(fp8));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13498)*1+lsi)*1]), &(fp19), &(fp12), &(fp8));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13501)*1+lsi)*1]), &(stack[((hsi*3+13498)*1+lsi)*1]), &(fp19), &(stack[((hsi*3+12875)*1+lsi)*1]), &(stack[((hsi*3+13215)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13507)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]), &(stack[((hsi*3+13498)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13517)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13532)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13553)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13581)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13617)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]));
+LIBINT2_REALTYPE fp28;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__s__0___Ab__up_(inteval, &(fp28), &(fp19), &(fp13));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13662)*1+lsi)*1]), &(fp28), &(fp19), &(fp13));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13665)*1+lsi)*1]), &(stack[((hsi*3+13662)*1+lsi)*1]), &(fp28), &(stack[((hsi*3+13498)*1+lsi)*1]), &(stack[((hsi*3+13334)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13671)*1+lsi)*1]), &(stack[((hsi*6+13665)*1+lsi)*1]), &(stack[((hsi*3+13662)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13681)*1+lsi)*1]), &(stack[((hsi*10+13671)*1+lsi)*1]), &(stack[((hsi*6+13665)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13696)*1+lsi)*1]), &(stack[((hsi*15+13681)*1+lsi)*1]), &(stack[((hsi*10+13671)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13717)*1+lsi)*1]), &(stack[((hsi*21+13696)*1+lsi)*1]), &(stack[((hsi*15+13681)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13745)*1+lsi)*1]), &(stack[((hsi*28+13717)*1+lsi)*1]), &(stack[((hsi*21+13696)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13662)*1+lsi)*1]), &(stack[((hsi*36+13745)*1+lsi)*1]), &(stack[((hsi*28+13717)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+13781)*1+lsi)*1]), &(stack[((hsi*45+13662)*1+lsi)*1]), &(stack[((hsi*36+13745)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+12820)*1+lsi)*1]),&(stack[((hsi*55+13781)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*28+13123)*1+lsi)*1]), &(stack[((hsi*21+13032)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13836)*1+lsi)*1]), &(stack[((hsi*28+13151)*1+lsi)*1]), &(stack[((hsi*21+13053)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13872)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]), &(stack[((hsi*36+13836)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13917)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*36+13836)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+13962)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+14017)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+14072)*1+lsi)*1]), &(stack[((hsi*55+13781)*1+lsi)*1]), &(stack[((hsi*45+13662)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+12754)*1+lsi)*1]),&(stack[((hsi*66+14072)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13662)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+14138)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*28+13123)*1+lsi)*1]), &(stack[((hsi*36+13662)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+14183)*1+lsi)*1]), &(stack[((hsi*36+13836)*1+lsi)*1]), &(stack[((hsi*28+13151)*1+lsi)*1]), &(stack[((hsi*36+13662)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+14228)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]), &(stack[((hsi*45+14183)*1+lsi)*1]), &(stack[((hsi*45+14138)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+14283)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]), &(stack[((hsi*45+14138)*1+lsi)*1]), &(stack[((hsi*45+14183)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+14338)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+14404)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+14470)*1+lsi)*1]), &(stack[((hsi*66+14072)*1+lsi)*1]), &(stack[((hsi*55+13781)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+12676)*1+lsi)*1]),&(stack[((hsi*78+14470)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+13662)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+14593)*1+lsi)*1]), &(stack[((hsi*45+14138)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+14648)*1+lsi)*1]), &(stack[((hsi*45+14183)*1+lsi)*1]), &(stack[((hsi*36+13836)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+14703)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]), &(stack[((hsi*55+14648)*1+lsi)*1]), &(stack[((hsi*55+14593)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+14769)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]), &(stack[((hsi*55+14593)*1+lsi)*1]), &(stack[((hsi*55+14648)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+14835)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+14913)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+14991)*1+lsi)*1]), &(stack[((hsi*78+14470)*1+lsi)*1]), &(stack[((hsi*66+14072)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+12585)*1+lsi)*1]),&(stack[((hsi*91+14991)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+15082)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+13662)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+15137)*1+lsi)*1]), &(stack[((hsi*55+14593)*1+lsi)*1]), &(stack[((hsi*45+14138)*1+lsi)*1]), &(stack[((hsi*55+15082)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+15203)*1+lsi)*1]), &(stack[((hsi*55+14648)*1+lsi)*1]), &(stack[((hsi*45+14183)*1+lsi)*1]), &(stack[((hsi*55+15082)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+15269)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]), &(stack[((hsi*66+15203)*1+lsi)*1]), &(stack[((hsi*66+15137)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+15347)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]), &(stack[((hsi*66+15137)*1+lsi)*1]), &(stack[((hsi*66+15203)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+15425)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+15516)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+15607)*1+lsi)*1]), &(stack[((hsi*91+14991)*1+lsi)*1]), &(stack[((hsi*78+14470)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+12480)*1+lsi)*1]),&(stack[((hsi*105+15607)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+15712)*1+lsi)*1]), &(stack[((hsi*55+15082)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+15778)*1+lsi)*1]), &(stack[((hsi*66+15137)*1+lsi)*1]), &(stack[((hsi*55+14593)*1+lsi)*1]), &(stack[((hsi*66+15712)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+15856)*1+lsi)*1]), &(stack[((hsi*66+15203)*1+lsi)*1]), &(stack[((hsi*55+14648)*1+lsi)*1]), &(stack[((hsi*66+15712)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+15934)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]), &(stack[((hsi*78+15856)*1+lsi)*1]), &(stack[((hsi*78+15778)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+16025)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]), &(stack[((hsi*78+15778)*1+lsi)*1]), &(stack[((hsi*78+15856)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+16116)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+16221)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_4_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+16326)*1+lsi)*1]), &(stack[((hsi*105+15607)*1+lsi)*1]), &(stack[((hsi*91+14991)*1+lsi)*1]), &(stack[((hsi*105+16221)*1+lsi)*1]), &(stack[((hsi*105+16116)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+12360)*1+lsi)*1]),&(stack[((hsi*120+16326)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp14;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__s__0___Ab__up_(inteval, &(fp14), &(fp8));
+LIBINT2_REALTYPE fp11;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__s__0___Ab__up_(inteval, &(fp11), &(fp7));
+LIBINT2_REALTYPE fp9;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__s__0___Ab__up_(inteval, &(fp9), &(fp5));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13771)*1+lsi)*1]), &(fp14), &(fp9), &(fp11), &(fp8));
+LIBINT2_REALTYPE fp6;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__s__0___Ab__up_(inteval, &(fp6), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13698)*1+lsi)*1]), &(fp11), &(fp6), &(fp7));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13774)*1+lsi)*1]), &(fp9), &(fp6), &(fp5));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*3+13771)*1+lsi)*1]), &(fp14), &(stack[((hsi*3+13774)*1+lsi)*1]), &(stack[((hsi*3+13698)*1+lsi)*1]), &(stack[((hsi*3+13215)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13777)*1+lsi)*1]), &(fp6), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+16446)*1+lsi)*1]), &(stack[((hsi*3+13698)*1+lsi)*1]), &(fp11), &(stack[((hsi*3+13777)*1+lsi)*1]), &(stack[((hsi*3+12881)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+16452)*1+lsi)*1]), &(stack[((hsi*3+13774)*1+lsi)*1]), &(fp9), &(stack[((hsi*3+13777)*1+lsi)*1]), &(stack[((hsi*3+12878)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*3+13771)*1+lsi)*1]), &(stack[((hsi*6+16452)*1+lsi)*1]), &(stack[((hsi*6+16446)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*3+13777)*1+lsi)*1]), &(fp6), &(stack[((hsi*3+12890)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16474)*1+lsi)*1]), &(stack[((hsi*6+16446)*1+lsi)*1]), &(stack[((hsi*3+13698)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*6+12899)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16484)*1+lsi)*1]), &(stack[((hsi*6+16452)*1+lsi)*1]), &(stack[((hsi*3+13774)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*6+12893)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*10+16484)*1+lsi)*1]), &(stack[((hsi*10+16474)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*3+13777)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+16519)*1+lsi)*1]), &(stack[((hsi*10+16474)*1+lsi)*1]), &(stack[((hsi*6+16446)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*10+12931)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+16534)*1+lsi)*1]), &(stack[((hsi*10+16484)*1+lsi)*1]), &(stack[((hsi*6+16452)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*10+12921)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*15+16534)*1+lsi)*1]), &(stack[((hsi*15+16519)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+16585)*1+lsi)*1]), &(stack[((hsi*15+16519)*1+lsi)*1]), &(stack[((hsi*10+16474)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*15+12981)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+16606)*1+lsi)*1]), &(stack[((hsi*15+16534)*1+lsi)*1]), &(stack[((hsi*10+16484)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*15+12966)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*21+16606)*1+lsi)*1]), &(stack[((hsi*21+16585)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16676)*1+lsi)*1]), &(stack[((hsi*21+16585)*1+lsi)*1]), &(stack[((hsi*15+16519)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*21+13053)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16704)*1+lsi)*1]), &(stack[((hsi*21+16606)*1+lsi)*1]), &(stack[((hsi*15+16534)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*21+13032)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*28+16704)*1+lsi)*1]), &(stack[((hsi*28+16676)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16768)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+16796)*1+lsi)*1]), &(stack[((hsi*28+16676)*1+lsi)*1]), &(stack[((hsi*21+16585)*1+lsi)*1]), &(stack[((hsi*28+16768)*1+lsi)*1]), &(stack[((hsi*28+13151)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+16832)*1+lsi)*1]), &(stack[((hsi*28+16704)*1+lsi)*1]), &(stack[((hsi*21+16606)*1+lsi)*1]), &(stack[((hsi*28+16768)*1+lsi)*1]), &(stack[((hsi*28+13123)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*36+16832)*1+lsi)*1]), &(stack[((hsi*36+16796)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]));
+LIBINT2_REALTYPE fp18;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__s__0___Ab__up_(inteval, &(fp18), &(fp12));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+12890)*1+lsi)*1]), &(fp18), &(fp11), &(fp9), &(fp12));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]), &(fp18), &(stack[((hsi*3+13698)*1+lsi)*1]), &(stack[((hsi*3+13774)*1+lsi)*1]), &(stack[((hsi*3+12875)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]), &(stack[((hsi*6+16446)*1+lsi)*1]), &(stack[((hsi*6+16452)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*10+16474)*1+lsi)*1]), &(stack[((hsi*10+16484)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*15+16519)*1+lsi)*1]), &(stack[((hsi*15+16534)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*21+16585)*1+lsi)*1]), &(stack[((hsi*21+16606)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*28+16676)*1+lsi)*1]), &(stack[((hsi*28+16704)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*36+16796)*1+lsi)*1]), &(stack[((hsi*36+16832)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]));
+LIBINT2_REALTYPE fp27;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__s__0___Ab__up_(inteval, &(fp27), &(fp19));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+17022)*1+lsi)*1]), &(fp27), &(fp18), &(fp14), &(fp19));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+17025)*1+lsi)*1]), &(stack[((hsi*3+17022)*1+lsi)*1]), &(fp27), &(stack[((hsi*3+12890)*1+lsi)*1]), &(stack[((hsi*3+13771)*1+lsi)*1]), &(stack[((hsi*3+13498)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+17031)*1+lsi)*1]), &(stack[((hsi*6+17025)*1+lsi)*1]), &(stack[((hsi*3+17022)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+17041)*1+lsi)*1]), &(stack[((hsi*10+17031)*1+lsi)*1]), &(stack[((hsi*6+17025)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+17056)*1+lsi)*1]), &(stack[((hsi*15+17041)*1+lsi)*1]), &(stack[((hsi*10+17031)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+17077)*1+lsi)*1]), &(stack[((hsi*21+17056)*1+lsi)*1]), &(stack[((hsi*15+17041)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+17105)*1+lsi)*1]), &(stack[((hsi*28+17077)*1+lsi)*1]), &(stack[((hsi*21+17056)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*36+17105)*1+lsi)*1]), &(stack[((hsi*28+17077)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+17141)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*36+17105)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+12305)*1+lsi)*1]),&(stack[((hsi*55+17141)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+17067)*1+lsi)*1]), &(stack[((hsi*28+16768)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+17196)*1+lsi)*1]), &(stack[((hsi*36+16796)*1+lsi)*1]), &(stack[((hsi*28+16676)*1+lsi)*1]), &(stack[((hsi*36+17067)*1+lsi)*1]), &(stack[((hsi*36+13836)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+17241)*1+lsi)*1]), &(stack[((hsi*36+16832)*1+lsi)*1]), &(stack[((hsi*28+16704)*1+lsi)*1]), &(stack[((hsi*36+17067)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*45+17241)*1+lsi)*1]), &(stack[((hsi*45+17196)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*45+17196)*1+lsi)*1]), &(stack[((hsi*45+17241)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17396)*1+lsi)*1]), &(stack[((hsi*55+17141)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+12239)*1+lsi)*1]),&(stack[((hsi*66+17396)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*36+17067)*1+lsi)*1]), &(stack[((hsi*28+16768)*1+lsi)*1]), &(stack[((hsi*36+13662)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+17462)*1+lsi)*1]), &(stack[((hsi*45+17196)*1+lsi)*1]), &(stack[((hsi*36+16796)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*45+14183)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+17517)*1+lsi)*1]), &(stack[((hsi*45+17241)*1+lsi)*1]), &(stack[((hsi*36+16832)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*45+14138)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*55+17517)*1+lsi)*1]), &(stack[((hsi*55+17462)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*55+17462)*1+lsi)*1]), &(stack[((hsi*55+17517)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+17704)*1+lsi)*1]), &(stack[((hsi*66+17396)*1+lsi)*1]), &(stack[((hsi*55+17141)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+12161)*1+lsi)*1]),&(stack[((hsi*78+17704)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+17782)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*36+17067)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17837)*1+lsi)*1]), &(stack[((hsi*55+17462)*1+lsi)*1]), &(stack[((hsi*45+17196)*1+lsi)*1]), &(stack[((hsi*55+17782)*1+lsi)*1]), &(stack[((hsi*55+14648)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17903)*1+lsi)*1]), &(stack[((hsi*55+17517)*1+lsi)*1]), &(stack[((hsi*45+17241)*1+lsi)*1]), &(stack[((hsi*55+17782)*1+lsi)*1]), &(stack[((hsi*55+14593)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*66+17903)*1+lsi)*1]), &(stack[((hsi*66+17837)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*66+17837)*1+lsi)*1]), &(stack[((hsi*66+17903)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+18125)*1+lsi)*1]), &(stack[((hsi*78+17704)*1+lsi)*1]), &(stack[((hsi*66+17396)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+12070)*1+lsi)*1]),&(stack[((hsi*91+18125)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+18216)*1+lsi)*1]), &(stack[((hsi*55+17782)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]), &(stack[((hsi*55+15082)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+18282)*1+lsi)*1]), &(stack[((hsi*66+17837)*1+lsi)*1]), &(stack[((hsi*55+17462)*1+lsi)*1]), &(stack[((hsi*66+18216)*1+lsi)*1]), &(stack[((hsi*66+15203)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+18360)*1+lsi)*1]), &(stack[((hsi*66+17903)*1+lsi)*1]), &(stack[((hsi*55+17517)*1+lsi)*1]), &(stack[((hsi*66+18216)*1+lsi)*1]), &(stack[((hsi*66+15137)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*78+18360)*1+lsi)*1]), &(stack[((hsi*78+18282)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*78+18282)*1+lsi)*1]), &(stack[((hsi*78+18360)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+18620)*1+lsi)*1]), &(stack[((hsi*91+18125)*1+lsi)*1]), &(stack[((hsi*78+17704)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+11965)*1+lsi)*1]),&(stack[((hsi*105+18620)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+18725)*1+lsi)*1]), &(stack[((hsi*66+18216)*1+lsi)*1]), &(stack[((hsi*55+17782)*1+lsi)*1]), &(stack[((hsi*66+15712)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+18803)*1+lsi)*1]), &(stack[((hsi*78+18282)*1+lsi)*1]), &(stack[((hsi*66+17837)*1+lsi)*1]), &(stack[((hsi*78+18725)*1+lsi)*1]), &(stack[((hsi*78+15856)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+18894)*1+lsi)*1]), &(stack[((hsi*78+18360)*1+lsi)*1]), &(stack[((hsi*66+17903)*1+lsi)*1]), &(stack[((hsi*78+18725)*1+lsi)*1]), &(stack[((hsi*78+15778)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+18985)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*91+18894)*1+lsi)*1]), &(stack[((hsi*91+18803)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+19090)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*91+18803)*1+lsi)*1]), &(stack[((hsi*91+18894)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_3_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+19195)*1+lsi)*1]), &(stack[((hsi*105+18620)*1+lsi)*1]), &(stack[((hsi*91+18125)*1+lsi)*1]), &(stack[((hsi*105+19090)*1+lsi)*1]), &(stack[((hsi*105+18985)*1+lsi)*1]), &(stack[((hsi*105+16221)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+11845)*1+lsi)*1]),&(stack[((hsi*120+19195)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp15;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__s__0___Ab__up_(inteval, &(fp15), &(fp9), &(fp5));
+LIBINT2_REALTYPE fp10;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__s__0___Ab__up_(inteval, &(fp10), &(fp6), &(fp4));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+14548)*1+lsi)*1]), &(fp15), &(fp8), &(fp12), &(fp10), &(fp9));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp10), &(fp7), &(fp5), &(fp6));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+14554)*1+lsi)*1]), &(stack[((hsi*3+14548)*1+lsi)*1]), &(fp15), &(stack[((hsi*3+13215)*1+lsi)*1]), &(stack[((hsi*3+12875)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*3+13774)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+17103)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp10), &(stack[((hsi*3+12881)*1+lsi)*1]), &(stack[((hsi*3+12878)*1+lsi)*1]), &(stack[((hsi*3+13777)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13662)*1+lsi)*1]), &(stack[((hsi*6+14554)*1+lsi)*1]), &(stack[((hsi*3+14548)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]), &(stack[((hsi*6+17103)*1+lsi)*1]), &(stack[((hsi*6+16452)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+14560)*1+lsi)*1]), &(stack[((hsi*6+17103)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*6+12899)*1+lsi)*1]), &(stack[((hsi*6+12893)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+17109)*1+lsi)*1]), &(stack[((hsi*10+13662)*1+lsi)*1]), &(stack[((hsi*6+14554)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]), &(stack[((hsi*10+14560)*1+lsi)*1]), &(stack[((hsi*10+16484)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13707)*1+lsi)*1]), &(stack[((hsi*10+14560)*1+lsi)*1]), &(stack[((hsi*6+17103)*1+lsi)*1]), &(stack[((hsi*10+12931)*1+lsi)*1]), &(stack[((hsi*10+12921)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13672)*1+lsi)*1]), &(stack[((hsi*15+17109)*1+lsi)*1]), &(stack[((hsi*10+13662)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]), &(stack[((hsi*15+13707)*1+lsi)*1]), &(stack[((hsi*15+16534)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+14570)*1+lsi)*1]), &(stack[((hsi*15+13707)*1+lsi)*1]), &(stack[((hsi*10+14560)*1+lsi)*1]), &(stack[((hsi*15+12981)*1+lsi)*1]), &(stack[((hsi*15+12966)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+12966)*1+lsi)*1]), &(stack[((hsi*21+13672)*1+lsi)*1]), &(stack[((hsi*15+17109)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]), &(stack[((hsi*21+14570)*1+lsi)*1]), &(stack[((hsi*21+16606)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*21+14570)*1+lsi)*1]), &(stack[((hsi*15+13707)*1+lsi)*1]), &(stack[((hsi*21+13053)*1+lsi)*1]), &(stack[((hsi*21+13032)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13032)*1+lsi)*1]), &(stack[((hsi*28+12966)*1+lsi)*1]), &(stack[((hsi*21+13672)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*28+16704)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*21+14570)*1+lsi)*1]), &(stack[((hsi*28+13151)*1+lsi)*1]), &(stack[((hsi*28+13123)*1+lsi)*1]), &(stack[((hsi*28+16768)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13123)*1+lsi)*1]), &(stack[((hsi*36+13032)*1+lsi)*1]), &(stack[((hsi*28+12966)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*36+16832)*1+lsi)*1]));
+LIBINT2_REALTYPE fp17;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__s__0___Ab__up_(inteval, &(fp17), &(fp11), &(fp7));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+16768)*1+lsi)*1]), &(fp17), &(fp12), &(fp10), &(fp8), &(fp11));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]), &(fp17), &(stack[((hsi*3+12875)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*3+13215)*1+lsi)*1]), &(stack[((hsi*3+13698)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]), &(stack[((hsi*6+12884)*1+lsi)*1]), &(stack[((hsi*6+17103)*1+lsi)*1]), &(stack[((hsi*6+13218)*1+lsi)*1]), &(stack[((hsi*6+16446)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*10+12905)*1+lsi)*1]), &(stack[((hsi*10+14560)*1+lsi)*1]), &(stack[((hsi*10+13224)*1+lsi)*1]), &(stack[((hsi*10+16474)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*15+12941)*1+lsi)*1]), &(stack[((hsi*15+13707)*1+lsi)*1]), &(stack[((hsi*15+13234)*1+lsi)*1]), &(stack[((hsi*15+16519)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+12921)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*21+12996)*1+lsi)*1]), &(stack[((hsi*21+14570)*1+lsi)*1]), &(stack[((hsi*21+13249)*1+lsi)*1]), &(stack[((hsi*21+16585)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13215)*1+lsi)*1]), &(stack[((hsi*28+12921)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*28+13074)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*28+13270)*1+lsi)*1]), &(stack[((hsi*28+16676)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13251)*1+lsi)*1]), &(stack[((hsi*36+13215)*1+lsi)*1]), &(stack[((hsi*28+12921)*1+lsi)*1]), &(stack[((hsi*36+13179)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*36+13298)*1+lsi)*1]), &(stack[((hsi*36+16796)*1+lsi)*1]));
+LIBINT2_REALTYPE fp26;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__s__0___Ab__up_(inteval, &(fp26), &(fp18), &(fp12));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13168)*1+lsi)*1]), &(fp26), &(fp19), &(fp17), &(fp13), &(fp15), &(fp18));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13171)*1+lsi)*1]), &(stack[((hsi*3+13168)*1+lsi)*1]), &(fp26), &(stack[((hsi*3+13498)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]), &(stack[((hsi*3+13334)*1+lsi)*1]), &(stack[((hsi*3+14548)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13177)*1+lsi)*1]), &(stack[((hsi*6+13171)*1+lsi)*1]), &(stack[((hsi*3+13168)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]), &(stack[((hsi*6+14554)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+13177)*1+lsi)*1]), &(stack[((hsi*6+13171)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]), &(stack[((hsi*10+13662)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13296)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+13177)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]), &(stack[((hsi*15+17109)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13168)*1+lsi)*1]), &(stack[((hsi*21+13296)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]), &(stack[((hsi*21+13672)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+19379)*1+lsi)*1]), &(stack[((hsi*28+13168)*1+lsi)*1]), &(stack[((hsi*21+13296)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]), &(stack[((hsi*28+12921)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]), &(stack[((hsi*28+12966)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+19415)*1+lsi)*1]), &(stack[((hsi*36+19379)*1+lsi)*1]), &(stack[((hsi*28+13168)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]), &(stack[((hsi*36+13215)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]), &(stack[((hsi*36+13032)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+19460)*1+lsi)*1]), &(stack[((hsi*45+19415)*1+lsi)*1]), &(stack[((hsi*36+19379)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]), &(stack[((hsi*45+13251)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]), &(stack[((hsi*45+13123)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+11790)*1+lsi)*1]),&(stack[((hsi*55+19460)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*36+13836)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*36+17067)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+19515)*1+lsi)*1]), &(stack[((hsi*45+13123)*1+lsi)*1]), &(stack[((hsi*36+13032)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*45+17241)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+19570)*1+lsi)*1]), &(stack[((hsi*45+13251)*1+lsi)*1]), &(stack[((hsi*36+13215)*1+lsi)*1]), &(stack[((hsi*45+13872)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*45+13917)*1+lsi)*1]), &(stack[((hsi*45+17196)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+13836)*1+lsi)*1]), &(stack[((hsi*55+19460)*1+lsi)*1]), &(stack[((hsi*45+19415)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]), &(stack[((hsi*55+19570)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]), &(stack[((hsi*55+19515)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+11724)*1+lsi)*1]),&(stack[((hsi*66+13836)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+19379)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*45+14183)*1+lsi)*1]), &(stack[((hsi*45+14138)*1+lsi)*1]), &(stack[((hsi*45+17022)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+14138)*1+lsi)*1]), &(stack[((hsi*55+19515)*1+lsi)*1]), &(stack[((hsi*45+13123)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]), &(stack[((hsi*55+19379)*1+lsi)*1]), &(stack[((hsi*55+17517)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17022)*1+lsi)*1]), &(stack[((hsi*55+19570)*1+lsi)*1]), &(stack[((hsi*45+13251)*1+lsi)*1]), &(stack[((hsi*55+14228)*1+lsi)*1]), &(stack[((hsi*55+19379)*1+lsi)*1]), &(stack[((hsi*55+14283)*1+lsi)*1]), &(stack[((hsi*55+17462)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+19625)*1+lsi)*1]), &(stack[((hsi*66+13836)*1+lsi)*1]), &(stack[((hsi*55+19460)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]), &(stack[((hsi*66+17022)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]), &(stack[((hsi*66+14138)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+11646)*1+lsi)*1]),&(stack[((hsi*78+19625)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+19703)*1+lsi)*1]), &(stack[((hsi*55+19379)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*55+14648)*1+lsi)*1]), &(stack[((hsi*55+14593)*1+lsi)*1]), &(stack[((hsi*55+17782)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+19769)*1+lsi)*1]), &(stack[((hsi*66+14138)*1+lsi)*1]), &(stack[((hsi*55+19515)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]), &(stack[((hsi*66+19703)*1+lsi)*1]), &(stack[((hsi*66+17903)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+19847)*1+lsi)*1]), &(stack[((hsi*66+17022)*1+lsi)*1]), &(stack[((hsi*55+19570)*1+lsi)*1]), &(stack[((hsi*66+14703)*1+lsi)*1]), &(stack[((hsi*66+19703)*1+lsi)*1]), &(stack[((hsi*66+14769)*1+lsi)*1]), &(stack[((hsi*66+17837)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+19925)*1+lsi)*1]), &(stack[((hsi*78+19625)*1+lsi)*1]), &(stack[((hsi*66+13836)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]), &(stack[((hsi*78+19847)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]), &(stack[((hsi*78+19769)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+11555)*1+lsi)*1]),&(stack[((hsi*91+19925)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+20016)*1+lsi)*1]), &(stack[((hsi*66+19703)*1+lsi)*1]), &(stack[((hsi*55+19379)*1+lsi)*1]), &(stack[((hsi*66+15203)*1+lsi)*1]), &(stack[((hsi*66+15137)*1+lsi)*1]), &(stack[((hsi*66+18216)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+20094)*1+lsi)*1]), &(stack[((hsi*78+19769)*1+lsi)*1]), &(stack[((hsi*66+14138)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]), &(stack[((hsi*78+20016)*1+lsi)*1]), &(stack[((hsi*78+18360)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+20185)*1+lsi)*1]), &(stack[((hsi*78+19847)*1+lsi)*1]), &(stack[((hsi*66+17022)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]), &(stack[((hsi*78+20016)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]), &(stack[((hsi*78+18282)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+20276)*1+lsi)*1]), &(stack[((hsi*91+19925)*1+lsi)*1]), &(stack[((hsi*78+19625)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]), &(stack[((hsi*91+20185)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]), &(stack[((hsi*91+20094)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+11450)*1+lsi)*1]),&(stack[((hsi*105+20276)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+20381)*1+lsi)*1]), &(stack[((hsi*78+20016)*1+lsi)*1]), &(stack[((hsi*66+19703)*1+lsi)*1]), &(stack[((hsi*78+15856)*1+lsi)*1]), &(stack[((hsi*78+15778)*1+lsi)*1]), &(stack[((hsi*78+18725)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+20472)*1+lsi)*1]), &(stack[((hsi*91+20094)*1+lsi)*1]), &(stack[((hsi*78+19769)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]), &(stack[((hsi*91+20381)*1+lsi)*1]), &(stack[((hsi*91+18894)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+20577)*1+lsi)*1]), &(stack[((hsi*91+20185)*1+lsi)*1]), &(stack[((hsi*78+19847)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]), &(stack[((hsi*91+20381)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]), &(stack[((hsi*91+18803)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_2_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+20682)*1+lsi)*1]), &(stack[((hsi*105+20276)*1+lsi)*1]), &(stack[((hsi*91+19925)*1+lsi)*1]), &(stack[((hsi*105+16221)*1+lsi)*1]), &(stack[((hsi*105+20577)*1+lsi)*1]), &(stack[((hsi*105+16116)*1+lsi)*1]), &(stack[((hsi*105+20472)*1+lsi)*1]), &(stack[((hsi*105+19090)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+11330)*1+lsi)*1]),&(stack[((hsi*120+20682)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp16;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__s__0___Ab__up_(inteval, &(fp16), &(fp10), &(fp6));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13902)*1+lsi)*1]), &(fp16), &(fp11), &(fp9), &(fp10));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13905)*1+lsi)*1]), &(stack[((hsi*3+13902)*1+lsi)*1]), &(fp16), &(stack[((hsi*3+13698)*1+lsi)*1]), &(stack[((hsi*3+13774)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13911)*1+lsi)*1]), &(stack[((hsi*6+13905)*1+lsi)*1]), &(stack[((hsi*3+13902)*1+lsi)*1]), &(stack[((hsi*6+16446)*1+lsi)*1]), &(stack[((hsi*6+16452)*1+lsi)*1]), &(stack[((hsi*6+17103)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+13911)*1+lsi)*1]), &(stack[((hsi*6+13905)*1+lsi)*1]), &(stack[((hsi*10+16474)*1+lsi)*1]), &(stack[((hsi*10+16484)*1+lsi)*1]), &(stack[((hsi*10+14560)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+13911)*1+lsi)*1]), &(stack[((hsi*15+16519)*1+lsi)*1]), &(stack[((hsi*15+16534)*1+lsi)*1]), &(stack[((hsi*15+13707)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*21+16585)*1+lsi)*1]), &(stack[((hsi*21+16606)*1+lsi)*1]), &(stack[((hsi*21+14570)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*28+16676)*1+lsi)*1]), &(stack[((hsi*28+16704)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+16676)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*36+16796)*1+lsi)*1]), &(stack[((hsi*36+16832)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]));
+LIBINT2_REALTYPE fp25;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__s__0___Ab__up_(inteval, &(fp25), &(fp17), &(fp11));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp25), &(fp18), &(fp16), &(fp14), &(fp17));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+16771)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp25), &(stack[((hsi*3+12890)*1+lsi)*1]), &(stack[((hsi*3+13902)*1+lsi)*1]), &(stack[((hsi*3+13771)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16777)*1+lsi)*1]), &(stack[((hsi*6+16771)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*6+13905)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+16787)*1+lsi)*1]), &(stack[((hsi*10+16777)*1+lsi)*1]), &(stack[((hsi*6+16771)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*10+13911)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+16802)*1+lsi)*1]), &(stack[((hsi*15+16787)*1+lsi)*1]), &(stack[((hsi*10+16777)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*21+16802)*1+lsi)*1]), &(stack[((hsi*15+16787)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*21+16802)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*28+12921)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+16771)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*28+19315)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*36+13215)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+20802)*1+lsi)*1]), &(stack[((hsi*45+16771)*1+lsi)*1]), &(stack[((hsi*36+19343)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*45+16676)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*45+13251)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+11275)*1+lsi)*1]),&(stack[((hsi*55+20802)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+19315)*1+lsi)*1]), &(stack[((hsi*45+16676)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*45+17196)*1+lsi)*1]), &(stack[((hsi*45+17241)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+17196)*1+lsi)*1]), &(stack[((hsi*55+20802)*1+lsi)*1]), &(stack[((hsi*45+16771)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*55+19315)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*55+19570)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+11209)*1+lsi)*1]),&(stack[((hsi*66+17196)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+16771)*1+lsi)*1]), &(stack[((hsi*55+19315)*1+lsi)*1]), &(stack[((hsi*45+16676)*1+lsi)*1]), &(stack[((hsi*55+17462)*1+lsi)*1]), &(stack[((hsi*55+17517)*1+lsi)*1]), &(stack[((hsi*55+19379)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+20857)*1+lsi)*1]), &(stack[((hsi*66+17196)*1+lsi)*1]), &(stack[((hsi*55+20802)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*66+16771)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*66+17022)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+11131)*1+lsi)*1]),&(stack[((hsi*78+20857)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+20935)*1+lsi)*1]), &(stack[((hsi*66+16771)*1+lsi)*1]), &(stack[((hsi*55+19315)*1+lsi)*1]), &(stack[((hsi*66+17837)*1+lsi)*1]), &(stack[((hsi*66+17903)*1+lsi)*1]), &(stack[((hsi*66+19703)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+21013)*1+lsi)*1]), &(stack[((hsi*78+20857)*1+lsi)*1]), &(stack[((hsi*66+17196)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*78+20935)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*78+19847)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+11040)*1+lsi)*1]),&(stack[((hsi*91+21013)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+21104)*1+lsi)*1]), &(stack[((hsi*78+20935)*1+lsi)*1]), &(stack[((hsi*66+16771)*1+lsi)*1]), &(stack[((hsi*78+18282)*1+lsi)*1]), &(stack[((hsi*78+18360)*1+lsi)*1]), &(stack[((hsi*78+20016)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+21195)*1+lsi)*1]), &(stack[((hsi*91+21013)*1+lsi)*1]), &(stack[((hsi*78+20857)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*91+21104)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*91+20185)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+10935)*1+lsi)*1]),&(stack[((hsi*105+21195)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+21300)*1+lsi)*1]), &(stack[((hsi*91+21104)*1+lsi)*1]), &(stack[((hsi*78+20935)*1+lsi)*1]), &(stack[((hsi*91+18803)*1+lsi)*1]), &(stack[((hsi*91+18894)*1+lsi)*1]), &(stack[((hsi*91+20381)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+21405)*1+lsi)*1]), &(stack[((hsi*105+21195)*1+lsi)*1]), &(stack[((hsi*91+21013)*1+lsi)*1]), &(stack[((hsi*105+19090)*1+lsi)*1]), &(stack[((hsi*105+21300)*1+lsi)*1]), &(stack[((hsi*105+18985)*1+lsi)*1]), &(stack[((hsi*105+20577)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+10815)*1+lsi)*1]),&(stack[((hsi*120+21405)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp24;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__s__0___Ab__up_(inteval, &(fp24), &(fp16), &(fp10));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp24), &(fp17), &(fp15), &(fp16));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13168)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp24), &(stack[((hsi*3+16768)*1+lsi)*1]), &(stack[((hsi*3+14548)*1+lsi)*1]), &(stack[((hsi*3+13902)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16585)*1+lsi)*1]), &(stack[((hsi*6+13168)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*6+14554)*1+lsi)*1]), &(stack[((hsi*6+13905)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13921)*1+lsi)*1]), &(stack[((hsi*10+16585)*1+lsi)*1]), &(stack[((hsi*6+13168)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*10+13662)*1+lsi)*1]), &(stack[((hsi*10+13911)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13168)*1+lsi)*1]), &(stack[((hsi*15+13921)*1+lsi)*1]), &(stack[((hsi*10+16585)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*15+17109)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16585)*1+lsi)*1]), &(stack[((hsi*21+13168)*1+lsi)*1]), &(stack[((hsi*15+13921)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*21+13672)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13921)*1+lsi)*1]), &(stack[((hsi*28+16585)*1+lsi)*1]), &(stack[((hsi*21+13168)*1+lsi)*1]), &(stack[((hsi*28+12921)*1+lsi)*1]), &(stack[((hsi*28+12966)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*36+13921)*1+lsi)*1]), &(stack[((hsi*28+16585)*1+lsi)*1]), &(stack[((hsi*36+13215)*1+lsi)*1]), &(stack[((hsi*36+13032)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+21525)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*36+13921)*1+lsi)*1]), &(stack[((hsi*45+13251)*1+lsi)*1]), &(stack[((hsi*45+13123)*1+lsi)*1]), &(stack[((hsi*45+16676)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+10760)*1+lsi)*1]),&(stack[((hsi*55+21525)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+21580)*1+lsi)*1]), &(stack[((hsi*55+21525)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*55+19570)*1+lsi)*1]), &(stack[((hsi*55+19515)*1+lsi)*1]), &(stack[((hsi*55+19315)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+10694)*1+lsi)*1]),&(stack[((hsi*66+21580)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+21646)*1+lsi)*1]), &(stack[((hsi*66+21580)*1+lsi)*1]), &(stack[((hsi*55+21525)*1+lsi)*1]), &(stack[((hsi*66+17022)*1+lsi)*1]), &(stack[((hsi*66+14138)*1+lsi)*1]), &(stack[((hsi*66+16771)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+10616)*1+lsi)*1]),&(stack[((hsi*78+21646)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+21724)*1+lsi)*1]), &(stack[((hsi*78+21646)*1+lsi)*1]), &(stack[((hsi*66+21580)*1+lsi)*1]), &(stack[((hsi*78+19847)*1+lsi)*1]), &(stack[((hsi*78+19769)*1+lsi)*1]), &(stack[((hsi*78+20935)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+10525)*1+lsi)*1]),&(stack[((hsi*91+21724)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+21815)*1+lsi)*1]), &(stack[((hsi*91+21724)*1+lsi)*1]), &(stack[((hsi*78+21646)*1+lsi)*1]), &(stack[((hsi*91+20185)*1+lsi)*1]), &(stack[((hsi*91+20094)*1+lsi)*1]), &(stack[((hsi*91+21104)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+10420)*1+lsi)*1]),&(stack[((hsi*105+21815)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c_0_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+21920)*1+lsi)*1]), &(stack[((hsi*105+21815)*1+lsi)*1]), &(stack[((hsi*91+21724)*1+lsi)*1]), &(stack[((hsi*105+20577)*1+lsi)*1]), &(stack[((hsi*105+20472)*1+lsi)*1]), &(stack[((hsi*105+21300)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+10300)*1+lsi)*1]),&(stack[((hsi*120+21920)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp23;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__s__0___Ab__up_(inteval, &(fp23), &(fp15), &(fp9));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp23), &(fp14), &(fp18), &(fp16), &(fp15));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13168)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp23), &(stack[((hsi*3+13771)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]), &(stack[((hsi*3+13902)*1+lsi)*1]), &(stack[((hsi*3+14548)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16585)*1+lsi)*1]), &(stack[((hsi*6+13168)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*6+13905)*1+lsi)*1]), &(stack[((hsi*6+14554)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13921)*1+lsi)*1]), &(stack[((hsi*10+16585)*1+lsi)*1]), &(stack[((hsi*6+13168)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*10+13911)*1+lsi)*1]), &(stack[((hsi*10+13662)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13168)*1+lsi)*1]), &(stack[((hsi*15+13921)*1+lsi)*1]), &(stack[((hsi*10+16585)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*15+17109)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16585)*1+lsi)*1]), &(stack[((hsi*21+13168)*1+lsi)*1]), &(stack[((hsi*15+13921)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*21+13672)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13902)*1+lsi)*1]), &(stack[((hsi*28+16585)*1+lsi)*1]), &(stack[((hsi*21+13168)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*28+13707)*1+lsi)*1]), &(stack[((hsi*28+12966)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*36+13902)*1+lsi)*1]), &(stack[((hsi*28+16585)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*36+13735)*1+lsi)*1]), &(stack[((hsi*36+13032)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+13707)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*36+13902)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*45+16676)*1+lsi)*1]), &(stack[((hsi*45+13123)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+10245)*1+lsi)*1]),&(stack[((hsi*55+13707)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+22040)*1+lsi)*1]), &(stack[((hsi*55+13707)*1+lsi)*1]), &(stack[((hsi*45+13168)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*55+19315)*1+lsi)*1]), &(stack[((hsi*55+19515)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+10179)*1+lsi)*1]),&(stack[((hsi*66+22040)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+22106)*1+lsi)*1]), &(stack[((hsi*66+22040)*1+lsi)*1]), &(stack[((hsi*55+13707)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*66+16771)*1+lsi)*1]), &(stack[((hsi*66+14138)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+10101)*1+lsi)*1]),&(stack[((hsi*78+22106)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+22184)*1+lsi)*1]), &(stack[((hsi*78+22106)*1+lsi)*1]), &(stack[((hsi*66+22040)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*78+20935)*1+lsi)*1]), &(stack[((hsi*78+19769)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+10010)*1+lsi)*1]),&(stack[((hsi*91+22184)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+22275)*1+lsi)*1]), &(stack[((hsi*91+22184)*1+lsi)*1]), &(stack[((hsi*78+22106)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*91+21104)*1+lsi)*1]), &(stack[((hsi*91+20094)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+9905)*1+lsi)*1]),&(stack[((hsi*105+22275)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+22380)*1+lsi)*1]), &(stack[((hsi*105+22275)*1+lsi)*1]), &(stack[((hsi*91+22184)*1+lsi)*1]), &(stack[((hsi*105+18985)*1+lsi)*1]), &(stack[((hsi*105+19090)*1+lsi)*1]), &(stack[((hsi*105+21300)*1+lsi)*1]), &(stack[((hsi*105+20472)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+9785)*1+lsi)*1]),&(stack[((hsi*120+22380)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp22;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__s__0___Ab__up_(inteval, &(fp22), &(fp14), &(fp8));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp22), &(fp13), &(fp15), &(fp19), &(fp17), &(fp14));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13902)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(fp22), &(stack[((hsi*3+13334)*1+lsi)*1]), &(stack[((hsi*3+14548)*1+lsi)*1]), &(stack[((hsi*3+13498)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]), &(stack[((hsi*3+13771)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16676)*1+lsi)*1]), &(stack[((hsi*6+13902)*1+lsi)*1]), &(stack[((hsi*3+14551)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]), &(stack[((hsi*6+14554)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]), &(stack[((hsi*6+16468)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+16676)*1+lsi)*1]), &(stack[((hsi*6+13902)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]), &(stack[((hsi*10+13662)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]), &(stack[((hsi*10+16509)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+16676)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]), &(stack[((hsi*15+17109)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]), &(stack[((hsi*15+16570)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+13902)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]), &(stack[((hsi*21+13672)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]), &(stack[((hsi*21+16655)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+16655)*1+lsi)*1]), &(stack[((hsi*28+13902)*1+lsi)*1]), &(stack[((hsi*21+17088)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]), &(stack[((hsi*28+12966)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]), &(stack[((hsi*28+12921)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+16655)*1+lsi)*1]), &(stack[((hsi*28+13902)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]), &(stack[((hsi*36+13032)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]), &(stack[((hsi*36+13215)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+13168)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+16655)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]), &(stack[((hsi*45+13123)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]), &(stack[((hsi*45+13251)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+9730)*1+lsi)*1]),&(stack[((hsi*55+13168)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+13223)*1+lsi)*1]), &(stack[((hsi*55+13168)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]), &(stack[((hsi*55+19515)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]), &(stack[((hsi*55+19570)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+9664)*1+lsi)*1]),&(stack[((hsi*66+13223)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+22500)*1+lsi)*1]), &(stack[((hsi*66+13223)*1+lsi)*1]), &(stack[((hsi*55+13168)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]), &(stack[((hsi*66+14138)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]), &(stack[((hsi*66+17022)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+9586)*1+lsi)*1]),&(stack[((hsi*78+22500)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+22578)*1+lsi)*1]), &(stack[((hsi*78+22500)*1+lsi)*1]), &(stack[((hsi*66+13223)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]), &(stack[((hsi*78+19769)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]), &(stack[((hsi*78+19847)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+9495)*1+lsi)*1]),&(stack[((hsi*91+22578)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+22669)*1+lsi)*1]), &(stack[((hsi*91+22578)*1+lsi)*1]), &(stack[((hsi*78+22500)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]), &(stack[((hsi*91+20094)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]), &(stack[((hsi*91+20185)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+9390)*1+lsi)*1]),&(stack[((hsi*105+22669)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_2_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+22774)*1+lsi)*1]), &(stack[((hsi*105+22669)*1+lsi)*1]), &(stack[((hsi*91+22578)*1+lsi)*1]), &(stack[((hsi*105+16116)*1+lsi)*1]), &(stack[((hsi*105+20472)*1+lsi)*1]), &(stack[((hsi*105+16221)*1+lsi)*1]), &(stack[((hsi*105+20577)*1+lsi)*1]), &(stack[((hsi*105+18985)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+9270)*1+lsi)*1]),&(stack[((hsi*120+22774)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp21;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__s__0___Ab__up_(inteval, &(fp21), &(fp13));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+16768)*1+lsi)*1]), &(fp21), &(fp14), &(fp18), &(fp13));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+16655)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]), &(fp21), &(stack[((hsi*3+13771)*1+lsi)*1]), &(stack[((hsi*3+12890)*1+lsi)*1]), &(stack[((hsi*3+13334)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+16661)*1+lsi)*1]), &(stack[((hsi*6+16655)*1+lsi)*1]), &(stack[((hsi*3+16768)*1+lsi)*1]), &(stack[((hsi*6+13701)*1+lsi)*1]), &(stack[((hsi*6+12915)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+16661)*1+lsi)*1]), &(stack[((hsi*6+16655)*1+lsi)*1]), &(stack[((hsi*10+16458)*1+lsi)*1]), &(stack[((hsi*10+12956)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+12890)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*10+16661)*1+lsi)*1]), &(stack[((hsi*15+16494)*1+lsi)*1]), &(stack[((hsi*15+13017)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+12911)*1+lsi)*1]), &(stack[((hsi*21+12890)*1+lsi)*1]), &(stack[((hsi*15+12875)*1+lsi)*1]), &(stack[((hsi*21+16549)*1+lsi)*1]), &(stack[((hsi*21+13102)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+12939)*1+lsi)*1]), &(stack[((hsi*28+12911)*1+lsi)*1]), &(stack[((hsi*21+12890)*1+lsi)*1]), &(stack[((hsi*28+16627)*1+lsi)*1]), &(stack[((hsi*28+16913)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+12939)*1+lsi)*1]), &(stack[((hsi*28+12911)*1+lsi)*1]), &(stack[((hsi*36+16732)*1+lsi)*1]), &(stack[((hsi*36+16941)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+16446)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+12939)*1+lsi)*1]), &(stack[((hsi*45+16868)*1+lsi)*1]), &(stack[((hsi*45+16977)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+9215)*1+lsi)*1]),&(stack[((hsi*55+16446)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+12875)*1+lsi)*1]), &(stack[((hsi*55+16446)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*55+17286)*1+lsi)*1]), &(stack[((hsi*55+17341)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+9149)*1+lsi)*1]),&(stack[((hsi*66+12875)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+16501)*1+lsi)*1]), &(stack[((hsi*66+12875)*1+lsi)*1]), &(stack[((hsi*55+16446)*1+lsi)*1]), &(stack[((hsi*66+17572)*1+lsi)*1]), &(stack[((hsi*66+17638)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+9071)*1+lsi)*1]),&(stack[((hsi*78+16501)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+12941)*1+lsi)*1]), &(stack[((hsi*78+16501)*1+lsi)*1]), &(stack[((hsi*66+12875)*1+lsi)*1]), &(stack[((hsi*78+17969)*1+lsi)*1]), &(stack[((hsi*78+18047)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+8980)*1+lsi)*1]),&(stack[((hsi*91+12941)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+16579)*1+lsi)*1]), &(stack[((hsi*91+12941)*1+lsi)*1]), &(stack[((hsi*78+16501)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+8875)*1+lsi)*1]),&(stack[((hsi*105+16579)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_3_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+16837)*1+lsi)*1]), &(stack[((hsi*105+16579)*1+lsi)*1]), &(stack[((hsi*91+12941)*1+lsi)*1]), &(stack[((hsi*105+18985)*1+lsi)*1]), &(stack[((hsi*105+19090)*1+lsi)*1]), &(stack[((hsi*105+16116)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+8755)*1+lsi)*1]),&(stack[((hsi*120+16837)*1+lsi)*1]),120);
+LIBINT2_REALTYPE fp20;
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__s__0___Ab__up_(inteval, &(fp20), &(fp19), &(fp13));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__p__0___Ab__up_(inteval, &(stack[((hsi*3+13032)*1+lsi)*1]), &(fp20), &(fp13), &(fp19));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__d__0___Ab__up_(inteval, &(stack[((hsi*6+13035)*1+lsi)*1]), &(stack[((hsi*3+13032)*1+lsi)*1]), &(fp20), &(stack[((hsi*3+13334)*1+lsi)*1]), &(stack[((hsi*3+13498)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__f__0___Ab__up_(inteval, &(stack[((hsi*10+13041)*1+lsi)*1]), &(stack[((hsi*6+13035)*1+lsi)*1]), &(stack[((hsi*3+13032)*1+lsi)*1]), &(stack[((hsi*6+13337)*1+lsi)*1]), &(stack[((hsi*6+13501)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__g__0___Ab__up_(inteval, &(stack[((hsi*15+13051)*1+lsi)*1]), &(stack[((hsi*10+13041)*1+lsi)*1]), &(stack[((hsi*6+13035)*1+lsi)*1]), &(stack[((hsi*10+13343)*1+lsi)*1]), &(stack[((hsi*10+13507)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__h__0___Ab__up_(inteval, &(stack[((hsi*21+13066)*1+lsi)*1]), &(stack[((hsi*15+13051)*1+lsi)*1]), &(stack[((hsi*10+13041)*1+lsi)*1]), &(stack[((hsi*15+13353)*1+lsi)*1]), &(stack[((hsi*15+13517)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__i__0___Ab__up_(inteval, &(stack[((hsi*28+16684)*1+lsi)*1]), &(stack[((hsi*21+13066)*1+lsi)*1]), &(stack[((hsi*15+13051)*1+lsi)*1]), &(stack[((hsi*21+13368)*1+lsi)*1]), &(stack[((hsi*21+13532)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__k__0___Ab__up_(inteval, &(stack[((hsi*36+13289)*1+lsi)*1]), &(stack[((hsi*28+16684)*1+lsi)*1]), &(stack[((hsi*21+13066)*1+lsi)*1]), &(stack[((hsi*28+13389)*1+lsi)*1]), &(stack[((hsi*28+13553)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__l__0___Ab__up_(inteval, &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+13289)*1+lsi)*1]), &(stack[((hsi*28+16684)*1+lsi)*1]), &(stack[((hsi*36+13417)*1+lsi)*1]), &(stack[((hsi*36+13581)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__m__0___Ab__up_(inteval, &(stack[((hsi*55+13032)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*36+13289)*1+lsi)*1]), &(stack[((hsi*45+13453)*1+lsi)*1]), &(stack[((hsi*45+13617)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+8700)*1+lsi)*1]),&(stack[((hsi*55+13032)*1+lsi)*1]),55);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__ps__0___Ab__up_(inteval, &(stack[((hsi*66+13289)*1+lsi)*1]), &(stack[((hsi*55+13032)*1+lsi)*1]), &(stack[((hsi*45+14548)*1+lsi)*1]), &(stack[((hsi*55+13962)*1+lsi)*1]), &(stack[((hsi*55+14017)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+8634)*1+lsi)*1]),&(stack[((hsi*66+13289)*1+lsi)*1]),66);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+13355)*1+lsi)*1]), &(stack[((hsi*66+13289)*1+lsi)*1]), &(stack[((hsi*55+13032)*1+lsi)*1]), &(stack[((hsi*66+14338)*1+lsi)*1]), &(stack[((hsi*66+14404)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+8556)*1+lsi)*1]),&(stack[((hsi*78+13355)*1+lsi)*1]),78);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+13433)*1+lsi)*1]), &(stack[((hsi*78+13355)*1+lsi)*1]), &(stack[((hsi*66+13289)*1+lsi)*1]), &(stack[((hsi*78+14835)*1+lsi)*1]), &(stack[((hsi*78+14913)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+8465)*1+lsi)*1]),&(stack[((hsi*91+13433)*1+lsi)*1]),91);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+13524)*1+lsi)*1]), &(stack[((hsi*91+13433)*1+lsi)*1]), &(stack[((hsi*78+13355)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+8360)*1+lsi)*1]),&(stack[((hsi*105+13524)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_4_c__minus_4_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+22894)*1+lsi)*1]), &(stack[((hsi*105+13524)*1+lsi)*1]), &(stack[((hsi*91+13433)*1+lsi)*1]), &(stack[((hsi*105+16116)*1+lsi)*1]), &(stack[((hsi*105+16221)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+8240)*1+lsi)*1]),&(stack[((hsi*120+22894)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+8185)*1+lsi)*1]),&(stack[((hsi*55+14017)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+8119)*1+lsi)*1]),&(stack[((hsi*66+14404)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+8041)*1+lsi)*1]),&(stack[((hsi*78+14913)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+7950)*1+lsi)*1]),&(stack[((hsi*91+15516)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+7845)*1+lsi)*1]),&(stack[((hsi*105+16221)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pp__0___Ab__up_(inteval, &(stack[((hsi*78+13629)*1+lsi)*1]), &(stack[((hsi*66+15712)*1+lsi)*1]), &(stack[((hsi*55+15082)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+23014)*1+lsi)*1]), &(stack[((hsi*78+15856)*1+lsi)*1]), &(stack[((hsi*66+15203)*1+lsi)*1]), &(stack[((hsi*78+13629)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+23105)*1+lsi)*1]), &(stack[((hsi*78+15778)*1+lsi)*1]), &(stack[((hsi*66+15137)*1+lsi)*1]), &(stack[((hsi*78+13629)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+23196)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]), &(stack[((hsi*78+15347)*1+lsi)*1]), &(stack[((hsi*91+23105)*1+lsi)*1]), &(stack[((hsi*91+23014)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+23301)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]), &(stack[((hsi*78+15269)*1+lsi)*1]), &(stack[((hsi*91+23014)*1+lsi)*1]), &(stack[((hsi*91+23105)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_3_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+23406)*1+lsi)*1]), &(stack[((hsi*105+16221)*1+lsi)*1]), &(stack[((hsi*91+15516)*1+lsi)*1]), &(stack[((hsi*105+23301)*1+lsi)*1]), &(stack[((hsi*105+23196)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+7725)*1+lsi)*1]),&(stack[((hsi*120+23406)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+7670)*1+lsi)*1]),&(stack[((hsi*55+17341)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+7604)*1+lsi)*1]),&(stack[((hsi*66+17638)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+7526)*1+lsi)*1]),&(stack[((hsi*78+18047)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+7435)*1+lsi)*1]),&(stack[((hsi*91+18529)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+7330)*1+lsi)*1]),&(stack[((hsi*105+19090)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+23526)*1+lsi)*1]), &(stack[((hsi*78+18725)*1+lsi)*1]), &(stack[((hsi*66+18216)*1+lsi)*1]), &(stack[((hsi*78+13629)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+23617)*1+lsi)*1]), &(stack[((hsi*91+18894)*1+lsi)*1]), &(stack[((hsi*78+18360)*1+lsi)*1]), &(stack[((hsi*91+23526)*1+lsi)*1]), &(stack[((hsi*91+23105)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+23722)*1+lsi)*1]), &(stack[((hsi*91+18803)*1+lsi)*1]), &(stack[((hsi*78+18282)*1+lsi)*1]), &(stack[((hsi*91+23526)*1+lsi)*1]), &(stack[((hsi*91+23014)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_2_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+23827)*1+lsi)*1]), &(stack[((hsi*105+19090)*1+lsi)*1]), &(stack[((hsi*91+18529)*1+lsi)*1]), &(stack[((hsi*105+23722)*1+lsi)*1]), &(stack[((hsi*105+23617)*1+lsi)*1]), &(stack[((hsi*105+23301)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+7210)*1+lsi)*1]),&(stack[((hsi*120+23827)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+7155)*1+lsi)*1]),&(stack[((hsi*55+19570)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+7089)*1+lsi)*1]),&(stack[((hsi*66+17022)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+7011)*1+lsi)*1]),&(stack[((hsi*78+19847)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+6920)*1+lsi)*1]),&(stack[((hsi*91+20185)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+6815)*1+lsi)*1]),&(stack[((hsi*105+20577)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+23947)*1+lsi)*1]), &(stack[((hsi*91+20381)*1+lsi)*1]), &(stack[((hsi*78+20016)*1+lsi)*1]), &(stack[((hsi*91+23014)*1+lsi)*1]), &(stack[((hsi*91+23105)*1+lsi)*1]), &(stack[((hsi*91+23526)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+24052)*1+lsi)*1]), &(stack[((hsi*105+20577)*1+lsi)*1]), &(stack[((hsi*91+20185)*1+lsi)*1]), &(stack[((hsi*105+23301)*1+lsi)*1]), &(stack[((hsi*105+23947)*1+lsi)*1]), &(stack[((hsi*105+23196)*1+lsi)*1]), &(stack[((hsi*105+23722)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+6695)*1+lsi)*1]),&(stack[((hsi*120+24052)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+6640)*1+lsi)*1]),&(stack[((hsi*55+19315)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+6574)*1+lsi)*1]),&(stack[((hsi*66+16771)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+6496)*1+lsi)*1]),&(stack[((hsi*78+20935)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+6405)*1+lsi)*1]),&(stack[((hsi*91+21104)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+6300)*1+lsi)*1]),&(stack[((hsi*105+21300)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c_0_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+24172)*1+lsi)*1]), &(stack[((hsi*105+21300)*1+lsi)*1]), &(stack[((hsi*91+21104)*1+lsi)*1]), &(stack[((hsi*105+23722)*1+lsi)*1]), &(stack[((hsi*105+23617)*1+lsi)*1]), &(stack[((hsi*105+23947)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+6180)*1+lsi)*1]),&(stack[((hsi*120+24172)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+6125)*1+lsi)*1]),&(stack[((hsi*55+19515)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+6059)*1+lsi)*1]),&(stack[((hsi*66+14138)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+5981)*1+lsi)*1]),&(stack[((hsi*78+19769)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+5890)*1+lsi)*1]),&(stack[((hsi*91+20094)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+5785)*1+lsi)*1]),&(stack[((hsi*105+20472)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+24292)*1+lsi)*1]), &(stack[((hsi*105+20472)*1+lsi)*1]), &(stack[((hsi*91+20094)*1+lsi)*1]), &(stack[((hsi*105+23196)*1+lsi)*1]), &(stack[((hsi*105+23301)*1+lsi)*1]), &(stack[((hsi*105+23947)*1+lsi)*1]), &(stack[((hsi*105+23617)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+5665)*1+lsi)*1]),&(stack[((hsi*120+24292)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+5610)*1+lsi)*1]),&(stack[((hsi*55+17286)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+5544)*1+lsi)*1]),&(stack[((hsi*66+17572)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+5466)*1+lsi)*1]),&(stack[((hsi*78+17969)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+5375)*1+lsi)*1]),&(stack[((hsi*91+18438)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+5270)*1+lsi)*1]),&(stack[((hsi*105+18985)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_2_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+24412)*1+lsi)*1]), &(stack[((hsi*105+18985)*1+lsi)*1]), &(stack[((hsi*91+18438)*1+lsi)*1]), &(stack[((hsi*105+23617)*1+lsi)*1]), &(stack[((hsi*105+23722)*1+lsi)*1]), &(stack[((hsi*105+23196)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+5150)*1+lsi)*1]),&(stack[((hsi*120+24412)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+5095)*1+lsi)*1]),&(stack[((hsi*55+13962)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+5029)*1+lsi)*1]),&(stack[((hsi*66+14338)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+4951)*1+lsi)*1]),&(stack[((hsi*78+14835)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+4860)*1+lsi)*1]),&(stack[((hsi*91+15425)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+4755)*1+lsi)*1]),&(stack[((hsi*105+16116)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_3_c__minus_3_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+24532)*1+lsi)*1]), &(stack[((hsi*105+16116)*1+lsi)*1]), &(stack[((hsi*91+15425)*1+lsi)*1]), &(stack[((hsi*105+23196)*1+lsi)*1]), &(stack[((hsi*105+23301)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+4635)*1+lsi)*1]),&(stack[((hsi*120+24532)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+4580)*1+lsi)*1]),&(stack[((hsi*55+14228)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+4514)*1+lsi)*1]),&(stack[((hsi*66+14703)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+4436)*1+lsi)*1]),&(stack[((hsi*78+15269)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+4345)*1+lsi)*1]),&(stack[((hsi*91+15934)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+4240)*1+lsi)*1]),&(stack[((hsi*105+23301)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pd__0___Ab__up_(inteval, &(stack[((hsi*91+24652)*1+lsi)*1]), &(stack[((hsi*78+13629)*1+lsi)*1]), &(stack[((hsi*66+15712)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+24743)*1+lsi)*1]), &(stack[((hsi*91+23105)*1+lsi)*1]), &(stack[((hsi*78+15778)*1+lsi)*1]), &(stack[((hsi*91+24652)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+24848)*1+lsi)*1]), &(stack[((hsi*91+23014)*1+lsi)*1]), &(stack[((hsi*78+15856)*1+lsi)*1]), &(stack[((hsi*91+24652)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_2_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+24953)*1+lsi)*1]), &(stack[((hsi*105+23301)*1+lsi)*1]), &(stack[((hsi*91+15934)*1+lsi)*1]), &(stack[((hsi*105+24848)*1+lsi)*1]), &(stack[((hsi*105+24743)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+4120)*1+lsi)*1]),&(stack[((hsi*120+24953)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+4065)*1+lsi)*1]),&(stack[((hsi*55+17462)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+3999)*1+lsi)*1]),&(stack[((hsi*66+17837)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+3921)*1+lsi)*1]),&(stack[((hsi*78+18282)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+3830)*1+lsi)*1]),&(stack[((hsi*91+18803)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+3725)*1+lsi)*1]),&(stack[((hsi*105+23722)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+25073)*1+lsi)*1]), &(stack[((hsi*91+23526)*1+lsi)*1]), &(stack[((hsi*78+18725)*1+lsi)*1]), &(stack[((hsi*91+24652)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+25178)*1+lsi)*1]), &(stack[((hsi*105+23722)*1+lsi)*1]), &(stack[((hsi*91+18803)*1+lsi)*1]), &(stack[((hsi*105+25073)*1+lsi)*1]), &(stack[((hsi*105+24848)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+3605)*1+lsi)*1]),&(stack[((hsi*120+25178)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+3550)*1+lsi)*1]),&(stack[((hsi*55+19379)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+3484)*1+lsi)*1]),&(stack[((hsi*66+19703)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+3406)*1+lsi)*1]),&(stack[((hsi*78+20016)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+3315)*1+lsi)*1]),&(stack[((hsi*91+20381)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+3210)*1+lsi)*1]),&(stack[((hsi*105+23947)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c_0_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+25298)*1+lsi)*1]), &(stack[((hsi*105+23947)*1+lsi)*1]), &(stack[((hsi*91+20381)*1+lsi)*1]), &(stack[((hsi*105+24848)*1+lsi)*1]), &(stack[((hsi*105+24743)*1+lsi)*1]), &(stack[((hsi*105+25073)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+3090)*1+lsi)*1]),&(stack[((hsi*120+25298)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+3035)*1+lsi)*1]),&(stack[((hsi*55+17517)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+2969)*1+lsi)*1]),&(stack[((hsi*66+17903)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+2891)*1+lsi)*1]),&(stack[((hsi*78+18360)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+2800)*1+lsi)*1]),&(stack[((hsi*91+18894)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+2695)*1+lsi)*1]),&(stack[((hsi*105+23617)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+25418)*1+lsi)*1]), &(stack[((hsi*105+23617)*1+lsi)*1]), &(stack[((hsi*91+18894)*1+lsi)*1]), &(stack[((hsi*105+25073)*1+lsi)*1]), &(stack[((hsi*105+24743)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+2575)*1+lsi)*1]),&(stack[((hsi*120+25418)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+2520)*1+lsi)*1]),&(stack[((hsi*55+14283)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+2454)*1+lsi)*1]),&(stack[((hsi*66+14769)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+2376)*1+lsi)*1]),&(stack[((hsi*78+15347)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+2285)*1+lsi)*1]),&(stack[((hsi*91+16025)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+2180)*1+lsi)*1]),&(stack[((hsi*105+23196)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_2_c__minus_2_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+25538)*1+lsi)*1]), &(stack[((hsi*105+23196)*1+lsi)*1]), &(stack[((hsi*91+16025)*1+lsi)*1]), &(stack[((hsi*105+24743)*1+lsi)*1]), &(stack[((hsi*105+24848)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+2060)*1+lsi)*1]),&(stack[((hsi*120+25538)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+2005)*1+lsi)*1]),&(stack[((hsi*55+14648)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+1939)*1+lsi)*1]),&(stack[((hsi*66+15203)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+1861)*1+lsi)*1]),&(stack[((hsi*78+15856)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+1770)*1+lsi)*1]),&(stack[((hsi*91+23014)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+1665)*1+lsi)*1]),&(stack[((hsi*105+24848)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pf__0___Ab__up_(inteval, &(stack[((hsi*105+25658)*1+lsi)*1]), &(stack[((hsi*91+24652)*1+lsi)*1]), &(stack[((hsi*78+13629)*1+lsi)*1]));
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+25763)*1+lsi)*1]), &(stack[((hsi*105+24848)*1+lsi)*1]), &(stack[((hsi*91+23014)*1+lsi)*1]), &(stack[((hsi*105+25658)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+1545)*1+lsi)*1]),&(stack[((hsi*120+25763)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+1490)*1+lsi)*1]),&(stack[((hsi*55+17782)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+1424)*1+lsi)*1]),&(stack[((hsi*66+18216)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+1346)*1+lsi)*1]),&(stack[((hsi*78+18725)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+1255)*1+lsi)*1]),&(stack[((hsi*91+23526)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+1150)*1+lsi)*1]),&(stack[((hsi*105+25073)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c_0_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+25883)*1+lsi)*1]), &(stack[((hsi*105+25073)*1+lsi)*1]), &(stack[((hsi*91+23526)*1+lsi)*1]), &(stack[((hsi*105+25658)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+1030)*1+lsi)*1]),&(stack[((hsi*120+25883)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+975)*1+lsi)*1]),&(stack[((hsi*55+14593)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+909)*1+lsi)*1]),&(stack[((hsi*66+15137)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+831)*1+lsi)*1]),&(stack[((hsi*78+15778)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+740)*1+lsi)*1]),&(stack[((hsi*91+23105)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+635)*1+lsi)*1]),&(stack[((hsi*105+24743)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_1_c__minus_1_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+26003)*1+lsi)*1]), &(stack[((hsi*105+24743)*1+lsi)*1]), &(stack[((hsi*91+23105)*1+lsi)*1]), &(stack[((hsi*105+25658)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+515)*1+lsi)*1]),&(stack[((hsi*120+26003)*1+lsi)*1]),120);
+_libint2_static_api_inc1_short_(&(stack[((hsi*55+460)*1+lsi)*1]),&(stack[((hsi*55+15082)*1+lsi)*1]),55);
+_libint2_static_api_inc1_short_(&(stack[((hsi*66+394)*1+lsi)*1]),&(stack[((hsi*66+15712)*1+lsi)*1]),66);
+_libint2_static_api_inc1_short_(&(stack[((hsi*78+316)*1+lsi)*1]),&(stack[((hsi*78+13629)*1+lsi)*1]),78);
+_libint2_static_api_inc1_short_(&(stack[((hsi*91+225)*1+lsi)*1]),&(stack[((hsi*91+24652)*1+lsi)*1]),91);
+_libint2_static_api_inc1_short_(&(stack[((hsi*105+120)*1+lsi)*1]),&(stack[((hsi*105+25658)*1+lsi)*1]),105);
+OSVRRSMultipole_aB_s__0___SphericalMultipole_sB_0_c_0_Sb__pg__0___Ab__up_(inteval, &(stack[((hsi*120+26123)*1+lsi)*1]), &(stack[((hsi*105+25658)*1+lsi)*1]), &(stack[((hsi*91+24652)*1+lsi)*1]));
+_libint2_static_api_inc1_short_(&(stack[((hsi*120+0)*1+lsi)*1]),&(stack[((hsi*120+26123)*1+lsi)*1]),120);
+}
+}
+}
+const int hsi = 0;
+const int lsi = 0;
+const int vi = 0;
+/** Number of flops = 12875 */
+}
+
+#ifdef __cplusplus
+};
+LIBINT_PRAGMA_CLANG(diagnostic pop)
+LIBINT_PRAGMA_GCC(diagnostic pop)
+#endif

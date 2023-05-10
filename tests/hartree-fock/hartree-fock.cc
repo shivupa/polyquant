@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2020 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
  *  This file is part of Libint.
  *
@@ -118,6 +118,7 @@ int main(int argc, char *argv[]) {
 
     // initializes the Libint integrals library ... now ready to compute
     libint2::initialize();
+    libint2::set_solid_harmonics_ordering(libint2::SHGShellOrdering_Standard);
 
     // compute overlap integrals
     auto S = compute_1body_ints(shells, Operator::overlap);

@@ -1,10 +1,13 @@
 from __future__ import print_function
-import sys, re, math, os
+import math
+import os
+import re
+import sys
 
 def pat_numbers(n):
     result = ''
     for i in range(n):
-        result += '\s*([+-e\d.]+)'
+        result += r'\s*([+-e\d.]+)'
     return result
 
 def validate(label, data, refdata, tolerance, textline):
@@ -34,6 +37,8 @@ if os.path.exists(path_to_libfeatures):
     no = False
     yes = True
     exec(open(path_to_libfeatures).read())
+else:
+    sys.exit(2)
 
 # ignore test if ERI_MAX_AM  is too low
 if LIBINT_ERI_MAX_AM<2:
@@ -49,11 +54,19 @@ Qref = [-7.01719638074453, 0.024624345507934, -0.576201299024159,
         -8.04716669024124, 0.638204907990955, -6.35134519242917 ]
 Qtol = 1e-8
 
-smuref = [-muref[1]/2, muref[2], -muref[0]/2]
+# Note that the sphemultipole order is fixed at generator build time (not influenced by libint2::solid_harmonics_ordering())
+if (LIBINT_SHGSHELL_ORDERING == LIBINT_SHGSHELL_ORDERING_STANDARD):
+    smuref = [-muref[1]/2,  muref[2],   -muref[0]/2]  # [ 0.046, -0.105,  0.132]
+    print("Checking sphemultipole LIBINT_SHGSHELL_ORDERING=Standard\n");
+else:
+    smuref = [ muref[2],   -muref[0]/2, -muref[1]/2]  # [-0.105,  0.132,  0.046]
+    print("Checking sphemultipole LIBINT_SHGSHELL_ORDERING=Gaussian\n");
 smutol = 1e-9
 
-sQref = [Qref[1]/4, -Qref[4]/2, (2*Qref[5] - Qref[0] - Qref[3])/4,
-         -Qref[2]/2, (Qref[0] - Qref[3])/8  ]
+if (LIBINT_SHGSHELL_ORDERING == LIBINT_SHGSHELL_ORDERING_STANDARD):
+    sQref = [Qref[1]/4, -Qref[4]/2, (2*Qref[5] - Qref[0] - Qref[3])/4, -Qref[2]/2, (Qref[0] - Qref[3])/8  ]
+else:
+    sQref = [(2*Qref[5] - Qref[0] - Qref[3])/4, -Qref[2]/2, -Qref[4]/2, (Qref[0] - Qref[3])/8, Qref[1]/4]
 sQtol = 1e-8
 
 F1ref = [-5.43569555903312, -1.88298017654395, -2.17427822361352,
@@ -107,21 +120,21 @@ Htol = 1e-9
 Hok = False if LIBINT_ONEBODY_DERIV>1 and LIBINT_ERI_DERIV>1 else True
 
 for line in instr:
-    match1 = re.match('\*\* Hartree-Fock energy =' + pat_numbers(1), line)
-    match2 = re.match('\*\* edipole =' + pat_numbers(3), line)
-    match3 = re.match('\*\* equadrupole =' + pat_numbers(6), line)
-    match4 = re.match('\*\* 1-body forces =' + pat_numbers(9), line)
-    match5 = re.match('\*\* Pulay forces =' + pat_numbers(9), line)
-    match6 = re.match('\*\* 2-body forces =' + pat_numbers(9), line)
-    match7 = re.match('\*\* nuclear repulsion forces =' + pat_numbers(9), line)
-    match8 = re.match('\*\* Hartree-Fock forces =' + pat_numbers(9), line)
-    match9 = re.match('\*\* 1-body hessian =' + pat_numbers(45), line)
-    match10 = re.match('\*\* Pulay hessian =' + pat_numbers(45), line)
-    match11 = re.match('\*\* 2-body hessian =' + pat_numbers(45), line)
-    match12 = re.match('\*\* nuclear repulsion hessian =' + pat_numbers(45), line)
-    match13 = re.match('\*\* Hartree-Fock hessian =' + pat_numbers(45), line)
-    match14 = re.match('\*\* sph edipole =' + pat_numbers(3), line)
-    match15 = re.match('\*\* sph equadrupole =' + pat_numbers(5), line)
+    match1 = re.match(r'\*\* Hartree-Fock energy =' + pat_numbers(1), line)
+    match2 = re.match(r'\*\* edipole =' + pat_numbers(3), line)
+    match3 = re.match(r'\*\* equadrupole =' + pat_numbers(6), line)
+    match4 = re.match(r'\*\* 1-body forces =' + pat_numbers(9), line)
+    match5 = re.match(r'\*\* Pulay forces =' + pat_numbers(9), line)
+    match6 = re.match(r'\*\* 2-body forces =' + pat_numbers(9), line)
+    match7 = re.match(r'\*\* nuclear repulsion forces =' + pat_numbers(9), line)
+    match8 = re.match(r'\*\* Hartree-Fock forces =' + pat_numbers(9), line)
+    match9 = re.match(r'\*\* 1-body hessian =' + pat_numbers(45), line)
+    match10 = re.match(r'\*\* Pulay hessian =' + pat_numbers(45), line)
+    match11 = re.match(r'\*\* 2-body hessian =' + pat_numbers(45), line)
+    match12 = re.match(r'\*\* nuclear repulsion hessian =' + pat_numbers(45), line)
+    match13 = re.match(r'\*\* Hartree-Fock hessian =' + pat_numbers(45), line)
+    match14 = re.match(r'\*\* sph edipole =' + pat_numbers(3), line)
+    match15 = re.match(r'\*\* sph equadrupole =' + pat_numbers(5), line)
     if match1:
         eok = validate("HF energy", match1.groups(), eref, etol, line)
     elif match2:

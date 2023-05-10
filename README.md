@@ -12,17 +12,19 @@ Copyright (C) 2004-2020 Edward F. Valeev
 
 This version has been configured for PolyQuant
 ```
-./configure \
-    --enable-eri=1 \
-    --enable-eri2=1 \
-    --enable-eri3=1 \
-    --enable-fma=$FMA \
-    --with-max-am=5 \
-    --with-eri-max-am=5,4 \
-    --with-eri2-max-am=7,6 \
-    --with-eri3-max-am=7,6 \
-    --with-opt-am=3 \
-    --with-cartgauss-ordering=gamess
+cmake -S. -Bbuild -GNinja \
+    -DLIBINT_GENERATE_FMA=1 \
+    -DWITH_MAX_AM=10 \
+    -DWITH_OPT_AM=4 \
+    -DENABLE_ERI=0 \
+    -DENABLE_ERI2=0 \
+    -DENABLE_ERI3=0 \
+    -DLIBINT2_SHGAUSS_ORDERING='standard' \
+    -DLIBINT2_CARTGAUSS_ORDERING='gamess' \
+    -DLIBINT2_SHELL_SET='standard' \
+    -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON
+
+cmake --build build --target install -j12
 ```
 
 Build it like

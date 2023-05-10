@@ -49,9 +49,8 @@ fp4 = 0.0000000000000000e+00 - fp5;
 LIBINT2_REALTYPE fp3;
 fp3 = inteval->oo2z[vi] * fp4;
 LIBINT2_REALTYPE fp6;
-fp6 = inteval->PA_x[vi] * src0[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp2;
-fp2 = fp6 + fp3;
+fp2 = libint2::fma_plus(inteval->PA_x[vi], src0[((hsi*1+0)*1+lsi)*1], fp3);
 target[((hsi*3+0)*1+lsi)*1] = fp2;
 }
 }

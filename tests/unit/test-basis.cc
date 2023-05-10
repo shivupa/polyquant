@@ -13,10 +13,10 @@ TEST_CASE("Basis", "[basis]") {
     REQUIRE(bs.nbf() > 0);
   };
   for(auto&& bs_name : {"3-21g",
-                         "6-311g**",
+                         "6-311g_d_p_",
                          "6-31g",
-                         "6-31g*",
-                         "6-31g**",
+                         "6-31g_d_",
+                         "6-31g_d_p_",
                          "ano-rcc",
                          "aug-cc-pv5z-cabs",
                          "aug-cc-pvdz-cabs",

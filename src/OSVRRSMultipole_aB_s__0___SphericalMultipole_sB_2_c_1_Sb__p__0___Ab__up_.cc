@@ -41,9 +41,8 @@ fp2 = 0.0000000000000000e+00 + src2[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp1;
 fp1 = inteval->oo2z[vi] * fp2;
 LIBINT2_REALTYPE fp3;
-fp3 = inteval->PB_z[vi] * src0[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp0;
-fp0 = fp3 + fp1;
+fp0 = libint2::fma_plus(inteval->PB_z[vi], src0[((hsi*1+0)*1+lsi)*1], fp1);
 target[((hsi*3+2)*1+lsi)*1] = fp0;
 LIBINT2_REALTYPE fp4;
 fp4 = inteval->PB_y[vi] * src0[((hsi*1+0)*1+lsi)*1];
@@ -55,9 +54,8 @@ fp7 = 0.0000000000000000e+00 - fp8;
 LIBINT2_REALTYPE fp6;
 fp6 = inteval->oo2z[vi] * fp7;
 LIBINT2_REALTYPE fp9;
-fp9 = inteval->PB_x[vi] * src0[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp5;
-fp5 = fp9 + fp6;
+fp5 = libint2::fma_plus(inteval->PB_x[vi], src0[((hsi*1+0)*1+lsi)*1], fp6);
 target[((hsi*3+0)*1+lsi)*1] = fp5;
 }
 }

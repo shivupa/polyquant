@@ -39,23 +39,20 @@ const int vi = 0;
 LIBINT2_REALTYPE fp1;
 fp1 = inteval->WQ_z[vi] * src1[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp2;
-fp2 = inteval->QC_z[vi] * src0[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp0;
-fp0 = fp2 + fp1;
+fp0 = libint2::fma_plus(inteval->QC_z[vi], src0[((hsi*1+0)*1+lsi)*1], fp1);
 target[((hsi*3+2)*1+lsi)*1] = fp0;
 LIBINT2_REALTYPE fp4;
 fp4 = inteval->WQ_y[vi] * src1[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp5;
-fp5 = inteval->QC_y[vi] * src0[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp3;
-fp3 = fp5 + fp4;
+fp3 = libint2::fma_plus(inteval->QC_y[vi], src0[((hsi*1+0)*1+lsi)*1], fp4);
 target[((hsi*3+1)*1+lsi)*1] = fp3;
 LIBINT2_REALTYPE fp7;
 fp7 = inteval->WQ_x[vi] * src1[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp8;
-fp8 = inteval->QC_x[vi] * src0[((hsi*1+0)*1+lsi)*1];
 LIBINT2_REALTYPE fp6;
-fp6 = fp8 + fp7;
+fp6 = libint2::fma_plus(inteval->QC_x[vi], src0[((hsi*1+0)*1+lsi)*1], fp7);
 target[((hsi*3+0)*1+lsi)*1] = fp6;
 }
 }
