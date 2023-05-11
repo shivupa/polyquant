@@ -49,9 +49,9 @@ jobs:
         run: |
           cmake \
             -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
-            -DENABLE_FORTRAN=OFF \
+            -DLIBINT2_ENABLE_FORTRAN=OFF \
             -DLIBINT2_REALTYPE=double \
-            -DLIBINT2_BUILD_TESTS=OFF \
+            -DBUILD_TESTING=OFF \
             -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
             -G "${{ matrix.config.generators }}" \
             $GITHUB_WORKSPACE
@@ -66,7 +66,7 @@ jobs:
       - name: Rename deb
         shell: bash
         run: |
-          mv builddir/Libint-2.8.0-Linux.deb ${{ matrix.config.artifact }}
+          mv builddir/Libint-2.7.2-Linux.deb ${{ matrix.config.artifact }}
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
