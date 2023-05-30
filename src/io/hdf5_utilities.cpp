@@ -222,7 +222,15 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
 
   // dump number of basis types
   path = basis_group + "/NbElements";
-  H5Easy::dump(*hdf5_file, path, unique_shells.size(), H5Easy::DumpMode::Overwrite);
+  auto NbElements = 0;
+  for (auto atom_shells : unique_shells) {
+    if (atom_shells.size() == 0) {
+      atom_idx++;
+      continue; // no basis functions on atom
+    }
+    NbElements++;
+  }
+  H5Easy::dump(*hdf5_file, path, NbElements, H5Easy::DumpMode::Overwrite);
   // dump basis name
   std::string basis_name = fmt::format("LCAOBSet_{}", quantum_part_name);
   path = basis_group + "/name";
@@ -232,7 +240,6 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
   auto shell_idx = 0ul;
   for (auto atom_shells : unique_shells) {
     if (atom_shells.size() == 0) {
-      atom_idx++;
       continue; // no basis functions on atom
     }
     shell_idx = 0ul;
