@@ -225,7 +225,6 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
   auto NbElements = 0;
   for (auto atom_shells : unique_shells) {
     if (atom_shells.size() == 0) {
-      atom_idx++;
       continue; // no basis functions on atom
     }
     NbElements++;
