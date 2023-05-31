@@ -244,7 +244,7 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       continue; // no basis functions on atom
     }
     shell_idx = 0ul;
-    auto atom_basis_group = basis_group + "/atomicBasisSet" + std::to_string(atom_idx);
+    auto atom_basis_group = basis_group + "/atomicBasisSet" + std::to_string(unique_atom_idx);
     // dump number of basis types
     path = atom_basis_group + "/NbBasisGroups";
     H5Easy::dump(*hdf5_file, path, atom_shells.size(), H5Easy::DumpMode::Overwrite);
