@@ -236,9 +236,11 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
   write_str(path, basis_name);
   // loop over shells
   auto atom_idx = 0ul;
+  auto unique_atom_idx = 0ul; // not every atom type needs to have a basis fn
   auto shell_idx = 0ul;
   for (auto atom_shells : unique_shells) {
     if (atom_shells.size() == 0) {
+      atom_idx++;
       continue; // no basis functions on atom
     }
     shell_idx = 0ul;
@@ -366,6 +368,7 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       }
       shell_idx++;
     }
+    unique_atom_idx++;
     atom_idx++;
   }
 }
