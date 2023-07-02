@@ -1068,6 +1068,34 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
         int drop_cols = 0;
 
+        // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
+        // C.resize(1);
+        // C[0].resize(1);
+        // C[0][0] = L;
+        // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals;
+        // E_orbitals.resize(1);
+        // E_orbitals[0].resize(1);
+        // E_orbitals[0][0] = s;
+        // int nao = L.rows();
+        // int nmo = L.cols();
+        // std::vector<std::vector<std::vector<std::string>>> symm_label;
+        // symm_label.resize(1); 
+        // symm_label[0].resize(1); 
+        // symm_label[0][0].resize(nmo, "A");
+        // std::string title = "canonical orth";
+        // std::vector<std::vector<std::vector<std::string>>> ao_labels;
+        // ao_labels.resize(1);
+        // ao_labels[0].resize(nmo);
+        // for (auto i =  0; i < nmo; i++){
+        // ao_labels[0][i].resize(4, "A");
+        // }
+        // dump_orbitals(C, E_orbitals, E_orbitals, symm_label,title, ao_labels);
+
+        //for (auto i  = 0; i < s.size() ; i++){
+        //    std::cout << " " << s[i] << std::endl;
+        //}
+        //std::cout << std::endl;
+
         while (s(drop_cols) < thresh) {
           drop_cols++;
         }
@@ -1077,10 +1105,12 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
           message =
               "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
           Polyquant_cout(message);
-          s = s(Eigen::seq(drop_cols, Eigen::last));
-          s = s.array().rsqrt();
+          Eigen::Matrix<double, Eigen::Dynamic, 1> s_new;
+          s_new = s(Eigen::seq(drop_cols, Eigen::last));
+          s_new = s_new.array().rsqrt();
           Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L_new = L(Eigen::all, Eigen::seq(drop_cols, Eigen::last));
-          this->orth_X[quantum_part_idx][irrep_idx].noalias() = L_new * s.asDiagonal();
+          this->orth_X[quantum_part_idx][irrep_idx].noalias() = L_new * s_new.asDiagonal();
+          // std::cout << "SHIV DEBUG " <<           this->orth_X[quantum_part_idx][irrep_idx].rows() << " " <<           this->orth_X[quantum_part_idx][irrep_idx].cols() << std::endl;
         } else {
           s = s.array().rsqrt();
           this->orth_X[quantum_part_idx][irrep_idx].noalias() = L * s.asDiagonal();
