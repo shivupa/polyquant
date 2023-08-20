@@ -397,20 +397,24 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     return det;
   }
 
-  int maximum_orbital_across_all_parts = *std::max_element(max_orb.begin(), max_orb.end());
+  std::vector<int> max_orb_with_fc(max_orb.size());
+  for (auto local_idx_part = 0; local_idx_part < max_orb.size(); local_idx_part++) {
+    max_orb_with_fc[local_idx_part] = max_orb[local_idx_part] + frozen_core[local_idx_part];
+  }
+  int maximum_orbital_across_all_parts = *std::max_element(max_orb_with_fc.begin(), max_orb_with_fc.end());
   T num_int = (maximum_orbital_across_all_parts >> bit_kind_shift) + one;
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
   std::vector<T> new_det;
-  // if (num_int != det.size()) {
-  //   T j = 0;
-  //   T begin = bit_kind_size - nfc;
-  //   T end = bit_kind_size;
-  //   T mask = (one << (end - begin)) - one;
-  //   // set in this int
-  //   j |= ((det[0] >> begin) & mask);
-  //   new_det.push_back(j);
-  // }
+  if (num_int != det.size()) {
+     T j = 0;
+     auto begin = bit_kind_size - nfc;
+     auto end = bit_kind_size;
+     T mask = (one << (end - begin)) - one;
+     // set in this int
+     j |= ((det[0] >> begin) & mask);
+     new_det.push_back(j);
+  }
   for (auto i : det) {
     // std::cout << "SHIV    ";
     // std::bitset<bit_kind_size> b(i);
