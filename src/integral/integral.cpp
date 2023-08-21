@@ -1079,8 +1079,8 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         // int nao = L.rows();
         // int nmo = L.cols();
         // std::vector<std::vector<std::vector<std::string>>> symm_label;
-        // symm_label.resize(1); 
-        // symm_label[0].resize(1); 
+        // symm_label.resize(1);
+        // symm_label[0].resize(1);
         // symm_label[0][0].resize(nmo, "A");
         // std::string title = "canonical orth";
         // std::vector<std::vector<std::vector<std::string>>> ao_labels;
@@ -1091,10 +1091,10 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         // }
         // dump_orbitals(C, E_orbitals, E_orbitals, symm_label,title, ao_labels);
 
-        //for (auto i  = 0; i < s.size() ; i++){
-        //    std::cout << " " << s[i] << std::endl;
-        //}
-        //std::cout << std::endl;
+        // for (auto i  = 0; i < s.size() ; i++){
+        //     std::cout << " " << s[i] << std::endl;
+        // }
+        // std::cout << std::endl;
 
         while (s(drop_cols) < thresh) {
           drop_cols++;

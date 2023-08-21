@@ -403,20 +403,20 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
   }
   int maximum_orbital_across_all_parts = *std::max_element(max_orb_with_fc.begin(), max_orb_with_fc.end());
   if (nfc > 64) {
-      APP_ABORT("Can't handle >=64 core orbitals");
+    APP_ABORT("Can't handle >=64 core orbitals");
   }
   T num_int = (maximum_orbital_across_all_parts >> bit_kind_shift) + one;
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
   std::vector<T> new_det;
   if (num_int != det.size()) {
-     T j = 0;
-     auto begin = bit_kind_size - nfc;
-     auto end = bit_kind_size;
-     T mask = (one << (end - begin)) - one;
-     // set in this int
-     j |= ((det[0] >> begin) & mask);
-     new_det.push_back(j);
+    T j = 0;
+    auto begin = bit_kind_size - nfc;
+    auto end = bit_kind_size;
+    T mask = (one << (end - begin)) - one;
+    // set in this int
+    j |= ((det[0] >> begin) & mask);
+    new_det.push_back(j);
   }
   for (auto i : det) {
     // std::cout << "SHIV    ";

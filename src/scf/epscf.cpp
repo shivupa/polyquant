@@ -1540,14 +1540,14 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   Polyquant_cout("    Orbitals per Irrep");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-      std::stringstream ss;
-      ss << "        Particle " << quantum_part_idx << " : ";
+    std::stringstream ss;
+    ss << "        Particle " << quantum_part_idx << " : ";
     this->num_mo_per_irrep[quantum_part_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
     for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       this->num_mo_per_irrep[quantum_part_idx][irrep_idx] = this->input_integral->orth_X[quantum_part_idx][irrep_idx].cols();
-        ss << this->num_mo_per_irrep[quantum_part_idx][irrep_idx] << " ";
+      ss << this->num_mo_per_irrep[quantum_part_idx][irrep_idx] << " ";
     }
-      Polyquant_cout(ss.str());
+    Polyquant_cout(ss.str());
     quantum_part_idx++;
   }
   this->input_integral->calculate_kinetic();
