@@ -402,6 +402,9 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     max_orb_with_fc[local_idx_part] = max_orb[local_idx_part] + frozen_core[local_idx_part];
   }
   int maximum_orbital_across_all_parts = *std::max_element(max_orb_with_fc.begin(), max_orb_with_fc.end());
+  if (nfc > 64) {
+      APP_ABORT("Can't handle >=64 core orbitals");
+  }
   T num_int = (maximum_orbital_across_all_parts >> bit_kind_shift) + one;
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
