@@ -393,10 +393,6 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
   T zero = 0;
   auto det = unique_dets[idx_part][idx_spin][i];
   auto nfc = this->frozen_core[idx_part];
-  if (nfc == 0) {
-    return det;
-  }
-
   std::vector<int> max_orb_with_fc(max_orb.size());
   for (auto local_idx_part = 0; local_idx_part < max_orb.size(); local_idx_part++) {
     max_orb_with_fc[local_idx_part] = max_orb[local_idx_part] + frozen_core[local_idx_part];
@@ -406,6 +402,17 @@ template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det_withfcorbs(int
     APP_ABORT("Can't handle >=64 core orbitals");
   }
   T num_int = (maximum_orbital_across_all_parts >> bit_kind_shift) + one;
+
+  if (nfc == 0) {
+    if (num_int == det.size()) {
+      return det;
+    } else {
+      std::vector<T> new_det;
+      new_det.push_back(zero);
+      new_det.insert(new_det.end(), det.begin(), det.end());
+      return new_det;
+    }
+  }
   auto count = 0;
   // todo this has to change if T is ever not uint64_t
   std::vector<T> new_det;
