@@ -43,7 +43,7 @@ public:
     }
   };
 
-  int get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx);
+  void get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx);
   void create_det(int idx_part, std::vector<std::vector<int>> &occ);
   void get_unique_excitation_list(int idx_part, int idx_spin, int idx_det, int excitation_level, std::vector<std::vector<T>> &return_dets) const;
   void get_unique_excitation_set(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<std::vector<T>> &return_dets) const;
@@ -116,29 +116,7 @@ public:
   void set_epscf(std::shared_ptr<POLYQUANT_EPSCF> scf) { this->input_epscf = scf; };
   void set_molecule(std::shared_ptr<POLYQUANT_MOLECULE> molecule) { this->input_molecule = molecule; };
 
-  // void construct_cache(size_t size_in_gb = 10000) {
-  //   // This is actually super complicated. Some assumptions are made here that
-  //   // doesn't quite transfer to ACTUAL size used
-  //   // https://stackoverflow.com/questions/25375202/how-to-measure-memory-usage-of-stdunordered-map
-  //   // It is assumed that map size() * sizeof(hashed object)
-  //   std::string message = "Setting CI determinant elements max cache size: ";
-  //   message += std::to_string(size_in_gb);
-  //   message += " GB";
-  //   std::pair<int, int> temp(0, 0);
-  //   this->cache_size = (size_in_gb * 1e9) / sizeof(temp);
-  //   message += " or ";
-  //   message += std::to_string(this->cache_size);
-  //   message += " objects";
-  //   Polyquant_cout(message);
-  //   polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> constructed_cache(this->cache_size);
-  //   this->cache = constructed_cache;
-  // }
-
-  // size_t cache_size;
-
-  // mutable polyquant_lfu_cache<std::pair<int, int>, double, PairHash<int>> cache;
-
-  mutable std::vector<double> diagonal_Hii;
+  mutable Eigen::Matrix<double, Eigen::Dynamic, 1> diagonal_Hii;
   void precompute_diagonal_Slater_Condon() const;
   double Slater_Condon(int i_det, int j_det) const;
 
@@ -154,11 +132,7 @@ public:
     const int cols = this->N_dets;
     return cols;
   }
-  int N_dets;
-  int curr_symm_block;
   // y_out = M * x_in
-  Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
-  // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ham;
   // void perform_op(const double *x_in, double *y_out) const;
 
   // needed for custom operator in Davidson
@@ -171,6 +145,8 @@ public:
   void sigma_one_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                                 const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin, int other_idx_part,
                                                 int other_idx_spin) const;
+  void sigma_one_species_class_singleshot(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C,
+                                          int idx_part, int idx_spin, int other_idx_part, int other_idx_spin) const;
   void sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
   void sigma_two_species_diagonal_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                                const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin) const;
@@ -179,6 +155,8 @@ public:
   void sigma_two_species_class_two_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                                 const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C, int idx_part, int idx_spin, int other_idx_part,
                                                 int other_idx_spin) const;
+  void sigma_two_species_class_singleshot(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
+                                          const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
   void sigma_two_species(const Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
   void create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
@@ -186,6 +164,8 @@ public:
 
   void create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
                    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
+
+  void evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S_squared, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const;
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const;
 
@@ -203,10 +183,21 @@ public:
   void two_species_create_ham_singleshot();
 
   void create_ham();
+  void create_S_sq_penalty(std::string type, std::vector<double> expected_S2, std::vector<double> spin_penalty);
+  void create_S_sq_minus_expected_S_sq_matrix_singleshot(Eigen::SparseMatrix<double, Eigen::RowMajor> &S2_pen, int idx_part, double expected_S2_for_part);
   std::vector<int> det_idx_unfold(std::size_t det_idx) const;
 
+  Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
+  int N_dets;                // Number of determinants in this symmetry block
+  int N_dets_complete_space; // Number of determinants in the full space (not the full ci space, but the full space of the current excitation level). If symmetry is off this is equal to N_dets, if
+                             // symmetry is on this should be ~N_irrep * N_dets.
+  int curr_symm_block;
   bool slow_diag = false;
   bool build_matrix = true;
+  double screening_threshold = 0.0;
+
+  const T bit_kind_shift = 6;                   // TODO this only applies to 64bit right now
+  static const T bit_kind_size = 8 * sizeof(T); // TODO this only applies to 64bit right now
 };
 } // namespace polyquant
 #endif

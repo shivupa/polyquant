@@ -28,8 +28,11 @@ public:
   void setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
-  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs);
+  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs,
+                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &transforming_orbs);
+  void resize_for_NOs();
   void calculate_NOs();
+  void calculate_S_squared();
   void setup_determinants();
   void run();
   void print_start();
@@ -82,6 +85,8 @@ public:
   POLYQUANT_DETSET<uint64_t> detset;
   Eigen::Matrix<double, Eigen::Dynamic, 1> energies;
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_ci;
+  // state_idx, quantum_part_type idx
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> S_squared;
 
   // FC_DM stored in AO basis since we need to make the FC operators fc_occ.asDiagonal() is FC_DM in MO basis
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> fc_dm;
@@ -93,6 +98,9 @@ public:
   // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_no;
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_nso;
   // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_no;
+  //
+  std::vector<std::vector<std::vector<std::vector<int>>>> symm_label_idxs;
+  std::vector<std::vector<std::vector<std::vector<std::string>>>> symm_labels;
 
   std::vector<int> NO_states;
 
@@ -104,11 +112,6 @@ public:
    */
   double convergence_E = 1e-6;
   /**
-   * @brief Root mean squared change in DM convergence
-   *
-   */
-  double convergence_DM = 1e-8;
-  /**
    * @brief Maximum iteration number
    *
    */
@@ -117,9 +120,18 @@ public:
   int num_subspace_vec = 5;
   bool verbose = false;
   bool exact_diag = false;
+  bool symmetrize_NOs = true;
 
-  double det_print_threshold = 0.1;
-  size_t cache_size = std::numeric_limits<size_t>::max();
+  bool first_order_spin_penalty = false;
+  bool second_order_spin_penalty = false;
+  std::vector<double> expected_S2;
+  std::vector<double> spin_penalty;
+  double default_spin_penalty = 0.1;
+  double det_print_threshold = 0.01;
+  // this is how much the diagonal values of the hamiltonian are shifted by
+  double hf_det_energy = 0.0;
+  // this is how much to shift the eigenvalues (hf_det_energy + e_nuc + e_fc)
+  double constant_shift = 0.0;
 };
 } // namespace polyquant
 #endif

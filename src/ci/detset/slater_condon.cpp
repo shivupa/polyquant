@@ -100,32 +100,55 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::precompute_diagonal_Slater_Condon() const {
-  diagonal_Hii.resize(N_dets, 0.0);
-  for (auto i = 0; i < N_dets; i++) {
-    Slater_Condon_diagonal_calls++;
-    auto i_unfold = det_idx_unfold(i);
-    double matrix_elem = 0.0;
-    auto idx_part = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_integral->input_molecule->quantum_particles) {
-      auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
-      auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
-      auto det_i = std::make_pair(det_i_a, det_i_b);
-      matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, i_unfold);
-      auto other_idx_part = 0ul;
-      for (auto const &[other_quantum_part_key, other_quantum_part] : this->input_integral->input_molecule->quantum_particles) {
-        if (idx_part == other_idx_part) {
-          continue;
-        }
-        auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
-        auto det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
-        auto det_i = std::make_pair(det_i_a, det_i_b);
-        auto charge_factor = quantum_part.charge * other_quantum_part.charge;
-        matrix_elem += charge_factor * this->mixed_part_ham_diag(idx_part, other_idx_part, i_unfold, i_unfold);
-        other_idx_part++;
+  auto function = __PRETTY_FUNCTION__;
+  POLYQUANT_TIMER timer(function);
+  diagonal_Hii.resize(N_dets);
+  diagonal_Hii.setZero();
+
+  auto nthreads = omp_get_max_threads();
+#pragma omp parallel
+  {
+    Eigen::Matrix<double, Eigen::Dynamic, 1> diagonal_Hii_local;
+    diagonal_Hii_local.resize(N_dets);
+    diagonal_Hii_local.setZero();
+    auto thread_id = omp_get_thread_num();
+
+    for (auto i = 0; i < N_dets; i++) {
+      if (i % nthreads != thread_id) {
+        continue;
       }
-      idx_part++;
+      auto i_unfold = det_idx_unfold(i);
+      double matrix_elem = 0.0;
+      auto idx_part = 0ul;
+      for (auto const &[quantum_part_key, quantum_part] : this->input_integral->input_molecule->quantum_particles) {
+        auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+        auto det_i_b = this->get_det(idx_part, 1, i_unfold[idx_part * 2 + 1]);
+        auto det_i = std::make_pair(det_i_a, det_i_b);
+        matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, i_unfold);
+        auto other_idx_part = 0ul;
+        for (auto const &[other_quantum_part_key, other_quantum_part] : this->input_integral->input_molecule->quantum_particles) {
+          if (idx_part == other_idx_part) {
+            continue;
+          }
+          auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
+          auto det_i_b = this->get_det(other_idx_part, 1, i_unfold[other_idx_part * 2 + 1]);
+          auto det_i = std::make_pair(det_i_a, det_i_b);
+          auto charge_factor = quantum_part.charge * other_quantum_part.charge;
+          matrix_elem += charge_factor * this->mixed_part_ham_diag(idx_part, other_idx_part, i_unfold, i_unfold);
+          other_idx_part++;
+        }
+        idx_part++;
+      }
+      // std::cout << i << "   " << matrix_elem << "           (";
+      // for (auto shiv : i_unfold) {
+      //   std::cout << " " << shiv << ",";
+      // }
+      // std::cout << " )" << std::endl;
+
+      diagonal_Hii_local(i) = matrix_elem;
     }
-    diagonal_Hii[i] = matrix_elem;
+#pragma omp critical
+    diagonal_Hii += diagonal_Hii_local;
   }
 }
 

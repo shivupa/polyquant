@@ -18,8 +18,9 @@ using json = nlohmann::json;
 
 namespace polyquant {
 
-#define POLYQUANT_TEST_EPSILON_LOOSE 0.000001
-#define POLYQUANT_TEST_EPSILON_TIGHT 0.00000001
+#define POLYQUANT_TEST_EPSILON_LOOSE 1e-6
+#define POLYQUANT_TEST_EPSILON_TIGHT 1e-8
+#define POLYQUANT_TEST_EPSILON_VERYTIGHT 1e-10
 #define POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT 1e-14
 
 // /**
@@ -216,25 +217,30 @@ template <typename T> void Polyquant_dump_direct_product_table(const Eigen::Matr
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << " direct product table" << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+  std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << ""
             << "  ";
   for (size_t j = 0; j < mat.cols(); j++) {
-    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[j] << "  ";
+    std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << row_titles[j] << "  ";
   }
   std::cout << std::endl;
 
-  std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << ""
+  std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << ""
             << "  ";
   for (size_t j = 0; j < mat.cols(); j++) {
-    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << "---"
+    std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << "---"
               << "  ";
   }
   std::cout << std::endl;
 
   for (size_t i = 0; i < mat.rows(); i++) {
-    std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[i] << " |";
+    std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << row_titles[i] << " |";
     for (size_t j = 0; j < mat.cols(); j++) {
-      std::cout << std::fixed << std::showpoint << std::setw(20) << std::setprecision(10) << row_titles[mat(i, j)] << "  ";
+      if (mat(i, j) >= 0) {
+        std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << row_titles[mat(i, j)] << "  ";
+      } else {
+        std::cout << std::fixed << std::showpoint << std::setw(10) << std::setprecision(10) << "MULT"
+                  << "  ";
+      }
     }
     std::cout << std::endl;
   }
@@ -334,23 +340,15 @@ template <typename T> struct PairHash {
     return seed;
   }
 };
-
 /**
  * Argsort for std vector
  * @param vector input
  * @return sorted indicies std vector
  */
-template <typename T> std::vector<int> argsort(const std::vector<T> &in_vec, bool ascending = true) {
+template <typename T, typename CompType = std::greater<>> std::vector<int> argsort(const std::vector<T> &in_vec, CompType comparison = CompType{}) {
   std::vector<int> indices(in_vec.size());
   std::iota(indices.begin(), indices.end(), 0);
-  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
-    // sort indices according to corresponding array element
-    if (ascending) {
-      return in_vec[left] < in_vec[right];
-    } else {
-      return in_vec[left] > in_vec[right];
-    }
-  });
+  std::sort(indices.begin(), indices.end(), [&in_vec, &comparison](int left, int right) -> bool { return comparison(in_vec[left], in_vec[right]); });
   return indices;
 };
 /**
@@ -358,17 +356,10 @@ template <typename T> std::vector<int> argsort(const std::vector<T> &in_vec, boo
  * @param vector input
  * @return sorted indicies std vector
  */
-template <typename T> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, bool ascending = true) {
+template <typename T, typename CompType = std::greater<>> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, CompType comparison = CompType{}) {
   std::vector<int> indices(in_vec.size());
   std::iota(indices.begin(), indices.end(), 0);
-  std::sort(indices.begin(), indices.end(), [&in_vec, &ascending](int left, int right) -> bool {
-    // sort indices according to corresponding array element
-    if (ascending) {
-      return in_vec(left) < in_vec(right);
-    } else {
-      return in_vec(left) > in_vec(right);
-    }
-  });
+  std::sort(indices.begin(), indices.end(), [&in_vec, &comparison](int left, int right) -> bool { return comparison(in_vec(left), in_vec(right)); });
   return indices;
 };
 ;

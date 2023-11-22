@@ -43,108 +43,140 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
   elements_for_msym = this->to_point_msym_charges_for_symmetry();
   int length = elements_for_msym.size();
 
-  auto &ctx = input_symm->ctx;
-
   if (input_symm->do_symmetry == false) {
     return;
   }
 
-  // TODO Figure out setting symmetry thresholds here for now use default
-  //  if(NULL != thresholds){
-  //      if(MSYM_SUCCESS != (ret = msymSetThresholds(ctx, thresholds))) goto err;
-  //  }
+  auto quantum_part_idx = 0ul;
+  for (auto &[quantum_part_key, quantum_part] : this->quantum_particles) {
+    auto &ctx = input_symm->ctx[quantum_part_idx];
 
-  // set atoms in ctx
-  if (MSYM_SUCCESS != (ret = msymSetElements(ctx, length, elements_for_msym.data()))) {
+    // TODO Figure out setting symmetry thresholds here for now use default
+    //  if(NULL != thresholds){
+    //      if(MSYM_SUCCESS != (ret = msymSetThresholds(ctx, thresholds))) goto err;
+    //  }
 
-    auto error = msymErrorString(ret);
-    std::cout << error << std::endl;
-    error = msymGetErrorDetails();
-    std::cout << error << std::endl;
-    APP_ABORT("Error setting atoms for symmetrizing");
-  }
-
-  /* Get elements msym elements */
-  // i have no idea why this is required i need to check with their library
-  // if(MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))){
-  //    APP_ABORT("Error getting atoms for symmetrizing");
-  //}
-
-  // geometrical information
-  std::vector<double> com;
-  com.resize(3);
-  if (MSYM_SUCCESS != (ret = msymGetCenterOfMass(ctx, com.data()))) {
-    APP_ABORT("Error calculating center of mass");
-  }
-  double radius = 0.0;
-  if (MSYM_SUCCESS != (ret = msymGetRadius(ctx, &radius))) {
-    APP_ABORT("Error calculationg radius");
-  }
-
-  std::cout << "SYMMMETRY TESTING : COM  " << com[0] << "   " << com[1] << "    " << com[2] << std::endl;
-  std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
-
-  if (length != 1) {
-    if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
+    // set atoms in ctx
+    if (MSYM_SUCCESS != (ret = msymSetElements(ctx, length, elements_for_msym.data()))) {
 
       auto error = msymErrorString(ret);
       std::cout << error << std::endl;
       error = msymGetErrorDetails();
       std::cout << error << std::endl;
-      APP_ABORT("Error Figuring out symmetry");
+      APP_ABORT("Error setting atoms for symmetrizing");
     }
-  } else {
-    std::string pg = "D2h";
-    if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+
+    /* Get elements msym elements */
+    // i have no idea why this is required i need to check with their library
+    // if(MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))){
+    //    APP_ABORT("Error getting atoms for symmetrizing");
+    //}
+
+    // geometrical information
+    std::vector<double> com;
+    com.resize(3);
+    if (MSYM_SUCCESS != (ret = msymGetCenterOfMass(ctx, com.data()))) {
+      APP_ABORT("Error calculating center of mass");
+    }
+    double radius = 0.0;
+    if (MSYM_SUCCESS != (ret = msymGetRadius(ctx, &radius))) {
+      APP_ABORT("Error calculation radius");
+    }
+
+    // std::cout << "SYMMMETRY TESTING : COM  " << com[0] << "   " << com[1] << "    " << com[2] << std::endl;
+    // std::cout << "SYMMMETRY TESTING : radius  " << radius << std::endl;
+
+    if (length != 1) {
+      // if (!input_symm->point_group.empty()) {
+      //   APP_ABORT("Symmetry handler point group is already set, but this calculation is not an atom. Currently the point group can only be manually specified for atoms as SO(3).");
+      // }
+
+      if (input_symm->point_group.empty()) {
+        if (MSYM_SUCCESS != (ret = msymFindSymmetry(ctx))) {
+          auto error = msymErrorString(ret);
+          std::cout << error << std::endl;
+          error = msymGetErrorDetails();
+          std::cout << error << std::endl;
+          APP_ABORT("Error Figuring out symmetry");
+        }
+      } else {
+        std::string pg = this->input_symm->point_group;
+        if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+          auto error = msymErrorString(ret);
+          std::cout << error << std::endl;
+          error = msymGetErrorDetails();
+          std::cout << error << std::endl;
+          APP_ABORT("Error setting PG to custom PG");
+        }
+      }
+    } else {
+      // single atom
+      if (input_symm->point_group == "SO(3)") {
+        std::cout << "SYMMETRY: IDENTIFIED POINT GROUP " << input_symm->point_group << std::endl;
+        if (com[0] != 0.0 || com[1] != 0.0 || com[2] != 0.0) {
+          APP_ABORT("For SO(3) symmetry the atom must be located at the origin.");
+        }
+        return;
+      } else if (input_symm->point_group == "D2h" || input_symm->point_group == "") {
+        std::string pg = "D2h";
+        if (MSYM_SUCCESS != (ret = msymSetPointGroupByName(ctx, pg.c_str()))) {
+          auto error = msymErrorString(ret);
+          std::cout << error << std::endl;
+          error = msymGetErrorDetails();
+          std::cout << error << std::endl;
+          APP_ABORT("Error setting PG to D2h");
+        }
+      } else {
+
+        std::stringstream buffer;
+        buffer << "Symmetric point group " << input_symm->point_group << " not identified for a single atom." << std::endl;
+        APP_ABORT(buffer.str());
+      }
+    }
+    input_symm->point_group.resize(6);
+    if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), input_symm->point_group.data()))) {
+      // if(MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group))){
       auto error = msymErrorString(ret);
       std::cout << error << std::endl;
       error = msymGetErrorDetails();
       std::cout << error << std::endl;
-      APP_ABORT("Error setting PG to D2h");
+      APP_ABORT("Error Getting Point group");
     }
-  }
-  input_symm->point_group.resize(6);
-  if (MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), input_symm->point_group.data()))) {
-    // if(MSYM_SUCCESS != (ret = msymGetPointGroupName(ctx, sizeof(char[6]), point_group))){
-    auto error = msymErrorString(ret);
-    std::cout << error << std::endl;
-    error = msymGetErrorDetails();
-    std::cout << error << std::endl;
-    APP_ABORT("Error Getting Point group");
-  }
-  input_symm->point_group.erase(input_symm->point_group.find('\0'));
-  std::cout << "SYMMMETRY TESTING : IDENTIFIED POINT GROUP" << input_symm->point_group << std::endl;
-  input_symm->sub_group = input_symm->point_group;
+    input_symm->point_group.erase(input_symm->point_group.find('\0'));
+    std::cout << "SYMMMETRY: IDENTIFIED POINT GROUP " << input_symm->point_group << std::endl;
+    input_symm->sub_group = input_symm->point_group;
 
-  // TODO add a way to descend in symmetry
-  // open issue for this
+    // TODO add a way to descend in symmetry
+    // open issue for this
 
-  // Symmetrize and Align Molecule
-  double symerr = 0.0;
-  if (MSYM_SUCCESS != (ret = msymSymmetrizeElements(ctx, &symerr))) {
+    // Symmetrize and Align Molecule
+    double symerr = 0.0;
+    if (MSYM_SUCCESS != (ret = msymSymmetrizeElements(ctx, &symerr))) {
 
-    auto error = msymErrorString(ret);
-    std::cout << error << std::endl;
-    error = msymGetErrorDetails();
-    std::cout << error << std::endl;
-    APP_ABORT("Error Symmetrizing molecule!");
-  }
-  if (MSYM_SUCCESS != (ret = msymAlignAxes(ctx))) {
-    APP_ABORT("Error Aligning molecule!");
-  }
+      auto error = msymErrorString(ret);
+      std::cout << error << std::endl;
+      error = msymGetErrorDetails();
+      std::cout << error << std::endl;
+      APP_ABORT("Error Symmetrizing molecule!");
+    }
+    if (MSYM_SUCCESS != (ret = msymAlignAxes(ctx))) {
+      APP_ABORT("Error Aligning molecule!");
+    }
 
-  int mlength;
-  msym_element_t *melements = NULL;
+    int mlength;
+    msym_element_t *melements = NULL;
 
-  if (MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))) {
-    APP_ABORT("Error getting the symmetrized structure.");
-  }
-  if (mlength != elements_for_msym.size()) {
-    APP_ABORT("Number of atoms changed during symmetrizing molecule.");
-  }
-  elements_for_msym.clear();
-  for (auto i = 0; i < mlength; i++) {
-    elements_for_msym.push_back(melements[i]);
+    if (MSYM_SUCCESS != (ret = msymGetElements(ctx, &mlength, &melements))) {
+      APP_ABORT("Error getting the symmetrized structure.");
+    }
+    if (mlength != elements_for_msym.size()) {
+      APP_ABORT("Number of atoms changed during symmetrizing molecule.");
+    }
+    elements_for_msym.clear();
+    for (auto i = 0; i < mlength; i++) {
+      elements_for_msym.push_back(melements[i]);
+    }
+    quantum_part_idx++;
   }
 
   from_point_msym_charges_for_symmetry(elements_for_msym);
@@ -408,7 +440,7 @@ void POLYQUANT_MOLECULE::print_molecule() {
     Polyquant_cout("mass: " + std::to_string(quantum_part.mass));
     Polyquant_cout("charge: " + std::to_string(quantum_part.charge));
     Polyquant_cout("spin: " + std::to_string(quantum_part.spin));
-    Polyquant_cout("multiplicity: " + std::to_string(quantum_part.multiplicity));
+    Polyquant_cout("expected multiplicity: " + std::to_string(quantum_part.multiplicity));
     Polyquant_cout("number of particles: " + std::to_string(quantum_part.num_parts));
     Polyquant_cout("number of particles (alpha): " + std::to_string(quantum_part.num_parts_alpha));
     Polyquant_cout("number of particles (beta): " + std::to_string(quantum_part.num_parts_beta));
@@ -435,6 +467,7 @@ void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_p
     set_molecular_multiplicity();
     set_molecular_restricted();
     parse_particles();
+    this->input_symm->create_ctx_for_particle_types(this->quantum_particles.size());
     symmetrize_molecule();
     // Calculate nuclear repulsion energy
     this->calculate_E_nuc();
@@ -574,8 +607,8 @@ std::string POLYQUANT_MOLECULE::get_label_of_center(const std::array<double, 3> 
   }
   if (label == "") {
     APP_ABORT("Could not find a label for the center provided.");
-    return "";
   }
+  return label;
 }
 std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmetry(std::string classical_part_key) const {
   std::vector<msym_element_t> atom_point_charges;

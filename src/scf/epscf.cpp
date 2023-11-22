@@ -6,13 +6,10 @@ void POLYQUANT_EPSCF::form_H_core() {
   this->H_core.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-    // this->H_core[quantum_part_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
-    // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h;
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     this->H_core[quantum_part_idx].setZero(num_basis, num_basis);
     this->H_core[quantum_part_idx] += (1.0 / quantum_part.mass) * this->input_integral->kinetic[quantum_part_idx];
     this->H_core[quantum_part_idx] += (-quantum_part.charge) * this->input_integral->nuclear[quantum_part_idx];
-    // this->H_core[quantum_part_idx][irrep_idx].noalias() = this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * h * this->input_basis->salcs[quantum_part_idx][irrep_idx];
     if (verbose == true) {
       std::stringstream filename;
       filename << "H_core_";
@@ -138,7 +135,12 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
   engines.resize(nthreads);
   FA.resize(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
-  engines[0].set_precision(this->input_integral->tolerance_2e);
+  // if (this->Cauchy_Schwarz_screening) {
+  //   engines[0].set(libint2::ScreeningMethod::SchwarzInf);
+  //   engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  // } else {
+  engines[0].set_precision(0.0);
+  //}
   for (int i = 0; i < nthreads; i++) {
     engines[i] = engines[0];
     FA[i].resizeLike(fock);
@@ -147,59 +149,63 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
 #pragma omp parallel
   {
     int shellcounter = 0;
+    auto thread_id = omp_get_thread_num();
     for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
-      auto thread_id = omp_get_thread_num();
       auto shell_i_bf_start = shell2bf_a[shell_i];
       auto shell_i_bf_size = shells_a[shell_i].size();
       auto shellpairdata_ij_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_a_idx]).at(shell_i).begin();
       for (auto &shell_j : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
         auto shell_j_bf_start = shell2bf_a[shell_j];
         auto shell_j_bf_size = shells_a[shell_j].size();
-        const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
-        shellpairdata_ij_iter++;
-        auto D_shell_ij_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_a, quantum_part_a_idx,
-                                                                        quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
+        // const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
+        // shellpairdata_ij_iter++;
+        // auto D_shell_ij_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_a, quantum_part_a_idx,
+        //                                                                 quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
         for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
           auto shell_k_bf_start = shell2bf_b[shell_k];
           auto shell_k_bf_size = shells_b[shell_k].size();
-          auto D_shell_ik_norm = 0.0;
-          auto D_shell_jk_norm = 0.0;
-          if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-            // TODO technically we should assert quantum_part_a_irrep_idx == quantum_part_b_irrep_idx
-            D_shell_ik_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_k_bf_start,
-                                                                        shell_k_bf_size);
-            D_shell_jk_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size, shell_k_bf_start,
-                                                                        shell_k_bf_size);
-          }
-          auto shellpairdata_kl_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
+          // auto D_shell_ik_norm = 0.0;
+          // auto D_shell_jk_norm = 0.0;
+          // if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+          //   D_shell_ik_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
+          //   shell_k_bf_start,
+          //                                                               shell_k_bf_size);
+          //   D_shell_jk_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
+          //   shell_k_bf_start,
+          //                                                               shell_k_bf_size);
+          // }
+          // auto shellpairdata_kl_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
           for (auto &shell_l : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
             shellcounter++;
+            // const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
+            // shellpairdata_kl_iter++;
             if (shellcounter % nthreads != thread_id) {
               continue;
             }
             auto shell_l_bf_start = shell2bf_b[shell_l];
             auto shell_l_bf_size = shells_b[shell_l].size();
-            const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
-            shellpairdata_kl_iter++;
-            auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
-                                                                            quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
-            // for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space
-            // but this is unsupported for now
-            auto D_shell_il_norm = 0.0;
-            auto D_shell_jl_norm = 0.0;
-            if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-              auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
-                                                                               shell_l_bf_start, shell_l_bf_size);
-              auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
-                                                                               shell_l_bf_start, shell_l_bf_size);
-            }
-            if (this->Cauchy_Schwarz_screening) {
-              if (std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm}) *
-                      this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
-                  this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
-                continue;
-              }
-            }
+            // auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
+            //                                                                 quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
+            //  for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space
+            //  but this is unsupported for now
+            // auto D_shell_il_norm = 0.0;
+            // auto D_shell_jl_norm = 0.0;
+            // if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+            //   auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
+            //                                                                    shell_l_bf_start, shell_l_bf_size);
+            //   auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
+            //                                                                    shell_l_bf_start, shell_l_bf_size);
+            // }
+            // auto D_norm = std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm});
+            //  Ideally we should screen based on a density threshold. This seemed to not be working correctly
+            //  eq 5 10.1063/1.476741
+            // if (this->Cauchy_Schwarz_screening){// && this->Cauchy_Schwarz_threshold[quantum_part_a_idx] > 1e-10) {
+            //   if (D_norm * this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
+            //       this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
+            //     continue;
+            //   }
+            // }
+
             // compute the permutational degeneracy for the given shell
             // set this may look like the libint example but we are
             // breaking bra-ket symmetry so we are 4 fold symmetric
@@ -208,7 +214,15 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
+            // if (this->Cauchy_Schwarz_screening) { //&& this->Cauchy_Schwarz_threshold[quantum_part_a_idx] > 1e-10) {
+            //   engines[thread_id].set_precision(D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
+            //   engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
+            //                                                                                      shellpairdata_kl);
+            // } else {
+            // engines[thread_id].set_precision(0.0); // D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
             engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
+            //}
+            // engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
             if (buf_1234 != nullptr) {
@@ -349,10 +363,10 @@ void POLYQUANT_EPSCF::diag_fock_helper(int quantum_part_idx, int quantum_part_ir
     C_prime = eigensolver.eigenvectors();
     mo_C = this->input_integral->orth_X[quantum_part_idx][quantum_part_irrep_idx] * C_prime;
     for (auto i = 0; i < mo_C.cols(); i++) {
-      auto max_val = mo_C(Eigen::placeholders::all, i).maxCoeff();
-      auto min_val = mo_C(Eigen::placeholders::all, i).minCoeff();
+      auto max_val = mo_C(Eigen::all, i).maxCoeff();
+      auto min_val = mo_C(Eigen::all, i).minCoeff();
       if (std::abs(min_val) > std::abs(max_val) && min_val < 0) {
-        mo_C(Eigen::placeholders::all, i) *= -1;
+        mo_C(Eigen::all, i) *= -1;
       }
     }
   }
@@ -367,35 +381,25 @@ void POLYQUANT_EPSCF::diag_fock() {
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     this->iteration_rms_error[quantum_part_idx][0] = 0.0;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis_irrep;
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
     FD_commutator.noalias() = (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral->overlap[quantum_part_idx] -
                                this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]);
-    for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+    F_diis = this->F[quantum_part_idx][0];
+    if (this->diis_extrapolation) {
+      this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
+    }
+    auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
+    auto num_mo_total = this->num_mo[quantum_part_idx];
+    this->iteration_rms_error[quantum_part_idx][0] = FD_commutator.norm() / (num_mo_total * num_mo_total);
+    for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
       auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
       if (num_mo == 0) {
         continue;
       }
-
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &X = this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &c = this->C[quantum_part_idx][0][irrep_idx];
-
-      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator_irrep = X.transpose() * FD_commutator * X;
-      F_diis = X.transpose() * this->F[quantum_part_idx][0] * X;
-      this->iteration_rms_error[quantum_part_idx][0] += FD_commutator_irrep.norm() / (num_mo * num_mo);
-      if (this->diis_extrapolation) {
-        this->diis[quantum_part_idx][0][irrep_idx].extrapolate(F_diis, FD_commutator_irrep);
-      }
-      // F_diis = c * F_diis * c.transpose();
-      // F_diis = X.transpose() * F_diis * X;
-
-      // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
-      // FD_commutator.noalias() = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() *
-      //                           (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral->overlap[quantum_part_idx] -
-      //                            this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]) *
-      //                           this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-      //  FD_comm = X.T @ ( F @ D @ S -  S @ D @ F) @ X;
-      // F_prime = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() * F_diis * this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-      diag_fock_helper(quantum_part_idx, irrep_idx, F_diis, this->C[quantum_part_idx][0][irrep_idx], this->E_orbitals[quantum_part_idx][0][irrep_idx]);
+      F_diis_irrep.noalias() = X.transpose() * F_diis * X;
+      diag_fock_helper(quantum_part_idx, irrep_idx, F_diis_irrep, this->C[quantum_part_idx][0][irrep_idx], this->E_orbitals[quantum_part_idx][0][irrep_idx]);
     }
     if (this->incremental_fock) {
       if (this->incremental_fock_doing_incremental[quantum_part_idx][0]) {
@@ -418,36 +422,26 @@ void POLYQUANT_EPSCF::diag_fock() {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis;
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_diis_irrep;
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
       FD_commutator.noalias() = (this->F[quantum_part_idx][1] * this->D_combined[quantum_part_idx][1] * this->input_integral->overlap[quantum_part_idx] -
                                  this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][1] * this->F[quantum_part_idx][1]);
+
+      F_diis = this->F[quantum_part_idx][1];
+      if (this->diis_extrapolation) {
+        this->diis[quantum_part_idx][1].extrapolate(F_diis, FD_commutator);
+      }
+      auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
+      auto num_mo_total = this->num_mo[quantum_part_idx];
+      this->iteration_rms_error[quantum_part_idx][1] = FD_commutator.norm() / (num_mo_total * num_mo_total);
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
         if (num_mo == 0) {
           continue;
         }
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &X = this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &c = this->C[quantum_part_idx][1][irrep_idx];
-
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator_irrep = X.transpose() * FD_commutator * X;
-        F_diis = X.transpose() * this->F[quantum_part_idx][1] * X;
-        this->iteration_rms_error[quantum_part_idx][1] += FD_commutator_irrep.norm() / (num_mo * num_mo);
-        if (this->diis_extrapolation) {
-          this->diis[quantum_part_idx][1][irrep_idx].extrapolate(F_diis, FD_commutator_irrep);
-        }
-        // F_diis = c * F_diis * c.transpose();
-        // F_diis = X.transpose() * F_diis * X;
-
-        // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> F_prime(num_mo, num_mo);
-        // F_diis.noalias() = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() * this->F[quantum_part_idx][1] * this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-        // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
-        // FD_commutator.noalias() = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() *
-        //                           (this->F[quantum_part_idx][1] * this->D_combined[quantum_part_idx][1] * this->input_integral->overlap[quantum_part_idx] -
-        //                            this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][1] * this->F[quantum_part_idx][1]) *
-        //                           this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-        //  F_prime = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() * F_diis * this->input_integral->orth_X[quantum_part_idx][irrep_idx];
-        // diag_fock_helper(quantum_part_idx, irrep_idx, F_prime, this->C[quantum_part_idx][1][irrep_idx], this->E_orbitals[quantum_part_idx][1][irrep_idx]);
-        diag_fock_helper(quantum_part_idx, irrep_idx, F_diis, this->C[quantum_part_idx][1][irrep_idx], this->E_orbitals[quantum_part_idx][1][irrep_idx]);
+        F_diis_irrep.noalias() = X.transpose() * F_diis * X;
+        diag_fock_helper(quantum_part_idx, irrep_idx, F_diis_irrep, this->C[quantum_part_idx][1][irrep_idx], this->E_orbitals[quantum_part_idx][1][irrep_idx]);
       }
       if (this->incremental_fock) {
         if (this->incremental_fock_doing_incremental[quantum_part_idx][1]) {
@@ -590,6 +584,63 @@ void POLYQUANT_EPSCF::calculate_E_total() {
   this->E_total += this->input_molecule->E_nuc;
 }
 
+void POLYQUANT_EPSCF::calculate_S_squared() {
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
+
+  S_squared.resize(this->input_molecule->quantum_particles.size());
+  multiplicity.resize(this->input_molecule->quantum_particles.size());
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto n_spin = 1;
+    auto n_a = quantum_part.num_parts_alpha;
+    auto n_b = quantum_part.num_parts_beta;
+
+    auto spin_sq = 0.0;
+    auto mult = 0.0;
+    auto spin_sq_xy = 0.0;
+    auto spin_sq_z = 0.0;
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_a = this->C_combined[quantum_part_idx][0](Eigen::all, Eigen::seqN(0, n_a));
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_b = this->C_combined[quantum_part_idx][1](Eigen::all, Eigen::seqN(0, n_b));
+
+      orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], orb_subset_a, orb_subset_b);
+
+      spin_sq_xy = (n_a + n_b) * 0.5;
+      spin_sq_xy -= orbital_overlap.array().square().sum();
+
+      spin_sq_z = 0.25 * std::pow(n_a - n_b, 2);
+
+      spin_sq = spin_sq_xy + spin_sq_z;
+      mult = std::sqrt(spin_sq + 0.25) - 0.5;
+      mult = 2 * mult + 1;
+
+    } else if (quantum_part.num_parts > 1 && quantum_part.restricted == true) {
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_a = this->C_combined[quantum_part_idx][0](Eigen::all, Eigen::seqN(0, n_a));
+      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset_b = this->C_combined[quantum_part_idx][0](Eigen::all, Eigen::seqN(0, n_b));
+
+      orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], orb_subset_a, orb_subset_b);
+
+      spin_sq_xy = (n_a + n_b) * 0.5;
+      spin_sq_xy -= orbital_overlap.array().square().sum();
+
+      spin_sq_z = 0.25 * std::pow(n_a - n_b, 2);
+
+      mult = std::sqrt(spin_sq + 0.25) - 0.5;
+      mult = 2 * mult + 1;
+    } else {
+      spin_sq = 0.5 + 0.25;
+      mult = std::sqrt(spin_sq + 0.25) - 0.5;
+      mult = 2 * mult + 1;
+    }
+
+    S_squared[quantum_part_idx] = spin_sq;
+    multiplicity[quantum_part_idx] = mult;
+
+    quantum_part_idx++;
+  }
+}
+
 void POLYQUANT_EPSCF::check_stop() {
   std::string pad(7, ' ');
   std::string divider(95, '-');
@@ -706,11 +757,12 @@ void POLYQUANT_EPSCF::reset_diis() {
       if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
         nspin = 2;
       }
-      this->diis[quantum_part_idx].resize(nspin);
+      // this->diis[quantum_part_idx].resize(nspin);
       for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < nspin; quantum_part_spin_idx++) {
-        for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
-          this->diis[quantum_part_idx][quantum_part_spin_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
-        }
+        // for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+        // this->diis[quantum_part_idx][quantum_part_spin_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
+        this->diis[quantum_part_idx].emplace_back(this->diis_start, this->diis_size, this->diis_damping, 1, 1, this->diis_mixing_fraction);
+        //}
       }
       quantum_part_idx++;
     }
@@ -813,6 +865,13 @@ void POLYQUANT_EPSCF::resize_objects() {
   this->E_orbitals.resize(this->input_molecule->quantum_particles.size());
   this->occ.resize(this->input_molecule->quantum_particles.size());
 
+  this->C_combined.resize(this->input_molecule->quantum_particles.size());
+  this->E_orbitals_combined.resize(this->input_molecule->quantum_particles.size());
+  this->occ_combined.resize(this->input_molecule->quantum_particles.size());
+  this->symm_label_idxs.resize(this->input_molecule->quantum_particles.size());
+  this->symm_labels.resize(this->input_molecule->quantum_particles.size());
+  this->num_mo.resize(this->input_molecule->quantum_particles.size());
+
   this->reset_diis();
   this->reset_incfock();
 
@@ -824,6 +883,13 @@ void POLYQUANT_EPSCF::resize_objects() {
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+
+    auto nmo = 0;
+    for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
+      nmo += this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
+    }
+    this->num_mo[quantum_part_idx] = nmo;
+
     if (quantum_part.num_parts == 1) {
       this->D[quantum_part_idx].resize(1);
       this->D_combined[quantum_part_idx].resize(1);
@@ -834,6 +900,14 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->E_orbitals[quantum_part_idx].resize(1);
       this->occ[quantum_part_idx].resize(1);
 
+      this->C_combined[quantum_part_idx].resize(1);
+      this->E_orbitals_combined[quantum_part_idx].resize(1);
+      this->occ_combined[quantum_part_idx].resize(1);
+      this->symm_label_idxs[quantum_part_idx].resize(1);
+      this->symm_labels[quantum_part_idx].resize(1);
+
+      this->iteration_rms_error[quantum_part_idx].resize(1);
+
       this->D[quantum_part_idx][0].resize(num_irrep);
       this->D_last[quantum_part_idx][0].resize(num_irrep);
       this->C[quantum_part_idx][0].resize(num_irrep);
@@ -843,7 +917,16 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->D_combined[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->D_last_combined[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->iteration_rms_error[quantum_part_idx].resize(1);
+
+      this->C_combined[quantum_part_idx][0].resize(num_basis, this->num_mo[quantum_part_idx]);
+      this->C_combined[quantum_part_idx][0].setZero();
+      this->E_orbitals_combined[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->E_orbitals_combined[quantum_part_idx][0].setZero();
+      this->occ_combined[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->occ_combined[quantum_part_idx][0].setZero();
+      this->symm_label_idxs[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->symm_labels[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
 
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
@@ -851,7 +934,7 @@ void POLYQUANT_EPSCF::resize_objects() {
         this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
-        this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
       }
     } else if (quantum_part.restricted == false) {
@@ -863,6 +946,14 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->F[quantum_part_idx].resize(2);
       this->E_orbitals[quantum_part_idx].resize(2);
       this->occ[quantum_part_idx].resize(2);
+
+      this->C_combined[quantum_part_idx].resize(2);
+      this->E_orbitals_combined[quantum_part_idx].resize(2);
+      this->occ_combined[quantum_part_idx].resize(2);
+      this->symm_label_idxs[quantum_part_idx].resize(2);
+      this->symm_labels[quantum_part_idx].resize(2);
+
+      this->iteration_rms_error[quantum_part_idx].resize(2);
 
       this->D[quantum_part_idx][0].resize(num_irrep);
       this->D_last[quantum_part_idx][0].resize(num_irrep);
@@ -880,14 +971,31 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->D_combined[quantum_part_idx][1].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][1].setZero(num_basis, num_basis);
-      this->iteration_rms_error[quantum_part_idx].resize(2);
+
+      this->C_combined[quantum_part_idx][0].resize(num_basis, this->num_mo[quantum_part_idx]);
+      this->C_combined[quantum_part_idx][0].setZero();
+      this->E_orbitals_combined[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->E_orbitals_combined[quantum_part_idx][0].setZero();
+      this->occ_combined[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->occ_combined[quantum_part_idx][0].setZero();
+      this->symm_label_idxs[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->symm_labels[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->C_combined[quantum_part_idx][1].resize(num_basis, this->num_mo[quantum_part_idx]);
+      this->C_combined[quantum_part_idx][1].setZero();
+      this->E_orbitals_combined[quantum_part_idx][1].resize(this->num_mo[quantum_part_idx]);
+      this->E_orbitals_combined[quantum_part_idx][1].setZero();
+      this->occ_combined[quantum_part_idx][1].resize(this->num_mo[quantum_part_idx]);
+      this->occ_combined[quantum_part_idx][1].setZero();
+      this->symm_label_idxs[quantum_part_idx][1].resize(this->num_mo[quantum_part_idx]);
+      this->symm_labels[quantum_part_idx][1].resize(this->num_mo[quantum_part_idx]);
+
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
       this->iteration_rms_error[quantum_part_idx][1] = 0.0;
 
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
-        this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
-        this->E_orbitals[quantum_part_idx][1][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][1][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][1][irrep_idx].setZero(num_mo);
         this->C[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_mo);
@@ -907,6 +1015,14 @@ void POLYQUANT_EPSCF::resize_objects() {
       this->E_orbitals[quantum_part_idx].resize(1);
       this->occ[quantum_part_idx].resize(1);
 
+      this->C_combined[quantum_part_idx].resize(1);
+      this->E_orbitals_combined[quantum_part_idx].resize(1);
+      this->occ_combined[quantum_part_idx].resize(1);
+      this->symm_label_idxs[quantum_part_idx].resize(1);
+      this->symm_labels[quantum_part_idx].resize(1);
+
+      this->iteration_rms_error[quantum_part_idx].resize(1);
+
       this->D[quantum_part_idx][0].resize(num_irrep);
       this->D_last[quantum_part_idx][0].resize(num_irrep);
       this->C[quantum_part_idx][0].resize(num_irrep);
@@ -915,12 +1031,21 @@ void POLYQUANT_EPSCF::resize_objects() {
 
       this->D_combined[quantum_part_idx][0].setZero(num_basis, num_basis);
       this->F[quantum_part_idx][0].setZero(num_basis, num_basis);
-      this->iteration_rms_error[quantum_part_idx].resize(1);
+
+      this->C_combined[quantum_part_idx][0].resize(num_basis, this->num_mo[quantum_part_idx]);
+      this->C_combined[quantum_part_idx][0].setZero();
+      this->E_orbitals_combined[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->E_orbitals_combined[quantum_part_idx][0].setZero();
+      this->occ_combined[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->occ_combined[quantum_part_idx][0].setZero();
+      this->symm_label_idxs[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+      this->symm_labels[quantum_part_idx][0].resize(this->num_mo[quantum_part_idx]);
+
       this->iteration_rms_error[quantum_part_idx][0] = 0.0;
 
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
         auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
-        this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
+        // this->E_orbitals[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->occ[quantum_part_idx][0][irrep_idx].setZero(num_mo);
         this->D[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
         this->D_last[quantum_part_idx][0][irrep_idx].setZero(num_basis, num_basis);
@@ -967,8 +1092,7 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
     // Paper doi: 10.1021/jp801738f
     // eq. 2.7
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset =
-        this->C_ref_mom[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx](Eigen::placeholders::all, Eigen::seqN(0, num_parts));
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orb_subset = this->C_ref_mom[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx](Eigen::all, Eigen::seqN(0, num_parts));
     orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], orb_subset, this->C[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx]);
     // orbital_overlap = C_ref.T @ S @ C
     // M x N           = M x a @ a x a @ a x N
@@ -985,8 +1109,7 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 
     }
     // descending argsort based on overlap with occupied orbitals
     std::vector<int> argsort_indices;
-    bool ascending = false;
-    argsort_indices = argsort(total_ovlp_with_prev_occ, ascending);
+    argsort_indices = argsort(total_ovlp_with_prev_occ, std::less<double>{});
     // reorder orbitals with respect to overlap
     // i.e. permute the columns
     this->permute_MOs(quantum_part_idx, quantum_part_spin_idx, quantum_part_irrep_idx, argsort_indices);
@@ -1019,8 +1142,18 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
       }
       Eigen::Matrix<double, Eigen::Dynamic, 1> orb_e_combined;
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
-        if (this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size() == 0) {
+        auto num_mo = this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
+        if (num_mo == 0) {
           continue;
+        }
+        if (this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size() == 0) {
+          APP_WARN("The orbitals are most likely being read from file, but the orbitals occupations were not provided in the input file. We will populate according to the aufbau principle for HCORE "
+                   "orbitals.");
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> H_prime;
+          H_prime.noalias() = this->input_integral->orth_X[quantum_part_idx][irrep_idx].transpose() * this->H_core[quantum_part_idx] * this->input_integral->orth_X[quantum_part_idx][irrep_idx];
+          Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C_prime;
+          Eigen::Matrix<double, Eigen::Dynamic, 1> e_orb;
+          diag_fock_helper(quantum_part_idx, irrep_idx, H_prime, C_prime, this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx]);
         }
         Eigen::Matrix<double, Eigen::Dynamic, 1> temp;
         temp.resize(orb_e_combined.size() + this->E_orbitals[quantum_part_idx][quantum_part_spin_idx][irrep_idx].size());
@@ -1044,20 +1177,22 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep() {
       }
 
       // checking
-      auto npart_from_irreps = 0;
-      for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
-        npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
-      }
-      if (npart_from_irreps != npart_spin) {
-        APP_ABORT("part per irrep sum != npart from molecule");
-      }
+      // auto npart_from_irreps = 0;
+      // for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+      //   npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
+      // }
+      // if (npart_from_irreps != npart_spin) {
+      //   APP_ABORT("part per irrep sum != npart from molecule");
+      // }
     }
     quantum_part_idx++;
   }
+  this->form_occ_helper_initial_npart_per_irrep_from_input();
 }
 
-void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
-  // just check that what we got is of a resonable dim
+/*
+void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_file() {
+  npart_per_irrep.resize(this->input_molecule->quantum_particles.size());
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
@@ -1065,13 +1200,40 @@ void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       n_spin = 2;
     }
+    npart_per_irrep[quantum_part_idx].resize(n_spin);
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
+      npart_per_irrep[quantum_part_idx][quantum_part_spin_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
+      auto npart_spin = (quantum_part_spin_idx == 1) ? quantum_part.num_parts_beta : quantum_part.num_parts_alpha;
+      npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][0] = npart_spin;
+    }
+    quantum_part_idx++;
+  }
+}
+*/
+
+void POLYQUANT_EPSCF::form_occ_helper_initial_npart_per_irrep_from_input() {
+  // just check that what we got is of a resonable dim
+  auto quantum_part_idx = 0ul;
+  Polyquant_cout("    Initial Particles per Irrep");
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+    auto n_spin = 1;
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      n_spin = 2;
+    }
+    for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
+      std::stringstream ss;
+      ss << "        Particle " << quantum_part_idx << " ";
+      ss << "spin " << quantum_part_spin_idx << " : ";
       auto npart_spin = (quantum_part_spin_idx == 1) ? quantum_part.num_parts_beta : quantum_part.num_parts_alpha;
       // checking
       auto npart_from_irreps = 0;
       for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
+        ss << this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx] << " ";
         npart_from_irreps += this->npart_per_irrep[quantum_part_idx][quantum_part_spin_idx][irrep_idx];
       }
+      // ss << std::endl;
+      Polyquant_cout(ss.str());
       if (npart_from_irreps != npart_spin) {
         APP_ABORT("Input part per irrep sum != npart from molecule");
       }
@@ -1142,15 +1304,8 @@ void POLYQUANT_EPSCF::form_occ() {
   }
 }
 
-void POLYQUANT_EPSCF::form_combined_orbitals(std::string title) {
+void POLYQUANT_EPSCF::form_combined_orbitals() {
   auto quantum_part_idx = 0ul;
-  C_combined.resize(this->input_molecule->quantum_particles.size());
-  E_orbitals_combined.resize(this->input_molecule->quantum_particles.size());
-  occ_combined.resize(this->input_molecule->quantum_particles.size());
-  std::vector<std::vector<std::vector<std::string>>> symm_labels;
-  symm_label_idxs.resize(this->input_molecule->quantum_particles.size());
-  symm_labels.resize(this->input_molecule->quantum_particles.size());
-  num_mo.resize(this->input_molecule->quantum_particles.size());
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
@@ -1158,28 +1313,8 @@ void POLYQUANT_EPSCF::form_combined_orbitals(std::string title) {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       n_spin = 2;
     }
-    C_combined[quantum_part_idx].resize(n_spin);
-    E_orbitals_combined[quantum_part_idx].resize(n_spin);
-    occ_combined[quantum_part_idx].resize(n_spin);
-    symm_label_idxs[quantum_part_idx].resize(n_spin);
-    symm_labels[quantum_part_idx].resize(n_spin);
-
     for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
-      // get total num_mo
-      auto nmo = 0;
-      for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
-        nmo += this->num_mo_per_irrep[quantum_part_idx][irrep_idx];
-      }
-      this->num_mo[quantum_part_idx] = nmo;
-
-      C_combined[quantum_part_idx][quantum_part_spin_idx].resize(num_basis, nmo);
-      C_combined[quantum_part_idx][quantum_part_spin_idx].setZero();
-      E_orbitals_combined[quantum_part_idx][quantum_part_spin_idx].resize(nmo);
-      E_orbitals_combined[quantum_part_idx][quantum_part_spin_idx].setZero();
-      occ_combined[quantum_part_idx][quantum_part_spin_idx].resize(nmo);
-      occ_combined[quantum_part_idx][quantum_part_spin_idx].setZero();
-      symm_label_idxs[quantum_part_idx][quantum_part_spin_idx].resize(nmo);
-      symm_labels[quantum_part_idx][quantum_part_spin_idx].resize(nmo);
+      auto nmo = this->num_mo[quantum_part_idx];
 
       std::vector<int> curr_bas_idx;
       curr_bas_idx.resize(num_irrep, 0);
@@ -1209,8 +1344,10 @@ void POLYQUANT_EPSCF::form_combined_orbitals(std::string title) {
     }
     quantum_part_idx++;
   }
+}
 
-  dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, symm_labels, title, this->input_basis->ao_labels);
+void POLYQUANT_EPSCF::print_combined_orbitals(std::string title) {
+  dump_orbitals(this->C_combined, this->E_orbitals_combined, this->occ_combined, this->symm_labels, title, this->input_basis->ao_labels);
 }
 
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_EPSCF::det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S,
@@ -1226,6 +1363,36 @@ void POLYQUANT_EPSCF::permute_MOs(const int quantum_part_idx, const int quantum_
   swapper_mat.indices() = Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>, Eigen::Unaligned>(permutation.data(), permutation.size());
   // multiply from right : permute cols, multiply from left, permute rows
   this->C[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx] = this->C[quantum_part_idx][quantum_part_spin_idx][quantum_part_irrep_idx] * swapper_mat;
+}
+
+void POLYQUANT_EPSCF::reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &C_to_orth, const int quantum_part_idx) {
+  std::string line;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> orbital_overlap;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_orth_X;
+  Eigen::Matrix<double, Eigen::Dynamic, 1> s;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
+  Eigen::Index max_row, max_col;
+  orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
+  auto orbital_overlap_to_check = orbital_overlap;
+  orbital_overlap_to_check.array() -= 1;
+  double max = orbital_overlap_to_check.maxCoeff(&max_row, &max_col);
+  line = fmt::format("Maximum difference MO overlap matrix from identity matrix (before orthogonalization) : S_mo({:02}, {:02}) = {:> 10e}", max_row, max_col, max);
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(orbital_overlap);
+  if (eigensolver.info() != Eigen::Success)
+    APP_ABORT("Error reorthogonalizing orbitals!");
+  // Duplicated code from integral symm orth. Should generalize symm orth call in integral api and reduce repeated code.
+  s = eigensolver.eigenvalues();
+  L = eigensolver.eigenvectors();
+  s = s.array().rsqrt();
+  MO_orth_X = s.asDiagonal();
+  MO_orth_X = L * MO_orth_X * L.transpose();
+  C_to_orth = C_to_orth * MO_orth_X;
+  // checking
+  orbital_overlap = det_overlap(this->input_integral->overlap[quantum_part_idx], C_to_orth, C_to_orth);
+  orbital_overlap.diagonal().array() -= 1;
+  max = orbital_overlap.maxCoeff(&max_row, &max_col);
+  line = fmt::format("Maximum difference MO overlap matrix from identity matrix (after orthogonalization) : S_mo({:02}, {:02}) = {:> 10e}", max_row, max_col, max);
+  Polyquant_cout(line);
 }
 
 void POLYQUANT_EPSCF::permute_initial_MOs() {
@@ -1244,10 +1411,30 @@ void POLYQUANT_EPSCF::permute_initial_MOs() {
   // }
 }
 void POLYQUANT_EPSCF::print_success() {
+  form_combined_orbitals();
+  calculate_S_squared();
   Polyquant_cout("SCF SUCCESS");
   Polyquant_cout(this->E_total);
+
+  std::string pad(7, ' ');
+  std::string divider(76, '-');
+  std::string line;
+  line = divider;
+  Polyquant_cout(line);
+  line = pad;
+  line += fmt::format("{:<30}:{:>30f}", "Total Energy", this->E_total);
+  Polyquant_cout(line);
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    line = pad;
+    line += fmt::format("{:<20}:{:>20f} S^2={:>5f} Mult={:>5f}", quantum_part_key, E_particles[quantum_part_idx], S_squared[quantum_part_idx], multiplicity[quantum_part_idx]);
+    Polyquant_cout(line);
+    quantum_part_idx++;
+  }
+  line = divider;
+  Polyquant_cout(line);
   Polyquant_cout("");
-  form_combined_orbitals();
+  print_combined_orbitals();
 }
 
 void POLYQUANT_EPSCF::print_exceeded_iterations() { Polyquant_cout("Exceeded Iterations"); }
@@ -1279,6 +1466,34 @@ void POLYQUANT_EPSCF::print_params() {
     quantum_part_idx++;
   }
   Polyquant_cout(buffer.str());
+}
+
+void POLYQUANT_EPSCF::symmetrize_orbitals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C_tosym, std::vector<std::vector<std::vector<int>>> &symm_label_idxs_to_fill,
+                                          std::vector<std::vector<std::vector<std::string>>> &symm_labels_to_fill) {
+  msym_error_t ret = MSYM_SUCCESS;
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto &ctx = this->input_symmetry->ctx[quantum_part_idx];
+    int bfsl = this->input_basis->num_basis[quantum_part_idx];
+    for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < C_tosym[quantum_part_idx].size(); quantum_part_spin_idx++) {
+      auto nmo = this->num_mo[quantum_part_idx];
+      if (MSYM_SUCCESS != (ret = msymSymmetrizeWavefunctions(ctx, bfsl, C_tosym[quantum_part_idx][quantum_part_spin_idx].data(), this->input_basis->species[quantum_part_idx].data(),
+                                                             this->input_basis->pf[quantum_part_idx].data()))) {
+        auto error = msymErrorString(ret);
+        std::cout << error << std::endl;
+        error = msymGetErrorDetails();
+        std::cout << error << std::endl;
+        APP_ABORT("Error symmetrizing orbitals");
+      }
+
+      for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
+        auto determined_irrep = this->input_basis->species[quantum_part_idx][mo_idx];
+        symm_labels_to_fill[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_symmetry->irrep_names[quantum_part_idx][determined_irrep];
+        symm_label_idxs_to_fill[quantum_part_idx][quantum_part_spin_idx][mo_idx] = determined_irrep;
+      }
+    }
+    quantum_part_idx++;
+  }
 }
 
 void POLYQUANT_EPSCF::dump_molden() {
@@ -1322,12 +1537,17 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   this->input_integral->calculate_overlap();
   this->input_integral->calculate_orthogonalization();
   this->num_mo_per_irrep.resize(this->input_molecule->quantum_particles.size());
+  Polyquant_cout("    Orbitals per Irrep");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    std::stringstream ss;
+    ss << "        Particle " << quantum_part_idx << " : ";
     this->num_mo_per_irrep[quantum_part_idx].resize(this->input_symmetry->irrep_names[quantum_part_idx].size());
     for (auto irrep_idx = 0; irrep_idx < this->input_symmetry->irrep_names[quantum_part_idx].size(); irrep_idx++) {
       this->num_mo_per_irrep[quantum_part_idx][irrep_idx] = this->input_integral->orth_X[quantum_part_idx][irrep_idx].cols();
+      ss << this->num_mo_per_irrep[quantum_part_idx][irrep_idx] << " ";
     }
+    Polyquant_cout(ss.str());
     quantum_part_idx++;
   }
   this->input_integral->calculate_kinetic();
@@ -1348,6 +1568,8 @@ void POLYQUANT_EPSCF::setup_standard() {
   this->guess_DM();
   if (this->npart_per_irrep.size() == 0) {
     this->form_occ_helper_initial_npart_per_irrep();
+  } else {
+    this->form_occ_helper_initial_npart_per_irrep_from_input();
   }
   this->form_occ();
   this->form_DM();
@@ -1379,78 +1601,103 @@ void POLYQUANT_EPSCF::run() {
 void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  if (!this->input_symmetry->do_symmetry) {
-    this->print_start_iterations();
-    this->print_params();
-    this->calculate_integrals();
-    // start the SCF process
-    this->form_H_core();
-    this->resize_objects();
-    this->guess_DM();
-    if (this->npart_per_irrep.size() == 0) {
-      this->form_occ_helper_initial_npart_per_irrep();
-    }
-    // write over the current dm
-    auto quantum_part_idx = 0ul;
-    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-      auto idx = 0;
-      std::filesystem::path path(filename);
-      std::string dir = path.parent_path().string();
-      std::string file = path.filename().string();
-      std::string file_to_load = dir + quantum_part_key + "_" + file;
-
-      POLYQUANT_HDF5 hdf5_file(file_to_load);
-      Polyquant_cout("Reading coefficients from file : " + file_to_load);
-
-      // if (!root_group.exists("Super_Twist")) {
-      //   APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
-      // }
-      // auto Super_Twist_group = root_group.get_group("Super_Twist");
-
-      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
-      auto quantum_part_irrep_idx = 0;
-      auto num_mo = this->num_mo_per_irrep[quantum_part_idx][quantum_part_irrep_idx];
-
-      Polyquant_cout("Reading eigenset_" + std::to_string(idx));
-      std::vector<double> data;
-      std::string hpath = "/Super_Twist/eigenset_" + std::to_string(idx);
-      hdf5_file.load_data(data, hpath);
-#pragma omp parallel for
-      for (auto i = 0; i < num_mo; i++) {
-        for (auto j = 0; j < num_basis; j++) {
-          this->C[quantum_part_idx][quantum_part_irrep_idx][0](j, i) = data[i * num_basis + j];
-        }
-      }
-
-      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
-        hpath = "/Super_Twist/eigenset_" + std::to_string(idx + 1);
-        Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
-        data.clear();
-        hdf5_file.load_data(data, hpath);
-#pragma omp parallel for
-        for (auto i = 0; i < num_mo; i++) {
-          for (auto j = 0; j < num_basis; j++) {
-            this->C[quantum_part_idx][quantum_part_irrep_idx][1](j, i) = data[i * num_basis + j];
-          }
-        }
-      }
-      idx += 2;
-      quantum_part_idx++;
-    }
-    if (permute_orbitals_start) {
-      permute_initial_MOs();
-    }
-
-    this->form_occ();
-    this->form_DM();
-    // Polyquant_cout("Running a single SCF iteration");
-    // this->run_iteration();
-    this->form_fock();
-    this->print_iteration();
-    this->calculate_E_total();
-    Polyquant_cout(this->E_total);
-    this->form_combined_orbitals("GUESS ORBITALS FROM FILE");
+  // if (!this->input_symmetry->do_symmetry) {
+  this->print_start_iterations();
+  this->print_params();
+  this->calculate_integrals();
+  // start the SCF process
+  this->form_H_core();
+  this->resize_objects();
+  // this->guess_DM();
+  if (this->npart_per_irrep.size() == 0) {
+    this->form_occ_helper_initial_npart_per_irrep();
   } else {
-    APP_ABORT("Reading from file when symmetry is on is not currently supported!");
+    this->form_occ_helper_initial_npart_per_irrep_from_input();
   }
+  // write over the current dm
+  auto quantum_part_idx = 0ul;
+  for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+    auto idx = 0;
+    std::filesystem::path path(filename);
+    std::string dir = path.parent_path().string();
+    std::string file = path.filename().string();
+    std::string file_to_load = dir + quantum_part_key + "_" + file;
+
+    POLYQUANT_HDF5 hdf5_file(file_to_load);
+    Polyquant_cout("Reading coefficients from file : " + file_to_load);
+
+    // if (!root_group.exists("Super_Twist")) {
+    //   APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
+    // }
+    // auto Super_Twist_group = root_group.get_group("Super_Twist");
+
+    auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+    auto quantum_part_irrep_idx = 0;
+    auto num_mo = this->num_mo[quantum_part_idx];
+
+    Polyquant_cout("Reading eigenset_" + std::to_string(idx));
+    // std::vector<double> data;
+    // data.resize(num_mo * num_basis);
+    std::string hpath = "/Super_Twist/eigenset_" + std::to_string(idx);
+    // hdf5_file.load_data(data, hpath);
+    hdf5_file.load_data(this->C_combined[quantum_part_idx][0], hpath);
+    this->C_combined[quantum_part_idx][0].transposeInPlace();
+
+    // #pragma omp parallel for
+    // for (auto i = 0; i < num_mo; i++) {
+    //   for (auto j = 0; j < num_basis; j++) {
+    //     this->C_combined[quantum_part_idx][0](j, i) = data[i * num_basis + j];
+    //   }
+    // }
+
+    reorthogonalize_MOs(this->C_combined[quantum_part_idx][0], quantum_part_idx);
+
+    if (this->input_symmetry->do_symmetry == false) {
+      auto quantum_part_irrep_idx = 0;
+      this->C[quantum_part_idx][0][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][0];
+    }
+    if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+      hpath = "/Super_Twist/eigenset_" + std::to_string(idx + 1);
+      Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
+      // data.clear();
+      // data.resize(num_mo * num_basis);
+      // hdf5_file.load_data(data, hpath);
+      // #pragma omp parallel for
+      // for (auto i = 0; i < num_mo; i++) {
+      //   for (auto j = 0; j < num_basis; j++) {
+      //     this->C_combined[quantum_part_idx][1](j, i) = data[i * num_basis + j];
+      //   }
+      // }
+      hdf5_file.load_data(this->C_combined[quantum_part_idx][1], hpath);
+      this->C_combined[quantum_part_idx][1].transposeInPlace();
+
+      reorthogonalize_MOs(this->C_combined[quantum_part_idx][1], quantum_part_idx);
+      if (this->input_symmetry->do_symmetry == false) {
+        auto quantum_part_irrep_idx = 0;
+        this->C[quantum_part_idx][1][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][0];
+      }
+    }
+    idx += 2;
+    quantum_part_idx++;
+  }
+  if (permute_orbitals_start) {
+    permute_initial_MOs();
+  }
+  // this->form_combined_orbitals();
+  if (this->input_symmetry->do_symmetry == true) {
+    this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
+  }
+
+  this->form_occ();
+  this->form_DM();
+  this->form_fock();
+  // Polyquant_cout("Running a single SCF iteration");
+  // this->run_iteration();
+  this->print_iteration();
+  this->calculate_E_total();
+  Polyquant_cout(this->E_total);
+  this->print_combined_orbitals("GUESS ORBITALS FROM FILE");
+  //} else {
+  //  APP_ABORT("Reading from file when symmetry is on is not currently supported!");
+  //}
 }

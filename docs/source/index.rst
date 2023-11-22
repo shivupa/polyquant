@@ -8,13 +8,12 @@ Welcome to Polyquant's documentation!
 
 .. mdinclude:: ../../README.md
 
-
 Polyquant API
 =================================
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   coverage
    api/library_root
-
 

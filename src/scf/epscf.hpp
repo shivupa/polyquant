@@ -68,10 +68,13 @@ public:
                            const double occval);
 
   void form_occ_helper_initial_npart_per_irrep();
+  // void form_occ_helper_initial_npart_per_irrep_from_file();
   void form_occ_helper_initial_npart_per_irrep_from_input();
   void form_occ();
 
-  void form_combined_orbitals(std::string title = "CONVERGED MOLECULAR ORBITALS");
+  void form_combined_orbitals();
+
+  void print_combined_orbitals(std::string title = "CONVERGED MOLECULAR ORBITALS");
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> det_overlap(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff1,
                                                                     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &coeff2);
@@ -81,12 +84,15 @@ public:
   bool permute_orbitals_start = false;
 
   void permute_initial_MOs();
+  void reorthogonalize_MOs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &C_to_orth, const int quantum_part_idx);
 
   void permute_MOs(const int quantum_part_idx, const int quantum_part_spin_idx, const int quantum_part_irrep_idx, std::vector<int> &permutation);
 
   void calculate_E_elec() override;
 
   void calculate_E_total() override;
+
+  void calculate_S_squared();
 
   void check_stop() override;
 
@@ -97,6 +103,7 @@ public:
   void run_iteration() override;
 
   void guess_DM_hcore();
+
   void guess_DM() override;
 
   void resize_objects();
@@ -118,6 +125,9 @@ public:
   void print_error();
 
   void setup_from_file(std::string &filename);
+
+  void symmetrize_orbitals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C_tosym, std::vector<std::vector<std::vector<int>>> &symm_label_idxs_to_fill,
+                           std::vector<std::vector<std::vector<std::string>>> &symm_labels_to_fill);
 
   void print_params();
 
@@ -170,6 +180,7 @@ public:
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals_combined;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> occ_combined;
   std::vector<std::vector<std::vector<int>>> symm_label_idxs;
+  std::vector<std::vector<std::vector<std::string>>> symm_labels;
   std::vector<int> num_mo;
 
   std::string occupation_mode = "aufbau";
@@ -214,6 +225,8 @@ public:
    *
    */
   std::vector<double> E_particles;
+  std::vector<double> S_squared;
+  std::vector<double> multiplicity;
   /**
    * @brief Energy of the quantum particles from the previous iteration
    *
@@ -245,10 +258,10 @@ public:
   /**
    * @brief DIIS extrapolators
    *
-   * indexes: particle, spin, symmetry block
+   * indexes: particle, spin
    *
    */
-  std::vector<std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> diis;
+  std::vector<std::vector<libint2::DIIS<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> diis;
   /**
    * @brief Stop running iterations?
    *

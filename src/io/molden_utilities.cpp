@@ -67,11 +67,22 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
         if (pure) {
           using namespace libint2;
           int m;
-          FOR_SOLIDHARM_MOLDEN(l, m)
-          const auto ao_in_shell = libint2::INT_SOLIDHARMINDEX(l, m);
-          ao_map[ao_molden] = ao + ao_in_shell;
-          ++ao_molden;
-          END_FOR_SOLIDHARM_MOLDEN
+          if (l != 1) {
+            FOR_SOLIDHARM_MOLDEN(l, m)
+            const auto ao_in_shell = libint2::INT_SOLIDHARMINDEX(l, m);
+            ao_map[ao_molden] = ao + ao_in_shell;
+            ++ao_molden;
+            END_FOR_SOLIDHARM_MOLDEN
+          } else {
+            // specialization for p shell.
+            // expand as cartesian rather than spherical
+            std::vector<int> p_shell_cart_ordering = {1, -1, 0};
+            for (auto m : p_shell_cart_ordering) {
+              const auto ao_in_shell = libint2::INT_SOLIDHARMINDEX(l, m);
+              ao_map[ao_molden] = ao + ao_in_shell;
+              ++ao_molden;
+            }
+          }
           ao += 2 * l + 1;
         } else {
           using namespace libint2;

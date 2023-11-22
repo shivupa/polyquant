@@ -40,6 +40,7 @@ message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 # add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/cmake-modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/bilke_cmake_modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
 ################################################################################
@@ -51,16 +52,32 @@ option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
 ################################################################################
 # set up code coverage configuration
 add_library(coverage_config INTERFACE)
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-  if(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    # Add required flags (GCC & LLVM/Clang)
-    target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      target_link_options(coverage_config INTERFACE --coverage)
-    else(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-      target_link_libraries(coverage_config INTERFACE --coverage)
-    endif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-  endif(POLYQUANT_CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if(CMAKE_BUILD_TYPE MATCHES DEBUG) 
+    if(POLYQUANT_CODE_COVERAGE)
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+
+        set(COVERAGE_EXCLUDES
+            ${PROJECT_BINARY_DIR}/*
+            ${PROJECT_SOURCE_DIR}/tests/*
+            /usr/*
+        )
+        # Add required flags (GCC & LLVM/Clang)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+          target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
+          if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+            target_link_options(coverage_config INTERFACE --coverage)
+          else(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+            target_link_libraries(coverage_config INTERFACE --coverage)
+          endif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+        endif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        setup_target_for_coverage_lcov(
+            NAME polyquant_coverage
+            EXECUTABLE ${CMAKE_CTEST_COMMAND}
+            DEPENDENCIES main_test
+        )
+
+    endif(POLYQUANT_CODE_COVERAGE)
 endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
 ################################################################################
 # enable testing 
@@ -97,11 +114,15 @@ if(POLYQUANT_DOC)
   set(SPHINX_SOURCE ${POLYQUANT_BINARY_DIR}/docs/source)
   set(SPHINX_BUILD ${POLYQUANT_BINARY_DIR}/docs)
   add_custom_target(
-    Sphinx ALL
+    polyquant_docs_html ALL
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
-    COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${SPHINX_BUILD}
-    COMMENT "Generating documentation with Sphinx")
+    COMMENT "Generating documentation with Sphinx (html)")
+  add_custom_target(
+    polyquant_docs_pdf ALL
+    COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
+    WORKING_DIRECTORY ${SPHINX_BUILD}
+    COMMENT "Generating documentation with Sphinx (pdf)")
 endif(POLYQUANT_DOC)
 ################################################################################
 # Find libraries
@@ -232,11 +253,12 @@ FetchContent_MakeAvailable(fmt)
 ########################################
 # testing
 FetchContent_Declare(
-  doctest
-  GIT_REPOSITORY https://github.com/onqtam/doctest.git
-  GIT_TAG origin/dev)
-FetchContent_MakeAvailable(doctest)
-include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG origin/devel)
+FetchContent_MakeAvailable(Catch2)
+set(CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/contrib" ${CMAKE_MODULE_PATH})
+include(Catch)
 ################################################################################
 # this will do stuff in the src/CMakeLists.txt
 add_subdirectory(src)

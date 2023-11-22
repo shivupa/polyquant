@@ -72,6 +72,14 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
     APP_ABORT(ss.str());
   }
   this->ham.makeCompressed();
+  std::stringstream ss;
+  ss << "Created hamiltonian matrix." << std::endl;
+  ss << "  number of nonzero matrix elem before pruning: " << this->ham.nonZeros() << std::endl;
+  if (this->screening_threshold != 0.0) {
+    this->ham.prune(this->screening_threshold, 1.0);
+  }
+  ss << "  number of nonzero matrix elem after  pruning: " << this->ham.nonZeros() << std::endl;
+  Polyquant_cout(ss.str());
   // Polyquant_dump_sparse_mat_to_file(ham, "ci_ham.txt");
 }
 

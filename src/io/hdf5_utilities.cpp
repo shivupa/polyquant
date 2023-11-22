@@ -14,12 +14,49 @@ void POLYQUANT_HDF5::create_file(const std::string &fname) {
   this->hdf5_file = std::make_unique<HighFive::File>(this->filename, HighFive::File::OpenOrCreate);
 }
 
+void POLYQUANT_HDF5::write_str(std::string path, std::string val) {
+  if (val.size() > 100) {
+    APP_ABORT("HDF5 string work around requires a constant sized char array. Recompile with a larger array in POLYQUANT_HDF5::write_str array");
+  }
+  char val_arr[100];
+  // HighFive::FixedLenStringArray<20> val_arr{val.c_str()};
+  // char val_arr[val.size() + 1];
+  std::copy(val.begin(), val.end(), val_arr);
+  // std::array val_arr_std {val.c_str()};
+  POLYQUANT_STR_TYPE val_type(val);
+  // std::string group_name(path);
+  // group_name = group_name.substr(0, group_name.rfind("/" ));
+  // std::string attr_name(path);
+  // attr_name = attr_name.substr(attr_name.rfind("/") +1);
+  // std::cout << "SHIV " << group_name << std::endl;
+  // std::cout << this->exist(group_name) << std::endl;
+  // if (!this->exist(group_name)){
+  //     auto group = (*hdf5_file).createGroup(group_name);
+  // }
+  // std::cout << this->exist(group_name) << std::endl;
+  // std::cout << "SHIV " << attr_name << std::endl;
+  // auto group = (*hdf5_file).getGroup(group_name);
+  // auto attr = group.createAttribute(attr_name, HighFive::DataSpace{1}, val_type);
+  if (!this->exist(path)) {
+    auto ds = (*hdf5_file).createDataSet(path, HighFive::DataSpace{1}, val_type);
+    ds.write(val_arr);
+  } else {
+    auto ds = (*hdf5_file).getDataSet(path);
+    ds.write(val_arr);
+  }
+
+  // std::wstring ws(val.begin(), val.end());
+  // attr.write(val_arr);
+
+  // H5Easy::dump(*hdf5_file, path, val_local, H5Easy::DumpMode::Overwrite);
+}
+
 void POLYQUANT_HDF5::dump_application() {
   // write generating code name
   Polyquant_cout("dumping application parameters");
   std::string path = "/application/code";
-  std::vector<std::string> title = {"Polyquant"};
-  H5Easy::dump(*hdf5_file, path, title, H5Easy::DumpMode::Overwrite);
+  std::string title = "Polyquant";
+  write_str(path, title);
 }
 
 void POLYQUANT_HDF5::dump_PBC(bool pbc) {
@@ -51,7 +88,13 @@ void POLYQUANT_HDF5::dump_atoms(int num_atom, int num_species, std::vector<int> 
     flattened_atomic_positions.insert(flattened_atomic_positions.end(), atomic_position.begin(), atomic_position.end());
   }
   path = atoms_group + "/positions";
-  H5Easy::dump(*hdf5_file, path, flattened_atomic_positions, H5Easy::DumpMode::Overwrite);
+  // H5Easy::dump(*hdf5_file, path, flattened_atomic_positions, H5Easy::DumpMode::Overwrite);
+  if (this->exist(path)) {
+    auto dataset = (*hdf5_file).getDataSet(path);
+    dataset.write(atomic_centers);
+  } else {
+    (*hdf5_file).createDataSet(path, atomic_centers);
+  }
 
   for (auto i = 0ul; i < atomic_number.size(); i++) {
     auto species_group = atoms_group + "/species_" + std::to_string(i);
@@ -59,14 +102,14 @@ void POLYQUANT_HDF5::dump_atoms(int num_atom, int num_species, std::vector<int> 
     path = species_group + "/atomic_number";
     H5Easy::dump(*hdf5_file, path, atomic_number[i], H5Easy::DumpMode::Overwrite);
     // dump atomic charge
-    path = species_group + "/atomic_charge";
+    path = species_group + "/charge";
     H5Easy::dump(*hdf5_file, path, atomic_charge[i], H5Easy::DumpMode::Overwrite);
     // dump core elec
     path = species_group + "/core";
     H5Easy::dump(*hdf5_file, path, core_elec[i], H5Easy::DumpMode::Overwrite);
     // dump atomic name
     path = species_group + "/name";
-    H5Easy::dump(*hdf5_file, path, atomic_names[i], H5Easy::DumpMode::Overwrite);
+    write_str(path, atomic_names[i]);
   }
 }
 // TODO
@@ -97,7 +140,7 @@ void POLYQUANT_HDF5::dump_generalparameters(bool complex_vals, bool ecp, bool re
   H5Easy::dump(*hdf5_file, path, num_mo, H5Easy::DumpMode::Overwrite);
   // write bohr_unit
   path = parameters_group + "/Unit";
-  int bohr_u;
+  int bohr_u = 1;
   H5Easy::dump(*hdf5_file, path, bohr_u, H5Easy::DumpMode::Overwrite);
   // write num_part_alpha
   path = parameters_group + "/NbAlpha";
@@ -128,17 +171,25 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
     Polyquant_cout(buffer.str());
 
     path = super_twist_group + "/" + tag;
-    H5Easy::dump(*hdf5_file, path, E_orb[spin_idx], H5Easy::DumpMode::Overwrite);
+    Eigen::Matrix<double, 1, Eigen::Dynamic> E_orb_rowmat = E_orb[spin_idx].transpose();
+    // H5Easy::dump(*hdf5_file, path, E_orb_rowmat, H5Easy::DumpMode::Overwrite);
+    if (this->exist(path)) {
+      auto dataset = (*hdf5_file).getDataSet(path);
+      dataset.write(E_orb_rowmat);
+    } else {
+      (*hdf5_file).createDataSet(path, E_orb_rowmat);
+    }
 
     // write orbital coeffs
-    std::vector<double> flattened_mo_coeff;
-    for (auto i = 0ul; i < num_mo; i++) {
-      for (auto j = 0ul; j < num_ao; j++) {
-        flattened_mo_coeff.push_back(mo_coeff[spin_idx](j, i));
-      }
-    }
+    // std::vector<double> flattened_mo_coeff;
+    // for (auto i = 0ul; i < num_mo; i++) {
+    //   for (auto j = 0ul; j < num_ao; j++) {
+    //     flattened_mo_coeff.push_back(mo_coeff[spin_idx](j, i));
+    //   }
+    // }
     path = super_twist_group + "/eigenset_" + std::to_string(spin_idx);
-    H5Easy::dump(*hdf5_file, path, flattened_mo_coeff, H5Easy::DumpMode::Overwrite);
+    // H5Easy::dump(*hdf5_file, path, flattened_mo_coeff, H5Easy::DumpMode::Overwrite);
+    H5Easy::dump(*hdf5_file, path, mo_coeff[spin_idx].transpose(), H5Easy::DumpMode::Overwrite);
   }
 }
 
@@ -171,20 +222,29 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
 
   // dump number of basis types
   path = basis_group + "/NbElements";
-  H5Easy::dump(*hdf5_file, path, unique_shells.size(), H5Easy::DumpMode::Overwrite);
-  // dump basis name
-  std::string basis_name = fmt::format("LCAOBSet_{}", quantum_part_name);
-  path = basis_group + "/name";
-  H5Easy::dump(*hdf5_file, path, basis_name, H5Easy::DumpMode::Overwrite);
-  // loop over shells
-  auto atom_idx = 0ul;
-  auto shell_idx = 0ul;
+  auto NbElements = 0;
   for (auto atom_shells : unique_shells) {
     if (atom_shells.size() == 0) {
       continue; // no basis functions on atom
     }
+    NbElements++;
+  }
+  H5Easy::dump(*hdf5_file, path, NbElements, H5Easy::DumpMode::Overwrite);
+  // dump basis name
+  std::string basis_name = fmt::format("LCAOBSet_{}", quantum_part_name);
+  path = basis_group + "/name";
+  write_str(path, basis_name);
+  // loop over shells
+  auto atom_idx = 0ul;
+  auto unique_atom_idx = 0ul; // not every atom type needs to have a basis fn
+  auto shell_idx = 0ul;
+  for (auto atom_shells : unique_shells) {
+    if (atom_shells.size() == 0) {
+      atom_idx++;
+      continue; // no basis functions on atom
+    }
     shell_idx = 0ul;
-    auto atom_basis_group = basis_group + "/atomicBasisSet" + std::to_string(atom_idx);
+    auto atom_basis_group = basis_group + "/atomicBasisSet" + std::to_string(unique_atom_idx);
     // dump number of basis types
     path = atom_basis_group + "/NbBasisGroups";
     H5Easy::dump(*hdf5_file, path, atom_shells.size(), H5Easy::DumpMode::Overwrite);
@@ -193,29 +253,29 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       // dump cartesian or spherical
       std::string cart_sph = "spherical";
       path = atom_basis_group + "/angular";
-      H5Easy::dump(*hdf5_file, path, cart_sph, H5Easy::DumpMode::Overwrite);
+      write_str(path, cart_sph);
       // dump expansion type
       std::string expandYlm = "natural";
       path = atom_basis_group + "/expandYlm";
-      H5Easy::dump(*hdf5_file, path, expandYlm, H5Easy::DumpMode::Overwrite);
+      write_str(path, expandYlm);
     } else {
       std::string cart_sph = "cartesian";
       path = atom_basis_group + "/angular";
-      H5Easy::dump(*hdf5_file, path, cart_sph, H5Easy::DumpMode::Overwrite);
+      write_str(path, cart_sph);
       // dump expansion type
       std::string expandYlm = "Gamess";
       path = atom_basis_group + "/expandYlm";
-      H5Easy::dump(*hdf5_file, path, expandYlm, H5Easy::DumpMode::Overwrite);
+      write_str(path, expandYlm);
     }
     // dump atom type and name
     path = atom_basis_group + "/elementType";
-    H5Easy::dump(*hdf5_file, path, atomic_names[atom_idx], H5Easy::DumpMode::Overwrite);
+    write_str(path, atomic_names[atom_idx]);
     path = atom_basis_group + "/name";
-    H5Easy::dump(*hdf5_file, path, atomic_names[atom_idx], H5Easy::DumpMode::Overwrite);
+    write_str(path, atomic_names[atom_idx]);
     // dump normalization
     std::string normalized = "no";
     path = atom_basis_group + "/normalized";
-    H5Easy::dump(*hdf5_file, path, normalized, H5Easy::DumpMode::Overwrite);
+    write_str(path, normalized);
     // dump grid data
     int grid_npts = 1001;
     path = atom_basis_group + "/grid_npts";
@@ -231,7 +291,8 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
 
     std::string grid_type = "log";
     path = atom_basis_group + "/grid_type";
-    H5Easy::dump(*hdf5_file, path, grid_type, H5Easy::DumpMode::Overwrite);
+    // H5Easy::dump(*hdf5_file, path, grid_type, H5Easy::DumpMode::Overwrite);
+    write_str(path, grid_type);
 
     shell_idx = 0ul;
     for (auto shell : atom_shells) {
@@ -247,11 +308,11 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       // dump basis type
       std::string basis_type = "Gaussian";
       path = shell_group + "/type";
-      H5Easy::dump(*hdf5_file, path, basis_type, H5Easy::DumpMode::Overwrite);
+      write_str(path, basis_type);
       // dump basis function id
       std::string basis_id = atomic_names[atom_idx] + std::to_string(shell_idx) + std::to_string(shell.contr[0].l);
       path = shell_group + "/rid";
-      H5Easy::dump(*hdf5_file, path, basis_id, H5Easy::DumpMode::Overwrite);
+      write_str(path, basis_id);
       // dump basis function location
       std::vector<double> origin = {shell.O[0], shell.O[1], shell.O[2]};
       path = shell_group + "/Shell_coord";
@@ -296,7 +357,7 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       }
 
       for (auto i = 0ul; i < shell.alpha.size(); ++i) {
-        auto curr_func_group = rad_func_group + "DataRad" + std::to_string(i);
+        auto curr_func_group = rad_func_group + "/DataRad" + std::to_string(i);
         // dump exponent and contraction coefficient
         double exponent = shell.alpha[i];
         path = curr_func_group + "/exponent";
@@ -307,6 +368,7 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
       }
       shell_idx++;
     }
+    unique_atom_idx++;
     atom_idx++;
   }
 }
@@ -335,25 +397,38 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
   for (int part_idx = 0; part_idx < dets.size(); part_idx++) {
     for (int spin_idx = 0; spin_idx < dets[part_idx].size(); spin_idx++) {
       std::string tag = "/CI_" + std::to_string(part_idx * 2 + spin_idx);
-      std::vector<uint64_t> flattened_dets;
+      Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> flattened_dets;
+      flattened_dets.resize(N_dets, N_int_per_det);
+      flattened_dets.setZero();
+      // std::vector<uint64_t> flattened_dets;
       for (int i = 0; i < N_dets; i++) {
-        for (int j = N_int_per_det - 1; j >= 0; j--) {
-          if (j < dets[part_idx][spin_idx][i].size()) {
-            flattened_dets.push_back(dets[part_idx][spin_idx][i][j]);
-          } else {
-            flattened_dets.push_back(0);
-          }
+        for (int j = 0; j < N_int_per_det; j++) {
+          flattened_dets(i, j) = dets[part_idx][spin_idx][i][N_int_per_det - j - 1];
         }
       }
       path = multidet_group + tag;
       H5Easy::dump(*hdf5_file, path, flattened_dets, H5Easy::DumpMode::Overwrite);
+
+      // if (this->exist(path)) {
+      //   auto dataset = (*hdf5_file).getDataSet(path);
+      //   dataset.write(flattened_dets);
+      // } else {
+      //   //(*hdf5_file).createDataSet(path, flattened_dets);
+      //   // dataset.write(flattened_dets);
+      //   auto dataset = (*hdf5_file).createDataSet<uint64_t>(path, HighFive::DataSpace::From(flattened_dets));
+      //   dataset.write(flattened_dets);
+      // }
     }
   }
 
   for (auto i = 0ul; i < N_states; i++) {
     std::vector<double> coeff;
+    // Eigen::Matrix<double, Eigen::Dynamic, 1> coeff;
+    // coeff.resize(N_dets );
+    // coeff.setZero();
     for (auto j = 0ul; j < N_dets; j++) {
       coeff.push_back(C(j, i));
+      // coeff[j] = C(j, i);
     }
     std::string tag = "/Coeff";
     if (i > 0) {
@@ -361,6 +436,13 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
     }
 
     path = multidet_group + tag;
+    // if (this->exist(path)) {
+    //   auto dataset = (*hdf5_file).getDataSet(path);
+    //   dataset.write(coeff);
+    // } else {
+    //   auto dataset = (*hdf5_file).createDataSet<uint64_t>(path, HighFive::DataSpace::From(coeff));
+    //   dataset.write(coeff);
+    // }
     H5Easy::dump(*hdf5_file, path, coeff, H5Easy::DumpMode::Overwrite);
   }
 

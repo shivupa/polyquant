@@ -1,0 +1,39 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["Be"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "SCF",
+    "basis":
+        { "electron" :
+          {"Be" : [{ "custom" : 
+            {"type" : "file",
+             "filename" : "../../tests/data/be/aug_cc_pvdz/electron_basis.g94"}}]}
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "symmetry" : true,
+    "dump_for_qmcpack" : false,
+    "mf_keywords" :{
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-12,
+        "iteration_max" : 200,
+        "from_file" : false,
+        "incremental_fock" : true,
+        "npart_per_irrep" :
+        [
+            [
+                [2,0,0,0,0,0,0,0]
+            ]
+        ]
+   },
+   "pure" : true
+      }
+}

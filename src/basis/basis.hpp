@@ -8,7 +8,6 @@
 #include <iterator>
 #include <libint2.hpp> // IWYU pragma: keep
 #include <numbers>
-//#include <math.h>
 #include <stdlib.h>
 #include <string>
 
@@ -57,6 +56,7 @@ public:
        "zzzzyy", "xxxxyz", "yyyyxz", "zzzzxy", "xxxyyy", "xxxzzz", "yyyzzz", "xxxyyz", "xxxzzy", "yyyxxz", "yyyzzx", "zzzxxy", "zzzyyx", "xxyyzz"}};
 
   void symmetrize_basis();
+  void symmetrize_basis_SO3();
   void reorder_combined_salcs(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &combined_salcs, const size_t basis_idx);
   /**
    * @brief The name of the basis to load
@@ -82,6 +82,10 @@ public:
   // indexing particle idx, irrep idx
   std::vector<std::vector<int>> salc_per_irrep;
   std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> salcs;
+
+  // symmetry info we will want to store for symmetrizing wfn
+  std::vector<std::vector<msym_partner_function_t>> pf;
+  std::vector<std::vector<int>> species;
   bool pure = true;
 };
 } // namespace polyquant

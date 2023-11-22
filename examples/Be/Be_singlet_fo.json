@@ -1,0 +1,57 @@
+{
+  "molecule": {
+    "geometry": [
+        0.0000000, 0.0000000,  0.0000000
+    ],
+    "symbols": ["Be"],
+    "molecular_charge": 0,
+    "molecular_multiplicity": 1
+  },
+  "driver": "energy",
+  "model": {
+    "method": "CI",
+    "basis": 
+        { "electron" :
+          {"Be" : [{ "library" : 
+              {"type" : "cc-pvdz"}}]
+          }
+        }
+  },
+  "keywords": {
+    "restricted" : true,
+    "symmetry" : true,
+    "dump_for_qmcpack" : true,
+    "hdf5_filename_qmcpack" : "H_wpos.h5",
+    "pure" : true,
+    "mf_keywords" :{
+        "convergence_E" : 1e-12,
+        "convergence_DM" : 1e-12,
+        "iteration_max" : 200,
+        "from_file" : false,
+        "npart_per_irrep" : 
+        [
+            [
+                [2,0,0,0,0,0,0,0]
+            ]
+        ]
+    },
+    "ci_keywords" : {
+       "convergence_E" : 1e-12,
+       "num_states" : 13,
+       "iteration_max" : 200,
+       "num_subspace_vec" : 20,
+       "slow_diag" : false,
+       "screening_threshold" : 1e-40,
+       "spin_penalty_type" : "first_order",
+       "expected_S2" : [0.0],
+       "spin_penalty" : [0.1],
+       "build_matrix" : true,
+       "excitation_level" : [ 
+           [2,2,4]
+       ],
+       "frozen_core" : [0],
+       "deleted_virtual" : [0]
+   }
+  }
+}
+

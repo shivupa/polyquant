@@ -206,13 +206,117 @@ void POLYQUANT_BASIS::set_ao_labels() {
   }
 }
 
-void POLYQUANT_BASIS::symmetrize_basis() {
+void POLYQUANT_BASIS::symmetrize_basis_SO3() {
 
+  // indexing particle idx, irrep idx
+  std::vector<std::vector<std::string>> symm_op_names;
+  // clang-format off
+  const std::vector<std::vector<std::string>> SO3_irrep_names {
+  {"s+0"},
+  {"p-1", "p+0", "p+1"},
+  {"d-2", "d-1", "d+0", "d+1", "d+2"},
+  {"f-3", "f-2", "f-1", "f+0", "f+1", "f+2", "f+3"},
+  {"g-4", "g-3", "g-2", "g-1", "g+0", "g+1", "g+2", "g+3", "g+4"} 
+  };
+  const std::vector<std::vector<int>> SO3_l_m_to_irrepidx {
+      {  0},
+      {  1,  2,  3},
+      {  4,  5,  6,  7,  8},
+      {  9, 10, 11, 12, 13, 14, 15},
+      { 16, 17, 18, 19, 20, 21, 22, 23, 24}
+  };
+  const auto num_irrep = 25;
+  // clang-format on
+  Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> direct_product_table;
+
+  symmetry->symm_op_names.resize(this->basis.size());
+  symmetry->irrep_names.resize(this->basis.size());
+
+  salc_per_irrep.resize(this->basis.size());
+  this->salcs.resize(this->basis.size());
+
+  this->pf.resize(this->basis.size());
+  this->species.resize(this->basis.size());
+
+  Polyquant_cout("Symmetrizing basis... Building SALCs");
+  auto basis_idx = 0;
+  for (auto &quantum_particle_basis : this->basis) {
+    symmetry->symm_op_names[basis_idx].resize(0);
+
+    salc_per_irrep[basis_idx].resize(num_irrep, 0);
+    this->salcs[basis_idx].resize(num_irrep);
+    for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
+      this->salcs[basis_idx][irrep_idx].resize(this->num_basis[basis_idx], 0);
+      this->salcs[basis_idx][irrep_idx].setZero();
+    }
+
+    for (auto l = 0; l < SO3_irrep_names.size(); l++) {
+      for (auto m = 0; m < SO3_irrep_names[l].size(); m++) {
+        symmetry->irrep_names[basis_idx].push_back(SO3_irrep_names[l][m]);
+      }
+    }
+
+    auto ao_idx = 0;
+    for (auto shell : quantum_particle_basis) {
+      for (auto contr : shell.contr) {
+        if (contr.pure) {
+          auto l = contr.l;
+          for (int m = -l, m_idx = 0; m <= l; m++, m_idx++) {
+
+            auto irrep_idx = SO3_l_m_to_irrepidx[l][m_idx];
+            std::cout << irrep_idx << std::endl;
+            this->salcs[basis_idx][irrep_idx].conservativeResize(Eigen::NoChange, this->salcs[basis_idx][irrep_idx].cols() + 1);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> salc;
+            salc.resize(this->salcs[basis_idx][irrep_idx].rows());
+            salc.setZero();
+            salc(ao_idx) = 1.0;
+            this->salcs[basis_idx][irrep_idx].col(this->salcs[basis_idx][irrep_idx].cols() - 1) = salc;
+            this->salc_per_irrep[basis_idx][irrep_idx]++;
+            ao_idx++;
+          }
+        } else {
+          APP_ABORT("SO(3) requires spherical basis sets.");
+        }
+      }
+    }
+
+    symmetry->direct_product_table.resize(num_irrep, num_irrep);
+    symmetry->direct_product_table.setZero();
+    symmetry->direct_product_table.array() -= 1;
+    for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
+      symmetry->direct_product_table(0, irrep_idx) = irrep_idx;
+      symmetry->direct_product_table(irrep_idx, 0) = irrep_idx;
+      symmetry->direct_product_table(irrep_idx, irrep_idx) = 0;
+    }
+    Polyquant_dump_direct_product_table(symmetry->direct_product_table, symmetry->point_group, symmetry->irrep_names[basis_idx]);
+
+    std::stringstream irrep_msg;
+    irrep_msg << "    ";
+    irrep_msg << "SALCs per Irreps\n";
+    irrep_msg << "    ";
+    irrep_msg << "----------------\n";
+    for (auto i = 0; i < symmetry->irrep_names[basis_idx].size(); i++) {
+      irrep_msg << "    ";
+      irrep_msg << "    ";
+      irrep_msg << "Irrep ";
+      irrep_msg << symmetry->irrep_names[basis_idx][i];
+      irrep_msg << " with ";
+      irrep_msg << salc_per_irrep[basis_idx][i];
+      irrep_msg << " functions.\n";
+      // Polyquant_dump_mat(salcs[basis_idx][i], symmetry->irrep_names[basis_idx][i]);
+    }
+    Polyquant_cout(irrep_msg.str());
+    basis_idx++;
+  }
+}
+void POLYQUANT_BASIS::symmetrize_basis() {
+  // thresh for assigning shell to atoms
+  static constexpr double thresh = std::numeric_limits<double>::epsilon() * 1e2;
   msym_error_t ret = MSYM_SUCCESS;
-  if (symmetry->point_group != "C1") {
+  if (symmetry->point_group != "C1" && symmetry->point_group != "SO(3)") {
     msym_point_group_type_t mtype;
     int mn;
-    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(symmetry->ctx, &mtype, &mn))) {
+    if (MSYM_SUCCESS != (ret = msymGetPointGroupType(symmetry->ctx[0], &mtype, &mn))) {
       APP_ABORT("Error getting point group type.");
     }
 
@@ -240,14 +344,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       salcs[basis_idx][0].resize(this->num_basis[basis_idx], this->num_basis[basis_idx]);
       salcs[basis_idx][0].setIdentity();
     }
-
+  } else if (symmetry->point_group == "SO(3)") {
+    symmetrize_basis_SO3();
   } else {
-    const msym_equivalence_set_t *mes = NULL;
-    int mesl = 0;
-    if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(symmetry->ctx, &mesl, &mes))) {
-      APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
-    }
-    // std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
 
     std::vector<std::vector<msym_basis_function_t>> mbfs;
     mbfs.resize(this->basis.size());
@@ -257,19 +356,28 @@ void POLYQUANT_BASIS::symmetrize_basis() {
     salc_per_irrep.resize(this->basis.size());
     salcs.resize(this->basis.size());
 
+    this->pf.resize(this->basis.size());
+    this->species.resize(this->basis.size());
+
     Polyquant_cout("Symmetrizing basis... Building SALCs");
     auto basis_idx = 0;
 
     for (auto &quantum_particle_basis : this->basis) {
-      auto ctx = symmetry->ctx;
+      auto &ctx = symmetry->ctx[basis_idx];
+      const msym_equivalence_set_t *mes = NULL;
+      int mesl = 0;
+      if (MSYM_SUCCESS != (ret = msymGetEquivalenceSets(ctx, &mesl, &mes))) {
+        APP_ABORT("Something went wrong while finding the equivalent sets of atoms.");
+      }
+      // std::cout << "SYMMETRY TESTING: number of equivalent sets of atoms " << mesl << std::endl;
       auto ao_idx = 0;
       for (auto shell : quantum_particle_basis) {
         for (auto sym_eq_set_idx = 0; sym_eq_set_idx < mesl; sym_eq_set_idx++) {
           for (auto atom_in_sym_eq_set_idx = 0; atom_in_sym_eq_set_idx < mes[sym_eq_set_idx].length; atom_in_sym_eq_set_idx++) {
-            if (shell.O[0] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0] && shell.O[1] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1] &&
-                shell.O[2] == mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) {
+            if (std::abs(shell.O[0] - mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[0]) < thresh &&
+                std::abs(shell.O[1] - mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[1]) < thresh &&
+                std::abs(shell.O[2] - mes[sym_eq_set_idx].elements[atom_in_sym_eq_set_idx]->v[2]) < thresh) {
               // std::cout << "MATCHED SHELL TO ATOM" << std::endl;
-
               for (auto contr : shell.contr) {
                 if (contr.pure) {
                   for (int m = -contr.l; m <= contr.l; m++) {
@@ -380,9 +488,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       pcmem.resize(bfsl);
       pcmem.setZero();
 
-      std::vector<msym_partner_function_t> pf(bfsl);
+      this->pf[basis_idx].resize(bfsl);
+      this->species[basis_idx].resize(bfsl);
 
-      std::vector<int> species(bfsl);
       int msrsl = 0;
       const msym_subrepresentation_space_t *msrs = NULL;
       const msym_character_table_t *mct = NULL;
@@ -394,7 +502,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
         std::cout << error << std::endl;
         APP_ABORT("Error getting subrepresentation spaces");
       }
-      if (MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, combined_salcs.data(), species.data(), pf.data()))) {
+      if (MSYM_SUCCESS != (ret = msymGetSALCs(ctx, bfsl, combined_salcs.data(), species[basis_idx].data(), pf[basis_idx].data()))) {
         // auto error = msymErrorString(ret);
         // error = msymGetErrorDetails();
         APP_ABORT("Error getting salcs");
@@ -410,7 +518,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
       auto offset = 0;
       for (auto count = 0; count < msrsl; count++) {
         salc_per_irrep[basis_idx].push_back(msrs[count].salcl);
-        salcs[basis_idx].push_back(combined_salcs(Eigen::placeholders::all, Eigen::seq(offset, offset + salc_per_irrep[basis_idx][count] - 1)));
+        salcs[basis_idx].push_back(combined_salcs(Eigen::all, Eigen::seq(offset, offset + salc_per_irrep[basis_idx][count] - 1)));
         offset += salc_per_irrep[basis_idx][count];
       }
       for (auto i = 0; i < mct->d; i++) {
@@ -423,7 +531,7 @@ void POLYQUANT_BASIS::symmetrize_basis() {
           //    std::cout << "       STHISDsdF " << a << std::endl;
           //  }
         }
-        temp_irrep_name.erase(std::remove_if(temp_irrep_name.begin(), temp_irrep_name.end(), [](char c) { return !(c >= 0 && c < 128); }), temp_irrep_name.end());
+        // temp_irrep_name.erase(std::remove_if(temp_irrep_name.begin(), temp_irrep_name.end(), [](char c) { return !(c >= 0 && c < 128); }), temp_irrep_name.end());
         symmetry->irrep_names[basis_idx].push_back(temp_irrep_name);
       }
 

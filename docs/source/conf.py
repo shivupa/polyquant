@@ -88,6 +88,8 @@ if on_rtd:
         """
         INPUT = ../../src
         EXCLUDE_PATTERNS =*.txt
+        ALIASES  = "rst=\\verbatim embed:rst:leading-asterisk"
+        ALIASES += "endrst=\\endverbatim"
         """
     )
 else:
@@ -95,8 +97,11 @@ else:
         """
         INPUT = @POLYQUANT_SOURCE_DIR@/src
         EXCLUDE_PATTERNS =*.txt
+        ALIASES  = "rst=\\verbatim embed:rst:leading-asterisk"
+        ALIASES += "endrst=\\endverbatim"
         """
     )
+
 
 # Tell sphinx what the primary language being documented is.
 primary_domain = "cpp"

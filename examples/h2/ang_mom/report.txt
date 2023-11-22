@@ -1,0 +1,10 @@
+0_s/electron_polyquant.molden
+(0, 0) 8.54378112702392e-08
+1_p/electron_polyquant.molden
+(0, 0) 2.743300784313618e-07
+2_d/electron_polyquant.molden
+(1, 1) 2.743400011606667e-07
+3_f/electron_polyquant.molden
+(1, 1) 2.743383773484709e-07
+4_g/electron_polyquant.molden
+(1, 1) 2.7434057070507833e-07

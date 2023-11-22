@@ -1,0 +1,125 @@
+name: Polyquant CMake Build
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  actions: write
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  cmake-build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu_Latest_GCC11_Debug_Ninja_Docs",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            pkgs: "gcc-11 g++-11",
+            cc: "gcc-11",
+            cxx: "g++-11",
+            generators: "Ninja"
+          }
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Print env
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: libint.yml
+          workflow_conclusion: success
+          name: polyquant-libint.deb
+      - name: Install dependencies on Ubuntu
+        if: startsWith(matrix.config.name, 'Ubuntu_Latest')
+        run: |
+          sudo apt-get update
+          sudo apt-get install \
+            ninja-build \
+            cmake \
+            libboost-all-dev \
+            intel-mkl \
+            liblapack-dev \
+            libeigen3-dev \
+            libhdf5-dev \
+            lcov \
+            doxygen \
+            ${{ matrix.config.pkgs }}
+          pip install sphinx sphinx-rtd-theme breathe exhale m2r m2r2
+          ninja --version
+          cmake --version
+          ${{ matrix.config.cc }} --version
+          sudo dpkg -i polyquant-libint.deb
+          mkdir builddir
+          echo $MKLROOT
+          ls /usr/share/libint/*/basis/
+      - name: Install libmsym
+        run: |
+          git clone https://github.com/mcodev31/libmsym.git
+          cd libmsym
+          mkdir build
+          cd build
+          # build as shared library; build examples (built in ./examples,  not installed)
+          cmake -DBUILD_SHARED_LIBS:BOOL=ON -DMSYM_BUILD_EXAMPLES:BOOL=ON ../.
+          make
+          sudo make install
+      - name: Create a directory that the libint imported target requires. DO NOT DELETE THIS STEP.
+        shell: bash
+        run: |
+          mkdir $GITHUB_WORKSPACE/libint2
+      - name: Configure
+        shell: bash
+        working-directory: builddir
+        env:
+          CC: matrix.config.cc
+          CXX: matrix.config.cxx
+          MKLROOT: /usr/include/mkl
+        run: |
+          cmake \
+            -DPOLYQUANT_DOC=1 \
+            -DPOLYQUANT_TEST=1 \
+            -DPOLYQUANT_CODE_COVERAGE=1 \
+            -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+            -G "${{ matrix.config.generators }}" \
+            ..
+      - name: Build
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --config ${{ matrix.config.build_type }}
+      - name: Build coverage
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --target polyquant_coverage --config ${{ matrix.config.build_type }}
+      - name: Build docs
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --target polyquant_docs_html --config ${{ matrix.config.build_type }}
+      - name: Move coverage report
+        shell: bash
+        working-directory: builddir
+        run: cp -r polyquant_coverage docs/html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: 'builddir/docs/html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+      

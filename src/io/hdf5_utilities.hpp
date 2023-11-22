@@ -21,6 +21,18 @@
 
 namespace polyquant {
 
+struct POLYQUANT_STR_TYPE : public HighFive::DataType {
+  // adapted from https://github.com/BlueBrain/HighFive/issues/678#issuecomment-1402315600
+  POLYQUANT_STR_TYPE(std::string val) {
+    _hid = H5Tcopy(H5T_C_S1);
+    if (H5Tset_size(_hid, val.size()) < 0) {
+      HighFive::HDF5ErrMapper::ToException<HighFive::DataTypeException>("Unable to define datatype size to str size");
+    }
+    H5Tset_cset(_hid, H5T_CSET_ASCII);
+    H5Tset_strpad(_hid, H5T_STR_NULLPAD);
+  }
+};
+
 /**
  * @brief A class to assist with HDF5 dumping
  *
@@ -48,9 +60,10 @@ public:
   std::unique_ptr<HighFive::File> hdf5_file;
   std::string filename;
 
-  template <typename T> void load_data(T output, std::string path) { hdf5_file->getDataSet(path).read(output); }
+  template <typename T> void load_data(T &output, std::string path) { output = H5Easy::load<T>(*hdf5_file, path); }
 
   bool exist(std::string path) { return hdf5_file->exist(path); }
+  void write_str(std::string path, std::string val);
   void dump_application();
   void dump_PBC(bool PBC);
   void dump_atoms(int num_atom, int num_species, std::vector<int> atomic_species_ids, std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec,

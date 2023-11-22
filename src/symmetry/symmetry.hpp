@@ -21,7 +21,11 @@ namespace polyquant {
 class POLYQUANT_SYMMETRY {
 public:
   POLYQUANT_SYMMETRY() = default;
-  ~POLYQUANT_SYMMETRY() { msymReleaseContext(ctx); }
+  ~POLYQUANT_SYMMETRY() {
+    for (auto c : ctx) {
+      msymReleaseContext(c);
+    }
+  }
   /**
    * @brief Construct a new polyquant symmetry handler object given an input object with
    * a call to setup_symmetry.
@@ -37,11 +41,12 @@ public:
    */
   void setup_symmetry(std::shared_ptr<POLYQUANT_INPUT> input_params);
   void set_symmetry_from_input();
+  void create_ctx_for_particle_types(int n);
 
   std::shared_ptr<POLYQUANT_INPUT> input;
   std::string point_group;
   std::string sub_group;
-  msym_context ctx;
+  std::vector<msym_context> ctx;
   bool do_symmetry = true;
 
   // indexing particle idx, irrep idx

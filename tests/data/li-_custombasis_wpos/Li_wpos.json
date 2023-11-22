@@ -44,7 +44,6 @@
         "diis_start" : 10,
         "diis_damping" : 0.0,
         "diis_size" : 10,
-        "Cauchy_Schwarz_screening" : true,
         "incremental_fock" : true
     },
    "pure" : true

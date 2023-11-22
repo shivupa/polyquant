@@ -136,7 +136,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         scf_calc->incremental_fock_initial_onset_thresh = this->input_params->input_data["keywords"]["mf_keywords"]["incremental_fock_initial_onset_thresh"];
       }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_screening")) {
-        scf_calc->Cauchy_Schwarz_screening = this->input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
+        APP_ABORT("Cauchy Schwarz screening (integrals and density) is not working. e-/e+ are very sensitive. This should be handled carefully.");
+        // scf_calc->Cauchy_Schwarz_screening = this->input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
       }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
         APP_ABORT("Cauchy_Schwarz_threshold cannot be set by the user!");
@@ -181,7 +182,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
             skip_scf = this->input_params->input_data["keywords"]["mf_keywords"]["from_file_skipiterations"];
           }
         } else {
-          dump_for_qmcpack = true;
+          // dump_for_qmcpack = false;
           mean_field_type = "SCF";
         }
       } else if (mean_field_type == "FILE") {
@@ -250,6 +251,10 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   Polyquant_cout(post_mean_field_type);
   std::string mean_field_type = "FILE";
   std::string fcidump_filename;
+
+  if (post_mean_field_type == "FILE") {
+    APP_ABORT("FROM_FILE for ci not implemented.");
+  }
   this->run_mean_field(mean_field_type);
   ci_calc = std::make_shared<POLYQUANT_EPCI>(this->scf_calc);
 
@@ -272,11 +277,44 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("num_states")) {
         ci_calc->num_states = this->input_params->input_data["keywords"]["ci_keywords"]["num_states"];
       }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("spin_penalty_type")) {
+        auto spin_penalty_type = this->input_params->input_data["keywords"]["ci_keywords"]["spin_penalty_type"];
+        if (spin_penalty_type == "first_order") {
+          ci_calc->first_order_spin_penalty = true;
+          ci_calc->second_order_spin_penalty = false;
+        } else if (spin_penalty_type == "second_order") {
+          ci_calc->first_order_spin_penalty = false;
+          ci_calc->second_order_spin_penalty = true;
+        } else {
+          APP_ABORT("keywords->ci_keywords->spin_penalty_type can only be first_order or second_order");
+        }
+      }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("expected_S2")) {
+        auto s_sq = this->input_params->input_data["keywords"]["ci_keywords"]["expected_S2"];
+        ci_calc->expected_S2.clear();
+        if (s_sq.type() == json::value_t::array) {
+          for (auto i = 0; i < s_sq.size(); i++) {
+            ci_calc->expected_S2.push_back(s_sq[i]);
+          }
+        }
+      }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("spin_penalty")) {
+        auto s_p = this->input_params->input_data["keywords"]["ci_keywords"]["spin_penalty"];
+        ci_calc->spin_penalty.clear();
+        if (s_p.type() == json::value_t::array) {
+          for (auto i = 0; i < s_p.size(); i++) {
+            ci_calc->spin_penalty.push_back(s_p[i]);
+          }
+        }
+      }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("num_subspace_vec")) {
         ci_calc->num_subspace_vec = this->input_params->input_data["keywords"]["ci_keywords"]["num_subspace_vec"];
       }
-      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("cache_size")) {
-        ci_calc->cache_size = this->input_params->input_data["keywords"]["ci_keywords"]["cache_size"];
+      // if (this->input_params->input_data["keywords"]["ci_keywords"].contains("cache_size")) {
+      //   ci_calc->cache_size = this->input_params->input_data["keywords"]["ci_keywords"]["cache_size"];
+      // }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("symmetrize_NOs")) {
+        ci_calc->symmetrize_NOs = this->input_params->input_data["keywords"]["ci_keywords"]["symmetrize_NOs"];
       }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("slow_diag")) {
         ci_calc->detset.slow_diag = this->input_params->input_data["keywords"]["ci_keywords"]["slow_diag"];
@@ -324,6 +362,9 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
       }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("fcidump_filename")) {
         fcidump_filename = this->input_params->input_data["keywords"]["ci_keywords"]["fcidump_filename"];
+      }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("screening_threshold")) {
+        ci_calc->detset.screening_threshold = this->input_params->input_data["keywords"]["ci_keywords"]["screening_threshold"];
       }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("frozen_core")) {
         auto FC = this->input_params->input_data["keywords"]["ci_keywords"]["frozen_core"];

@@ -236,7 +236,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-        // A+B doubles
+        // (part 0 spin 0 single, part 0 spin 1 single) doubles
         for (auto idx_J_B_det : unique_singles[0][1][idx_I_B_det]) {
           std::vector<int> jdet_idx(4);
           jdet_idx[2 * 0 + 0] = idx_J_A_det;
@@ -257,7 +257,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             // triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(folded_jdet_idx, i_det, integral));
           }
         }
-        // A+C doubles
+        // (part 0 spin 0 single, part 1 spin 0 single) doubles
         for (auto idx_J_C_det : unique_singles[1][0][idx_I_C_det]) {
           std::vector<int> jdet_idx(4);
           jdet_idx[2 * 0 + 0] = idx_J_A_det;
@@ -276,7 +276,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             }
           }
         }
-        // A+D doubles
+        // (part 0 spin 0 single, part 1 spin 1 single) doubles
         for (auto idx_J_D_det : unique_singles[1][1][idx_I_D_det]) {
           std::vector<int> jdet_idx(4);
           jdet_idx[2 * 0 + 0] = idx_J_A_det;
@@ -296,7 +296,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // B singles
+      // part 0 spin 1 singles
       for (auto idx_J_B_det : unique_singles[0][1][idx_I_B_det]) {
         if (idx_J_B_det < idx_I_B_det) {
           continue;
@@ -318,7 +318,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-        // B+C doubles
+        // (part 0 spin 1 single, part 1 spin 0 single) doubles
         for (auto idx_J_C_det : unique_singles[1][0][idx_I_C_det]) {
           std::vector<int> jdet_idx(4);
           jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -337,7 +337,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             }
           }
         }
-        // B+D doubles
+        // (part 0 spin 1 single, part 1 spin 1 single) doubles
         for (auto idx_J_D_det : unique_singles[1][1][idx_I_D_det]) {
           std::vector<int> jdet_idx(4);
           jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -357,7 +357,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // C singles
+      // part 1 spin 0 singles
       for (auto idx_J_C_det : unique_singles[1][0][idx_I_C_det]) {
         if (idx_J_C_det < idx_I_C_det) {
           continue;
@@ -379,7 +379,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-        // C+D doubles
+        // (part 1 spin 0 single, part 1 spin 1 single) doubles
         for (auto idx_J_D_det : unique_singles[1][1][idx_I_D_det]) {
           std::vector<int> jdet_idx(4);
           jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -400,7 +400,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // D singles
+      // part 1 spin 1 singles
       for (auto idx_J_D_det : unique_singles[1][1][idx_I_D_det]) {
         if (idx_J_D_det < idx_I_D_det) {
           continue;
@@ -423,7 +423,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // A doubles
+      // part 0 spin 0 doubles
       for (auto idx_J_A_det : unique_doubles[0][0][idx_I_A_det]) {
         if (idx_J_A_det < idx_I_A_det) {
           continue;
@@ -444,7 +444,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // B doubles
+      // part 0 spin 1 doubles
       for (auto idx_J_B_det : unique_doubles[0][1][idx_I_B_det]) {
         if (idx_J_B_det < idx_I_B_det) {
           continue;
@@ -465,7 +465,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // C doubles
+      // part 1 spin 0 doubles
       for (auto idx_J_C_det : unique_doubles[1][0][idx_I_C_det]) {
         if (idx_J_C_det < idx_I_C_det) {
           continue;
@@ -486,7 +486,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
           }
         }
       }
-      // D doubles
+      // part 1 spin 1 doubles
       for (auto idx_J_D_det : unique_doubles[1][1][idx_I_D_det]) {
         if (idx_J_D_det < idx_I_D_det) {
           continue;

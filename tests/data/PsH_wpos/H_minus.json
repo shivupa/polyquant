@@ -23,7 +23,6 @@
         "convergence_E" : 1e-12,
         "convergence_DM" : 1e-10,
         "iteration_max" : 200,
-        "Cauchy_Schwarz_screening" : true,
         "incremental_fock" : true
     },
    "ci_keywords" : {

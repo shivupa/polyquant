@@ -24,6 +24,7 @@
         }
   },
   "keywords": {
+    "symmetry" : false,
     "restricted" : true,
     "dump_for_qmcpack" : true,
     "hdf5_filename_qmcpack" : "H_wpos.h5",
