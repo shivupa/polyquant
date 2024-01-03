@@ -392,8 +392,8 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   } else if (post_mean_field_type == "CI") {
     this->ci_calc->run();
     if (dump_for_qmcpack) {
-      dump_post_mf_for_qmcpack(hdf5_filename);
       dump_post_mf_NOs_for_qmcpack(hdf5_filename);
+      dump_post_mf_for_qmcpack(hdf5_filename);
     }
   } else if (post_mean_field_type == "FILE") {
     this->ci_calc->setup(this->scf_calc);
