@@ -1,5 +1,6 @@
-# Polyquant <img src="logo/logo_rectangle_higherres.png" height="32">
+# Polyquant 
 
+<img src="logo/logo_rectangle_higherres.png" height="54">
 
 [![Polyquant CMake Build](https://github.com/shivupa/Polyquant/actions/workflows/Polyquant.yml/badge.svg?branch=main)](https://github.com/shivupa/Polyquant/actions/workflows/Polyquant.yml)
 
