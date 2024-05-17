@@ -1,4 +1,4 @@
-# Polyquant
+# Polyquant <img src="logo/logo_rectangle_higherres.png" height="200">
 
 ![Polyquant logo](logo/logo_rectangle_higherres.png)
 
