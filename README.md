@@ -1,5 +1,7 @@
 # Polyquant
 
+![Polyquant logo](logo/logo_rectangle_higherres.png)
+
 [![Polyquant CMake Build](https://github.com/shivupa/Polyquant/actions/workflows/Polyquant.yml/badge.svg?branch=main)](https://github.com/shivupa/Polyquant/actions/workflows/Polyquant.yml)
 
 Polyquant uses C++20. This is required because the CI operations use https://en.cppreference.com/w/cpp/header/bit.
