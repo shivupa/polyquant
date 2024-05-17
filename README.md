@@ -1,6 +1,6 @@
-# polyquant
+# Polyquant
 
-[![Polyquant CMake Build](https://github.com/shivupa/polyquant/actions/workflows/polyquant.yml/badge.svg?branch=main)](https://github.com/shivupa/polyquant/actions/workflows/polyquant.yml)
+[![Polyquant CMake Build](https://github.com/shivupa/Polyquant/actions/workflows/Polyquant.yml/badge.svg?branch=main)](https://github.com/shivupa/Polyquant/actions/workflows/Polyquant.yml)
 
 Polyquant uses C++20. This is required because the CI operations use https://en.cppreference.com/w/cpp/header/bit.
 
@@ -17,21 +17,21 @@ Polyquant uses C++20. This is required because the CI operations use https://en.
    molecular point group symmetry lib 
 
 ### For a production build (These are installed via CMake's FetchContent)
-- [onqtam/doctest](https://github.com/onqtam/doctest)
-   The fastest feature-rich C++11/14/17/20 single-header testing framework for unit tests and TDD 
-   `Polyquant` uses doctest for testing.
+- [catchorg/Catch2](https://github.com/catchorg/Catch2)
+   A modern, C++-native, test framework for unit-tests, TDD and BDD - using C++14, C++17 and later (C++11 support is in v2.x branch, and C++03 on the Catch1.x branch)
+   `Polyquant` uses Catch2 for testing.
 
 - [nlohmann/json](https://github.com/nlohmann/json)
    JSON for Modern C++
 
-   `Polyquant` uses `nlohmann/json` to parse the [MolSSI/QCSchema](https://github.com/MolSSI/QCSchema)
+   `Polyquant` uses `nlohmann/json` to parse the [MolSSI/QCSchema](https://github.com/MolSSI/QCSchema)-like input format
 - [evaleev/libint](https://github.com/evaleev/libint)
    Libint is a high-performance library for computing Gaussian integrals in quantum mechanics
 
    `Polyquant` uses `evaleev/libint` to calculate integrals over gaussian basis functions.
    To convert for qmcpack you need to configure with [-with-cartgauss-ordering=gamess](https://github.com/evaleev/libint/wiki#configuring-libint-compiler)
 
-   The `libint` branch has a configured library compatible with polyquant. It is recommended to build the libint branch, install, and then build the main branch.
+   The `libint` branch has a configured library compatible with Polyquant. It is recommended to build the libint branch, install, and then build the main branch.
 
 - [BlueBrain/HighFive](https://github.com/BlueBrain/HighFive)
    HighFive - Header-only C++ HDF5 interface 
