@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2004-2021 Edward F. Valeev
+ *  Copyright (C) 2004-2024 Edward F. Valeev
  *
- *  This file is part of Libint.
+ *  This file is part of Libint library.
  *
- *  Libint is free software: you can redistribute it and/or modify
+ *  Libint library is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Libint is distributed in the hope that it will be useful,
+ *  Libint library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Libint library.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,7 +28,7 @@
 #include <HRRPart1bra0ket0lp.h>
 #include <HRRPart1bra0ket0md.h>
 #include <HRRPart1bra0ket0mp.h>
-#include <HRRPart1bra0ket0psp.h>
+#include <HRRPart1bra0ket0np.h>
 #include <eri3_aB_G__0__K__1___TwoPRep_unit__0__G__1___Ab__up_0_prereq.h>
 
 #ifdef __cplusplus
@@ -62,7 +62,7 @@ HRRPart1bra0ket0ld(inteval, &(inteval->stack[((hsi*4050+16800)*1+lsi)*1]), &(int
 HRRPart1bra0ket0kp(inteval, &(inteval->stack[((hsi*1620+20850)*1+lsi)*1]), &(inteval->stack[((hsi*675+2985)*1+lsi)*1]), &(inteval->stack[((hsi*540+3660)*1+lsi)*1]),15);
 HRRPart1bra0ket0kd(inteval, &(inteval->stack[((hsi*3240+22470)*1+lsi)*1]), &(inteval->stack[((hsi*2025+12300)*1+lsi)*1]), &(inteval->stack[((hsi*1620+20850)*1+lsi)*1]),15);
 HRRPart1bra0ket0kf(inteval, &(inteval->stack[((hsi*5400+25710)*1+lsi)*1]), &(inteval->stack[((hsi*4050+16800)*1+lsi)*1]), &(inteval->stack[((hsi*3240+22470)*1+lsi)*1]),15);
-HRRPart1bra0ket0psp(inteval, &(inteval->stack[((hsi*2970+20850)*1+lsi)*1]), &(inteval->stack[((hsi*1170+0)*1+lsi)*1]), &(inteval->stack[((hsi*990+1170)*1+lsi)*1]),15);
+HRRPart1bra0ket0np(inteval, &(inteval->stack[((hsi*2970+20850)*1+lsi)*1]), &(inteval->stack[((hsi*1170+0)*1+lsi)*1]), &(inteval->stack[((hsi*990+1170)*1+lsi)*1]),15);
 HRRPart1bra0ket0md(inteval, &(inteval->stack[((hsi*4950+31110)*1+lsi)*1]), &(inteval->stack[((hsi*2970+20850)*1+lsi)*1]), &(inteval->stack[((hsi*2475+14325)*1+lsi)*1]),15);
 HRRPart1bra0ket0lf(inteval, &(inteval->stack[((hsi*6750+36060)*1+lsi)*1]), &(inteval->stack[((hsi*4950+31110)*1+lsi)*1]), &(inteval->stack[((hsi*4050+16800)*1+lsi)*1]),15);
 HRRPart1bra0ket0kg(inteval, &(inteval->stack[((hsi*8100+4200)*1+lsi)*1]), &(inteval->stack[((hsi*6750+36060)*1+lsi)*1]), &(inteval->stack[((hsi*5400+25710)*1+lsi)*1]),15);

@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2004-2021 Edward F. Valeev
+ *  Copyright (C) 2004-2024 Edward F. Valeev
  *
- *  This file is part of Libint.
+ *  This file is part of Libint library.
  *
- *  Libint is free software: you can redistribute it and/or modify
+ *  Libint library is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Libint is distributed in the hope that it will be useful,
+ *  Libint library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Libint library.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,7 +28,7 @@
 #include <OSVRRP0InBra_aB_d__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_d__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_d__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_d__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_d__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_d__0__s__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_f__0__d__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_f__0__f__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
@@ -38,7 +38,7 @@
 #include <OSVRRP0InBra_aB_f__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_f__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_f__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_f__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_f__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_f__0__s__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_g__0__f__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_g__0__g__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
@@ -47,7 +47,7 @@
 #include <OSVRRP0InBra_aB_g__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_g__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_g__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_g__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_g__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_g__0__s__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_h__0__f__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_h__0__g__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
@@ -56,20 +56,20 @@
 #include <OSVRRP0InBra_aB_h__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_h__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_h__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_h__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_h__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_i__0__g__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_i__0__h__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_i__0__i__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_i__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_i__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_i__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_i__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_i__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_k__0__h__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_k__0__i__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_k__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_k__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_k__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_k__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_k__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__d__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__f__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__g__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
@@ -78,8 +78,8 @@
 #include <OSVRRP0InBra_aB_p__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__p__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP0InBra_aB_p__0__s__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP1InBra_aB_d__0__p__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP1InBra_aB_f__0__p__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
@@ -93,8 +93,8 @@
 #include <OSVRRP1InBra_aB_s__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP1InBra_aB_s__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP1InBra_aB_s__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
+#include <OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 #include <OSVRRP1InBra_aB_s__0__p__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
-#include <OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0.h>
 
 #ifdef __cplusplus
 LIBINT_PRAGMA_CLANG(diagnostic push)
@@ -403,30 +403,30 @@ OSVRRP0InBra_aB_f__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[(
 OSVRRP0InBra_aB_h__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1155+9036)*1+lsi)*1]), &(stack[((hsi*825+29025)*1+lsi)*1]), &(stack[((hsi*550+25995)*1+lsi)*1]), &(stack[((hsi*550+11320)*1+lsi)*1]), &(stack[((hsi*675+13184)*1+lsi)*1]));
 OSVRRP0InBra_aB_k__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1980+34525)*1+lsi)*1]), &(stack[((hsi*1540+31830)*1+lsi)*1]), &(stack[((hsi*1155+9036)*1+lsi)*1]), &(stack[((hsi*1155+33370)*1+lsi)*1]), &(stack[((hsi*1260+26940)*1+lsi)*1]));
 _libint2_static_api_inc1_short_(&(stack[((hsi*1980+2376)*1+lsi)*1]),&(stack[((hsi*1980+34525)*1+lsi)*1]),1980);
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*55+21963)*1+lsi)*1]), &(stack[((hsi*55+22018)*1+lsi)*1]), &(stack[((hsi*45+23187)*1+lsi)*1]), &(stack[((hsi*45+23277)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*55+21963)*1+lsi)*1]));
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10440)*1+lsi)*1]), &(stack[((hsi*55+21963)*1+lsi)*1]), &(stack[((hsi*45+23232)*1+lsi)*1]), &(stack[((hsi*45+23187)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10440)*1+lsi)*1]));
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*55+22018)*1+lsi)*1]), &(stack[((hsi*55+10880)*1+lsi)*1]), &(stack[((hsi*45+23277)*1+lsi)*1]), &(stack[((hsi*45+23727)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*55+22018)*1+lsi)*1]));
-OSVRRP0InBra_aB_d__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*165+10495)*1+lsi)*1]));
-OSVRRP0InBra_aB_f__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*330+22073)*1+lsi)*1]));
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*55+10660)*1+lsi)*1]), &(stack[((hsi*55+10440)*1+lsi)*1]), &(stack[((hsi*45+15350)*1+lsi)*1]), &(stack[((hsi*45+23232)*1+lsi)*1]));
-OSVRRP0InBra_aB_d__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*165+10715)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+11221)*1+lsi)*1]), &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*55+10660)*1+lsi)*1]));
-OSVRRP0InBra_aB_f__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+27183)*1+lsi)*1]), &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*198+11221)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*330+22403)*1+lsi)*1]));
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10880)*1+lsi)*1]), &(stack[((hsi*55+14023)*1+lsi)*1]), &(stack[((hsi*45+23727)*1+lsi)*1]), &(stack[((hsi*45+15693)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+21963)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10880)*1+lsi)*1]));
-OSVRRP0InBra_aB_d__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+22161)*1+lsi)*1]), &(stack[((hsi*198+21963)*1+lsi)*1]), &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*165+10935)*1+lsi)*1]));
-OSVRRP0InBra_aB_f__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+22557)*1+lsi)*1]), &(stack[((hsi*396+22161)*1+lsi)*1]), &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*330+24042)*1+lsi)*1]));
-OSVRRP0InBra_aB_g__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*990+23217)*1+lsi)*1]), &(stack[((hsi*660+22557)*1+lsi)*1]), &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*550+14700)*1+lsi)*1]));
-OSVRRP0InBra_aB_h__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1386+36505)*1+lsi)*1]), &(stack[((hsi*990+23217)*1+lsi)*1]), &(stack[((hsi*660+27183)*1+lsi)*1]), &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*825+28200)*1+lsi)*1]));
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+27843)*1+lsi)*1]), &(stack[((hsi*55+11100)*1+lsi)*1]), &(stack[((hsi*55+10660)*1+lsi)*1]), &(stack[((hsi*45+13139)*1+lsi)*1]), &(stack[((hsi*45+15350)*1+lsi)*1]));
-OSVRRP0InBra_aB_d__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+9696)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+27843)*1+lsi)*1]), &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*165+17151)*1+lsi)*1]));
-OSVRRP0InBra_aB_g__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*990+14408)*1+lsi)*1]), &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*396+9696)*1+lsi)*1]), &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*550+17316)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+27843)*1+lsi)*1]), &(stack[((hsi*55+11100)*1+lsi)*1]));
-OSVRRP0InBra_aB_f__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+27843)*1+lsi)*1]), &(stack[((hsi*396+9696)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*198+11221)*1+lsi)*1]), &(stack[((hsi*330+17866)*1+lsi)*1]));
-OSVRRP0InBra_aB_h__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1386+9696)*1+lsi)*1]), &(stack[((hsi*990+14408)*1+lsi)*1]), &(stack[((hsi*660+27843)*1+lsi)*1]), &(stack[((hsi*660+27183)*1+lsi)*1]), &(stack[((hsi*825+29025)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*55+21963)*1+lsi)*1]), &(stack[((hsi*55+22018)*1+lsi)*1]), &(stack[((hsi*45+23187)*1+lsi)*1]), &(stack[((hsi*45+23277)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*55+21963)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10440)*1+lsi)*1]), &(stack[((hsi*55+21963)*1+lsi)*1]), &(stack[((hsi*45+23232)*1+lsi)*1]), &(stack[((hsi*45+23187)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10440)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*55+22018)*1+lsi)*1]), &(stack[((hsi*55+10880)*1+lsi)*1]), &(stack[((hsi*45+23277)*1+lsi)*1]), &(stack[((hsi*45+23727)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*55+22018)*1+lsi)*1]));
+OSVRRP0InBra_aB_d__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*165+10495)*1+lsi)*1]));
+OSVRRP0InBra_aB_f__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*330+22073)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*55+10660)*1+lsi)*1]), &(stack[((hsi*55+10440)*1+lsi)*1]), &(stack[((hsi*45+15350)*1+lsi)*1]), &(stack[((hsi*45+23232)*1+lsi)*1]));
+OSVRRP0InBra_aB_d__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*165+10715)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+11221)*1+lsi)*1]), &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*55+10660)*1+lsi)*1]));
+OSVRRP0InBra_aB_f__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+27183)*1+lsi)*1]), &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*198+11221)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*330+22403)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10880)*1+lsi)*1]), &(stack[((hsi*55+14023)*1+lsi)*1]), &(stack[((hsi*45+23727)*1+lsi)*1]), &(stack[((hsi*45+15693)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+21963)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*55+10880)*1+lsi)*1]));
+OSVRRP0InBra_aB_d__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+22161)*1+lsi)*1]), &(stack[((hsi*198+21963)*1+lsi)*1]), &(stack[((hsi*66+25995)*1+lsi)*1]), &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*165+10935)*1+lsi)*1]));
+OSVRRP0InBra_aB_f__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+22557)*1+lsi)*1]), &(stack[((hsi*396+22161)*1+lsi)*1]), &(stack[((hsi*198+26061)*1+lsi)*1]), &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*330+24042)*1+lsi)*1]));
+OSVRRP0InBra_aB_g__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*990+23217)*1+lsi)*1]), &(stack[((hsi*660+22557)*1+lsi)*1]), &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*550+14700)*1+lsi)*1]));
+OSVRRP0InBra_aB_h__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1386+36505)*1+lsi)*1]), &(stack[((hsi*990+23217)*1+lsi)*1]), &(stack[((hsi*660+27183)*1+lsi)*1]), &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*825+28200)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+27843)*1+lsi)*1]), &(stack[((hsi*55+11100)*1+lsi)*1]), &(stack[((hsi*55+10660)*1+lsi)*1]), &(stack[((hsi*45+13139)*1+lsi)*1]), &(stack[((hsi*45+15350)*1+lsi)*1]));
+OSVRRP0InBra_aB_d__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+9696)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+27843)*1+lsi)*1]), &(stack[((hsi*66+11155)*1+lsi)*1]), &(stack[((hsi*165+17151)*1+lsi)*1]));
+OSVRRP0InBra_aB_g__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*990+14408)*1+lsi)*1]), &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*396+9696)*1+lsi)*1]), &(stack[((hsi*396+33370)*1+lsi)*1]), &(stack[((hsi*550+17316)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+27843)*1+lsi)*1]), &(stack[((hsi*55+11100)*1+lsi)*1]));
+OSVRRP0InBra_aB_f__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+27843)*1+lsi)*1]), &(stack[((hsi*396+9696)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*198+11221)*1+lsi)*1]), &(stack[((hsi*330+17866)*1+lsi)*1]));
+OSVRRP0InBra_aB_h__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1386+9696)*1+lsi)*1]), &(stack[((hsi*990+14408)*1+lsi)*1]), &(stack[((hsi*660+27843)*1+lsi)*1]), &(stack[((hsi*660+27183)*1+lsi)*1]), &(stack[((hsi*825+29025)*1+lsi)*1]));
 OSVRRP1InBra_aB_s__0__p__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*3+27183)*1+lsi)*1]), &(inteval->_aB_s___0__s___1___TwoPRep_s___0__s___1___Ab__up_16[vi]), &(inteval->_aB_s___0__s___1___TwoPRep_s___0__s___1___Ab__up_17[vi]));
 OSVRRP1InBra_aB_s__0__d__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*6+27186)*1+lsi)*1]), &(stack[((hsi*3+13859)*1+lsi)*1]), &(stack[((hsi*3+27183)*1+lsi)*1]), &(inteval->_aB_s___0__s___1___TwoPRep_s___0__s___1___Ab__up_15[vi]), &(inteval->_aB_s___0__s___1___TwoPRep_s___0__s___1___Ab__up_16[vi]));
 OSVRRP1InBra_aB_s__0__f__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*10+27192)*1+lsi)*1]), &(stack[((hsi*6+13862)*1+lsi)*1]), &(stack[((hsi*6+27186)*1+lsi)*1]), &(stack[((hsi*3+18555)*1+lsi)*1]), &(stack[((hsi*3+13859)*1+lsi)*1]));
@@ -436,14 +436,14 @@ OSVRRP1InBra_aB_s__0__i__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[(
 OSVRRP1InBra_aB_s__0__k__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*36+27266)*1+lsi)*1]), &(stack[((hsi*28+13914)*1+lsi)*1]), &(stack[((hsi*28+27238)*1+lsi)*1]), &(stack[((hsi*21+18589)*1+lsi)*1]), &(stack[((hsi*21+13893)*1+lsi)*1]));
 OSVRRP1InBra_aB_s__0__l__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*45+27302)*1+lsi)*1]), &(stack[((hsi*36+13942)*1+lsi)*1]), &(stack[((hsi*36+27266)*1+lsi)*1]), &(stack[((hsi*28+15665)*1+lsi)*1]), &(stack[((hsi*28+13914)*1+lsi)*1]));
 OSVRRP1InBra_aB_s__0__m__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*55+27347)*1+lsi)*1]), &(stack[((hsi*45+13978)*1+lsi)*1]), &(stack[((hsi*45+27302)*1+lsi)*1]), &(stack[((hsi*36+18610)*1+lsi)*1]), &(stack[((hsi*36+13942)*1+lsi)*1]));
-OSVRRP1InBra_aB_s__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+27402)*1+lsi)*1]), &(stack[((hsi*55+14023)*1+lsi)*1]), &(stack[((hsi*55+27347)*1+lsi)*1]), &(stack[((hsi*45+15693)*1+lsi)*1]), &(stack[((hsi*45+13978)*1+lsi)*1]));
-OSVRRP0InBra_aB_p__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+27402)*1+lsi)*1]), &(stack[((hsi*55+14023)*1+lsi)*1]));
-OSVRRP0InBra_aB_d__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+27183)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*165+12374)*1+lsi)*1]));
-OSVRRP0InBra_aB_f__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+27579)*1+lsi)*1]), &(stack[((hsi*396+27183)*1+lsi)*1]), &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*198+21963)*1+lsi)*1]), &(stack[((hsi*330+14078)*1+lsi)*1]));
-OSVRRP0InBra_aB_g__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*990+17151)*1+lsi)*1]), &(stack[((hsi*660+27579)*1+lsi)*1]), &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*396+22161)*1+lsi)*1]), &(stack[((hsi*550+12539)*1+lsi)*1]));
-OSVRRP0InBra_aB_h__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1386+25995)*1+lsi)*1]), &(stack[((hsi*990+17151)*1+lsi)*1]), &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*660+22557)*1+lsi)*1]), &(stack[((hsi*825+29850)*1+lsi)*1]));
-OSVRRP0InBra_aB_i__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1848+11082)*1+lsi)*1]), &(stack[((hsi*1386+25995)*1+lsi)*1]), &(stack[((hsi*990+14408)*1+lsi)*1]), &(stack[((hsi*990+23217)*1+lsi)*1]), &(stack[((hsi*1155+30675)*1+lsi)*1]));
-OSVRRP0InBra_aB_k__0__ps__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*2376+25995)*1+lsi)*1]), &(stack[((hsi*1848+11082)*1+lsi)*1]), &(stack[((hsi*1386+9696)*1+lsi)*1]), &(stack[((hsi*1386+36505)*1+lsi)*1]), &(stack[((hsi*1540+31830)*1+lsi)*1]));
+OSVRRP1InBra_aB_s__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*66+27402)*1+lsi)*1]), &(stack[((hsi*55+14023)*1+lsi)*1]), &(stack[((hsi*55+27347)*1+lsi)*1]), &(stack[((hsi*45+15693)*1+lsi)*1]), &(stack[((hsi*45+13978)*1+lsi)*1]));
+OSVRRP0InBra_aB_p__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+27402)*1+lsi)*1]), &(stack[((hsi*55+14023)*1+lsi)*1]));
+OSVRRP0InBra_aB_d__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*396+27183)*1+lsi)*1]), &(stack[((hsi*198+26325)*1+lsi)*1]), &(stack[((hsi*66+26523)*1+lsi)*1]), &(stack[((hsi*66+26259)*1+lsi)*1]), &(stack[((hsi*165+12374)*1+lsi)*1]));
+OSVRRP0InBra_aB_f__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*660+27579)*1+lsi)*1]), &(stack[((hsi*396+27183)*1+lsi)*1]), &(stack[((hsi*198+26589)*1+lsi)*1]), &(stack[((hsi*198+21963)*1+lsi)*1]), &(stack[((hsi*330+14078)*1+lsi)*1]));
+OSVRRP0InBra_aB_g__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*990+17151)*1+lsi)*1]), &(stack[((hsi*660+27579)*1+lsi)*1]), &(stack[((hsi*396+26787)*1+lsi)*1]), &(stack[((hsi*396+22161)*1+lsi)*1]), &(stack[((hsi*550+12539)*1+lsi)*1]));
+OSVRRP0InBra_aB_h__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1386+25995)*1+lsi)*1]), &(stack[((hsi*990+17151)*1+lsi)*1]), &(stack[((hsi*660+9036)*1+lsi)*1]), &(stack[((hsi*660+22557)*1+lsi)*1]), &(stack[((hsi*825+29850)*1+lsi)*1]));
+OSVRRP0InBra_aB_i__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*1848+11082)*1+lsi)*1]), &(stack[((hsi*1386+25995)*1+lsi)*1]), &(stack[((hsi*990+14408)*1+lsi)*1]), &(stack[((hsi*990+23217)*1+lsi)*1]), &(stack[((hsi*1155+30675)*1+lsi)*1]));
+OSVRRP0InBra_aB_k__0__n__1___TwoPRep_unit__0__s__1___Ab__up_0(inteval, &(stack[((hsi*2376+25995)*1+lsi)*1]), &(stack[((hsi*1848+11082)*1+lsi)*1]), &(stack[((hsi*1386+9696)*1+lsi)*1]), &(stack[((hsi*1386+36505)*1+lsi)*1]), &(stack[((hsi*1540+31830)*1+lsi)*1]));
 _libint2_static_api_inc1_short_(&(stack[((hsi*2376+0)*1+lsi)*1]),&(stack[((hsi*2376+25995)*1+lsi)*1]),2376);
 }
 }

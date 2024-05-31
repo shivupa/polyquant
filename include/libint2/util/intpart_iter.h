@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2004-2021 Edward F. Valeev
+ *  Copyright (C) 2004-2024 Edward F. Valeev
  *
- *  This file is part of Libint.
+ *  This file is part of Libint library.
  *
- *  Libint is free software: you can redistribute it and/or modify
+ *  Libint library is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Libint is distributed in the hope that it will be useful,
+ *  Libint library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Libint library.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -54,7 +54,7 @@ template <typename T>
 struct has_static_size : std::false_type {};
 
 template <typename T, typename A>
-void resize(std::vector<T,A>& x, std::size_t n) {
+void resize(std::vector<T, A>& x, std::size_t n) {
   x.resize(n);
 }
 
@@ -82,7 +82,8 @@ struct FixedOrderedIntegerPartitionIterator {
   template <typename Seq = Sequence>
   explicit FixedOrderedIntegerPartitionIterator(
       unsigned_integer_type n,
-      typename std::enable_if<detail::has_static_size<Seq>::value>::type* = nullptr)
+      typename std::enable_if<detail::has_static_size<Seq>::value>::type* =
+          nullptr)
       : n_(n) {
     assert(n >= 0);
     // initialize partition_
