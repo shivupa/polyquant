@@ -1,7 +1,7 @@
 # FindMultiprecision.cmake
 # ------------------------
 #
-# GMP, GMP++, MPIR, MPFR CMake module for Unix and Windows.
+# GMP, MPIR, MPFR CMake module.
 #
 # Built upon FindMPFR.cmake by
 #   Copyright (c) 2006, 2007 Montel Laurent, <montel@kde.org>
@@ -11,6 +11,10 @@
 #   Redistribution and use is allowed according to the terms of the BSD license.
 #
 #
+## This module supports requiring a minimum version, e.g. you can do
+##   find_package(MPFR 2.3.0)
+## to require version 2.3.0 to newer of MPFR.
+##
 # This module sets the following variables in your project:
 #
 # ::
@@ -57,8 +61,11 @@
 #
 # ::
 #
-#   Multiprecision_ROOT - CMake variable, set to root directory of this package
+##   Libint2_DIR - CMake variable, set to directory containing this Config file
 #   CMAKE_PREFIX_PATH - CMake variable, set to root directory of this package
+##   PATH - environment variable, set to bin directory of this package
+##   CMAKE_DISABLE_FIND_PACKAGE_Libint2 - CMake variable, disables
+##     find_package(Libint2) when not REQUIRED, perhaps to force internal build
 
 # if no components given, act like a FindGMP
 list(LENGTH Multiprecision_FIND_COMPONENTS _lcomp)
@@ -66,19 +73,25 @@ if (_lcomp EQUAL 0)
     list(APPEND Multiprecision_FIND_COMPONENTS gmp)
 endif()
 
+#message("prefix: ${CMAKE_FIND_LIBRARY_PREFIXES}")
+#message("suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
 if(WIN32)
     list(INSERT CMAKE_FIND_LIBRARY_SUFFIXES 0 ".dll")
 endif()
+#message("suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+#message("root: ${Multiprecision_ROOT}")
 
 find_path(
-  MPFR_INCLUDE
-  NAMES
-    mpfr.h
-  PATHS
-    $ENV{GMPDIR}
-    $ENV{MPFRDIR}
-    ${INCLUDE_INSTALL_DIR}
-  )
+    MPFR_INCLUDE
+    NAMES
+      mpfr.h
+    PATHS
+      $ENV{GMPDIR}
+      $ENV{MPFRDIR}
+      ${INCLUDE_INSTALL_DIR}
+    #NO_SYSTEM_ENVIRONMENT_PATH
+    #NO_CMAKE_SYSTEM_PATH
+    )
 
 # Set MPFR_FIND_VERSION to 1.0.0 if no minimum version is specified
 if(NOT MPFR_FIND_VERSION)
@@ -122,72 +135,75 @@ if(MPFR_INCLUDE)
     endif()
 endif()
 
+# todo Multiprecision/MPFR version
+
 find_library(
-  MPFR_LIBRARY
-  NAMES
-    mpfr
-  PATHS
-    $ENV{GMPDIR}
-    $ENV{MPFRDIR}
-    ${LIB_INSTALL_DIR}
-  PATH_SUFFIXES
-    bin
-    ${MPFR_ROOT}/bin
-  )
+    MPFR_LIBRARY
+    NAMES
+      mpfr
+    PATHS
+      $ENV{GMPDIR}
+      $ENV{MPFRDIR}
+      ${LIB_INSTALL_DIR}
+    PATH_SUFFIXES
+      bin
+      ${MPFR_ROOT}/bin
+    )
 
 find_path(
-  GMP_INCLUDE
-  NAMES
-    gmp.h
-  PATHS
-    $ENV{GMPDIR}
-    $ENV{MPFRDIR}
-    ${INCLUDE_INSTALL_DIR}
-  )
+    GMP_INCLUDE
+    NAMES
+      gmp.h
+    PATHS
+      $ENV{GMPDIR}
+      $ENV{MPFRDIR}
+      ${INCLUDE_INSTALL_DIR}
+    #NO_SYSTEM_ENVIRONMENT_PATH
+    #NO_CMAKE_SYSTEM_PATH
+    )
 
 find_library(
-  GMP_LIBRARY
-  NAMES
-    gmp
-  PATHS
-    $ENV{GMPDIR}
-    $ENV{MPFRDIR}
-    ${LIB_INSTALL_DIR}
-  PATH_SUFFIXES
-    bin
-    ${MPFR_ROOT}/bin
-  )
+    GMP_LIBRARY
+    NAMES
+      gmp
+    PATHS
+      $ENV{GMPDIR}
+      $ENV{MPFRDIR}
+      ${LIB_INSTALL_DIR}
+    PATH_SUFFIXES
+      bin
+      ${MPFR_ROOT}/bin
+    )
 
 find_path(
-  GMPXX_INCLUDE
-  NAMES
-    gmpxx.h
-  PATHS
-    $ENV{GMPDIR}
-    $ENV{MPFRDIR}
-    ${INCLUDE_INSTALL_DIR}
-  )
+    GMPXX_INCLUDE
+    NAMES
+      gmpxx.h
+    PATHS
+      $ENV{GMPDIR}
+      $ENV{MPFRDIR}
+      ${INCLUDE_INSTALL_DIR}
+    #NO_SYSTEM_ENVIRONMENT_PATH
+    #NO_CMAKE_SYSTEM_PATH
+    )
 
 find_library(
-  GMPXX_LIBRARY
-  NAMES
-    gmpxx
-    gmp  # gmp.dll on Win c-f conda package contains cxx (actually a copy of mpir, a drop-in replacement for gmp)
-  PATHS
-    $ENV{GMPDIR}
-    $ENV{MPFRDIR}
-    ${LIB_INSTALL_DIR}
-  PATH_SUFFIXES
-    bin
-    ${MPFR_ROOT}/bin
-  )
+    GMPXX_LIBRARY
+    NAMES
+      gmpxx
+      gmp  # gmp.dll on Win c-f conda package contains cxx (actually a copy of mpir, a drop-in replacement for gmp)
+    PATHS
+      $ENV{GMPDIR}
+      $ENV{MPFRDIR}
+      ${LIB_INSTALL_DIR}
+    PATH_SUFFIXES
+      bin
+      ${MPFR_ROOT}/bin
+    )
 
-if (CMAKE_VERSION VERSION_GREATER 3.15)
-    message(VERBOSE "GMP    inc=${GMP_INCLUDE}   lib=${GMP_LIBRARY}")
-    message(VERBOSE "GMPXX  inc=${GMPXX_INCLUDE} lib=${GMPXX_LIBRARY}")
-    message(VERBOSE "MPFR   inc=${MPFR_INCLUDE}  lib=${MPFR_LIBRARY}")
-endif()
-
+#message("GMP    ${GMP_INCLUDE} ${GMP_LIBRARY}")
+#message("GMPXX  ${GMPXX_INCLUDE} ${GMPXX_LIBRARY}")
+#message("MPFR   ${MPFR_INCLUDE} ${MPFR_LIBRARY}")
 if (GMP_INCLUDE AND GMP_LIBRARY)
     set(Multiprecision_gmp_FOUND 1)  # Multiprecision::gmp
 
@@ -222,21 +238,21 @@ function(dump_cmake_variables)
 endfunction()
 
 macro(check_required_components _NAME)
-    foreach(comp ${${_NAME}_FIND_COMPONENTS})
-        if(NOT ${_NAME}_${comp}_FOUND)
-            if(${_NAME}_FIND_REQUIRED_${comp})
-                set(${_NAME}_FOUND FALSE)
-            endif()
-        endif()
-    endforeach()
+  foreach(comp ${${_NAME}_FIND_COMPONENTS})
+    if(NOT ${_NAME}_${comp}_FOUND)
+      if(${_NAME}_FIND_REQUIRED_${comp})
+        set(${_NAME}_FOUND FALSE)
+      endif()
+    endif()
+  endforeach()
 endmacro()
+
 
 if(NOT CMAKE_REQUIRED_QUIET)
     message(STATUS "FindMultiprecision components requested: ${Multiprecision_FIND_COMPONENTS}")
     dump_cmake_variables("^Multiprecision_([A-Za-z0-9_]+)_FOUND$" "FindMultiprecision components found: ")
 endif()
 
-include(FindPackageHandleStandardArgs)
 set(Multiprecision_FOUND 1)
 check_required_components(Multiprecision)
 find_package_handle_standard_args(
@@ -249,10 +265,11 @@ find_package_handle_standard_args(
   HANDLE_COMPONENTS
   )
 
+
 if(WIN32)
-  string(REPLACE ".lib" ".dll" GMP_LIBRARY_DLL "${GMP_LIBRARY}")
-  string(REPLACE ".lib" ".dll" GMPXX_LIBRARY_DLL "${GMPXX_LIBRARY}")
-  string(REPLACE ".lib" ".dll" MPFR_LIBRARY_DLL "${MPFR_LIBRARY}")
+  string( REPLACE ".lib" ".dll" GMP_LIBRARY_DLL "${GMP_LIBRARY}" )
+  string( REPLACE ".lib" ".dll" GMPXX_LIBRARY_DLL "${GMPXX_LIBRARY}" )
+  string( REPLACE ".lib" ".dll" MPFR_LIBRARY_DLL "${MPFR_LIBRARY}" )
 endif()
 
 # now that `find_package(Multiprecision COMPONENTS ...)` will succeed, create targets
@@ -306,7 +323,7 @@ if ((Multiprecision_gmpxx_FOUND EQUAL 1) AND NOT TARGET Multiprecision::gmpxx)
     if (EXISTS "${GMPXX_LIBRARY_DLL}")
         add_library(Multiprecision::gmpxx SHARED IMPORTED)
         set_target_properties(
-          Multiprecision::gmpxx
+          Multiprecision::gmp
           PROPERTIES
             IMPORTED_LOCATION "${GMPXX_LIBRARY_DLL}"
             IMPORTED_IMPLIB "${GMPXX_LIBRARY}"

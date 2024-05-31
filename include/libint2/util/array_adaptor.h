@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2004-2024 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
- *  This file is part of Libint library.
+ *  This file is part of Libint.
  *
- *  Libint library is free software: you can redistribute it and/or modify
+ *  Libint is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Libint library is distributed in the hope that it will be useful,
+ *  Libint is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with Libint library.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -22,8 +22,8 @@
 #define INCLUDE_LIBINT2_UTIL_ARRAY_ADAPTOR_H_
 
 #include <cassert>
-#include <cstddef>
 #include <cstdlib>
+#include <cstddef>
 #include <type_traits>
 #include <vector>
 
@@ -64,8 +64,7 @@ class ext_stack_allocator {
 
   explicit ext_stack_allocator(array_type& array) noexcept
       : stack_(&array[0]), free_(stack_) {}
-  template <typename U,
-            typename = typename std::enable_if<std::is_same<const U, T>::value>>
+  template <typename U, typename = typename std::enable_if<std::is_same<const U,T>::value>>
   explicit ext_stack_allocator(U (&array)[N]) noexcept
       : stack_(const_cast<T*>(&array[0])), free_(stack_) {}
 

@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2004-2024 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
- *  This file is part of Libint library.
+ *  This file is part of Libint.
  *
- *  Libint library is free software: you can redistribute it and/or modify
+ *  Libint is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Libint library is distributed in the hope that it will be useful,
+ *  Libint is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with Libint library.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -39,7 +39,6 @@ void (*libint2_build_1emultipole[8][8])(const Libint_t*);
 void (*libint2_build_2emultipole[8][8])(const Libint_t*);
 void (*libint2_build_3emultipole[8][8])(const Libint_t*);
 void (*libint2_build_sphemultipole[8][8])(const Libint_t*);
-void (*libint2_build_opVop[8][8])(const Libint_t*);
 void (*libint2_build_eri[8][8][8][8])(const Libint_t*);
 void (*libint2_build_3eri[8][8][8])(const Libint_t*);
 void (*libint2_build_2eri[8][8])(const Libint_t*);
@@ -935,134 +934,6 @@ libint2_build_sphemultipole[7][5] = _sphemultipole_K_H;
 libint2_build_sphemultipole[7][6] = _sphemultipole_K_I;
 
 libint2_build_sphemultipole[7][7] = _sphemultipole_K_K;
-
-libint2_build_opVop[0][0] = _opVop_S_S;
-
-libint2_build_opVop[0][1] = _opVop_S_P;
-
-libint2_build_opVop[0][2] = _opVop_S_D;
-
-libint2_build_opVop[0][3] = _opVop_S_F;
-
-libint2_build_opVop[0][4] = _opVop_S_G;
-
-libint2_build_opVop[0][5] = _opVop_S_H;
-
-libint2_build_opVop[0][6] = _opVop_S_I;
-
-libint2_build_opVop[0][7] = _opVop_S_K;
-
-libint2_build_opVop[1][0] = _opVop_P_S;
-
-libint2_build_opVop[1][1] = _opVop_P_P;
-
-libint2_build_opVop[1][2] = _opVop_P_D;
-
-libint2_build_opVop[1][3] = _opVop_P_F;
-
-libint2_build_opVop[1][4] = _opVop_P_G;
-
-libint2_build_opVop[1][5] = _opVop_P_H;
-
-libint2_build_opVop[1][6] = _opVop_P_I;
-
-libint2_build_opVop[1][7] = _opVop_P_K;
-
-libint2_build_opVop[2][0] = _opVop_D_S;
-
-libint2_build_opVop[2][1] = _opVop_D_P;
-
-libint2_build_opVop[2][2] = _opVop_D_D;
-
-libint2_build_opVop[2][3] = _opVop_D_F;
-
-libint2_build_opVop[2][4] = _opVop_D_G;
-
-libint2_build_opVop[2][5] = _opVop_D_H;
-
-libint2_build_opVop[2][6] = _opVop_D_I;
-
-libint2_build_opVop[2][7] = _opVop_D_K;
-
-libint2_build_opVop[3][0] = _opVop_F_S;
-
-libint2_build_opVop[3][1] = _opVop_F_P;
-
-libint2_build_opVop[3][2] = _opVop_F_D;
-
-libint2_build_opVop[3][3] = _opVop_F_F;
-
-libint2_build_opVop[3][4] = _opVop_F_G;
-
-libint2_build_opVop[3][5] = _opVop_F_H;
-
-libint2_build_opVop[3][6] = _opVop_F_I;
-
-libint2_build_opVop[3][7] = _opVop_F_K;
-
-libint2_build_opVop[4][0] = _opVop_G_S;
-
-libint2_build_opVop[4][1] = _opVop_G_P;
-
-libint2_build_opVop[4][2] = _opVop_G_D;
-
-libint2_build_opVop[4][3] = _opVop_G_F;
-
-libint2_build_opVop[4][4] = _opVop_G_G;
-
-libint2_build_opVop[4][5] = _opVop_G_H;
-
-libint2_build_opVop[4][6] = _opVop_G_I;
-
-libint2_build_opVop[4][7] = _opVop_G_K;
-
-libint2_build_opVop[5][0] = _opVop_H_S;
-
-libint2_build_opVop[5][1] = _opVop_H_P;
-
-libint2_build_opVop[5][2] = _opVop_H_D;
-
-libint2_build_opVop[5][3] = _opVop_H_F;
-
-libint2_build_opVop[5][4] = _opVop_H_G;
-
-libint2_build_opVop[5][5] = _opVop_H_H;
-
-libint2_build_opVop[5][6] = _opVop_H_I;
-
-libint2_build_opVop[5][7] = _opVop_H_K;
-
-libint2_build_opVop[6][0] = _opVop_I_S;
-
-libint2_build_opVop[6][1] = _opVop_I_P;
-
-libint2_build_opVop[6][2] = _opVop_I_D;
-
-libint2_build_opVop[6][3] = _opVop_I_F;
-
-libint2_build_opVop[6][4] = _opVop_I_G;
-
-libint2_build_opVop[6][5] = _opVop_I_H;
-
-libint2_build_opVop[6][6] = _opVop_I_I;
-
-libint2_build_opVop[6][7] = _opVop_I_K;
-
-libint2_build_opVop[7][0] = _opVop_K_S;
-
-libint2_build_opVop[7][1] = _opVop_K_P;
-
-libint2_build_opVop[7][2] = _opVop_K_D;
-
-libint2_build_opVop[7][3] = _opVop_K_F;
-
-libint2_build_opVop[7][4] = _opVop_K_G;
-
-libint2_build_opVop[7][5] = _opVop_K_H;
-
-libint2_build_opVop[7][6] = _opVop_K_I;
-
-libint2_build_opVop[7][7] = _opVop_K_K;
 
 libint2_build_eri[0][0][0][0] = _aB_S__0__S__1___TwoPRep_S__0__S__1___Ab__up_0;
 

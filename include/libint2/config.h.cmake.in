@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2023 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
  *  This file is part of Libint.
  *
@@ -18,13 +18,19 @@
  *
  */
 
-/* This file is automatically processed by CMake.
+/* This file is automatically processed by configure script.
    It MUST NOT be changed manually after configuration, otherwise
    the library will likely fail to compile or produce erroneous results
  */
 
 #ifndef _libint2_include_libint2config_h_
 #define _libint2_include_libint2config_h_
+
+/* The host architecture. */
+#cmakedefine LIBINT_HOST_ARCH "@LIBINT_HOST_ARCH@"
+
+/* The target architecture. */
+#cmakedefine LIBINT_TARGET_ARCH "@LIBINT_TARGET_ARCH@"
 
 /* The version number. */
 #cmakedefine LIBINT_VERSION "@LIBINT_VERSION@"
@@ -39,7 +45,7 @@
 #define LIBINT_MICRO_VERSION @LIBINT_MICRO_VERSION@
 
 /* Prefix for all names in API */
-#cmakedefine LIBINT_API_PREFIX "@LIBINT_API_PREFIX@"
+#undef LIBINT_API_PREFIX
 
 /* Max AM (same for all derivatives; if not defined see LIBINT_MAX_AM_LIST) */
 #cmakedefine LIBINT_MAX_AM @LIBINT_MAX_AM@
@@ -92,17 +98,11 @@
 #undef INCLUDE_G12DKH
 #endif
 
-/* Max AM for one-body ints (same for all derivatives; if not defined see ONEBODY_MAX_AM_LIST) */
+/* Max AM for one-body ints */
 #cmakedefine ONEBODY_MAX_AM @ONEBODY_MAX_AM@
 
-/* Max AM for one-body and its derivatives */
-#cmakedefine ONEBODY_MAX_AM_LIST "@ONEBODY_MAX_AM_LIST@"
-
-/* Max optimized AM for one-body ints (same for all derivatives; if not defined see ONEBODY_OPT_AM_LIST) */
+/* Max optimized AM for one-body ints */
 #cmakedefine ONEBODY_OPT_AM @ONEBODY_OPT_AM@
-
-/* Max optimized AM for one-body and its derivatives */
-#cmakedefine ONEBODY_OPT_AM_LIST "@ONEBODY_OPT_AM_LIST@"
 
 /* Max order of spherical multipole ints */
 #cmakedefine MULTIPOLE_MAX_ORDER @MULTIPOLE_MAX_ORDER@
@@ -157,9 +157,6 @@
 
 /* Support [Ti,G12] ? */
 #cmakedefine01 SUPPORT_T1G12
-#ifndef INCLUDE_G12
-#undef SUPPORT_T1G12
-#endif
 
 /* Max AM for G12DKH method integrals */
 #cmakedefine G12DKH_MAX_AM @G12DKH_MAX_AM@
@@ -174,52 +171,49 @@
 #cmakedefine LIBINT_ENABLE_GENERIC_CODE @LIBINT_ENABLE_GENERIC_CODE@
 
 /* maximum length of vectors */
-#cmakedefine LIBINT_VECTOR_LENGTH @LIBINT_VECTOR_LENGTH@
+#undef LIBINT_VECTOR_LENGTH
 
 /* how to vectorize */
-#cmakedefine LIBINT_VECTOR_METHOD "@LIBINT_VECTOR_METHOD@"
-#ifndef LIBINT_VECTOR_LENGTH
 #undef LIBINT_VECTOR_METHOD
-#endif
 
 /* if can be controlled with posix_memalign, alignment size */
 #define LIBINT_ALIGN_SIZE @LIBINT_ALIGN_SIZE@
 
-/* Specifies the ordering of cartesian Gaussians in a shell. Allowed values are defined at the bottom of this file -- also see CMakeLists.txt */
+/* Specifies the ordering of cartesian Gaussians in a shell. Allowed values are defined at the bottom of this file -- also see configure.in */
 #cmakedefine LIBINT_CGSHELL_ORDERING @LIBINT_CGSHELL_ORDERING@
 
-/* Specifies the ordering of solid harmonics Gaussians in a shell. Allowed values are defined at the bottom of this file -- also see CMakeLists.txt */
+/* Specifies the ordering of solid harmonics Gaussians in a shell. Allowed values are defined at the bottom of this file -- also see configure.in */
 #cmakedefine LIBINT_SHGSHELL_ORDERING @LIBINT_SHGSHELL_ORDERING@
 
-/* Specifies the class of shell sets generated. Allowed values are defined at the bottom of this file -- also see CMakeLists.txt */
+/* Specifies the class of shell sets generated. Allowed values are defined at the bottom of this file -- also see configure.in */
 #cmakedefine LIBINT_SHELL_SET @LIBINT_SHELL_SET@
 
 /* User-defined real type */
-#cmakedefine LIBINT_USER_DEFINED_REAL "@LIBINT_USER_DEFINED_REAL@"
+#undef LIBINT_USER_DEFINED_REAL
 
 /* Include statements needed to use LIBINT_USER_DEFINED_REAL */
-#cmakedefine LIBINT_USER_DEFINED_REAL_INCLUDES "@LIBINT_USER_DEFINED_REAL_INCLUDES@"
+#undef LIBINT_USER_DEFINED_REAL_INCLUDES
 
-/* Generate FMA instructions? */
+/*Generate FMA instructions? */
 #cmakedefine LIBINT_GENERATE_FMA @LIBINT_GENERATE_FMA@
 
 /* Accumulate integrals to the buffer? */
-#cmakedefine LIBINT_ACCUM_INTS @LIBINT_ACCUM_INTS@
+#undef LIBINT_ACCUM_INTS
 
 /* Whether FLOP counting is supported */
-#cmakedefine LIBINT_FLOP_COUNT @LIBINT_FLOP_COUNT@
+#undef LIBINT_FLOP_COUNT
 
 /* Whether profile instrumentation will be enabled */
-#cmakedefine LIBINT_PROFILE @LIBINT_PROFILE@
+#undef LIBINT_PROFILE
 
 /* Support contracted integrals? */
 #cmakedefine LIBINT_CONTRACTED_INTS @LIBINT_CONTRACTED_INTS@
 
 /* Generate single evaluator type? */
-#cmakedefine LIBINT_SINGLE_EVALTYPE @LIBINT_SINGLE_EVALTYPE@
+#define LIBINT_SINGLE_EVALTYPE @LIBINT_SINGLE_EVALTYPE@
 
 /* Generate composite evaluators? */
-#cmakedefine01 LIBINT_USE_COMPOSITE_EVALUATORS
+#define LIBINT_USE_COMPOSITE_EVALUATORS @LIBINT_USE_COMPOSITE_EVALUATORS@
 
 /* Strategy for ERI evaluation */
 #define LIBINT_ERI_STRATEGY @LIBINT_ERI_STRATEGY@
@@ -227,16 +221,70 @@
 /* --------------------------
   have C++ features?
    -------------------------- */
+/* see lib/autoconf/ac_check_cpp11.m4 */
 
 /* define if CXX compiler can compile C++11 */
 #cmakedefine LIBINT_HAS_CXX11 @LIBINT_HAS_CXX11@
 
-/* C++ compiler allows template with default params as template template parameter (check is NYI) */
+/* define if array has fill member function. */
+#cmakedefine LIBINT_ARRAY_HAS_FILL @LIBINT_ARRAY_HAS_FILL@
+
+/* define if std::array is available. */
+#cmakedefine LIBINT_HAS_STD_ARRAY @LIBINT_HAS_STD_ARRAY@
+
+/* define if std::make_shared and std::allocate_shared are available. */
+#cmakedefine LIBINT_HAS_STD_MAKE_SHARED @LIBINT_HAS_STD_MAKE_SHARED@
+
+/* define if std::shared_ptr is available. */
+#cmakedefine LIBINT_HAS_STD_SHARED_PTR @LIBINT_HAS_STD_SHARED_PTR@
+
+/* define if std::tr1::array is available. */
+#undef LIBINT_HAS_STD_TR1_ARRAY
+
+/* define if std::tr1::shared_ptr is available. */
+#undef LIBINT_HAS_STD_TR1_SHARED_PTR
+
+/* define if std::tr1 type traits are available. */
+#undef LIBINT_HAS_STD_TR1_TYPE_TRAITS
+
+/* define if std type traits are available. */
+#cmakedefine LIBINT_HAS_STD_TYPE_TRAITS @LIBINT_HAS_STD_TYPE_TRAITS@
+
+/* define if Libint is using <array>. */
+#cmakedefine LIBINT_USE_ARRAY @LIBINT_USE_ARRAY@
+
+/* define if Libint is using <boost/tr1/array.hpp>. */
+#undef LIBINT_USE_BOOST_TR1_ARRAY_HPP
+
+/* define if Libint is using <boost/tr1/memory.hpp>. */
+#undef LIBINT_USE_BOOST_TR1_MEMORY_HPP
+
+/* define if Libint is using <boost/tr1/type_traits.hpp>. */
+#undef LIBINT_USE_BOOST_TR1_TYPE_TRAITS_HPP
+
+/* define if Libint is using <memory>. */
+#cmakedefine LIBINT_USE_MEMORY @LIBINT_USE_MEMORY@
+
+/* define if Libint is using <tr1/array>. */
+#undef LIBINT_USE_TR1_ARRAY
+
+/* define if Libint is using <tr1/memory>. */
+#undef LIBINT_USE_TR1_MEMORY
+
+/* define if Libint is using <tr1/type_traits>. */
+#undef LIBINT_USE_TR1_TYPE_TRAITS
+
+/* define if Libint is using <type_traits>. */
+#cmakedefine LIBINT_USE_TYPE_TRAITS @LIBINT_USE_TYPE_TRAITS@
+
+/* C++ compiler allows template with default params as template template parameter */
 #undef CXX_ALLOWS_DEFPARAMTEMPLATE_AS_TEMPTEMPPARAM
 
-/* define if Eigen library is available. (not implemented for CMake) */
-/* #cmakedefine LIBINT_HAS_EIGEN @LIBINT_HAS_EIGEN@ */
-#undef LIBINT_HAS_EIGEN
+/* is shared_ptr in boost? */
+#undef HAVE_SHARED_PTR_IN_BOOST
+
+/* define if Eigen library is available. */
+#cmakedefine LIBINT_HAS_EIGEN @LIBINT_HAS_EIGEN@
 
 /* define if system-wide Boost.Preprocessor is available */
 #cmakedefine LIBINT_HAS_SYSTEM_BOOST_PREPROCESSOR_VARIADICS @LIBINT_HAS_SYSTEM_BOOST_PREPROCESSOR_VARIADICS@
@@ -259,7 +307,7 @@
 /*
   Known sets of shell sets
 */
-#cmakedefine LIBINT_SHELL_SET_STANDARD @LIBINT_SHELL_SET_STANDARD@
+#cmakedefine LIBINT_SHELL_SET_STANDARD @LIBINT_SHELL_SET_STANDARD@ 
 #cmakedefine LIBINT_SHELL_SET_ORCA     @LIBINT_SHELL_SET_ORCA@
 
 /*
@@ -268,9 +316,6 @@
 
 /* have stdint.h ? */
 #cmakedefine HAVE_STDINT_H @HAVE_STDINT_H@
-
-/* have MPFR library ? */
-#cmakedefine LIBINT_HAS_MPFR @LIBINT_HAS_MPFR@
 
 /* have posix_memalign ? */
 #cmakedefine HAVE_POSIX_MEMALIGN @HAVE_POSIX_MEMALIGN@
@@ -319,27 +364,13 @@
 
 #ifdef __has_cpp_attribute
 #if __has_cpp_attribute(deprecated)
+#ifndef LIBINT_DEPRECATED
 #define LIBINT_DEPRECATED(msg) [[deprecated(msg)]]
+#endif
 #endif
 #endif
 #ifndef LIBINT_DEPRECATED
 #define LIBINT_DEPRECATED(msg) LIBINT_XPRAGMA( LIBINT_CONCAT(message, msg) )
-#endif
-
-#ifdef __has_cpp_attribute
-#if __has_cpp_attribute(maybe_unused)
-#define LIBINT_MAYBE_UNUSED [[maybe_unused]]
-#endif
-#endif  /* __has_cpp_attribute */
-#ifndef LIBINT_MAYBE_UNUSED
-#if defined __has_attribute
-#  if __has_attribute (unused)
-#    define LIBINT_MAYBE_UNUSED __attribute__ ((unused))
-#  endif
-#endif  /* __has_attribute */
-#endif  /* LIBINT_MAYBE_UNUSED */
-#ifndef LIBINT_MAYBE_UNUSED  /* fallback */
-#define LIBINT_MAYBE_UNUSED
 #endif
 
 #if @_EXPORT_MODE@

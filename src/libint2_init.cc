@@ -1,20 +1,20 @@
 /*
- *  Copyright (C) 2004-2024 Edward F. Valeev
+ *  Copyright (C) 2004-2021 Edward F. Valeev
  *
- *  This file is part of Libint library.
+ *  This file is part of Libint.
  *
- *  Libint library is free software: you can redistribute it and/or modify
+ *  Libint is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Libint library is distributed in the hope that it will be useful,
+ *  Libint is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with Libint library.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Libint.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -168,25 +168,6 @@ assert(max_am <= 7);
 if (max_am == 6) return LIBINT2_MAX_STACK_SIZE_6_sphemultipole * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_6_sphemultipole * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_6_sphemultipole > LIBINT2_MAX_HRR_LSRANK_6_sphemultipole ? LIBINT2_MAX_HRR_HSRANK_6_sphemultipole : LIBINT2_MAX_HRR_LSRANK_6_sphemultipole);
 assert(max_am <= 7);
 if (max_am == 7) return LIBINT2_MAX_STACK_SIZE_7_sphemultipole * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_7_sphemultipole * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_7_sphemultipole > LIBINT2_MAX_HRR_LSRANK_7_sphemultipole ? LIBINT2_MAX_HRR_HSRANK_7_sphemultipole : LIBINT2_MAX_HRR_LSRANK_7_sphemultipole);
-return 0; // unreachable
-}
-size_t libint2_need_memory_opVop(int max_am) {
-assert(max_am <= 7);
-if (max_am == 0) return LIBINT2_MAX_STACK_SIZE_0_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_0_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_0_opVop > LIBINT2_MAX_HRR_LSRANK_0_opVop ? LIBINT2_MAX_HRR_HSRANK_0_opVop : LIBINT2_MAX_HRR_LSRANK_0_opVop);
-assert(max_am <= 7);
-if (max_am == 1) return LIBINT2_MAX_STACK_SIZE_1_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_1_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_1_opVop > LIBINT2_MAX_HRR_LSRANK_1_opVop ? LIBINT2_MAX_HRR_HSRANK_1_opVop : LIBINT2_MAX_HRR_LSRANK_1_opVop);
-assert(max_am <= 7);
-if (max_am == 2) return LIBINT2_MAX_STACK_SIZE_2_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_2_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_2_opVop > LIBINT2_MAX_HRR_LSRANK_2_opVop ? LIBINT2_MAX_HRR_HSRANK_2_opVop : LIBINT2_MAX_HRR_LSRANK_2_opVop);
-assert(max_am <= 7);
-if (max_am == 3) return LIBINT2_MAX_STACK_SIZE_3_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_3_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_3_opVop > LIBINT2_MAX_HRR_LSRANK_3_opVop ? LIBINT2_MAX_HRR_HSRANK_3_opVop : LIBINT2_MAX_HRR_LSRANK_3_opVop);
-assert(max_am <= 7);
-if (max_am == 4) return LIBINT2_MAX_STACK_SIZE_4_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_4_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_4_opVop > LIBINT2_MAX_HRR_LSRANK_4_opVop ? LIBINT2_MAX_HRR_HSRANK_4_opVop : LIBINT2_MAX_HRR_LSRANK_4_opVop);
-assert(max_am <= 7);
-if (max_am == 5) return LIBINT2_MAX_STACK_SIZE_5_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_5_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_5_opVop > LIBINT2_MAX_HRR_LSRANK_5_opVop ? LIBINT2_MAX_HRR_HSRANK_5_opVop : LIBINT2_MAX_HRR_LSRANK_5_opVop);
-assert(max_am <= 7);
-if (max_am == 6) return LIBINT2_MAX_STACK_SIZE_6_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_6_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_6_opVop > LIBINT2_MAX_HRR_LSRANK_6_opVop ? LIBINT2_MAX_HRR_HSRANK_6_opVop : LIBINT2_MAX_HRR_LSRANK_6_opVop);
-assert(max_am <= 7);
-if (max_am == 7) return LIBINT2_MAX_STACK_SIZE_7_opVop * LIBINT2_MAX_VECLEN + LIBINT2_MAX_VECTOR_STACK_SIZE_7_opVop * LIBINT2_MAX_VECLEN * (LIBINT2_MAX_HRR_HSRANK_7_opVop > LIBINT2_MAX_HRR_LSRANK_7_opVop ? LIBINT2_MAX_HRR_HSRANK_7_opVop : LIBINT2_MAX_HRR_LSRANK_7_opVop);
 return 0; // unreachable
 }
 size_t libint2_need_memory_eri(int max_am) {
@@ -457,35 +438,6 @@ assert(max_am <= 7);
 if (max_am == 7)
 inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_7_sphemultipole * LIBINT2_MAX_VECLEN;
 }
-void libint2_init_opVop(Libint_t* inteval, int max_am, void* buf) {
-if (buf != 0) inteval->stack = reinterpret_cast<LIBINT2_REALTYPE*>(buf);
-else 
-inteval->stack = libint2::malloc<LIBINT2_REALTYPE>(libint2_need_memory_opVop(max_am));
-assert(max_am <= 7);
-if (max_am == 0)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_0_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 1)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_1_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 2)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_2_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 3)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_3_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 4)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_4_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 5)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_5_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 6)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_6_opVop * LIBINT2_MAX_VECLEN;
-assert(max_am <= 7);
-if (max_am == 7)
-inteval->vstack = inteval->stack + LIBINT2_MAX_STACK_SIZE_7_opVop * LIBINT2_MAX_VECLEN;
-}
 void libint2_init_eri(Libint_t* inteval, int max_am, void* buf) {
 if (buf != 0) inteval->stack = reinterpret_cast<LIBINT2_REALTYPE*>(buf);
 else 
@@ -609,11 +561,6 @@ inteval->stack = 0;
 inteval->vstack = 0;
 }
 void libint2_cleanup_sphemultipole(Libint_t* inteval) {
-free(inteval->stack);
-inteval->stack = 0;
-inteval->vstack = 0;
-}
-void libint2_cleanup_opVop(Libint_t* inteval) {
 free(inteval->stack);
 inteval->stack = 0;
 inteval->vstack = 0;
