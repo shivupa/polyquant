@@ -32,6 +32,23 @@ include(GNUInstallDirs)
 include(CTest)
 include(options)
 
+#  <<<  Packaging  >>>
+
+include(InstallRequiredSystemLibraries)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Libint for Polyquant")
+set(CPACK_PACKAGE_VERSION_MAJOR "${LIBINT_MAJOR_VERSION}")
+set(CPACK_PACKAGE_VERSION_MINOR "${LIBINT_MINOR_VERSION}")
+set(CPACK_PACKAGE_VERSION_PATCH "${LIBINT_MICRO_VERSION}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+set(CPACK_SOURCE_STRIP_FILES TRUE)
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shiv Upadhyay")
+set(CPACK_BINARY_DEB ON CACHE BOOL ON)
+include(CPack)
+
+
 #  <<<  General  >>>
 
 option_with_default(CMAKE_BUILD_TYPE "Build type" Release)
