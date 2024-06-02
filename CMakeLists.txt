@@ -133,9 +133,8 @@ find_package(OpenMP REQUIRED)
 # json parsing
 FetchContent_Declare(
   nlohmann_json
-  GIT_REPOSITORY
-    https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-  GIT_TAG v3.9.1)
+  GIT_REPOSITORY https://github.com/nlohmann/json
+  GIT_TAG v3.11.3)
 FetchContent_GetProperties(nlohmann_json)
 set(JSON_BuildTests OFF)
 if(NOT nlohmann_json_POPULATED)
@@ -147,7 +146,7 @@ endif(NOT nlohmann_json_POPULATED)
 FetchContent_Declare(
   CPR
   GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-  GIT_TAG 1.5.2)
+  GIT_TAG 1.10.5)
 set(BUILD_CPR_TESTS OFF)
 set(BUILD_CPR_TESTS_SSL OFF)
 set(BUILD_TESTING OFF)
@@ -158,8 +157,8 @@ find_package(Eigen3 3.3 NO_MODULE)
 if (NOT TARGET Eigen3::Eigen)
     FetchContent_Declare(
       Eigen
-      GIT_REPOSITORY https://gitlab.com/shivupa/eigen.git
-      GIT_TAG master
+      GIT_REPOSITORY https://gitlab.com/libeigen/eigen
+      GIT_TAG 3.4.0
       GIT_SHALLOW TRUE
       GIT_PROGRESS TRUE)
     set(EIGEN_BUILD_DOC OFF)
@@ -240,7 +239,7 @@ set(HIGHFIVE_EXAMPLES OFF CACHE INTERNAL "")  # Forces the value
 FetchContent_Declare(
   HighFive
   GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
-  GIT_TAG origin/master)
+  GIT_TAG v2.9.0)
 FetchContent_MakeAvailable(HighFive)
 ########################################
 # Text Formatting
@@ -255,7 +254,7 @@ FetchContent_MakeAvailable(fmt)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG origin/devel)
+    GIT_TAG v3.6.0)
 FetchContent_MakeAvailable(Catch2)
 set(CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/contrib" ${CMAKE_MODULE_PATH})
 include(Catch)
