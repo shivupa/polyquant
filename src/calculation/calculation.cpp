@@ -392,8 +392,8 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   } else if (post_mean_field_type == "CI") {
     this->ci_calc->run();
     if (dump_for_qmcpack) {
-      dump_post_mf_for_qmcpack(hdf5_filename);
       dump_post_mf_NOs_for_qmcpack(hdf5_filename);
+      dump_post_mf_for_qmcpack(hdf5_filename);
     }
   } else if (post_mean_field_type == "FILE") {
     this->ci_calc->setup(this->scf_calc);
@@ -621,13 +621,22 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
   for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {
     dets[idx_part].resize(2);
   }
+  for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {
+    for (int idx_spin = 0; idx_spin < 2; idx_spin++) {
+      auto i_unfold = this->ci_calc->detset.det_idx_unfold(0);
+      auto curr_det = this->ci_calc->detset.get_det_withfcorbs(idx_part, idx_spin, i_unfold[2 * idx_part + idx_spin]);
+      auto N_bits = curr_det.size();
+      dets[idx_part][idx_spin].resize(this->ci_calc->detset.N_dets, std::vector<uint64_t>(N_bits, 0ul));
+    }
+  }
+#pragma omp parallel
   for (auto i = 0; i < this->ci_calc->detset.N_dets; i++) {
     auto i_unfold = this->ci_calc->detset.det_idx_unfold(i);
     for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {
       auto curr_det_a = this->ci_calc->detset.get_det_withfcorbs(idx_part, 0, i_unfold[2 * idx_part + 0]);
       auto curr_det_b = this->ci_calc->detset.get_det_withfcorbs(idx_part, 1, i_unfold[2 * idx_part + 1]);
-      dets[idx_part][0].push_back(curr_det_a);
-      dets[idx_part][1].push_back(curr_det_b);
+      dets[idx_part][0][i] = curr_det_a;
+      dets[idx_part][1][i] = curr_det_b;
     }
   }
   std::string particle_filename = "Multidet_" + filename;
