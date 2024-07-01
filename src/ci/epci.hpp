@@ -28,8 +28,7 @@ public:
   void setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf);
   void calculate_integrals();
   void calculate_fc_energy();
-  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs,
-                      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &transforming_orbs);
+  void diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs, Eigen::Matrix<double, Eigen::Dynamic, 1> &occs, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &transforming_orbs, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orth_X);
   void resize_for_NOs();
   void calculate_NOs();
   void calculate_S_squared();
@@ -94,9 +93,13 @@ public:
   // state_idx, particle_type_idx, spin_idx -> dm
   // DM stored in MO basis
   std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> dm1;
-  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_nso;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_nso_combined;
+  std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>>> C_nso;
+  // state_idx, particle_type_idx, spin_idx, irrep -> C_nso
+  // state_idx, particle_type_idx, spin_idx -> C_nso_combined
   // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>>> C_no;
-  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_nso;
+  std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_nso_combined;
+  std::vector<std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>>> occ_nso;
   // std::vector<std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>>> occ_no;
   //
   std::vector<std::vector<std::vector<std::vector<int>>>> symm_label_idxs;
