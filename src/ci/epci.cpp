@@ -129,9 +129,19 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
 }
 
 void POLYQUANT_EPCI::diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &dm, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orbs,
-                                    Eigen::Matrix<double, Eigen::Dynamic, 1> &occs, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &transforming_orbs) {
+                                    Eigen::Matrix<double, Eigen::Dynamic, 1> &occs, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &transforming_orbs, 
+                                    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &orth_X){
 
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> NOs_mobasis;
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dm_orth; 
+  std::cout << orth_X.rows() << " " << orth_X.cols() << std::endl;
+  std::cout << dm.rows() << " " << dm.cols() << std::endl;
+  std::cout <<   std::endl;
+  if (orth_X.rows() == 0 && orth_X.cols() == 0) {
+    return;
+  }
+
+  dm_orth.noalias() = orth_X.transpose() * dm * orth_X;
   Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(dm);
   occs = eigensolver.eigenvalues();
   NOs_mobasis = eigensolver.eigenvectors();
@@ -142,37 +152,52 @@ void POLYQUANT_EPCI::diag_dm_helper(Eigen::Matrix<double, Eigen::Dynamic, Eigen:
   // multiply from right : permute cols, multiply from left, permute rows
   std::sort(occs.begin(), occs.end(), std::greater<double>());
   NOs_mobasis = NOs_mobasis * swapper_mat;
-  orbs.noalias() = transforming_orbs * NOs_mobasis;
+  orbs.noalias() = transforming_orbs * orth_X * NOs_mobasis;
 }
 
 void POLYQUANT_EPCI::resize_for_NOs() {
   this->dm1.resize(this->NO_states.size());
   this->C_nso.resize(this->NO_states.size());
+  this->C_nso_combined.resize(this->NO_states.size());
   this->symm_label_idxs.resize(this->NO_states.size());
   this->symm_labels.resize(this->NO_states.size());
   // this->C_no.resize(this->NO_states.size());
   this->occ_nso.resize(this->NO_states.size());
+  this->occ_nso_combined.resize(this->NO_states.size());
   // this->occ_no.resize(this->NO_states.size());
 
   for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
     auto state_idx = this->NO_states[state_vec_idx];
     this->dm1[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     this->C_nso[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
+    this->C_nso_combined[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     this->symm_label_idxs[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     this->symm_labels[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     // this->C_no[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     this->occ_nso[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
+    this->occ_nso_combined[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     // this->occ_no[state_vec_idx].resize(this->input_molecule->quantum_particles.size());
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
       auto num_basis = this->input_basis->num_basis[quantum_part_idx];
       if (quantum_part.num_parts > 1) {
         dm1[state_vec_idx][quantum_part_idx].resize(2);
+        this->C_nso_combined[state_vec_idx][quantum_part_idx].resize(2);
+        this->C_nso_combined[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
+        this->C_nso_combined[state_vec_idx][quantum_part_idx][1].setZero(num_basis, num_basis);
         this->C_nso[state_vec_idx][quantum_part_idx].resize(2);
+        this->C_nso[state_vec_idx][quantum_part_idx][0].resize(num_irrep);
+        this->C_nso[state_vec_idx][quantum_part_idx][1].resize(num_irrep);
         this->symm_label_idxs[state_vec_idx][quantum_part_idx].resize(2);
         this->symm_labels[state_vec_idx][quantum_part_idx].resize(2);
         // this->C_no[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_nso_combined[state_vec_idx][quantum_part_idx].resize(2);
+        this->occ_nso_combined[state_vec_idx][quantum_part_idx][0].setZero(num_basis);
+        this->occ_nso_combined[state_vec_idx][quantum_part_idx][1].setZero(num_basis);
         this->occ_nso[state_vec_idx][quantum_part_idx].resize(2);
+        this->occ_nso[state_vec_idx][quantum_part_idx][0].resize(num_irrep);
+        this->occ_nso[state_vec_idx][quantum_part_idx][1].resize(num_irrep);
         // this->occ_no[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
         dm1[state_vec_idx][quantum_part_idx][1].setZero(num_basis, num_basis);
@@ -181,11 +206,17 @@ void POLYQUANT_EPCI::resize_for_NOs() {
         this->symm_label_idxs[state_vec_idx][quantum_part_idx][1].resize(num_basis);
         this->symm_labels[state_vec_idx][quantum_part_idx][1].resize(num_basis, "?");
       } else {
+        this->C_nso_combined[state_vec_idx][quantum_part_idx].resize(1);
+        this->C_nso_combined[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
         this->C_nso[state_vec_idx][quantum_part_idx].resize(1);
+        this->C_nso[state_vec_idx][quantum_part_idx][0].resize(num_irrep);
         this->symm_label_idxs[state_vec_idx][quantum_part_idx].resize(1);
         this->symm_labels[state_vec_idx][quantum_part_idx].resize(1);
         // this->C_no[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_nso_combined[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_nso_combined[state_vec_idx][quantum_part_idx][0].setZero(num_basis);
         this->occ_nso[state_vec_idx][quantum_part_idx].resize(1);
+        this->occ_nso[state_vec_idx][quantum_part_idx][0].resize(num_irrep);
         // this->occ_no[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx].resize(1);
         dm1[state_vec_idx][quantum_part_idx][0].setZero(num_basis, num_basis);
@@ -276,40 +307,78 @@ void POLYQUANT_EPCI::calculate_NOs() {
       auto ex_lvl = this->excitation_level[quantum_part_idx];
       if (std::get<0>(ex_lvl) == 0 && std::get<1>(ex_lvl) == 0) {
         if (quantum_part.num_parts > 1) {
-          this->C_nso[state_vec_idx][quantum_part_idx][0] = this->input_epscf->C_combined[quantum_part_idx][0];
-          this->occ_nso[state_vec_idx][quantum_part_idx][0] = this->input_epscf->occ_combined[quantum_part_idx][0];
+          this->C_nso_combined[state_vec_idx][quantum_part_idx][0] = this->input_epscf->C_combined[quantum_part_idx][0];
+          this->occ_nso_combined[state_vec_idx][quantum_part_idx][0] = this->input_epscf->occ_combined[quantum_part_idx][0];
           if (quantum_part.restricted == false) {
-            this->C_nso[state_vec_idx][quantum_part_idx][1] = this->input_epscf->C_combined[quantum_part_idx][1];
-            this->occ_nso[state_vec_idx][quantum_part_idx][1] = this->input_epscf->occ_combined[quantum_part_idx][1];
+            this->C_nso_combined[state_vec_idx][quantum_part_idx][1] = this->input_epscf->C_combined[quantum_part_idx][1];
+            this->occ_nso_combined[state_vec_idx][quantum_part_idx][1] = this->input_epscf->occ_combined[quantum_part_idx][1];
           } else {
-            this->C_nso[state_vec_idx][quantum_part_idx][1] = this->input_epscf->C_combined[quantum_part_idx][0];
-            this->occ_nso[state_vec_idx][quantum_part_idx][1] = this->input_epscf->occ_combined[quantum_part_idx][0];
+            this->C_nso_combined[state_vec_idx][quantum_part_idx][1] = this->input_epscf->C_combined[quantum_part_idx][0];
+            this->occ_nso_combined[state_vec_idx][quantum_part_idx][1] = this->input_epscf->occ_combined[quantum_part_idx][0];
           }
         } else {
-          this->C_nso[state_vec_idx][quantum_part_idx][0] = this->input_epscf->C_combined[quantum_part_idx][0];
-          this->occ_nso[state_vec_idx][quantum_part_idx][0] = this->input_epscf->occ_combined[quantum_part_idx][0];
+          this->C_nso_combined[state_vec_idx][quantum_part_idx][0] = this->input_epscf->C_combined[quantum_part_idx][0];
+          this->occ_nso_combined[state_vec_idx][quantum_part_idx][0] = this->input_epscf->occ_combined[quantum_part_idx][0];
         }
       } else {
-        if (quantum_part.num_parts > 1) {
-          diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][0], this->C_nso[state_vec_idx][quantum_part_idx][0], this->occ_nso[state_vec_idx][quantum_part_idx][0],
-                         this->input_epscf->C_combined[quantum_part_idx][0]);
-          if (quantum_part.restricted == false) {
-            diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][1], this->C_nso[state_vec_idx][quantum_part_idx][1], this->occ_nso[state_vec_idx][quantum_part_idx][1],
-                           this->input_epscf->C_combined[quantum_part_idx][1]);
+        auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
+        for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
+          if (quantum_part.num_parts > 1) {
+            diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][0], this->C_nso[state_vec_idx][quantum_part_idx][0][irrep_idx], this->occ_nso[state_vec_idx][quantum_part_idx][0][irrep_idx],
+                           this->input_epscf->C[quantum_part_idx][0][irrep_idx],
+                           this->input_integral->orth_X[quantum_part_idx][irrep_idx]);
+            if (quantum_part.restricted == false) {
+              diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][1], this->C_nso[state_vec_idx][quantum_part_idx][1][irrep_idx], this->occ_nso[state_vec_idx][quantum_part_idx][1][irrep_idx],
+                             this->input_epscf->C[quantum_part_idx][1][irrep_idx], this->input_integral->orth_X[quantum_part_idx][irrep_idx]);
+            } else {
+              diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][1], this->C_nso[state_vec_idx][quantum_part_idx][1][irrep_idx], this->occ_nso[state_vec_idx][quantum_part_idx][1][irrep_idx],
+                             this->input_epscf->C[quantum_part_idx][0][irrep_idx], this->input_integral->orth_X[quantum_part_idx][irrep_idx]);
+            }
           } else {
-            diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][1], this->C_nso[state_vec_idx][quantum_part_idx][1], this->occ_nso[state_vec_idx][quantum_part_idx][1],
-                           this->input_epscf->C_combined[quantum_part_idx][0]);
+            diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][0], this->C_nso[state_vec_idx][quantum_part_idx][0][irrep_idx], this->occ_nso[state_vec_idx][quantum_part_idx][0][irrep_idx],
+                           this->input_epscf->C[quantum_part_idx][0][irrep_idx], this->input_integral->orth_X[quantum_part_idx][irrep_idx]);
           }
-        } else {
-          diag_dm_helper(this->dm1[state_vec_idx][quantum_part_idx][0], this->C_nso[state_vec_idx][quantum_part_idx][0], this->occ_nso[state_vec_idx][quantum_part_idx][0],
-                         this->input_epscf->C_combined[quantum_part_idx][0]);
         }
       }
       quantum_part_idx++;
     }
 
+    //form combined NOs
+    //
+    quantum_part_idx = 0ul;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+      auto num_irrep = this->input_symmetry->irrep_names[quantum_part_idx].size();
+      auto n_spin = 1;
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        n_spin = 2;
+      }
+      for (auto quantum_part_spin_idx = 0; quantum_part_spin_idx < n_spin; quantum_part_spin_idx++) {
+        auto nmo = this->input_epscf->num_mo[quantum_part_idx];
+
+        std::vector<int> curr_bas_idx;
+        curr_bas_idx.resize(num_irrep, 0);
+        auto overall_mo_idx = 0;
+        for (auto irrep_idx = 0; irrep_idx < num_irrep; irrep_idx++) {
+        auto nmo_irrep = this->input_epscf->num_mo_per_irrep[quantum_part_idx][irrep_idx];
+        for (auto mo_idx = 0; mo_idx < nmo_irrep; mo_idx++) {
+          this->C_nso_combined[state_vec_idx][quantum_part_idx][quantum_part_spin_idx].col(overall_mo_idx) = this->C_nso[state_vec_idx][quantum_part_idx][quantum_part_spin_idx][irrep_idx].col(mo_idx);
+          this->occ_nso_combined[state_vec_idx][quantum_part_idx][quantum_part_spin_idx][overall_mo_idx] = this->occ_nso[state_vec_idx][quantum_part_idx][quantum_part_spin_idx][irrep_idx][mo_idx];
+          overall_mo_idx++;
+        }
+        }
+        std::vector<int> argsort_indices;
+        argsort_indices = argsort(this->occ_nso_combined[state_vec_idx][quantum_part_idx][quantum_part_spin_idx], std::greater<double>{});
+        Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> swapper_mat(this->C_nso_combined[state_vec_idx][quantum_part_idx][quantum_part_spin_idx].cols());
+        swapper_mat.indices() = Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1>, Eigen::Unaligned>(argsort_indices.data(), argsort_indices.size());
+        // multiply from right : permute cols, multiply from left, permute rows
+        std::sort(this->occ_nso_combined[state_vec_idx][quantum_part_idx][quantum_part_spin_idx].begin(), this->occ_nso_combined[state_vec_idx][quantum_part_idx][quantum_part_spin_idx].end(), std::greater<double>());
+      }
+      quantum_part_idx++;
+    }
+
     if (this->input_symmetry->do_symmetry && this->symmetrize_NOs) {
-      this->input_epscf->symmetrize_orbitals(this->C_nso[state_vec_idx], this->symm_label_idxs[state_vec_idx], this->symm_labels[state_vec_idx]);
+      this->input_epscf->symmetrize_orbitals(this->C_nso_combined[state_vec_idx], this->symm_label_idxs[state_vec_idx], this->symm_labels[state_vec_idx]);
     }
   }
 }
@@ -511,7 +580,7 @@ void POLYQUANT_EPCI::print_success() {
     //   }
     //   quantum_part_idx++;
     // }
-    dump_orbitals(this->C_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->occ_nso[state_vec_idx], this->symm_labels[state_vec_idx], title.str(), this->input_basis->ao_labels);
+    dump_orbitals(this->C_nso_combined[state_vec_idx], this->occ_nso_combined[state_vec_idx], this->occ_nso_combined[state_vec_idx], this->symm_labels[state_vec_idx], title.str(), this->input_basis->ao_labels);
 
     // title.str(std::string());
     // title << "NATURAL ORBITALS  state " << state_idx;
@@ -692,12 +761,12 @@ void POLYQUANT_EPCI::dump_molden() {
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
       // bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
       bool unique_beta = quantum_part.num_parts > 1;
-      auto &NO_a_coeff = this->C_nso[state_vec_idx][quantum_part_idx][0];
-      auto &NO_a_energy = this->occ_nso[state_vec_idx][quantum_part_idx][0];
-      auto &NO_a_occupation = this->occ_nso[state_vec_idx][quantum_part_idx][0];
-      auto &NO_b_coeff = unique_beta ? this->C_nso[state_vec_idx][quantum_part_idx][1] : this->C_nso[state_vec_idx][quantum_part_idx][0];
-      auto &NO_b_energy = unique_beta ? this->occ_nso[state_vec_idx][quantum_part_idx][1] : this->occ_nso[state_vec_idx][quantum_part_idx][0];
-      auto &NO_b_occupation = unique_beta ? this->occ_nso[state_vec_idx][quantum_part_idx][1] : this->occ_nso[state_vec_idx][quantum_part_idx][0];
+      auto &NO_a_coeff = this->C_nso_combined[state_vec_idx][quantum_part_idx][0];
+      auto &NO_a_energy = this->occ_nso_combined[state_vec_idx][quantum_part_idx][0];
+      auto &NO_a_occupation = this->occ_nso_combined[state_vec_idx][quantum_part_idx][0];
+      auto &NO_b_coeff = unique_beta ? this->C_nso_combined[state_vec_idx][quantum_part_idx][1] : this->C_nso_combined[state_vec_idx][quantum_part_idx][0];
+      auto &NO_b_energy = unique_beta ? this->occ_nso_combined[state_vec_idx][quantum_part_idx][1] : this->occ_nso_combined[state_vec_idx][quantum_part_idx][0];
+      auto &NO_b_occupation = unique_beta ? this->occ_nso_combined[state_vec_idx][quantum_part_idx][1] : this->occ_nso_combined[state_vec_idx][quantum_part_idx][0];
 
       std::vector<std::string> NO_a_symmetry_labels;
       NO_a_symmetry_labels.resize(NO_a_coeff.cols(), "A");

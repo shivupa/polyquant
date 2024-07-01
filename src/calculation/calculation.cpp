@@ -612,7 +612,7 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
       Polyquant_cout("Dumping HDF5 to filename: " + particle_filename.str());
       POLYQUANT_HDF5 hdf5_f(particle_filename.str());
       hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
-                                         quantum_part_name, ci_calc->occ_nso[state_vec_idx][quantum_part_idx], ci_calc->C_nso[state_vec_idx][quantum_part_idx],
+                                         quantum_part_name, ci_calc->occ_nso_combined[state_vec_idx][quantum_part_idx], ci_calc->C_nso_combined[state_vec_idx][quantum_part_idx],
                                          ci_calc->symm_label_idxs[state_vec_idx][quantum_part_idx], ci_calc->symm_labels[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
                                          atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
     }
