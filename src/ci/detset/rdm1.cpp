@@ -57,7 +57,11 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
           auto contribution = phase * C(i_det, state_idx) * C(j_det, state_idx);
           auto k = holes[0];
           auto l = parts[0];
-          if (std::abs(contribution) > thresh) {
+          auto shifted_k_hole = k + frozen_core[quantum_part_idx];
+          auto shifted_l_part = l + frozen_core[quantum_part_idx];
+          auto symm_k_idx = this->input_epscf->symm_label_idxs[quantum_part_idx][0][shifted_k_hole];
+          auto symm_l_idx = this->input_epscf->symm_label_idxs[quantum_part_idx][0][shifted_l_part];
+          if (std::abs(contribution) > thresh && symm_k_idx == symm_l_idx) {
             MO_rdm1_thread_contributions[thread_id](k, l) += contribution;
             MO_rdm1_thread_contributions[thread_id](l, k) += contribution;
           }
