@@ -289,6 +289,10 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
           APP_ABORT("keywords->ci_keywords->spin_penalty_type can only be first_order or second_order");
         }
       }
+      if (this->input_params->input_data["keywords"]["ci_keywords"].contains("calc_s2")) {
+        auto calc_s_sq = this->input_params->input_data["keywords"]["ci_keywords"]["calc_s2"];
+        ci_calc->calc_s_sq = calc_s_sq;
+      }
       if (this->input_params->input_data["keywords"]["ci_keywords"].contains("expected_S2")) {
         auto s_sq = this->input_params->input_data["keywords"]["ci_keywords"]["expected_S2"];
         ci_calc->expected_S2.clear();

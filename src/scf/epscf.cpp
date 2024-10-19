@@ -409,7 +409,7 @@ void POLYQUANT_EPSCF::diag_fock() {
           this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->iteration_rms_error[quantum_part_idx][0] / 10;
         }
       } else {
-        if (this->iteration_rms_error[quantum_part_idx][0]<incremental_fock_initial_onset_thresh &&this->iteration_num> 1) {
+        if (this->iteration_rms_error[quantum_part_idx][0] < incremental_fock_initial_onset_thresh && this->iteration_num > 1) {
           this->incremental_fock_doing_incremental[quantum_part_idx][0] = true;
           this->incremental_fock_reset_threshold[quantum_part_idx][0] = this->iteration_rms_error[quantum_part_idx][0] / 10;
           std::stringstream buffer;
@@ -451,7 +451,7 @@ void POLYQUANT_EPSCF::diag_fock() {
             this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->iteration_rms_error[quantum_part_idx][1] / 10;
           }
         } else {
-          if (this->iteration_rms_error[quantum_part_idx][1]<incremental_fock_initial_onset_thresh &&this->iteration_num> 1) {
+          if (this->iteration_rms_error[quantum_part_idx][1] < incremental_fock_initial_onset_thresh && this->iteration_num > 1) {
             this->incremental_fock_doing_incremental[quantum_part_idx][1] = true;
             this->incremental_fock_reset_threshold[quantum_part_idx][1] = this->iteration_rms_error[quantum_part_idx][1] / 10;
             std::stringstream buffer;
