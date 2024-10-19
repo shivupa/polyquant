@@ -322,7 +322,7 @@ void POLYQUANT_EPCI::calculate_S_squared() {
   auto nspecies = this->input_molecule->quantum_particles.size();
 
   this->S_squared.resize(nstates, nspecies);
-  this->S_squared.fill(-999); //lets set it to some random value
+  this->S_squared.fill(-999); // lets set it to some random value
 
   if (this->calc_s_sq) {
     this->detset.evaluate_s2(this->S_squared, this->C_ci);

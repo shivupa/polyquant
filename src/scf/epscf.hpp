@@ -18,7 +18,7 @@ public:
 
   POLYQUANT_EPSCF(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_MOLECULE> molecule, std::shared_ptr<POLYQUANT_BASIS> basis,
                   std::shared_ptr<POLYQUANT_INTEGRAL> integral)
-      : POLYQUANT_SCF(params, symmetry, molecule, basis, integral){};
+      : POLYQUANT_SCF(params, symmetry, molecule, basis, integral) {};
 
   void form_H_core() override;
 
