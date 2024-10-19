@@ -15,7 +15,7 @@
 #include <Spectra/LoggerBase.h>
 #include <Spectra/MatOp/SparseSymMatProd.h>
 #include <Spectra/SymEigsSolver.h>
-#include <combinations.hpp>
+#include <cppitertools/combinations.hpp>
 #include <inttypes.h>
 #include <string>
 

@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <bit>
 #include <bitset>
-#include <combinations.hpp>
+#include <cppitertools/combinations.hpp>
 #include <inttypes.h>
 #include <iostream>
 #include <iterator>
