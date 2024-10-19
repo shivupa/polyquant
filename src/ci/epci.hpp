@@ -124,6 +124,7 @@ public:
 
   bool first_order_spin_penalty = false;
   bool second_order_spin_penalty = false;
+  bool calc_s_sq = false;
   std::vector<double> expected_S2;
   std::vector<double> spin_penalty;
   double default_spin_penalty = 0.1;
