@@ -15,7 +15,6 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
   auto spin_0 = 0;
   auto spin_1 = 1;
 
-  S_squared.resize(nstates, nspecies);
   S_squared.setZero();
 
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> S_sq_thread_contributions;
