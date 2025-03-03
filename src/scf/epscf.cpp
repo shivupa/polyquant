@@ -1648,7 +1648,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
       reorthogonalize_MOs(this->C_combined[quantum_part_idx][1], quantum_part_idx);
       if (this->input_symmetry->do_symmetry == false) {
         auto quantum_part_irrep_idx = 0;
-        this->C[quantum_part_idx][1][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][0];
+        this->C[quantum_part_idx][1][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][1];
       }
     }
     idx += 2;
@@ -1668,6 +1668,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   // Polyquant_cout("Running a single SCF iteration");
   // this->run_iteration();
   this->print_iteration();
+  this->calculate_E_elec();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
   this->print_combined_orbitals("GUESS ORBITALS FROM FILE");
