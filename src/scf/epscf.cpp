@@ -1658,8 +1658,39 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     permute_initial_MOs();
   }
   // this->form_combined_orbitals();
-  if (this->input_symmetry->do_symmetry == true) {
+  // todo. What if we have symm info saved to bin?
+  bool symm_info_not_populated = true;
+  if (this->input_symmetry->do_symmetry == true and symm_info_not_populated) {
     this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
+  }
+
+  // need to fill C into C_irrep
+  if (this->input_symmetry->do_symmetry == true) {
+    auto qpidx = 0;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+      auto spinidx = 0;
+      auto nmo = this->symm_label_idxs[qpidx][spinidx].size();
+      auto nirrep = this->C[qpidx][spinidx].size();
+      std::vector<int> populated_mos_per_irrep(nirrep, 0);
+      for (auto mo_idx = 0; mo_idx < nmo; mo_idx++){
+        auto irrep_idx = this->symm_label_idxs[qpidx][0][mo_idx];
+        this->C[qpidx][spinidx][irrep_idx].col(populated_mos_per_irrep[irrep_idx]) = this->C_combined[qpidx][spinidx].col(mo_idx);
+        populated_mos_per_irrep[irrep_idx]++;
+      }
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+        auto spinidx = 1;
+        auto nmo = this->symm_label_idxs[qpidx][spinidx].size();
+        auto nirrep = this->C[qpidx][spinidx].size();
+        std::vector<int> populated_mos_per_irrep(nirrep, 0);
+        for (auto mo_idx = 0; mo_idx < nmo; mo_idx++){
+          auto irrep_idx = this->symm_label_idxs[qpidx][0][mo_idx];
+          this->C[qpidx][spinidx][irrep_idx].col(populated_mos_per_irrep[irrep_idx]) = this->C_combined[qpidx][spinidx].col(mo_idx);
+          populated_mos_per_irrep[irrep_idx]++;
+        }
+      }
+    }
   }
 
   this->form_occ();
