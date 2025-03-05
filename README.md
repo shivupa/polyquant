@@ -40,6 +40,7 @@ cmake --build build --target install -j12
 ```
 
 Build it like
+
 ```
 mkdir -p build
 cmake --build build -DENABLE_FORTRAN=ON -DLIBINT2_REALTYPE=double -DLIBINT2_BUILD_TESTS=OFF -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON -GNinja 
