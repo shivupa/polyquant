@@ -1660,8 +1660,39 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   // this->form_combined_orbitals();
   // todo. What if we have symm info saved to bin?
   bool symm_info_not_populated = true;
+
   if (this->input_symmetry->do_symmetry == true and symm_info_not_populated) {
-    this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
+    try {
+      Polyquant_cout("Attempting to read symmetry info from h5 file...");
+      quantum_part_idx = 0ul;
+      for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+        std::filesystem::path path(filename);
+        std::string dir = path.parent_path().string();
+        std::string file = path.filename().string();
+        std::string file_to_load = dir + quantum_part_key + "_" + file;
+
+        POLYQUANT_HDF5 hdf5_file(file_to_load);
+
+        auto spin_idx = 0;
+        // read if we have this in bin
+        std::string hpath = "/Super_Twist/eigensymmlab_" + std::to_string(spin_idx);
+        hdf5_file.load_data(this->symm_labels[quantum_part_idx][spin_idx], hpath);
+        hpath = "/Super_Twist/eigensymmint_" + std::to_string(spin_idx);
+        hdf5_file.load_data(this->symm_label_idxs[quantum_part_idx][spin_idx], hpath);
+        if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+          spin_idx = 1;
+          hpath = "/Super_Twist/eigensymmlab_" + std::to_string(spin_idx);
+          hdf5_file.load_data(this->symm_labels[quantum_part_idx][spin_idx], hpath);
+          hpath = "/Super_Twist/eigensymmint_" + std::to_string(spin_idx);
+          hdf5_file.load_data(this->symm_label_idxs[quantum_part_idx][spin_idx], hpath);
+        }
+        quantum_part_idx++;
+      }
+    } catch (...) { // failed to load symm info
+      APP_WARN(
+          "We are restarting a calculation with symmetry but symmetry info was not found in the bin file. Attempting to symmetrize orbitals... This is a numerically tenuous process, and may fail...");
+      this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
+    }
   }
 
   // need to fill C into C_irrep
