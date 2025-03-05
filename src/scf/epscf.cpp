@@ -1673,7 +1673,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
       auto nmo = this->symm_label_idxs[qpidx][spinidx].size();
       auto nirrep = this->C[qpidx][spinidx].size();
       std::vector<int> populated_mos_per_irrep(nirrep, 0);
-      for (auto mo_idx = 0; mo_idx < nmo; mo_idx++){
+      for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
         auto irrep_idx = this->symm_label_idxs[qpidx][0][mo_idx];
         this->C[qpidx][spinidx][irrep_idx].col(populated_mos_per_irrep[irrep_idx]) = this->C_combined[qpidx][spinidx].col(mo_idx);
         populated_mos_per_irrep[irrep_idx]++;
@@ -1684,7 +1684,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
         auto nmo = this->symm_label_idxs[qpidx][spinidx].size();
         auto nirrep = this->C[qpidx][spinidx].size();
         std::vector<int> populated_mos_per_irrep(nirrep, 0);
-        for (auto mo_idx = 0; mo_idx < nmo; mo_idx++){
+        for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
           auto irrep_idx = this->symm_label_idxs[qpidx][0][mo_idx];
           this->C[qpidx][spinidx][irrep_idx].col(populated_mos_per_irrep[irrep_idx]) = this->C_combined[qpidx][spinidx].col(mo_idx);
           populated_mos_per_irrep[irrep_idx]++;

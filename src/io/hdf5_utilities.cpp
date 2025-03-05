@@ -157,7 +157,8 @@ void POLYQUANT_HDF5::dump_generalparameters(bool complex_vals, bool ecp, bool re
 }
 
 void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num_mo, std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> E_orb,
-                              std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff) {
+                              std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff, std::vector<std::vector<int>> mo_symm_label_idxs,
+                              std::vector<std::vector<std::string>> mo_symm_labels) {
   // write MO parameters
   Polyquant_cout("dumping MOs");
   std::string super_twist_group = "/Super_Twist";
@@ -190,6 +191,11 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
     path = super_twist_group + "/eigenset_" + std::to_string(spin_idx);
     // H5Easy::dump(*hdf5_file, path, flattened_mo_coeff, H5Easy::DumpMode::Overwrite);
     H5Easy::dump(*hdf5_file, path, mo_coeff[spin_idx].transpose(), H5Easy::DumpMode::Overwrite);
+
+    path = super_twist_group + "/eigensymmlab_" + std::to_string(spin_idx);
+    H5Easy::dump(*hdf5_file, path, mo_symm_labels[spin_idx], H5Easy::DumpMode::Overwrite);
+    path = super_twist_group + "/eigensymmint_" + std::to_string(spin_idx);
+    H5Easy::dump(*hdf5_file, path, mo_symm_label_idxs[spin_idx], H5Easy::DumpMode::Overwrite);
   }
 }
 
@@ -376,14 +382,15 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
 void POLYQUANT_HDF5::dump_mf_to_hdf5_for_QMCPACK(bool pbc, bool complex_vals, bool ecp, bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha, int num_part_beta,
                                                  int num_part_total, int multiplicity, int num_atom, int num_species, std::string quantum_part_name,
                                                  std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> E_orb, std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> mo_coeff,
-                                                 std::vector<int> atomic_species_ids, std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec,
-                                                 std::vector<std::string> atomic_names, std::vector<std::vector<double>> atomic_centers, std::vector<std::vector<libint2::Shell>> unique_shells) {
+                                                 std::vector<std::vector<int>> mo_symm_label_idxs, std::vector<std::vector<std::string>> mo_symm_labels, std::vector<int> atomic_species_ids,
+                                                 std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec, std::vector<std::string> atomic_names,
+                                                 std::vector<std::vector<double>> atomic_centers, std::vector<std::vector<libint2::Shell>> unique_shells) {
   // create file
   Polyquant_cout("dumping file");
   this->dump_application();
   this->dump_PBC(pbc);
   this->dump_generalparameters(complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity);
-  this->dump_MOs(quantum_part_name, num_ao, num_mo, E_orb, mo_coeff);
+  this->dump_MOs(quantum_part_name, num_ao, num_mo, E_orb, mo_coeff, mo_symm_label_idxs, mo_symm_labels);
   this->dump_atoms(num_atom, num_species, atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names, atomic_centers);
   this->dump_basis(quantum_part_name, atomic_names, unique_shells);
 }
