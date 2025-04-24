@@ -53,37 +53,37 @@ jobs:
             generators: "Ninja"
           }
           - {
-            name: "Ubuntu_Latest_Clang13_Release_Ninja",
-            os: ubuntu-latest,
-            build_type: "Release",
-            pkgs: "llvm-toolchain-13",
-            cc: "clang-13",
-            cxx: "clang++-13",
-            generators: "Ninja"
-          }
-          - {
-            name: "Ubuntu_Latest_Clang13_Debug_Ninja",
-            os: ubuntu-latest,
-            build_type: "Debug",
-            pkgs: "llvm-toolchain-13",
-            cc: "clang-13",
-            cxx: "clang++-13",
-            generators: "Ninja"
-          }
-          - {
             name: "Ubuntu_Latest_Clang19_Release_Ninja",
             os: ubuntu-latest,
             build_type: "Release",
-            pkgs: "llvm-toolchain-19",
+            pkgs: "19",
             cc: "clang-19",
             cxx: "clang++-19",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_Clang19_Debug_Ninja",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            pkgs: "19",
+            cc: "clang-19",
+            cxx: "clang++-19",
+            generators: "Ninja"
+          }
+          - {
+            name: "Ubuntu_Latest_Clang20_Release_Ninja",
+            os: ubuntu-latest,
+            build_type: "Release",
+            pkgs: "20",
+            cc: "clang-20",
+            cxx: "clang++-20",
             generators: "Ninja"
           }
           - {
             name: "Ubuntu_Latest_Clang20_Debug_Ninja",
             os: ubuntu-latest,
             build_type: "Debug",
-            pkgs: "llvm-toolchain-20",
+            pkgs: "20",
             cc: "clang-20",
             cxx: "clang++-20",
             generators: "Ninja"
@@ -115,7 +115,20 @@ jobs:
             liblapack-dev \
             libeigen3-dev \
             libhdf5-dev \
-            ${{ matrix.config.pkgs }}
+            wget
+      - name: Install compiler (gcc)
+        if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
+        run : |
+          sudo apt-get update
+          sudo apt-get install ${{ matrix.config.pkgs }}
+      - name: Install compiler (clange)
+        if: startsWith(matrix.config.name, 'Ubuntu_Latest_Clang')
+        run : |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ matrix.config.pkgs }}
+      - name: echo important info
+        run : |
           ninja --version
           cmake --version
           ${{ matrix.config.cc }} --version
