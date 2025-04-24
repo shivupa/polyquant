@@ -121,12 +121,12 @@ jobs:
         run : |
           sudo apt-get update
           sudo apt-get install ${{ matrix.config.pkgs }}
-      - name: Install compiler (clange)
+      - name: Install compiler (clang)
         if: startsWith(matrix.config.name, 'Ubuntu_Latest_Clang')
         run : |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh ${{ matrix.config.pkgs }}
+          sudo ./llvm.sh ${{ matrix.config.pkgs }} all
       - name: echo important info
         run : |
           ninja --version
