@@ -1075,7 +1075,6 @@ void POLYQUANT_EPSCF::print_iteration() {
 
 void POLYQUANT_EPSCF::form_occ_helper_aufbau(Eigen::Matrix<double, Eigen::Dynamic, 1> &part_occ, const int quantum_part_idx, const int quantum_part_spin_idx, const int quantum_part_irrep_idx,
                                              const int num_parts, const double occval) {
-
   part_occ.setZero(part_occ.size());
   for (auto i = 0; i < num_parts; i++) {
     part_occ[i] = occval;
@@ -1626,29 +1625,14 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     POLYQUANT_HDF5 hdf5_file(file_to_load);
     Polyquant_cout("Reading coefficients from file : " + file_to_load);
 
-    // if (!root_group.exists("Super_Twist")) {
-    //   APP_ABORT("Reading coefficients failed. No Super_Twist group in HDF5 file.");
-    // }
-    // auto Super_Twist_group = root_group.get_group("Super_Twist");
-
     auto num_basis = this->input_basis->num_basis[quantum_part_idx];
     auto quantum_part_irrep_idx = 0;
     auto num_mo = this->num_mo[quantum_part_idx];
 
     Polyquant_cout("Reading eigenset_" + std::to_string(idx));
-    // std::vector<double> data;
-    // data.resize(num_mo * num_basis);
     std::string hpath = "/Super_Twist/eigenset_" + std::to_string(idx);
-    // hdf5_file.load_data(data, hpath);
     hdf5_file.load_data(this->C_combined[quantum_part_idx][0], hpath);
     this->C_combined[quantum_part_idx][0].transposeInPlace();
-
-    // #pragma omp parallel for
-    // for (auto i = 0; i < num_mo; i++) {
-    //   for (auto j = 0; j < num_basis; j++) {
-    //     this->C_combined[quantum_part_idx][0](j, i) = data[i * num_basis + j];
-    //   }
-    // }
 
     reorthogonalize_MOs(this->C_combined[quantum_part_idx][0], quantum_part_idx);
 
@@ -1659,22 +1643,12 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
       hpath = "/Super_Twist/eigenset_" + std::to_string(idx + 1);
       Polyquant_cout("Reading eigenset_" + std::to_string(idx + 1));
-      // data.clear();
-      // data.resize(num_mo * num_basis);
-      // hdf5_file.load_data(data, hpath);
-      // #pragma omp parallel for
-      // for (auto i = 0; i < num_mo; i++) {
-      //   for (auto j = 0; j < num_basis; j++) {
-      //     this->C_combined[quantum_part_idx][1](j, i) = data[i * num_basis + j];
-      //   }
-      // }
       hdf5_file.load_data(this->C_combined[quantum_part_idx][1], hpath);
       this->C_combined[quantum_part_idx][1].transposeInPlace();
-
       reorthogonalize_MOs(this->C_combined[quantum_part_idx][1], quantum_part_idx);
       if (this->input_symmetry->do_symmetry == false) {
         auto quantum_part_irrep_idx = 0;
-        this->C[quantum_part_idx][1][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][0];
+        this->C[quantum_part_idx][1][quantum_part_irrep_idx] = this->C_combined[quantum_part_idx][1];
       }
     }
     idx += 2;
@@ -1684,8 +1658,70 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
     permute_initial_MOs();
   }
   // this->form_combined_orbitals();
+  // todo. What if we have symm info saved to bin?
+  bool symm_info_not_populated = true;
+
+  if (this->input_symmetry->do_symmetry == true and symm_info_not_populated) {
+    try {
+      Polyquant_cout("Attempting to read symmetry info from h5 file...");
+      quantum_part_idx = 0ul;
+      for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+        std::filesystem::path path(filename);
+        std::string dir = path.parent_path().string();
+        std::string file = path.filename().string();
+        std::string file_to_load = dir + quantum_part_key + "_" + file;
+
+        POLYQUANT_HDF5 hdf5_file(file_to_load);
+
+        auto spin_idx = 0;
+        // read if we have this in bin
+        std::string hpath = "/Super_Twist/eigensymmlab_" + std::to_string(spin_idx);
+        hdf5_file.load_data(this->symm_labels[quantum_part_idx][spin_idx], hpath);
+        hpath = "/Super_Twist/eigensymmint_" + std::to_string(spin_idx);
+        hdf5_file.load_data(this->symm_label_idxs[quantum_part_idx][spin_idx], hpath);
+        if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+          spin_idx = 1;
+          hpath = "/Super_Twist/eigensymmlab_" + std::to_string(spin_idx);
+          hdf5_file.load_data(this->symm_labels[quantum_part_idx][spin_idx], hpath);
+          hpath = "/Super_Twist/eigensymmint_" + std::to_string(spin_idx);
+          hdf5_file.load_data(this->symm_label_idxs[quantum_part_idx][spin_idx], hpath);
+        }
+        quantum_part_idx++;
+      }
+    } catch (...) { // failed to load symm info
+      APP_WARN(
+          "We are restarting a calculation with symmetry but symmetry info was not found in the bin file. Attempting to symmetrize orbitals... This is a numerically tenuous process, and may fail...");
+      this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
+    }
+  }
+
+  // need to fill C into C_irrep
   if (this->input_symmetry->do_symmetry == true) {
-    this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
+    auto qpidx = 0;
+    for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
+      auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+      auto spinidx = 0;
+      auto nmo = this->symm_label_idxs[qpidx][spinidx].size();
+      auto nirrep = this->C[qpidx][spinidx].size();
+      std::vector<int> populated_mos_per_irrep(nirrep, 0);
+      for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
+        auto irrep_idx = this->symm_label_idxs[qpidx][0][mo_idx];
+        this->C[qpidx][spinidx][irrep_idx].col(populated_mos_per_irrep[irrep_idx]) = this->C_combined[qpidx][spinidx].col(mo_idx);
+        populated_mos_per_irrep[irrep_idx]++;
+      }
+      if (quantum_part.num_parts > 1 && quantum_part.restricted == false) {
+        auto num_basis = this->input_basis->num_basis[quantum_part_idx];
+        auto spinidx = 1;
+        auto nmo = this->symm_label_idxs[qpidx][spinidx].size();
+        auto nirrep = this->C[qpidx][spinidx].size();
+        std::vector<int> populated_mos_per_irrep(nirrep, 0);
+        for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
+          auto irrep_idx = this->symm_label_idxs[qpidx][0][mo_idx];
+          this->C[qpidx][spinidx][irrep_idx].col(populated_mos_per_irrep[irrep_idx]) = this->C_combined[qpidx][spinidx].col(mo_idx);
+          populated_mos_per_irrep[irrep_idx]++;
+        }
+      }
+    }
   }
 
   this->form_occ();
@@ -1694,6 +1730,7 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   // Polyquant_cout("Running a single SCF iteration");
   // this->run_iteration();
   this->print_iteration();
+  this->calculate_E_elec();
   this->calculate_E_total();
   Polyquant_cout(this->E_total);
   this->print_combined_orbitals("GUESS ORBITALS FROM FILE");
