@@ -137,10 +137,11 @@ FetchContent_Declare(
   GIT_TAG v3.12.0)
 FetchContent_GetProperties(nlohmann_json)
 set(JSON_BuildTests OFF)
-if(NOT nlohmann_json_POPULATED)
-  FetchContent_Populate(nlohmann_json)
-  add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif(NOT nlohmann_json_POPULATED)
+FetchContent_MakeAvailable(nlohmann_json)
+# if(NOT nlohmann_json_POPULATED)
+#   FetchContent_Populate(nlohmann_json)
+#   add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR} EXCLUDE_FROM_ALL)
+# endif(NOT nlohmann_json_POPULATED)
 ########################################
 # curl requests to get basis sets
 FetchContent_Declare(
