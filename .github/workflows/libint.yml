@@ -1,5 +1,8 @@
 name: Polyquant configured libint build
 on:
+  push:
+    branches:
+      - libint
   schedule:
     - cron: '0 1 1 * *'
 
