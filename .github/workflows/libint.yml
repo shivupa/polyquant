@@ -1,0 +1,71 @@
+name: Polyquant configured libint build
+on:
+  schedule:
+    - cron: '0 1 1 * *'
+
+jobs:
+  libint-build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu_Latest_GCC",
+            os: ubuntu-latest,
+            artifact: "polyquant-libint.deb",
+            build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
+            generators: "Ninja"
+          }
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v4
+        with:
+          ref: 'libint'
+      - name: Print env
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.config.name, 'Ubuntu_Latest_GCC')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake
+          ninja --version
+          cmake --version
+          gcc --version
+          sudo apt-get install -y libeigen3-dev libboost-all-dev
+          mkdir builddir
+          mkdir installdir
+      - name: Configure
+        shell: bash
+        working-directory: builddir
+        run: |
+          cmake \
+            -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+            -DLIBINT2_ENABLE_FORTRAN=OFF \
+            -DLIBINT2_REALTYPE=double \
+            -DBUILD_TESTING=OFF \
+            -DLIBINT2_BUILD_SHARED_AND_STATIC_LIBS=ON \
+            -G "${{ matrix.config.generators }}" \
+            $GITHUB_WORKSPACE
+      - name: Build
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --config ${{ matrix.config.build_type }}
+      - name: Build deb
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --target package
+      - name: Rename deb
+        shell: bash
+        run: |
+          mv builddir/Libint2-2.7.2-Linux.deb ${{ matrix.config.artifact }}
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./${{ matrix.config.artifact }}
+          name: ${{ matrix.config.artifact }}
