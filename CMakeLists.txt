@@ -39,8 +39,24 @@ message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 # set up where to find Find*.cmake files and where to put the things we build
 # add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/cmake-modules" ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/bilke_cmake_modules" ${CMAKE_MODULE_PATH})
+
+################################################################################
+# linear algebra cmake modules
+FetchContent_Declare( linalg_cmake_modules
+  GIT_REPOSITORY https://github.com/wavefunction91/linalg-cmake-modules.git
+  GIT_TAG main
+)
+FetchContent_MakeAvailable( linalg_cmake_modules )
+set(CMAKE_MODULE_PATH "${linalg_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+################################################################################
+# bilke cmake modules
+FetchContent_Declare( bilke_cmake_modules
+  GIT_REPOSITORY https://github.com/bilke/cmake-modules.git
+  GIT_TAG main
+)
+FetchContent_MakeAvailable( bilke_cmake_modules )
+set(CMAKE_MODULE_PATH "${bilke_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+################################################################################
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
 ################################################################################
