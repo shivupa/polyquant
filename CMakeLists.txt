@@ -148,6 +148,12 @@ endif(POLYQUANT_DOC)
 # OpenMP for parallelization
 find_package(OpenMP REQUIRED)
 ########################################
+# LinAlg
+# set this list to prioritize a BLAS type
+set( BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
+find_package( BLAS REQUIRED )
+find_package( LAPACK REQUIRED )
+########################################
 # json parsing
 FetchContent_Declare(
   nlohmann_json
@@ -189,11 +195,6 @@ if (NOT TARGET Eigen3::Eigen)
     set(EIGEN_BUILD_PKGCONFIG OFF)
     FetchContent_MakeAvailable(Eigen)
 endif (NOT TARGET Eigen3::Eigen)
-########################################
-# LinAlg
-# set this list to prioritize a BLAS type
-set( LinAlg_BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
-find_package(LinAlg REQUIRED)
 ########################################
 # Spectra for sparse math
 FetchContent_Declare(
