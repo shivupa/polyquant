@@ -48,6 +48,7 @@ FetchContent_Declare( linalg_cmake_modules
 )
 FetchContent_MakeAvailable( linalg_cmake_modules )
 set(CMAKE_MODULE_PATH "${linalg_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 ################################################################################
 # bilke cmake modules
 FetchContent_Declare( bilke_cmake_modules
@@ -56,6 +57,7 @@ FetchContent_Declare( bilke_cmake_modules
 )
 FetchContent_MakeAvailable( bilke_cmake_modules )
 set(CMAKE_MODULE_PATH "${bilke_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 ################################################################################
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
