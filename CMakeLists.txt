@@ -52,7 +52,7 @@ set(CMAKE_MODULE_PATH "${linalg_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
 # bilke cmake modules
 FetchContent_Declare( bilke_cmake_modules
   GIT_REPOSITORY https://github.com/bilke/cmake-modules.git
-  GIT_TAG main
+  GIT_TAG master
 )
 FetchContent_MakeAvailable( bilke_cmake_modules )
 set(CMAKE_MODULE_PATH "${bilke_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
