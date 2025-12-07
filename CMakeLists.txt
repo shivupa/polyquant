@@ -39,8 +39,24 @@ message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 # set up where to find Find*.cmake files and where to put the things we build
 # add_compile_options(-Wall -Wextra -pedantic -Werror -O3)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/cmake-modules" ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/bilke_cmake_modules" ${CMAKE_MODULE_PATH})
+
+################################################################################
+# linear algebra cmake modules
+FetchContent_Declare( linalg_cmake_modules
+  GIT_REPOSITORY https://github.com/wavefunction91/linalg-cmake-modules.git
+  GIT_TAG main
+)
+FetchContent_MakeAvailable( linalg_cmake_modules )
+set(CMAKE_MODULE_PATH "${linalg_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+################################################################################
+# bilke cmake modules
+FetchContent_Declare( bilke_cmake_modules
+  GIT_REPOSITORY https://github.com/bilke/cmake-modules.git
+  GIT_TAG main
+)
+FetchContent_MakeAvailable( bilke_cmake_modules )
+set(CMAKE_MODULE_PATH "${bilke_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+################################################################################
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
 ################################################################################
@@ -134,26 +150,27 @@ find_package(OpenMP REQUIRED)
 FetchContent_Declare(
   nlohmann_json
   GIT_REPOSITORY https://github.com/nlohmann/json
-  GIT_TAG v3.11.3)
+  GIT_TAG v3.12.0)
 FetchContent_GetProperties(nlohmann_json)
 set(JSON_BuildTests OFF)
-if(NOT nlohmann_json_POPULATED)
-  FetchContent_Populate(nlohmann_json)
-  add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif(NOT nlohmann_json_POPULATED)
+FetchContent_MakeAvailable(nlohmann_json)
+# if(NOT nlohmann_json_POPULATED)
+#   FetchContent_Populate(nlohmann_json)
+#   add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR} EXCLUDE_FROM_ALL)
+# endif(NOT nlohmann_json_POPULATED)
 ########################################
 # curl requests to get basis sets
 FetchContent_Declare(
   CPR
   GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-  GIT_TAG 1.10.5)
+  GIT_TAG 1.11.2)
 set(BUILD_CPR_TESTS OFF)
 set(BUILD_CPR_TESTS_SSL OFF)
 set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(CPR)
 ########################################
 # Eigen for matrix math
-find_package(Eigen3 3.3 NO_MODULE)
+find_package(Eigen3 3.4 NO_MODULE)
 if (NOT TARGET Eigen3::Eigen)
     FetchContent_Declare(
       Eigen
@@ -238,8 +255,8 @@ set(HIGHFIVE_BUILD_DOCS OFF CACHE INTERNAL "")  # Forces the value
 set(HIGHFIVE_EXAMPLES OFF CACHE INTERNAL "")  # Forces the value
 FetchContent_Declare(
   HighFive
-  GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
-  GIT_TAG v2.9.0)
+  GIT_REPOSITORY https://github.com/highfive-devs/highfive.git
+  GIT_TAG v3.0.0-beta2)
 FetchContent_MakeAvailable(HighFive)
 ########################################
 # Text Formatting
@@ -254,7 +271,7 @@ FetchContent_MakeAvailable(fmt)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.6.0)
+    GIT_TAG v3.8.1)
 FetchContent_MakeAvailable(Catch2)
 set(CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/contrib" ${CMAKE_MODULE_PATH})
 include(Catch)
