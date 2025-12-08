@@ -48,14 +48,16 @@ FetchContent_Declare( linalg_cmake_modules
 )
 FetchContent_MakeAvailable( linalg_cmake_modules )
 set(CMAKE_MODULE_PATH "${linalg_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 ################################################################################
 # bilke cmake modules
 FetchContent_Declare( bilke_cmake_modules
   GIT_REPOSITORY https://github.com/bilke/cmake-modules.git
-  GIT_TAG main
+  GIT_TAG master
 )
 FetchContent_MakeAvailable( bilke_cmake_modules )
 set(CMAKE_MODULE_PATH "${bilke_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 ################################################################################
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/lib CACHE PATH "Single output directory for building all libraries.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${POLYQUANT_BINARY_DIR}/bin CACHE PATH "Single output directory for building all executables.")
@@ -146,6 +148,12 @@ endif(POLYQUANT_DOC)
 # OpenMP for parallelization
 find_package(OpenMP REQUIRED)
 ########################################
+# LinAlg
+# set this list to prioritize a BLAS type
+set( BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
+find_package( BLAS REQUIRED )
+find_package( LAPACK REQUIRED )
+########################################
 # json parsing
 FetchContent_Declare(
   nlohmann_json
@@ -187,11 +195,6 @@ if (NOT TARGET Eigen3::Eigen)
     set(EIGEN_BUILD_PKGCONFIG OFF)
     FetchContent_MakeAvailable(Eigen)
 endif (NOT TARGET Eigen3::Eigen)
-########################################
-# LinAlg
-# set this list to prioritize a BLAS type
-set( LinAlg_BLAS_PREFERENCE_LIST "BLIS" "IntelMKL" "IBMESSL" "OpenBLAS" "ReferenceBLAS" )
-find_package(LinAlg REQUIRED)
 ########################################
 # Spectra for sparse math
 FetchContent_Declare(

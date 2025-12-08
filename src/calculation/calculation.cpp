@@ -634,7 +634,7 @@ void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
       dets[idx_part][idx_spin].resize(this->ci_calc->detset.N_dets, std::vector<uint64_t>(N_bits, 0ul));
     }
   }
-#pragma omp parallel
+#pragma omp parallel for
   for (auto i = 0; i < this->ci_calc->detset.N_dets; i++) {
     auto i_unfold = this->ci_calc->detset.det_idx_unfold(i);
     for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {
