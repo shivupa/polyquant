@@ -429,12 +429,16 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   std::vector<int> atomic_charge;
   std::vector<int> core_elec;
   std::vector<std::string> atomic_names;
-  std::vector<std::vector<double>> atomic_centers = this->input_molecule->centers;
+  std::vector<std::vector<double>> atomic_centers;// = this->input_molecule->centers;
+  atomic_centers.resize(this->input_molecule->centers.size());
   atomic_species_ids.resize(this->input_molecule->centers.size());
   std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
   for (auto const &[classical_part_key, classical_part] : this->input_molecule->classical_particles) {
     for (auto idx : classical_part.center_idx) {
       atomic_species_ids[idx] = classical_part_idx;
+      atom_centers[classical_part_idx].resize(3);
+      for (auto iXYZ = 0; iXYZ < 3; iXYZ++)
+        atom_centers[classical_part_idx][iXYZ] = this->input_molecule->centers[idx][iXYZ];
     }
     atomic_number.push_back((int)classical_part.charge);
     atomic_charge.push_back((int)classical_part.charge);
@@ -533,12 +537,16 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
   std::vector<int> atomic_charge;
   std::vector<int> core_elec;
   std::vector<std::string> atomic_names;
-  std::vector<std::vector<double>> atomic_centers = this->input_molecule->centers;
+  std::vector<std::vector<double>> atomic_centers; // = this->input_molecule->centers;
+  atomic_centers.resize(this->input_molecule->centers.size());
   atomic_species_ids.resize(this->input_molecule->centers.size());
   std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
   for (auto const &[classical_part_key, classical_part] : this->input_molecule->classical_particles) {
     for (auto idx : classical_part.center_idx) {
       atomic_species_ids[idx] = classical_part_idx;
+      atom_centers[classical_part_idx].resize(3);
+      for (auto iXYZ = 0; iXYZ < 3; iXYZ++)
+        atom_centers[classical_part_idx][iXYZ] = this->input_molecule->centers[idx][iXYZ];
     }
     atomic_number.push_back((int)classical_part.charge);
     atomic_charge.push_back((int)classical_part.charge);
