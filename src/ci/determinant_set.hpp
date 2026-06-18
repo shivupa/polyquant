@@ -38,7 +38,7 @@ public:
   }
   void resize(std::size_t size) {
     unique_dets.resize(size);
-    for (auto i = 0; i < size; i++) {
+    for (size_t i = 0ul; i < size; i++) {
       unique_dets[i].resize(2);
     }
   };
