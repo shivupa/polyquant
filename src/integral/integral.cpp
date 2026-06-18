@@ -290,8 +290,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                             auto C_pi = mo_coeffs_a(shell_p_bf, shell_i_bf);
                             if (C_pi != 0.0) {
                               auto val = C_pi * eri_pqrs;
-                              // temp1(shell_i_bf - frozen_core[quantum_part_a_idx], shell_q_bf, shell_r_bf, shell_s_bf) += mo_coeffs_a(shell_p_bf, shell_i_bf) * eri_pqrs;
-                              // num_mo_a * num_shell_a * num_shell_b * num_shell_b
                               auto idx1 = (shell_i_bf - frozen_core[quantum_part_a_idx]) * num_ao_a * num_ao_b * num_ao_b;
                               idx1 += shell_q_bf * num_ao_b * num_ao_b;
                               idx1 += shell_r_bf * num_ao_b;
@@ -318,10 +316,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     temp_threads[thread_id].resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
     temp_threads[thread_id].setZero();
   }
-// temp2.resize(num_mo_a * num_mo_a * num_ao_b * num_ao_b);
-// temp2.setZero();
-// temp2 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_shell_b, num_shell_b);
-// temp2.setZero();
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -335,19 +329,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             fn_counter++;
             if (fn_counter % nthreads != thread_id)
               continue;
-            // for (auto q = 0; q < num_ao_a; q++) {
-            //   auto idx1 = i * num_ao_a * num_ao_b * num_ao_b;
-            //   idx1 += q * num_ao_b * num_ao_b;
-            //   idx1 += r * num_ao_b;
-            //   idx1 += s;
-            //   // elem += mo_coeffs_a(q, j) * temp1(i, q, r, s)
-            //   elem += mo_coeffs_a(q, j + frozen_core[quantum_part_a_idx]) * temp1(idx1);
-            // }
-            // auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
-            // idx2 += j * num_ao_b * num_ao_b;
-            // idx2 += r * num_ao_b;
-            // idx2 += s;
-            // temp2(idx2) += elem;
             auto offset = i * num_ao_a * num_ao_b * num_ao_b;
             offset += r * num_ao_b;
             offset += s;
@@ -356,7 +337,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             idx2 += j * num_ao_b * num_ao_b;
             idx2 += r * num_ao_b;
             idx2 += s;
-            // temp2(idx2) = mo_coeffs_a(Eigen::seqN(0, num_ao_a), j + frozen_core[quantum_part_a_idx]).dot(temp1(Eigen::seqN(offset, num_ao_a, stride)));
             temp_threads[thread_id](idx2) = mo_coeffs_a(Eigen::seqN(0, num_ao_a), j + frozen_core[quantum_part_a_idx]).dot(temp(Eigen::seqN(offset, num_ao_a, stride)));
           }
         }
@@ -370,13 +350,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     temp_threads[thread_id].resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
     temp_threads[thread_id].setZero();
   }
-// temp1.resize(0);
-// temp3.resize(num_mo_a * num_mo_a * num_mo_b * num_ao_b);
-// temp3.setZero();
-//  delete temp1;
-//  temp1 = Eigen::Tensor<double, 1>(0);
-//  temp3 = Eigen::Tensor<double, 4>(num_mo_a, num_mo_a, num_mo_b, num_shell_b);
-//  temp3.setZero();
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -390,20 +363,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             fn_counter++;
             if (fn_counter % nthreads != thread_id)
               continue;
-            // for (auto r = 0; r < num_ao_b; r++) {
-            //   auto idx2 = i * num_mo_a * num_ao_b * num_ao_b;
-            //   idx2 += j * num_ao_b * num_ao_b;
-            //   idx2 += r * num_ao_b;
-            //   idx2 += s;
-            //   // elem += mo_coeffs_b(r, k) * temp2(i, j, r, s);
-            //   elem += mo_coeffs_b(r, k + frozen_core[quantum_part_b_idx]) * temp2(idx2);
-            // }
-            // auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
-            // idx3 += j * num_mo_b * num_ao_b;
-            // idx3 += k * num_ao_b;
-            // idx3 += s;
-            // // temp3(i, j, k, s) += elem;
-            // temp3(idx3) += elem;
             auto offset = i * num_mo_a * num_ao_b * num_ao_b;
             offset += j * num_ao_b * num_ao_b;
             offset += s;
@@ -412,7 +371,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             idx2 += j * num_mo_b * num_ao_b;
             idx2 += k * num_ao_b;
             idx2 += s;
-            // temp3(idx2) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), k + frozen_core[quantum_part_b_idx]).dot(temp2(Eigen::seqN(offset, num_ao_b, stride)));
             temp_threads[thread_id](idx2) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), k + frozen_core[quantum_part_b_idx]).dot(temp(Eigen::seqN(offset, num_ao_b, stride)));
           }
         }
@@ -427,11 +385,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     eri_threads[thread_id].resize(eri_size_a, eri_size_b);
     eri_threads[thread_id].setZero();
   }
-// temp2.resize(0);
-// temp2.setZero();
-// temp2 = Eigen::Tensor<double, 1>(0);
-// delete temp2;
-// eri.resize(eri_size_a, eri_size_b);
 #pragma omp parallel
   {
     auto fn_counter = 0;
@@ -445,21 +398,10 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
             fn_counter++;
             if (fn_counter % nthreads != thread_id)
               continue;
-            // for (auto s = 0; s < num_ao_b; s++) {
-            //   auto idx3 = i * num_mo_a * num_mo_b * num_ao_b;
-            //   idx3 += j * num_mo_b * num_ao_b;
-            //   idx3 += k * num_ao_b;
-            //   idx3 += s;
-            //   // elem += mo_coeffs_b(s, l) * temp1(i, j, k, s);
-            //   elem += mo_coeffs_b(s, l + frozen_core[quantum_part_b_idx]) * temp3(idx3);
-            // }
-            // // temp2(i, j, k, l) += elem;
-            // eri(this->idx2(i, j), this->idx2(k, l)) = elem;
             auto offset = i * num_mo_a * num_mo_b * num_ao_b;
             offset += j * num_mo_b * num_ao_b;
             offset += k * num_ao_b;
             auto stride = 1;
-            // eri(this->idx2(i, j), this->idx2(k, l)) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), l + frozen_core[quantum_part_b_idx]).dot(temp3(Eigen::seqN(offset, num_ao_b, stride)));
             eri_threads[thread_id](this->idx2(i, j), this->idx2(k, l)) = mo_coeffs_b(Eigen::seqN(0, num_ao_b), l + frozen_core[quantum_part_b_idx]).dot(temp(Eigen::seqN(offset, num_ao_b, stride)));
           }
         }
@@ -560,7 +502,6 @@ void POLYQUANT_INTEGRAL::compute_Schwarz_ints(Eigen::Matrix<double, Eigen::Dynam
         Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> buf_mat(buf[0], n12, n12);
         auto norm = buf_mat.lpNorm<Eigen::Infinity>();
         output_matrix(s1, s2) = std::sqrt(norm);
-        // output_matrix(s2, s1) = std::sqrt(norm);
       }
     }
   }
@@ -887,88 +828,6 @@ void POLYQUANT_INTEGRAL::compute_1body_ints(Eigen::Matrix<double, Eigen::Dynamic
     }
   }
 }
-/**
- * @details This follows the HF test in the Libint2 repo. It constructs the
- * integral engines and splits up the calculation of integrals on each OpenMP
- * rank.
- */
-// void POLYQUANT_INTEGRAL::compute_2body_ints(
-//     Eigen::Matrix<double, Eigen::Dynamic, 1> &output_vec,
-//     const libint2::BasisSet &shells, libint2::Operator obtype) {
-//   // Following the HF test in the Libint2 repo
-//   // construct the overlap integrals engine
-// #pragma omp parallel
-//   {
-//     int nthreads = omp_get_num_threads();
-//     auto thread_id = omp_get_thread_num();
-//
-//     std::vector<libint2::Engine> engines;
-//     if (thread_id == 0) {
-//       std::string message =
-//           "Computing on " + std::to_string(nthreads) + " threads.";
-//       Polyquant_cout(message);
-//     }
-//     engines.resize(nthreads);
-//     engines[0] = libint2::Engine(obtype, shells.max_nprim(), shells.max_l(),
-//     0); engines[0].set_precision(this->tolerance_2e); if (nthreads > 1) {
-//       if (thread_id == 0) {
-//         Polyquant_cout("Making more engines for each thread");
-//       }
-//       for (auto i = 1ul; i < nthreads; i++) {
-//         engines[i] = engines[0];
-//       }
-//     }
-//
-//     auto shell2bf = shells.shell2bf();
-//
-//     // buf[0] points to the target shell set after every call to
-//     // engine.compute()
-//     const auto &buf = engines[thread_id].results();
-//     // loop over unique shell pairs, {s1,s2} such that s1 >= s2
-//     // this is due to the permutational symmetry of the real integrals over
-//     // Hermitian operators: (1|2) = (2|1)
-//     for (auto s1 = 0l, s1234 = 0l; s1 != shells.size(); ++s1) {
-//       auto bf1_first = shell2bf[s1]; // first basis function in this shell
-//       auto n1 = shells[s1].size();
-//       for (auto s2 = 0l; s2 <= s1; ++s2) {
-//         auto bf2_first = shell2bf[s2];
-//         auto n2 = shells[s2].size();
-//         for (auto s3 = 0l; s3 <= s1; ++s3) {
-//           auto bf3_first = shell2bf[s3]; // first basis function in this
-//           shell auto n3 = shells[s3].size(); for (auto s4 = 0l; s4 <= (s1 ==
-//           s3 ? s2 : s3); ++s4) {
-//             auto bf4_first = shell2bf[s4];
-//             auto n4 = shells[s4].size();
-//             if ((s1234++) % nthreads != thread_id)
-//               continue;
-//             // compute shell pair
-//             engines[thread_id].compute(shells[s1], shells[s2], shells[s3],
-//                                        shells[s4]);
-//             const auto *buf_1234 = buf[0];
-//             if (buf_1234 == nullptr)
-//               continue; // if all integrals screened out, skip to next
-//               quartet
-//             for (size_t f1 = 0, f1234 = 0; f1 != n1; ++f1) {
-//               const auto bf1 = f1 + bf1_first;
-//               for (size_t f2 = 0; f2 != n2; ++f2) {
-//                 const auto bf2 = f2 + bf2_first;
-//                 for (size_t f3 = 0; f3 != n3; ++f3) {
-//                   const auto bf3 = f3 + bf3_first;
-//                   for (size_t f4 = 0; f4 != n4; ++f4, ++f1234) {
-//                     const auto bf4 = f4 + bf4_first;
-//                     size_t location = this->idx8(bf1, bf2, bf3, bf4);
-//                     output_vec(location) = buf_1234[f1234];
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-
 void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
   Polyquant_cout("Calculating Symmetric Orthogonalization Matrix...");
   auto function = __PRETTY_FUNCTION__;
@@ -1045,7 +904,6 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         this->orth_X[quantum_part_idx][irrep_idx].resize(num_salc, num_salc);
         Eigen::Matrix<double, Eigen::Dynamic, 1> s;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> L;
-        // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
         if (num_salc == 0) {
           continue;
         }
@@ -1068,34 +926,6 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         double thresh = std::pow(10.0, -(this->eig_s2_linear_dep_threshold));
         int drop_cols = 0;
 
-        // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> C;
-        // C.resize(1);
-        // C[0].resize(1);
-        // C[0][0] = L;
-        // std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> E_orbitals;
-        // E_orbitals.resize(1);
-        // E_orbitals[0].resize(1);
-        // E_orbitals[0][0] = s;
-        // int nao = L.rows();
-        // int nmo = L.cols();
-        // std::vector<std::vector<std::vector<std::string>>> symm_label;
-        // symm_label.resize(1);
-        // symm_label[0].resize(1);
-        // symm_label[0][0].resize(nmo, "A");
-        // std::string title = "canonical orth";
-        // std::vector<std::vector<std::vector<std::string>>> ao_labels;
-        // ao_labels.resize(1);
-        // ao_labels[0].resize(nmo);
-        // for (auto i =  0; i < nmo; i++){
-        // ao_labels[0][i].resize(4, "A");
-        // }
-        // dump_orbitals(C, E_orbitals, E_orbitals, symm_label,title, ao_labels);
-
-        // for (auto i  = 0; i < s.size() ; i++){
-        //     std::cout << " " << s[i] << std::endl;
-        // }
-        // std::cout << std::endl;
-
         while (s(drop_cols) < thresh) {
           drop_cols++;
         }
@@ -1116,14 +946,6 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
           this->orth_X[quantum_part_idx][irrep_idx].noalias() = L * s.asDiagonal();
         }
         this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
-        // std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].rows() << std::endl;
-        // std::cout << this->input_basis->salcs[quantum_part_idx][irrep_idx].cols() << std::endl;
-        // std::cout << this->orth_X[quantum_part_idx][irrep_idx].rows() << std::endl;
-        // std::cout << this->orth_X[quantum_part_idx][irrep_idx].cols() << std::endl;
-        // this->orth_X[quantum_part_idx][irrep_idx] = this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->orth_X[quantum_part_idx][irrep_idx];
-        // this->orth_X[quantum_part_idx][irrep_idx] = this->orth_X[quantum_part_idx][irrep_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
-        // auto temp = this->input_basis->salcs[quantum_part_idx][irrep_idx] * this->orth_X[quantum_part_idx][irrep_idx];
-
         if (verbose == true) {
           std::stringstream filename;
           filename << "orthogonalizer_";
