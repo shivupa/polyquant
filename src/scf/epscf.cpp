@@ -276,7 +276,6 @@ void POLYQUANT_EPSCF::form_fock_helper() {
   libint2::initialize();
   for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule->quantum_particles.size(); quantum_part_a_idx++) {
     if ((this->iteration_num > 1) && this->freeze_density[quantum_part_a_idx] == true) {
-      quantum_part_a_idx++;
       continue;
     }
     auto quantum_part_a_it = this->input_molecule->quantum_particles.begin();
