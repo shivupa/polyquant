@@ -138,12 +138,6 @@ template <typename T> void POLYQUANT_DETSET<T>::precompute_diagonal_Slater_Condo
         }
         idx_part++;
       }
-      // std::cout << i << "   " << matrix_elem << "           (";
-      // for (auto shiv : i_unfold) {
-      //   std::cout << " " << shiv << ",";
-      // }
-      // std::cout << " )" << std::endl;
-
       diagonal_Hii_local(i) = matrix_elem;
     }
 #pragma omp critical

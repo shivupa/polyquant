@@ -67,7 +67,7 @@ public:
    * @return int combined index for the flattened upper triangle of the
    * symmetric matrix
    */
-  template <typename T> const T idx2(const T &i, const T &j) const {
+  template <typename T> T idx2(const T &i, const T &j) const {
     std::pair<T, T> ij_idx;
     ij_idx = std::make_pair(i, j);
     auto ij_elem = symmetric_matrix_triangular_idx(i, j);
