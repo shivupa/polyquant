@@ -8,12 +8,11 @@ POLYQUANT_INTEGRAL::POLYQUANT_INTEGRAL(std::shared_ptr<POLYQUANT_INPUT> input, s
   this->setup_integral(input, symmetry, basis, molecule);
 }
 
-POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() {}
+POLYQUANT_INTEGRAL::~POLYQUANT_INTEGRAL() { libint2::finalize(); }
 
 void POLYQUANT_INTEGRAL::calculate_overlap() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  libint2::initialize();
   Polyquant_cout("Calculating One Body Overlap Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
@@ -32,13 +31,11 @@ void POLYQUANT_INTEGRAL::calculate_overlap() {
     }
     quantum_part_idx++;
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_INTEGRAL::calculate_Schwarz() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  libint2::initialize();
   Polyquant_cout("Calculating pseudo One Body Schwarz Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
@@ -58,7 +55,6 @@ void POLYQUANT_INTEGRAL::calculate_Schwarz() {
     }
     quantum_part_idx++;
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &fc_dm, std::vector<int> &frozen_core) {
@@ -73,7 +69,6 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
       this->frozen_core_ints[i][j].setZero();
     }
   }
-  libint2::initialize();
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule->quantum_particles) {
     for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < fc_dm[quantum_part_a_idx].size(); quantum_part_a_spin_idx++) {
@@ -91,7 +86,6 @@ void POLYQUANT_INTEGRAL::calculate_frozen_core_ints(std::vector<std::vector<Eige
     }
     quantum_part_a_idx++;
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
@@ -100,7 +94,6 @@ void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
   }
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  libint2::initialize();
   Polyquant_cout("Calculating unique shell pairs...");
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_a_part] : this->input_molecule->quantum_particles) {
@@ -109,13 +102,11 @@ void POLYQUANT_INTEGRAL::calculate_unique_shell_pairs(double threshold) {
     }
     quantum_part_a_idx++;
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_INTEGRAL::calculate_kinetic() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  libint2::initialize();
   Polyquant_cout("Calculating One Body Kinetic Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
@@ -134,13 +125,11 @@ void POLYQUANT_INTEGRAL::calculate_kinetic() {
     }
     quantum_part_idx++;
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_INTEGRAL::calculate_nuclear() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  libint2::initialize();
   Polyquant_cout("Calculating One Body Nuclear Integrals...");
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
@@ -160,7 +149,6 @@ void POLYQUANT_INTEGRAL::calculate_nuclear() {
     }
     quantum_part_idx++;
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_INTEGRAL::calculate_mo_1_body_integrals(std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &mo_coeffs, std::vector<int> frozen_core,
@@ -210,7 +198,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
                                                                                                         int num_part_beta, std::vector<int> frozen_core, std::vector<int> deleted_virtual) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  libint2::initialize();
   auto num_ao_a = this->input_basis->num_basis[quantum_part_a_idx];
   int num_mo_a = mo_coeffs_a.cols() - frozen_core[quantum_part_a_idx] - deleted_virtual[quantum_part_a_idx];
   auto num_ao_b = this->input_basis->num_basis[quantum_part_b_idx];
@@ -414,7 +401,6 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
     eri += eri_threads[thread_id];
     eri_threads[thread_id].resize(0, 0);
   }
-  libint2::finalize();
   return eri;
 }
 
@@ -640,6 +626,7 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
 
 void POLYQUANT_INTEGRAL::setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis,
                                         std::shared_ptr<POLYQUANT_MOLECULE> molecule) {
+  libint2::initialize();
   this->input_params = input;
   this->input_symmetry = symmetry;
   this->input_basis = basis;

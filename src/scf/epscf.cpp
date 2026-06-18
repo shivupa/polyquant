@@ -273,7 +273,6 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
 }
 
 void POLYQUANT_EPSCF::form_fock_helper() {
-  libint2::initialize();
   for (auto quantum_part_a_idx = 0; quantum_part_a_idx < this->input_molecule->quantum_particles.size(); quantum_part_a_idx++) {
     if ((this->iteration_num > 1) && this->freeze_density[quantum_part_a_idx] == true) {
       continue;
@@ -302,7 +301,6 @@ void POLYQUANT_EPSCF::form_fock_helper() {
       }
     }
   }
-  libint2::finalize();
 }
 
 void POLYQUANT_EPSCF::form_fock() {
