@@ -210,7 +210,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   auto nthreads = omp_get_max_threads();
-  std::vector<std::vector<std::vector<double>>> threads_map_contributions;
+  std::vector<std::vector<std::vector<size_t>>> threads_map_contributions;
   threads_map_contributions.resize(nthreads);
   for (auto i = 0; i < nthreads; i++) {
     threads_map_contributions[i].clear();
@@ -290,7 +290,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   auto nthreads = omp_get_max_threads();
-  std::vector<std::vector<std::vector<double>>> threads_map_contributions;
+  std::vector<std::vector<std::vector<size_t>>> threads_map_contributions;
   threads_map_contributions.resize(nthreads);
   for (auto i = 0; i < nthreads; i++) {
     threads_map_contributions[i].clear();
