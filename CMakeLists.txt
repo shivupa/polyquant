@@ -14,10 +14,8 @@ set(POLYQUANT_VERSION "${POLYQUANT_VERSION_MAJOR}.${POLYQUANT_VERSION_MINOR}.${P
 # parts of the code, but for now we don't need to
 configure_file(${POLYQUANT_SOURCE_DIR}/src/polyquant.settings ${POLYQUANT_BINARY_DIR}/bin/polyquant.settings)
 install(FILES ${POLYQUANT_BINARY_DIR}/bin/polyquant.settings DESTINATION bin)
-# set include paths
-include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 # turn on position independent code
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ################################################################################
 # set required C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -215,8 +213,6 @@ find_package(libmsym REQUIRED)
 # libint for gaussian AO integrals
 find_package(Libint2)
 if (LIBINT2_FOUND)
-    INCLUDE_DIRECTORIES(${LIBINT2_INCLUDE_DIRS})
-    add_definitions(${LIBINT2_EXTRA_DEFINITIONS})
     message("Libint2 library found in system. Using system installed Libint2.")
 else (LIBINT2_FOUND)
     set(POLYQUANT_GIT_USERNAME $ENV{GIT_USERNAME})
