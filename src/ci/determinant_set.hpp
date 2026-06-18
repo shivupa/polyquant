@@ -28,13 +28,6 @@ template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() {}
   ~POLYQUANT_DETSET() {
-    std::stringstream ss;
-    ss << "SLATER CONDON CALLS : " << Slater_Condon_calls << std::endl;
-    ss << "SLATER CONDON DIAGONAL (i==j) CALLS : " << Slater_Condon_diagonal_calls << std::endl;
-    double percentage_of_all_calls = ((double)Slater_Condon_diagonal_calls) / ((double)Slater_Condon_calls);
-    percentage_of_all_calls *= 100.0;
-    ss << "percent SLATER CONDON DIAGONAL (i==j) CALLS : " << percentage_of_all_calls << "%" << std::endl;
-    Polyquant_cout(ss.str());
   }
   void resize(std::size_t size) {
     unique_dets.resize(size);
@@ -120,8 +113,6 @@ public:
   void precompute_diagonal_Slater_Condon() const;
   double Slater_Condon(int i_det, int j_det) const;
 
-  mutable int Slater_Condon_calls = 0;
-  mutable int Slater_Condon_diagonal_calls = 0;
   // for diagonalization stuff
   using Scalar = double; // A typedef named "Scalar" is required
   int rows() const {

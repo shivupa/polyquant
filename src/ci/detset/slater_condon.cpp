@@ -5,7 +5,6 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
   if (i_det == j_det) {
     return diagonal_Hii[i_det];
   }
-  Slater_Condon_calls++;
   // std::pair<int, int> mat_idx;
   // if (j_det < i_det) {
   //   mat_idx = std::make_pair(j_det, i_det);
