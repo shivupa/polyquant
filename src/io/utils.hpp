@@ -114,6 +114,7 @@ inline void Polyquant_dump_str_to_file(const std::string &str, const std::string
   std::ofstream strfile;
   strfile.open(filename);
   strfile << str << std::endl;
+  strfile.close();
 };
 
 template <typename t> void Polyquant_read_vec_from_file(std::vector<t> &vec, const std::string &filename) {
