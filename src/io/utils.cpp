@@ -205,7 +205,7 @@ int quantum_symb_to_charge(std::string key) {
   if (_atm_symb_to_num.count(key)) {
     return _atm_symb_to_num[key];
   } else if (key == "electron") {
-    return -1.0;
+    return -1;
   } else {
     return 0;
   }
