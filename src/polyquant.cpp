@@ -21,33 +21,34 @@
 using namespace polyquant;
 
 int main(int argc, char **argv) {
-  Eigen::initParallel();
-  cxxopts::Options options("polyquant", "polyquant -- A software package for nonrelativistically treating multiple interacting quantum species.");
-  options.add_options()("i,input", "input filename", cxxopts::value<std::string>())("h,help", "Print usage");
-  options.allow_unrecognised_options();
-  auto input_parameters = options.parse(argc, argv);
+  try {
+    Eigen::initParallel();
+    cxxopts::Options options("polyquant", "polyquant -- A software package for nonrelativistically treating multiple interacting quantum species.");
+    options.add_options()("i,input", "input filename", cxxopts::value<std::string>())("h,help", "Print usage");
+    options.allow_unrecognised_options();
+    auto input_parameters = options.parse(argc, argv);
 
-  if (input_parameters.unmatched().size() > 0) {
-    Polyquant_cout(options.help());
-    APP_ABORT("Too many input files provided!");
-  } else if (input_parameters.count("help")) {
-    Polyquant_cout(options.help());
-  } else if (input_parameters.count("input")) {
-    if (input_parameters.count("input") == 1) {
-      POLYQUANT_TIMER timer("TOTAL RUNTIME");
-      Polyquant_dump_program_header();
-      std::string filename = input_parameters["input"].as<std::string>();
-      // set up calculation object
-      POLYQUANT_CALCULATION calc = POLYQUANT_CALCULATION(filename);
-      // run calculation
-      calc.run();
-    } else {
-      // todo throw error and quit nicely some app abort
+    if (input_parameters.unmatched().size() > 0) {
       Polyquant_cout(options.help());
       APP_ABORT("Too many input files provided!");
+    } else if (input_parameters.count("help")) {
+      Polyquant_cout(options.help());
+    } else if (input_parameters.count("input")) {
+      if (input_parameters.count("input") == 1) {
+        POLYQUANT_TIMER timer("TOTAL RUNTIME");
+        Polyquant_dump_program_header();
+        std::string filename = input_parameters["input"].as<std::string>();
+        POLYQUANT_CALCULATION calc = POLYQUANT_CALCULATION(filename);
+        calc.run();
+      } else {
+        Polyquant_cout(options.help());
+        APP_ABORT("Too many input files provided!");
+      }
+    } else {
+      Polyquant_cout(options.help());
     }
-  } else {
-    Polyquant_cout(options.help());
+  } catch (const PolyquantException &) {
+    return 1;
   }
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS

@@ -18,6 +18,14 @@ using json = nlohmann::json;
 
 namespace polyquant {
 
+class PolyquantException : public std::exception {
+  std::string msg_;
+
+public:
+  explicit PolyquantException(const std::string &reason) : msg_(reason) {}
+  const char *what() const noexcept override { return msg_.c_str(); }
+};
+
 #define POLYQUANT_TEST_EPSILON_LOOSE 1e-6
 #define POLYQUANT_TEST_EPSILON_TIGHT 1e-8
 #define POLYQUANT_TEST_EPSILON_VERYTIGHT 1e-10

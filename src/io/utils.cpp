@@ -6,12 +6,10 @@ using namespace polyquant;
 #if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 namespace polyquant {
 void APP_ABORT(const std::string &reason) {
-  std::vector<std::string> ERROR_MESSAGE = {"THIS IS A POLYQUANT ERROR. PLEASE REPORT TO POLYQUANT MAINTAINERS.", "    ABORT REASON:"};
-  ERROR_MESSAGE.push_back(reason);
-  for (auto line : ERROR_MESSAGE) {
-    Polyquant_cout(line);
-  }
-  exit(1);
+  Polyquant_cout("THIS IS A POLYQUANT ERROR. PLEASE REPORT TO POLYQUANT MAINTAINERS.");
+  Polyquant_cout("    ABORT REASON:");
+  Polyquant_cout(reason);
+  throw PolyquantException(reason);
 }
 
 void APP_WARN(const std::string &reason) {
