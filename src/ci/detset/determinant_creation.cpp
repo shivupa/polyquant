@@ -376,7 +376,7 @@ template <typename T> void POLYQUANT_DETSET<T>::print_determinants() {
 }
 
 template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::size_t det_idx) const {
-  if (det_idx > this->N_dets) {
+  if (det_idx >= this->N_dets) {
     APP_ABORT("det_idx_unfold called with value greater than the number of determinants");
   }
 
