@@ -27,8 +27,7 @@ namespace polyquant {
 template <typename T> class POLYQUANT_DETSET {
 public:
   POLYQUANT_DETSET() {}
-  ~POLYQUANT_DETSET() {
-  }
+  ~POLYQUANT_DETSET() {}
   void resize(std::size_t size) {
     unique_dets.resize(size);
     for (size_t i = 0ul; i < size; i++) {
