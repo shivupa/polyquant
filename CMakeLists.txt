@@ -42,7 +42,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 # linear algebra cmake modules
 FetchContent_Declare( linalg_cmake_modules
   GIT_REPOSITORY https://github.com/wavefunction91/linalg-cmake-modules.git
-  GIT_TAG main
+  GIT_TAG 222364df5e7639f371bf2f37ceb0f476301101a1
 )
 FetchContent_MakeAvailable( linalg_cmake_modules )
 set(CMAKE_MODULE_PATH "${linalg_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
@@ -51,7 +51,7 @@ message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 # bilke cmake modules
 FetchContent_Declare( bilke_cmake_modules
   GIT_REPOSITORY https://github.com/bilke/cmake-modules.git
-  GIT_TAG master
+  GIT_TAG 5b988b5beb64270cf68b7d6c20298ebc8236b580
 )
 FetchContent_MakeAvailable( bilke_cmake_modules )
 set(CMAKE_MODULE_PATH "${bilke_cmake_modules_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
@@ -166,10 +166,11 @@ FetchContent_MakeAvailable(nlohmann_json)
 # endif(NOT nlohmann_json_POPULATED)
 ########################################
 # curl requests to get basis sets
+set( CPR_CURL_USE_LIBPSL OFF CACHE INTERNAL "Disable LIBPSL (requires meson which might not be around on clusters)")
 FetchContent_Declare(
   CPR
   GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-  GIT_TAG 1.11.2)
+  GIT_TAG 1.14.2)
 set(BUILD_CPR_TESTS OFF)
 set(BUILD_CPR_TESTS_SSL OFF)
 set(BUILD_TESTING OFF)
@@ -181,7 +182,7 @@ if (NOT TARGET Eigen3::Eigen)
     FetchContent_Declare(
       Eigen
       GIT_REPOSITORY https://gitlab.com/libeigen/eigen
-      GIT_TAG 3.4.0
+      GIT_TAG 5.0.1
       GIT_SHALLOW TRUE
       GIT_PROGRESS TRUE)
     set(EIGEN_BUILD_DOC OFF)
@@ -235,14 +236,14 @@ endif (LIBINT2_FOUND)
 FetchContent_Declare(
   cppitertools
   GIT_REPOSITORY https://github.com/ryanhaining/cppitertools.git
-  GIT_TAG origin/master)
+  GIT_TAG v2.3)
 FetchContent_MakeAvailable(cppitertools)
 ########################################
 # command line options
 FetchContent_Declare(
   cxxopts
   GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
-  GIT_TAG origin/master)
+  GIT_TAG v3.3.1)
 FetchContent_MakeAvailable(cxxopts)
 set(CONAN "DISABLE" CACHE STRING "conan options AUTO (conan must be in path), MANUAL (expects conanbuildinfo.c make in build directory) or DISABLE")
 set(DISABLE_TESTS True CACHE BOOL "Disable building unit tests")
@@ -255,14 +256,14 @@ set(HIGHFIVE_EXAMPLES OFF CACHE INTERNAL "")  # Forces the value
 FetchContent_Declare(
   HighFive
   GIT_REPOSITORY https://github.com/highfive-devs/highfive.git
-  GIT_TAG v3.0.0-beta2)
+  GIT_TAG v3.3.0)
 FetchContent_MakeAvailable(HighFive)
 ########################################
 # Text Formatting
 # TODO replace with std::format once compilers support it
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG master
+  GIT_TAG 12.2.0
 )
 FetchContent_MakeAvailable(fmt)
 ########################################
@@ -270,7 +271,7 @@ FetchContent_MakeAvailable(fmt)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.8.1)
+    GIT_TAG v3.15.1)
 FetchContent_MakeAvailable(Catch2)
 set(CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/contrib" ${CMAKE_MODULE_PATH})
 include(Catch)

@@ -2,6 +2,7 @@
 #define POLYQUANT_INPUT_TIMER_H
 #include "io/utils.hpp"
 #include <chrono>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <regex>

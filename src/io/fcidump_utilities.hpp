@@ -9,7 +9,7 @@
 #include <cctype>
 #include <chrono>
 #include <filesystem>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>

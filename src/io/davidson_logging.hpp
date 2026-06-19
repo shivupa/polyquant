@@ -7,6 +7,7 @@
 #include <Spectra/MatOp/DenseSymMatProd.h>
 #include <Spectra/MatOp/SparseSymMatProd.h>
 #include <chrono>
+#include <fmt/format.h>
 #include <iomanip>
 #include <iostream>
 #include <type_traits>

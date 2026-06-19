@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>

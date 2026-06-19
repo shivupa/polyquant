@@ -5,6 +5,7 @@
 #include "molecule/quantum_particles.hpp"
 #include "scf/scf.hpp"
 #include <filesystem>
+#include <fmt/format.h>
 #include <libint2.hpp> // IWYU pragma: keep
 #include <libint2/chemistry/sto3g_atomic_density.h>
 #include <libint2/diis.h>
