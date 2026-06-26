@@ -152,6 +152,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
   // TODO generalize this and parallellize...
   this->N_dets = 0;
   this->N_dets_complete_space = 0;
+  this->unfolded_stride = (excitation_level.size() == 2) ? 4 : 2;
+  this->unfolded_dets.clear();
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_0 = std::make_pair(this->unique_dets[0][0][0], this->unique_dets[0][1][0]);
   std::pair<std::vector<T>, std::vector<T>> hf_det_pair_1;
   int symm_idx = -1;
@@ -184,6 +186,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
                 if (excitation_degree_0 + excitation_degree_1 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
                   std::vector<int> det_idx = {i, j, k, l};
                   this->dets[det_idx] = this->N_dets;
+                  this->unfolded_dets.insert(this->unfolded_dets.end(), det_idx.begin(), det_idx.end());
                   this->N_dets++;
                 }
               }
@@ -198,6 +201,7 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
           if (excitation_degree_0 <= max_collective_excitation_level && excitation_symm_idx == this->curr_symm_block) {
             std::vector<int> det_idx = {i, j};
             this->dets[det_idx] = this->N_dets;
+            this->unfolded_dets.insert(this->unfolded_dets.end(), det_idx.begin(), det_idx.end());
             this->N_dets++;
           }
         }
@@ -225,6 +229,10 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
         threads_map_contributions[i].clear();
         threads_map_contributions[i].resize(this->unique_dets[idx_part][idx_spin].size());
       }
+      std::unordered_map<std::vector<T>, std::size_t, VectorHash<T>> unique_det_index;
+      unique_det_index.reserve(this->unique_dets[idx_part][idx_spin].size());
+      for (auto i = 0; i < this->unique_dets[idx_part][idx_spin].size(); i++)
+        unique_det_index[this->unique_dets[idx_part][idx_spin][i]] = i;
 #pragma omp parallel
       {
         auto thread_id = omp_get_thread_num();
@@ -234,19 +242,10 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
           }
           std::set<std::vector<T>> excited_dets;
           this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 1, excited_dets);
-
-          auto curr_idx = 0;
-          while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
-            // for (auto curr_idx = 0; curr_idx < this->unique_dets[idx_part][idx_spin].size(); curr_idx++) {
-            auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-            auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-            auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-            if (det_in_excited_dets_list != excited_dets.end()) {
-              threads_map_contributions[thread_id][idx_det].push_back(curr_idx);
-              // unique_singles[idx_part][idx_spin][idx_det].push_back(curr_idx);
-              excited_dets.erase(det_in_excited_dets_list);
-            }
-            curr_idx++;
+          for (const auto &excited_det : excited_dets) {
+            auto it = unique_det_index.find(excited_det);
+            if (it != unique_det_index.end())
+              threads_map_contributions[thread_id][idx_det].push_back(it->second);
           }
 #pragma omp critical
           unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].end(), threads_map_contributions[thread_id][idx_det].begin(),
@@ -316,6 +315,10 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
         threads_map_contributions[i].clear();
         threads_map_contributions[i].resize(this->unique_dets[idx_part][idx_spin].size());
       }
+      std::unordered_map<std::vector<T>, std::size_t, VectorHash<T>> unique_det_index;
+      unique_det_index.reserve(this->unique_dets[idx_part][idx_spin].size());
+      for (auto i = 0; i < this->unique_dets[idx_part][idx_spin].size(); i++)
+        unique_det_index[this->unique_dets[idx_part][idx_spin][i]] = i;
 #pragma omp parallel
       {
         auto thread_id = omp_get_thread_num();
@@ -325,17 +328,10 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
           }
           std::set<std::vector<T>> excited_dets;
           this->get_unique_excitation_set(idx_part, idx_spin, idx_det, 2, excited_dets);
-          auto curr_idx = 0;
-          while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
-            auto curr_det = this->unique_dets[idx_part][idx_spin][curr_idx];
-            auto is_det = [&curr_det](std::vector<T> i) { return i == curr_det; };
-            auto det_in_excited_dets_list = std::find_if(excited_dets.begin(), excited_dets.end(), is_det);
-            if (det_in_excited_dets_list != excited_dets.end()) {
-              threads_map_contributions[thread_id][idx_det].push_back(curr_idx);
-              // unique_doubles[idx_part][idx_spin][idx_det].push_back(curr_idx);
-              excited_dets.erase(det_in_excited_dets_list);
-            }
-            curr_idx++;
+          for (const auto &excited_det : excited_dets) {
+            auto it = unique_det_index.find(excited_det);
+            if (it != unique_det_index.end())
+              threads_map_contributions[thread_id][idx_det].push_back(it->second);
           }
 #pragma omp critical
           unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].end(), threads_map_contributions[thread_id][idx_det].begin(),
@@ -387,12 +383,8 @@ template <typename T> std::vector<int> POLYQUANT_DETSET<T>::det_idx_unfold(std::
   if (det_idx >= this->N_dets) {
     APP_ABORT("det_idx_unfold called with value greater than the number of determinants");
   }
-
-  auto it = std::find_if(std::begin(dets), std::end(dets), [&det_idx](auto &&pair) { return pair.second == det_idx; });
-  if (it == std::end(dets)) {
-    APP_ABORT("det_idx_unfold could not find determinant which should exist (idx < N_dets).");
-  }
-  return it->first;
+  auto base = this->unfolded_dets.begin() + det_idx * this->unfolded_stride;
+  return std::vector<int>(base, base + this->unfolded_stride);
 }
 
 template <typename T> std::vector<T> POLYQUANT_DETSET<T>::get_det(int idx_part, int idx_spin, int i) const { return unique_dets[idx_part][idx_spin][i]; }
