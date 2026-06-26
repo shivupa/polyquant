@@ -117,18 +117,24 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
 
 template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const {
   for (auto i = 0; i < D.size(); i++) {
-    std::bitset<bit_kind_size> D_bitset(D[i]);
-    for (auto j = 0; j < D_bitset.size(); j++) {
-      auto orb_idx = ((D.size() - i - 1) * bit_kind_size) + j;
-      // max_orb - 1 because we are dealing with the index
-      if (orb_idx >= this->max_orb[idx_part]) {
+    auto base = (D.size() - i - 1) * bit_kind_size;
+    T occ_bits = D[i];
+    while (occ_bits) {
+      auto pos = std::countr_zero(occ_bits);
+      auto orb_idx = base + pos;
+      if (orb_idx >= static_cast<std::size_t>(this->max_orb[idx_part]))
         break;
-      }
-      if (D_bitset[j] == 1) {
-        occ.push_back(orb_idx);
-      } else {
-        virt.push_back(orb_idx);
-      }
+      occ.push_back(orb_idx);
+      occ_bits &= occ_bits - 1;
+    }
+    T virt_bits = ~D[i];
+    while (virt_bits) {
+      auto pos = std::countr_zero(virt_bits);
+      auto orb_idx = base + pos;
+      if (orb_idx >= static_cast<std::size_t>(this->max_orb[idx_part]))
+        break;
+      virt.push_back(orb_idx);
+      virt_bits &= virt_bits - 1;
     }
   }
 
