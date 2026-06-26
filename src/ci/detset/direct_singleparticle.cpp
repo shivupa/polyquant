@@ -257,18 +257,13 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
   }
   for (auto i = 0; i < nthreads; i++)
     sigma_workspace_[i].setZero();
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
+#pragma omp parallel for schedule(dynamic, 64)
+  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto thread_id = omp_get_thread_num();
-    // loop over connected singles alpha
-    for (auto i_det = 0; i_det < this->N_dets; i_det++) {
+    {
       auto idet_unfold = det_idx_unfold(i_det);
       auto idx_I_A_det = idet_unfold[first_spin_idx];
       auto idx_I_B_det = idet_unfold[second_spin_idx];
-      if (i_det % nthreads != thread_id) {
-        continue;
-      }
       // diagonal
       for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
         auto integral = diagonal_Hii[i_det];
