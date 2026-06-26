@@ -303,8 +303,12 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
     for (auto idx_spin = 0; idx_spin < 2; idx_spin++) {
       unique_doubles[idx_part][idx_spin].resize(this->unique_dets[idx_part][idx_spin].size());
       // do we have enough particles to do a double excitation?
-      if (this->unique_dets[idx_part][idx_spin][0][0] < 2) {
-        continue;
+      {
+        int n_occ = 0;
+        for (auto x : this->unique_dets[idx_part][idx_spin][0])
+          n_occ += std::popcount(x);
+        if (n_occ < 2)
+          continue;
       }
       for (auto i = 0; i < nthreads; i++) {
         threads_map_contributions[i].clear();
