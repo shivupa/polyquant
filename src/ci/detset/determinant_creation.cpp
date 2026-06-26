@@ -249,10 +249,12 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
             curr_idx++;
           }
 #pragma omp critical
-          unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+          unique_singles[idx_part][idx_spin][idx_det].insert(unique_singles[idx_part][idx_spin][idx_det].end(), threads_map_contributions[thread_id][idx_det].begin(),
                                                              threads_map_contributions[thread_id][idx_det].end());
         }
       }
+      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++)
+        std::sort(unique_singles[idx_part][idx_spin][idx_det].begin(), unique_singles[idx_part][idx_spin][idx_det].end());
 
       // auto curr_idx = 0;
       // while (!excited_dets.empty() && curr_idx < this->unique_dets[idx_part][idx_spin].size()) {
@@ -336,10 +338,12 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_dou
             curr_idx++;
           }
 #pragma omp critical
-          unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].begin(), threads_map_contributions[thread_id][idx_det].begin(),
+          unique_doubles[idx_part][idx_spin][idx_det].insert(unique_doubles[idx_part][idx_spin][idx_det].end(), threads_map_contributions[thread_id][idx_det].begin(),
                                                              threads_map_contributions[thread_id][idx_det].end());
         }
       }
+      for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++)
+        std::sort(unique_doubles[idx_part][idx_spin][idx_det].begin(), unique_doubles[idx_part][idx_spin][idx_det].end());
       // merge vectors
       // for (auto idx_det = 0; idx_det < this->unique_dets[idx_part][idx_spin].size(); idx_det++) {
       //   auto thread_id = idx_det % nthreads;
