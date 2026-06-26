@@ -19,12 +19,15 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
   // For example the SCF can have spin restricted species with spin unrestricted species.
   // It isn't documented or explicitly clear that 2 spins per particle type are always expected to be present.
   auto nthreads = omp_get_max_threads();
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> threads_sigma_contributions;
-  threads_sigma_contributions.resize(nthreads);
-  for (auto i = 0; i < nthreads; i++) {
-    threads_sigma_contributions[i].resize(this->rows(), C.cols());
-    threads_sigma_contributions[i].setZero();
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
+      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+    sigma_workspace_.resize(nthreads);
+    for (auto i = 0; i < nthreads; i++)
+      sigma_workspace_[i].resize(this->rows(), C.cols());
+    sigma_workspace_nthreads_ = nthreads;
   }
+  for (auto i = 0; i < nthreads; i++)
+    sigma_workspace_[i].setZero();
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -47,7 +50,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
               // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
               auto integral = diagonal_Hii[folded_idet_idx];
               for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_idet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
               }
             }
           }
@@ -56,10 +59,10 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
     }
 
 #pragma omp critical
-    sigma += threads_sigma_contributions[thread_id];
+    sigma += sigma_workspace_[thread_id];
   }
   // for (auto i = 0; i < nthreads; i++) {
-  //   sigma += threads_sigma_contributions[i];
+  //   sigma += sigma_workspace_[i];
   // }
 }
 
@@ -73,12 +76,15 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
   auto second_spin_idx = 1 - idx_spin;
   auto other_idx_part = 1 - idx_part;
   auto nthreads = omp_get_max_threads();
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> threads_sigma_contributions;
-  threads_sigma_contributions.resize(nthreads);
-  for (auto i = 0; i < nthreads; i++) {
-    threads_sigma_contributions[i].resize(this->rows(), C.cols());
-    threads_sigma_contributions[i].setZero();
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
+      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+    sigma_workspace_.resize(nthreads);
+    for (auto i = 0; i < nthreads; i++)
+      sigma_workspace_[i].resize(this->rows(), C.cols());
+    sigma_workspace_nthreads_ = nthreads;
   }
+  for (auto i = 0; i < nthreads; i++)
+    sigma_workspace_[i].setZero();
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -133,10 +139,10 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
                   // }
                   if (integral != 0.0) {
                     for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                      threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                      sigma_workspace_[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
                       // if (folded_idet_idx != folded_jdet_idx)
                       //{
-                      threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
+                      sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
                       //}
                     }
                   }
@@ -149,10 +155,10 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
     }
 
 #pragma omp critical
-    sigma += threads_sigma_contributions[thread_id];
+    sigma += sigma_workspace_[thread_id];
   }
   // for (auto i = 0; i < nthreads; i++) {
-  //   sigma += threads_sigma_contributions[i];
+  //   sigma += sigma_workspace_[i];
   // }
 }
 
@@ -184,12 +190,15 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
   // auto second_spin_idx = idx_spin - 1 % this->input_integral->mo_one_body_ints[idx_part].size();
   auto second_spin_idx = 1 - idx_spin;
   auto nthreads = omp_get_max_threads();
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> threads_sigma_contributions;
-  threads_sigma_contributions.resize(nthreads);
-  for (auto i = 0; i < nthreads; i++) {
-    threads_sigma_contributions[i].resize(this->rows(), C.cols());
-    threads_sigma_contributions[i].setZero();
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
+      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+    sigma_workspace_.resize(nthreads);
+    for (auto i = 0; i < nthreads; i++)
+      sigma_workspace_[i].resize(this->rows(), C.cols());
+    sigma_workspace_nthreads_ = nthreads;
   }
+  for (auto i = 0; i < nthreads; i++)
+    sigma_workspace_[i].setZero();
 #pragma omp parallel
   {
     int nthreads = omp_get_num_threads();
@@ -251,8 +260,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
                     auto folded_jdet_idx = jdet_it->second;
                     auto integral = Slater_Condon(folded_det_idx, folded_jdet_idx);
                     for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                      threads_sigma_contributions[thread_id](folded_det_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                      threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_det_idx, state_idx);
+                      sigma_workspace_[thread_id](folded_det_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                      sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_det_idx, state_idx);
                     }
                   }
                 }
@@ -264,10 +273,10 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
     }
 
 #pragma omp critical
-    sigma += threads_sigma_contributions[thread_id];
+    sigma += sigma_workspace_[thread_id];
   }
   // for (auto i = 0; i < nthreads; i++) {
-  //   sigma += threads_sigma_contributions[i];
+  //   sigma += sigma_workspace_[i];
   // }
 }
 
@@ -282,12 +291,15 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
   auto other_quantum_part = (++this->input_integral->input_molecule->quantum_particles.begin())->second;
   auto charge_factor = quantum_part.charge * other_quantum_part.charge;
   auto nthreads = omp_get_max_threads();
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> threads_sigma_contributions;
-  threads_sigma_contributions.resize(nthreads);
-  for (auto i = 0; i < nthreads; i++) {
-    threads_sigma_contributions[i].resize(this->rows(), C.cols());
-    threads_sigma_contributions[i].setZero();
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
+      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+    sigma_workspace_.resize(nthreads);
+    for (auto i = 0; i < nthreads; i++)
+      sigma_workspace_[i].resize(this->rows(), C.cols());
+    sigma_workspace_nthreads_ = nthreads;
   }
+  for (auto i = 0; i < nthreads; i++)
+    sigma_workspace_[i].setZero();
 #pragma omp parallel
   {
     auto thread_id = omp_get_thread_num();
@@ -304,7 +316,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
       // diagonal
       for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
         auto integral = diagonal_Hii[i_det];
-        threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(i_det, state_idx);
+        sigma_workspace_[thread_id](i_det, state_idx) += integral * C(i_det, state_idx);
       }
       // part 0 spin 0 singles
       for (auto idx_J_A_det : unique_singles[0][0][idx_I_A_det]) {
@@ -324,8 +336,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -343,8 +355,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
-                threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+                sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
               }
             }
           }
@@ -362,8 +374,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
-                threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+                sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
               }
             }
           }
@@ -381,8 +393,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
-                threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+                sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
               }
             }
           }
@@ -407,8 +419,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -426,8 +438,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
-                threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+                sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
               }
             }
           }
@@ -446,8 +458,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
-                threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+                sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
               }
             }
           }
@@ -472,8 +484,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -492,8 +504,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             integral += charge_factor * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
-                threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+                sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+                sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
               }
             }
           }
@@ -518,8 +530,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += charge_factor * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -541,8 +553,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += same_part_ham_double(0, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -564,8 +576,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += same_part_ham_double(0, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -587,8 +599,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += same_part_ham_double(1, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -610,8 +622,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
           integral += same_part_ham_double(1, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
-              threads_sigma_contributions[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
-              threads_sigma_contributions[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
@@ -619,7 +631,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
     }
 
 #pragma omp critical
-    sigma += threads_sigma_contributions[thread_id];
+    sigma += sigma_workspace_[thread_id];
   }
 }
 

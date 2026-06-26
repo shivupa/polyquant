@@ -180,6 +180,8 @@ public:
   Eigen::SparseMatrix<double, Eigen::RowMajor> ham;
   std::vector<int> unfolded_dets; // flat: stride * N_dets ints; index via det_idx_unfold
   int unfolded_stride = 0;        // 2 for 1-species, 4 for 2-species
+  mutable std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma_workspace_;
+  mutable int sigma_workspace_nthreads_ = 0;
   int N_dets;                // Number of determinants in this symmetry block
   int N_dets_complete_space; // Number of determinants in the full space (not the full ci space, but the full space of the current excitation level). If symmetry is off this is equal to N_dets, if
                              // symmetry is on this should be ~N_irrep * N_dets.
