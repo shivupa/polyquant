@@ -58,12 +58,9 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
       }
     }
 
-#pragma omp critical
-    sigma += sigma_workspace_[thread_id];
   }
-  // for (auto i = 0; i < nthreads; i++) {
-  //   sigma += sigma_workspace_[i];
-  // }
+  for (auto i = 0; i < nthreads; i++)
+    sigma += sigma_workspace_[i];
 }
 
 template <typename T>
@@ -154,12 +151,9 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
       }
     }
 
-#pragma omp critical
-    sigma += sigma_workspace_[thread_id];
   }
-  // for (auto i = 0; i < nthreads; i++) {
-  //   sigma += sigma_workspace_[i];
-  // }
+  for (auto i = 0; i < nthreads; i++)
+    sigma += sigma_workspace_[i];
 }
 
 template <typename T>
@@ -272,12 +266,9 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
       }
     }
 
-#pragma omp critical
-    sigma += sigma_workspace_[thread_id];
   }
-  // for (auto i = 0; i < nthreads; i++) {
-  //   sigma += sigma_workspace_[i];
-  // }
+  for (auto i = 0; i < nthreads; i++)
+    sigma += sigma_workspace_[i];
 }
 
 template <typename T>
@@ -629,10 +620,9 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
         }
       }
     }
-
-#pragma omp critical
-    sigma += sigma_workspace_[thread_id];
   }
+  for (auto i = 0; i < nthreads; i++)
+    sigma += sigma_workspace_[i];
 }
 
 template <typename T>
