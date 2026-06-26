@@ -29,10 +29,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
         std::vector<int> det_idx(2);
         det_idx[first_spin_idx] = idx_I_A_det;
         det_idx[second_spin_idx] = idx_I_B_det;
-        if (this->dets.find(det_idx) != this->dets.end()) {
-          // TODO pick one of these and stick to that form
-          // auto folded_idet_idx = this->dets.find(det_idx)->second;
-          auto folded_idet_idx = this->dets.at(det_idx);
+        auto idet_it = this->dets.find(det_idx);
+        if (idet_it != this->dets.end()) {
+          auto folded_idet_idx = idet_it->second;
           // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
           auto integral = diagonal_Hii[folded_idet_idx];
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
@@ -77,8 +76,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
         std::vector<int> det_idx(2);
         det_idx[first_spin_idx] = idx_I_A_det;
         det_idx[second_spin_idx] = idx_I_B_det;
-        if (this->dets.find(det_idx) != this->dets.end()) {
-          auto folded_idet_idx = this->dets.find(det_idx)->second;
+        auto idet_it = this->dets.find(det_idx);
+        if (idet_it != this->dets.end()) {
+          auto folded_idet_idx = idet_it->second;
           // replace this with for (idx_J_A_det in single_excitation(idx_I_A_det) + double_excitation(idx_I_A_det))
           std::vector<int> excitation_list;
           std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
@@ -102,8 +102,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
             std::vector<int> jdet_idx(2);
             jdet_idx[first_spin_idx] = idx_J_A_det;
             jdet_idx[second_spin_idx] = idx_I_B_det;
-            if (this->dets.find(jdet_idx) != this->dets.end()) {
-
+            auto jdet_it = this->dets.find(jdet_idx);
+            if (jdet_it != this->dets.end()) {
+              auto folded_jdet_idx = jdet_it->second;
               auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
               auto integral = 0.0;
               if (num_exec == 1) {
@@ -112,7 +113,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
                 integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
               }
               if (integral != 0.0) {
-                auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
                 for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
                   // auto integral = Slater_Condon(folded_idet_idx, folded_jdet_idx);
                   threads_sigma_contributions[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
@@ -172,7 +172,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
         std::vector<int> det_idx(2);
         det_idx[first_spin_idx] = idx_I_A_det;
         det_idx[second_spin_idx] = idx_I_B_det;
-        if (this->dets.find(det_idx) != this->dets.end()) {
+        auto idet_it = this->dets.find(det_idx);
+        if (idet_it != this->dets.end()) {
+          auto folded_det_idx = idet_it->second;
           // std::set<int> a_excitation_list;
           // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, a_excitation_list);
           // std::sort(a_excitation_list.begin(), a_excitation_list.end());
@@ -189,7 +191,6 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
             //  if (num_exec != 1) {
             //    continue;
             //  }
-            auto folded_det_idx = this->dets.find(det_idx)->second;
             // replace this with for (idx_J_B_det in single_excitation(idx_I_B_det))
             // for (auto idx_J_B_det = idx_I_B_det; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
             // for (auto idx_J_B_det = 0; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
@@ -209,8 +210,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
               std::vector<int> jdet_idx(2);
               jdet_idx[first_spin_idx] = idx_J_A_det;
               jdet_idx[second_spin_idx] = idx_J_B_det;
-              if (this->dets.find(jdet_idx) != this->dets.end()) {
-                auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+              auto jdet_it = this->dets.find(jdet_idx);
+              if (jdet_it != this->dets.end()) {
+                auto folded_jdet_idx = jdet_it->second;
                 // auto integral = Slater_Condon(folded_det_idx, folded_jdet_idx);
                 auto integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
                 if (integral != 0.0) {
@@ -278,8 +280,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_J_A_det;
         jdet_idx[second_spin_idx] = idx_I_B_det;
-        if (this->dets.find(jdet_idx) != this->dets.end()) {
-          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+        auto jdet_it = this->dets.find(jdet_idx);
+        if (jdet_it != this->dets.end()) {
+          auto folded_jdet_idx = jdet_it->second;
           auto integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
@@ -293,8 +296,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
           std::vector<int> jdet_idx(2);
           jdet_idx[first_spin_idx] = idx_J_A_det;
           jdet_idx[second_spin_idx] = idx_J_B_det;
-          if (this->dets.find(jdet_idx) != this->dets.end()) {
-            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto jdet_it2 = this->dets.find(jdet_idx);
+          if (jdet_it2 != this->dets.end()) {
+            auto folded_jdet_idx = jdet_it2->second;
             auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               if (integral != 0.0) {
@@ -314,8 +318,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_I_A_det;
         jdet_idx[second_spin_idx] = idx_J_B_det;
-        if (this->dets.find(jdet_idx) != this->dets.end()) {
-          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+        auto jdet_it = this->dets.find(jdet_idx);
+        if (jdet_it != this->dets.end()) {
+          auto folded_jdet_idx = jdet_it->second;
           auto integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
@@ -334,8 +339,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_J_A_det;
         jdet_idx[second_spin_idx] = idx_I_B_det;
-        if (this->dets.find(jdet_idx) != this->dets.end()) {
-          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+        auto jdet_it = this->dets.find(jdet_idx);
+        if (jdet_it != this->dets.end()) {
+          auto folded_jdet_idx = jdet_it->second;
           auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
@@ -354,8 +360,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_I_A_det;
         jdet_idx[second_spin_idx] = idx_J_B_det;
-        if (this->dets.find(jdet_idx) != this->dets.end()) {
-          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+        auto jdet_it = this->dets.find(jdet_idx);
+        if (jdet_it != this->dets.end()) {
+          auto folded_jdet_idx = jdet_it->second;
           auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             if (integral != 0.0) {
