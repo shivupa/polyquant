@@ -188,6 +188,7 @@ public:
   int curr_symm_block;
   bool slow_diag = false;
   bool build_matrix = true;
+  bool use_singleshot = true;
   double screening_threshold = 0.0;
 
   static const T bit_kind_shift = 6;            // TODO this only applies to 64bit right now

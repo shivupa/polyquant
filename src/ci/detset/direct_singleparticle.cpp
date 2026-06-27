@@ -21,28 +21,12 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
   }
   for (auto i = 0; i < nthreads; i++)
     sigma_workspace_[i].setZero();
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
+#pragma omp parallel for schedule(dynamic, 64)
+  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto thread_id = omp_get_thread_num();
-    for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++) {
-      for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++) {
-        if ((idx_I_A_det + idx_I_B_det) % nthreads != thread_id)
-          continue;
-        std::vector<int> det_idx(2);
-        det_idx[first_spin_idx] = idx_I_A_det;
-        det_idx[second_spin_idx] = idx_I_B_det;
-        auto idet_it = this->dets.find(det_idx);
-        if (idet_it != this->dets.end()) {
-          auto folded_idet_idx = idet_it->second;
-          // auto integral = Slater_Condon(folded_idet_idx, folded_idet_idx);
-          auto integral = diagonal_Hii[folded_idet_idx];
-          for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-            sigma_workspace_[thread_id](folded_idet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
-          }
-        }
-      }
-    }
+    auto integral = diagonal_Hii[i_det];
+    for (auto state_idx = 0; state_idx < C.cols(); state_idx++)
+      sigma_workspace_[thread_id](i_det, state_idx) += integral * C(i_det, state_idx);
   }
   for (auto i = 0; i < nthreads; i++)
     sigma += sigma_workspace_[i];
@@ -68,69 +52,38 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
   }
   for (auto i = 0; i < nthreads; i++)
     sigma_workspace_[i].setZero();
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
+#pragma omp parallel for schedule(dynamic, 64)
+  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto thread_id = omp_get_thread_num();
-    for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++) {
-      for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++) {
-        if ((idx_I_A_det + idx_I_B_det) % nthreads != thread_id)
-          continue;
-        std::vector<int> det_idx(2);
-        det_idx[first_spin_idx] = idx_I_A_det;
-        det_idx[second_spin_idx] = idx_I_B_det;
-        auto idet_it = this->dets.find(det_idx);
-        if (idet_it != this->dets.end()) {
-          auto folded_idet_idx = idet_it->second;
-          // replace this with for (idx_J_A_det in single_excitation(idx_I_A_det) + double_excitation(idx_I_A_det))
-          std::vector<int> excitation_list;
-          std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
-                         unique_doubles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_doubles[idx_part][first_spin_idx][idx_I_A_det].end(), std::back_inserter(excitation_list));
-          // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, excitation_list);
-          //  do we have enough particles to do a double excitation?
-          //  if (this->unique_dets[idx_part][first_spin_idx][0][0] > 1)
-          //    this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 2, excitation_list);
-          //  std::sort(excitation_list.begin(), excitation_list.end());
-          //  excitation_list.erase(std::remove_if(excitation_list.begin(), excitation_list.end(), [&idx_I_A_det](int x) { return x < idx_I_A_det; }), excitation_list.end());
-
-          // for (auto idx_J_A_det = idx_I_A_det; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++) {
-          // auto excitation_list_count = 0;
-          for (auto idx_J_A_det : excitation_list) {
-            // excitation_list_count++;
-            // if ((idx_I_A_det + idx_I_B_det + excitation_list_count) % nthreads != thread_id)
-            //   continue;
-            if (idx_J_A_det <= idx_I_A_det) {
-              continue;
-            }
-            std::vector<int> jdet_idx(2);
-            jdet_idx[first_spin_idx] = idx_J_A_det;
-            jdet_idx[second_spin_idx] = idx_I_B_det;
-            auto jdet_it = this->dets.find(jdet_idx);
-            if (jdet_it != this->dets.end()) {
-              auto folded_jdet_idx = jdet_it->second;
-              auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
-              auto integral = 0.0;
-              if (num_exec == 1) {
-                integral = same_part_ham_single(idx_part, det_idx, jdet_idx);
-              } else {
-                integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
-              }
-              if (integral != 0.0) {
-                for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                  // auto integral = Slater_Condon(folded_idet_idx, folded_jdet_idx);
-                  sigma_workspace_[thread_id](folded_idet_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                  // if (folded_idet_idx != folded_jdet_idx)
-                  //{
-                  sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_idet_idx, state_idx);
-                  //}
-                }
-              }
-            }
+    auto idet_unfold = det_idx_unfold(i_det);
+    auto idx_I_A_det = idet_unfold[first_spin_idx];
+    auto idx_I_B_det = idet_unfold[second_spin_idx];
+    std::vector<int> excitation_list;
+    std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
+                   unique_doubles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_doubles[idx_part][first_spin_idx][idx_I_A_det].end(), std::back_inserter(excitation_list));
+    for (auto idx_J_A_det : excitation_list) {
+      if (idx_J_A_det <= idx_I_A_det)
+        continue;
+      std::vector<int> jdet_idx(2);
+      jdet_idx[first_spin_idx] = idx_J_A_det;
+      jdet_idx[second_spin_idx] = idx_I_B_det;
+      auto jdet_it = this->dets.find(jdet_idx);
+      if (jdet_it != this->dets.end()) {
+        auto folded_jdet_idx = jdet_it->second;
+        auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
+        double integral = 0.0;
+        if (num_exec == 1)
+          integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
+        else
+          integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
+        if (integral != 0.0) {
+          for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
+            sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+            sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
           }
         }
       }
     }
-
   }
   for (auto i = 0; i < nthreads; i++)
     sigma += sigma_workspace_[i];
@@ -164,74 +117,32 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
   }
   for (auto i = 0; i < nthreads; i++)
     sigma_workspace_[i].setZero();
-#pragma omp parallel
-  {
-    int nthreads = omp_get_num_threads();
+#pragma omp parallel for schedule(dynamic, 64)
+  for (auto i_det = 0; i_det < this->N_dets; i_det++) {
     auto thread_id = omp_get_thread_num();
-    for (auto idx_I_A_det = 0; idx_I_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_I_A_det++) {
-      for (auto idx_I_B_det = 0; idx_I_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_I_B_det++) {
-        if ((idx_I_A_det + idx_I_B_det) % nthreads != thread_id)
-          continue;
-        std::vector<int> det_idx(2);
-        det_idx[first_spin_idx] = idx_I_A_det;
-        det_idx[second_spin_idx] = idx_I_B_det;
-        auto idet_it = this->dets.find(det_idx);
-        if (idet_it != this->dets.end()) {
-          auto folded_det_idx = idet_it->second;
-          // std::set<int> a_excitation_list;
-          // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, a_excitation_list);
-          // std::sort(a_excitation_list.begin(), a_excitation_list.end());
-          // a_excitation_list.erase(std::remove_if(a_excitation_list.begin(), a_excitation_list.end(), [&idx_I_A_det](int x) { return x < idx_I_A_det; }), a_excitation_list.end());
-          // auto a_excitation_list_count = 0;
-          for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
-            if (idx_J_A_det < idx_I_A_det) {
-              continue;
-            }
-            // a_excitation_list_count++;
-            //  replace this with for (idx_J_A_det in single_excitation(idx_I_A_det))
-            //  for (auto idx_J_A_det = idx_I_A_det; idx_J_A_det < this->unique_dets[idx_part][first_spin_idx].size(); idx_J_A_det++) {
-            //  auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
-            //  if (num_exec != 1) {
-            //    continue;
-            //  }
-            // replace this with for (idx_J_B_det in single_excitation(idx_I_B_det))
-            // for (auto idx_J_B_det = idx_I_B_det; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
-            // for (auto idx_J_B_det = 0; idx_J_B_det < this->unique_dets[idx_part][second_spin_idx].size(); idx_J_B_det++) {
-            // std::set<int> b_excitation_list;
-            // this->get_unique_excitation_list_of_indices(idx_part, second_spin_idx, idx_I_B_det, 1, b_excitation_list);
-            // std::sort(b_excitation_list.begin(), b_excitation_list.end());
-            //  b_excitation_list.erase(std::remove_if(b_excitation_list.begin(), b_excitation_list.end(), [&idx_I_B_det](int x){return x < idx_I_B_det;}), b_excitation_list.end());
-            // auto b_excitation_list_count = 0;
-            for (auto idx_J_B_det : unique_singles[idx_part][second_spin_idx][idx_I_B_det]) {
-              // b_excitation_list_count++;
-
-              // auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][second_spin_idx][idx_I_B_det], this->unique_dets[idx_part][second_spin_idx][idx_J_B_det]);
-              // if (num_exec != 1) {
-              //   continue;
-              // }
-
-              std::vector<int> jdet_idx(2);
-              jdet_idx[first_spin_idx] = idx_J_A_det;
-              jdet_idx[second_spin_idx] = idx_J_B_det;
-              auto jdet_it = this->dets.find(jdet_idx);
-              if (jdet_it != this->dets.end()) {
-                auto folded_jdet_idx = jdet_it->second;
-                // auto integral = Slater_Condon(folded_det_idx, folded_jdet_idx);
-                auto integral = same_part_ham_double(idx_part, det_idx, jdet_idx);
-                if (integral != 0.0) {
-                  for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
-                    sigma_workspace_[thread_id](folded_det_idx, state_idx) += integral * C(folded_jdet_idx, state_idx);
-                    sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(folded_det_idx, state_idx);
-                  }
-                }
-              }
-              // instead of JB starting at 0 we could do swaps IAJB JAIB
+    auto idet_unfold = det_idx_unfold(i_det);
+    auto idx_I_A_det = idet_unfold[first_spin_idx];
+    auto idx_I_B_det = idet_unfold[second_spin_idx];
+    for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
+      if (idx_J_A_det < idx_I_A_det)
+        continue;
+      for (auto idx_J_B_det : unique_singles[idx_part][second_spin_idx][idx_I_B_det]) {
+        std::vector<int> jdet_idx(2);
+        jdet_idx[first_spin_idx] = idx_J_A_det;
+        jdet_idx[second_spin_idx] = idx_J_B_det;
+        auto jdet_it = this->dets.find(jdet_idx);
+        if (jdet_it != this->dets.end()) {
+          auto folded_jdet_idx = jdet_it->second;
+          auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
+          if (integral != 0.0) {
+            for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
+              sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+              sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
             }
           }
         }
       }
     }
-
   }
   for (auto i = 0; i < nthreads; i++)
     sigma += sigma_workspace_[i];
@@ -384,25 +295,24 @@ void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eig
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_contribution;
   sigma_contribution.resize(this->rows(), C.cols());
   sigma_contribution.setZero();
-  // // Diagonal Contribution
-  // sigma_one_species_diagonal_contribution(sigma_contribution, C, 0, 0);
-  // sigma += sigma_contribution;
-  // sigma_contribution.setZero();
-  // // Aa Aa
-  // sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 0);
-  // sigma += sigma_contribution;
-  // sigma_contribution.setZero();
-  // // Ab Ab
-  // sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 1);
-  // sigma += sigma_contribution;
-  // sigma_contribution.setZero();
-  // // Aa Ab
-  // sigma_one_species_class_two_contribution(sigma_contribution, C, 0, 0, 0, 1);
-  // sigma += sigma_contribution;
-  // sigma_contribution.setZero();
-  sigma_one_species_class_singleshot(sigma_contribution, C, 0, 0, 0, 1);
-  sigma += sigma_contribution;
-  sigma_contribution.setZero();
+  if (use_singleshot) {
+    sigma_one_species_class_singleshot(sigma_contribution, C, 0, 0, 0, 1);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+  } else {
+    sigma_one_species_diagonal_contribution(sigma_contribution, C, 0, 0);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+    sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 0);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+    sigma_one_species_class_one_contribution(sigma_contribution, C, 0, 1);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+    sigma_one_species_class_two_contribution(sigma_contribution, C, 0, 0, 0, 1);
+    sigma += sigma_contribution;
+    sigma_contribution.setZero();
+  }
 }
 
 template class POLYQUANT_DETSET<uint64_t>;
