@@ -169,6 +169,12 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
     APP_ABORT("Internal Fock task construction error: shell quartet count mismatch.");
   }
 
+  const auto doing_incremental_fock = this->incremental_fock && incremental_fock_doing_incremental[quantum_part_a_idx][quantum_part_a_spin_idx];
+  const auto same_spin_exchange = quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx;
+  const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
+  const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.5 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
+  const auto exchange_scale = 0.125;
+
 #pragma omp parallel for schedule(dynamic, 1)
   for (long long task_idx = 0; task_idx < static_cast<long long>(tasks.size()); task_idx++) {
     auto thread_id = omp_get_thread_num();
@@ -210,6 +216,45 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
       }
     }
 
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_kl_shell;
+    if (doing_incremental_fock) {
+      D_kl_shell =
+          (dm[quantum_part_b_idx][quantum_part_b_spin_idx] - dm_last[quantum_part_b_idx][quantum_part_b_spin_idx])
+              .block(shell_k_bf_start, shell_l_bf_start, shell_k_bf_size, shell_l_bf_size);
+      if (quantum_part_b.num_parts > 1 && quantum_part_b.restricted == true) {
+        D_kl_shell += D_kl_shell;
+      } else if (quantum_part_b.num_parts > 1 && quantum_part_b.restricted == false) {
+        D_kl_shell += (dm[quantum_part_b_idx][1 - quantum_part_b_spin_idx] - dm_last[quantum_part_b_idx][1 - quantum_part_b_spin_idx])
+                          .block(shell_k_bf_start, shell_l_bf_start, shell_k_bf_size, shell_l_bf_size);
+      }
+    } else {
+      D_kl_shell = dm[quantum_part_b_idx][quantum_part_b_spin_idx].block(shell_k_bf_start, shell_l_bf_start, shell_k_bf_size, shell_l_bf_size);
+      if (quantum_part_b.num_parts > 1 && quantum_part_b.restricted == true) {
+        D_kl_shell += D_kl_shell;
+      } else if (quantum_part_b.num_parts > 1 && quantum_part_b.restricted == false) {
+        D_kl_shell += dm[quantum_part_b_idx][1 - quantum_part_b_spin_idx].block(shell_k_bf_start, shell_l_bf_start, shell_k_bf_size, shell_l_bf_size);
+      }
+    }
+
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_ik_shell;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_jl_shell;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_il_shell;
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> D_jk_shell;
+    if (same_spin_exchange) {
+      if (doing_incremental_fock) {
+        const auto D_exchange = dm[quantum_part_a_idx][quantum_part_a_spin_idx] - dm_last[quantum_part_a_idx][quantum_part_a_spin_idx];
+        D_ik_shell = D_exchange.block(shell_i_bf_start, shell_k_bf_start, shell_i_bf_size, shell_k_bf_size);
+        D_jl_shell = D_exchange.block(shell_j_bf_start, shell_l_bf_start, shell_j_bf_size, shell_l_bf_size);
+        D_il_shell = D_exchange.block(shell_i_bf_start, shell_l_bf_start, shell_i_bf_size, shell_l_bf_size);
+        D_jk_shell = D_exchange.block(shell_j_bf_start, shell_k_bf_start, shell_j_bf_size, shell_k_bf_size);
+      } else {
+        D_ik_shell = dm[quantum_part_a_idx][quantum_part_a_spin_idx].block(shell_i_bf_start, shell_k_bf_start, shell_i_bf_size, shell_k_bf_size);
+        D_jl_shell = dm[quantum_part_a_idx][quantum_part_a_spin_idx].block(shell_j_bf_start, shell_l_bf_start, shell_j_bf_size, shell_l_bf_size);
+        D_il_shell = dm[quantum_part_a_idx][quantum_part_a_spin_idx].block(shell_i_bf_start, shell_l_bf_start, shell_i_bf_size, shell_l_bf_size);
+        D_jk_shell = dm[quantum_part_a_idx][quantum_part_a_spin_idx].block(shell_j_bf_start, shell_k_bf_start, shell_j_bf_size, shell_k_bf_size);
+      }
+    }
+
     // compute the permutational degeneracy for the given shell
     // set this may look like the libint example but we are
     // breaking bra-ket symmetry so we are 4 fold symmetric
@@ -223,34 +268,34 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
     auto shell_ijkl_bf = 0;
     if (buf_1234 != nullptr) {
       for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+        const auto shell_i_bf_local = shell_i_bf - shell_i_bf_start;
         for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
+          const auto shell_j_bf_local = shell_j_bf - shell_j_bf_start;
           for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
+            const auto shell_k_bf_local = shell_k_bf - shell_k_bf_start;
             for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
+              const auto shell_l_bf_local = shell_l_bf - shell_l_bf_start;
               auto eri_ijkl = buf_1234[shell_ijkl_bf];
               shell_ijkl_bf++;
-              auto D_kl = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
-                                                              quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
-              const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
-              const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.5 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
+              auto D_kl = D_kl_shell(shell_k_bf_local, shell_l_bf_local);
               FA[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
               FA[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
               // FB[thread_id](shell_k_bf, shell_l_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
               // FB[thread_id](shell_l_bf, shell_k_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
               // exchange terms
-              if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-                auto D_ik = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_k_bf);
-                auto D_jl = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_l_bf);
-                auto D_il = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_l_bf);
-                auto D_jk = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_k_bf);
-                const auto scale = 0.125;
-                FA[thread_id](shell_i_bf, shell_k_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_k_bf, shell_i_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_j_bf, shell_l_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_l_bf, shell_j_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_i_bf, shell_l_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_l_bf, shell_i_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_j_bf, shell_k_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
-                FA[thread_id](shell_k_bf, shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+              if (same_spin_exchange) {
+                auto D_ik = D_ik_shell(shell_i_bf_local, shell_k_bf_local);
+                auto D_jl = D_jl_shell(shell_j_bf_local, shell_l_bf_local);
+                auto D_il = D_il_shell(shell_i_bf_local, shell_l_bf_local);
+                auto D_jk = D_jk_shell(shell_j_bf_local, shell_k_bf_local);
+                FA[thread_id](shell_i_bf, shell_k_bf) -= exchange_scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_k_bf, shell_i_bf) -= exchange_scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_j_bf, shell_l_bf) -= exchange_scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_l_bf, shell_j_bf) -= exchange_scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_i_bf, shell_l_bf) -= exchange_scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_l_bf, shell_i_bf) -= exchange_scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_j_bf, shell_k_bf) -= exchange_scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_k_bf, shell_j_bf) -= exchange_scale * D_il * shell_ijkl_perdeg * eri_ijkl;
               }
             }
           }
