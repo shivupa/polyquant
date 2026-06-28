@@ -1,1 +1,5 @@
+sphinx
+sphinx-rtd-theme
+breathe
 exhale
+m2r2

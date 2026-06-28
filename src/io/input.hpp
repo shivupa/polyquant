@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -39,6 +40,7 @@ public:
    * @param filename the file to parse.
    */
   void parse_input(const std::string &filename);
+  void resolve_relative_filenames(json &node, const std::filesystem::path &base_path);
   /**
    * @brief the json object to store the input
    *

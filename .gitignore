@@ -36,3 +36,15 @@ build/
 docs/source/api
 docs/_build
 .vscode/
+
+# Generated Polyquant run artifacts
+EMSL_LOADED_BASIS_*.g94
+polyquant_used_geometry.xyz
+*.h5
+*.molden
+FC_DM_*.txt
+FCop_*.txt
+Fock_*.txt
+DM_*.txt
+DMcombined_*.txt
+CI_state_*_DM_*.txt

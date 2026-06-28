@@ -73,10 +73,17 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const std::string
         libint_atom.atomic_number = atom_symb_to_num(center_basis["library"]["atom"]);
       }
     }
+    std::string basis_type = center_basis["library"]["type"].get<std::string>();
     std::string basis_url = "https://www.basissetexchange.org/api/basis/";
-    basis_url += center_basis["library"]["type"];
+    basis_url += basis_type;
     basis_url += "/format/gaussian94";
     auto r = cpr::Get(cpr::Url{basis_url}, cpr::VerifySsl{false});
+    if (r.status_code < 200 || r.status_code >= 300 || r.text.empty()) {
+      std::stringstream error_msg;
+      error_msg << "Failed to download basis '" << basis_type << "' from Basis Set Exchange. HTTP status " << r.status_code
+                << ". Check network access or use a file-backed custom basis for reproducible runs.";
+      APP_ABORT(error_msg.str());
+    }
     std::string filename = "EMSL_LOADED_BASIS_";
     filename += quantum_part_key;
     filename += "_";
