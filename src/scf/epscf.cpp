@@ -146,119 +146,88 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
     FA[i].resizeLike(fock);
     FA[i].setZero();
   }
-#pragma omp parallel
-  {
-    int shellcounter = 0;
-    auto thread_id = omp_get_thread_num();
-    for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
-      auto shell_i_bf_start = shell2bf_a[shell_i];
-      auto shell_i_bf_size = shells_a[shell_i].size();
-      auto shellpairdata_ij_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_a_idx]).at(shell_i).begin();
-      for (auto &shell_j : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
-        auto shell_j_bf_start = shell2bf_a[shell_j];
-        auto shell_j_bf_size = shells_a[shell_j].size();
-        // const auto *shellpairdata_ij = shellpairdata_ij_iter->get();
-        // shellpairdata_ij_iter++;
-        // auto D_shell_ij_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_a, quantum_part_a_idx,
-        //                                                                 quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size, shell_j_bf_start, shell_j_bf_size);
-        for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
-          auto shell_k_bf_start = shell2bf_b[shell_k];
-          auto shell_k_bf_size = shells_b[shell_k].size();
-          // auto D_shell_ik_norm = 0.0;
-          // auto D_shell_jk_norm = 0.0;
-          // if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-          //   D_shell_ik_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
-          //   shell_k_bf_start,
-          //                                                               shell_k_bf_size);
-          //   D_shell_jk_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
-          //   shell_k_bf_start,
-          //                                                               shell_k_bf_size);
-          // }
-          // auto shellpairdata_kl_iter = std::get<1>(this->input_integral->unique_shell_pairs[quantum_part_b_idx]).at(shell_k).begin();
-          for (auto &shell_l : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
-            shellcounter++;
-            // const auto *shellpairdata_kl = shellpairdata_kl_iter->get();
-            // shellpairdata_kl_iter++;
-            if (shellcounter % nthreads != thread_id) {
-              continue;
-            }
-            auto shell_l_bf_start = shell2bf_b[shell_l];
-            auto shell_l_bf_size = shells_b[shell_l].size();
-            // auto D_shell_kl_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
-            //                                                                 quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
-            //  for now ignore exchange contributions if quantum_part_a_idx != quantum_part_b_idx in the future we may want to have exchange between particles that are in the same basis space
-            //  but this is unsupported for now
-            // auto D_shell_il_norm = 0.0;
-            // auto D_shell_jl_norm = 0.0;
-            // if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-            //   auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start, shell_i_bf_size,
-            //                                                                    shell_l_bf_start, shell_l_bf_size);
-            //   auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start, shell_j_bf_size,
-            //                                                                    shell_l_bf_start, shell_l_bf_size);
-            // }
-            // auto D_norm = std::max({D_shell_ij_norm, D_shell_ik_norm, D_shell_il_norm, D_shell_jk_norm, D_shell_jl_norm, D_shell_kl_norm});
-            //  Ideally we should screen based on a density threshold. This seemed to not be working correctly
-            //  eq 5 10.1063/1.476741
-            // if (this->Cauchy_Schwarz_screening){// && this->Cauchy_Schwarz_threshold[quantum_part_a_idx] > 1e-10) {
-            //   if (D_norm * this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
-            //       this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
-            //     continue;
-            //   }
-            // }
+  struct FockShellQuartetTask {
+    size_t shell_i;
+    size_t shell_j;
+    size_t shell_k;
+    size_t shell_l;
+  };
 
-            // compute the permutational degeneracy for the given shell
-            // set this may look like the libint example but we are
-            // breaking bra-ket symmetry so we are 4 fold symmetric
-            // instead of 8
-            const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
-            const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
-            auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
-            const auto &buf = engines[thread_id].results();
-            // if (this->Cauchy_Schwarz_screening) { //&& this->Cauchy_Schwarz_threshold[quantum_part_a_idx] > 1e-10) {
-            //   engines[thread_id].set_precision(D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
-            //   engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
-            //                                                                                      shellpairdata_kl);
-            // } else {
-            // engines[thread_id].set_precision(0.0); // D_norm != 0.0 ? this->Cauchy_Schwarz_threshold[quantum_part_a_idx] / D_norm : this->Cauchy_Schwarz_threshold[quantum_part_a_idx]);
-            engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
-            //}
-            // engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
-            const auto *buf_1234 = buf[0];
-            auto shell_ijkl_bf = 0;
-            if (buf_1234 != nullptr) {
-              for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
-                for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
-                  for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
-                    for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
-                      auto eri_ijkl = buf_1234[shell_ijkl_bf];
-                      shell_ijkl_bf++;
-                      auto D_kl = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
-                                                                      quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
-                      const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
-                      const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.5 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
-                      FA[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
-                      FA[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
-                      // FB[thread_id](shell_k_bf, shell_l_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
-                      // FB[thread_id](shell_l_bf, shell_k_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
-                      // exchange terms
-                      if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
-                        auto D_ik = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_k_bf);
-                        auto D_jl = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_l_bf);
-                        auto D_il = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_l_bf);
-                        auto D_jk = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_k_bf);
-                        const auto scale = 0.125;
-                        FA[thread_id](shell_i_bf, shell_k_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_k_bf, shell_i_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_j_bf, shell_l_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_l_bf, shell_j_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_i_bf, shell_l_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_l_bf, shell_i_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_j_bf, shell_k_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
-                        FA[thread_id](shell_k_bf, shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
-                      }
-                    }
-                  }
-                }
+  std::vector<FockShellQuartetTask> tasks;
+  std::size_t shell_quartet_count = 0;
+  for (size_t shell_i = 0; shell_i < num_shell_a; shell_i++) {
+    for (auto &shell_j : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_a_idx])[shell_i]) {
+      for (size_t shell_k = 0; shell_k < num_shell_b; shell_k++) {
+        for (auto &shell_l : std::get<0>(this->input_integral->unique_shell_pairs[quantum_part_b_idx])[shell_k]) {
+          tasks.push_back({shell_i, shell_j, shell_k, shell_l});
+          shell_quartet_count++;
+        }
+      }
+    }
+  }
+  if (tasks.size() != shell_quartet_count) {
+    APP_ABORT("Internal Fock task construction error: shell quartet count mismatch.");
+  }
+
+#pragma omp parallel for schedule(dynamic, 1)
+  for (long long task_idx = 0; task_idx < static_cast<long long>(tasks.size()); task_idx++) {
+    auto thread_id = omp_get_thread_num();
+    const auto &task = tasks[task_idx];
+    const auto shell_i = task.shell_i;
+    const auto shell_j = task.shell_j;
+    const auto shell_k = task.shell_k;
+    const auto shell_l = task.shell_l;
+
+    auto shell_i_bf_start = shell2bf_a[shell_i];
+    auto shell_i_bf_size = shells_a[shell_i].size();
+    auto shell_j_bf_start = shell2bf_a[shell_j];
+    auto shell_j_bf_size = shells_a[shell_j].size();
+    auto shell_k_bf_start = shell2bf_b[shell_k];
+    auto shell_k_bf_size = shells_b[shell_k].size();
+    auto shell_l_bf_start = shell2bf_b[shell_l];
+    auto shell_l_bf_size = shells_b[shell_l].size();
+
+    // compute the permutational degeneracy for the given shell
+    // set this may look like the libint example but we are
+    // breaking bra-ket symmetry so we are 4 fold symmetric
+    // instead of 8
+    const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
+    const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
+    auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
+    const auto &buf = engines[thread_id].results();
+    engines[thread_id].compute(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
+    const auto *buf_1234 = buf[0];
+    auto shell_ijkl_bf = 0;
+    if (buf_1234 != nullptr) {
+      for (auto shell_i_bf = shell_i_bf_start; shell_i_bf < shell_i_bf_start + shell_i_bf_size; ++shell_i_bf) {
+        for (auto shell_j_bf = shell_j_bf_start; shell_j_bf < shell_j_bf_start + shell_j_bf_size; ++shell_j_bf) {
+          for (auto shell_k_bf = shell_k_bf_start; shell_k_bf < shell_k_bf_start + shell_k_bf_size; ++shell_k_bf) {
+            for (auto shell_l_bf = shell_l_bf_start; shell_l_bf < shell_l_bf_start + shell_l_bf_size; ++shell_l_bf) {
+              auto eri_ijkl = buf_1234[shell_ijkl_bf];
+              shell_ijkl_bf++;
+              auto D_kl = this->directscf_get_density_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
+                                                              quantum_part_b_spin_idx, shell_k_bf, shell_l_bf);
+              const auto spinscale = (quantum_part_a_idx == quantum_part_b_idx && quantum_part_b.restricted == false && quantum_part_b.num_parts > 1) ? 0.5 : 1.0;
+              const auto scaleall = (quantum_part_a_idx == quantum_part_b_idx) ? 0.5 * spinscale : 0.5 * quantum_part_a.charge * quantum_part_b.charge * spinscale;
+              FA[thread_id](shell_i_bf, shell_j_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+              FA[thread_id](shell_j_bf, shell_i_bf) += scaleall * shell_ijkl_perdeg * D_kl * eri_ijkl;
+              // FB[thread_id](shell_k_bf, shell_l_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
+              // FB[thread_id](shell_l_bf, shell_k_bf) += scaleall * shell_ijkl_perdeg * D_ij * eri_ijkl;
+              // exchange terms
+              if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+                auto D_ik = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_k_bf);
+                auto D_jl = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_l_bf);
+                auto D_il = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf, shell_l_bf);
+                auto D_jk = this->directscf_get_density_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf, shell_k_bf);
+                const auto scale = 0.125;
+                FA[thread_id](shell_i_bf, shell_k_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_k_bf, shell_i_bf) -= scale * D_jl * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_j_bf, shell_l_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_l_bf, shell_j_bf) -= scale * D_ik * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_i_bf, shell_l_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_l_bf, shell_i_bf) -= scale * D_jk * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_j_bf, shell_k_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
+                FA[thread_id](shell_k_bf, shell_j_bf) -= scale * D_il * shell_ijkl_perdeg * eri_ijkl;
               }
             }
           }
