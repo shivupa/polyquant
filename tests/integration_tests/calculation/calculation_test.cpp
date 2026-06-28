@@ -528,6 +528,22 @@ TEST_CASE("CALCULATION: PsH compare No Sym, D2H, SO(3).") {
   }
 }
 
+TEST_CASE("CALCULATION: PsH no-symmetry SCF with Cauchy-Schwarz screening.") {
+  POLYQUANT_CALCULATION reference_calc("../../tests/data/PsH_wpos/symmetry/PsH_wpos_nosym.json");
+  POLYQUANT_CALCULATION screened_calc("../../tests/data/PsH_wpos/symmetry/PsH_wpos_nosym.json");
+  screened_calc.input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"] = true;
+  reference_calc.run();
+  screened_calc.run();
+
+  REQUIRE(screened_calc.scf_calc->Cauchy_Schwarz_screening);
+  REQUIRE(screened_calc.scf_calc->converged);
+  REQUIRE(screened_calc.scf_calc->independent_converged);
+  REQUIRE(!screened_calc.scf_calc->exceeded_iterations);
+  REQUIRE(screened_calc.input_integral->Schwarz[0].rows() > 0);
+  REQUIRE(screened_calc.input_integral->Schwarz[1].rows() > 0);
+  REQUIRE_THAT(screened_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(reference_calc.scf_calc->E_total, POLYQUANT_TEST_EPSILON_LOOSE));
+}
+
 TEST_CASE("CALCULATION: Be/cc-pvdz compare SCF to PySCF.") {
   POLYQUANT_CALCULATION d2h("../../tests/data/be/cc_pvdz/Be.json");
   d2h.run();

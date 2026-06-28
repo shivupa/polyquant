@@ -275,7 +275,8 @@ void POLYQUANT_EPSCF::form_fock_helper() {
     auto quantum_part_a_spin_lim = quantum_part_a.restricted ? 1 : 2;
     quantum_part_a_spin_lim = (quantum_part_a.num_parts == 1) ? 1 : quantum_part_a_spin_lim;
     for (auto quantum_part_a_spin_idx = 0; quantum_part_a_spin_idx < quantum_part_a_spin_lim; quantum_part_a_spin_idx++) {
-      this->Cauchy_Schwarz_threshold[quantum_part_a_idx] = std::max(this->iteration_rms_error[quantum_part_a_idx][quantum_part_a_spin_idx] / 1e4, std::numeric_limits<double>::epsilon());
+      this->Cauchy_Schwarz_threshold[quantum_part_a_idx] =
+          std::max(std::min(this->iteration_rms_error[quantum_part_a_idx][quantum_part_a_spin_idx] / 1e4, this->convergence_DM), std::numeric_limits<double>::epsilon());
       for (auto quantum_part_b_idx = 0; quantum_part_b_idx < this->input_molecule->quantum_particles.size(); quantum_part_b_idx++) {
         if (!independent_converged && quantum_part_a_idx != quantum_part_b_idx)
           continue;
