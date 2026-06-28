@@ -19,8 +19,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
   // For example the SCF can have spin restricted species with spin unrestricted species.
   // It isn't documented or explicitly clear that 2 spins per particle type are always expected to be present.
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
@@ -49,8 +48,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
   auto second_spin_idx = 1 - idx_spin;
   auto other_idx_part = 1 - idx_part;
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
@@ -70,7 +68,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
       if (idx_J_A_det <= idx_I_A_det)
         continue;
       std::vector<int> jdet_idx(4);
-      for (auto k = 0; k < 4; k++) jdet_idx[k] = idet_unfold[k];
+      for (auto k = 0; k < 4; k++)
+        jdet_idx[k] = idet_unfold[k];
       jdet_idx[2 * idx_part + first_spin_idx] = idx_J_A_det;
       auto jdet_it = this->dets.find(jdet_idx);
       if (jdet_it != this->dets.end()) {
@@ -89,7 +88,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
       if (idx_J_A_det <= idx_I_A_det)
         return;
       std::vector<int> jdet_idx(4);
-      for (auto k = 0; k < 4; k++) jdet_idx[k] = idet_unfold[k];
+      for (auto k = 0; k < 4; k++)
+        jdet_idx[k] = idet_unfold[k];
       jdet_idx[2 * idx_part + first_spin_idx] = idx_J_A_det;
       auto jdet_it = this->dets.find(jdet_idx);
       if (jdet_it != this->dets.end()) {
@@ -139,8 +139,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
   auto charge_factor_c2 = quantum_part_c2.charge * other_quantum_part_c2.charge;
   const bool same_part = (idx_A_part_spin.first == idx_B_part_spin.first);
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
@@ -159,14 +158,14 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_two_contribution(Eigen::Ref<Ei
         continue;
       for (auto idx_J_B_det : unique_singles[idx_B_part_spin.first][idx_B_part_spin.second][idx_I_B_det]) {
         std::vector<int> jdet_idx(4);
-        for (auto k = 0; k < 4; k++) jdet_idx[k] = idet_unfold[k];
+        for (auto k = 0; k < 4; k++)
+          jdet_idx[k] = idet_unfold[k];
         jdet_idx[2 * idx_A_part_spin.first + idx_A_part_spin.second] = idx_J_A_det;
         jdet_idx[2 * idx_B_part_spin.first + idx_B_part_spin.second] = idx_J_B_det;
         auto jdet_it = this->dets.find(jdet_idx);
         if (jdet_it != this->dets.end()) {
           auto folded_jdet_idx = jdet_it->second;
-          double integral = same_part ? same_part_ham_double(idx_A_part_spin.first, idet_unfold, jdet_idx)
-                                      : charge_factor_c2 * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
+          double integral = same_part ? same_part_ham_double(idx_A_part_spin.first, idet_unfold, jdet_idx) : charge_factor_c2 * mixed_part_ham_double(0, 1, idet_unfold, jdet_idx);
           if (integral != 0.0) {
             for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
               sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
@@ -192,8 +191,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
   auto other_quantum_part = (++this->input_integral->input_molecule->quantum_particles.begin())->second;
   auto charge_factor = quantum_part.charge * other_quantum_part.charge;
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());

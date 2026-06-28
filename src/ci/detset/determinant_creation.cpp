@@ -55,13 +55,6 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
     APP_ABORT("Excitation level exceeds virtual size!");
   }
 
-  std::cout << " GET_UNIQUE_EXCITATION_LIST " ;
-  std::cout << " "  << idx_part;
-  std::cout << " "  << idx_spin;
-  std::cout << " "  << idx_det;
-  std::cout << " "  << excitation_level;
-  std::cout << " "  << std::endl;
-
   for (auto &&iocc : iter::combinations(occ, excitation_level)) {
     for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
       std::vector<T> temp_det(det);

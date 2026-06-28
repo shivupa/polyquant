@@ -12,8 +12,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eig
   auto second_spin_idx = 1 - idx_spin;
 
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
@@ -43,8 +42,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
   auto second_spin_idx = 1 - idx_spin;
 
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
@@ -123,8 +121,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_two_contribution(Eigen::Ref<Ei
   // auto second_spin_idx = idx_spin - 1 % this->input_integral->mo_one_body_ints[idx_part].size();
   auto second_spin_idx = other_idx_spin;
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
@@ -174,8 +171,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = other_idx_spin;
   auto nthreads = omp_get_max_threads();
-  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() ||
-      sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
+  if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
     for (auto i = 0; i < nthreads; i++)
       sigma_workspace_[i].resize(this->rows(), C.cols());
