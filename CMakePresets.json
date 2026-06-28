@@ -1,0 +1,106 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "release",
+      "displayName": "Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "POLYQUANT_DOC": "0",
+        "POLYQUANT_TEST": "1",
+        "POLYQUANT_NETWORK_TESTS": "0",
+        "POLYQUANT_CODE_COVERAGE": "0"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "POLYQUANT_DOC": "0",
+        "POLYQUANT_TEST": "1",
+        "POLYQUANT_NETWORK_TESTS": "0",
+        "POLYQUANT_CODE_COVERAGE": "0"
+      }
+    },
+    {
+      "name": "debug-network-tests",
+      "displayName": "Debug With Network Tests",
+      "inherits": "debug",
+      "cacheVariables": {
+        "POLYQUANT_NETWORK_TESTS": "1"
+      }
+    },
+    {
+      "name": "docs",
+      "displayName": "Documentation",
+      "inherits": "debug",
+      "cacheVariables": {
+        "POLYQUANT_DOC": "1"
+      }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Coverage",
+      "inherits": "debug",
+      "cacheVariables": {
+        "POLYQUANT_CODE_COVERAGE": "1"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "debug-network-tests",
+      "configurePreset": "debug-network-tests"
+    },
+    {
+      "name": "docs",
+      "configurePreset": "docs",
+      "targets": [
+        "polyquant_docs_html"
+      ]
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "targets": [
+        "polyquant_coverage"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug-network-tests",
+      "configurePreset": "debug-network-tests",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
