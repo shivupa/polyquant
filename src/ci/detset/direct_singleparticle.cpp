@@ -58,10 +58,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
     auto idet_unfold = det_idx_unfold(i_det);
     auto idx_I_A_det = idet_unfold[first_spin_idx];
     auto idx_I_B_det = idet_unfold[second_spin_idx];
-    std::vector<int> excitation_list;
-    std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
-                   unique_doubles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_doubles[idx_part][first_spin_idx][idx_I_A_det].end(), std::back_inserter(excitation_list));
-    for (auto idx_J_A_det : excitation_list) {
+    for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
       if (idx_J_A_det <= idx_I_A_det)
         continue;
       std::vector<int> jdet_idx(2);
@@ -84,6 +81,24 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_one_contribution(Eigen::Ref<Ei
         }
       }
     }
+    this->for_each_unique_double(idx_part, first_spin_idx, idx_I_A_det, [&](auto idx_J_A_det) {
+      if (idx_J_A_det <= idx_I_A_det)
+        return;
+      std::vector<int> jdet_idx(2);
+      jdet_idx[first_spin_idx] = idx_J_A_det;
+      jdet_idx[second_spin_idx] = idx_I_B_det;
+      auto jdet_it = this->dets.find(jdet_idx);
+      if (jdet_it != this->dets.end()) {
+        auto folded_jdet_idx = jdet_it->second;
+        double integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
+        if (integral != 0.0) {
+          for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
+            sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+            sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+          }
+        }
+      }
+    });
   }
   for (auto i = 0; i < nthreads; i++)
     sigma += sigma_workspace_[i];
@@ -240,9 +255,9 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
         }
       }
       // loop over connected doubles alpha
-      for (auto idx_J_A_det : unique_doubles[idx_part][first_spin_idx][idx_I_A_det]) {
+      this->for_each_unique_double(idx_part, first_spin_idx, idx_I_A_det, [&](auto idx_J_A_det) {
         if (idx_J_A_det < idx_I_A_det) {
-          continue;
+          return;
         }
         //  alpha double
         std::vector<int> jdet_idx(2);
@@ -259,11 +274,11 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
             }
           }
         }
-      }
+      });
       // loop over connected doubles beta
-      for (auto idx_J_B_det : unique_doubles[idx_part][second_spin_idx][idx_I_B_det]) {
+      this->for_each_unique_double(idx_part, second_spin_idx, idx_I_B_det, [&](auto idx_J_B_det) {
         if (idx_J_B_det < idx_I_B_det) {
-          continue;
+          return;
         }
         //  alpha single
         std::vector<int> jdet_idx(2);
@@ -280,7 +295,7 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
             }
           }
         }
-      }
+      });
     }
   }
   for (auto i = 0; i < nthreads; i++)

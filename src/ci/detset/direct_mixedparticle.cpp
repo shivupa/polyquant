@@ -66,10 +66,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
     auto thread_id = omp_get_thread_num();
     auto idet_unfold = det_idx_unfold(i_det);
     auto idx_I_A_det = idet_unfold[2 * idx_part + first_spin_idx];
-    std::vector<int> excitation_list;
-    std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
-                   unique_doubles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_doubles[idx_part][first_spin_idx][idx_I_A_det].end(), std::back_inserter(excitation_list));
-    for (auto idx_J_A_det : excitation_list) {
+    for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
       if (idx_J_A_det <= idx_I_A_det)
         continue;
       std::vector<int> jdet_idx(4);
@@ -78,14 +75,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
       auto jdet_it = this->dets.find(jdet_idx);
       if (jdet_it != this->dets.end()) {
         auto folded_jdet_idx = jdet_it->second;
-        auto num_exec = single_spin_num_excitation(this->unique_dets[idx_part][first_spin_idx][idx_I_A_det], this->unique_dets[idx_part][first_spin_idx][idx_J_A_det]);
-        double integral = 0.0;
-        if (num_exec == 1) {
-          integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
-          integral += charge_factor_c1 * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
-        } else {
-          integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
-        }
+        double integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
+        integral += charge_factor_c1 * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
         if (integral != 0.0) {
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
             sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
@@ -94,6 +85,24 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
         }
       }
     }
+    this->for_each_unique_double(idx_part, first_spin_idx, idx_I_A_det, [&](auto idx_J_A_det) {
+      if (idx_J_A_det <= idx_I_A_det)
+        return;
+      std::vector<int> jdet_idx(4);
+      for (auto k = 0; k < 4; k++) jdet_idx[k] = idet_unfold[k];
+      jdet_idx[2 * idx_part + first_spin_idx] = idx_J_A_det;
+      auto jdet_it = this->dets.find(jdet_idx);
+      if (jdet_it != this->dets.end()) {
+        auto folded_jdet_idx = jdet_it->second;
+        double integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
+        if (integral != 0.0) {
+          for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
+            sigma_workspace_[thread_id](i_det, state_idx) += integral * C(folded_jdet_idx, state_idx);
+            sigma_workspace_[thread_id](folded_jdet_idx, state_idx) += integral * C(i_det, state_idx);
+          }
+        }
+      }
+    });
   }
   for (auto i = 0; i < nthreads; i++)
     sigma += sigma_workspace_[i];
@@ -426,9 +435,9 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
         }
       }
       // part 0 spin 0 doubles
-      for (auto idx_J_A_det : unique_doubles[0][0][idx_I_A_det]) {
+      this->for_each_unique_double(0, 0, idx_I_A_det, [&](auto idx_J_A_det) {
         if (idx_J_A_det < idx_I_A_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_J_A_det;
@@ -447,11 +456,11 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             }
           }
         }
-      }
+      });
       // part 0 spin 1 doubles
-      for (auto idx_J_B_det : unique_doubles[0][1][idx_I_B_det]) {
+      this->for_each_unique_double(0, 1, idx_I_B_det, [&](auto idx_J_B_det) {
         if (idx_J_B_det < idx_I_B_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -470,11 +479,11 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             }
           }
         }
-      }
+      });
       // part 1 spin 0 doubles
-      for (auto idx_J_C_det : unique_doubles[1][0][idx_I_C_det]) {
+      this->for_each_unique_double(1, 0, idx_I_C_det, [&](auto idx_J_C_det) {
         if (idx_J_C_det < idx_I_C_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -493,11 +502,11 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             }
           }
         }
-      }
+      });
       // part 1 spin 1 doubles
-      for (auto idx_J_D_det : unique_doubles[1][1][idx_I_D_det]) {
+      this->for_each_unique_double(1, 1, idx_I_D_det, [&](auto idx_J_D_det) {
         if (idx_J_D_det < idx_I_D_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -516,7 +525,7 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
             }
           }
         }
-      }
+      });
     }
   }
   for (auto i = 0; i < nthreads; i++)

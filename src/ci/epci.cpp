@@ -384,7 +384,6 @@ void POLYQUANT_EPCI::setup_determinants() {
   Polyquant_cout("Full space (without symmetry) contains " + std::to_string(this->detset.N_dets_complete_space) + " determinants");
   this->detset.print_determinants();
   this->detset.create_unique_excitation_map_singles();
-  this->detset.create_unique_excitation_map_doubles();
 }
 
 void POLYQUANT_EPCI::print_start() {

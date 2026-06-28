@@ -19,6 +19,7 @@
 #include <set>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -42,8 +43,47 @@ public:
   void get_unique_excitation_list_of_indices(int idx_part, int idx_spin, int idx_det, int excitation_level, std::set<int> &return_idx_list) const;
   void create_unique_excitation(int idx_part, int idx_spin, int excitation_level);
   void create_excitation(std::vector<std::tuple<int, int, int>> excitation_level, int max_collective_excitation_level);
+  void create_unique_det_index_maps();
   void create_unique_excitation_map_singles();
-  void create_unique_excitation_map_doubles();
+  template <typename Callback> void for_each_unique_double(int idx_part, int idx_spin, int idx_det, Callback callback) const {
+    T one = 1;
+    std::vector<int> occ, virt;
+    auto det = this->unique_dets[idx_part][idx_spin][idx_det];
+    this->get_occ_virt(idx_part, det, occ, virt);
+
+    if (occ.size() < 2 || virt.size() < 2) {
+      return;
+    }
+    if (unique_det_indices.empty()) {
+      APP_ABORT("for_each_unique_double called before unique determinant index maps were created.");
+    }
+
+    const auto &unique_det_index = unique_det_indices[idx_part][idx_spin];
+    std::vector<size_t> connected_indices;
+    for (auto &&iocc : iter::combinations(occ, 2)) {
+      for (auto &&ivirt : iter::combinations(virt, 2)) {
+        std::vector<T> temp_det(det);
+        for (auto &occbit : iocc) {
+          auto int_idx = (temp_det.size() - one) - (occbit >> bit_kind_shift);
+          temp_det[int_idx] &= ~(one << (occbit & (bit_kind_size - one)));
+        }
+        for (auto &virtbit : ivirt) {
+          auto int_idx = (temp_det.size() - one) - (virtbit >> bit_kind_shift);
+          temp_det[int_idx] |= one << (virtbit & (bit_kind_size - one));
+        }
+        auto it = unique_det_index.find(temp_det);
+        if (it != unique_det_index.end()) {
+          connected_indices.push_back(it->second);
+        }
+      }
+    }
+
+    std::sort(connected_indices.begin(), connected_indices.end());
+    connected_indices.erase(std::unique(connected_indices.begin(), connected_indices.end()), connected_indices.end());
+    for (auto idx : connected_indices) {
+      callback(idx);
+    }
+  }
 
   int single_spin_num_excitation(const std::vector<T> &Di, const std::vector<T> &Dj) const;
   int num_excitation(const std::pair<std::vector<T>, std::vector<T>> &Di, const std::pair<std::vector<T>, std::vector<T>> &Dj) const;
@@ -79,8 +119,8 @@ public:
   // indexes that are single excitations same spin
   // unique_singles[part_type_idx][spin_idx][det_i].size() ->num connected singles
   std::vector<std::vector<std::vector<std::vector<size_t>>>> unique_singles;
-  // indexes that are double excitations same spin
-  std::vector<std::vector<std::vector<std::vector<size_t>>>> unique_doubles;
+  // lookup maps for unique_dets[part_type_idx][spin_idx]
+  std::vector<std::vector<std::unordered_map<std::vector<T>, std::size_t, VectorHash<T>>>> unique_det_indices;
   /**
    * @brief map of det index vector - vector of size (num quantum particle types * 2 spins)
    * index 0, 1 correspond to particle 0 spin 0, particle 0 spin 1 etc.

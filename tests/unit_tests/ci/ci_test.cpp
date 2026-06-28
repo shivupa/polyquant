@@ -6,8 +6,79 @@
 #include <bitset>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <chrono>
+#include <omp.h>
+#include <set>
+#include <unordered_map>
 
 using namespace polyquant;
+
+namespace {
+struct DetsetSnapshot {
+  int N_dets = 0;
+  int N_dets_complete_space = 0;
+  int unfolded_stride = 0;
+  std::vector<int> unfolded_dets;
+  std::unordered_map<std::vector<int>, int, VectorHash<int>> dets;
+};
+
+class OmpThreadCountGuard {
+public:
+  OmpThreadCountGuard() : previous_thread_count_(omp_get_max_threads()) {}
+  ~OmpThreadCountGuard() { omp_set_num_threads(previous_thread_count_); }
+
+private:
+  int previous_thread_count_;
+};
+
+DetsetSnapshot snapshot_detset(const POLYQUANT_DETSET<uint64_t> &detset) {
+  DetsetSnapshot snapshot;
+  snapshot.N_dets = detset.N_dets;
+  snapshot.N_dets_complete_space = detset.N_dets_complete_space;
+  snapshot.unfolded_stride = detset.unfolded_stride;
+  snapshot.unfolded_dets = detset.unfolded_dets;
+  snapshot.dets = detset.dets;
+  return snapshot;
+}
+
+void require_same_detset_snapshot(const DetsetSnapshot &expected, const DetsetSnapshot &actual) {
+  REQUIRE(actual.N_dets == expected.N_dets);
+  REQUIRE(actual.N_dets_complete_space == expected.N_dets_complete_space);
+  REQUIRE(actual.unfolded_stride == expected.unfolded_stride);
+  REQUIRE(actual.unfolded_dets == expected.unfolded_dets);
+  REQUIRE(actual.dets.size() == expected.dets.size());
+  for (const auto &[det_idx, expected_id] : expected.dets) {
+    auto actual_it = actual.dets.find(det_idx);
+    REQUIRE(actual_it != actual.dets.end());
+    REQUIRE(actual_it->second == expected_id);
+  }
+}
+
+DetsetSnapshot build_single_species_detset_snapshot(const std::shared_ptr<POLYQUANT_EPSCF> &scf_calc, int num_threads) {
+  omp_set_num_threads(num_threads);
+  POLYQUANT_EPCI test_ci;
+  std::tuple<int, int, int> ex_lvl = {2, 2, 2};
+  test_ci.excitation_level.push_back(ex_lvl);
+  test_ci.setup(scf_calc);
+  test_ci.calculate_integrals();
+  test_ci.setup_determinants();
+  return snapshot_detset(test_ci.detset);
+}
+
+DetsetSnapshot build_two_species_detset_snapshot(const std::shared_ptr<POLYQUANT_EPSCF> &scf_calc, int num_threads) {
+  omp_set_num_threads(num_threads);
+  POLYQUANT_EPCI test_ci;
+  std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+  test_ci.excitation_level.push_back(ex_lvl);
+  test_ci.excitation_level.push_back(ex_lvl);
+  test_ci.setup(scf_calc);
+  test_ci.detset.frozen_core.assign(2, 0);
+  test_ci.detset.deleted_virtual.assign(2, 0);
+  test_ci.calculate_integrals();
+  test_ci.setup_determinants();
+  return snapshot_detset(test_ci.detset);
+}
+} // namespace
 
 TEST_CASE("CI: one body MO basis", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
@@ -575,6 +646,67 @@ TEST_CASE("CI: det_idx_unfold", "[CI]") {
     }
   }
 }
+
+TEST_CASE("CI: on-demand double excitation indices match generated determinants", "[CI]") {
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.run();
+  POLYQUANT_EPCI test_ci;
+  std::tuple<int, int, int> ex_lvl = {2, 2, 2};
+  test_ci.excitation_level.push_back(ex_lvl);
+  test_ci.setup(test_calc.scf_calc);
+  test_ci.calculate_integrals();
+  test_ci.setup_determinants();
+
+  const int idx_part = 0;
+  const int idx_spin = 0;
+  const int idx_det = 0;
+
+  std::set<std::vector<uint64_t>> generated_double_dets;
+  test_ci.detset.get_unique_excitation_set(idx_part, idx_spin, idx_det, 2, generated_double_dets);
+
+  std::vector<size_t> expected_indices;
+  for (auto i = 0ul; i < test_ci.detset.unique_dets[idx_part][idx_spin].size(); i++) {
+    if (generated_double_dets.find(test_ci.detset.unique_dets[idx_part][idx_spin][i]) != generated_double_dets.end()) {
+      expected_indices.push_back(i);
+    }
+  }
+
+  std::vector<size_t> actual_indices;
+  test_ci.detset.for_each_unique_double(idx_part, idx_spin, idx_det, [&actual_indices](std::size_t idx) { actual_indices.push_back(idx); });
+  REQUIRE(actual_indices == expected_indices);
+  REQUIRE(std::is_sorted(actual_indices.begin(), actual_indices.end()));
+  REQUIRE(std::adjacent_find(actual_indices.begin(), actual_indices.end()) == actual_indices.end());
+
+  std::set<int> actual_index_set;
+  test_ci.detset.get_unique_excitation_list_of_indices(idx_part, idx_spin, idx_det, 2, actual_index_set);
+  REQUIRE(actual_index_set == std::set<int>(expected_indices.begin(), expected_indices.end()));
+}
+
+TEST_CASE("CI: one species determinant construction is OpenMP deterministic", "[CI]") {
+  OmpThreadCountGuard omp_thread_count_guard;
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.run();
+
+  auto single_thread_snapshot = build_single_species_detset_snapshot(test_calc.scf_calc, 1);
+  auto multi_thread_snapshot = build_single_species_detset_snapshot(test_calc.scf_calc, 2);
+
+  require_same_detset_snapshot(single_thread_snapshot, multi_thread_snapshot);
+}
+
+TEST_CASE("CI: two species determinant construction is OpenMP deterministic", "[CI]") {
+  OmpThreadCountGuard omp_thread_count_guard;
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  test_calc.run();
+
+  auto single_thread_snapshot = build_two_species_detset_snapshot(test_calc.scf_calc, 1);
+  auto multi_thread_snapshot = build_two_species_detset_snapshot(test_calc.scf_calc, 2);
+
+  require_same_detset_snapshot(single_thread_snapshot, multi_thread_snapshot);
+}
+
 TEST_CASE("CI: mixed part ham diag ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
@@ -767,6 +899,48 @@ TEST_CASE("CI: single species sigma slow v fast", "[CI]") {
   }
 }
 
+// TEST_CASE("CI: single species sigma slow v non-singleshot", "[CI]") {
+//   POLYQUANT_CALCULATION test_calc;
+//   test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+//   test_calc.run();
+//   POLYQUANT_EPCI test_ci;
+//   std::tuple<int, int, int> ex_lvl = {2, 2, 2};
+//   test_ci.excitation_level.push_back(ex_lvl);
+//   test_ci.setup(test_calc.scf_calc);
+//   test_ci.calculate_integrals();
+//   test_ci.setup_determinants();
+//   test_ci.detset.precompute_diagonal_Slater_Condon();
+//   test_ci.detset.use_singleshot = false;
+// 
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
+//   sigma.resize(test_ci.detset.N_dets, 1);
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
+//   sigma_fast.resize(test_ci.detset.N_dets, 1);
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
+//   C.resize(test_ci.detset.N_dets, 1);
+// 
+//   C.setZero(); sigma.setZero(); sigma_fast.setZero();
+//   C(0, 0) = 1.0;
+//   test_ci.detset.create_sigma_slow(sigma, C);
+//   test_ci.detset.create_sigma(sigma_fast, C);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++)
+//     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+// 
+//   C.setZero(); sigma.setZero(); sigma_fast.setZero();
+//   C(5, 0) = 1.0;
+//   test_ci.detset.create_sigma_slow(sigma, C);
+//   test_ci.detset.create_sigma(sigma_fast, C);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++)
+//     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+// 
+//   C.setZero(); sigma.setZero(); sigma_fast.setZero();
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++) C(i, 0) = 1.0 / test_ci.detset.N_dets;
+//   test_ci.detset.create_sigma_slow(sigma, C);
+//   test_ci.detset.create_sigma(sigma_fast, C);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++)
+//     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+// }
+
 TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
@@ -851,6 +1025,184 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
   }
 }
+// TEST_CASE("CI: multispecies sigma slow v non-singleshot", "[CI]") {
+//   POLYQUANT_CALCULATION test_calc;
+//   test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
+//   test_calc.run();
+//   POLYQUANT_EPCI test_ci;
+//   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+//   test_ci.excitation_level.push_back(ex_lvl);
+//   test_ci.excitation_level.push_back(ex_lvl);
+//   test_ci.detset.frozen_core.push_back(0);
+//   test_ci.detset.frozen_core.push_back(0);
+//   test_ci.detset.deleted_virtual.push_back(0);
+//   test_ci.detset.deleted_virtual.push_back(0);
+//   test_ci.setup(test_calc.scf_calc);
+//   test_ci.calculate_integrals();
+//   test_ci.setup_determinants();
+//   test_ci.detset.precompute_diagonal_Slater_Condon();
+//   test_ci.detset.use_singleshot = false;
+// 
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
+//   sigma.resize(test_ci.detset.N_dets, 1);
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
+//   sigma_fast.resize(test_ci.detset.N_dets, 1);
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
+//   C.resize(test_ci.detset.N_dets, 1);
+// 
+//   C.setZero(); sigma.setZero(); sigma_fast.setZero();
+//   C(0, 0) = 1.0;
+//   test_ci.detset.create_sigma_slow(sigma, C);
+//   test_ci.detset.create_sigma(sigma_fast, C);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++)
+//     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+// 
+//   C.setZero(); sigma.setZero(); sigma_fast.setZero();
+//   C(5, 0) = 1.0;
+//   test_ci.detset.create_sigma_slow(sigma, C);
+//   test_ci.detset.create_sigma(sigma_fast, C);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++)
+//     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+// 
+//   C.setZero(); sigma.setZero(); sigma_fast.setZero();
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++) C(i, 0) = 1.0 / test_ci.detset.N_dets;
+//   test_ci.detset.create_sigma_slow(sigma, C);
+//   test_ci.detset.create_sigma(sigma_fast, C);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++)
+//     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
+// }
+// 
+// namespace {
+// // Shared helper: time singleshot vs non-singleshot sigma over N_ITER iterations and print results.
+// void run_sigma_benchmark(POLYQUANT_EPCI &test_ci, const std::string &label, int n_iter) {
+//   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma, C;
+//   sigma.resize(test_ci.detset.N_dets, 1);
+//   C.resize(test_ci.detset.N_dets, 1);
+//   for (auto i = 0; i < test_ci.detset.N_dets; i++) C(i, 0) = 1.0 / test_ci.detset.N_dets;
+// 
+//   test_ci.detset.use_singleshot = true;
+//   auto t0 = std::chrono::high_resolution_clock::now();
+//   for (int n = 0; n < n_iter; n++) { sigma.setZero(); test_ci.detset.create_sigma(sigma, C); }
+//   auto t1 = std::chrono::high_resolution_clock::now();
+//   double ms_ss = std::chrono::duration<double, std::milli>(t1 - t0).count() / n_iter;
+// 
+//   test_ci.detset.use_singleshot = false;
+//   auto t2 = std::chrono::high_resolution_clock::now();
+//   for (int n = 0; n < n_iter; n++) { sigma.setZero(); test_ci.detset.create_sigma(sigma, C); }
+//   auto t3 = std::chrono::high_resolution_clock::now();
+//   double ms_ns = std::chrono::duration<double, std::milli>(t3 - t2).count() / n_iter;
+// 
+//   std::cout << "\n[" << label << ", N_dets=" << test_ci.detset.N_dets << ", " << n_iter << " iters]\n"
+//             << "  singleshot:     " << ms_ss << " ms/iter\n"
+//             << "  non-singleshot: " << ms_ns << " ms/iter\n"
+//             << "  ratio (non/ss): " << ms_ns / ms_ss << "\n";
+// }
+// } // namespace
+// 
+// TEST_CASE("CI: sigma benchmark singleshot vs non-singleshot", "[CI][benchmark]") {
+//   // small: H2O STO-3G CISD (~141 dets)
+//   {
+//     POLYQUANT_CALCULATION test_calc;
+//     test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+//     test_calc.run();
+//     POLYQUANT_EPCI test_ci;
+//     test_ci.excitation_level.push_back({2, 2, 2});
+//     test_ci.setup(test_calc.scf_calc);
+//     test_ci.calculate_integrals();
+//     test_ci.setup_determinants();
+//     test_ci.detset.precompute_diagonal_Slater_Condon();
+//     run_sigma_benchmark(test_ci, "single-species H2O STO-3G CISD", 200);
+//   }
+// 
+//   // medium: H2O cc-pVDZ CISD (~12K dets)
+//   {
+//     POLYQUANT_CALCULATION test_calc;
+//     test_calc.setup_calculation("../../tests/data/h2o_ccpvdz/h2o.json");
+//     test_calc.run();
+//     POLYQUANT_EPCI test_ci;
+//     test_ci.excitation_level.push_back({2, 2, 2});
+//     test_ci.setup(test_calc.scf_calc);
+//     test_ci.calculate_integrals();
+//     test_ci.setup_determinants();
+//     test_ci.detset.precompute_diagonal_Slater_Condon();
+//     run_sigma_benchmark(test_ci, "single-species H2O cc-pVDZ CISD", 10);
+//   }
+// 
+//   // large: H2O aug-cc-pVDZ CISD (~45K dets)
+//   {
+//     POLYQUANT_CALCULATION test_calc;
+//     test_calc.setup_calculation("../../tests/data/h2o_augccpvdz/h2o.json");
+//     test_calc.run();
+//     POLYQUANT_EPCI test_ci;
+//     test_ci.excitation_level.push_back({2, 2, 2});
+//     test_ci.setup(test_calc.scf_calc);
+//     test_ci.calculate_integrals();
+//     test_ci.setup_determinants();
+//     test_ci.detset.precompute_diagonal_Slater_Condon();
+//     run_sigma_benchmark(test_ci, "single-species H2O aug-cc-pVDZ CISD", 3);
+//   }
+// 
+//   // two species: PsH CIS (~18 dets)
+//   {
+//     POLYQUANT_CALCULATION test_calc;
+//     test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
+//     test_calc.run();
+//     POLYQUANT_EPCI test_ci;
+//     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
+//     test_ci.excitation_level.push_back(ex_lvl);
+//     test_ci.excitation_level.push_back(ex_lvl);
+//     test_ci.detset.frozen_core.push_back(0);
+//     test_ci.detset.frozen_core.push_back(0);
+//     test_ci.detset.deleted_virtual.push_back(0);
+//     test_ci.detset.deleted_virtual.push_back(0);
+//     test_ci.setup(test_calc.scf_calc);
+//     test_ci.calculate_integrals();
+//     test_ci.setup_determinants();
+//     test_ci.detset.precompute_diagonal_Slater_Condon();
+//     run_sigma_benchmark(test_ci, "two-species PsH CIS", 200);
+//   }
+// 
+//   // two species medium: H2O+e+ cc-pVDZ CISD/CIS (~14K dets)
+//   {
+//     POLYQUANT_CALCULATION test_calc;
+//     test_calc.setup_calculation("../../tests/data/h2o_ccpvdz_wpos/h2o.json");
+//     test_calc.run();
+//     POLYQUANT_EPCI test_ci;
+//     test_ci.excitation_level.push_back({2, 2, 2}); // electrons: CISD
+//     test_ci.excitation_level.push_back({1, 0, 1}); // positron: CIS (1 alpha)
+//     test_ci.detset.frozen_core.push_back(0);
+//     test_ci.detset.frozen_core.push_back(0);
+//     test_ci.detset.deleted_virtual.push_back(0);
+//     test_ci.detset.deleted_virtual.push_back(0);
+//     test_ci.setup(test_calc.scf_calc);
+//     test_ci.calculate_integrals();
+//     test_ci.setup_determinants();
+//     test_ci.detset.precompute_diagonal_Slater_Condon();
+//     run_sigma_benchmark(test_ci, "two-species H2O+e+ cc-pVDZ CISD/CIS", 5);
+//   }
+// 
+//   // two species large: H2O+e+ aug-cc-pVDZ CISD/CIS (~50K dets)
+//   {
+//     POLYQUANT_CALCULATION test_calc;
+//     test_calc.setup_calculation("../../tests/data/h2o_augccpvdz_wpos/h2o.json");
+//     test_calc.run();
+//     POLYQUANT_EPCI test_ci;
+//     test_ci.excitation_level.push_back({2, 2, 2}); // electrons: CISD
+//     test_ci.excitation_level.push_back({1, 0, 1}); // positron: CIS (1 alpha)
+//     test_ci.detset.frozen_core.push_back(0);
+//     test_ci.detset.frozen_core.push_back(0);
+//     test_ci.detset.deleted_virtual.push_back(0);
+//     test_ci.detset.deleted_virtual.push_back(0);
+//     test_ci.setup(test_calc.scf_calc);
+//     test_ci.calculate_integrals();
+//     test_ci.setup_determinants();
+//     test_ci.detset.precompute_diagonal_Slater_Condon();
+//     run_sigma_benchmark(test_ci, "two-species H2O+e+ aug-cc-pVDZ CISD/CIS", 2);
+//   }
+// 
+//   REQUIRE(true);
+// }
+
 TEST_CASE("CI: Natural Orbitals", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation("../../tests/data/PsH_wpos/H_minus.json");
