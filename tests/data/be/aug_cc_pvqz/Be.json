@@ -14,7 +14,7 @@
         { "electron" :
           {"Be" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "../../tests/data/be/aug_cc_pvqz/electron_basis.g94"}}]}
+             "filename" : "electron_basis.g94"}}]}
         }
   },
   "keywords": {

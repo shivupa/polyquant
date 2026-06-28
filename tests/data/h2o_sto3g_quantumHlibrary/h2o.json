@@ -17,19 +17,19 @@
         {
             "H" : [{ "custom" : 
                 {"type" : "file",
-                 "filename" : "../../tests/data/h2o_sto3gfile/H_basis.g94"}}],
+                 "filename" : "../h2o_sto3gfile/H_basis.g94"}}],
             "O" : [{ "custom" : 
                 {"type" : "file",
-                 "filename" : "../../tests/data/h2o_sto3gfile/O_basis.g94"}}]
+                 "filename" : "../h2o_sto3gfile/O_basis.g94"}}]
         },
       "H" :
         {
             "H" : [{ "custom" : 
                 {"type" : "file",
-                 "filename" : "../../tests/data/h2o_sto3gfile/H_basis.g94"}}],
+                 "filename" : "../h2o_sto3gfile/H_basis.g94"}}],
             "O" : [{ "custom" : 
                 {"type" : "file",
-                 "filename" : "../../tests/data/h2o_sto3gfile/O_basis.g94"}}]
+                 "filename" : "../h2o_sto3gfile/O_basis.g94"}}]
         }
 
     }

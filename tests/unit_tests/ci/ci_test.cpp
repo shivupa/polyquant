@@ -3,6 +3,7 @@
 #include "integral/integral.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
+#include "test_paths.hpp"
 #include <bitset>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -82,7 +83,7 @@ DetsetSnapshot build_two_species_detset_snapshot(const std::shared_ptr<POLYQUANT
 
 TEST_CASE("CI: one body MO basis", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o_sto3galls.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o_sto3galls.json"));
   test_calc.run();
   std::vector frozen_core = {0};
   std::vector deleted_virtual = {0};
@@ -97,7 +98,7 @@ TEST_CASE("CI: one body MO basis", "[CI]") {
   test_calc.scf_calc->input_integral->calculate_mo_1_body_integrals(test_calc.scf_calc->C_combined, frozen_core, deleted_virtual);
 
   std::vector<std::vector<double>> reference_values;
-  std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/ref_mo_onebody.txt";
+  std::string reference_values_file = TestDataPath("h2o_sto3glibrary_cisd/ref_mo_onebody.txt");
   Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
 
   auto num_mo = test_calc.scf_calc->C_combined[0][0].cols();
@@ -112,14 +113,14 @@ TEST_CASE("CI: one body MO basis", "[CI]") {
 
 TEST_CASE("CI: two body MO basis", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o_sto3galls.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o_sto3galls.json"));
   test_calc.run();
   std::vector frozen_core = {0};
   std::vector deleted_virtual = {0};
   test_calc.scf_calc->input_integral->calculate_mo_2_body_integrals(test_calc.scf_calc->C_combined, frozen_core, deleted_virtual);
 
   std::vector<std::vector<double>> reference_values;
-  std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/ref_eri.txt";
+  std::string reference_values_file = TestDataPath("h2o_sto3glibrary_cisd/ref_eri.txt");
   Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
 
   auto num_mo = test_calc.scf_calc->C_combined[0][0].cols();
@@ -142,7 +143,7 @@ TEST_CASE("CI: two body MO basis", "[CI]") {
 
 TEST_CASE("CI: setup/detset construction ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -202,7 +203,7 @@ TEST_CASE("CI: setup/detset construction ", "[CI]") {
 
 TEST_CASE("CI: frozen core energy ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -218,7 +219,7 @@ TEST_CASE("CI: frozen core energy ", "[CI]") {
 
 TEST_CASE("CI: get_det ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -246,7 +247,7 @@ TEST_CASE("CI: get_det ", "[CI]") {
 
 TEST_CASE("CI: frozen core get_det ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -553,7 +554,7 @@ TEST_CASE("CI: get occ virt ", "[CI]") {
 }
 TEST_CASE("CI: same part ham diag ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -573,7 +574,7 @@ TEST_CASE("CI: same part ham diag ", "[CI]") {
 }
 TEST_CASE("CI: same part ham single ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -598,7 +599,7 @@ TEST_CASE("CI: same part ham single ", "[CI]") {
 }
 TEST_CASE("CI: same part ham double ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {2, 2, 2};
@@ -625,7 +626,7 @@ TEST_CASE("CI: same part ham double ", "[CI]") {
 
 TEST_CASE("CI: det_idx_unfold", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -649,7 +650,7 @@ TEST_CASE("CI: det_idx_unfold", "[CI]") {
 
 TEST_CASE("CI: on-demand double excitation indices match generated determinants", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {2, 2, 2};
@@ -686,7 +687,7 @@ TEST_CASE("CI: on-demand double excitation indices match generated determinants"
 TEST_CASE("CI: one species determinant construction is OpenMP deterministic", "[CI]") {
   OmpThreadCountGuard omp_thread_count_guard;
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
 
   auto single_thread_snapshot = build_single_species_detset_snapshot(test_calc.scf_calc, 1);
@@ -698,7 +699,7 @@ TEST_CASE("CI: one species determinant construction is OpenMP deterministic", "[
 TEST_CASE("CI: two species determinant construction is OpenMP deterministic", "[CI]") {
   OmpThreadCountGuard omp_thread_count_guard;
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  test_calc.setup_calculation(TestDataPath("li-_custombasis_wpos/Li_wpos.json"));
   test_calc.run();
 
   auto single_thread_snapshot = build_two_species_detset_snapshot(test_calc.scf_calc, 1);
@@ -709,7 +710,7 @@ TEST_CASE("CI: two species determinant construction is OpenMP deterministic", "[
 
 TEST_CASE("CI: mixed part ham diag ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  test_calc.setup_calculation(TestDataPath("li-_custombasis_wpos/Li_wpos.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -731,7 +732,7 @@ TEST_CASE("CI: mixed part ham diag ", "[CI]") {
 }
 TEST_CASE("CI: mixed part ham single ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  test_calc.setup_calculation(TestDataPath("li-_custombasis_wpos/Li_wpos.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -778,7 +779,7 @@ TEST_CASE("CI: mixed part ham single ", "[CI]") {
 
 TEST_CASE("CI: mixed part ham double ", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  test_calc.setup_calculation(TestDataPath("li-_custombasis_wpos/Li_wpos.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -823,7 +824,7 @@ TEST_CASE("CI: mixed part ham double ", "[CI]") {
 
 TEST_CASE("CI: single species sigma slow v fast", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {2, 2, 2};
@@ -901,7 +902,7 @@ TEST_CASE("CI: single species sigma slow v fast", "[CI]") {
 
 // TEST_CASE("CI: single species sigma slow v non-singleshot", "[CI]") {
 //   POLYQUANT_CALCULATION test_calc;
-//   test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+//   test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
 //   test_calc.run();
 //   POLYQUANT_EPCI test_ci;
 //   std::tuple<int, int, int> ex_lvl = {2, 2, 2};
@@ -911,28 +912,28 @@ TEST_CASE("CI: single species sigma slow v fast", "[CI]") {
 //   test_ci.setup_determinants();
 //   test_ci.detset.precompute_diagonal_Slater_Condon();
 //   test_ci.detset.use_singleshot = false;
-// 
+//
 //   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
 //   sigma.resize(test_ci.detset.N_dets, 1);
 //   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
 //   sigma_fast.resize(test_ci.detset.N_dets, 1);
 //   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
 //   C.resize(test_ci.detset.N_dets, 1);
-// 
+//
 //   C.setZero(); sigma.setZero(); sigma_fast.setZero();
 //   C(0, 0) = 1.0;
 //   test_ci.detset.create_sigma_slow(sigma, C);
 //   test_ci.detset.create_sigma(sigma_fast, C);
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++)
 //     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
-// 
+//
 //   C.setZero(); sigma.setZero(); sigma_fast.setZero();
 //   C(5, 0) = 1.0;
 //   test_ci.detset.create_sigma_slow(sigma, C);
 //   test_ci.detset.create_sigma(sigma_fast, C);
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++)
 //     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
-// 
+//
 //   C.setZero(); sigma.setZero(); sigma_fast.setZero();
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++) C(i, 0) = 1.0 / test_ci.detset.N_dets;
 //   test_ci.detset.create_sigma_slow(sigma, C);
@@ -943,7 +944,7 @@ TEST_CASE("CI: single species sigma slow v fast", "[CI]") {
 
 TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
+  test_calc.setup_calculation(TestDataPath("PsH_wpos/PsH_wpos.json"));
   test_calc.run();
   POLYQUANT_EPCI test_ci;
   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -1027,7 +1028,7 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 }
 // TEST_CASE("CI: multispecies sigma slow v non-singleshot", "[CI]") {
 //   POLYQUANT_CALCULATION test_calc;
-//   test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
+//   test_calc.setup_calculation(TestDataPath("PsH_wpos/PsH_wpos.json"));
 //   test_calc.run();
 //   POLYQUANT_EPCI test_ci;
 //   std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -1042,28 +1043,28 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //   test_ci.setup_determinants();
 //   test_ci.detset.precompute_diagonal_Slater_Condon();
 //   test_ci.detset.use_singleshot = false;
-// 
+//
 //   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma;
 //   sigma.resize(test_ci.detset.N_dets, 1);
 //   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_fast;
 //   sigma_fast.resize(test_ci.detset.N_dets, 1);
 //   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
 //   C.resize(test_ci.detset.N_dets, 1);
-// 
+//
 //   C.setZero(); sigma.setZero(); sigma_fast.setZero();
 //   C(0, 0) = 1.0;
 //   test_ci.detset.create_sigma_slow(sigma, C);
 //   test_ci.detset.create_sigma(sigma_fast, C);
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++)
 //     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
-// 
+//
 //   C.setZero(); sigma.setZero(); sigma_fast.setZero();
 //   C(5, 0) = 1.0;
 //   test_ci.detset.create_sigma_slow(sigma, C);
 //   test_ci.detset.create_sigma(sigma_fast, C);
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++)
 //     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
-// 
+//
 //   C.setZero(); sigma.setZero(); sigma_fast.setZero();
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++) C(i, 0) = 1.0 / test_ci.detset.N_dets;
 //   test_ci.detset.create_sigma_slow(sigma, C);
@@ -1071,7 +1072,7 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++)
 //     REQUIRE_THAT(sigma(i, 0), Catch::Matchers::WithinAbs(sigma_fast(i, 0), 10 * POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT));
 // }
-// 
+//
 // namespace {
 // // Shared helper: time singleshot vs non-singleshot sigma over N_ITER iterations and print results.
 // void run_sigma_benchmark(POLYQUANT_EPCI &test_ci, const std::string &label, int n_iter) {
@@ -1079,31 +1080,31 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //   sigma.resize(test_ci.detset.N_dets, 1);
 //   C.resize(test_ci.detset.N_dets, 1);
 //   for (auto i = 0; i < test_ci.detset.N_dets; i++) C(i, 0) = 1.0 / test_ci.detset.N_dets;
-// 
+//
 //   test_ci.detset.use_singleshot = true;
 //   auto t0 = std::chrono::high_resolution_clock::now();
 //   for (int n = 0; n < n_iter; n++) { sigma.setZero(); test_ci.detset.create_sigma(sigma, C); }
 //   auto t1 = std::chrono::high_resolution_clock::now();
 //   double ms_ss = std::chrono::duration<double, std::milli>(t1 - t0).count() / n_iter;
-// 
+//
 //   test_ci.detset.use_singleshot = false;
 //   auto t2 = std::chrono::high_resolution_clock::now();
 //   for (int n = 0; n < n_iter; n++) { sigma.setZero(); test_ci.detset.create_sigma(sigma, C); }
 //   auto t3 = std::chrono::high_resolution_clock::now();
 //   double ms_ns = std::chrono::duration<double, std::milli>(t3 - t2).count() / n_iter;
-// 
+//
 //   std::cout << "\n[" << label << ", N_dets=" << test_ci.detset.N_dets << ", " << n_iter << " iters]\n"
 //             << "  singleshot:     " << ms_ss << " ms/iter\n"
 //             << "  non-singleshot: " << ms_ns << " ms/iter\n"
 //             << "  ratio (non/ss): " << ms_ns / ms_ss << "\n";
 // }
 // } // namespace
-// 
+//
 // TEST_CASE("CI: sigma benchmark singleshot vs non-singleshot", "[CI][benchmark]") {
 //   // small: H2O STO-3G CISD (~141 dets)
 //   {
 //     POLYQUANT_CALCULATION test_calc;
-//     test_calc.setup_calculation("../../tests/data/h2o_sto3gfile/h2o.json");
+//     test_calc.setup_calculation(TestDataPath("h2o_sto3gfile/h2o.json"));
 //     test_calc.run();
 //     POLYQUANT_EPCI test_ci;
 //     test_ci.excitation_level.push_back({2, 2, 2});
@@ -1113,11 +1114,11 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //     test_ci.detset.precompute_diagonal_Slater_Condon();
 //     run_sigma_benchmark(test_ci, "single-species H2O STO-3G CISD", 200);
 //   }
-// 
+//
 //   // medium: H2O cc-pVDZ CISD (~12K dets)
 //   {
 //     POLYQUANT_CALCULATION test_calc;
-//     test_calc.setup_calculation("../../tests/data/h2o_ccpvdz/h2o.json");
+//     test_calc.setup_calculation(TestDataPath("h2o_ccpvdz/h2o.json"));
 //     test_calc.run();
 //     POLYQUANT_EPCI test_ci;
 //     test_ci.excitation_level.push_back({2, 2, 2});
@@ -1127,11 +1128,11 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //     test_ci.detset.precompute_diagonal_Slater_Condon();
 //     run_sigma_benchmark(test_ci, "single-species H2O cc-pVDZ CISD", 10);
 //   }
-// 
+//
 //   // large: H2O aug-cc-pVDZ CISD (~45K dets)
 //   {
 //     POLYQUANT_CALCULATION test_calc;
-//     test_calc.setup_calculation("../../tests/data/h2o_augccpvdz/h2o.json");
+//     test_calc.setup_calculation(TestDataPath("h2o_augccpvdz/h2o.json"));
 //     test_calc.run();
 //     POLYQUANT_EPCI test_ci;
 //     test_ci.excitation_level.push_back({2, 2, 2});
@@ -1141,11 +1142,11 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //     test_ci.detset.precompute_diagonal_Slater_Condon();
 //     run_sigma_benchmark(test_ci, "single-species H2O aug-cc-pVDZ CISD", 3);
 //   }
-// 
+//
 //   // two species: PsH CIS (~18 dets)
 //   {
 //     POLYQUANT_CALCULATION test_calc;
-//     test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos.json");
+//     test_calc.setup_calculation(TestDataPath("PsH_wpos/PsH_wpos.json"));
 //     test_calc.run();
 //     POLYQUANT_EPCI test_ci;
 //     std::tuple<int, int, int> ex_lvl = {1, 1, 1};
@@ -1161,11 +1162,11 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //     test_ci.detset.precompute_diagonal_Slater_Condon();
 //     run_sigma_benchmark(test_ci, "two-species PsH CIS", 200);
 //   }
-// 
+//
 //   // two species medium: H2O+e+ cc-pVDZ CISD/CIS (~14K dets)
 //   {
 //     POLYQUANT_CALCULATION test_calc;
-//     test_calc.setup_calculation("../../tests/data/h2o_ccpvdz_wpos/h2o.json");
+//     test_calc.setup_calculation(TestDataPath("h2o_ccpvdz_wpos/h2o.json"));
 //     test_calc.run();
 //     POLYQUANT_EPCI test_ci;
 //     test_ci.excitation_level.push_back({2, 2, 2}); // electrons: CISD
@@ -1180,11 +1181,11 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //     test_ci.detset.precompute_diagonal_Slater_Condon();
 //     run_sigma_benchmark(test_ci, "two-species H2O+e+ cc-pVDZ CISD/CIS", 5);
 //   }
-// 
+//
 //   // two species large: H2O+e+ aug-cc-pVDZ CISD/CIS (~50K dets)
 //   {
 //     POLYQUANT_CALCULATION test_calc;
-//     test_calc.setup_calculation("../../tests/data/h2o_augccpvdz_wpos/h2o.json");
+//     test_calc.setup_calculation(TestDataPath("h2o_augccpvdz_wpos/h2o.json"));
 //     test_calc.run();
 //     POLYQUANT_EPCI test_ci;
 //     test_ci.excitation_level.push_back({2, 2, 2}); // electrons: CISD
@@ -1199,19 +1200,19 @@ TEST_CASE("CI: multispecies sigma slow v fast", "[CI]") {
 //     test_ci.detset.precompute_diagonal_Slater_Condon();
 //     run_sigma_benchmark(test_ci, "two-species H2O+e+ aug-cc-pVDZ CISD/CIS", 2);
 //   }
-// 
+//
 //   REQUIRE(true);
 // }
 
 TEST_CASE("CI: Natural Orbitals", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/PsH_wpos/H_minus.json");
+  test_calc.setup_calculation(TestDataPath("PsH_wpos/H_minus.json"));
   test_calc.run();
 
   std::vector<double> NO_occ_pyscf;
   std::vector<std::vector<double>> NO_pyscf;
-  Polyquant_read_vec_from_file(NO_occ_pyscf, "../../tests/data/PsH_wpos/h_minus_NO_occ.txt");
-  Polyquant_read_vecofvec_from_file(NO_pyscf, "../../tests/data/PsH_wpos/h_minus_NO.txt");
+  Polyquant_read_vec_from_file(NO_occ_pyscf, TestDataPath("PsH_wpos/h_minus_NO_occ.txt"));
+  Polyquant_read_vecofvec_from_file(NO_pyscf, TestDataPath("PsH_wpos/h_minus_NO.txt"));
 
   for (auto i = 0; i < NO_occ_pyscf.size(); i++) {
     REQUIRE_THAT(test_calc.ci_calc->occ_nso[0][0][0][i], Catch::Matchers::WithinAbs(NO_occ_pyscf[i] / 2.0, POLYQUANT_TEST_EPSILON_LOOSE));
@@ -1224,7 +1225,7 @@ TEST_CASE("CI: Natural Orbitals", "[CI]") {
 }
 TEST_CASE("CI: Multispecies Natural Orbitals", "[CI]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/PsH_wpos/PsH_wpos_CI.json");
+  test_calc.setup_calculation(TestDataPath("PsH_wpos/PsH_wpos_CI.json"));
   test_calc.run();
 
   REQUIRE_THAT(test_calc.ci_calc->occ_nso[0][0][0].sum(), Catch::Matchers::WithinAbs(1.0, POLYQUANT_TEST_EPSILON_TIGHT));

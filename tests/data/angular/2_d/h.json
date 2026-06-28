@@ -15,7 +15,7 @@
         { "electron" :
           {"H" : [{ "custom" : 
             {"type" : "file",
-             "filename" : "../../tests/data/angular/2_d/electron_basis.g94"}}]}
+             "filename" : "electron_basis.g94"}}]}
         }
   },
   "keywords": {

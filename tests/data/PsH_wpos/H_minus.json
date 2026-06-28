@@ -14,7 +14,7 @@
         { "electron" :
           {"H" : [{ "custom" : 
               {"type" : "file",
-               "filename" : "../../tests/data/PsH_wpos/electron_basis.g94"}}]}
+               "filename" : "electron_basis.g94"}}]}
         }
   },
   "keywords": {

@@ -4,6 +4,11 @@ add_executable(main_test unit_tests/io/io_test.cpp unit_tests/molecule/molecule_
 # find the required testing library and link the other required libraries
 target_link_libraries(main_test Catch2::Catch2WithMain polyquant_lib)
 
-target_include_directories(main_test PRIVATE include)
-catch_discover_tests(main_test)
+target_include_directories(main_test PRIVATE ${PROJECT_SOURCE_DIR}/tests)
+target_compile_definitions(main_test PRIVATE POLYQUANT_TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data")
+if(POLYQUANT_NETWORK_TESTS)
+  catch_discover_tests(main_test)
+else()
+  catch_discover_tests(main_test TEST_SPEC "~[network]")
+endif()
 # add_test(main_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/main_test)

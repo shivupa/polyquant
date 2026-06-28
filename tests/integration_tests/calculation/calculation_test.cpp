@@ -3,6 +3,7 @@
 #include "integral/integral.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
+#include "test_paths.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -110,9 +111,9 @@ std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> get_in
   return int_map;
 };
 
-TEST_CASE("CALCULATION: H2/ano-R0(EMSL basis) SCF.") {
+TEST_CASE("CALCULATION: H2/ano-R0(EMSL basis) SCF.", "[network]") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2_anor0EMSL/h2.json");
+  test_calc.setup_calculation(TestDataPath("h2_anor0EMSL/h2.json"));
   test_calc.run();
   // Verified using pyscf
   // Tue Jul  5 11:02:08 AM EDT 2022
@@ -134,7 +135,7 @@ TEST_CASE("CALCULATION: H2/ano-R0(EMSL basis) SCF.") {
 
 TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF.") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary/h2o.json"));
   test_calc.run();
   // Verified using pyscf
   // Tue Jul  5 11:16:05 AM EDT 2022
@@ -156,7 +157,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF.") {
 
 TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF with Cauchy-Schwarz screening.") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary/h2o.json"));
   test_calc.input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"] = true;
   test_calc.run();
 
@@ -171,7 +172,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF with Cauchy-Schwarz screening.")
 }
 
 TEST_CASE("CALCULATION: H2O/sto-3g(basis from file) SCF.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3gfile/h2o.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("h2o_sto3gfile/h2o.json"));
   test_calc.run();
   // Verified using pyscf
   // Tue Jul  5 11:16:25 AM EDT 2022
@@ -188,7 +189,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(basis from file) SCF.") {
 }
 
 TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF library basis.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumHlibrary/h2o.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("h2o_sto3g_quantumHlibrary/h2o.json"));
   test_calc.run();
   REQUIRE(test_calc.scf_calc->converged);
   REQUIRE(test_calc.scf_calc->independent_converged);
@@ -209,7 +210,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF library basis.") {
 }
 
 TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF (basis from file).") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3g_quantumHfile/h2o.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("h2o_sto3g_quantumHfile/h2o.json"));
   test_calc.run();
   REQUIRE(test_calc.scf_calc->converged);
   REQUIRE(test_calc.scf_calc->independent_converged);
@@ -230,7 +231,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g quantum H SCF (basis from file).") {
 }
 
 TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/li-_custombasis_wpos/Li_wpos.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("li-_custombasis_wpos/Li_wpos.json"));
   test_calc.run();
   REQUIRE(test_calc.scf_calc->converged);
   REQUIRE(test_calc.scf_calc->independent_converged);
@@ -250,7 +251,7 @@ TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF.") {
   REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-7.5257234633, POLYQUANT_TEST_EPSILON_LOOSE));
 }
 TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/li-_custombasis_wpos/Li_wpos_dumpHDF5.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("li-_custombasis_wpos/Li_wpos_dumpHDF5.json"));
   test_calc.run();
   POLYQUANT_HDF5 file("electron_Li_wpos.h5");
   REQUIRE(file.exist("/PBC"));
@@ -268,7 +269,7 @@ TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {
 
 TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary_cisd/h2o.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary_cisd/h2o.json"));
   test_calc.run();
   REQUIRE(test_calc.scf_calc->converged);
 
@@ -276,7 +277,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
   REQUIRE_THAT(test_calc.ci_calc->energies[1], Catch::Matchers::WithinAbs(-74.59209776692875, POLYQUANT_TEST_EPSILON_LOOSE));
 
   std::vector<std::vector<double>> reference_values;
-  std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/cisd_ham_elements.txt";
+  std::string reference_values_file = TestDataPath("h2o_sto3glibrary_cisd/cisd_ham_elements.txt");
   Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
   std::cout << test_calc.ci_calc->detset.N_dets << std::endl;
   auto count = 0;
@@ -324,7 +325,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
 
 TEST_CASE("CALCULATION: H2O/sto-3g(library) CI slow.") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary_cisd/h2o_slow.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary_cisd/h2o_slow.json"));
   test_calc.run();
   REQUIRE(test_calc.scf_calc->converged);
 
@@ -332,7 +333,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) CI slow.") {
   REQUIRE_THAT(test_calc.ci_calc->energies[1], Catch::Matchers::WithinAbs(-74.59209776692875, POLYQUANT_TEST_EPSILON_LOOSE));
 
   std::vector<std::vector<double>> reference_values;
-  std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/cisd_ham_elements.txt";
+  std::string reference_values_file = TestDataPath("h2o_sto3glibrary_cisd/cisd_ham_elements.txt");
   Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
   std::cout << test_calc.ci_calc->detset.N_dets << std::endl;
   auto count = 0;
@@ -379,7 +380,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) CI slow.") {
 }
 TEST_CASE("CALCULATION: H2O/sto-3g(library) explicit ham.") {
   POLYQUANT_CALCULATION test_calc;
-  test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary_cisd/h2o_explicitham.json");
+  test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary_cisd/h2o_explicitham.json"));
   test_calc.run();
   REQUIRE(test_calc.scf_calc->converged);
 
@@ -387,7 +388,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) explicit ham.") {
   REQUIRE_THAT(test_calc.ci_calc->energies[1], Catch::Matchers::WithinAbs(-74.59209776692875, POLYQUANT_TEST_EPSILON_LOOSE));
 
   std::vector<std::vector<double>> reference_values;
-  std::string reference_values_file = "../../tests/data/h2o_sto3glibrary_cisd/cisd_ham_elements.txt";
+  std::string reference_values_file = TestDataPath("h2o_sto3glibrary_cisd/cisd_ham_elements.txt");
   Polyquant_read_vecofvec_from_file(reference_values, reference_values_file);
   std::cout << test_calc.ci_calc->detset.N_dets << std::endl;
   auto count = 0;
@@ -407,7 +408,7 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) explicit ham.") {
 }
 
 TEST_CASE("CALCULATION: PsH/custom basis CI dump HDF5.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/PsH_wpos/PsH_wpos_CI_hdf5.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("PsH_wpos/PsH_wpos_CI_hdf5.json"));
   test_calc.run();
   POLYQUANT_HDF5 file("electron_PsH_wpos.h5");
   REQUIRE(file.exist("/PBC"));
@@ -438,9 +439,9 @@ TEST_CASE("CALCULATION: PsH/custom basis CI dump HDF5.") {
 }
 
 TEST_CASE("CALCULATION: SCF restart test no skipiterations.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/h2sto3g_restart/h2.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("h2sto3g_restart/h2.json"));
   test_calc.run();
-  POLYQUANT_CALCULATION test_calc2("../../tests/data/h2sto3g_restart/h2_restart_noskipiterations.json");
+  POLYQUANT_CALCULATION test_calc2(TestDataPath("h2sto3g_restart/h2_restart_noskipiterations.json"));
   test_calc2.run();
   REQUIRE_THAT(test_calc.scf_calc->E_particles[0], Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_particles[0], POLYQUANT_TEST_EPSILON_LOOSE));
 
@@ -462,9 +463,9 @@ TEST_CASE("CALCULATION: SCF restart test no skipiterations.") {
 }
 
 TEST_CASE("CALCULATION: SCF restart test skipiterations.") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/h2sto3g_restart/h2.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("h2sto3g_restart/h2.json"));
   test_calc.run();
-  POLYQUANT_CALCULATION test_calc2("../../tests/data/h2sto3g_restart/h2_restart_skipiterations.json");
+  POLYQUANT_CALCULATION test_calc2(TestDataPath("h2sto3g_restart/h2_restart_skipiterations.json"));
   test_calc2.run();
   REQUIRE_THAT(test_calc.scf_calc->E_particles[0], Catch::Matchers::WithinAbs(test_calc2.scf_calc->E_particles[0], POLYQUANT_TEST_EPSILON_LOOSE));
 
@@ -483,7 +484,7 @@ TEST_CASE("CALCULATION: SCF restart test skipiterations.") {
 }
 
 TEST_CASE("CALCULATION: PsH compare to literature CISD (10.1063/1.5094035).") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/PsH_wpos/compare_CISD.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("PsH_wpos/compare_CISD.json"));
   test_calc.run();
 
   REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-0.6660682662312821245, POLYQUANT_TEST_EPSILON_LOOSE));
@@ -498,7 +499,7 @@ TEST_CASE("CALCULATION: PsH compare to literature CISD (10.1063/1.5094035).") {
 }
 
 TEST_CASE("CALCULATION: PsH compare to literature FCI (10.1063/1.5094035).") {
-  POLYQUANT_CALCULATION test_calc("../../tests/data/PsH_wpos/compare_FCI.json");
+  POLYQUANT_CALCULATION test_calc(TestDataPath("PsH_wpos/compare_FCI.json"));
   test_calc.run();
 
   REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-0.6660682662312821245, POLYQUANT_TEST_EPSILON_LOOSE));
@@ -513,9 +514,9 @@ TEST_CASE("CALCULATION: PsH compare to literature FCI (10.1063/1.5094035).") {
 }
 
 TEST_CASE("CALCULATION: PsH compare No Sym, D2H, SO(3).") {
-  POLYQUANT_CALCULATION nosym("../../tests/data/PsH_wpos/symmetry/PsH_wpos_nosym.json");
-  POLYQUANT_CALCULATION d2h("../../tests/data/PsH_wpos/symmetry/PsH_wpos_symd2h.json");
-  POLYQUANT_CALCULATION so3("../../tests/data/PsH_wpos/symmetry/PsH_wpos_symso3.json");
+  POLYQUANT_CALCULATION nosym(TestDataPath("PsH_wpos/symmetry/PsH_wpos_nosym.json"));
+  POLYQUANT_CALCULATION d2h(TestDataPath("PsH_wpos/symmetry/PsH_wpos_symd2h.json"));
+  POLYQUANT_CALCULATION so3(TestDataPath("PsH_wpos/symmetry/PsH_wpos_symso3.json"));
   nosym.run();
   d2h.run();
   so3.run();
@@ -529,8 +530,8 @@ TEST_CASE("CALCULATION: PsH compare No Sym, D2H, SO(3).") {
 }
 
 TEST_CASE("CALCULATION: PsH no-symmetry SCF with Cauchy-Schwarz screening.") {
-  POLYQUANT_CALCULATION reference_calc("../../tests/data/PsH_wpos/symmetry/PsH_wpos_nosym.json");
-  POLYQUANT_CALCULATION screened_calc("../../tests/data/PsH_wpos/symmetry/PsH_wpos_nosym.json");
+  POLYQUANT_CALCULATION reference_calc(TestDataPath("PsH_wpos/symmetry/PsH_wpos_nosym.json"));
+  POLYQUANT_CALCULATION screened_calc(TestDataPath("PsH_wpos/symmetry/PsH_wpos_nosym.json"));
   screened_calc.input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"] = true;
   reference_calc.run();
   screened_calc.run();
@@ -545,19 +546,19 @@ TEST_CASE("CALCULATION: PsH no-symmetry SCF with Cauchy-Schwarz screening.") {
 }
 
 TEST_CASE("CALCULATION: Be/cc-pvdz compare SCF to PySCF.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/be/cc_pvdz/Be.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("be/cc_pvdz/Be.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/be/cc_pvdz/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("be/cc_pvdz/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/be/cc_pvdz/mo_energy.txt";
+  reference_values_file = TestDataPath("be/cc_pvdz/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/be/cc_pvdz/total_energy.txt";
+  reference_values_file = TestDataPath("be/cc_pvdz/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -571,19 +572,19 @@ TEST_CASE("CALCULATION: Be/cc-pvdz compare SCF to PySCF.") {
 }
 
 TEST_CASE("CALCULATION: Be/aug-cc-pvdz compare SCF to PySCF.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/be/aug_cc_pvdz/Be.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("be/aug_cc_pvdz/Be.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/be/aug_cc_pvdz/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("be/aug_cc_pvdz/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/be/aug_cc_pvdz/mo_energy.txt";
+  reference_values_file = TestDataPath("be/aug_cc_pvdz/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/be/aug_cc_pvdz/total_energy.txt";
+  reference_values_file = TestDataPath("be/aug_cc_pvdz/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -597,19 +598,19 @@ TEST_CASE("CALCULATION: Be/aug-cc-pvdz compare SCF to PySCF.") {
 }
 
 TEST_CASE("CALCULATION: Be/aug-cc-pvqz compare SCF to PySCF.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/be/aug_cc_pvqz/Be.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("be/aug_cc_pvqz/Be.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/be/aug_cc_pvqz/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("be/aug_cc_pvqz/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/be/aug_cc_pvqz/mo_energy.txt";
+  reference_values_file = TestDataPath("be/aug_cc_pvqz/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/be/aug_cc_pvqz/total_energy.txt";
+  reference_values_file = TestDataPath("be/aug_cc_pvqz/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -623,19 +624,19 @@ TEST_CASE("CALCULATION: Be/aug-cc-pvqz compare SCF to PySCF.") {
 }
 
 TEST_CASE("CALCULATION: Angular S.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/angular/0_s/h.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("angular/0_s/h.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/angular/0_s/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("angular/0_s/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/angular/0_s/mo_energy.txt";
+  reference_values_file = TestDataPath("angular/0_s/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/angular/0_s/total_energy.txt";
+  reference_values_file = TestDataPath("angular/0_s/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -648,7 +649,7 @@ TEST_CASE("CALCULATION: Angular S.") {
   }
   std::cout << "ERI" << std::endl;
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> int_map = get_ints(d2h);
-  reference_values_file = "../../tests/data/angular/0_s/eri.txt";
+  reference_values_file = TestDataPath("angular/0_s/eri.txt");
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
     // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
@@ -658,19 +659,19 @@ TEST_CASE("CALCULATION: Angular S.") {
 }
 
 TEST_CASE("CALCULATION: Angular P.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/angular/1_p/h.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("angular/1_p/h.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/angular/1_p/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("angular/1_p/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/angular/1_p/mo_energy.txt";
+  reference_values_file = TestDataPath("angular/1_p/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/angular/1_p/total_energy.txt";
+  reference_values_file = TestDataPath("angular/1_p/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -683,7 +684,7 @@ TEST_CASE("CALCULATION: Angular P.") {
   }
   std::cout << "ERI" << std::endl;
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> int_map = get_ints(d2h);
-  reference_values_file = "../../tests/data/angular/1_p/eri.txt";
+  reference_values_file = TestDataPath("angular/1_p/eri.txt");
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   // pyscf orders p orbitals differently
   std::vector<int> reorder_internal_to_pyscf = {1, 2, 0, 4, 5, 3};
@@ -696,19 +697,19 @@ TEST_CASE("CALCULATION: Angular P.") {
   }
 }
 TEST_CASE("CALCULATION: Angular D.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/angular/2_d/h.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("angular/2_d/h.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/angular/2_d/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("angular/2_d/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/angular/2_d/mo_energy.txt";
+  reference_values_file = TestDataPath("angular/2_d/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/angular/2_d/total_energy.txt";
+  reference_values_file = TestDataPath("angular/2_d/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -721,7 +722,7 @@ TEST_CASE("CALCULATION: Angular D.") {
   }
   std::cout << "ERI" << std::endl;
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> int_map = get_ints(d2h);
-  reference_values_file = "../../tests/data/angular/2_d/eri.txt";
+  reference_values_file = TestDataPath("angular/2_d/eri.txt");
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
     // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
@@ -730,19 +731,19 @@ TEST_CASE("CALCULATION: Angular D.") {
   }
 }
 TEST_CASE("CALCULATION: Angular F.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/angular/3_f/h.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("angular/3_f/h.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/angular/3_f/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("angular/3_f/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/angular/3_f/mo_energy.txt";
+  reference_values_file = TestDataPath("angular/3_f/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/angular/3_f/total_energy.txt";
+  reference_values_file = TestDataPath("angular/3_f/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -757,7 +758,7 @@ TEST_CASE("CALCULATION: Angular F.") {
 
   std::cout << "ERI" << std::endl;
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> int_map = get_ints(d2h);
-  reference_values_file = "../../tests/data/angular/3_f/eri.txt";
+  reference_values_file = TestDataPath("angular/3_f/eri.txt");
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
     // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
@@ -766,19 +767,19 @@ TEST_CASE("CALCULATION: Angular F.") {
   }
 }
 TEST_CASE("CALCULATION: Angular G.") {
-  POLYQUANT_CALCULATION d2h("../../tests/data/angular/4_g/h.json");
+  POLYQUANT_CALCULATION d2h(TestDataPath("angular/4_g/h.json"));
   d2h.run();
 
   std::vector<std::vector<double>> reference_mo_coeff;
-  std::string reference_values_file = "../../tests/data/angular/4_g/mo_coeff.txt";
+  std::string reference_values_file = TestDataPath("angular/4_g/mo_coeff.txt");
   Polyquant_read_vecofvec_from_file(reference_mo_coeff, reference_values_file);
 
   std::vector<double> reference_mo_energies;
-  reference_values_file = "../../tests/data/angular/4_g/mo_energy.txt";
+  reference_values_file = TestDataPath("angular/4_g/mo_energy.txt");
   Polyquant_read_vec_from_file(reference_mo_energies, reference_values_file);
 
   std::vector<double> reference_etot;
-  reference_values_file = "../../tests/data/angular/4_g/total_energy.txt";
+  reference_values_file = TestDataPath("angular/4_g/total_energy.txt");
   Polyquant_read_vec_from_file(reference_etot, reference_values_file);
 
   std::cout << "our    pyscf          diff" << std::endl;
@@ -792,7 +793,7 @@ TEST_CASE("CALCULATION: Angular G.") {
 
   std::cout << "ERI" << std::endl;
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> int_map = get_ints(d2h);
-  reference_values_file = "../../tests/data/angular/4_g/eri.txt";
+  reference_values_file = TestDataPath("angular/4_g/eri.txt");
   std::unordered_map<std::tuple<int, int, int, int>, double, FourTupleHash> ref_int_map = load_ints_for_testing(reference_values_file);
   for (const auto &[key, value] : int_map) {
     // std::cout << std::get<0>(key) << " " << std::get<1>(key) << " " << std::get<2>(key) << " " << std::get<3>(key) << " "
