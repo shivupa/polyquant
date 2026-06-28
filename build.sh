@@ -1,28 +1,37 @@
 #!/bin/bash
-#./format.sh
-rm -rf build
-mkdir -p build
-cd build
+set -euo pipefail
+
+BUILD_DIR="${BUILD_DIR:-build}"
+BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}"
+POLYQUANT_DOC="${POLYQUANT_DOC:-0}"
+POLYQUANT_TEST="${POLYQUANT_TEST:-1}"
+POLYQUANT_NETWORK_TESTS="${POLYQUANT_NETWORK_TESTS:-0}"
+POLYQUANT_CODE_COVERAGE="${POLYQUANT_CODE_COVERAGE:-0}"
+
+generator_args=()
+if command -v ninja >/dev/null 2>&1; then
+  generator_args=(-G Ninja)
+fi
+
 cmake \
-    -DPOLYQUANT_DOC=0 \
-    -DPOLYQUANT_TEST=1 \
-    -DPOLYQUANT_CODE_COVERAGE=0 \
-    -DCMAKE_C_COMPILER=clang \
-    -DCMAKE_CXX_COMPILER=clang++ \
-    -DCMAKE_BUILD_TYPE="Release" \
-    -DBLIS_INCLUDE_DIR=/opt/aocl-aocc \
-    -G Ninja \
-    ..
-#ninja Sphinx
-ninja
-#make -j12 
-# lcov --capture --initial --directory . --base-directory ../src --output-file coverage_base.info
-# ninja test
-# lcov --base-directory ../src --directory . --capture --output-file coverage.info
-# # filter out system and extra files.
-# # output coverage data for debugging (optional)
-# lcov -a coverage_base.info -a coverage.info -o coverage_total.info
-# # To also not include test code in coverage add them with full path to the patterns: '*/tests/*'
-# lcov --remove coverage_total.info '/usr/*' "${HOME}"'/.cache/*' '*/tests/*' '*build/*' --output-file coverage_total.info
-# lcov --list coverage_total.info
-# genhtml coverage_total.info -o temp
+  -S . \
+  -B "${BUILD_DIR}" \
+  -DPOLYQUANT_DOC="${POLYQUANT_DOC}" \
+  -DPOLYQUANT_TEST="${POLYQUANT_TEST}" \
+  -DPOLYQUANT_NETWORK_TESTS="${POLYQUANT_NETWORK_TESTS}" \
+  -DPOLYQUANT_CODE_COVERAGE="${POLYQUANT_CODE_COVERAGE}" \
+  -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+  "${generator_args[@]}" \
+  "$@"
+
+build_args=(--build "${BUILD_DIR}")
+if [[ -n "${BUILD_PARALLEL_LEVEL:-}" ]]; then
+  build_args+=(--parallel "${BUILD_PARALLEL_LEVEL}")
+else
+  build_args+=(--parallel)
+fi
+cmake "${build_args[@]}"
+
+if [[ "${RUN_TESTS:-0}" == "1" ]]; then
+  ctest --test-dir "${BUILD_DIR}" --output-on-failure
+fi
