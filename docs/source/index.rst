@@ -19,5 +19,4 @@ Polyquant API
    :maxdepth: 2
    :caption: Contents:
 
-   coverage
    api/library_root
