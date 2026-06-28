@@ -4,6 +4,10 @@ Developer Documentation
 This section contains generated API documentation and development notes for
 people changing Polyquant itself.
 
+Start with the workflow notes when changing code, tests, examples, or
+documentation. Use the generated API pages as a declaration-level reference
+while adding or completing Doxygen comments.
+
 Generated API
 -------------
 
@@ -14,4 +18,9 @@ should be treated as generated documentation output.
 .. toctree::
    :maxdepth: 2
 
+   building
+   source_layout
+   documentation
+   examples
+   formatting
    api/library_root
