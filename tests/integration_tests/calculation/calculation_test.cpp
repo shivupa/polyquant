@@ -154,6 +154,22 @@ TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF.") {
   REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-74.962926342808259506, 10 * POLYQUANT_TEST_EPSILON_LOOSE));
 }
 
+TEST_CASE("CALCULATION: H2O/sto-3g(library) SCF with Cauchy-Schwarz screening.") {
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation("../../tests/data/h2o_sto3glibrary/h2o.json");
+  test_calc.input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"] = true;
+  test_calc.run();
+
+  REQUIRE(test_calc.scf_calc->Cauchy_Schwarz_screening);
+  REQUIRE(test_calc.scf_calc->converged);
+  REQUIRE(test_calc.scf_calc->independent_converged);
+  REQUIRE(!test_calc.scf_calc->exceeded_iterations);
+  REQUIRE(test_calc.input_integral->Schwarz[0].rows() > 0);
+  REQUIRE(test_calc.input_integral->Schwarz[0].cols() > 0);
+  REQUIRE_THAT(test_calc.scf_calc->E_particles[0], Catch::Matchers::WithinAbs(-84.1577900311, 10 * POLYQUANT_TEST_EPSILON_LOOSE));
+  REQUIRE_THAT(test_calc.scf_calc->E_total, Catch::Matchers::WithinAbs(-74.962926342808259506, 10 * POLYQUANT_TEST_EPSILON_LOOSE));
+}
+
 TEST_CASE("CALCULATION: H2O/sto-3g(basis from file) SCF.") {
   POLYQUANT_CALCULATION test_calc("../../tests/data/h2o_sto3gfile/h2o.json");
   test_calc.run();

@@ -187,6 +187,29 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
     auto shell_l_bf_start = shell2bf_b[shell_l];
     auto shell_l_bf_size = shells_b[shell_l].size();
 
+    if (this->Cauchy_Schwarz_screening) {
+      auto D_norm = directscf_get_shell_density_norm_coulomb(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, quantum_part_b, quantum_part_b_idx,
+                                                            quantum_part_b_spin_idx, shell_k_bf_start, shell_k_bf_size, shell_l_bf_start, shell_l_bf_size);
+      if (quantum_part_a_idx == quantum_part_b_idx && quantum_part_a_spin_idx == quantum_part_b_spin_idx) {
+        const auto D_shell_ik_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start,
+                                                                               shell_i_bf_size, shell_k_bf_start, shell_k_bf_size);
+        const auto D_shell_jk_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start,
+                                                                               shell_j_bf_size, shell_k_bf_start, shell_k_bf_size);
+        const auto D_shell_il_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_i_bf_start,
+                                                                               shell_i_bf_size, shell_l_bf_start, shell_l_bf_size);
+        const auto D_shell_jl_norm = directscf_get_shell_density_norm_exchange(dm, dm_last, quantum_part_a, quantum_part_a_idx, quantum_part_a_spin_idx, shell_j_bf_start,
+                                                                               shell_j_bf_size, shell_l_bf_start, shell_l_bf_size);
+        D_norm = std::max({D_norm, D_shell_ik_norm, D_shell_jk_norm, D_shell_il_norm, D_shell_jl_norm});
+      }
+      if (D_norm == 0.0) {
+        continue;
+      }
+      if (D_norm * this->input_integral->Schwarz[quantum_part_a_idx](shell_i, shell_j) * this->input_integral->Schwarz[quantum_part_b_idx](shell_k, shell_l) <
+          this->Cauchy_Schwarz_threshold[quantum_part_a_idx]) {
+        continue;
+      }
+    }
+
     // compute the permutational degeneracy for the given shell
     // set this may look like the libint example but we are
     // breaking bra-ket symmetry so we are 4 fold symmetric
