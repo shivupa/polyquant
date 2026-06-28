@@ -144,6 +144,7 @@ jobs:
         run: |
           git clone https://github.com/mcodev31/libmsym.git
           cd libmsym
+          git checkout 85e47232376a8e735c2a7b5283f40b59b3953db1
           mkdir build
           cd build
           # build as shared library; build examples (built in ./examples,  not installed)
