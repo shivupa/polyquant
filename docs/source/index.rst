@@ -8,7 +8,7 @@ workflows for systems with multiple interacting quantum particle types.
 Documentation downloads
 =======================
 
-`Download the PDF documentation <polyquant.pdf>`_
+`Download the PDF documentation <../latex/polyquant.pdf>`_
 
 Contents
 ========

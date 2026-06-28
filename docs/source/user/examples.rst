@@ -74,7 +74,6 @@ Input file:
            "diis_extrapolation" : true,
            "diis_size" : 10,
            "diis_damping" : 10.00,
-           "diis_mixing_fraction" : 0.2,
            "Cauchy_Schwarz_screening" : true,
            "incremental_fock" : true
        },
