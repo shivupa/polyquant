@@ -10,7 +10,7 @@
         "CMAKE_BUILD_TYPE": "Release",
         "POLYQUANT_DOC": "0",
         "POLYQUANT_TEST": "1",
-        "POLYQUANT_NETWORK_TESTS": "0",
+        "POLYQUANT_NETWORK_TESTS": "1",
         "POLYQUANT_CODE_COVERAGE": "0"
       }
     },
@@ -23,7 +23,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "POLYQUANT_DOC": "0",
         "POLYQUANT_TEST": "1",
-        "POLYQUANT_NETWORK_TESTS": "0",
+        "POLYQUANT_NETWORK_TESTS": "1",
         "POLYQUANT_CODE_COVERAGE": "0"
       }
     },

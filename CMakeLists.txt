@@ -70,7 +70,7 @@ set(POLYQUANT_TEST
     1
     CACHE BOOL "Enable/disable testing")
 set(POLYQUANT_NETWORK_TESTS
-    0
+    1
     CACHE BOOL "Enable/disable tests that require network access")
 set(FETCHCONTENT_QUIET ON)
 option(POLYQUANT_CODE_COVERAGE "Enable/disable coverage reporting" OFF)
@@ -124,6 +124,7 @@ if(POLYQUANT_DOC)
   file(COPY ${PROJECT_SOURCE_DIR}/README.md DESTINATION ${POLYQUANT_BINARY_DIR})
   configure_file(${PROJECT_SOURCE_DIR}/docs/source/conf.py ${POLYQUANT_BINARY_DIR}/docs/source)
   find_package(Sphinx REQUIRED)
+  find_program(LATEXMK_EXECUTABLE latexmk)
   set(SPHINX_SOURCE ${POLYQUANT_BINARY_DIR}/docs/source)
   set(SPHINX_BUILD ${POLYQUANT_BINARY_DIR}/docs)
   add_custom_target(
@@ -131,11 +132,20 @@ if(POLYQUANT_DOC)
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
     WORKING_DIRECTORY ${SPHINX_BUILD}
     COMMENT "Generating documentation with Sphinx (html)")
-  add_custom_target(
-    polyquant_docs_pdf ALL
-    COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
-    WORKING_DIRECTORY ${SPHINX_BUILD}
-    COMMENT "Generating documentation with Sphinx (pdf)")
+  if(LATEXMK_EXECUTABLE)
+    add_custom_target(
+      polyquant_docs_pdf ALL
+      COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
+      WORKING_DIRECTORY ${SPHINX_BUILD}
+      COMMENT "Generating documentation with Sphinx (pdf)")
+  else(LATEXMK_EXECUTABLE)
+    add_custom_target(
+      polyquant_docs_pdf
+      COMMAND ${CMAKE_COMMAND} -E echo "latexmk is required to build the PDF documentation."
+      COMMAND ${CMAKE_COMMAND} -E false
+      WORKING_DIRECTORY ${SPHINX_BUILD}
+      COMMENT "Generating documentation with Sphinx (pdf)")
+  endif(LATEXMK_EXECUTABLE)
 endif(POLYQUANT_DOC)
 # ######################################################################################################################################################################################################
 # Find libraries
