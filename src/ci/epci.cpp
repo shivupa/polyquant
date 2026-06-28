@@ -574,6 +574,7 @@ void POLYQUANT_EPCI::fcidump(std::string &filename) {
 void POLYQUANT_EPCI::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  POLYQUANT_TIMER::reset_aggregate_timers();
   this->print_start();
   if (this->input_symmetry->do_symmetry) {
     if (this->input_symmetry->point_group == "SO(3)") {
@@ -682,6 +683,7 @@ void POLYQUANT_EPCI::run() {
   }
   delete logger;
   logger = NULL;
+  POLYQUANT_TIMER::print_aggregate_timers();
 }
 
 void POLYQUANT_EPCI::dump_molden() {

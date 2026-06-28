@@ -114,6 +114,30 @@ double POLYQUANT_EPSCF::directscf_get_density_exchange(const std::vector<std::ve
   return D_val;
 }
 
+void POLYQUANT_EPSCF::prepare_fock_workspace(const int nthreads, const size_t max_nprim, const int max_l, const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock) {
+  if (nthreads <= 0) {
+    APP_ABORT("Invalid OpenMP thread count while preparing Fock workspace.");
+  }
+
+  const auto rebuild_engines = this->fock_engines.size() != static_cast<size_t>(nthreads) || this->fock_workspace_max_nprim != max_nprim || this->fock_workspace_max_l != max_l;
+  if (rebuild_engines) {
+    this->fock_engines.resize(nthreads);
+    this->fock_engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
+    this->fock_engines[0].set_precision(0.0);
+    for (int i = 1; i < nthreads; i++) {
+      this->fock_engines[i] = this->fock_engines[0];
+    }
+    this->fock_workspace_max_nprim = max_nprim;
+    this->fock_workspace_max_l = max_l;
+  }
+
+  this->fock_thread_matrices.resize(nthreads);
+  for (int i = 0; i < nthreads; i++) {
+    this->fock_thread_matrices[i].resizeLike(fock);
+    this->fock_thread_matrices[i].setZero();
+  }
+}
+
 void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock,
                                                           const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm,
                                                           const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &dm_last, const QUANTUM_PARTICLE_SET &quantum_part_a,
@@ -128,24 +152,11 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
 
   // loop over shells
   auto nthreads = omp_get_max_threads();
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> FA;
   auto max_nprim = shells_a.max_nprim() > shells_b.max_nprim() ? shells_a.max_nprim() : shells_b.max_nprim();
   auto max_l = shells_a.max_l() > shells_b.max_l() ? shells_a.max_l() : shells_b.max_l();
-  std::vector<libint2::Engine> engines;
-  engines.resize(nthreads);
-  FA.resize(nthreads);
-  engines[0] = libint2::Engine(libint2::Operator::coulomb, max_nprim, max_l, 0);
-  // if (this->Cauchy_Schwarz_screening) {
-  //   engines[0].set(libint2::ScreeningMethod::SchwarzInf);
-  //   engines[0].set_precision(std::numeric_limits<double>::epsilon());
-  // } else {
-  engines[0].set_precision(0.0);
-  //}
-  for (int i = 0; i < nthreads; i++) {
-    engines[i] = engines[0];
-    FA[i].resizeLike(fock);
-    FA[i].setZero();
-  }
+  this->prepare_fock_workspace(nthreads, max_nprim, max_l, fock);
+  auto &engines = this->fock_engines;
+  auto &FA = this->fock_thread_matrices;
   struct FockShellQuartetTask {
     size_t shell_i;
     size_t shell_j;
@@ -342,6 +353,7 @@ void POLYQUANT_EPSCF::form_fock_helper() {
 }
 
 void POLYQUANT_EPSCF::form_fock() {
+  POLYQUANT_TIMER timer("POLYQUANT_EPSCF::form_fock", POLYQUANT_TIMER_MODE::aggregate);
   // set data structures
   auto quantum_part_a_idx = 0ul;
   for (auto const &[quantum_part_a_key, quantum_part_a] : this->input_molecule->quantum_particles) {
@@ -1612,6 +1624,7 @@ void POLYQUANT_EPSCF::setup_standard() {
 void POLYQUANT_EPSCF::run() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
+  POLYQUANT_TIMER::reset_aggregate_timers();
 
   std::string divider(95, '-');
   while (!this->stop) {
@@ -1630,6 +1643,7 @@ void POLYQUANT_EPSCF::run() {
   } else {
     this->print_error();
   }
+  POLYQUANT_TIMER::print_aggregate_timers();
 }
 
 void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {

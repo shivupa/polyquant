@@ -1,10 +1,13 @@
 #ifndef POLYQUANT_INPUT_TIMER_H
 #define POLYQUANT_INPUT_TIMER_H
 #include "io/utils.hpp"
+#include <algorithm>
 #include <chrono>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <mutex>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -13,7 +16,18 @@ using json = nlohmann::json;
 
 namespace polyquant {
 
+enum class POLYQUANT_TIMER_MODE { print_on_destruction, aggregate };
+
 class POLYQUANT_TIMER {
+  using clock = std::chrono::steady_clock;
+
+  struct aggregate_timer_stats {
+    size_t count = 0;
+    clock::duration total = clock::duration::zero();
+    clock::duration min = clock::duration::zero();
+    clock::duration max = clock::duration::zero();
+  };
+
 public:
   POLYQUANT_TIMER() { this->set_start_time(); };
 
@@ -22,12 +36,43 @@ public:
     this->set_calling_function(calling_func);
   };
 
+  POLYQUANT_TIMER(const std::string &calling_func, POLYQUANT_TIMER_MODE mode) {
+    this->set_start_time();
+    this->set_calling_function(calling_func);
+    this->timer_mode = mode;
+  };
+
   ~POLYQUANT_TIMER() {
-    if (print_on_destruction) {
-      this->set_end_time();
+    this->set_end_time();
+    if (this->timer_mode == POLYQUANT_TIMER_MODE::aggregate) {
+      this->record_aggregate_timer(this->get_duration());
+    } else if (print_on_destruction) {
       this->print_timer_end();
     }
   };
+
+  static void print_aggregate_timers() {
+    std::map<std::string, aggregate_timer_stats> timers;
+    {
+      std::lock_guard<std::mutex> lock(aggregate_timers_mutex);
+      timers = aggregate_timers;
+    }
+
+    for (const auto &[name, stats] : timers) {
+      if (stats.count == 0) {
+        continue;
+      }
+      std::stringstream buffer;
+      buffer << "Aggregate Timer " << name << " count=" << stats.count << " total=" << format_duration(stats.total) << " avg=" << format_duration(stats.total / stats.count)
+             << " min=" << format_duration(stats.min) << " max=" << format_duration(stats.max) << std::endl;
+      Polyquant_cout(buffer.str());
+    }
+  }
+
+  static void reset_aggregate_timers() {
+    std::lock_guard<std::mutex> lock(aggregate_timers_mutex);
+    aggregate_timers.clear();
+  }
 
   /**
    * @brief Get the memory usage in bytes
@@ -109,18 +154,13 @@ public:
   void set_print_on_destruction(bool print_val) { this->print_on_destruction = print_val; };
   void set_calling_function(const std::string &calling_func) { this->calling_function = calling_func; };
 
-  void set_start_time() { this->start = std::chrono::high_resolution_clock::now(); };
+  void set_start_time() { this->start = clock::now(); };
 
-  void set_end_time() { this->end = std::chrono::high_resolution_clock::now(); };
+  void set_end_time() { this->end = clock::now(); };
 
-  std::chrono::system_clock::duration get_duration() { return end - start; }
+  clock::duration get_duration() { return end - start; }
 
-  void print_timer_end() {
-    // use std::format once supported
-    // use std::chrono::days etc once it is used
-    // typedef std::chrono::duration<int, std::ratio<86400>> days;
-    auto duration = get_duration();
-    // auto d = std::chrono::duration_cast<days>(duration);
+  static std::string format_duration(clock::duration duration) {
     auto d = std::chrono::duration_cast<std::chrono::days>(duration);
     duration -= d;
     auto h = std::chrono::duration_cast<std::chrono::hours>(duration);
@@ -135,9 +175,15 @@ public:
     duration -= us;
     auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
     duration -= ns;
+
     std::stringstream buffer;
-    buffer << "Timer " << this->calling_function << "    " << d.count() << "d:" << h.count() << "h:" << m.count() << "m:" << s.count() << "s:" << ms.count() << "ms:" << us.count()
-           << "us:" << ns.count() << "ns";
+    buffer << d.count() << "d:" << h.count() << "h:" << m.count() << "m:" << s.count() << "s:" << ms.count() << "ms:" << us.count() << "us:" << ns.count() << "ns";
+    return buffer.str();
+  }
+
+  void print_timer_end() {
+    std::stringstream buffer;
+    buffer << "Timer " << this->calling_function << "    " << format_duration(this->get_duration());
     double mem_used, mem_avail, mem_total;
     process_mem_total(mem_used, mem_avail, mem_total);
     std::string used = formatted_mem(mem_used);
@@ -148,10 +194,28 @@ public:
   };
 
 private:
+  void record_aggregate_timer(clock::duration duration) {
+    std::lock_guard<std::mutex> lock(aggregate_timers_mutex);
+    auto &stats = aggregate_timers[this->calling_function];
+    if (stats.count == 0) {
+      stats.min = duration;
+      stats.max = duration;
+    } else {
+      stats.min = std::min(stats.min, duration);
+      stats.max = std::max(stats.max, duration);
+    }
+    stats.count++;
+    stats.total += duration;
+  }
+
+  static inline std::map<std::string, aggregate_timer_stats> aggregate_timers;
+  static inline std::mutex aggregate_timers_mutex;
+
   bool print_on_destruction = true;
+  POLYQUANT_TIMER_MODE timer_mode = POLYQUANT_TIMER_MODE::print_on_destruction;
   std::string calling_function = "UNKNOWN";
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
-  std::chrono::time_point<std::chrono::high_resolution_clock> end;
+  std::chrono::time_point<clock> start;
+  std::chrono::time_point<clock> end;
 };
 } // namespace polyquant
 #endif

@@ -4,8 +4,7 @@
 namespace polyquant {
 template <typename T>
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
-  auto function = __PRETTY_FUNCTION__;
-  POLYQUANT_TIMER timer(function);
+  POLYQUANT_TIMER timer("POLYQUANT_DETSET::sigma", POLYQUANT_TIMER_MODE::aggregate);
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> output;
   output.resize(this->rows(), mat_in.cols());
   output.setZero();

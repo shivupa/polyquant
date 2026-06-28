@@ -48,6 +48,8 @@ public:
                                            const int quantum_part_a_idx, const int quantum_part_a_spin_idx, const QUANTUM_PARTICLE_SET &quantum_part_b, const int quantum_part_b_idx,
                                            const int quantum_part_b_spin_idx);
 
+  void prepare_fock_workspace(const int nthreads, const size_t max_nprim, const int max_l, const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &fock);
+
   void form_fock_helper();
 
   void form_fock() override;
@@ -323,6 +325,11 @@ public:
    *
    */
   std::vector<double> Cauchy_Schwarz_threshold;
+
+  std::vector<libint2::Engine> fock_engines;
+  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> fock_thread_matrices;
+  size_t fock_workspace_max_nprim = 0;
+  int fock_workspace_max_l = -1;
 
   /**
    * @brief Exceeded iterations?
