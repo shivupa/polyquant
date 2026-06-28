@@ -1,22 +1,20 @@
-.. Polyquant documentation master file, created by
-   sphinx-quickstart on Sun Dec 29 01:10:36 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Polyquant Documentation
+=======================
 
-Welcome to Polyquant's documentation!
-=====================================
+Polyquant is a C++ package for nonrelativistic multicomponent quantum
+calculations, including self-consistent field and configuration interaction
+workflows for systems with multiple interacting quantum particle types.
 
 Documentation downloads
 =======================
 
 `Download the PDF documentation <polyquant.pdf>`_
 
-.. mdinclude:: ../../README.md
+Contents
+========
 
-Polyquant API
-=============
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   api/library_root
+   user/index
+   developer/index

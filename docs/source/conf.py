@@ -73,7 +73,7 @@ breathe_default_project = "Polyquant"
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
-    "containmentFolder": "./api",
+    "containmentFolder": "./developer/api",
     "rootFileName": "library_root.rst",
     "rootFileTitle": "Polyquant API",
     "doxygenStripFromPath": "..",
