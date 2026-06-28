@@ -69,7 +69,8 @@
       "name": "docs",
       "configurePreset": "docs",
       "targets": [
-        "polyquant_docs_html"
+        "polyquant_docs_html",
+        "polyquant_docs_pdf"
       ]
     },
     {

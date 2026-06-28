@@ -57,6 +57,10 @@ jobs:
             libhdf5-dev \
             lcov \
             doxygen \
+            latexmk \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
             ${{ matrix.config.pkgs }}
           python -m pip install -r docs/requirements.txt
           ninja --version
@@ -105,10 +109,18 @@ jobs:
         shell: bash
         working-directory: builddir
         run: cmake --build . --target polyquant_coverage --config ${{ matrix.config.build_type }}
-      - name: Build docs
+      - name: Build docs HTML
         shell: bash
         working-directory: builddir
         run: cmake --build . --target polyquant_docs_html --config ${{ matrix.config.build_type }}
+      - name: Build docs PDF
+        shell: bash
+        working-directory: builddir
+        run: cmake --build . --target polyquant_docs_pdf --config ${{ matrix.config.build_type }}
+      - name: Publish PDF with docs site
+        shell: bash
+        working-directory: builddir
+        run: cp docs/latex/polyquant.pdf docs/html/polyquant.pdf
       - name: Move coverage report
         shell: bash
         working-directory: builddir

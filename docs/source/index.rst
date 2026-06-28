@@ -4,16 +4,20 @@
    contain the root `toctree` directive.
 
 Welcome to Polyquant's documentation!
-=================================
+=====================================
+
+Documentation downloads
+=======================
+
+`Download the PDF documentation <polyquant.pdf>`_
 
 .. mdinclude:: ../../README.md
 
 Polyquant API
-=================================
+=============
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    coverage
    api/library_root
-

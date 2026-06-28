@@ -1,3 +1,5 @@
+# Python dependencies for the Sphinx HTML and LaTeX/PDF documentation builds.
+# System LaTeX packages are installed by the docs CI workflow.
 sphinx
 sphinx-rtd-theme
 breathe
