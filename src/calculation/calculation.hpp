@@ -64,7 +64,7 @@ public:
    * @brief Run or resume a mean-field workflow.
    *
    * Supports native SCF execution or HDF5-backed orbital import via the special
-   * `"FILE"` mode. May also emit HDF5 output files.
+   * `"FILE"` mode. May also emit QMCPACK HDF5 output files.
    *
    * @param mean_field_type Uppercase mean-field method selector.
    */
