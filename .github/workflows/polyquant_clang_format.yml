@@ -2,11 +2,10 @@ name: Polyquant clang-format check
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-  release:
     tags:
       - 'v*'
+  pull_request:
+    branches: [main]
 
 jobs:
   formatting-check:

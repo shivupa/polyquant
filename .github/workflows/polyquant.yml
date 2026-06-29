@@ -2,11 +2,10 @@ name: Polyquant CMake Build
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-  release:
     tags:
       - 'v*'
+  pull_request:
+    branches: [main]
 
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
