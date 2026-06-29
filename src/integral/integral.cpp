@@ -1,3 +1,8 @@
+/**
+ * @file integral.cpp
+ * @brief Implementation of AO/MO integral generation and orthogonalization utilities.
+ */
+
 #include "integral/integral.hpp"
 
 using namespace polyquant;
@@ -207,6 +212,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_INTEGRAL::transf
   // tmp = np.einsum('qj,iqrs->ijrs', C, tmp, optimize=True)
   // tmp = np.einsum('ijrs,rk->ijks', tmp, C, optimize=True)
   // I_mo = np.einsum('ijks,sl->ijkl', tmp, C, optimize=True)
+  // Perform the AO->MO Coulomb transform as four successive contractions so the
+  // code never materializes the full AO 4-tensor in memory.
   auto nthreads = omp_get_max_threads();
   auto shells_a = this->input_basis->basis[quantum_part_a_idx];
   auto shells_b = this->input_basis->basis[quantum_part_b_idx];
@@ -560,8 +567,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
             const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
             auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
             const auto &buf = engines[thread_id].results();
-            // engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l], shellpairdata_ij,
-            //                                                                                    shellpairdata_kl);
+            // The shell-pair metadata was precomputed for screening; the current
+            // implementation still evaluates the surviving quartets directly.
             engines[thread_id].compute2<libint2::Operator::coulomb, libint2::BraKet::xx_xx, 0>(shells_a[shell_i], shells_a[shell_j], shells_b[shell_k], shells_b[shell_l]);
             const auto *buf_1234 = buf[0];
             auto shell_ijkl_bf = 0;
@@ -626,6 +633,8 @@ void POLYQUANT_INTEGRAL::compute_frozen_core_ints(Eigen::Matrix<double, Eigen::D
 
 void POLYQUANT_INTEGRAL::setup_integral(std::shared_ptr<POLYQUANT_INPUT> input, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_BASIS> basis,
                                         std::shared_ptr<POLYQUANT_MOLECULE> molecule) {
+  // Libint has process-wide state, so initialization is coupled to the lifetime
+  // of the integral driver and finalized in the destructor.
   libint2::initialize();
   this->input_params = input;
   this->input_symmetry = symmetry;
@@ -718,7 +727,7 @@ std::tuple<std::unordered_map<size_t, std::vector<size_t>>, std::vector<std::vec
     auto &list = return_splist[s1];
     std::sort(list.begin(), list.end());
   }
-  // Shell pairs will be used for coloumb interaction. Thats all we use in this code anyways
+  // Shell-pair metadata is only needed for Coulomb operators in the current code.
   for (size_t i = 0; i != nthreads; ++i) {
     engines[i].set(libint2::Operator::coulomb);
   }
@@ -832,6 +841,8 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
           continue;
         }
         // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp = this->overlap[quantum_part_idx];
+        // Orthogonalize within each symmetry block by projecting the AO overlap
+        // into the SALC basis for the current particle type and irrep.
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
             this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
@@ -846,7 +857,8 @@ void POLYQUANT_INTEGRAL::symmetric_orthogonalization() {
         Polyquant_cout(message);
         Polyquant_cout("Symmetric Orthogonalization does not drop any MOs due to linear dependency.");
 
-        // orth_X = L @ s^{-1/2} @ L.T
+        // Symmetric orthogonalization keeps every SALC column and applies
+        // X = L s^{-1/2} L^T in the projected irrep block.
         s = s.array().rsqrt();
         this->orth_X[quantum_part_idx][irrep_idx] = s.asDiagonal();
         this->orth_X[quantum_part_idx][irrep_idx] = L * this->orth_X[quantum_part_idx][irrep_idx] * L.transpose();
@@ -894,6 +906,8 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
         if (num_salc == 0) {
           continue;
         }
+        // Canonical orthogonalization uses the same SALC-projected overlap, but
+        // can drop weak-eigenvalue directions before building X.
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ovlp =
             this->input_basis->salcs[quantum_part_idx][irrep_idx].transpose() * this->overlap[quantum_part_idx] * this->input_basis->salcs[quantum_part_idx][irrep_idx];
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> eigensolver(ovlp);
@@ -917,7 +931,8 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
           drop_cols++;
         }
 
-        // orth_X = L @ s^{-1/2}
+        // Drop the most linearly dependent SALC directions, then build the
+        // rectangular canonical orthogonalizer from the surviving eigenvectors.
         if (drop_cols > 0) {
           message =
               "For quantum particle " + std::to_string(quantum_part_idx) + " irrep " + std::to_string(irrep_idx) + ", linear dependency detected. Dropping " + std::to_string(drop_cols) + " orbitals.";
@@ -949,6 +964,8 @@ void POLYQUANT_INTEGRAL::canonical_orthogonalization() {
 }
 
 void POLYQUANT_INTEGRAL::parse_integral_parameters() {
+  // Keyword parsing is intentionally tolerant of missing keys but aborts on
+  // recognized keys with invalid value types or unsupported method names.
   // parse 2e tolerance
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("tolerance_2e")) {
