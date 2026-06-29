@@ -1,5 +1,10 @@
 #include "scf/epscf.hpp"
 
+/**
+ * @file epscf.cpp
+ * @brief Multicomponent SCF iteration, occupation, restart, and output logic.
+ */
+
 using namespace polyquant;
 
 void POLYQUANT_EPSCF::form_H_core() {
@@ -150,7 +155,8 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
   auto num_shell_b = this->input_basis->basis[quantum_part_b_idx].size();
   auto shell2bf_b = this->input_basis->basis[quantum_part_b_idx].shell2bf();
 
-  // loop over shells
+  // Build a work queue of shell quartets because the particle-pair problem is
+  // only fourfold symmetric after separating species and spin channels.
   auto nthreads = omp_get_max_threads();
   auto max_nprim = shells_a.max_nprim() > shells_b.max_nprim() ? shells_a.max_nprim() : shells_b.max_nprim();
   auto max_l = shells_a.max_l() > shells_b.max_l() ? shells_a.max_l() : shells_b.max_l();
@@ -264,10 +270,8 @@ void POLYQUANT_EPSCF::form_fock_helper_single_fock_matrix(Eigen::Matrix<double, 
       }
     }
 
-    // compute the permutational degeneracy for the given shell
-    // set this may look like the libint example but we are
-    // breaking bra-ket symmetry so we are 4 fold symmetric
-    // instead of 8
+    // The usual eightfold ERI symmetry is reduced here because the bra and ket
+    // particle spaces may differ, so only shell-pair exchange symmetry remains.
     const auto shell_ij_perdeg = (shell_i == shell_j) ? 1.0 : 2.0;
     const auto shell_kl_perdeg = (shell_k == shell_l) ? 1.0 : 2.0;
     auto shell_ijkl_perdeg = shell_ij_perdeg * shell_kl_perdeg;
@@ -332,6 +336,9 @@ void POLYQUANT_EPSCF::form_fock_helper() {
       this->Cauchy_Schwarz_threshold[quantum_part_a_idx] =
           std::max(std::min(this->iteration_rms_error[quantum_part_a_idx][quantum_part_a_spin_idx] / 1e4, this->convergence_DM), std::numeric_limits<double>::epsilon());
       for (auto quantum_part_b_idx = 0; quantum_part_b_idx < this->input_molecule->quantum_particles.size(); quantum_part_b_idx++) {
+        // During the first stage, each particle density is converged in the
+        // field of only its own species. Mixed-species interactions are added
+        // after all independent blocks have converged once.
         if (!independent_converged && quantum_part_a_idx != quantum_part_b_idx)
           continue;
         auto quantum_part_b_it = this->input_molecule->quantum_particles.begin();
@@ -430,6 +437,8 @@ void POLYQUANT_EPSCF::diag_fock() {
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> FD_commutator(num_basis, num_basis);
     FD_commutator.noalias() = (this->F[quantum_part_idx][0] * this->D_combined[quantum_part_idx][0] * this->input_integral->overlap[quantum_part_idx] -
                                this->input_integral->overlap[quantum_part_idx] * this->D_combined[quantum_part_idx][0] * this->F[quantum_part_idx][0]);
+    // DIIS is applied in the AO basis using the commutator error, then each
+    // symmetry block is diagonalized in the orthogonalized AO basis.
     F_diis = this->F[quantum_part_idx][0];
     if (this->diis_extrapolation) {
       this->diis[quantum_part_idx][0].extrapolate(F_diis, FD_commutator);
@@ -777,8 +786,8 @@ void POLYQUANT_EPSCF::check_stop() {
       Polyquant_cout("Turning on interactions.");
       this->converged = false;
       this->stop = false;
-      // reset DIIS since we now have interactions so extrapolating with
-      // noninteracting
+      // Once mixed-particle couplings are enabled, previous DIIS and
+      // incremental-Fock history is no longer consistent with the equations.
       Polyquant_cout("Resetting DIIS and incremental fock building.");
       this->reset_diis();
       this->reset_incfock();
@@ -1151,7 +1160,8 @@ void POLYQUANT_EPSCF::form_occ_helper_MOM(Eigen::Matrix<double, Eigen::Dynamic, 
     } else {
       total_ovlp_with_prev_occ = orbital_overlap.colwise().sum();
     }
-    // descending argsort based on overlap with occupied orbitals
+    // Orbitals are reordered by overlap with the previous occupied space so the
+    // same state character is tracked across SCF iterations.
     std::vector<int> argsort_indices;
     argsort_indices = argsort(total_ovlp_with_prev_occ, std::less<double>{});
     // reorder orbitals with respect to overlap
@@ -1363,6 +1373,8 @@ void POLYQUANT_EPSCF::form_combined_orbitals() {
       std::vector<int> curr_bas_idx;
       curr_bas_idx.resize(num_irrep, 0);
 
+      // Merge the irrep blocks by global energy ordering so downstream code can
+      // consume a single MO list per particle and spin channel.
       for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
         double min_e = std::numeric_limits<double>::infinity();
         int min_e_irrep = -1;
@@ -1530,6 +1542,8 @@ void POLYQUANT_EPSCF::symmetrize_orbitals(std::vector<std::vector<Eigen::Matrix<
         APP_ABORT("Error symmetrizing orbitals");
       }
 
+      // libmsym writes irrep assignments back through the species array, which
+      // is then mirrored into the per-orbital string and integer labels here.
       for (auto mo_idx = 0; mo_idx < nmo; mo_idx++) {
         auto determined_irrep = this->input_basis->species[quantum_part_idx][mo_idx];
         symm_labels_to_fill[quantum_part_idx][quantum_part_spin_idx][mo_idx] = this->input_symmetry->irrep_names[quantum_part_idx][determined_irrep];
@@ -1577,7 +1591,8 @@ void POLYQUANT_EPSCF::dump_molden() {
 void POLYQUANT_EPSCF::calculate_integrals() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  // calculate integrals we need
+  // EPSCF builds only the integral pieces it needs on demand; four-center ERIs
+  // are evaluated directly during Fock construction rather than stored globally.
   this->input_integral->calculate_overlap();
   this->input_integral->calculate_orthogonalization();
   this->num_mo_per_irrep.resize(this->input_molecule->quantum_particles.size());
@@ -1603,6 +1618,8 @@ void POLYQUANT_EPSCF::calculate_integrals() {
   }
 }
 void POLYQUANT_EPSCF::setup_standard() {
+  // Standard startup uses an H-core guess, then infers per-irrep occupations
+  // before the first full Fock build.
   this->print_start_iterations();
   this->print_params();
   this->calculate_integrals();
@@ -1660,7 +1677,8 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
   } else {
     this->form_occ_helper_initial_npart_per_irrep_from_input();
   }
-  // write over the current dm
+  // Restart files store combined orbital coefficient matrices. These are
+  // reorthogonalized and then unpacked back into symmetry blocks if needed.
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     auto idx = 0;
@@ -1735,14 +1753,15 @@ void POLYQUANT_EPSCF::setup_from_file(std::string &filename) {
         }
         quantum_part_idx++;
       }
-    } catch (...) { // failed to load symm info
+    } catch (...) { // failed to load symmetry labels from file
       APP_WARN(
           "We are restarting a calculation with symmetry but symmetry info was not found in the bin file. Attempting to symmetrize orbitals... This is a numerically tenuous process, and may fail...");
       this->symmetrize_orbitals(this->C_combined, this->symm_label_idxs, this->symm_labels);
     }
   }
 
-  // need to fill C into C_irrep
+  // After restart, rebuild the per-irrep coefficient blocks from the combined
+  // orbitals and their symmetry labels so the ordinary SCF machinery can resume.
   if (this->input_symmetry->do_symmetry == true) {
     auto qpidx = 0;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
