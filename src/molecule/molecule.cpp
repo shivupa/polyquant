@@ -1,5 +1,10 @@
 #include "molecule/molecule.hpp"
 
+/**
+ * @file molecule.cpp
+ * @brief Molecule parsing, symmetry preparation, and coordinate conversion logic.
+ */
+
 using namespace polyquant;
 
 POLYQUANT_MOLECULE::POLYQUANT_MOLECULE(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry) { setup_molecule(input_params, input_symmetry); }
@@ -72,7 +77,7 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     //    APP_ABORT("Error getting atoms for symmetrizing");
     //}
 
-    // geometrical information
+    // Query basic geometry diagnostics before choosing or validating the point group.
     std::vector<double> com;
     com.resize(3);
     if (MSYM_SUCCESS != (ret = msymGetCenterOfMass(ctx, com.data()))) {
@@ -149,7 +154,8 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
     // TODO add a way to descend in symmetry
     // open issue for this
 
-    // Symmetrize and Align Molecule
+    // libmsym may both snap the geometry to the detected symmetry and rotate it
+    // into its preferred axis convention.
     double symerr = 0.0;
     if (MSYM_SUCCESS != (ret = msymSymmetrizeElements(ctx, &symerr))) {
 
@@ -188,8 +194,7 @@ void POLYQUANT_MOLECULE::symmetrize_molecule() {
 }
 
 void POLYQUANT_MOLECULE::parse_particles() {
-  // Store center coordinates
-  // todo check for geom and symbols
+  // The input geometry is supplied in angstrom and stored internally in bohr.
   for (size_t i = 0; i < (input->input_data["molecule"]["geometry"].size() / 3); ++i) {
     std::vector<double> atom = {};
     for (int j = 0; j < 3; ++j) {
@@ -198,7 +203,8 @@ void POLYQUANT_MOLECULE::parse_particles() {
     }
     centers.push_back(atom);
   }
-  // Store center labels
+  // Each geometry center is first labeled from the input symbol list, then later
+  // classified as either classical-only or both classical and quantum.
   std::vector<std::string> center_labels;
   std::vector<int> quantum_nuclei;
   for (auto label : input->input_data["molecule"]["symbols"]) {
@@ -206,15 +212,15 @@ void POLYQUANT_MOLECULE::parse_particles() {
     quantum_nuclei.push_back(0);
   }
 
-  // Store if we are using nuclear charge modification
+  // Optional nuclear charge edits are applied before the electron count is inferred.
   bool charge_mod = false;
   if (input->input_data["molecule"].contains("modify_nuclear_charge")) {
     charge_mod = true;
   }
 
   if (input->input_data.contains("keywords")) {
-    // if (input->input_data["keywords"].contains("molecule_keywords")) {
-    // create classical and quantum centers
+    // `quantum_nuclei` may be given either as labels to promote or as an
+    // explicit center-by-center mask.
     if (input->input_data["keywords"].contains("quantum_nuclei")) {
       // if a label is given change all nuclei with matching label to be
       // quantum https://github.com/nlohmann/json/issues/1564
@@ -253,9 +259,8 @@ void POLYQUANT_MOLECULE::parse_particles() {
     Polyquant_cout("The input didn't contain a section called 'keywords'. All nuclei are going to be treated classically. No quantum particles present besides electrons.");
   }
 
-  // classical nuclei
-
-  // centers, center_labels, quantum_nuclei
+  // Every geometric center is kept in the classical map so basis-center and
+  // symmetry code can still see quantum nuclei and ghost centers.
   for (size_t i = 0; i < centers.size(); i++) {
     if (quantum_nuclei[i] == 0) {
       // classical center
@@ -276,7 +281,8 @@ void POLYQUANT_MOLECULE::parse_particles() {
       classical_particles[curr_label].num_parts += 1;
       classical_particles[curr_label].center_idx.push_back(i);
     } else {
-      // classical center for basis
+      // Quantum nuclei still create a classical placeholder entry with zeroed
+      // mass/charge so center-based basis handling preserves the full geometry.
       std::string curr_label = center_labels[i];
       if (classical_particles.count(curr_label) == 0) {
         CLASSICAL_PARTICLE_SET classical_part;
@@ -287,7 +293,8 @@ void POLYQUANT_MOLECULE::parse_particles() {
       }
       classical_particles[curr_label].num_parts += 1;
       classical_particles[curr_label].center_idx.push_back(i);
-      // quantum center
+      // The quantum entry carries the physical mass, charge, spin, and counts
+      // used later in multicomponent SCF and CI.
       if (quantum_particles.count(curr_label) == 0) {
         QUANTUM_PARTICLE_SET quantum_part;
         quantum_particles[curr_label] = quantum_part;
@@ -300,7 +307,8 @@ void POLYQUANT_MOLECULE::parse_particles() {
       quantum_particles[curr_label].center_idx.push_back(i);
     }
   }
-  // iterate over quantum particles to set alpha/beta particles and mult
+  // For promoted nuclei, alpha/beta counts and multiplicities are inferred from
+  // the total population using the same spin convention as other fermionic types.
   for (auto &[quantum_part_key, quantum_part] : this->quantum_particles) {
     quantum_part.num_parts_alpha = (quantum_part.num_parts / 2) + (quantum_part.num_parts % 2);
     quantum_part.num_parts_beta = (quantum_part.num_parts / 2);
@@ -319,7 +327,7 @@ void POLYQUANT_MOLECULE::parse_particles() {
       }
     }
   }
-  // create any other quantum particles
+  // Additional user-defined quantum particles need not be tied to geometry centers.
   if (input->input_data.contains("keywords")) {
     if (input->input_data["keywords"].contains("quantum_particles")) {
       for (auto qp : input->input_data["keywords"]["quantum_particles"]) {
@@ -373,8 +381,7 @@ void POLYQUANT_MOLECULE::parse_particles() {
           } else {
             APP_ABORT("Keywords->quantum particles is missing keyword 'restricted'!");
           }
-          // TODO make sure a user isn't specifying num_parts or multiplicity.
-          // These will be calculated
+          // Total population and multiplicity are derived from the spin-resolved counts.
           quantum_particles[curr_label].num_parts = quantum_particles[curr_label].num_parts_alpha + quantum_particles[curr_label].num_parts_beta;
           quantum_particles[curr_label].multiplicity =
               (std::abs(quantum_particles[curr_label].num_parts_alpha - quantum_particles[curr_label].num_parts_beta) * quantum_particles[curr_label].spin) + 1;
@@ -384,7 +391,8 @@ void POLYQUANT_MOLECULE::parse_particles() {
       Polyquant_cout("No additional quantum particles found.");
     }
   }
-  // create electrons
+  // Electrons are added last so their population can be inferred from the total
+  // charge balance after all classical and non-electron quantum species exist.
   std::string curr_label = "electron";
   if (quantum_particles.count(curr_label) == 0) {
     double num_parts = -this->charge;
@@ -484,7 +492,8 @@ void POLYQUANT_MOLECULE::setup_molecule(std::shared_ptr<POLYQUANT_INPUT> input_p
 std::string POLYQUANT_MOLECULE::dump_xyz(std::string classical_part_key) const {
   std::string header = "";
   std::string body = "";
-  // calculate num atoms
+  // The filter is applied while counting and printing so the XYZ header matches
+  // the emitted center list exactly.
   int num_atom = 0;
   for (auto classical_part : classical_particles) {
     // num_atom += classical_part.second.num_parts;
@@ -571,6 +580,8 @@ void POLYQUANT_MOLECULE::from_point_msym_charges_for_symmetry(std::vector<msym_e
     for (auto i = 0; i < classical_part.second.num_parts; i++) {
       auto center_idx = classical_part.second.center_idx[i];
 
+      // libmsym may reorder or relabel internally, so a short name check guards
+      // against writing coordinates back onto the wrong center type.
       msym_element_t temp_atom = symm_chrgs[symm_chrg_idx];
       if (temp_atom.name[0] != 'D') {
         auto nlet_in_name = classical_part.first.size() < 5 ? classical_part.first.size() : 4;
@@ -632,6 +643,8 @@ std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmet
       temp_atom.n = (int)(classical_part.second.charge);
       temp_atom.m = (int)(classical_part.second.mass);
 
+      // libmsym requires a concrete element name, so ghost centers are encoded
+      // as deuterium placeholders and later mapped back after symmetrization.
       if (classical_part.first == "X" || classical_part.second.mass == 0) {
         temp_atom.name[0] = 'D';
         temp_atom.name[1] = '\0';
@@ -649,6 +662,8 @@ std::vector<msym_element_t> POLYQUANT_MOLECULE::to_point_msym_charges_for_symmet
 
 void POLYQUANT_MOLECULE::calculate_E_nuc() {
   this->E_nuc = 0.0;
+  // The double loop accumulates all ordered pairs and divides by two at the end
+  // to recover the usual unique-pair classical Coulomb repulsion.
   for (auto classical_part_1 : classical_particles) {
     for (auto i = 0; i < classical_part_1.second.num_parts; i++) {
       for (auto classical_part_2 : classical_particles) {
