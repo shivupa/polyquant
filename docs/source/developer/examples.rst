@@ -38,27 +38,14 @@ the script so it changes to its own directory before launching Polyquant.
 Run commands
 ------------
 
-Use commands that work with both normal build layouts when practical:
+Use paths from the release preset build layout:
 
 .. code-block:: bash
 
-   ../../build/release/bin/polyquant -i my_example.json
-   ../../build/bin/polyquant -i my_example.json
+   POLYQUANT_BUILD_DIR/release/bin/polyquant -i my_example.json
 
-The first path matches preset release builds from the repository root. The
-second path matches the legacy ``build.sh`` default build directory.
-
-Scripts
--------
-
-Keep ``run.sh`` scripts small and explicit. They may call external tools such
-as QMCPACK, ``convert4qmc``, ``qmca``, ``h5dump``, Python plotting scripts, or
-comparison programs, but those tools should be commented or documented as
-external requirements rather than core Polyquant dependencies.
-
-Use ``clean.sh`` only for generated files from that example. Avoid removing
-shared basis files, checked-in reference files, or files outside the example
-directory.
+The ``build.sh`` helper also uses the release preset, so it creates the same
+``build/release/bin/polyquant`` executable path.
 
 Documentation expectations
 --------------------------

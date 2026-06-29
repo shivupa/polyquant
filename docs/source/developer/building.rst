@@ -51,6 +51,18 @@ Build HTML and PDF documentation with the docs preset:
    cmake --preset docs
    cmake --build --preset docs
 
+The build wrapper can also enable documentation for the selected build
+configuration:
+
+.. code-block:: bash
+
+   ./build.sh docs
+   ./build.sh release docs
+   ./build.sh debug docs
+
+Since release is the default build configuration, ``./build.sh docs`` is the
+same as ``./build.sh release docs``.
+
 The docs preset enables ``POLYQUANT_DOC`` and builds the
 ``polyquant_docs_html`` and ``polyquant_docs_pdf`` targets. HTML output is
 written below ``build/debug/docs/html`` for the inherited debug build
@@ -65,17 +77,25 @@ docs preset.
 Build wrapper
 -------------
 
-``build.sh`` is a compatibility wrapper around ``cmake -S . -B <build-dir>``
-and ``cmake --build <build-dir>``. It is useful for one-off local builds or
-CI-like jobs that configure through environment variables:
+``build.sh`` is a small helper for CMake presets. It defaults to release:
 
 .. code-block:: bash
 
-   BUILD_DIR=build/dev CMAKE_BUILD_TYPE=Debug POLYQUANT_DOC=0 RUN_TESTS=1 ./build.sh
+   ./build.sh
 
-The wrapper honors ``BUILD_DIR``, ``CMAKE_BUILD_TYPE``, ``POLYQUANT_DOC``,
-``POLYQUANT_TEST``, ``POLYQUANT_NETWORK_TESTS``,
-``POLYQUANT_CODE_COVERAGE``, ``BUILD_PARALLEL_LEVEL``, and ``RUN_TESTS``.
+Pass a preset name as the first argument for other common workflows:
+
+.. code-block:: bash
+
+   ./build.sh docs
+   ./build.sh debug
+   ./build.sh release docs
+   ./build.sh debug docs
+
+The release path matches the documented ``build/release/bin/polyquant``
+executable path. The wrapper honors ``BUILD_PARALLEL_LEVEL`` for build
+parallelism and ``RUN_TESTS=1`` to run the matching CTest preset after
+non-doc builds.
 
 Coverage builds
 ---------------

@@ -44,7 +44,8 @@ only during setup.
 Be explicit about indexing conventions. Polyquant code uses particle indices,
 spin indices, irrep indices, determinant indices, AO indices, and MO indices;
 comments should make the expected convention clear before a caller has to infer
-it from loops.
+it from loops. Big O notation estimates of memory and runtime would be preferred
+despite the current comments not including these.
 
 Document side effects for functions that write files, resize cached matrices,
 mutate member containers, read relative paths, call ``APP_ABORT``, or throw
@@ -68,6 +69,12 @@ After each substantial docstring batch, run:
 
    cmake --preset docs
    cmake --build --preset docs
+
+or use the wrapper:
+
+.. code-block:: bash
+
+   ./build.sh debug docs
 
 Fix new Doxygen, Breathe, Exhale, and Sphinx warnings while the changed
 declarations are still fresh.

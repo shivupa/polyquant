@@ -18,6 +18,9 @@ Install these before running CMake:
 * libmsym.
 * Libint2, recommended for normal builds. If CMake cannot find a system
   Libint2, it attempts to fetch the configured Polyquant ``libint`` branch.
+  Use a version of libint fetched from the Polyquant ``libint`` branch as 
+  it has been configured to work with the angular momentum ordering used by
+  Polyquant.
 * Sphinx, Doxygen, Breathe, Exhale, m2r2, and a Sphinx theme when building
   documentation.
 * ``latexmk`` when building the PDF documentation target.
@@ -72,12 +75,26 @@ Documentation build
    cmake --preset docs
    cmake --build --preset docs
 
+The build wrapper can also enable documentation for the selected build
+configuration:
+
+.. code-block:: bash
+
+   ./build.sh docs
+   ./build.sh release docs
+   ./build.sh debug docs
+
+Since release is the default build configuration, ``./build.sh docs`` is the
+same as ``./build.sh release docs``.
+
 Tests
 -----
 
 .. code-block:: bash
 
    ctest --preset release
+
+You should run tests and test failures shouldn't be ignored.
 
 Network-dependent tests are enabled by default in the presets. Disable them
 when configuring manually with:
@@ -89,18 +106,22 @@ when configuring manually with:
 Build wrapper
 -------------
 
-The ``build.sh`` wrapper provides the older build workflow. Its default build
-directory is ``build``, so the executable is usually ``build/bin/polyquant``.
+The ``build.sh`` wrapper is a convenience helper for CMake presets. It defaults
+to the release preset:
 
-The wrapper is controlled by these environment variables:
+.. code-block:: bash
 
-* ``BUILD_DIR``: build directory, default ``build``.
-* ``CMAKE_BUILD_TYPE``: CMake build type, default ``Release``.
-* ``POLYQUANT_DOC``: enable documentation targets, default ``1``.
-* ``POLYQUANT_TEST``: enable tests, default ``1``.
-* ``POLYQUANT_NETWORK_TESTS``: enable tests that need network access,
-  default ``1``.
-* ``POLYQUANT_CODE_COVERAGE``: enable coverage flags in supported Debug
-  builds, default ``1``.
-* ``BUILD_PARALLEL_LEVEL``: optional build parallelism passed to CMake.
-* ``RUN_TESTS``: run ``ctest`` after building when set to ``1``.
+   ./build.sh
+
+It also accepts a preset name:
+
+.. code-block:: bash
+
+   ./build.sh docs
+   ./build.sh debug
+   ./build.sh release docs
+   ./build.sh debug docs
+
+The default release build still writes ``build/release/bin/polyquant``. Set
+``BUILD_PARALLEL_LEVEL`` to control build parallelism, and set ``RUN_TESTS=1``
+to run the matching CTest preset after non-doc builds.

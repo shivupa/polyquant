@@ -4,7 +4,7 @@ Introduction
 Polyquant performs nonrelativistic quantum calculations for systems containing
 one or more quantum particle types. The code supports mean-field calculations,
 post-mean-field configuration interaction calculations, symmetry-aware basis
-handling, integral generation, and output formats used by downstream quantum
+handling, integral generation, and output for use by downstream quantum
 Monte Carlo workflows.
 
 Code layout
@@ -29,3 +29,4 @@ A typical run starts from a JSON input file. Polyquant parses the molecular
 geometry and particle definitions, builds symmetry and basis information,
 computes integrals, runs the requested mean-field calculation, optionally runs a
 CI calculation, and writes any requested output files.
+

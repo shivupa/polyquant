@@ -11,23 +11,21 @@ definitions and can add non-electron particle definitions under
 Run examples from their example directories when the input file uses relative
 paths to basis files.
 
+.. note::
+   The examples below refer to a ``POYLQUANT_BUILD_PATH`` which is the path to where
+   Polyquant was built. This of course varies on your system.
+
 SCF water example
 -----------------
 
 This example runs a water self-consistent field calculation with a custom
 electron basis file.
 
-From ``examples/h2o`` with the legacy ``build.sh`` layout:
+From ``examples/h2o``:
 
 .. code-block:: bash
 
-   ../../build/bin/polyquant -i h2o.json
-
-From ``examples/h2o`` with the release preset build layout:
-
-.. code-block:: bash
-
-   ../../build/release/bin/polyquant -i h2o.json
+   POLYQUANT_BUILD_PATH/release/bin/polyquant -i h2o.json
 
 The command calls the ``polyquant`` executable and passes ``h2o.json`` with the
 ``-i`` option. The executable reads the JSON, builds the molecule, loads
@@ -101,11 +99,11 @@ From ``examples/h2o_ci``:
 
 .. code-block:: bash
 
-   ../../build/release/bin/polyquant -i h2o_fc.json
+   POLYQUANT_BUILD_PATH/release/bin/polyquant -i h2o_fc.json
 
 The command reads ``h2o_fc.json``, performs the mean-field setup needed for the
-CI calculation, constructs the requested determinant space, and solves for the
-requested CI states.
+CI calculation, constructs the requested determinant space (CISD), and solves for the
+requested CI states. The example includes a frozen core MO.
 
 Input file:
 
@@ -152,7 +150,7 @@ Input file:
           "excitation_level" : [
               [2,2,2]
           ],
-          "frozen_core" : [0],
+          "frozen_core" : [1],
           "deleted_virtual" : [0]
       }
      }
@@ -183,7 +181,7 @@ From ``examples/PsH_separatebasissets/wpos``:
 
 .. code-block:: bash
 
-   ../../../build/release/bin/polyquant -i PsH_wpos_fast.json
+   POLYQUANT_BUILD_PATH/release/bin/polyquant -i PsH_wpos_fast.json
 
 The command reads the electron and positron basis files relative to the example
 directory, runs the multicomponent calculation, and writes ``H_wpos.h5`` when
@@ -269,18 +267,12 @@ Outputs and external tools
 --------------------------
 
 Depending on the input, Polyquant can write text output, MOLDEN orbital files,
-HDF5 files, FCIDUMP files, and QMCPACK-related files. Some example scripts also
-call external tools such as QMCPACK, ``convert4qmc``, ``qmca``, and ``h5dump``.
-Those tools are not required for a basic Polyquant calculation.
+HDF5 files, FCIDUMP files, and QMCPACK-related files. 
+For QMCPACK, ``convert4qmc`` should be able to directly read the Polyquant HDF5 file.
 
-Common problems
----------------
+Bugs?
+-----
 
-* If a custom basis file cannot be opened, run the command from the example
-  directory or update the filename path in the JSON input.
-* If CMake cannot find libmsym, install libmsym and make sure CMake can find its
-  package configuration.
-* If CMake cannot find Libint2, install Libint2 or allow the configured
-  FetchContent fallback to run.
-* If a library basis download fails, check network access or use a local custom
-  basis file instead.
+* Report an issue on Github: github.com/shivupa/polyquant
+
+
