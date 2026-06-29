@@ -1,3 +1,8 @@
+/**
+ * @file fcidump_utilities.cpp
+ * @brief Implementation of FCIDUMP integral export.
+ */
+
 #include "io/fcidump_utilities.hpp"
 
 using namespace polyquant;
@@ -20,7 +25,9 @@ void POLYQUANT_FCIDUMP::dump(int num_mo, int num_part_total, int ms2, bool restr
   input_ints = integrals;
   quantum_part_a_index = quantum_part_a_idx;
   quantum_part_b_index = quantum_part_b_idx;
-  // if this is an FCIDUMP for the same types, dump header info
+  // The header and same-particle-only records are written only once for
+  // diagonal particle blocks; mixed-particle blocks contribute just their
+  // coupling integrals.
   if (quantum_part_a_index == quantum_part_b_index) {
     this->dump_header(num_mo, num_part_total, ms2, restricted, MO_symmetry_labels, isym, point_group);
   }
@@ -63,7 +70,7 @@ void POLYQUANT_FCIDUMP::dump_one_body_ints() {
   if (quantum_part_a_index != quantum_part_b_index) {
     return;
   }
-  // if unrestricted loop over alpha and beta
+  // One-body records are only meaningful for same-particle blocks.
   std::string line;
   for (int spin_a = 0; spin_a < spin_types; spin_a++) {
     for (int spin_b = 0; spin_b < spin_types; spin_b++) {
@@ -82,7 +89,9 @@ void POLYQUANT_FCIDUMP::dump_one_body_ints() {
 }
 
 void POLYQUANT_FCIDUMP::dump_two_body_ints() {
-  // if restricted loop over alpha and beta
+  // The MO two-body matrices are already stored with triangular-pair indexing.
+  // Same-particle blocks could exploit eightfold symmetry; the current writer
+  // emits the fourfold form used by the stored matrices.
   std::string line;
   for (int spin_a = 0; spin_a < spin_types; spin_a++) {
     for (int spin_b = 0; spin_b < spin_types; spin_b++) {

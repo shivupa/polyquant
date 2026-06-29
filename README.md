@@ -3,6 +3,9 @@
 <img src="logo/logo_rectangle_higherres.png" height="54">
 
 [![Polyquant CMake Build](https://github.com/shivupa/polyquant/actions/workflows/polyquant.yml/badge.svg?branch=main)](https://github.com/shivupa/Polyquant/actions/workflows/polyquant.yml)
+[![Polyquant Docs Pages](https://github.com/shivupa/polyquant/actions/workflows/polyquant_pages.yml/badge.svg?branch=main)](https://github.com/shivupa/Polyquant/actions/workflows/polyquant_pages.yml)
+
+[Documentation](https://shivupa.github.io/polyquant/)
 
 Polyquant uses C++20. This is required because the CI operations use https://en.cppreference.com/w/cpp/header/bit.
 

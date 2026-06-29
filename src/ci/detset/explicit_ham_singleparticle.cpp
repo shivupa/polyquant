@@ -1,5 +1,10 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file explicit_ham_singleparticle.cpp
+ * @brief Explicit sparse Hamiltonian assembly for one-particle-species CI spaces.
+ */
+
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_one(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
@@ -24,14 +29,13 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       auto idet_unfold = det_idx_unfold(i_det);
       auto idx_I_A_det = idet_unfold[first_spin_idx];
       auto idx_I_B_det = idet_unfold[second_spin_idx];
-      std::vector<int> excitation_list;
       // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, excitation_list);
       // // do we have enough particles to do a double excitation?
       // if (this->unique_dets[idx_part][first_spin_idx][0][0] > 1)
       //   this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 2, excitation_list);
-      std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
-                     unique_doubles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_doubles[idx_part][first_spin_idx][idx_I_A_det].end(), std::back_inserter(excitation_list));
-      for (auto idx_J_A_det : excitation_list) {
+      // Class-one terms keep the opposite-spin determinant fixed while changing
+      // one same-spin determinant by a single or double excitation.
+      for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det <= idx_I_A_det) {
           continue;
         }
@@ -55,6 +59,23 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
           }
         }
       }
+      this->for_each_unique_double(idx_part, first_spin_idx, idx_I_A_det, [&](auto idx_J_A_det) {
+        if (idx_J_A_det <= idx_I_A_det) {
+          return;
+        }
+        std::vector<int> jdet_idx(2);
+        jdet_idx[first_spin_idx] = idx_J_A_det;
+        jdet_idx[second_spin_idx] = idx_I_B_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto integral = same_part_ham_double(idx_part, idet_unfold, jdet_idx);
+          if (integral != 0.0) {
+            auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      });
       ham_threads[thread_id].resize(this->N_dets, this->N_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
       ham_threads[thread_id].setFromTriplets(triplet_list_threads[thread_id].begin(), triplet_list_threads[thread_id].end());
@@ -111,6 +132,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       }
       // std::set<int> a_excitation_list;
       // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, a_excitation_list);
+      // Class-two terms change both spin channels by one single excitation each.
       for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det < idx_I_A_det) {
           continue;
@@ -197,7 +219,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
       if (i_det % nthreads != thread_id) {
         continue;
       }
-      // diagonal
+      // The singleshot path accumulates diagonal, single, and double
+      // contributions in one traversal of the connectivity graph.
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
       // loop over connected singles alpha
       for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
@@ -285,9 +308,9 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
       }
 
       // loop over alpha double excitations
-      for (auto idx_J_A_det : unique_doubles[idx_part][first_spin_idx][idx_I_A_det]) {
+      this->for_each_unique_double(idx_part, first_spin_idx, idx_I_A_det, [&](auto idx_J_A_det) {
         if (idx_J_A_det < idx_I_A_det) {
-          continue;
+          return;
         }
         //  alpha double
         std::vector<int> jdet_idx(2);
@@ -304,11 +327,11 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
             //}
           }
         }
-      }
+      });
       // loop over beta double excitations
-      for (auto idx_J_B_det : unique_doubles[idx_part][second_spin_idx][idx_I_B_det]) {
+      this->for_each_unique_double(idx_part, second_spin_idx, idx_I_B_det, [&](auto idx_J_B_det) {
         if (idx_J_B_det < idx_I_B_det) {
-          continue;
+          return;
         }
         //  alpha double
         std::vector<int> jdet_idx(2);
@@ -325,7 +348,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
             //}
           }
         }
-      }
+      });
 
       ham_threads[thread_id].resize(this->N_dets, this->N_dets);
       ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
@@ -403,7 +426,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
     // if (idx_I_A_det != idx_I_B_det)
     //     continue;
     //  loop over connected singles alpha
-    for (auto idx_J_A_det : unique_doubles[idx_part][first_spin_idx][idx_I_A_det]) {
+    for (auto idx_J_A_det : generated_same_spin_doubles_for_debug) {
       std::vector<int> jdet_idx(2);
       jdet_idx[first_spin_idx] = idx_J_A_det;
       jdet_idx[second_spin_idx] = idx_I_B_det;
@@ -459,8 +482,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
     // if (idx_I_A_det != idx_I_B_det)
     //     continue;
     //  loop over connected singles alpha
-    for (auto idx_J_A_det : unique_doubles[idx_part][first_spin_idx][idx_I_A_det]) {
-      for (auto idx_J_B_det : unique_doubles[idx_part][second_spin_idx][idx_I_B_det]) {
+    for (auto idx_J_A_det : generated_same_spin_doubles_for_debug) {
+      for (auto idx_J_B_det : generated_same_spin_doubles_for_debug) {
         std::vector<int> jdet_idx(2);
         jdet_idx[first_spin_idx] = idx_J_A_det;
         jdet_idx[second_spin_idx] = idx_J_B_det;
@@ -536,14 +559,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham() {
-  // // diagonal
-  // create_ham_diagonal(0, 0);
-  // // alpha alpha
-  // single_species_create_ham_class_one(0, 0);
-  // // beta beta
-  // single_species_create_ham_class_one(0, 1);
-  // // mixed alpha beta
-  // single_species_create_ham_class_two(0, 0, 0, 1);
+  // The default explicit-Hamiltonian path uses the singleshot implementation
+  // rather than assembling the classes separately.
   single_species_create_ham_singleshot(0, 0, 0, 1);
 }
 

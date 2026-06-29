@@ -14,11 +14,11 @@
         { "electron" :
           {"H" : [{ "custom" : 
               {"type" : "file",
-               "filename" : "../../tests/data/PsH_wpos/electron_basis.g94"}}]},
+               "filename" : "electron_basis.g94"}}]},
           "positron" :
           {"H" : [{ "custom" : 
               {"type" : "file",
-               "filename" : "../../tests/data/PsH_wpos/positron_basis.g94"}}]}
+               "filename" : "positron_basis.g94"}}]}
         }
   },
   "keywords": {

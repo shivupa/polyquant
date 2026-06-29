@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file determinant_operations.cpp
+ * @brief Packed-bit determinant utilities: excitation counting, phase, and occupations.
+ */
+
 namespace polyquant {
 template <typename T> int POLYQUANT_DETSET<T>::single_spin_num_excitation(const std::vector<T> &Di, const std::vector<T> &Dj) const {
   int excitation_degree = 0;
@@ -49,7 +54,8 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
   T one = 1;
   T zero = 0;
   std::vector<double> phase_list = {1.0, -1.0};
-  // only applicable to uint64
+  // The phase is the parity of the fermionic permutation that transforms Di
+  // into Dj in the packed-orbital ordering.
 
   for (auto l = 0; l < holes.size(); l++) {
     // notice compared to qp2 we add 1 to low rather than subtracting from high because we store 0 indexed things in parts and holes
@@ -61,8 +67,8 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
     // what int are we in?
     T j = low >> bit_kind_shift;
     T k = high >> bit_kind_shift;
-    // since we use a vector with the highest orbital on the right-most bit
-    // we need to change j and k to be enumerating from the end of the list
+    // Packed words are stored from highest orbital block to lowest, so the word
+    // indices must be mirrored before population counts are taken.
     j = Di.size() - j - one;
     k = Di.size() - k - one;
     // std::cout << " j k  " << j << " " << k;
@@ -116,19 +122,27 @@ template <typename T> double POLYQUANT_DETSET<T>::get_phase(std::vector<T> &Di, 
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::get_occ_virt(int idx_part, std::vector<T> &D, std::vector<int> &occ, std::vector<int> &virt) const {
+  // Ignore padding bits beyond max_orb[idx_part] so the excitation builders stay
+  // within the active orbital space for the current particle type.
   for (auto i = 0; i < D.size(); i++) {
-    std::bitset<bit_kind_size> D_bitset(D[i]);
-    for (auto j = 0; j < D_bitset.size(); j++) {
-      auto orb_idx = ((D.size() - i - 1) * bit_kind_size) + j;
-      // max_orb - 1 because we are dealing with the index
-      if (orb_idx >= this->max_orb[idx_part]) {
+    auto base = (D.size() - i - 1) * bit_kind_size;
+    T occ_bits = D[i];
+    while (occ_bits) {
+      auto pos = std::countr_zero(occ_bits);
+      auto orb_idx = base + pos;
+      if (orb_idx >= static_cast<std::size_t>(this->max_orb[idx_part]))
         break;
-      }
-      if (D_bitset[j] == 1) {
-        occ.push_back(orb_idx);
-      } else {
-        virt.push_back(orb_idx);
-      }
+      occ.push_back(orb_idx);
+      occ_bits &= occ_bits - 1;
+    }
+    T virt_bits = ~D[i];
+    while (virt_bits) {
+      auto pos = std::countr_zero(virt_bits);
+      auto orb_idx = base + pos;
+      if (orb_idx >= static_cast<std::size_t>(this->max_orb[idx_part]))
+        break;
+      virt.push_back(orb_idx);
+      virt_bits &= virt_bits - 1;
     }
   }
 

@@ -1,0 +1,52 @@
+name: Polyquant Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  source-release:
+    name: Source Zip Release
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Check tag matches project version
+        shell: bash
+        run: |
+          version_major=$(sed -n 's/^set(POLYQUANT_VERSION_MAJOR \([0-9]\+\)).*/\1/p' CMakeLists.txt)
+          version_minor=$(sed -n 's/^set(POLYQUANT_VERSION_MINOR \([0-9]\+\)).*/\1/p' CMakeLists.txt)
+          version_patch=$(sed -n 's/^set(POLYQUANT_VERSION_PATCH \([0-9]\+\)).*/\1/p' CMakeLists.txt)
+          project_version="v${version_major}.${version_minor}.${version_patch}"
+
+          if [[ "${GITHUB_REF_NAME}" != "${project_version}" ]]; then
+            echo "Release tag ${GITHUB_REF_NAME} does not match CMake project version ${project_version}."
+            exit 1
+          fi
+
+      - name: Package source zip
+        shell: bash
+        run: |
+          mkdir -p dist
+          git archive \
+            --format=zip \
+            --prefix="polyquant-${GITHUB_REF_NAME}/" \
+            --output="dist/polyquant-${GITHUB_REF_NAME}-source.zip" \
+            HEAD
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "dist/polyquant-${GITHUB_REF_NAME}-source.zip" \
+            --title "Polyquant ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag

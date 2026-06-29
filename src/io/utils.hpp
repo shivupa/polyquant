@@ -1,11 +1,16 @@
 #ifndef POLYQUANT_INPUTUTILS_H
 #define POLYQUANT_INPUTUTILS_H
+
+/**
+ * @file utils.hpp
+ * @brief Shared exceptions, formatting helpers, file-dump helpers, lookup tables, and small generic utilities.
+ */
 #include <Eigen/Dense>
 #include <Eigen/Eigen>
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -14,30 +19,87 @@
 #include <string>
 #include <vector>
 // TODO switch to #include <format> once it is supported
+/**
+ * @brief Convenience alias for the JSON type used by Polyquant IO helpers.
+ */
 using json = nlohmann::json;
 
 namespace polyquant {
 
+/**
+ * @brief Exception type thrown for user-facing Polyquant fatal errors.
+ *
+ * `APP_ABORT` formats diagnostics to stdout and then throws this exception so
+ * the CLI can exit cleanly without continuing execution.
+ */
+class PolyquantException : public std::exception {
+  /**
+   * @brief Stored diagnostic returned by `what()`.
+   */
+  std::string msg_;
+
+public:
+  /**
+   * @brief Construct an exception with a user-facing fatal-error message.
+   *
+   * @param reason Diagnostic explaining why execution cannot continue.
+   */
+  explicit PolyquantException(const std::string &reason) : msg_(reason) {}
+  /**
+   * @brief Return the stored fatal-error diagnostic.
+   *
+   * @return Null-terminated message string owned by this exception object.
+   */
+  const char *what() const noexcept override { return msg_.c_str(); }
+};
+
+/**
+ * @def POLYQUANT_TEST_EPSILON_LOOSE
+ * @brief Loose floating-point comparison tolerance used by tests.
+ */
 #define POLYQUANT_TEST_EPSILON_LOOSE 1e-6
+/**
+ * @def POLYQUANT_TEST_EPSILON_TIGHT
+ * @brief Tight floating-point comparison tolerance used by tests.
+ */
 #define POLYQUANT_TEST_EPSILON_TIGHT 1e-8
+/**
+ * @def POLYQUANT_TEST_EPSILON_VERYTIGHT
+ * @brief Very tight floating-point comparison tolerance used by tests.
+ */
 #define POLYQUANT_TEST_EPSILON_VERYTIGHT 1e-10
+/**
+ * @def POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT
+ * @brief Extremely tight floating-point comparison tolerance used by tests.
+ */
 #define POLYQUANT_TEST_EPSILON_EXTREMELYTIGHT 1e-14
 
-// /**
-//  * @brief Abort the code and print a reason for aborting.
-//  *
-//  * @param reason a string stating the reason to abort.
-//  */
+/**
+ * @brief Print a fatal diagnostic and abort execution via exception.
+ *
+ * @param reason Human-readable explanation of the failure.
+ */
 void APP_ABORT(const std::string &reason);
+/**
+ * @brief Print a non-fatal warning diagnostic.
+ *
+ * @param reason Human-readable explanation of the warning.
+ */
 void APP_WARN(const std::string &reason);
 /**
- * @brief A helper function to print only if we are on rank 0.
+ * @brief Print a value using Polyquant's default precision.
  *
- * @tparam T the type of the thing to print out
- * @param message
+ * @tparam T Printable type.
+ * @param message Message or object to print.
  */
 template <typename T> void Polyquant_cout(const T &message) { std::cout << std::setprecision(20) << message << std::endl; }
 
+/**
+ * @brief Print a boxed section header for human-readable console logs.
+ *
+ * @tparam T Printable type.
+ * @param message Section title text.
+ */
 template <typename T> void Polyquant_section_header(const T &message) {
   fmt::print("\n{0:^{2}}┌{0:─^{3}}┐\n"
              "{0:^{2}}│{0:^{3}}│\n"
@@ -51,29 +113,77 @@ template <typename T> void Polyquant_section_header(const T &message) {
 //    return __PRETTY_FUNCTION__;
 //};
 
+/**
+ * @brief Convert a chemical element symbol to its atomic number.
+ *
+ * Unknown keys return `0`.
+ *
+ * @param key Element symbol such as `"H"` or `"O"`.
+ * @return Atomic number or `0` when unknown.
+ */
 int atom_symb_to_num(std::string key);
 
+/**
+ * @brief Convert a chemical element symbol to its isotopic mass in atomic mass units.
+ *
+ * Unknown keys return `0.0`.
+ *
+ * @param key Element symbol such as `"H"` or `"O"`.
+ * @return Mass in atomic mass units or `0.0` when unknown.
+ */
 double atom_symb_to_mass(std::string key);
 
+/**
+ * @brief Return the default spin quantum number associated with a named quantum species.
+ *
+ * The current implementation returns `0.5` for every key.
+ *
+ * @param key Quantum species label.
+ * @return Spin quantum number.
+ */
 double quantum_symb_to_spin(std::string key);
 
+/**
+ * @brief Convert a named quantum species to its mass in electron-mass units.
+ *
+ * Atomic species reuse the stored atomic-mass table; `"electron"` returns
+ * `1.0`. Unknown keys return `0.0`.
+ *
+ * @param key Quantum species label.
+ * @return Mass or `0.0` when unknown.
+ */
 double quantum_symb_to_mass(std::string key);
 
+/**
+ * @brief Convert a named quantum species to its integer charge.
+ *
+ * Atomic species reuse atomic numbers, `"electron"` returns `-1`, and unknown
+ * keys return `0`.
+ *
+ * @param key Quantum species label.
+ * @return Integer charge.
+ */
 int quantum_symb_to_charge(std::string key);
 
 /**
- * @brief A helper function to dump the program header.
- *
+ * @brief Print the Polyquant ASCII-art program banner.
  */
 void Polyquant_dump_program_header();
 
 /**
- * @brief A helper function to dump a json object to std::out.
+ * @brief Pretty-print a JSON object to standard output.
  *
- * @param json_obj The json object to print.
+ * @param json_obj JSON object to print.
  */
 void Polyquant_dump_json(const json &json_obj);
 
+/**
+ * @brief Print a standard vector with a title block.
+ *
+ * @tparam T Scalar element type.
+ * @param vec Vector to print.
+ * @param title Title shown above the data.
+ */
 template <typename T> void Polyquant_dump_stdvec(const std::vector<T> &vec, const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
@@ -84,10 +194,12 @@ template <typename T> void Polyquant_dump_stdvec(const std::vector<T> &vec, cons
 };
 
 /**
- * @brief A helper function to dump a dense vector object to std::out.
+ * @brief Print a dense Eigen vector with a title block.
  *
- * @param vec The dense vector to print
- **/
+ * @tparam T Scalar element type.
+ * @param vec Dense vector to print.
+ * @param title Title shown above the data.
+ */
 template <typename T> void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
@@ -98,16 +210,29 @@ template <typename T> void Polyquant_dump_vec(const Eigen::Matrix<T, Eigen::Dyna
 };
 
 /**
- * @brief A helper function to dump a string to file.
+ * @brief Write a string to a text file.
  *
- * @param str the string to write
- **/
+ * Existing contents are overwritten.
+ *
+ * @param str String to write.
+ * @param filename Output path.
+ */
 inline void Polyquant_dump_str_to_file(const std::string &str, const std::string &filename) {
   std::ofstream strfile;
   strfile.open(filename);
   strfile << str << std::endl;
+  strfile.close();
 };
 
+/**
+ * @brief Read one numeric value per line into a standard vector.
+ *
+ * Existing contents of `vec` are cleared first.
+ *
+ * @tparam t Scalar element type.
+ * @param vec Destination vector.
+ * @param filename Input path.
+ */
 template <typename t> void Polyquant_read_vec_from_file(std::vector<t> &vec, const std::string &filename) {
   std::ifstream vecfile(filename);
   vec.clear();
@@ -121,6 +246,13 @@ template <typename t> void Polyquant_read_vec_from_file(std::vector<t> &vec, con
   }
 };
 
+/**
+ * @brief Write a vector-of-vectors as whitespace-formatted rows.
+ *
+ * @tparam t Scalar element type.
+ * @param vec Nested vector to write.
+ * @param filename Output path.
+ */
 template <typename t> void Polyquant_dump_vecofvec_to_file(const std::vector<std::vector<t>> &vec, const std::string &filename) {
   std::ofstream vvfile;
   vvfile.open(filename);
@@ -132,6 +264,15 @@ template <typename t> void Polyquant_dump_vecofvec_to_file(const std::vector<std
   }
 };
 
+/**
+ * @brief Read whitespace-formatted matrix rows into a vector-of-vectors.
+ *
+ * Existing contents of `vec` are cleared first.
+ *
+ * @tparam t Scalar element type.
+ * @param vec Destination nested vector.
+ * @param filename Input path.
+ */
 template <typename t> void Polyquant_read_vecofvec_from_file(std::vector<std::vector<t>> &vec, const std::string &filename) {
   std::ifstream vecfile(filename);
   vec.clear();
@@ -149,10 +290,12 @@ template <typename t> void Polyquant_read_vecofvec_from_file(std::vector<std::ve
 };
 
 /**
- * @brief A helper function to dump a dense vector object to file.
+ * @brief Write a dense Eigen vector to a text file.
  *
- * @param vec The dense vector to write.
- **/
+ * @tparam T Scalar element type.
+ * @param vec Dense vector to write.
+ * @param filename Output path.
+ */
 template <typename T> void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eigen::Dynamic, 1> &vec, const std::string &filename) {
   std::ofstream vecfile;
   vecfile.open(filename);
@@ -162,10 +305,12 @@ template <typename T> void Polyquant_dump_vec_to_file(const Eigen::Matrix<T, Eig
 };
 
 /**
- * @brief A helper function to dump a dense diagonal matrix object to std::out.
+ * @brief Print the diagonal of an Eigen diagonal matrix.
  *
- * @param mat The dense matrix to print
- **/
+ * @tparam T Scalar element type.
+ * @param mat Diagonal matrix to print.
+ * @param title Title shown above the data.
+ */
 template <typename T> void Polyquant_dump_diagmat(const Eigen::DiagonalMatrix<T, Eigen::Dynamic> &mat, const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
@@ -176,10 +321,12 @@ template <typename T> void Polyquant_dump_diagmat(const Eigen::DiagonalMatrix<T,
   }
 };
 /**
- * @brief A helper function to dump a dense matrix object to std::out.
+ * @brief Print a dense Eigen matrix.
  *
- * @param mat The dense matrix to print
- **/
+ * @tparam T Scalar element type.
+ * @param mat Dense matrix to print.
+ * @param title Title shown above the data.
+ */
 template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &title) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << std::endl;
@@ -192,6 +339,15 @@ template <typename T> void Polyquant_dump_mat(const Eigen::Matrix<T, Eigen::Dyna
   }
 };
 
+/**
+ * @brief Print a labeled character table.
+ *
+ * @tparam T Scalar element type.
+ * @param mat Character table values.
+ * @param title Base title string.
+ * @param row_titles Row labels.
+ * @param col_titles Column labels.
+ */
 template <typename T>
 void Polyquant_dump_character_table(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &title, const std::vector<std::string> &row_titles,
                                     const std::vector<std::string> &col_titles) {
@@ -213,6 +369,17 @@ void Polyquant_dump_character_table(const Eigen::Matrix<T, Eigen::Dynamic, Eigen
     std::cout << std::endl;
   }
 };
+/**
+ * @brief Print an irrep direct-product lookup table.
+ *
+ * Negative matrix entries are rendered as `"MULT"` to indicate multiple
+ * resulting irreps.
+ *
+ * @tparam T Integer-like matrix element type.
+ * @param mat Direct-product table.
+ * @param title Base title string.
+ * @param row_titles Irrep labels for both rows and columns.
+ */
 template <typename T> void Polyquant_dump_direct_product_table(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &title, const std::vector<std::string> &row_titles) {
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << title << " direct product table" << std::endl;
@@ -247,10 +414,12 @@ template <typename T> void Polyquant_dump_direct_product_table(const Eigen::Matr
 };
 
 /**
- * @brief A helper function to dump a dense diagonalmatrix object to file.
+ * @brief Write the diagonal of an Eigen diagonal matrix to a text file.
  *
- * @param mat The dense matrix to write.
- **/
+ * @tparam T Scalar element type.
+ * @param mat Diagonal matrix to write.
+ * @param filename Output path.
+ */
 template <typename T> void Polyquant_dump_diagmat_to_file(const Eigen::DiagonalMatrix<T, Eigen::Dynamic> &mat, const std::string &filename) {
   std::ofstream matfile;
   matfile.open(filename);
@@ -260,10 +429,15 @@ template <typename T> void Polyquant_dump_diagmat_to_file(const Eigen::DiagonalM
   }
 };
 /**
- * @brief A helper function to dump a sparse matrix object to file.
+ * @brief Write a sparse matrix by explicitly iterating over all entries.
  *
- * @param mat The sparse matrix to write.
- **/
+ * This produces a dense text representation and can therefore be expensive for
+ * large matrices.
+ *
+ * @tparam T Scalar element type.
+ * @param mat Sparse matrix to write.
+ * @param filename Output path.
+ */
 template <typename T> void Polyquant_dump_sparse_mat_to_file(const Eigen::SparseMatrix<T, Eigen::RowMajor> &mat, const std::string &filename) {
   std::ofstream matfile;
   matfile.open(filename);
@@ -276,10 +450,12 @@ template <typename T> void Polyquant_dump_sparse_mat_to_file(const Eigen::Sparse
 };
 
 /**
- * @brief A helper function to dump a dense matrix object to file.
+ * @brief Write a dense Eigen matrix to a text file.
  *
- * @param mat The dense matrix to write.
- **/
+ * @tparam T Scalar element type.
+ * @param mat Dense matrix to write.
+ * @param filename Output path.
+ */
 template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> &mat, const std::string &filename) {
   std::ofstream matfile;
   matfile.open(filename);
@@ -291,24 +467,47 @@ template <typename T> void Polyquant_dump_mat_to_file(const Eigen::Matrix<T, Eig
   }
 };
 /**
- * @brief A helper function to dump a string to file.
+ * @brief Write a Gaussian94-style basis block to disk.
  *
- * @param mat The dense matrix to write.
- **/
+ * Comment text following `!` is stripped and blank/comment-only lines are
+ * omitted. The file is wrapped with the leading delimiter expected by some
+ * downstream basis readers.
+ *
+ * @param contents Basis text to normalize and write.
+ * @param filename Output path.
+ */
 void Polyquant_dump_basis_to_file(const std::string &contents, const std::string &filename);
 
+/**
+ * @brief Print orbital energies, occupations, symmetry labels, and coefficients.
+ *
+ * Output is organized by particle type, spin block, and groups of molecular
+ * orbitals.
+ *
+ * @param C MO coefficient matrices `[idx_part][spin_idx]`.
+ * @param E_orbitals Orbital energy vectors `[idx_part][spin_idx]`.
+ * @param occ Orbital occupation vectors `[idx_part][spin_idx]`.
+ * @param symm_labels Orbital symmetry labels `[idx_part][spin_idx][mo_idx]`.
+ * @param title Heading printed before the orbital table.
+ * @param ao_labels AO labels `[idx_part][ao_idx][label_component]`.
+ */
 void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>>> &C, std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &E_orbitals,
                    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::vector<std::vector<std::vector<std::string>>> &symm_labels, std::string title,
                    std::vector<std::vector<std::vector<std::string>>> &ao_labels);
 
 // TODO move these functions to some sort of algorithms folder or something
 /**
- * @brief A hasher for a pair of vectors
- * for more info see https://stackoverflow.com/a/29855973
+ * @brief Hash a pair of vectors for unordered containers.
  *
- * @param v the std::pair of std::vector<T> to hash
- **/
+ * @tparam T Element type.
+ */
 template <typename T> struct PairVectorHash {
+  /**
+   * @brief Combine the hashes of both vectors in a pair.
+   *
+   * @param v Pair of vectors to hash in order.
+   * @return Combined hash value suitable for unordered containers.
+   */
   size_t operator()(const std::pair<std::vector<T>, std::vector<T>> &v) const {
     std::hash<T> hasher;
     size_t seed = 0;
@@ -321,7 +520,18 @@ template <typename T> struct PairVectorHash {
     return seed;
   }
 };
+/**
+ * @brief Hash a vector for unordered containers.
+ *
+ * @tparam T Element type.
+ */
 template <typename T> struct VectorHash {
+  /**
+   * @brief Combine the hashes of all elements in a vector.
+   *
+   * @param v Vector to hash in order.
+   * @return Combined hash value suitable for unordered containers.
+   */
   size_t operator()(const std::vector<T> &v) const {
     std::hash<T> hasher;
     size_t seed = 0;
@@ -331,7 +541,18 @@ template <typename T> struct VectorHash {
     return seed;
   }
 };
+/**
+ * @brief Hash a pair of scalar values for unordered containers.
+ *
+ * @tparam T Element type.
+ */
 template <typename T> struct PairHash {
+  /**
+   * @brief Combine the hashes of both values in a pair.
+   *
+   * @param v Pair to hash in order.
+   * @return Combined hash value suitable for unordered containers.
+   */
   size_t operator()(const std::pair<T, T> &v) const {
     std::hash<T> hasher;
     size_t seed = 0;
@@ -341,9 +562,15 @@ template <typename T> struct PairHash {
   }
 };
 /**
- * Argsort for std vector
- * @param vector input
- * @return sorted indicies std vector
+ * @brief Return indices that sort a standard vector under a comparator.
+ *
+ * The default comparator sorts in descending order via `std::greater<>`.
+ *
+ * @tparam T Element type.
+ * @tparam CompType Comparator type.
+ * @param in_vec Input vector.
+ * @param comparison Comparator used for ordering.
+ * @return Permutation indices that sort `in_vec`.
  */
 template <typename T, typename CompType = std::greater<>> std::vector<int> argsort(const std::vector<T> &in_vec, CompType comparison = CompType{}) {
   std::vector<int> indices(in_vec.size());
@@ -352,9 +579,15 @@ template <typename T, typename CompType = std::greater<>> std::vector<int> argso
   return indices;
 };
 /**
- * Argsort for Eigen vector
- * @param vector input
- * @return sorted indicies std vector
+ * @brief Return indices that sort an Eigen vector under a comparator.
+ *
+ * The default comparator sorts in descending order via `std::greater<>`.
+ *
+ * @tparam T Element type.
+ * @tparam CompType Comparator type.
+ * @param in_vec Input Eigen vector.
+ * @param comparison Comparator used for ordering.
+ * @return Permutation indices that sort `in_vec`.
  */
 template <typename T, typename CompType = std::greater<>> std::vector<int> argsort(const Eigen::Matrix<T, Eigen::Dynamic, 1> &in_vec, CompType comparison = CompType{}) {
   std::vector<int> indices(in_vec.size());
@@ -362,6 +595,5 @@ template <typename T, typename CompType = std::greater<>> std::vector<int> argso
   std::sort(indices.begin(), indices.end(), [&in_vec, &comparison](int left, int right) -> bool { return comparison(in_vec(left), in_vec(right)); });
   return indices;
 };
-;
 } // namespace polyquant
 #endif

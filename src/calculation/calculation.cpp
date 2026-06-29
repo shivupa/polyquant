@@ -1,6 +1,82 @@
+/**
+ * @file calculation.cpp
+ * @brief Implementation of top-level Polyquant workflow dispatch and export helpers.
+ */
+
 #include "calculation/calculation.hpp"
 
 using namespace polyquant;
+
+namespace {
+struct QmcpackHdf5MoleculeMetadata {
+  std::vector<int> atomic_species_ids;
+  std::vector<int> atomic_number;
+  std::vector<int> atomic_charge;
+  std::vector<int> core_elec;
+  std::vector<std::string> atomic_names;
+  std::vector<std::vector<double>> atomic_centers;
+  std::vector<std::vector<libint2::Shell>> unique_shells;
+};
+
+bool shell_matches_center(const libint2::Shell &shell, const std::vector<double> &center, double epsilon) {
+  return std::abs(shell.O[0] - center[0]) < epsilon && std::abs(shell.O[1] - center[1]) < epsilon && std::abs(shell.O[2] - center[2]) < epsilon;
+}
+
+QmcpackHdf5MoleculeMetadata build_qmcpack_hdf5_molecule_metadata(const std::shared_ptr<POLYQUANT_MOLECULE> &molecule, const libint2::BasisSet &basis) {
+  constexpr double center_match_epsilon = 1e-6;
+
+  QmcpackHdf5MoleculeMetadata metadata;
+  metadata.unique_shells.resize(molecule->classical_particles.size());
+
+  std::vector<int> center_to_species(molecule->centers.size(), -1);
+  std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type species_idx = 0;
+  for (auto const &[classical_part_key, classical_part] : molecule->classical_particles) {
+    for (auto center_idx : classical_part.center_idx) {
+      center_to_species[center_idx] = species_idx;
+    }
+    metadata.atomic_number.push_back(static_cast<int>(classical_part.charge));
+    metadata.atomic_charge.push_back(static_cast<int>(classical_part.charge));
+    metadata.core_elec.push_back(0);
+    metadata.atomic_names.push_back(classical_part_key);
+    species_idx++;
+  }
+
+  std::vector<bool> center_seen(molecule->centers.size(), false);
+  std::vector<int> species_shell_center(molecule->classical_particles.size(), -1);
+  for (const auto &shell : basis) {
+    for (auto center_idx = 0ul; center_idx < molecule->centers.size(); center_idx++) {
+      if (!shell_matches_center(shell, molecule->centers[center_idx], center_match_epsilon)) {
+        continue;
+      }
+
+      if (!center_seen[center_idx]) {
+        metadata.atomic_centers.push_back(molecule->centers[center_idx]);
+        metadata.atomic_species_ids.push_back(center_to_species[center_idx]);
+        center_seen[center_idx] = true;
+      }
+
+      const auto shell_species_idx = center_to_species[center_idx];
+      if (shell_species_idx >= 0 && species_shell_center[shell_species_idx] == -1) {
+        species_shell_center[shell_species_idx] = center_idx;
+      }
+      if (shell_species_idx >= 0 && species_shell_center[shell_species_idx] == static_cast<int>(center_idx)) {
+        metadata.unique_shells[shell_species_idx].push_back(shell);
+      }
+      break;
+    }
+  }
+
+  for (auto center_idx = 0ul; center_idx < molecule->centers.size(); center_idx++) {
+    if (center_seen[center_idx]) {
+      continue;
+    }
+    metadata.atomic_centers.push_back(molecule->centers[center_idx]);
+    metadata.atomic_species_ids.push_back(center_to_species[center_idx]);
+  }
+
+  return metadata;
+}
+} // namespace
 
 POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
   auto function = __PRETTY_FUNCTION__;
@@ -9,6 +85,8 @@ POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
 }
 
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
+  // The setup order mirrors the dependency graph: later layers require earlier
+  // parsed objects to exist and remain shared for the lifetime of the run.
   // parse input file
   Polyquant_section_header("Input Parameters");
   this->input_params = std::make_shared<POLYQUANT_INPUT>(filename);
@@ -29,6 +107,8 @@ void POLYQUANT_CALCULATION::run() {
   Polyquant_section_header("Calculation Requested");
   std::string mean_field_type = this->parse_mean_field();
   std::string post_mean_field_type = this->parse_post_mean_field();
+  // Post-mean-field requests take priority because they may require building
+  // or importing a mean-field reference as an internal prerequisite.
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
     this->run_post_mean_field(post_mean_field_type);
   } else if (post_mean_field_type == "FILE" && this->input_params->input_data.contains("keywords")) {
@@ -54,6 +134,8 @@ std::string POLYQUANT_CALCULATION::parse_mean_field() {
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("mf_keywords")) {
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("from_file")) {
+        // File-backed orbitals are only selected when no native mean-field
+        // method was explicitly requested in model->method.
         if (!this->mean_field_methods.contains(mean_field_type)) {
           mean_field_type = "FILE";
         } else {
@@ -96,6 +178,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   }
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("mf_keywords")) {
+      // These keywords directly mutate the SCF driver before setup/run.
       if (this->input_params->input_data["keywords"].contains("dump_for_qmcpack")) {
         dump_for_qmcpack = this->input_params->input_data["keywords"]["dump_for_qmcpack"];
       }
@@ -136,8 +219,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
         scf_calc->incremental_fock_initial_onset_thresh = this->input_params->input_data["keywords"]["mf_keywords"]["incremental_fock_initial_onset_thresh"];
       }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_screening")) {
-        APP_ABORT("Cauchy Schwarz screening (integrals and density) is not working. e-/e+ are very sensitive. This should be handled carefully.");
-        // scf_calc->Cauchy_Schwarz_screening = this->input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
+        scf_calc->Cauchy_Schwarz_screening = this->input_params->input_data["keywords"]["mf_keywords"]["Cauchy_Schwarz_screening"];
       }
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("Cauchy_Schwarz_threshold")) {
         APP_ABORT("Cauchy_Schwarz_threshold cannot be set by the user!");
@@ -224,6 +306,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       dump_mf_for_qmcpack(hdf5_filename);
     }
   } else if (mean_field_type == "FILE") {
+    // FILE mode rehydrates orbitals from an existing QMCPACK-style HDF5 file
+    // and can optionally skip any further SCF iterations.
     if (permute_orbitals_vector.size() != 0) {
       this->scf_calc->permute_orbitals_vector = permute_orbitals_vector;
       this->scf_calc->permute_orbitals_start = true;
@@ -255,6 +339,8 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   if (post_mean_field_type == "FILE") {
     APP_ABORT("FROM_FILE for ci not implemented.");
   }
+  // CI and FCIDUMP both rely on a populated SCF object, typically restored
+  // from file unless the input overrides that behavior inside run_mean_field().
   this->run_mean_field(mean_field_type);
   ci_calc = std::make_shared<POLYQUANT_EPCI>(this->scf_calc);
 
@@ -265,6 +351,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   }
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("ci_keywords")) {
+      // CI keywords are forwarded directly into the CI driver and determinant set.
       if (this->input_params->input_data["keywords"].contains("dump_for_qmcpack")) {
         dump_for_qmcpack = this->input_params->input_data["keywords"]["dump_for_qmcpack"];
       }
@@ -391,6 +478,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
     }
   }
   if (post_mean_field_type == "FCIDUMP") {
+    // FCIDUMP export needs transformed integrals but does not require a full CI solve.
     this->ci_calc->calculate_integrals();
     this->ci_calc->fcidump(fcidump_filename);
   } else if (post_mean_field_type == "CI") {
@@ -407,6 +495,8 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
 }
 
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
+  // The current export path writes one HDF5 file per quantum particle because
+  // QMCPACK trial-wavefunction metadata is particle-specific in this workflow.
   bool pbc = false;
   bool ecp = false;
   bool complex_vals = false;
@@ -424,24 +514,6 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
   if (!pure) {
     std::string pure_or_cart = "cartesian";
   }
-  std::vector<int> atomic_species_ids;
-  std::vector<int> atomic_number;
-  std::vector<int> atomic_charge;
-  std::vector<int> core_elec;
-  std::vector<std::string> atomic_names;
-  std::vector<std::vector<double>> atomic_centers = this->input_molecule->centers;
-  atomic_species_ids.resize(this->input_molecule->centers.size());
-  std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
-  for (auto const &[classical_part_key, classical_part] : this->input_molecule->classical_particles) {
-    for (auto idx : classical_part.center_idx) {
-      atomic_species_ids[idx] = classical_part_idx;
-    }
-    atomic_number.push_back((int)classical_part.charge);
-    atomic_charge.push_back((int)classical_part.charge);
-    core_elec.push_back(0);
-    atomic_names.push_back(classical_part_key);
-    classical_part_idx++;
-  }
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     std::string quantum_part_name = quantum_part_key;
@@ -453,64 +525,21 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
     int num_part_total = quantum_part.num_parts;
     int multiplicity = quantum_part.multiplicity;
     libint2::BasisSet basis = this->input_basis->basis[quantum_part_idx];
-    //  "cartesian"
-    // auto i = 0ul;
-    // for (auto shell : basis) {
-    //   i++;
-    // }
-    // auto idx =
-    //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
-    // if (idx != basis_shell2atom.end()) {
-    //   Polyquant_cout("Basis shell doesn't correspond to a classical "
-    //                  "center! This shouldn't happen. Basis shell:");
-    //   std::string idx_string(1, *idx);
-    //   Polyquant_cout("Shell:" + idx_string);
-    //   Polyquant_cout(basis[*idx]);
-    //   // APP_ABORT("Shell doesn't correspond to center");
-    // }
-    std::vector<std::vector<libint2::Shell>> unique_shells;
-    unique_shells.resize(this->input_molecule->classical_particles.size());
-    classical_part_idx = 0;
-    double EPSILON = 1e-6;
-    for (auto const &[classical_part_key, classical_part] : this->input_molecule->classical_particles) {
-      // Polyquant_cout(classical_part_key);
-      for (auto shell : basis) {
-        // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-        // std::to_string(this->input_molecule->centers[classical_part.center_idx[0]][0])
-        // + " " + std::to_string(shell.O[0]
-        // -this->input_molecule->centers[classical_part.center_idx[0]][0])
-        // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-        // std::to_string(this->input_molecule->centers[classical_part.center_idx[0]][1])
-        // + " " + std::to_string(shell.O[1]
-        // -this->input_molecule->centers[classical_part.center_idx[0]][1])
-        // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-        //  std::to_string(this->input_molecule->centers[classical_part.center_idx[0]][2])
-        // + " " + std::to_string(shell.O[2]
-        // -this->input_molecule->centers[classical_part.center_idx[0]][2])
-        // );
-        if (std::abs(shell.O[0] - this->input_molecule->centers[classical_part.center_idx[0]][0]) < EPSILON &&
-            std::abs(shell.O[1] - this->input_molecule->centers[classical_part.center_idx[0]][1]) < EPSILON &&
-            std::abs(shell.O[2] - this->input_molecule->centers[classical_part.center_idx[0]][2]) < EPSILON) {
-          // Polyquant_cout("Unique shell on center: " +
-          //                std::to_string(classical_part.center_idx[0]) +
-          //                " named: " + classical_part_key);
-          // Polyquant_cout(shell);
-          unique_shells[classical_part_idx].push_back(shell);
-        }
-      }
-      classical_part_idx++;
-    }
+    auto hdf5_metadata = build_qmcpack_hdf5_molecule_metadata(this->input_molecule, basis);
     std::string particle_filename = quantum_part_key + "_" + filename;
     Polyquant_cout("Dumping HDF5 to filename: " + particle_filename);
     POLYQUANT_HDF5 hdf5_f(particle_filename);
-    hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
+    hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
                                        quantum_part_name, scf_calc->E_orbitals_combined[quantum_part_idx], scf_calc->C_combined[quantum_part_idx], scf_calc->symm_label_idxs[quantum_part_idx],
-                                       scf_calc->symm_labels[quantum_part_idx], atomic_species_ids, atomic_number, atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
+                                       scf_calc->symm_labels[quantum_part_idx], hdf5_metadata.atomic_species_ids, hdf5_metadata.atomic_number, hdf5_metadata.atomic_charge, hdf5_metadata.core_elec,
+                                       hdf5_metadata.atomic_names, hdf5_metadata.atomic_centers, hdf5_metadata.unique_shells);
     quantum_part_idx++;
   }
 }
 
 void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) {
+  // Natural orbitals are exported as separate single-particle HDF5 files for
+  // each requested CI state and particle type.
   bool pbc = false;
   bool ecp = false;
   bool complex_vals = false;
@@ -528,24 +557,6 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
   if (!pure) {
     std::string pure_or_cart = "cartesian";
   }
-  std::vector<int> atomic_species_ids;
-  std::vector<int> atomic_number;
-  std::vector<int> atomic_charge;
-  std::vector<int> core_elec;
-  std::vector<std::string> atomic_names;
-  std::vector<std::vector<double>> atomic_centers = this->input_molecule->centers;
-  atomic_species_ids.resize(this->input_molecule->centers.size());
-  std::map<std::string, CLASSICAL_PARTICLE_SET>::size_type classical_part_idx = 0;
-  for (auto const &[classical_part_key, classical_part] : this->input_molecule->classical_particles) {
-    for (auto idx : classical_part.center_idx) {
-      atomic_species_ids[idx] = classical_part_idx;
-    }
-    atomic_number.push_back((int)classical_part.charge);
-    atomic_charge.push_back((int)classical_part.charge);
-    core_elec.push_back(0);
-    atomic_names.push_back(classical_part_key);
-    classical_part_idx++;
-  }
   auto quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     std::string quantum_part_name = quantum_part_key;
@@ -557,53 +568,7 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
     int num_part_total = quantum_part.num_parts;
     int multiplicity = quantum_part.multiplicity;
     libint2::BasisSet basis = this->input_basis->basis[quantum_part_idx];
-    //  "cartesian"
-    // auto i = 0ul;
-    // for (auto shell : basis) {
-    //   i++;
-    // }
-    // auto idx =
-    //     std::find(basis_shell2atom.begin(), basis_shell2atom.end(), -1);
-    // if (idx != basis_shell2atom.end()) {
-    //   Polyquant_cout("Basis shell doesn't correspond to a classical "
-    //                  "center! This shouldn't happen. Basis shell:");
-    //   std::string idx_string(1, *idx);
-    //   Polyquant_cout("Shell:" + idx_string);
-    //   Polyquant_cout(basis[*idx]);
-    //   // APP_ABORT("Shell doesn't correspond to center");
-    // }
-    std::vector<std::vector<libint2::Shell>> unique_shells;
-    unique_shells.resize(this->input_molecule->classical_particles.size());
-    classical_part_idx = 0;
-    double EPSILON = 1e-6;
-    for (auto const &[classical_part_key, classical_part] : this->input_molecule->classical_particles) {
-      // Polyquant_cout(classical_part_key);
-      for (auto shell : basis) {
-        // Polyquant_cout( std::to_string(shell.O[0]) + " " +
-        // std::to_string(this->input_molecule->centers[classical_part.center_idx[0]][0])
-        // + " " + std::to_string(shell.O[0]
-        // -this->input_molecule->centers[classical_part.center_idx[0]][0])
-        // ); Polyquant_cout( std::to_string(shell.O[1]) + " " +
-        // std::to_string(this->input_molecule->centers[classical_part.center_idx[0]][1])
-        // + " " + std::to_string(shell.O[1]
-        // -this->input_molecule->centers[classical_part.center_idx[0]][1])
-        // ); Polyquant_cout( std::to_string(shell.O[2]) + " " +
-        //  std::to_string(this->input_molecule->centers[classical_part.center_idx[0]][2])
-        // + " " + std::to_string(shell.O[2]
-        // -this->input_molecule->centers[classical_part.center_idx[0]][2])
-        // );
-        if (std::abs(shell.O[0] - this->input_molecule->centers[classical_part.center_idx[0]][0]) < EPSILON &&
-            std::abs(shell.O[1] - this->input_molecule->centers[classical_part.center_idx[0]][1]) < EPSILON &&
-            std::abs(shell.O[2] - this->input_molecule->centers[classical_part.center_idx[0]][2]) < EPSILON) {
-          // Polyquant_cout("Unique shell on center: " +
-          //                std::to_string(classical_part.center_idx[0]) +
-          //                " named: " + classical_part_key);
-          // Polyquant_cout(shell);
-          unique_shells[classical_part_idx].push_back(shell);
-        }
-      }
-      classical_part_idx++;
-    }
+    auto hdf5_metadata = build_qmcpack_hdf5_molecule_metadata(this->input_molecule, basis);
 
     for (int state_vec_idx = 0; state_vec_idx < ci_calc->NO_states.size(); state_vec_idx++) {
       auto state_idx = ci_calc->NO_states[state_vec_idx];
@@ -611,16 +576,19 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
       particle_filename << "NSO_State_" << state_idx << "_part_" << quantum_part_key << "_" << filename;
       Polyquant_cout("Dumping HDF5 to filename: " + particle_filename.str());
       POLYQUANT_HDF5 hdf5_f(particle_filename.str());
-      hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
+      hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
                                          quantum_part_name, ci_calc->occ_nso[state_vec_idx][quantum_part_idx], ci_calc->C_nso[state_vec_idx][quantum_part_idx],
-                                         ci_calc->symm_label_idxs[state_vec_idx][quantum_part_idx], ci_calc->symm_labels[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
-                                         atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
+                                         ci_calc->symm_label_idxs[state_vec_idx][quantum_part_idx], ci_calc->symm_labels[state_vec_idx][quantum_part_idx], hdf5_metadata.atomic_species_ids,
+                                         hdf5_metadata.atomic_number, hdf5_metadata.atomic_charge, hdf5_metadata.core_elec, hdf5_metadata.atomic_names, hdf5_metadata.atomic_centers,
+                                         hdf5_metadata.unique_shells);
     }
     quantum_part_idx++;
   }
 }
 
 void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
+  // Build the determinant occupation tensors expected by the QMCPACK
+  // multideterminant writer, including frozen-core orbitals in the bitstrings.
   std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
   dets.resize(this->input_molecule->quantum_particles.size());
   for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {

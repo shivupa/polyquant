@@ -1,14 +1,19 @@
 # tell cmake what our excutable is going to be
 add_executable(polyquant polyquant.cpp)
 add_library(polyquant_lib OBJECT)
+target_include_directories(polyquant_lib PUBLIC ${PROJECT_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
+if(LIBINT2_FOUND)
+  target_include_directories(polyquant_lib PUBLIC ${LIBINT2_INCLUDE_DIRS})
+  target_compile_definitions(polyquant_lib PUBLIC ${LIBINT2_EXTRA_DEFINITIONS})
+endif()
 
 # add the subdirectories of things that need to be built
-add_subdirectory(io)
 target_link_libraries(polyquant_lib PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(polyquant_lib PUBLIC Libint2::cxx)
 target_link_libraries(polyquant_lib PUBLIC HighFive)
 target_link_libraries(polyquant_lib PUBLIC fmt::fmt)
 target_link_libraries(polyquant_lib PUBLIC Spectra)
+add_subdirectory(io)
 
 add_subdirectory(symmetry)
 target_link_libraries(polyquant_lib PUBLIC msym)

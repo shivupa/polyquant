@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file rdm1.cpp
+ * @brief One-particle reduced density matrix construction from CI eigenvectors.
+ */
+
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_part_idx, const int quantum_part_spin_idx, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_rdm1,
@@ -27,7 +32,7 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
       auto idx_idet = i_unfold[2 * quantum_part_idx + quantum_part_spin_idx];
       auto ishift = 0;
       auto Di = this->get_det(quantum_part_idx, quantum_part_spin_idx, idx_idet);
-      // diagonal
+      // Diagonal contributions count occupied orbitals in each determinant.
       std::vector<int> occ, virt;
       this->get_occ_virt(quantum_part_idx, Di, occ, virt);
       for (auto orb_idx : occ) {
@@ -36,7 +41,8 @@ void POLYQUANT_DETSET<T>::create_1rdm(const int state_idx, const int quantum_par
           MO_rdm1_thread_contributions[thread_id](orb_idx, orb_idx) += contribution;
         }
       }
-      // off diagonal singles contributions
+      // Only determinant pairs connected by a single spin-orbital excitation
+      // contribute to the off-diagonal 1-RDM.
       for (auto idx_jdet : unique_singles[quantum_part_idx][quantum_part_spin_idx][idx_idet]) {
         std::vector<int> j_unfold = i_unfold;
         j_unfold[2 * quantum_part_idx + quantum_part_spin_idx] = idx_jdet;

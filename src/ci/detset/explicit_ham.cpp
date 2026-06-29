@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file explicit_ham.cpp
+ * @brief Explicit sparse Hamiltonian assembly dispatcher and diagonal insertion.
+ */
+
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::create_ham_diagonal(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
@@ -55,7 +60,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_ham() {
   this->ham.resize(this->N_dets, this->N_dets);
   std::vector<int> sizes;
   // sizes.resize(this->N_dets, this->N_dets);
-  // estimate
+  // Reserve a heuristic number of nonzeros per row to reduce sparse
+  // reallocation during triplet insertion.
   int estimate = std::sqrt(this->N_dets) * 10;
   this->estimate_n_interacting_dets = (estimate < this->N_dets) ? estimate : this->N_dets;
   sizes.resize(this->N_dets, estimate_n_interacting_dets);

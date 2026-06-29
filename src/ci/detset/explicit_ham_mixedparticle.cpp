@@ -1,5 +1,10 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file explicit_ham_mixedparticle.cpp
+ * @brief Explicit sparse Hamiltonian assembly for two-particle-species CI spaces.
+ */
+
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
@@ -27,13 +32,12 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
       auto idx_I_B_det = idet_unfold[2 * idx_part + second_spin_idx];
       auto idx_I_C_det = idet_unfold[2 * other_idx_part + first_spin_idx];
       auto idx_I_D_det = idet_unfold[2 * other_idx_part + second_spin_idx];
-      std::vector<int> excitation_list;
       // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, excitation_list);
       // if (this->unique_dets[idx_part][first_spin_idx][0][0] > 1)
       //   this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 2, excitation_list);
-      std::set_union(unique_singles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_singles[idx_part][first_spin_idx][idx_I_A_det].end(),
-                     unique_doubles[idx_part][first_spin_idx][idx_I_A_det].begin(), unique_doubles[idx_part][first_spin_idx][idx_I_A_det].end(), std::back_inserter(excitation_list));
-      for (auto idx_J_A_det : excitation_list) {
+      // Class-one terms vary one particle/spin block while leaving the other
+      // three blocks fixed.
+      for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det <= idx_I_A_det) {
           continue;
         }
@@ -53,6 +57,25 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
           }
         }
       }
+      this->for_each_unique_double(idx_part, first_spin_idx, idx_I_A_det, [&](auto idx_J_A_det) {
+        if (idx_J_A_det <= idx_I_A_det) {
+          return;
+        }
+        std::vector<int> jdet_idx(4);
+        jdet_idx[2 * idx_part + first_spin_idx] = idx_J_A_det;
+        jdet_idx[2 * idx_part + second_spin_idx] = idx_I_B_det;
+        jdet_idx[2 * other_idx_part + first_spin_idx] = idx_I_C_det;
+        jdet_idx[2 * other_idx_part + second_spin_idx] = idx_I_D_det;
+        if (this->dets.find(jdet_idx) != this->dets.end()) {
+          auto folded_jdet_idx = this->dets.find(jdet_idx)->second;
+          auto integral = Slater_Condon(i_det, folded_jdet_idx);
+          if (integral != 0.0) {
+            auto a = i_det < folded_jdet_idx ? i_det : folded_jdet_idx;
+            auto b = i_det < folded_jdet_idx ? folded_jdet_idx : i_det;
+            triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
+          }
+        }
+      });
     }
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());
@@ -94,6 +117,8 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
     APP_ABORT("two_species_create_ham_class_two called with same particle and spin idxs, which is inconsistent with two species class two contributions.");
   }
 
+  // Identify the two untouched particle/spin blocks so only the requested pair
+  // is varied in the class-two build.
   std::vector<std::pair<int, int>> idx_part_spin = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
   std::pair<int, int> idx_A_part_spin = {idx_part, idx_spin};
   std::pair<int, int> idx_B_part_spin = {other_idx_part, other_idx_spin};
@@ -212,7 +237,8 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
       auto idx_I_C_det = idet_unfold[2 * 1 + 0];
       auto idx_I_D_det = idet_unfold[2 * 1 + 1];
 
-      // diagonal
+      // The singleshot path accumulates every diagonal, same-particle, and
+      // mixed-particle contribution in one connectivity traversal.
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
       // part 0 spin 0 singles
       for (auto idx_J_A_det : unique_singles[0][0][idx_I_A_det]) {
@@ -424,9 +450,9 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
         }
       }
       // part 0 spin 0 doubles
-      for (auto idx_J_A_det : unique_doubles[0][0][idx_I_A_det]) {
+      this->for_each_unique_double(0, 0, idx_I_A_det, [&](auto idx_J_A_det) {
         if (idx_J_A_det < idx_I_A_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_J_A_det;
@@ -443,11 +469,11 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-      }
+      });
       // part 0 spin 1 doubles
-      for (auto idx_J_B_det : unique_doubles[0][1][idx_I_B_det]) {
+      this->for_each_unique_double(0, 1, idx_I_B_det, [&](auto idx_J_B_det) {
         if (idx_J_B_det < idx_I_B_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -464,11 +490,11 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-      }
+      });
       // part 1 spin 0 doubles
-      for (auto idx_J_C_det : unique_doubles[1][0][idx_I_C_det]) {
+      this->for_each_unique_double(1, 0, idx_I_C_det, [&](auto idx_J_C_det) {
         if (idx_J_C_det < idx_I_C_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -485,11 +511,11 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-      }
+      });
       // part 1 spin 1 doubles
-      for (auto idx_J_D_det : unique_doubles[1][1][idx_I_D_det]) {
+      this->for_each_unique_double(1, 1, idx_I_D_det, [&](auto idx_J_D_det) {
         if (idx_J_D_det < idx_I_D_det) {
-          continue;
+          return;
         }
         std::vector<int> jdet_idx(4);
         jdet_idx[2 * 0 + 0] = idx_I_A_det;
@@ -506,7 +532,7 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
             triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(a, b, integral));
           }
         }
-      }
+      });
     }
     ham_threads[thread_id].resize(this->N_dets, this->N_dets);
     ham_threads[thread_id].reserve(triplet_list_threads[thread_id].size());

@@ -1,9 +1,15 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file determinant_symm.cpp
+ * @brief Determinant symmetry labeling using SCF orbital irrep assignments.
+ */
+
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::get_symm_idx(int idx_part, const std::pair<std::vector<T>, std::vector<T>> &D, int &symm_idx) {
-  // int symm_idx = -1;
+  // Packed determinants omit frozen-core orbitals, so occupied indices must be
+  // shifted back into the full SCF orbital numbering before their irreps are read.
   std::vector<int> occ, virt;
   occ.clear();
   virt.clear();

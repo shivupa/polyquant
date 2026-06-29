@@ -2,6 +2,7 @@
 #include "integral/integral.hpp"
 #include "io/utils.hpp"
 #include "molecule/molecule.hpp"
+#include "test_paths.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -14,7 +15,7 @@ TEST_CASE("INTEGRAL: triangular matrix", "[INTEGRAL]") {
 }
 
 TEST_CASE("INTEGRAL: overlap AO basis", "[INTEGRAL]") {
-  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>(TestDataPath("h2o_sto3glibrary/h2o.json"));
   std::shared_ptr<POLYQUANT_SYMMETRY> test_symm = std::make_shared<POLYQUANT_SYMMETRY>(test_inp);
   std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp, test_symm);
   std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_symm, test_mol);
@@ -28,7 +29,7 @@ TEST_CASE("INTEGRAL: overlap AO basis", "[INTEGRAL]") {
 }
 
 TEST_CASE("INTEGRAL: kinetic AO basis", "[INTEGRAL]") {
-  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>(TestDataPath("h2o_sto3glibrary/h2o.json"));
   std::shared_ptr<POLYQUANT_SYMMETRY> test_symm = std::make_shared<POLYQUANT_SYMMETRY>(test_inp);
   std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp, test_symm);
   std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_symm, test_mol);
@@ -41,7 +42,7 @@ TEST_CASE("INTEGRAL: kinetic AO basis", "[INTEGRAL]") {
 }
 
 TEST_CASE("INTEGRAL: nuclear AO basis", "[INTEGRAL]") {
-  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>(TestDataPath("h2o_sto3glibrary/h2o.json"));
   std::shared_ptr<POLYQUANT_SYMMETRY> test_symm = std::make_shared<POLYQUANT_SYMMETRY>(test_inp);
   std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp, test_symm);
   std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_symm, test_mol);
@@ -53,7 +54,7 @@ TEST_CASE("INTEGRAL: nuclear AO basis", "[INTEGRAL]") {
   REQUIRE_THAT(test_int.nuclear[0](3, 5), Catch::Matchers::WithinAbs(0.22351644812734084, POLYQUANT_TEST_EPSILON_TIGHT));
 }
 TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis", "[INTEGRAL]") {
-  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>(TestDataPath("h2o_sto3glibrary/h2o.json"));
   std::shared_ptr<POLYQUANT_SYMMETRY> test_symm = std::make_shared<POLYQUANT_SYMMETRY>(test_inp);
   std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp, test_symm);
   std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_symm, test_mol);
@@ -66,7 +67,7 @@ TEST_CASE("INTEGRAL: symmetric orthogonalization AO basis", "[INTEGRAL]") {
   REQUIRE_THAT(test_int.orth_X[0][3](0, 0), Catch::Matchers::WithinAbs(0.9206084339, POLYQUANT_TEST_EPSILON_LOOSE));
 }
 TEST_CASE("INTEGRAL: canonical orthogonalization AO basis", "[INTEGRAL]") {
-  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>("../../tests/data/h2o_sto3glibrary/h2o.json");
+  std::shared_ptr<POLYQUANT_INPUT> test_inp = std::make_shared<POLYQUANT_INPUT>(TestDataPath("h2o_sto3glibrary/h2o.json"));
   std::shared_ptr<POLYQUANT_SYMMETRY> test_symm = std::make_shared<POLYQUANT_SYMMETRY>(test_inp);
   std::shared_ptr<POLYQUANT_MOLECULE> test_mol = std::make_shared<POLYQUANT_MOLECULE>(test_inp, test_symm);
   std::shared_ptr<POLYQUANT_BASIS> test_bas = std::make_shared<POLYQUANT_BASIS>(test_inp, test_symm, test_mol);

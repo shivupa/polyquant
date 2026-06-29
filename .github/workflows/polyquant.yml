@@ -2,11 +2,10 @@ name: Polyquant CMake Build
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-  release:
     tags:
       - 'v*'
+  pull_request:
+    branches: [main]
 
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -144,6 +143,7 @@ jobs:
         run: |
           git clone https://github.com/mcodev31/libmsym.git
           cd libmsym
+          git checkout 85e47232376a8e735c2a7b5283f40b59b3953db1
           mkdir build
           cd build
           # build as shared library; build examples (built in ./examples,  not installed)
@@ -165,6 +165,7 @@ jobs:
           cmake \
             -DPOLYQUANT_DOC=0 \
             -DPOLYQUANT_TEST=1 \
+            -DPOLYQUANT_NETWORK_TESTS=1 \
             -DPOLYQUANT_CODE_COVERAGE=0 \
             -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} \

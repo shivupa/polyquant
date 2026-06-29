@@ -1,12 +1,18 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file s2.cpp
+ * @brief CI `S^2` evaluation and spin-penalty matrix construction.
+ */
+
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &S_squared, const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
   T one = 1;
   T zero = 0;
-  // only for restricted cases
+  // The evaluation assumes both alpha and beta determinant lists are present
+  // for each particle type, even when the SCF reference was restricted.
   auto nthreads = omp_get_max_threads();
 
   auto nstates = C.cols();
@@ -43,7 +49,7 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
           auto Di_a = this->get_det(quantum_part_idx, spin_0, idx_idet_a);
           auto Di_b = this->get_det(quantum_part_idx, spin_1, idx_idet_b);
 
-          // Diagonal Contribution
+          // Diagonal contribution from the number of unpaired orbitals and Sz.
           // 10.1021/acs.jctc.7b00466
           // 10.1021/acs.jpca.2c01338
           // https://theses.hal.science/tel-02089570
@@ -81,7 +87,8 @@ void POLYQUANT_DETSET<T>::evaluate_s2(Eigen::Matrix<double, Eigen::Dynamic, Eige
           double S2_mat_elem = num_a + sz * (sz - 1.0);
           S_sq_thread_contributions[thread_id](state_idx, quantum_part_idx) += C_I * C_I * S2_mat_elem;
 
-          // Off-Diagonal Contribution
+          // Off-diagonal terms connect determinants related by the alpha/beta
+          // exchange pattern induced by the spin-flip operator.
           for (auto idx_jdet_a : unique_singles[quantum_part_idx][spin_0][idx_idet_a]) {
             for (auto idx_jdet_b : unique_singles[quantum_part_idx][spin_1][idx_idet_b]) {
               std::vector<int> j_unfold = i_unfold;
@@ -136,13 +143,13 @@ template <typename T> void POLYQUANT_DETSET<T>::create_S_sq_penalty(std::string 
     std::stringstream ss;
     if (type == "first_order") {
       auto expected_S2_for_part = 0.0;
-      // H' = H + aS^2
+      // First-order penalty uses H' = H + a S^2.
       create_S_sq_minus_expected_S_sq_matrix_singleshot(S2_penalty, quantum_part_idx, expected_S2_for_part);
       ss << "S2 penalty number of nonzero matrix elem : " << S2_penalty.nonZeros() << std::endl;
       this->ham += alpha * S2_penalty;
     } else {
       auto expected_S2_for_part = expected_S2[quantum_part_idx];
-      // H' = H + a(S^2 -I<S^2 expected>)^2
+      // Second-order penalty uses H' = H + a (S^2 - <S^2>_target)^2.
       create_S_sq_minus_expected_S_sq_matrix_singleshot(S2_penalty, quantum_part_idx, expected_S2_for_part);
       // pruned here is suppressing things that are zero Exactly not pruning based on a threshold
       S2_penalty = (S2_penalty * S2_penalty).pruned();
@@ -217,7 +224,8 @@ void POLYQUANT_DETSET<T>::create_S_sq_minus_expected_S_sq_matrix_singleshot(Eige
       S2_mat_elem -= expected_S2_for_part;
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, S2_mat_elem));
 
-      // Off-Diagonal Contribution
+      // Off-diagonal entries follow the same alpha/beta exchange pattern used
+      // in the direct S^2 expectation-value routine.
       for (auto idx_jdet_a : unique_singles[quantum_part_idx][spin_0][idx_idet_a]) {
         for (auto idx_jdet_b : unique_singles[quantum_part_idx][spin_1][idx_idet_b]) {
           std::vector<int> j_unfold = i_unfold;

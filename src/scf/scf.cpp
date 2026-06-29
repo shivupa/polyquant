@@ -1,5 +1,10 @@
 #include "scf/scf.hpp"
 
+/**
+ * @file scf.cpp
+ * @brief Base-class storage and shared-object binding for SCF drivers.
+ */
+
 using namespace polyquant;
 
 POLYQUANT_SCF::POLYQUANT_SCF(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_MOLECULE> molecule,
@@ -8,6 +13,8 @@ POLYQUANT_SCF::POLYQUANT_SCF(std::shared_ptr<POLYQUANT_INPUT> params, std::share
 }
 void POLYQUANT_SCF::setup_calculation(std::shared_ptr<POLYQUANT_INPUT> params, std::shared_ptr<POLYQUANT_SYMMETRY> symmetry, std::shared_ptr<POLYQUANT_MOLECULE> molecule,
                                       std::shared_ptr<POLYQUANT_BASIS> basis, std::shared_ptr<POLYQUANT_INTEGRAL> integral) {
+  // The base class only records shared dependencies. Concrete setup and
+  // validation live in derived SCF implementations.
   this->set_input(params);
   this->set_symmetry(symmetry);
   this->set_molecule(molecule);
