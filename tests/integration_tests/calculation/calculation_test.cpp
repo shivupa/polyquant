@@ -267,6 +267,42 @@ TEST_CASE("CALCULATION: Li-+p/custom basis quantum H SCF dump HDF5.") {
   REQUIRE(file2.exist("basisset"));
 }
 
+TEST_CASE("CALCULATION: H2O reordered atoms dump HDF5 in AO center order.") {
+  POLYQUANT_CALCULATION test_calc;
+  test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary/h2o_reordered_dumpHDF5.json"));
+
+  auto num_basis = static_cast<int>(test_calc.input_basis->num_basis[0]);
+  test_calc.scf_calc = std::make_shared<POLYQUANT_EPSCF>();
+  test_calc.scf_calc->num_mo = {num_basis};
+  test_calc.scf_calc->C_combined.resize(1);
+  test_calc.scf_calc->C_combined[0].resize(1);
+  test_calc.scf_calc->C_combined[0][0] = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::Identity(num_basis, num_basis);
+  test_calc.scf_calc->E_orbitals_combined.resize(1);
+  test_calc.scf_calc->E_orbitals_combined[0].resize(1);
+  test_calc.scf_calc->E_orbitals_combined[0][0].setZero(num_basis);
+  test_calc.scf_calc->symm_label_idxs.resize(1);
+  test_calc.scf_calc->symm_label_idxs[0] = {std::vector<int>(num_basis, 0)};
+  test_calc.scf_calc->symm_labels.resize(1);
+  test_calc.scf_calc->symm_labels[0] = {std::vector<std::string>(num_basis, "A")};
+
+  std::string filename = "h2o_reordered.h5";
+  test_calc.dump_mf_for_qmcpack(filename);
+
+  POLYQUANT_HDF5 file("electron_h2o_reordered.h5");
+  std::vector<int> species_ids;
+  std::vector<std::vector<double>> positions;
+  file.load_data(species_ids, "/atoms/species_ids");
+  file.load_data(positions, "/atoms/positions");
+
+  REQUIRE(species_ids == std::vector<int>{0, 0, 1});
+  REQUIRE(positions.size() == 3);
+  for (auto coord_idx = 0ul; coord_idx < 3; coord_idx++) {
+    REQUIRE_THAT(positions[0][coord_idx], Catch::Matchers::WithinAbs(test_calc.input_molecule->centers[1][coord_idx], POLYQUANT_TEST_EPSILON_TIGHT));
+    REQUIRE_THAT(positions[1][coord_idx], Catch::Matchers::WithinAbs(test_calc.input_molecule->centers[2][coord_idx], POLYQUANT_TEST_EPSILON_TIGHT));
+    REQUIRE_THAT(positions[2][coord_idx], Catch::Matchers::WithinAbs(test_calc.input_molecule->centers[0][coord_idx], POLYQUANT_TEST_EPSILON_TIGHT));
+  }
+}
+
 TEST_CASE("CALCULATION: H2O/sto-3g(library) CI.") {
   POLYQUANT_CALCULATION test_calc;
   test_calc.setup_calculation(TestDataPath("h2o_sto3glibrary_cisd/h2o.json"));
