@@ -4,7 +4,6 @@
     {
       "name": "release",
       "displayName": "Release",
-      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -17,7 +16,6 @@
     {
       "name": "debug",
       "displayName": "Debug",
-      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -38,6 +36,19 @@
     {
       "name": "docs",
       "displayName": "Documentation",
+      "inherits": "debug-docs"
+    },
+    {
+      "name": "release-docs",
+      "displayName": "Release With Documentation",
+      "inherits": "release",
+      "cacheVariables": {
+        "POLYQUANT_DOC": "1"
+      }
+    },
+    {
+      "name": "debug-docs",
+      "displayName": "Debug With Documentation",
       "inherits": "debug",
       "cacheVariables": {
         "POLYQUANT_DOC": "1"
@@ -72,6 +83,14 @@
         "polyquant_docs_html",
         "polyquant_docs_pdf"
       ]
+    },
+    {
+      "name": "release-docs",
+      "configurePreset": "release-docs"
+    },
+    {
+      "name": "debug-docs",
+      "configurePreset": "debug-docs"
     },
     {
       "name": "coverage",

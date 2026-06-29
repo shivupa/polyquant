@@ -1,30 +1,66 @@
 #!/bin/bash
 set -euo pipefail
 
-BUILD_DIR="${BUILD_DIR:-build}"
-BUILD_TYPE="${CMAKE_BUILD_TYPE:-Release}"
-POLYQUANT_DOC="${POLYQUANT_DOC:-1}"
-POLYQUANT_TEST="${POLYQUANT_TEST:-1}"
-POLYQUANT_NETWORK_TESTS="${POLYQUANT_NETWORK_TESTS:-1}"
-POLYQUANT_CODE_COVERAGE="${POLYQUANT_CODE_COVERAGE:-1}"
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  cat <<'EOF'
+Usage: ./build.sh [release|debug|debug-network-tests] [docs] [cmake configure args...]
+       ./build.sh coverage [cmake configure args...]
 
-generator_args=()
-if command -v ninja >/dev/null 2>&1; then
-  generator_args=(-G Ninja)
+Defaults to the release preset. Examples:
+  ./build.sh
+  ./build.sh docs
+  ./build.sh release docs
+  ./build.sh debug docs
+  RUN_TESTS=1 ./build.sh release
+EOF
+  exit 0
 fi
 
-cmake \
-  -S . \
-  -B "${BUILD_DIR}" \
-  -DPOLYQUANT_DOC="${POLYQUANT_DOC}" \
-  -DPOLYQUANT_TEST="${POLYQUANT_TEST}" \
-  -DPOLYQUANT_NETWORK_TESTS="${POLYQUANT_NETWORK_TESTS}" \
-  -DPOLYQUANT_CODE_COVERAGE="${POLYQUANT_CODE_COVERAGE}" \
-  -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
-  "${generator_args[@]}" \
-  "$@"
+config="release"
+docs="0"
+coverage="0"
 
-build_args=(--build "${BUILD_DIR}")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  release|debug|debug-network-tests)
+    config="$1"
+    shift
+    ;;
+  docs)
+    docs="1"
+    shift
+    ;;
+  coverage)
+    coverage="1"
+    shift
+    ;;
+  *)
+    break
+    ;;
+  esac
+done
+
+if [[ "${coverage}" == "1" && "${docs}" == "1" ]]; then
+  echo "coverage and docs cannot be combined in one preset" >&2
+  exit 2
+fi
+
+if [[ "${docs}" == "1" && "${config}" == "debug-network-tests" ]]; then
+  echo "docs can be combined with release or debug" >&2
+  exit 2
+fi
+
+if [[ "${coverage}" == "1" ]]; then
+  preset="coverage"
+elif [[ "${docs}" == "1" ]]; then
+  preset="${config}-docs"
+else
+  preset="${config}"
+fi
+
+cmake --preset "${preset}" "$@"
+
+build_args=(--build --preset "${preset}")
 if [[ -n "${BUILD_PARALLEL_LEVEL:-}" ]]; then
   build_args+=(--parallel "${BUILD_PARALLEL_LEVEL}")
 else
@@ -32,6 +68,6 @@ else
 fi
 cmake "${build_args[@]}"
 
-if [[ "${RUN_TESTS:-0}" == "1" ]]; then
-  ctest --test-dir "${BUILD_DIR}" --output-on-failure
+if [[ "${RUN_TESTS:-0}" == "1" && "${coverage}" != "1" ]]; then
+  ctest --preset "${config}"
 fi

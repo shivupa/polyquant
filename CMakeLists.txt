@@ -120,24 +120,33 @@ endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
 # set up docs
 if(POLYQUANT_DOC)
   # https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html add_subdirectory(docs)
-  file(COPY ${PROJECT_SOURCE_DIR}/docs DESTINATION ${POLYQUANT_BINARY_DIR})
-  file(COPY ${PROJECT_SOURCE_DIR}/README.md DESTINATION ${POLYQUANT_BINARY_DIR})
-  configure_file(${PROJECT_SOURCE_DIR}/docs/source/conf.py ${POLYQUANT_BINARY_DIR}/docs/source)
   find_package(Sphinx REQUIRED)
   find_program(LATEXMK_EXECUTABLE latexmk)
   set(SPHINX_SOURCE ${POLYQUANT_BINARY_DIR}/docs/source)
   set(SPHINX_BUILD ${POLYQUANT_BINARY_DIR}/docs)
   add_custom_target(
+    polyquant_docs_sync
+    COMMAND ${CMAKE_COMMAND} -E rm -rf ${SPHINX_SOURCE}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/docs/source ${SPHINX_SOURCE}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/README.md ${POLYQUANT_BINARY_DIR}/README.md
+    COMMAND
+      ${CMAKE_COMMAND} -DINPUT=${PROJECT_SOURCE_DIR}/docs/source/conf.py -DOUTPUT=${SPHINX_SOURCE}/conf.py
+      -DPOLYQUANT_SOURCE_DIR=${POLYQUANT_SOURCE_DIR} -DPOLYQUANT_BINARY_DIR=${POLYQUANT_BINARY_DIR} -P
+      ${PROJECT_SOURCE_DIR}/CMake/ConfigureFile.cmake
+    COMMENT "Synchronizing documentation sources")
+  add_custom_target(
     polyquant_docs_html ALL
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}/html
     WORKING_DIRECTORY ${SPHINX_BUILD}
     COMMENT "Generating documentation with Sphinx (html)")
+  add_dependencies(polyquant_docs_html polyquant_docs_sync)
   if(LATEXMK_EXECUTABLE)
     add_custom_target(
       polyquant_docs_pdf ALL
       COMMAND ${SPHINX_EXECUTABLE} -M latexpdf ${SPHINX_SOURCE} ${SPHINX_BUILD}
       WORKING_DIRECTORY ${SPHINX_BUILD}
       COMMENT "Generating documentation with Sphinx (pdf)")
+    add_dependencies(polyquant_docs_pdf polyquant_docs_sync)
   else(LATEXMK_EXECUTABLE)
     add_custom_target(
       polyquant_docs_pdf
@@ -145,6 +154,7 @@ if(POLYQUANT_DOC)
       COMMAND ${CMAKE_COMMAND} -E false
       WORKING_DIRECTORY ${SPHINX_BUILD}
       COMMENT "Generating documentation with Sphinx (pdf)")
+    add_dependencies(polyquant_docs_pdf polyquant_docs_sync)
   endif(LATEXMK_EXECUTABLE)
 endif(POLYQUANT_DOC)
 # ######################################################################################################################################################################################################
