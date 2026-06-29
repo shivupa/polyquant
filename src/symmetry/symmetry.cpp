@@ -2,6 +2,15 @@
 
 using namespace polyquant;
 
+/**
+ * @file symmetry.cpp
+ * @brief Input-driven symmetry mode selection and libmsym context allocation.
+ *
+ * The implementation in this file is intentionally small: it records the
+ * requested symmetry mode, enforces basic input consistency, and prepares
+ * particle-specific libmsym contexts for later basis and orbital setup code.
+ */
+
 POLYQUANT_SYMMETRY::POLYQUANT_SYMMETRY(std::shared_ptr<POLYQUANT_INPUT> input_params) { setup_symmetry(input_params); }
 
 void POLYQUANT_SYMMETRY::set_symmetry_from_input() {
@@ -39,6 +48,9 @@ void POLYQUANT_SYMMETRY::setup_symmetry(std::shared_ptr<POLYQUANT_INPUT> input_p
 }
 
 void POLYQUANT_SYMMETRY::create_ctx_for_particle_types(int n) {
+  // Each particle type gets its own libmsym context so later setup can attach
+  // basis- and particle-specific symmetry metadata without sharing mutable
+  // libmsym state across species.
   ctx.resize(n);
   for (int i = 0; i < n; i++) {
     ctx[i] = msymCreateContext();
