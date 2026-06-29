@@ -1,5 +1,10 @@
 #ifndef POLYQUANT_OUTPUT_DAVIDSON_LOGGING_H
 #define POLYQUANT_OUTPUT_DAVIDSON_LOGGING_H
+
+/**
+ * @file davidson_logging.hpp
+ * @brief Spectra Davidson iteration logging helpers.
+ */
 #include "io/timer.hpp"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -14,20 +19,60 @@
 
 namespace polyquant {
 
-// Derived Logger
+/**
+ * @brief Spectra logger that prints Davidson iteration summaries.
+ *
+ * The logger owns an internal `POLYQUANT_TIMER` used to time each iteration.
+ * It can also add a constant shift back to the reported eigenvalues so printed
+ * values match the physical Hamiltonian rather than the shifted matrix solved
+ * internally.
+ *
+ * @tparam Scalar Scalar type used by the Davidson solver.
+ * @tparam Vector Spectra vector type.
+ */
 template <typename Scalar, typename Vector> class DavidsonDerivedLogger : public Spectra::LoggerBase<Scalar, Vector> {
   // This derived logging class could have some reference to an ostream or call to another class that wraps ostreams etc.
 public:
+  /**
+   * @brief Timer used to measure one Davidson iteration at a time.
+   */
   POLYQUANT_TIMER runtime = POLYQUANT_TIMER();
+  /**
+   * @brief Constant spectral shift added back when printing eigenvalues.
+   */
   Scalar constant_shift = 0.0;
+  /**
+   * @brief Construct a logger with no spectral shift.
+   */
   DavidsonDerivedLogger() { runtime.set_print_on_destruction(false); };
+  /**
+   * @brief Construct a logger with a known constant spectral shift.
+   *
+   * @param constant_shift Shift to add back to printed eigenvalues.
+   */
   DavidsonDerivedLogger(Scalar constant_shift) {
     runtime.set_print_on_destruction(false);
     this->set_constant_shift(constant_shift);
   };
+  /**
+   * @brief Update the constant shift used for printed eigenvalues.
+   *
+   * @param constant_shift Shift to add back to reported eigenvalues.
+   */
   void set_constant_shift(Scalar constant_shift) { this->constant_shift = constant_shift; };
 
+  /**
+   * @brief Spectra callback invoked at the start of one Davidson iteration.
+   */
   inline void call_iteration_start() override final { runtime.set_start_time(); };
+  /**
+   * @brief Spectra callback invoked at the end of one Davidson iteration.
+   *
+   * This prints the iteration number, convergence count, subspace size,
+   * iteration runtime, current eigenvalues, convergence flags, and residuals.
+   *
+   * @param data Iteration snapshot provided by Spectra.
+   */
   inline void call_iteration_end(const Spectra::IterationData<Scalar, Vector> &data) override final {
     runtime.set_end_time();
     std::string pad(7, ' ');

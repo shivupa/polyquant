@@ -1,3 +1,8 @@
+/**
+ * @file input.cpp
+ * @brief Implementation of JSON input loading and relative-path rewriting.
+ */
+
 #include "io/input.hpp"
 
 using namespace polyquant;
@@ -15,6 +20,8 @@ void POLYQUANT_INPUT::parse_input(const std::string &filename) {
   if (!inputfile) {
     APP_ABORT("Could not open input file: " + filename);
   }
+  // Parse first, then normalize embedded filenames against the directory that
+  // contains the top-level input file so downstream loaders can use direct paths.
   this->input_data = json::parse(inputfile);
   this->resolve_relative_filenames(this->input_data, input_path.parent_path());
 
@@ -26,6 +33,8 @@ void POLYQUANT_INPUT::parse_input(const std::string &filename) {
 }
 
 void POLYQUANT_INPUT::resolve_relative_filenames(json &node, const std::filesystem::path &base_path) {
+  // Only keys literally named "filename" are rewritten; all other strings are
+  // left untouched even if they happen to look like paths.
   if (node.is_object()) {
     for (auto &[key, value] : node.items()) {
       if (key == "filename" && value.is_string()) {

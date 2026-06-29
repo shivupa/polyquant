@@ -1,3 +1,8 @@
+/**
+ * @file molden_utilities.cpp
+ * @brief Implementation of MOLDEN-format export.
+ */
+
 #include "io/molden_utilities.hpp"
 
 using namespace polyquant;
@@ -52,7 +57,8 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
   const auto atom2shell = basis.atom2shell(atoms);
   this->molden_file << "[GTO]" << std::endl;
 
-  // ao map change from the libint ordering to the molden ordering
+  // Build the AO permutation from Libint ordering into the ordering expected
+  // by common MOLDEN consumers, including the p-shell special case below.
   const auto nao = libint2::nbf(basis);
   ao_map.resize(nao);
   long ao_molden = 0;
@@ -74,8 +80,8 @@ void POLYQUANT_MOLDEN::dump_basis(std::vector<libint2::Atom> &atoms, libint2::Ba
             ++ao_molden;
             END_FOR_SOLIDHARM_MOLDEN
           } else {
-            // specialization for p shell.
-            // expand as cartesian rather than spherical
+            // Special-case p shells because many MOLDEN readers interpret them
+            // using cartesian-style x,y,z ordering rather than pure-harmonic order.
             std::vector<int> p_shell_cart_ordering = {1, -1, 0};
             for (auto m : p_shell_cart_ordering) {
               const auto ao_in_shell = libint2::INT_SOLIDHARMINDEX(l, m);
@@ -138,6 +144,7 @@ void POLYQUANT_MOLDEN::dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen
     this->molden_file << "  Ene= " << std::setprecision(10) << std::setw(20) << MO_a_energy[mo_idx] << std::endl;
     this->molden_file << "  Spin= Alpha" << std::endl;
     this->molden_file << "  Occup= " << std::setprecision(10) << std::setw(20) << MO_a_occupation[mo_idx] << std::endl;
+    // Emit coefficients in the reordered AO convention built in dump_basis().
     for (auto ao_idx = 0; ao_idx < MO_a_coeff.rows(); ao_idx++) {
       this->molden_file << "    " << std::setw(10) << ao_idx + 1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_a_coeff(ao_map[ao_idx], mo_idx) << std::endl;
       // this->molden_file << "    " << std::setw(10) << ao_idx+1 << std::scientific << std::setprecision(10) << std::setw(20) << MO_a_coeff(ao_idx, mo_idx) << std::endl;

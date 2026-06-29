@@ -1,5 +1,10 @@
 #ifndef POLYQUANT_INPUT_MOLDEN_H
 #define POLYQUANT_INPUT_MOLDEN_H
+
+/**
+ * @file molden_utilities.hpp
+ * @brief MOLDEN-format orbital and basis-set export helpers.
+ */
 #include "io/timer.hpp"
 #include "io/utils.hpp"
 #include <Eigen/Dense>
@@ -20,41 +25,74 @@
 namespace polyquant {
 
 /**
- * @brief A class to assist with MOLDEN dumping
+ * @brief Writer for single-particle MOLDEN files.
  *
+ * The writer owns an output stream and emits a complete MOLDEN file consisting
+ * of header, atom list, AO basis description, and alpha/beta orbital blocks.
+ * AO coefficients are reordered into the conventions expected by MOLDEN
+ * consumers, with a special p-shell treatment for interoperability.
  */
 class POLYQUANT_MOLDEN {
 public:
   POLYQUANT_MOLDEN() = default;
+  /**
+   * @brief Close the file if it is still open.
+   */
   ~POLYQUANT_MOLDEN() {
     if (this->molden_file.is_open()) {
       this->molden_file.close();
     }
   }
   /**
-   * @brief Construct a MOLDEN object using the create_file function.
+   * @brief Construct a writer and open the target MOLDEN file.
    *
-   * @param filename the file to write to.
+   * @param fname Output filename.
    */
   POLYQUANT_MOLDEN(const std::string &fname);
   /**
-   * @brief creates a MOLDEN file
+   * @brief Open or truncate the target MOLDEN file.
    *
-   * @param filename the file to write to.
+   * Existing files are overwritten.
+   *
+   * @param fname Output filename.
    */
   void create_file(const std::string &fname);
   /**
-   * @brief the molden file object
-   *
+   * @brief Owned output stream.
    */
   std::ofstream molden_file;
+  /**
+   * @brief Path of the currently open MOLDEN file.
+   */
   std::string filename;
+  /**
+   * @brief Write a complete MOLDEN file.
+   *
+   * @param atoms Classical centers in Libint atom format, written in atomic units.
+   * @param basis AO basis set whose shell ordering defines coefficient reordering.
+   * @param MO_a_coeff Alpha-orbital coefficients in AO-major order.
+   * @param MO_a_energy Alpha-orbital energies.
+   * @param MO_a_symmetry_labels Alpha-orbital symmetry labels.
+   * @param MO_a_occupation Alpha-orbital occupations.
+   * @param MO_b_coeff Beta-orbital coefficients in AO-major order.
+   * @param MO_b_energy Beta-orbital energies.
+   * @param MO_b_symmetry_labels Beta-orbital symmetry labels.
+   * @param MO_b_occupation Beta-orbital occupations.
+   */
   void dump(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy,
             std::vector<std::string> &MO_a_symmetry_labels, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff,
             Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_occupation);
 
 protected:
+  /**
+   * @brief Write the MOLDEN file header.
+   */
   void dump_header();
+  /**
+   * @brief Write the `[Atoms]` section in atomic units.
+   *
+   * @param atoms Classical centers in Libint atom format.
+   */
   void dump_atoms(std::vector<libint2::Atom> &atoms);
 
   /**
@@ -120,9 +158,24 @@ protected:
    * \endrst
    */
   void dump_basis(std::vector<libint2::Atom> &atoms, libint2::BasisSet &basis);
+  /**
+   * @brief Write the `[MO]` section for alpha and beta orbitals.
+   *
+   * @param MO_a_coeff Alpha-orbital coefficients.
+   * @param MO_a_energy Alpha-orbital energies.
+   * @param MO_a_symmetry_labels Alpha-orbital symmetry labels.
+   * @param MO_a_occupation Alpha-orbital occupations.
+   * @param MO_b_coeff Beta-orbital coefficients.
+   * @param MO_b_energy Beta-orbital energies.
+   * @param MO_b_symmetry_labels Beta-orbital symmetry labels.
+   * @param MO_b_occupation Beta-orbital occupations.
+   */
   void dump_orbitals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_a_coeff, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_energy, std::vector<std::string> &MO_a_symmetry_labels,
                      Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_a_occupation, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &MO_b_coeff,
                      Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_energy, std::vector<std::string> &MO_b_symmetry_labels, Eigen::Matrix<double, Eigen::Dynamic, 1> &MO_b_occupation);
+  /**
+   * @brief AO reordering map from internal Libint ordering to MOLDEN ordering.
+   */
   std::vector<long> ao_map;
   // void dump_generalparameters(bool complex_vals, bool ecp, bool restricted, int num_ao, int num_mo, bool bohr_unit, int num_part_alpha, int num_part_beta, int num_part_total, int multiplicity);
   // void dump_MOs(std::string quantum_part_name, int num_ao, int num_mo, std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>> E_orb,

@@ -1,3 +1,8 @@
+/**
+ * @file hdf5_utilities.cpp
+ * @brief Implementation of QMCPACK-oriented HDF5 writers.
+ */
+
 #include "io/hdf5_utilities.hpp"
 
 using namespace polyquant;
@@ -15,6 +20,8 @@ void POLYQUANT_HDF5::create_file(const std::string &fname) {
 }
 
 void POLYQUANT_HDF5::write_str(std::string path, std::string val) {
+  // HighFive string handling is routed through a fixed-length ASCII dataset
+  // workaround, so long strings require increasing the local buffer size.
   if (val.size() > 100) {
     APP_ABORT("HDF5 string work around requires a constant sized char array. Recompile with a larger array in POLYQUANT_HDF5::write_str array");
   }
@@ -88,7 +95,8 @@ void POLYQUANT_HDF5::dump_atoms(int num_atom, int num_species, std::vector<int> 
     flattened_atomic_positions.insert(flattened_atomic_positions.end(), atomic_position.begin(), atomic_position.end());
   }
   path = atoms_group + "/positions";
-  // H5Easy::dump(*hdf5_file, path, flattened_atomic_positions, H5Easy::DumpMode::Overwrite);
+  // Positions are stored as an explicit 2D dataset so QMCPACK readers can
+  // preserve the atom-by-coordinate shape directly.
   if (this->exist(path)) {
     auto dataset = (*hdf5_file).getDataSet(path);
     dataset.write(atomic_centers);
@@ -181,13 +189,8 @@ void POLYQUANT_HDF5::dump_MOs(std::string quantum_part_name, int num_ao, int num
       (*hdf5_file).createDataSet(path, E_orb_rowmat);
     }
 
-    // write orbital coeffs
-    // std::vector<double> flattened_mo_coeff;
-    // for (auto i = 0ul; i < num_mo; i++) {
-    //   for (auto j = 0ul; j < num_ao; j++) {
-    //     flattened_mo_coeff.push_back(mo_coeff[spin_idx](j, i));
-    //   }
-    // }
+    // Coefficients are written MO-major by transposing the in-memory AO-major
+    // coefficient matrix before dumping to HDF5.
     path = super_twist_group + "/eigenset_" + std::to_string(spin_idx);
     // H5Easy::dump(*hdf5_file, path, flattened_mo_coeff, H5Easy::DumpMode::Overwrite);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mo_transpose = mo_coeff[spin_idx].transpose();
@@ -204,6 +207,8 @@ void POLYQUANT_HDF5::dump_basis(std::string quantum_part_name, std::vector<std::
   // apply the shell normalization used in
   // https://github.com/pyscf/pyscf/blob/53e2069b4a3a2e0616bdf4d8c2e3f898c10a8330/pyscf/gto/mole.py#L827
   //_nomalize_contracted_ao in pyscf/gto/mole.py
+  // Convert Libint shell normalization into the contracted-GTO convention
+  // expected by QMCPACK-style basis metadata, following the PySCF formulas.
   // lambda for normalization
   auto gaussianint_lambda = [](auto n, auto alpha) {
     auto n1 = (n + 1.0) * 0.5;
@@ -386,7 +391,7 @@ void POLYQUANT_HDF5::dump_mf_to_hdf5_for_QMCPACK(bool pbc, bool complex_vals, bo
                                                  std::vector<std::vector<int>> mo_symm_label_idxs, std::vector<std::vector<std::string>> mo_symm_labels, std::vector<int> atomic_species_ids,
                                                  std::vector<int> atomic_number, std::vector<int> atomic_charge, std::vector<int> core_elec, std::vector<std::string> atomic_names,
                                                  std::vector<std::vector<double>> atomic_centers, std::vector<std::vector<libint2::Shell>> unique_shells) {
-  // create file
+  // This wrapper writes the full single-particle QMCPACK payload into one file.
   Polyquant_cout("dumping file");
   this->dump_application();
   this->dump_PBC(pbc);
@@ -414,6 +419,8 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
           flattened_dets(i, j) = dets[part_idx][spin_idx][i][N_int_per_det - j - 1];
         }
       }
+      // Each `/CI_k` dataset stores determinant words in reversed word order to
+      // match the downstream consumer's expected bit significance convention.
       path = multidet_group + tag;
       H5Easy::dump(*hdf5_file, path, flattened_dets, H5Easy::DumpMode::Overwrite);
 
@@ -443,6 +450,7 @@ void POLYQUANT_HDF5::dump_post_mf_to_hdf5_for_QMCPACK(std::vector<std::vector<st
       tag += "_" + std::to_string(i);
     }
 
+    // State 0 uses `/Coeff`; excited states use `/Coeff_i`.
     path = multidet_group + tag;
     // if (this->exist(path)) {
     //   auto dataset = (*hdf5_file).getDataSet(path);

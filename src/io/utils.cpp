@@ -1,11 +1,18 @@
+/**
+ * @file utils.cpp
+ * @brief Implementation of shared diagnostics, formatting, lookup, and text-dump helpers.
+ */
+
 #include "io/utils.hpp"
 
 using namespace polyquant;
 
 // LCOV_EXCL_START
-#if !defined(DOXYGEN_SHOULD_SKIP_THIS)
 namespace polyquant {
+/// @cond POLYQUANT_INTERNAL_IMPLEMENTATION
 void APP_ABORT(const std::string &reason) {
+  // Fatal errors are reported through a common exception so the CLI can return
+  // a nonzero status without forcing an immediate process abort.
   Polyquant_cout("THIS IS A POLYQUANT ERROR. PLEASE REPORT TO POLYQUANT MAINTAINERS.");
   Polyquant_cout("    ABORT REASON:");
   Polyquant_cout(reason);
@@ -59,6 +66,7 @@ void Polyquant_dump_basis_to_file(const std::string &contents, const std::string
   std::ofstream outfile;
   outfile.open(filename);
   outfile << "****" << std::endl;
+  // Normalize basis text by removing inline "!" comments and dropping blank lines.
   for (std::string line; std::getline(ss, line, '\n');) {
     std::string stripped_line = line.substr(0, line.find("!", 0));
     bool all_space = std::all_of(stripped_line.begin(), stripped_line.end(), isspace);
@@ -75,6 +83,8 @@ void dump_orbitals(const std::vector<std::vector<Eigen::Matrix<double, Eigen::Dy
                    std::vector<std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1>>> &occ, std::vector<std::vector<std::vector<std::string>>> &symm_label, std::string title,
                    std::vector<std::vector<std::vector<std::string>>> &ao_labels) {
   auto stride = 5;
+  // Print orbitals in fixed-width blocks so energies, occupations, symmetry
+  // labels, and AO coefficients remain aligned in plain-text output.
   Polyquant_cout(title);
   for (auto i = 0; i < E_orbitals.size(); i++) {
     for (auto j = 0; j < E_orbitals[i].size(); j++) {
@@ -208,6 +218,6 @@ int quantum_symb_to_charge(std::string key) {
     return 0;
   }
 }
+/// @endcond
 
 } // namespace polyquant
-#endif // DOXYGEN_SHOULD_SKIP_THIS
