@@ -1,3 +1,8 @@
+/**
+ * @file calculation.cpp
+ * @brief Implementation of top-level Polyquant workflow dispatch and export helpers.
+ */
+
 #include "calculation/calculation.hpp"
 
 using namespace polyquant;
@@ -9,6 +14,8 @@ POLYQUANT_CALCULATION::POLYQUANT_CALCULATION(const std::string &filename) {
 }
 
 void POLYQUANT_CALCULATION::setup_calculation(const std::string &filename) {
+  // The setup order mirrors the dependency graph: later layers require earlier
+  // parsed objects to exist and remain shared for the lifetime of the run.
   // parse input file
   Polyquant_section_header("Input Parameters");
   this->input_params = std::make_shared<POLYQUANT_INPUT>(filename);
@@ -29,6 +36,8 @@ void POLYQUANT_CALCULATION::run() {
   Polyquant_section_header("Calculation Requested");
   std::string mean_field_type = this->parse_mean_field();
   std::string post_mean_field_type = this->parse_post_mean_field();
+  // Post-mean-field requests take priority because they may require building
+  // or importing a mean-field reference as an internal prerequisite.
   if (this->post_mean_field_methods.contains(post_mean_field_type)) {
     this->run_post_mean_field(post_mean_field_type);
   } else if (post_mean_field_type == "FILE" && this->input_params->input_data.contains("keywords")) {
@@ -54,6 +63,8 @@ std::string POLYQUANT_CALCULATION::parse_mean_field() {
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("mf_keywords")) {
       if (this->input_params->input_data["keywords"]["mf_keywords"].contains("from_file")) {
+        // File-backed orbitals are only selected when no native mean-field
+        // method was explicitly requested in model->method.
         if (!this->mean_field_methods.contains(mean_field_type)) {
           mean_field_type = "FILE";
         } else {
@@ -96,6 +107,7 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
   }
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("mf_keywords")) {
+      // These keywords directly mutate the SCF driver before setup/run.
       if (this->input_params->input_data["keywords"].contains("dump_for_qmcpack")) {
         dump_for_qmcpack = this->input_params->input_data["keywords"]["dump_for_qmcpack"];
       }
@@ -223,6 +235,8 @@ void POLYQUANT_CALCULATION::run_mean_field(std::string &mean_field_type) {
       dump_mf_for_qmcpack(hdf5_filename);
     }
   } else if (mean_field_type == "FILE") {
+    // FILE mode repopulates orbitals from an existing HDF5 file
+    // and can optionally skip any further SCF iterations.
     if (permute_orbitals_vector.size() != 0) {
       this->scf_calc->permute_orbitals_vector = permute_orbitals_vector;
       this->scf_calc->permute_orbitals_start = true;
@@ -254,6 +268,8 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   if (post_mean_field_type == "FILE") {
     APP_ABORT("FROM_FILE for ci not implemented.");
   }
+  // CI and FCIDUMP both rely on a populated SCF object, typically restored
+  // from file unless the input overrides that behavior inside run_mean_field().
   this->run_mean_field(mean_field_type);
   ci_calc = std::make_shared<POLYQUANT_EPCI>(this->scf_calc);
 
@@ -264,6 +280,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
   }
   if (this->input_params->input_data.contains("keywords")) {
     if (this->input_params->input_data["keywords"].contains("ci_keywords")) {
+      // CI keywords are forwarded directly into the CI driver and determinant set.
       if (this->input_params->input_data["keywords"].contains("dump_for_qmcpack")) {
         dump_for_qmcpack = this->input_params->input_data["keywords"]["dump_for_qmcpack"];
       }
@@ -390,6 +407,7 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
     }
   }
   if (post_mean_field_type == "FCIDUMP") {
+    // FCIDUMP export needs transformed integrals but does not require a full CI solve.
     this->ci_calc->calculate_integrals();
     this->ci_calc->fcidump(fcidump_filename);
   } else if (post_mean_field_type == "CI") {
@@ -406,6 +424,8 @@ void POLYQUANT_CALCULATION::run_post_mean_field(std::string &post_mean_field_typ
 }
 
 void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
+  // The current export path writes one HDF5 file per quantum particle because
+  // QMCPACK trial-wavefunction metadata is particle-specific in this workflow.
   bool pbc = false;
   bool ecp = false;
   bool complex_vals = false;
@@ -510,6 +530,8 @@ void POLYQUANT_CALCULATION::dump_mf_for_qmcpack(std::string &filename) {
 }
 
 void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) {
+  // Natural orbitals are exported as separate single-particle HDF5 files for
+  // each requested CI state and particle type.
   bool pbc = false;
   bool ecp = false;
   bool complex_vals = false;
@@ -610,16 +632,19 @@ void POLYQUANT_CALCULATION::dump_post_mf_NOs_for_qmcpack(std::string &filename) 
       particle_filename << "NSO_State_" << state_idx << "_part_" << quantum_part_key << "_" << filename;
       Polyquant_cout("Dumping HDF5 to filename: " + particle_filename.str());
       POLYQUANT_HDF5 hdf5_f(particle_filename.str());
-      hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, ecp, complex_vals, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
+      hdf5_f.dump_mf_to_hdf5_for_QMCPACK(pbc, complex_vals, ecp, restricted, num_ao, num_mo, bohr_unit, num_part_alpha, num_part_beta, num_part_total, multiplicity, num_atom, num_species,
                                          quantum_part_name, ci_calc->occ_nso[state_vec_idx][quantum_part_idx], ci_calc->C_nso[state_vec_idx][quantum_part_idx],
-                                         ci_calc->symm_label_idxs[state_vec_idx][quantum_part_idx], ci_calc->symm_labels[state_vec_idx][quantum_part_idx], atomic_species_ids, atomic_number,
-                                         atomic_charge, core_elec, atomic_names, atomic_centers, unique_shells);
+                                         ci_calc->symm_label_idxs[state_vec_idx][quantum_part_idx], ci_calc->symm_labels[state_vec_idx][quantum_part_idx], hdf5_metadata.atomic_species_ids,
+                                         hdf5_metadata.atomic_number, hdf5_metadata.atomic_charge, hdf5_metadata.core_elec, hdf5_metadata.atomic_names, hdf5_metadata.atomic_centers,
+                                         hdf5_metadata.unique_shells);
     }
     quantum_part_idx++;
   }
 }
 
 void POLYQUANT_CALCULATION::dump_post_mf_for_qmcpack(std::string &filename) {
+  // Build the determinant occupation tensors expected by the QMCPACK
+  // multideterminant writer, including frozen-core orbitals in the bitstrings.
   std::vector<std::vector<std::vector<std::vector<uint64_t>>>> dets;
   dets.resize(this->input_molecule->quantum_particles.size());
   for (int idx_part = 0; idx_part < this->input_molecule->quantum_particles.size(); idx_part++) {
