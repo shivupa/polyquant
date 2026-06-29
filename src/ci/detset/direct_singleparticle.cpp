@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file direct_singleparticle.cpp
+ * @brief Matrix-free sigma construction for one-particle-species CI spaces.
+ */
+
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::sigma_one_species_diagonal_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
@@ -186,6 +191,8 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
       auto idet_unfold = det_idx_unfold(i_det);
       auto idx_I_A_det = idet_unfold[first_spin_idx];
       auto idx_I_B_det = idet_unfold[second_spin_idx];
+      // The singleshot path mirrors the explicit-Hamiltonian singleshot
+      // traversal but accumulates directly into sigma instead of triplets.
       // diagonal
       for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
         auto integral = diagonal_Hii[i_det];
@@ -301,8 +308,8 @@ void POLYQUANT_DETSET<T>::sigma_one_species_class_singleshot(Eigen::Ref<Eigen::M
 template <typename T>
 void POLYQUANT_DETSET<T>::sigma_one_species(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                             const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
-  // TODO handle idx_J_det == idx_I_det
-  // 3 unique terms
+  // One-species CI can either accumulate the traditional diagonal/class-one/
+  // class-two partitions or use the lower-overhead singleshot traversal.
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> sigma_contribution;
   sigma_contribution.resize(this->rows(), C.cols());
   sigma_contribution.setZero();

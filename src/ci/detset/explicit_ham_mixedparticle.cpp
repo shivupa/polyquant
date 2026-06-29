@@ -1,5 +1,10 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file explicit_ham_mixedparticle.cpp
+ * @brief Explicit sparse Hamiltonian assembly for two-particle-species CI spaces.
+ */
+
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
@@ -30,6 +35,8 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_one
       // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, excitation_list);
       // if (this->unique_dets[idx_part][first_spin_idx][0][0] > 1)
       //   this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 2, excitation_list);
+      // Class-one terms vary one particle/spin block while leaving the other
+      // three blocks fixed.
       for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det <= idx_I_A_det) {
           continue;
@@ -110,6 +117,8 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_class_two
     APP_ABORT("two_species_create_ham_class_two called with same particle and spin idxs, which is inconsistent with two species class two contributions.");
   }
 
+  // Identify the two untouched particle/spin blocks so only the requested pair
+  // is varied in the class-two build.
   std::vector<std::pair<int, int>> idx_part_spin = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
   std::pair<int, int> idx_A_part_spin = {idx_part, idx_spin};
   std::pair<int, int> idx_B_part_spin = {other_idx_part, other_idx_spin};
@@ -228,7 +237,8 @@ template <typename T> void POLYQUANT_DETSET<T>::two_species_create_ham_singlesho
       auto idx_I_C_det = idet_unfold[2 * 1 + 0];
       auto idx_I_D_det = idet_unfold[2 * 1 + 1];
 
-      // diagonal
+      // The singleshot path accumulates every diagonal, same-particle, and
+      // mixed-particle contribution in one connectivity traversal.
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
       // part 0 spin 0 singles
       for (auto idx_J_A_det : unique_singles[0][0][idx_I_A_det]) {

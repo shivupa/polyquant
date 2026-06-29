@@ -1,5 +1,10 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file slater_condon_singleparticle.cpp
+ * @brief Same-particle Slater-Condon matrix elements for diagonal, single, and double excitations.
+ */
+
 namespace polyquant {
 template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto det_i_a = this->get_det(idx_part, 0, i_unfold[idx_part * 2 + 0]);
@@ -17,6 +22,8 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_diag(int idx_par
   this->get_occ_virt(idx_part, det_i_b, bocc, bvirt);
 
   double elem = 0.0;
+  // Diagonal terms are the usual one-body contribution plus same-species
+  // Coulomb and exchange over occupied alpha/beta orbitals.
   for (auto orb_a_i : aocc) {
     elem += this->input_integral->mo_one_body_ints[idx_part][alpha_spin_idx](orb_a_i, orb_a_i);
   }
@@ -59,7 +66,7 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_single(int idx_p
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->input_integral->mo_one_body_ints[idx_part].size();
 
-  // spin = 0 alpha excitation, spin = 1 beta excitation
+  // Singles are split into alpha-only or beta-only excitation cases.
   auto spin = 0;
   if (det_i_a == det_j_a) {
     spin = 1;
@@ -113,7 +120,7 @@ template <typename T> double POLYQUANT_DETSET<T>::same_part_ham_double(int idx_p
   auto alpha_spin_idx = 0;
   auto beta_spin_idx = 1 % this->input_integral->mo_one_body_ints[idx_part].size();
 
-  // spin = -1 mixed, spin = 0 alpha excitation, spin = 1 beta excitation
+  // Doubles can be alpha-alpha, beta-beta, or one alpha plus one beta excitation.
   if (det_i_a == det_j_a) {
     std::vector<int> holes, parts;
     double phase = 1.0;

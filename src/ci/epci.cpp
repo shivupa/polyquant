@@ -1,5 +1,10 @@
 #include "ci/epci.hpp"
 
+/**
+ * @file epci.cpp
+ * @brief CI setup, diagonalization, natural-orbital generation, and output logic.
+ */
+
 using namespace polyquant;
 
 void POLYQUANT_EPCI::setup(std::shared_ptr<POLYQUANT_EPSCF> input_scf) {
@@ -30,6 +35,8 @@ void POLYQUANT_EPCI::calculate_integrals() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
 
+  // Frozen-core contributions are peeled off first so the transformed MO-space
+  // integrals and determinant-space dimensions reflect only the active orbitals.
   this->calculate_fc_energy();
   this->input_integral->calculate_mo_1_body_integrals(this->input_epscf->C_combined, this->detset.frozen_core, this->detset.deleted_virtual);
   this->input_integral->calculate_mo_2_body_integrals(this->input_epscf->C_combined, this->detset.frozen_core, this->detset.deleted_virtual);
@@ -47,7 +54,8 @@ void POLYQUANT_EPCI::calculate_integrals() {
 void POLYQUANT_EPCI::calculate_fc_energy() {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
-  // caculate dm for frozen core block
+  // Build frozen-core density matrices in the AO basis so the effective frozen-
+  // core one-body operator can be folded back into the active-space Hamiltonian.
   fc_dm.resize(this->input_molecule->quantum_particles.size());
   fc_occ.resize(this->input_molecule->quantum_particles.size());
   this->detset.frozen_core_energy.resize(this->input_molecule->quantum_particles.size());
@@ -95,7 +103,8 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
     quantum_part_idx++;
   }
 
-  // calculate frozen core  "operator"
+  // The integral layer converts these AO densities into frozen-core effective
+  // one-body operators used during active-space CI.
   this->input_integral->calculate_frozen_core_ints(fc_dm, this->detset.frozen_core);
 
   if (verbose == true) {
@@ -109,7 +118,8 @@ void POLYQUANT_EPCI::calculate_fc_energy() {
     }
   }
 
-  // calculate energy for frozen core block
+  // This constant energy shift is added back after diagonalization and should
+  // not appear inside the active determinant Hamiltonian itself.
   quantum_part_idx = 0ul;
   for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
     this->detset.frozen_core_energy[quantum_part_idx] = 0.0;
@@ -204,8 +214,8 @@ void POLYQUANT_EPCI::calculate_NOs() {
   this->resize_for_NOs();
   for (int state_vec_idx = 0; state_vec_idx < this->NO_states.size(); state_vec_idx++) {
     auto state_idx = this->NO_states[state_vec_idx];
-    // calculate DM in MO basis
-    // add FC contribution
+    // The CI 1-RDM is constructed in the active MO basis, then embedded back
+    // into the full MO space with any frozen-core occupations restored.
     auto quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> MO_rdm1;
@@ -269,8 +279,8 @@ void POLYQUANT_EPCI::calculate_NOs() {
       }
     }
 
-    // diag for NSOs and occ
-    // print
+    // If no excitations were allowed for a particle type, the SCF orbitals are
+    // already the natural orbitals for that block.
     quantum_part_idx = 0;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
       auto ex_lvl = this->excitation_level[quantum_part_idx];
@@ -596,6 +606,8 @@ void POLYQUANT_EPCI::run() {
   for (auto fc_energy : this->detset.frozen_core_energy) {
     frozen_core_shift += fc_energy;
   }
+  // The Davidson solve runs on the active-space Hamiltonian with constant terms
+  // stripped off. Those terms are restored to the reported eigenvalues below.
   this->constant_shift = this->input_molecule->E_nuc + frozen_core_shift;
   this->hf_det_energy = 0.0; // this->detset.diagonal_Hii[0];
   this->constant_shift += this->hf_det_energy;
@@ -603,6 +615,7 @@ void POLYQUANT_EPCI::run() {
   DavidsonDerivedLogger<Scalar, Vector_of_Scalar> *logger = new DavidsonDerivedLogger<Scalar, Vector_of_Scalar>(constant_shift);
 
   if (this->detset.build_matrix == false) {
+    // Matrix-free CI uses the determinant-set object directly as the Davidson operator.
     Spectra::DavidsonSymEigsSolver<POLYQUANT_DETSET<uint64_t>> solver(this->detset, this->num_states, initialsubspacevec, maxsubspacevec, logger);
     Eigen::Index maxit = this->iteration_max;
     int nconv = solver.compute(Spectra::SortRule::SmallestAlge, maxit, this->convergence_E);
@@ -620,6 +633,8 @@ void POLYQUANT_EPCI::run() {
       APP_ABORT("CI Calculation did not converge!");
     }
   } else {
+    // Explicit-Hamiltonian CI first assembles a sparse matrix, then either
+    // diagonalizes it densely or uses Spectra on the sparse operator.
     this->detset.create_ham();
 
     if (this->first_order_spin_penalty) {
@@ -631,6 +646,8 @@ void POLYQUANT_EPCI::run() {
     }
 
     if (this->exact_diag) {
+      // The sparse Hamiltonian is stored in upper-triangular form, so dense
+      // exact diagonalization first mirrors it into a full symmetric matrix.
       Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> h(this->detset.ham);
       for (auto i = 0; i < h.rows(); i++) {
         for (auto j = i; j < h.rows(); j++) {
@@ -691,7 +708,8 @@ void POLYQUANT_EPCI::dump_molden() {
     auto state_idx = this->NO_states[state_vec_idx];
     auto quantum_part_idx = 0ul;
     for (auto const &[quantum_part_key, quantum_part] : this->input_molecule->quantum_particles) {
-      // bool unique_beta = (quantum_part.num_parts > 1 && quantum_part.restricted == false);
+      // CI output always treats multi-particle species as having distinct spin
+      // channels in the NSO dump, even when the reference SCF was restricted.
       bool unique_beta = quantum_part.num_parts > 1;
       auto &NO_a_coeff = this->C_nso[state_vec_idx][quantum_part_idx][0];
       auto &NO_a_energy = this->occ_nso[state_vec_idx][quantum_part_idx][0];

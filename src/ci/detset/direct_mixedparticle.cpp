@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file direct_mixedparticle.cpp
+ * @brief Matrix-free sigma construction for two-particle-species CI spaces.
+ */
+
 namespace polyquant {
 template <typename T>
 void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
@@ -11,13 +16,9 @@ void POLYQUANT_DETSET<T>::sigma_two_species_diagonal_contribution(Eigen::Ref<Eig
   auto first_spin_idx = idx_spin;
   auto second_spin_idx = 1 - idx_spin;
   auto other_idx_part = 1 - idx_part;
-  // idx_XXX_A_det - idx_part, first_spin_idx - for example electron alpha
-  // idx_XXX_B_det - idx_part, second_spin_idx - for example electron beta
-  // idx_XXX_C_det - other_idx_part, first_spin_idx - for example positron alpha
-  // idx_XXX_D_det - other_idx_part, second_spin_idx - for example positron beta
-  // TODO there are some implicit assumptions about size in the CI portion of the code.
-  // For example the SCF can have spin restricted species with spin unrestricted species.
-  // It isn't documented or explicitly clear that 2 spins per particle type are always expected to be present.
+  // Two-species CI always unfolds determinants as
+  // (part0 alpha, part0 beta, part1 alpha, part1 beta), even if one species was
+  // treated as restricted at the SCF level.
   auto nthreads = omp_get_max_threads();
   if (sigma_workspace_nthreads_ != nthreads || sigma_workspace_.empty() || sigma_workspace_[0].rows() != this->rows() || sigma_workspace_[0].cols() != C.cols()) {
     sigma_workspace_.resize(nthreads);
@@ -75,6 +76,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_one_contribution(Eigen::Ref<Ei
       if (jdet_it != this->dets.end()) {
         auto folded_jdet_idx = jdet_it->second;
         double integral = same_part_ham_single(idx_part, idet_unfold, jdet_idx);
+        // Mixed-particle Coulomb couplings ride on top of the same-particle
+        // single-excitation term for the changing block.
         integral += charge_factor_c1 * mixed_part_ham_single(0, 1, idet_unfold, jdet_idx);
         if (integral != 0.0) {
           for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
@@ -209,6 +212,8 @@ void POLYQUANT_DETSET<T>::sigma_two_species_class_singleshot(Eigen::Ref<Eigen::M
       auto idx_I_C_det = idet_unfold[2 * 1 + 0];
       auto idx_I_D_det = idet_unfold[2 * 1 + 1];
 
+      // Singleshot mixed-species sigma accumulates every diagonal, same-particle,
+      // and mixed-particle class contribution in one connectivity traversal.
       // diagonal
       for (auto state_idx = 0; state_idx < C.cols(); state_idx++) {
         auto integral = diagonal_Hii[i_det];

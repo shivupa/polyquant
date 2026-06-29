@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file determinant_creation.cpp
+ * @brief Determinant generation and excitation-space construction.
+ */
+
 namespace polyquant {
 
 template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::vector<std::vector<int>> &occ) {
@@ -9,6 +14,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_det(int idx_part, std::ve
   std::string alpha_bit_string, beta_bit_string;
   int symm_idx = -1;
 
+  // Use a common packed-word length across particle types so unfolded CI indices
+  // refer to consistently sized bit-string blocks.
   int maximum_orbital_across_all_parts = *std::max_element(max_orb.begin(), max_orb.end());
   T num_int = (maximum_orbital_across_all_parts >> bit_kind_shift) + one;
 
@@ -59,6 +66,7 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_list(int i
     for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
       std::vector<T> temp_det(det);
       // https://stackoverflow.com/a/47990
+      // Realize one excitation pattern by clearing occupied bits and setting virtual bits.
       for (auto &occbit : iocc) {
         auto int_idx = (temp_det.size() - one) - (occbit >> bit_kind_shift);
         temp_det[int_idx] &= ~(one << (occbit & (bit_kind_size - one)));
@@ -88,6 +96,7 @@ template <typename T> void POLYQUANT_DETSET<T>::get_unique_excitation_set(int id
     for (auto &&ivirt : iter::combinations(virt, excitation_level)) {
       std::vector<T> temp_det(det);
       // https://stackoverflow.com/a/47990
+      // Realize one excitation pattern by clearing occupied bits and setting virtual bits.
       for (auto &occbit : iocc) {
         auto int_idx = (temp_det.size() - one) - (occbit >> bit_kind_shift);
         temp_det[int_idx] &= ~(one << (occbit & (bit_kind_size - one)));
@@ -153,7 +162,9 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
     std::vector<int> unfolded_indices;
   };
 
-  // TODO generalize this beyond the currently supported one- and two-particle-type paths.
+  // This builder currently supports only one- and two-particle-type CI spaces.
+  // The flattened determinant tuples are ordered as
+  // (part0 alpha, part0 beta, [part1 alpha, part1 beta]).
   this->N_dets = 0;
   this->N_dets_complete_space = 0;
   this->unfolded_stride = (excitation_level.size() == 2) ? 4 : 2;
@@ -180,6 +191,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
     beta_excitation_degrees_0[j] = this->single_spin_num_excitation(hf_det_pair_0.second, this->unique_dets[0][1][j]);
   }
 
+  // Precompute which unique determinants are admissible at or below each
+  // excitation degree to avoid repeated filtering inside the nested loops.
   auto build_allowed_indices_by_degree = [](const std::vector<int> &excitation_degrees, int max_degree) {
     std::vector<std::vector<std::size_t>> allowed_indices(max_degree + 1);
     for (auto idx = 0ul; idx < excitation_degrees.size(); idx++) {
@@ -241,6 +254,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_excitation(std::vector<st
           for (const auto l : beta_allowed_indices_1[std::min(max_beta_degree_1, max_degree_1)]) {
             std::pair<std::vector<T>, std::vector<T>> det_pair_1 = std::make_pair(this->unique_dets[1][0][k], this->unique_dets[1][1][l]);
 
+            // Track the size before symmetry filtering so reporting can compare
+            // the full excitation space against the kept symmetry block.
             bucket.complete_space_count++;
             int excitation_symm_idx = -1;
             get_symm_idx(0, det_pair_0, excitation_symm_idx);
@@ -309,6 +324,8 @@ template <typename T> void POLYQUANT_DETSET<T>::create_unique_excitation_map_sin
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
   this->create_unique_det_index_maps();
+  // The singles connectivity map is reused by both sparse-Hamiltonian and
+  // matrix-free CI kernels to avoid rebuilding one-excitation searches.
   auto nthreads = omp_get_max_threads();
   std::vector<std::vector<std::vector<size_t>>> threads_map_contributions;
   threads_map_contributions.resize(nthreads);

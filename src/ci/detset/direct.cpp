@@ -1,6 +1,11 @@
 
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file direct.cpp
+ * @brief Matrix-free CI Hamiltonian application dispatcher.
+ */
+
 namespace polyquant {
 template <typename T>
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::operator*(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &mat_in) const {
@@ -20,6 +25,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> POLYQUANT_DETSET<T>::opera
 template <typename T>
 void POLYQUANT_DETSET<T>::create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
+  // Dispatch to the species-specialized sigma builder used by Davidson in
+  // matrix-free CI mode.
   auto num_parts = this->input_integral->input_molecule->quantum_particles.size();
   if (num_parts == 1) {
     sigma_one_species(sigma, C);
@@ -35,7 +42,8 @@ void POLYQUANT_DETSET<T>::create_sigma(Eigen::Ref<Eigen::Matrix<double, Eigen::D
 template <typename T>
 void POLYQUANT_DETSET<T>::create_sigma_slow(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> sigma,
                                             const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> &C) const {
-  // Cij = Aik Bkj
+  // Reference dense sigma build for validation and debugging of the faster
+  // connectivity-driven implementations.
   for (auto i = 0; i < this->N_dets; i++) {
     for (auto j = 0; j < C.cols(); j++) {
       auto reduced_val = 0.0;

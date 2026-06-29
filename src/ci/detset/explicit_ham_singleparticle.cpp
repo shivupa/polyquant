@@ -1,5 +1,10 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file explicit_ham_singleparticle.cpp
+ * @brief Explicit sparse Hamiltonian assembly for one-particle-species CI spaces.
+ */
+
 namespace polyquant {
 template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_one(int idx_part, int idx_spin) {
   auto function = __PRETTY_FUNCTION__;
@@ -28,6 +33,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       // // do we have enough particles to do a double excitation?
       // if (this->unique_dets[idx_part][first_spin_idx][0][0] > 1)
       //   this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 2, excitation_list);
+      // Class-one terms keep the opposite-spin determinant fixed while changing
+      // one same-spin determinant by a single or double excitation.
       for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det <= idx_I_A_det) {
           continue;
@@ -125,6 +132,7 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_class_
       }
       // std::set<int> a_excitation_list;
       // this->get_unique_excitation_list_of_indices(idx_part, first_spin_idx, idx_I_A_det, 1, a_excitation_list);
+      // Class-two terms change both spin channels by one single excitation each.
       for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
         if (idx_J_A_det < idx_I_A_det) {
           continue;
@@ -211,7 +219,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
       if (i_det % nthreads != thread_id) {
         continue;
       }
-      // diagonal
+      // The singleshot path accumulates diagonal, single, and double
+      // contributions in one traversal of the connectivity graph.
       triplet_list_threads[thread_id].push_back(Eigen::Triplet<double>(i_det, i_det, diagonal_Hii[i_det]));
       // loop over connected singles alpha
       for (auto idx_J_A_det : unique_singles[idx_part][first_spin_idx][idx_I_A_det]) {
@@ -550,14 +559,8 @@ template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham_single
 }
 
 template <typename T> void POLYQUANT_DETSET<T>::single_species_create_ham() {
-  // // diagonal
-  // create_ham_diagonal(0, 0);
-  // // alpha alpha
-  // single_species_create_ham_class_one(0, 0);
-  // // beta beta
-  // single_species_create_ham_class_one(0, 1);
-  // // mixed alpha beta
-  // single_species_create_ham_class_two(0, 0, 0, 1);
+  // The default explicit-Hamiltonian path uses the singleshot implementation
+  // rather than assembling the classes separately.
   single_species_create_ham_singleshot(0, 0, 0, 1);
 }
 

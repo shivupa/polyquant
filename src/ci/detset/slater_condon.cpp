@@ -1,5 +1,10 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file slater_condon.cpp
+ * @brief Top-level Slater-Condon dispatch across same- and mixed-particle sectors.
+ */
+
 namespace polyquant {
 template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j_det) const {
   if (i_det == j_det) {
@@ -19,7 +24,8 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
   auto i_unfold = det_idx_unfold(i_det);
   auto j_unfold = det_idx_unfold(j_det);
   std::vector<bool> iequalj;
-  //   // todo condense this
+  // iequalj[p] records whether particle type p is unchanged between the two
+  // determinants, which lets the matrix element be partitioned by sector.
   for (auto idx_part = 0; idx_part < unique_dets.size(); idx_part++) {
     iequalj.push_back(i_unfold[idx_part * 2 + 0] == j_unfold[idx_part * 2 + 0] && i_unfold[idx_part * 2 + 1] == j_unfold[idx_part * 2 + 1]);
   }
@@ -38,13 +44,14 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
       excitation_level += this->num_excitation(det_i, det_j);
 
       if (excitation_level == 0) {
-        // do 1+2 body
+        // Same-particle diagonal elements contain one-body plus same-species
+        // Coulomb/exchange contributions.
         matrix_elem += this->same_part_ham_diag(idx_part, i_unfold, j_unfold);
       } else if (excitation_level == 1) {
-        // do 1+2 body
+        // Same-particle singles contain both one-body and two-body terms.
         matrix_elem += this->same_part_ham_single(idx_part, i_unfold, j_unfold);
       } else if (excitation_level == 2) {
-        // do 2 body
+        // Same-particle doubles contribute only through two-body terms.
         matrix_elem += this->same_part_ham_double(idx_part, i_unfold, j_unfold);
       }
     }
@@ -79,6 +86,8 @@ template <typename T> double POLYQUANT_DETSET<T>::Slater_Condon(int i_det, int j
         excitation_level_part_i = this->num_excitation(part_i_det_i, part_i_det_j);
         excitation_level_part_j = this->num_excitation(part_j_det_i, part_j_det_j);
         excitation_level = excitation_level_part_i + excitation_level_part_j;
+        // Mixed-particle interactions carry no exchange, only the charge-scaled
+        // Coulomb coupling between the two particle types.
         auto charge_factor = quantum_part.charge * other_quantum_part.charge;
         if (excitation_level < 3) {
           if (excitation_level_part_i == 0 && excitation_level_part_j == 0) {
@@ -116,6 +125,7 @@ template <typename T> void POLYQUANT_DETSET<T>::precompute_diagonal_Slater_Condo
       if (i % nthreads != thread_id) {
         continue;
       }
+      // Cache the diagonal once because Davidson and singleshot CI reuse it repeatedly.
       auto i_unfold = det_idx_unfold(i);
       double matrix_elem = 0.0;
       auto idx_part = 0ul;

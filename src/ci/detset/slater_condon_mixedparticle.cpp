@@ -1,8 +1,15 @@
 #include "ci/determinant_set.hpp"
 
+/**
+ * @file slater_condon_mixedparticle.cpp
+ * @brief Mixed-particle Slater-Condon matrix elements without exchange terms.
+ */
+
 namespace polyquant {
 template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_diag(int idx_part, int other_idx_part, std::vector<int> i_unfold, std::vector<int> j_unfold) const {
   auto elem = 0.0;
+  // Mixed-particle integral storage is keyed by ordered particle pairs, so
+  // normalize the lookup order first.
   if (other_idx_part < idx_part) {
     std::swap(idx_part, other_idx_part);
   }
@@ -68,7 +75,7 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_single(int idx_
   auto idx_part_beta_spin_idx = 1 % this->input_integral->mo_one_body_ints[idx_part].size();
   auto other_idx_part_alpha_spin_idx = 0;
   auto other_idx_part_beta_spin_idx = 1 % this->input_integral->mo_one_body_ints[other_idx_part].size();
-  // excitation in idx_part
+  // Exactly one particle type is excited for the mixed single-excitation case.
   if (other_idx_part_det_i_a == other_idx_part_det_j_a && other_idx_part_det_i_b == other_idx_part_det_j_b) {
     std::vector<int> aocc, avirt;
     std::vector<int> bocc, bvirt;
@@ -162,7 +169,8 @@ template <typename T> double POLYQUANT_DETSET<T>::mixed_part_ham_double(int idx_
   auto other_idx_part_alpha_spin_idx = 0;
   auto other_idx_part_beta_spin_idx = 1 % this->input_integral->mo_one_body_ints[other_idx_part].size();
 
-  // spin = -1 mixed, spin = 0 alpha excitation, spin = 1 beta excitation
+  // Mixed doubles are products of one single excitation on each particle type,
+  // with spin combinations handled case-by-case and no exchange subtraction.
   if (idx_part_det_i_a == idx_part_det_j_a && other_idx_part_det_i_a == other_idx_part_det_j_a) {
     // beta idx_part exc, beta other_idx_part exc
     std::vector<int> idx_part_holes, idx_part_parts;
