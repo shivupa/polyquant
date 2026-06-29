@@ -2,6 +2,15 @@
 
 using namespace polyquant;
 
+/**
+ * @file basis.cpp
+ * @brief Basis loading, AO labeling, and SALC construction implementation.
+ *
+ * This file handles basis acquisition from Libint libraries, Basis Set
+ * Exchange, or Gaussian94 files, then derives AO labels and symmetry-adapted
+ * transforms used by later integral and wave-function code.
+ */
+
 POLYQUANT_BASIS::POLYQUANT_BASIS(std::shared_ptr<POLYQUANT_INPUT> input_params, std::shared_ptr<POLYQUANT_SYMMETRY> input_symmetry, std::shared_ptr<POLYQUANT_MOLECULE> input_molecule) {
   auto function = __PRETTY_FUNCTION__;
   POLYQUANT_TIMER timer(function);
@@ -39,6 +48,8 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis(const std::string &quantu
 void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const std::string &quantum_part_key, const std::string &classical_part_key, const int &center_basis_idx, libint2::BasisSet &qp_basis) {
   auto center_basis = input->input_data["model"]["basis"][quantum_part_key][classical_part_key][center_basis_idx];
   try {
+    // Prefer Libint's built-in library; it avoids network access and produces a
+    // basis object directly in the target center ordering.
     // library basis with atom type specified
     if (center_basis["library"].contains("atom")) {
       auto libint_atoms = molecule->to_libint_atom(classical_part_key);
@@ -67,6 +78,8 @@ void POLYQUANT_BASIS::load_quantum_particle_atom_basis_library(const std::string
     std::stringstream emsl_msg;
     emsl_msg << "Trying to read basis from EMSL for " << classical_part_key;
     Polyquant_cout(emsl_msg.str());
+    // Fall back to Basis Set Exchange and persist the downloaded Gaussian94
+    // text so Libint can reload it through its standard parser.
     auto libint_atoms = molecule->to_libint_atom(classical_part_key);
     if (center_basis["library"].contains("atom")) {
       for (auto &libint_atom : libint_atoms) {
@@ -354,7 +367,9 @@ void POLYQUANT_BASIS::symmetrize_basis() {
   } else if (symmetry->point_group == "SO(3)") {
     symmetrize_basis_SO3();
   } else {
-
+    // For ordinary point-group symmetry, build libmsym basis functions in AO
+    // order, ask libmsym for combined SALCs, then split the dense SALC matrix
+    // into one block per irrep.
     std::vector<std::vector<msym_basis_function_t>> mbfs;
     mbfs.resize(this->basis.size());
 
